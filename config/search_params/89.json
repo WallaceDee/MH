@@ -1,0 +1,16 @@
+{
+    "level_min": "89",
+    "level_max": "89",
+    "expt_fangyu": "13",
+    "expt_kangfa": "13",
+    "expt_total": "39",
+    "bb_expt_gongji": "13",
+    "bb_expt_fangyu": "13",
+    "bb_expt_fashu": "13",
+    "bb_expt_kangfa": "13",
+    "school_skill_num": "7",
+    "school_skill_level": "99",
+    "skill_shensu": "39",
+    "skill_qiang_zhuang": "39",
+    "order_by": "price%20ASC"
+  }

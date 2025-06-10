@@ -1,0 +1,8 @@
+web/node_modules
+web/dist
+web/package-lock.json
+web/yarn.lock
+web/yarn-error.log
+web/yarn-debug.log
+data/
+output/

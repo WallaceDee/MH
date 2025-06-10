@@ -1,0 +1,20 @@
+{
+  "feature_weights": {
+    "level": 0.0,
+    "equipment_score": 7.218433412963657e-15,
+    "expt_total": 0.010570306310097338,
+    "limited_avt_count": 0.0,
+    "school_heat": 0.9891786925313645,
+    "market_index": 0.0002510011585310456
+  },
+  "feature_cols": [
+    "level",
+    "equipment_score",
+    "expt_total",
+    "limited_avt_count",
+    "school_heat",
+    "market_index"
+  ],
+  "n_neighbors": 5,
+  "train_time": "2025-06-06 14:40:14"
+}

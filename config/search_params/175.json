@@ -1,0 +1,14 @@
+{
+  "level_min": "175",
+  "level_max": "175",
+  "expt_fangyu": "25",
+  "expt_kangfa": "25",
+  "expt_total": "75",
+  "bb_expt_gongji": "20",
+  "bb_expt_fangyu": "20",
+  "bb_expt_fashu": "20",
+  "bb_expt_kangfa": "20",
+  "bb_expt_total": "20",
+  "skill_qiang_shen": "140",
+  "order_by": "price%20ASC"
+}
