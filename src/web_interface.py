@@ -260,6 +260,15 @@ def get_characters():
         bb_expt_total = request.args.get('bb_expt_total', type=int)
         skill_drive_pet = request.args.get('skill_drive_pet', type=int)
         
+        # 其他参数
+        equip_num = request.args.get('equip_num', type=int)
+        pet_num = request.args.get('pet_num', type=int)
+        pet_num_level = request.args.get('pet_num_level', type=int)
+        
+        # 排序参数
+        sort_by = request.args.get('sort_by', type=str)
+        sort_order = request.args.get('sort_order', type=str)
+        
         # 调用API获取数据
         from api.character_api import CharacterAPI
         api = CharacterAPI()
@@ -289,7 +298,14 @@ def get_characters():
             bb_expt_fashu=bb_expt_fashu,
             bb_expt_kangfa=bb_expt_kangfa,
             bb_expt_total=bb_expt_total,
-            skill_drive_pet=skill_drive_pet
+            skill_drive_pet=skill_drive_pet,
+            # 其他参数
+            equip_num=equip_num,
+            pet_num=pet_num,
+            pet_num_level=pet_num_level,
+            # 排序参数
+            sort_by=sort_by,
+            sort_order=sort_order
         )
         
         return jsonify(result)
@@ -297,6 +313,151 @@ def get_characters():
         return jsonify({
             "error": str(e),
             "message": "获取角色列表失败"
+        }), 500
+
+@app.route('/api/characters/export/json')
+def export_characters_json():
+    """导出角色数据为JSON文件"""
+    try:
+        # 获取所有查询参数（与get_characters相同）
+        year = request.args.get('year', type=int)
+        month = request.args.get('month', type=int)
+        level_min = request.args.get('level_min', type=int)
+        level_max = request.args.get('level_max', type=int)
+        school_skill_num = request.args.get('school_skill_num', type=int)
+        school_skill_level = request.args.get('school_skill_level', type=int)
+        
+        # 角色修炼参数
+        expt_gongji = request.args.get('expt_gongji', type=int)
+        expt_fangyu = request.args.get('expt_fangyu', type=int)
+        expt_fashu = request.args.get('expt_fashu', type=int)
+        expt_kangfa = request.args.get('expt_kangfa', type=int)
+        expt_total = request.args.get('expt_total', type=int)
+        max_expt_gongji = request.args.get('max_expt_gongji', type=int)
+        max_expt_fangyu = request.args.get('max_expt_fangyu', type=int)
+        max_expt_fashu = request.args.get('max_expt_fashu', type=int)
+        max_expt_kangfa = request.args.get('max_expt_kangfa', type=int)
+        expt_lieshu = request.args.get('expt_lieshu', type=int)
+        
+        # 召唤兽修炼参数
+        bb_expt_gongji = request.args.get('bb_expt_gongji', type=int)
+        bb_expt_fangyu = request.args.get('bb_expt_fangyu', type=int)
+        bb_expt_fashu = request.args.get('bb_expt_fashu', type=int)
+        bb_expt_kangfa = request.args.get('bb_expt_kangfa', type=int)
+        bb_expt_total = request.args.get('bb_expt_total', type=int)
+        skill_drive_pet = request.args.get('skill_drive_pet', type=int)
+        
+        # 生活技能参数
+        for skill in ['qiang_shen', 'qiang_zhuang', 'shensu', 'ming_xiang', 'anqi', 'dazao',
+                     'caifeng', 'qiaojiang', 'lianjin', 'yangsheng', 'pengren', 'zhongyao',
+                     'lingshi', 'jianshen', 'taoli', 'zhuibu', 'ronglian', 'cuiling',
+                     'wind_sense', 'rain_sense', 'snow_sense']:
+            locals()[f'skill_{skill}'] = request.args.get(f'skill_{skill}', type=int)
+        
+        # 其他参数
+        equip_num = request.args.get('equip_num', type=int)
+        pet_num = request.args.get('pet_num', type=int)
+        pet_num_level = request.args.get('pet_num_level', type=int)
+        
+        # 排序参数
+        sort_by = request.args.get('sort_by', type=str)
+        sort_order = request.args.get('sort_order', type=str)
+        
+        # 导出参数
+        export_all = request.args.get('export_all', 'false').lower() == 'true'
+        
+        # 准备参数字典
+        kwargs = {
+            'year': year,
+            'month': month,
+            'level_min': level_min,
+            'level_max': level_max,
+            'school_skill_num': school_skill_num,
+            'school_skill_level': school_skill_level,
+            'expt_gongji': expt_gongji,
+            'expt_fangyu': expt_fangyu,
+            'expt_fashu': expt_fashu,
+            'expt_kangfa': expt_kangfa,
+            'expt_total': expt_total,
+            'max_expt_gongji': max_expt_gongji,
+            'max_expt_fangyu': max_expt_fangyu,
+            'max_expt_fashu': max_expt_fashu,
+            'max_expt_kangfa': max_expt_kangfa,
+            'expt_lieshu': expt_lieshu,
+            'bb_expt_gongji': bb_expt_gongji,
+            'bb_expt_fangyu': bb_expt_fangyu,
+            'bb_expt_fashu': bb_expt_fashu,
+            'bb_expt_kangfa': bb_expt_kangfa,
+            'bb_expt_total': bb_expt_total,
+            'skill_drive_pet': skill_drive_pet,
+            'equip_num': equip_num,
+            'pet_num': pet_num,
+            'pet_num_level': pet_num_level,
+            'sort_by': sort_by,
+            'sort_order': sort_order
+        }
+        
+        # 添加生活技能参数
+        for skill in ['qiang_shen', 'qiang_zhuang', 'shensu', 'ming_xiang', 'anqi', 'dazao',
+                     'caifeng', 'qiaojiang', 'lianjin', 'yangsheng', 'pengren', 'zhongyao',
+                     'lingshi', 'jianshen', 'taoli', 'zhuibu', 'ronglian', 'cuiling',
+                     'wind_sense', 'rain_sense', 'snow_sense']:
+            skill_value = locals().get(f'skill_{skill}')
+            if skill_value is not None:
+                kwargs[f'skill_{skill}'] = skill_value
+        
+        # 调用导出API
+        from api.character_api import CharacterAPI
+        api = CharacterAPI()
+        json_path = api.export_characters_json(export_all=export_all, **kwargs)
+        
+        if json_path and os.path.exists(json_path):
+            return send_file(json_path, as_attachment=True, download_name=os.path.basename(json_path))
+        else:
+            return jsonify({
+                "error": "导出失败，没有找到匹配的数据或生成文件失败"
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "导出JSON文件失败"
+        }), 500
+
+@app.route('/api/characters/export/single/json')
+def export_single_character_json():
+    """导出单个角色数据为JSON文件"""
+    try:
+        # 获取参数
+        year = request.args.get('year', type=int)
+        month = request.args.get('month', type=int)
+        equip_id = request.args.get('equip_id')
+        
+        if not equip_id:
+            return jsonify({
+                "error": "缺少equip_id参数"
+            }), 400
+        
+        # 调用API导出单个角色
+        from api.character_api import CharacterAPI
+        api = CharacterAPI()
+        json_path = api.export_single_character_json(
+            year=year,
+            month=month,
+            equip_id=equip_id
+        )
+        
+        if json_path and os.path.exists(json_path):
+            return send_file(json_path, as_attachment=True, download_name=os.path.basename(json_path))
+        else:
+            return jsonify({
+                "error": "导出失败，没有找到匹配的角色数据"
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "导出单个角色JSON文件失败"
         }), 500
 
 def main():

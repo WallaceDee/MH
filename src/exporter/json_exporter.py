@@ -31,10 +31,14 @@ class CBGJSONExporter:
         # 使用动态配置加载器
         try:
             from ..parser.config_loader import get_config_loader
+            self.config_loader = get_config_loader()
         except ImportError:
-            from parser.config_loader import get_config_loader
-            
-        self.config_loader = get_config_loader()
+            try:
+                from parser.config_loader import get_config_loader
+                self.config_loader = get_config_loader()
+            except ImportError:
+                # 如果没有配置加载器，使用简单的默认配置
+                self.config_loader = None
     
     def _create_logger(self):
         """创建默认日志对象"""
@@ -118,6 +122,7 @@ class CBGJSONExporter:
             
                 -- 点数和潜力
                 l.skill_point as 剧情技能剩余技能点,
+                l.all_new_point as 乾元丹,
                 
                 -- 金钱和道具
                 l.cash as 现金,
@@ -263,23 +268,12 @@ class CBGJSONExporter:
             # 创建输出目录（如果不存在）
             os.makedirs(os.path.dirname(json_path), exist_ok=True)
             
-            # 创建导出数据结构
-            export_data = {
-                'export_info': {
-                    'export_time': datetime.now().isoformat(),
-                    'total_count': len(data_list),
-                    'export_format': 'json',
-                    'version': '1.0'
-                },
-                'characters': data_list
-            }
-            
-            # 写入JSON文件
+            # 直接导出角色数据数组，不包装额外结构
             with open(json_path, 'w', encoding='utf-8') as f:
                 if pretty:
-                    json.dump(export_data, f, ensure_ascii=False, indent=2)
+                    json.dump(data_list, f, ensure_ascii=False, indent=2)
                 else:
-                    json.dump(export_data, f, ensure_ascii=False)
+                    json.dump(data_list, f, ensure_ascii=False)
             
             self.logger.info(f"JSON文件保存完成: {json_path}")
             

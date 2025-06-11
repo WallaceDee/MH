@@ -166,6 +166,7 @@ DB_SCHEMA_CONFIG = {
             
             -- 转职飞升相关
             zhuan_zhi INTEGER,              -- 转职状态(iZhuanZhi)
+            all_new_point INTEGER,          -- 乾元丹(TA_iAllNewPoint)
             three_fly_lv INTEGER,           -- 化圣等级(i3FlyLv)
             nine_fight_level INTEGER,       -- 生死劫等级(nine_fight_level)
             

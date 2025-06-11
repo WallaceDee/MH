@@ -11,6 +11,7 @@ import sqlite3
 import logging
 from datetime import datetime
 import sys
+import time
 
 # 添加项目根目录到 Python 路径
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -50,14 +51,14 @@ class DataUpdater:
             # 获取要更新的角色
             if character_id:
                 cursor.execute("""
-                    SELECT c.equip_id, c.seller_nickname, d.raw_data_json 
+                    SELECT c.equip_id, c.seller_nickname, d.raw_data_json
                     FROM characters c
                     JOIN large_equip_desc_data d ON c.equip_id = d.equip_id
                     WHERE c.equip_id = ?
                 """, (character_id,))
             else:
                 cursor.execute("""
-                    SELECT c.equip_id, c.seller_nickname, d.raw_data_json 
+                    SELECT c.equip_id, c.seller_nickname, d.raw_data_json
                     FROM characters c
                     JOIN large_equip_desc_data d ON c.equip_id = d.equip_id
                 """)
@@ -146,6 +147,15 @@ class DataUpdater:
                             f"UPDATE characters SET {set_clause} WHERE equip_id = ?",
                             values
                         )
+                        
+                        # 单独更新 large_equip_desc_data 表中的 all_new_point 字段
+                        if parsed_desc.get('TA_iAllNewPoint'):
+                            cursor.execute(
+                                "UPDATE large_equip_desc_data SET all_new_point = ? WHERE equip_id = ?",
+                                [parsed_desc.get('TA_iAllNewPoint'), equip_id]
+                            )
+                            self.logger.info(f"更新角色 {equip_id} 的乾元丹数据: {parsed_desc.get('TA_iAllNewPoint')}")
+                        
                         updated_count += 1
                         self.logger.info(f"更新角色 {equip_id} 的数据成功")
                 
@@ -194,6 +204,206 @@ class DataUpdater:
         except Exception as e:
             self.logger.warning(f"解析large_equip_desc失败: {e}")
             return {}
+    
+    def get_house_real_owner_name(self, owner_status):
+        """转换房屋真实拥有者状态为中文名称"""
+        return self.common_parser.get_house_real_owner_name(owner_status)
+    
+    def add_column_to_characters(self, column_name, column_type):
+        """
+        为characters表添加新字段
+        
+        Args:
+            column_name: 字段名称
+            column_type: 字段类型 (如 'TEXT', 'INTEGER', 'REAL' 等)
+            
+        Returns:
+            bool: 是否添加成功
+        """
+        return self.add_column_to_table('characters', column_name, column_type)
+    
+    def add_column_to_table(self, table_name, column_name, column_type):
+        """
+        为指定表添加新字段
+        
+        Args:
+            table_name: 表名
+            column_name: 字段名称
+            column_type: 字段类型 (如 'TEXT', 'INTEGER', 'REAL' 等)
+            
+        Returns:
+            bool: 是否添加成功
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # 检查表是否存在
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+            if not cursor.fetchone():
+                self.logger.error(f"表 {table_name} 不存在")
+                return False
+            
+            # 检查字段是否已存在
+            cursor.execute(f"PRAGMA table_info({table_name})")
+            existing_columns = [column[1] for column in cursor.fetchall()]
+            
+            if column_name in existing_columns:
+                self.logger.warning(f"字段 {column_name} 在表 {table_name} 中已存在")
+                return False
+            
+            # 添加新字段
+            cursor.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}")
+            conn.commit()
+            self.logger.info(f"成功添加字段 {column_name} ({column_type}) 到表 {table_name}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"添加字段 {column_name} 到表 {table_name} 失败: {e}")
+            return False
+        finally:
+            conn.close()
+    
+    def add_column_to_large_equip_desc(self, column_name, column_type):
+        """
+        为large_equip_desc_data表添加新字段的便捷方法
+        
+        Args:
+            column_name: 字段名称
+            column_type: 字段类型 (如 'TEXT', 'INTEGER', 'REAL' 等)
+            
+        Returns:
+            bool: 是否添加成功
+        """
+        return self.add_column_to_table('large_equip_desc_data', column_name, column_type)
+    
+    def drop_column_from_table(self, table_name, column_name):
+        """
+        删除表中的字段
+        
+        Args:
+            table_name: 表名
+            column_name: 要删除的字段名
+            
+        Returns:
+            bool: 是否删除成功
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # 检查表是否存在
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+            if not cursor.fetchone():
+                self.logger.error(f"表 {table_name} 不存在")
+                return False
+            
+            # 检查字段是否存在
+            cursor.execute(f"PRAGMA table_info({table_name})")
+            columns = cursor.fetchall()
+            column_names = [col[1] for col in columns]
+            
+            if column_name not in column_names:
+                self.logger.warning(f"字段 {column_name} 在表 {table_name} 中不存在")
+                return False
+            
+            # 获取SQLite版本
+            cursor.execute("SELECT sqlite_version()")
+            version = cursor.fetchone()[0]
+            version_parts = [int(x) for x in version.split('.')]
+            
+            # SQLite 3.35.0+ 支持 ALTER TABLE DROP COLUMN
+            supports_drop_column = (version_parts[0] > 3 or 
+                                  (version_parts[0] == 3 and version_parts[1] > 35) or
+                                  (version_parts[0] == 3 and version_parts[1] == 35 and version_parts[2] >= 0))
+            
+            if supports_drop_column:
+                # 使用新语法直接删除字段
+                self.logger.info(f"使用 ALTER TABLE DROP COLUMN 删除字段 {column_name}")
+                cursor.execute(f"ALTER TABLE {table_name} DROP COLUMN {column_name}")
+            else:
+                # 使用传统方法：重建表
+                self.logger.info(f"使用表重建方法删除字段 {column_name}")
+                
+                # 获取除了要删除字段外的所有字段信息
+                remaining_columns = [col for col in columns if col[1] != column_name]
+                
+                if not remaining_columns:
+                    self.logger.error(f"不能删除表 {table_name} 的最后一个字段")
+                    return False
+                
+                # 构建新表的字段定义
+                column_defs = []
+                column_names_new = []
+                for col in remaining_columns:
+                    col_name = col[1]
+                    col_type = col[2]
+                    col_notnull = col[3]
+                    col_default = col[4]
+                    col_pk = col[5]
+                    
+                    col_def = f"{col_name} {col_type}"
+                    if col_pk:
+                        col_def += " PRIMARY KEY"
+                    if col_notnull and not col_pk:
+                        col_def += " NOT NULL"
+                    if col_default is not None:
+                        col_def += f" DEFAULT {col_default}"
+                    
+                    column_defs.append(col_def)
+                    column_names_new.append(col_name)
+                
+                # 创建临时表
+                temp_table = f"{table_name}_temp_{int(time.time())}"
+                create_sql = f"CREATE TABLE {temp_table} ({', '.join(column_defs)})"
+                cursor.execute(create_sql)
+                
+                # 复制数据到临时表
+                select_columns = ', '.join(column_names_new)
+                cursor.execute(f"INSERT INTO {temp_table} ({select_columns}) SELECT {select_columns} FROM {table_name}")
+                
+                # 删除原表
+                cursor.execute(f"DROP TABLE {table_name}")
+                
+                # 重命名临时表
+                cursor.execute(f"ALTER TABLE {temp_table} RENAME TO {table_name}")
+            
+            conn.commit()
+            self.logger.info(f"成功从表 {table_name} 删除字段 {column_name}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"从表 {table_name} 删除字段 {column_name} 失败: {e}")
+            if 'conn' in locals():
+                conn.rollback()
+            return False
+        finally:
+            if 'conn' in locals():
+                conn.close()
+    
+    def drop_column_from_characters(self, column_name):
+        """
+        从characters表删除字段的便捷方法
+        
+        Args:
+            column_name: 要删除的字段名
+            
+        Returns:
+            bool: 是否删除成功
+        """
+        return self.drop_column_from_table('characters', column_name)
+    
+    def drop_column_from_large_equip_desc(self, column_name):
+        """
+        从large_equip_desc_data表删除字段的便捷方法
+        
+        Args:
+            column_name: 要删除的字段名
+            
+        Returns:
+            bool: 是否删除成功
+        """
+        return self.drop_column_from_table('large_equip_desc_data', column_name)
 
 def main():
     """简单的测试函数"""
@@ -212,7 +422,9 @@ def main():
     updater = DataUpdater(db_path, logger)
     
     # 更新所有数据
+    # updater.add_column_to_characters('all_new_point','INTEGER')
     updater.update_character_data()
-
+    # updater.drop_column_from_table('characters','all_new_point')
+    # updater.add_column_to_table('large_equip_desc_data','all_new_point','INTEGER')
 if __name__ == "__main__":
     main() 

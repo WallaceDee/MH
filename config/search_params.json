@@ -1,8 +1,10 @@
 {
   "callback": "Request.JSONP.request_map.request_0",
-  "_": "1749566281428",
+  "_": "1749654296716",
   "level_min": "129",
   "level_max": "129",
+  "server_type": "3",
+  "zhuang_zhi": "1",
   "act": "recommd_by_role",
   "page": "1",
   "count": "15",

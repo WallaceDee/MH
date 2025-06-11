@@ -16,7 +16,7 @@ import pandas as pd
 from datetime import datetime
 from urllib.parse import urlencode
 import logging
-from tools.setup_requests_session import setup_session
+from .tools.setup_requests_session import setup_session
 import asyncio
 from playwright.async_api import async_playwright
 
@@ -737,6 +737,7 @@ class CBGSpider:
                             'beast_ski2': safe_int(parsed_desc.get('iBeastSki2')),
                             'beast_ski3': safe_int(parsed_desc.get('iBeastSki3')),
                             'beast_ski4': safe_int(parsed_desc.get('iBeastSki4')),
+                            'all_new_point':safe_int(parsed_desc.get('TA_iAllNewPoint')),
                             'skill_point': safe_int(parsed_desc.get('iSkiPoint')),
                             'attribute_point': safe_int(parsed_desc.get('iPoint')),
                             'potential': safe_int(parsed_desc.get('potential')),
@@ -1020,7 +1021,7 @@ class CBGSpider:
         
         # 构建基础CBG链接
         base_url = "https://xyq.cbg.163.com/equip"
-        params = f"s={server_id}&eid={eid}&client_type=web&o"
+        params = f"s={server_id}&eid={eid}"
         link = f"{base_url}?{params}"
         
         return link

@@ -136,6 +136,7 @@ class CBGExcelExporter:
                 
                 -- 社交信息
                 l.org_name as 帮派名称,
+                l.all_new_point as 乾元丹,
                 l.org_offer as 帮贡,
                 
                 -- 成就和评分

@@ -1,4 +1,5 @@
 import os
+import sys
 import sqlite3
 import json
 import logging
@@ -7,6 +8,13 @@ from datetime import datetime
 import glob
 import pandas as pd
 import joblib
+
+# 添加src目录到Python路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.dirname(current_dir)
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
+
 from feature_extractor import FeatureExtractor
 
 class CharacterEvaluator:
@@ -20,18 +28,11 @@ class CharacterEvaluator:
         self.df = None
         
         # 初始化规则引擎参数
-        self.BASE_PRICES = {
-            89: 800,    # 89级空号基准价
-            109: 1800,  # 109级空号基准价
-            129: 2500,  # 129级空号基准价
-            159: 8000,  # 159级空号基准价
-            175: 11000   # 175级空号基准价
-        }
-        
-        # 各等级修炼上限
-        self.MAX_CULTIVATION = {
-            89: 13, 109: 17, 129: 21, 159: 25, 175: 25
-        }
+        try:
+            from evaluate_model.level_config import LevelConfig
+        except ImportError:
+            from level_config import LevelConfig
+        self.level_config = LevelConfig
         
         # 装备评分系数
         self.EQUIP_COEFFS = {
@@ -71,29 +72,24 @@ class CharacterEvaluator:
 
     def get_base_price(self, level):
         """获取基础空号价格，返回最接近的等级基准价"""
-        # 获取所有可用等级
-        available_levels = sorted(self.BASE_PRICES.keys())
-        
-        # 如果等级正好匹配，直接返回
-        if level in self.BASE_PRICES:
-            return self.BASE_PRICES[level]
-            
-        # 找到最接近的等级
-        closest_level = min(available_levels, key=lambda x: abs(x - level))
-        return self.BASE_PRICES[closest_level]
+        config = self.level_config.get_nearest_level_config(level)
+        return config['base_price']
 
     def calc_base_attributes_value(self, base_price, features):
         """计算基础属性价值"""
         try:
-            # 获取等级对应的修炼上限
+            # 获取等级配置
             level = features.get('level', 0)
-            max_cult = self.MAX_CULTIVATION.get(level, 25)
+            config = self.level_config.get_nearest_level_config(level)
+            max_cult = config['max_cultivation']
+            max_school_skill = config['max_school_skill']
+            # 根据等级动态计算修炼完成度（0-1范围）
+            total_cultivation = features.get('total_cultivation', 0)
+            cult_completion = min(total_cultivation / (max_cult * 3), 1.0)
             
-            # 修炼完成度修正（0-1范围）
-            cult_completion = features.get('cultivation_completion', 0)
-            
-            # 控制力完成度修正
-            beast_completion = features.get('beast_ski_completion', 0)
+            # 根据等级动态计算控制力完成度
+            total_beast_ski = features.get('total_beast_ski', 0)
+            beast_completion = min(total_beast_ski / (max_cult * 4), 1.0)
             
             # 经验修正系数（指数增长）
             exp_factor = 1.0
@@ -111,9 +107,9 @@ class CharacterEvaluator:
             # 技能等级超过180时给予额外加成
             skill_factor = 1.0
             if avg_skill_level > 0:
-                skill_factor = 0.8 + (avg_skill_level / 180) * 0.4
-                skill_factor -= skill_std * 0.05
-            
+                skill_factor = avg_skill_level / max_school_skill
+                # skill_factor -= skill_std * 0.05
+            # print(f"技能修正（均值越高价值越高，标准差越低价值越高）: {avg_skill_level}-{max_school_skill}-{skill_std * 0.05}")
             # 强壮和神速技能修正
             strong_level = features.get('强壮', 0)
             speed_level = features.get('神速', 0)
@@ -122,7 +118,8 @@ class CharacterEvaluator:
             
             # 生活技能修正
             top_life_skills = features.get('top_life_skills', 0)
-            life_skill_factor = 1.0 + min(top_life_skills / 1000, 0.3)
+            # life_skill_factor = 1.0 + min(top_life_skills / 1000, 0.3)
+            life_skill_factor = 1.0
             
             # 应用所有修正
             adjusted_value = base_price * cult_completion * beast_completion
@@ -360,8 +357,7 @@ class CharacterEvaluator:
         try:
             # 准备保存的数据
             model_data = {
-                'BASE_PRICES': self.BASE_PRICES,
-                'MAX_CULTIVATION': self.MAX_CULTIVATION,
+                'LEVEL_CONFIGS': self.level_config.LEVEL_CONFIGS,
                 'EQUIP_COEFFS': self.EQUIP_COEFFS,
                 'PET_COEFFS': self.PET_COEFFS,
                 'train_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -374,8 +370,7 @@ class CharacterEvaluator:
             # 保存模型信息
             info_path = os.path.join(self.model_dir, f'{model_name}_info.json')
             model_info = {
-                'BASE_PRICES': self.BASE_PRICES,
-                'MAX_CULTIVATION': self.MAX_CULTIVATION,
+                'LEVEL_CONFIGS': self.level_config.LEVEL_CONFIGS,
                 'EQUIP_COEFFS': self.EQUIP_COEFFS,
                 'PET_COEFFS': self.PET_COEFFS,
                 'train_time': model_data['train_time']
@@ -406,8 +401,7 @@ class CharacterEvaluator:
             model_data = joblib.load(model_path)
             
             # 恢复模型状态
-            self.BASE_PRICES = model_data['BASE_PRICES']
-            self.MAX_CULTIVATION = model_data['MAX_CULTIVATION']
+            self.level_config.LEVEL_CONFIGS = model_data['LEVEL_CONFIGS']
             self.EQUIP_COEFFS = model_data['EQUIP_COEFFS']
             self.PET_COEFFS = model_data['PET_COEFFS']
             
@@ -416,8 +410,7 @@ class CharacterEvaluator:
             
             return {
                 'train_time': model_data['train_time'],
-                'BASE_PRICES': self.BASE_PRICES,
-                'MAX_CULTIVATION': self.MAX_CULTIVATION,
+                'LEVEL_CONFIGS': self.level_config.LEVEL_CONFIGS,
                 'EQUIP_COEFFS': self.EQUIP_COEFFS,
                 'PET_COEFFS': self.PET_COEFFS
             }
@@ -439,8 +432,7 @@ class CharacterEvaluator:
                     models.append({
                         'name': model_name,
                         'train_time': info['train_time'],
-                        'BASE_PRICES': info['BASE_PRICES'],
-                        'MAX_CULTIVATION': info['MAX_CULTIVATION'],
+                        'LEVEL_CONFIGS': info.get('LEVEL_CONFIGS', {}),
                         'EQUIP_COEFFS': info['EQUIP_COEFFS'],
                         'PET_COEFFS': info['PET_COEFFS']
                     })
@@ -449,6 +441,26 @@ class CharacterEvaluator:
             self.logger.error(f"列出模型失败: {e}")
             raise
 
+    def generate_cbg_link(self, eid):
+        """生成CBG角色分享链接"""
+        if not eid:
+            return None
+        
+        # 从eid中提取服务器ID
+        # eid格式通常是：服务器ID-角色ID，比如 "201808081404129-230011021108"
+        try:
+            if '-' in str(eid):
+                server_id = str(eid).split('-')[1]
+            
+            # 构建基础CBG链接
+            base_url = "https://xyq.cbg.163.com/equip"
+            params = f"s={server_id}&eid={eid}"
+            link = f"{base_url}?{params}"
+            
+            return link
+        except Exception:
+            return None
+
     def export_to_excel(self, output_path='results.xlsx'):
         """将评估结果导出到Excel文件"""
         try:
@@ -456,12 +468,11 @@ class CharacterEvaluator:
                 print("警告：没有数据可导出")
                 return None
                 
-            # 创建一个ExcelWriter对象
-            with pd.ExcelWriter(output_path) as writer:
+            # 创建一个ExcelWriter对象，启用超链接支持
+            with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
                 # 导出基础配置
                 config_df = pd.DataFrame([{
-                    'BASE_PRICES': json.dumps(self.BASE_PRICES, ensure_ascii=False),
-                    'MAX_CULTIVATION': json.dumps(self.MAX_CULTIVATION, ensure_ascii=False),
+                    'LEVEL_CONFIGS': json.dumps(self.level_config.LEVEL_CONFIGS, ensure_ascii=False),
                     'EQUIP_COEFFS': json.dumps(self.EQUIP_COEFFS, ensure_ascii=False),
                     'PET_COEFFS': json.dumps(self.PET_COEFFS, ensure_ascii=False)
                 }])
@@ -470,66 +481,189 @@ class CharacterEvaluator:
                 # 导出所有角色的评估结果
                 all_chars_df = self.df.copy()
                 
-                # 计算每个角色的价值
+                # 计算每个角色的价值和修正系数
                 results = []
                 for idx, row in all_chars_df.iterrows():
                     # 直接使用已有的特征数据
                     features = row.to_dict()
-                    base_price = self.get_base_price(features['level'])
+                    level = features.get('level', 0)
+                    price = features.get('price', 0)
+                    
+                    # 计算价值
+                    base_price = self.get_base_price(level)
                     base_value = self.calc_base_attributes_value(base_price, features)
                     equip_value = self.calc_equipment_value(features)
                     pets_value = self.calc_pets_value(features)
                     appearance_value = self.calc_appearance_value(features)
                     total_value = base_value + equip_value + pets_value + appearance_value
-                    final_value = self.apply_market_factors(total_value, features)
+                    
+                    # 计算差价和比率
+                    price_diff = total_value - price if price > 0 else 0
+                    price_ratio = total_value / price if price > 0 else 0
+                    
+                    # 计算各种修正系数
+                    config = self.level_config.get_nearest_level_config(level)
+                    max_cult = config['max_cultivation']
+                    max_school_skill = config['max_school_skill']
+                    
+                    total_cultivation = features.get('total_cultivation', 0)
+                    cult_completion = min(total_cultivation / (max_cult * 3), 1.0)
+                    
+                    total_beast_ski = features.get('total_beast_ski', 0)
+                    beast_completion = min(total_beast_ski / (max_cult * 4), 1.0)
+                    
+                    # 经验修正系数
+                    sum_exp = features.get('sum_exp', 0)
+                    base_exp = 100000000000  # 1000亿
+                    exp_ratio = min(sum_exp / base_exp, 1.0)
+                    exp_factor = 1.0 + 0.5 * (1 / (1 + np.exp(-10 * (exp_ratio - 0.8))))
+                    
+                    # 技能修正
+                    avg_skill_level = features.get('avg_skill_level', 0)
+                    skill_factor = avg_skill_level / max_school_skill if avg_skill_level > 0 else 1.0
+                    
+                    # 强壮和神速技能修正
+                    strong_level = features.get('强壮', 0)
+                    speed_level = features.get('神速', 0)
+                    strong_factor = 1.0 + min(strong_level / 40, 1) * 0.15
+                    speed_factor = 1.0 + min(speed_level / 40, 1) * 0.1
+                    
+                    # 生活技能修正
+                    top_life_skills = features.get('top_life_skills', 0)
+                    life_skill_factor = 1.0 
+                    
+                    # 生成CBG链接
+                    cbg_link = self.generate_cbg_link(idx)
                     
                     results.append({
                         'equip_id': idx,
+                        'cbg_link': cbg_link,  # 保留用于生成超链接，但不显示
+                        'estimated_value': total_value,
+                        'price_diff': price_diff,
+                        'price_ratio': price_ratio,
                         'base_value': base_value,
                         'equip_value': equip_value,
                         'pets_value': pets_value,
                         'appearance_value': appearance_value,
                         'total_value': total_value,
-                        'final_value': final_value
+                        # 修正系数
+                        'base_price': base_price,
+                        'cult_completion': cult_completion,
+                        'beast_completion': beast_completion,
+                        'exp_factor': exp_factor,
+                        'skill_factor': skill_factor,
+                        'strong_factor': strong_factor,
+                        'speed_factor': speed_factor,
+                        'life_skill_factor': life_skill_factor
                     })
                 
                 results_df = pd.DataFrame(results)
                 results_df.set_index('equip_id', inplace=True)
                 
                 # 合并原始特征和评估结果
-                final_df = pd.concat([all_chars_df, results_df], axis=1)
+                final_df = pd.concat([results_df, all_chars_df], axis=1)
                 
-                # 重新排序列，让价格相关的列优先显示
-                priority_cols = ['price', 'base_value', 'total_value', 'final_value']
-                other_cols = [col for col in final_df.columns if col not in priority_cols]
-                final_df = final_df[priority_cols + other_cols]
+                # 重新排序列：优先信息 -> 修正系数 -> 价值分解 -> 特征数据
+                # 先检查哪些列实际存在
+                available_priority_cols = ['price', 'estimated_value', 'price_diff', 'price_ratio', 'level']
+                optional_cols = ['server', 'school', 'server_name', 'school_desc']
+                for col in optional_cols:
+                    if col in final_df.columns:
+                        available_priority_cols.append(col)
+                
+                priority_cols = available_priority_cols
+                
+                factor_cols = [
+                    'base_price', 'cult_completion', 'beast_completion', 'exp_factor',
+                    'skill_factor', 'strong_factor', 'speed_factor', 'life_skill_factor'
+                ]
+                
+                value_cols = [
+                    'base_value', 'equip_value', 'pets_value', 'appearance_value', 'total_value'
+                ]
+                
+                # 特征数据列（排除已经使用的列，包括cbg_link）
+                used_cols = set(priority_cols + factor_cols + value_cols + ['cbg_link'])
+                feature_cols = [col for col in final_df.columns if col not in used_cols]
+                
+                # 最终列顺序（不包含cbg_link）
+                final_cols = priority_cols + factor_cols + value_cols + feature_cols
+                final_df = final_df[final_cols]
                 
                 # 导出到Excel
                 final_df.to_excel(writer, sheet_name='评估结果')
                 
+                # 获取工作表对象以添加超链接
+                worksheet = writer.sheets['评估结果']
+                
+                # 导入openpyxl的超链接类
+                from openpyxl.worksheet.hyperlink import Hyperlink
+                
+                # 为equip_id添加CBG超链接（在索引列）
+                print("正在添加CBG超链接...")
+                hyperlink_count = 0
+                
+                # 因为合并后cbg_link列可能在results_df中，我们直接从results_df获取
+                for row_idx, (index, row) in enumerate(final_df.iterrows(), start=2):  # 从第2行开始（第1行是标题）
+                    # 尝试从合并的DataFrame中获取cbg_link
+                    cbg_link = None
+                    if 'cbg_link' in row:
+                        cbg_link = row['cbg_link']
+                    
+                    # 如果还是没有，直接生成链接
+                    if not cbg_link:
+                        cbg_link = self.generate_cbg_link(index)
+                    
+                    if cbg_link and cbg_link.strip() and cbg_link != 'None':
+                        try:
+                            # equip_id在索引列（第1列，列索引为1）
+                            cell = worksheet.cell(row=row_idx, column=1)
+                            cell.hyperlink = cbg_link  # 直接使用字符串URL
+                            cell.value = str(index)  # 显示equip_id
+                            
+                            # 设置超链接样式
+                            from openpyxl.styles import Font
+                            cell.font = Font(color="0000FF", underline="single")
+                            hyperlink_count += 1
+                        except Exception as e:
+                            print(f"添加超链接失败 {index}: {e}")
+                            continue
+                
+                print(f"已添加 {hyperlink_count} 个超链接")
+                
                 # 导出价值统计
                 stats_df = pd.DataFrame([{
-                    'base_value_mean': results_df['base_value'].mean(),
-                    'equip_value_mean': results_df['equip_value'].mean(),
-                    'pets_value_mean': results_df['pets_value'].mean(),
-                    'appearance_value_mean': results_df['appearance_value'].mean(),
-                    'total_value_mean': results_df['total_value'].mean(),
-                    'final_value_mean': results_df['final_value'].mean(),
-                    'base_value_median': results_df['base_value'].median(),
-                    'equip_value_median': results_df['equip_value'].median(),
-                    'pets_value_median': results_df['pets_value'].median(),
-                    'appearance_value_median': results_df['appearance_value'].median(),
-                    'total_value_median': results_df['total_value'].median(),
-                    'final_value_median': results_df['final_value'].median()
+                    'total_count': len(final_df),
+                    'avg_price': final_df['price'].mean(),
+                    'avg_estimated_value': final_df['estimated_value'].mean(),
+                    'avg_price_diff': final_df['price_diff'].mean(),
+                    'avg_price_ratio': final_df['price_ratio'].mean(),
+                    'undervalued_count': (final_df['price_ratio'] > 1.2).sum(),
+                    'overvalued_count': (final_df['price_ratio'] < 0.8).sum(),
+                    'reasonable_count': ((final_df['price_ratio'] >= 0.8) & (final_df['price_ratio'] <= 1.2)).sum(),
+                    'base_value_mean': final_df['base_value'].mean(),
+                    'equip_value_mean': final_df['equip_value'].mean(),
+                    'pets_value_mean': final_df['pets_value'].mean(),
+                    'appearance_value_mean': final_df['appearance_value'].mean(),
+                    'total_value_mean': final_df['total_value'].mean(),
+                    'base_value_median': final_df['base_value'].median(),
+                    'equip_value_median': final_df['equip_value'].median(),
+                    'pets_value_median': final_df['pets_value'].median(),
+                    'appearance_value_median': final_df['appearance_value'].median(),
+                    'total_value_median': final_df['total_value'].median()
                 }])
                 stats_df.to_excel(writer, sheet_name='价值统计', index=False)
             
             print(f"\n导出完成，文件保存在：{output_path}")
             print(f"共导出 {len(self.df)} 个角色的评估结果")
+            print("列顺序：优先信息 -> 修正系数 -> 价值分解 -> 特征数据")
+            print("已为equip_id添加CBG超链接，点击equip_id可直接跳转")
             
             return output_path
         except Exception as e:
             print(f"导出Excel时发生错误: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
             return None
 
 if __name__ == "__main__":
@@ -551,7 +685,7 @@ if __name__ == "__main__":
         
         print("\n开始导出结果到Excel...")
         # 导出结果到Excel
-        output_path = evaluator.export_to_excel('results.xlsx')
+        output_path = evaluator.export_to_excel('results_with_links.xlsx')
         if output_path:
             print(f"结果已成功导出到: {output_path}")
         else:

@@ -121,7 +121,6 @@ class FeatureExtractor:
             total_cultivation = max(expt_ski1, expt_ski3) + expt_ski2 + expt_ski4
             features['expt_ski5'] = expt_ski5
             features['total_cultivation'] = total_cultivation
-            features['cultivation_completion'] = total_cultivation / (25 * 3)  # 修炼完成度
             
             # 控制力
             beast_ski1 = float(data.get('beast_ski1', 0))
@@ -138,15 +137,14 @@ class FeatureExtractor:
             # 计算总控制力
             total_beast_ski = beast_ski1 + beast_ski2 + beast_ski3 + beast_ski4
             features['total_beast_ski'] = total_beast_ski
-            features['beast_ski_completion'] = total_beast_ski / (25 * 4)  # 控制力完成度
             
             print("最终特征:", features)
             
         except Exception as e:
             self.logger.error(f"提取修炼特征失败: {e}")
             print(f"错误详情: {str(e)}")
-            features['cultivation_completion'] = 0
-            features['beast_ski_completion'] = 0
+            features['total_cultivation'] = 0
+            features['total_beast_ski'] = 0
             
         return features
 
