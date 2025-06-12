@@ -232,7 +232,7 @@
       </el-collapse>
     </div>
 
-    <el-table v-loading="loading" :data="characterList" border style="width: 100%" @sort-change="handleSortChange">
+    <el-table v-loading="loading" :data="characterList" border style="width: 100%" max-height="720" @sort-change="handleSortChange">
       <!-- 基本信息 -->
       <el-table-column prop="character_name" label="角色名" width="120">
         <template slot-scope="scope">
@@ -248,7 +248,7 @@
           }}亿
         </template>
       </el-table-column>
-      <el-table-column prop="price" label="价格" width="80" sortable="custom"/>
+      <el-table-column prop="price" label="价格" width="80" sortable="custom" />
       <!-- 修炼信息 -->
       <el-table-column label="修炼/控制力" width="300">
         <template slot-scope="scope">
@@ -282,12 +282,30 @@
           </el-popover>
         </template>
       </el-table-column>
+       <!-- 特殊宠物 -->
+       <el-table-column label="特殊宠物" width="120">
+        <template slot-scope="scope">
+          <el-popover placement="top" width="400" trigger="click" :content="scope.row.pet">
+            <div class="equip-desc" slot="reference" @click="copyText(scope.row.pet)">{{
+              scope.row.pet }}</div>
+          </el-popover>
+        </template>
+      </el-table-column>
       <!-- 宠物 -->
       <el-table-column label="宠物" width="120">
         <template slot-scope="scope">
           <el-popover placement="top" width="400" trigger="click" :content="scope.row.all_pets_json">
             <div class="equip-desc" slot="reference" @click="copyText(scope.row.all_pets_json)">{{
               scope.row.all_pets_json }}</div>
+          </el-popover>
+        </template>
+      </el-table-column>
+      <!-- 法宝 -->
+      <el-table-column label="法宝" width="120">
+        <template slot-scope="scope">
+          <el-popover placement="top" width="400" trigger="click" :content="scope.row.all_fabao_json">
+            <div class="equip-desc" slot="reference" @click="copyText(scope.row.all_fabao_json)">{{
+              scope.row.all_fabao_json }}</div>
           </el-popover>
         </template>
       </el-table-column>
@@ -313,15 +331,12 @@
       </el-table-column>
       <!-- 时间信息 -->
       <el-table-column prop="create_time" label="创建时间" width="200" />
-      <el-table-column prop="server" label="操作" width="150">
+      <el-table-column prop="server" label="操作" width="150" fixed="right">
         <template slot-scope="scope">
-          <el-button 
-            size="mini" 
-            type="primary" 
-            @click="handleExportSingleJSON(scope.row)"
+          <el-button size="mini" type="text" @click="handleExportSingleJSON(scope.row)"
             :loading="scope.row.exportLoading">
             导出JSON
-          </el-button> 
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -413,16 +428,16 @@ export default {
   methods: {
     handleSortChange({ prop, order }) {
       this.sortState[prop] = order
-      
+
       const sortFields = []
       const sortOrders = []
       for (const [field, order] of Object.entries(this.sortState)) {
         if (order) {
           sortFields.push(field)
-          sortOrders.push(order==='ascending'?'ASC':'DESC')
+          sortOrders.push(order === 'ascending' ? 'ASC' : 'DESC')
         }
       }
-      
+
       this.$set(this.searchForm, 'sort_by', sortFields.join(','))
       this.$set(this.searchForm, 'sort_order', sortOrders.join(','))
       this.handleSearch()
@@ -523,7 +538,7 @@ export default {
           params.append('pet_num', this.searchForm.pet_num)
         if (this.searchForm.pet_num_level !== undefined)
           params.append('pet_num_level', this.searchForm.pet_num_level)
-        if (this.searchForm.sort_by){
+        if (this.searchForm.sort_by) {
           params.append('sort_by', this.searchForm.sort_by)
           params.append('sort_order', this.searchForm.sort_order)
         }
@@ -766,13 +781,13 @@ export default {
           params.append('pet_num', this.searchForm.pet_num)
         if (this.searchForm.pet_num_level !== undefined)
           params.append('pet_num_level', this.searchForm.pet_num_level)
-        if (this.searchForm.sort_by){
+        if (this.searchForm.sort_by) {
           params.append('sort_by', this.searchForm.sort_by)
           params.append('sort_order', this.searchForm.sort_order)
         }
 
         const response = await fetch(`/api/characters/export/json?${params.toString()}`)
-        
+
         if (!response.ok) {
           throw new Error(`导出失败: ${response.status} ${response.statusText}`)
         }
@@ -802,7 +817,7 @@ export default {
     async handleExportSingleJSON(character) {
       // 设置单个角色的loading状态
       this.$set(character, 'exportLoading', true)
-      
+
       try {
         const [year, month] = this.searchForm.selectedDate.split('-')
         const params = new URLSearchParams({
@@ -812,7 +827,7 @@ export default {
         })
 
         const response = await fetch(`/api/characters/export/single/json?${params.toString()}`)
-        
+
         if (!response.ok) {
           throw new Error(`导出失败: ${response.status} ${response.statusText}`)
         }
@@ -821,13 +836,13 @@ export default {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        
+
         // 使用角色名和服务器名作为文件名
         const characterName = character.seller_nickname || '未知角色'
         const serverName = (character.area_name + '_' + character.server_name).replace(/[/\\:*?"<>|]/g, '_')
         const timestamp = new Date().getTime()
         link.download = `${characterName}_${serverName}_${timestamp}.json`
-        
+
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)

@@ -280,8 +280,8 @@ class CharacterAPI:
                         c.kindid, c.game_ordersn, c.pass_fair_show, c.fair_show_end_time,
                         c.accept_bargain, c.status_desc, c.onsale_expire_time_desc, c.expire_time,
                         c.race, c.fly_status, c.collect_num, c.life_skills, c.school_skills,
-                        c.ju_qing_skills, c.all_pets_json, c.all_equip_json AS all_equip_json_desc,
-                        c.all_shenqi_json, c.all_rider_json AS all_rider_json_desc,
+                        c.ju_qing_skills, c.yushoushu_skill, c.all_pets_json, c.all_equip_json AS all_equip_json_desc,
+                        c.all_shenqi_json, c.all_rider_json AS all_rider_json_desc, c.all_fabao_json,
                         c.ex_avt_json AS ex_avt_json_desc, c.create_time, c.update_time,
                         
                         l.*

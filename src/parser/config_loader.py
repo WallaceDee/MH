@@ -352,33 +352,25 @@ class ConfigLoader:
             raise e
     
     def get_rider_config(self) -> Dict[str, Any]:
-        """获取坐骑配置"""
-        try:
-            config = self._load_full_config()
-            
-            # 坐骑相关配置
-            rider_configs = {}
-            
-            # 获取坐骑信息
-            if 'rider_info' in config:
-                rider_configs['rider_info'] = config['rider_info']
-            
-            # 获取坐骑技能描述
-            if 'zuoqi_skill_desc' in config:
-                rider_configs['zuoqi_skill_desc'] = config['zuoqi_skill_desc']
-            
-            # 如果没有找到预期配置，记录警告
-            if not rider_configs.get('rider_info'):
-                self.logger.warning("未找到rider_info配置")
-            if not rider_configs.get('zuoqi_skill_desc'):
-                self.logger.warning("未找到zuoqi_skill_desc配置")
-            
-            self.logger.debug(f"加载了坐骑配置，包含{len(rider_configs)}个配置块")
-            return rider_configs
-            
-        except Exception as e:
-            self.logger.error(f"获取坐骑配置失败: {e}")
-            raise e
+        """获取坐骑配置信息"""
+        config = self._load_full_config()
+        return config.get('rider_info', {})
+
+    def get_fabao_config(self) -> Dict[str, Dict[str, str]]:
+        """
+        获取法宝配置信息
+        
+        Returns:
+            Dict[str, Dict[str, str]]: 法宝配置信息，格式为:
+            {
+                "法宝ID": {
+                    "name": "法宝名称",
+                    "desc": "法宝描述"
+                }
+            }
+        """
+        config = self._load_full_config()
+        return config.get('fabao_info', {})
 
     def get_clothes_config(self) -> Dict[str, Any]:
         """获取锦衣配置"""

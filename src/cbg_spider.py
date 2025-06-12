@@ -32,6 +32,7 @@ try:
     from .parser.rider_parser import RiderParser
     from .parser.ex_avt_parser import ExAvtParser
     from .parser.common_parser import CommonParser
+    from .parser.fabao_parser import FabaoParser
     from .utils.lpc_helper import LPCHelper
     from .utils.api_logger import log_api_request
     from .utils.cookie_updater import update_cookies_with_playwright
@@ -46,6 +47,7 @@ except ImportError:
     from parser.rider_parser import RiderParser
     from parser.ex_avt_parser import ExAvtParser
     from parser.common_parser import CommonParser
+    from parser.fabao_parser import FabaoParser
     from utils.lpc_helper import LPCHelper
     from utils.api_logger import log_api_request
     from utils.cookie_updater import update_cookies_with_playwright
@@ -100,6 +102,9 @@ class CBGSpider:
         
         # 初始化通用解析器
         self.common_parser = CommonParser(self.logger)
+
+        # 初始化法宝解析器
+        self.fabao_parser = FabaoParser(self.logger)
         
         # 初始化LPC解析助手
         self.lpc_helper = LPCHelper(self.logger)
@@ -207,7 +212,7 @@ class CBGSpider:
             raise
         finally:
             conn.close()
-    
+
     def get_school_name(self, school_id):
         """根据门派ID获取门派名称"""
         return self.common_parser.get_school_name(school_id)
@@ -562,7 +567,8 @@ class CBGSpider:
                 life_skills = ''
                 school_skills = ''
                 ju_qing_skills = ''
-                
+                yushoushu_skill = 0
+
                 large_equip_desc = char.get('large_equip_desc')
                 if large_equip_desc:
                     try:
@@ -574,6 +580,8 @@ class CBGSpider:
                                 life_skills = self.parse_life_skills(all_skills)
                                 school_skills = self.parse_school_skills(all_skills)
                                 ju_qing_skills = self.parse_ju_qing_skills(all_skills)
+                                yushoushu_skill = self.parse_yushoushu_skill(all_skills)
+
                     except Exception as e:
                         self.logger.warning(f"解析角色 {char.get('eid')} 的技能信息失败: {e}")
                 
@@ -605,7 +613,8 @@ class CBGSpider:
                     'create_time': datetime.now().isoformat(),
                     'life_skills': life_skills,
                     'school_skills': school_skills,
-                    'ju_qing_skills': ju_qing_skills
+                    'ju_qing_skills': ju_qing_skills,
+                    'yushoushu_skill': yushoushu_skill
                 }
                 
                 # 处理宠物数据（保存all_pets_json）
@@ -647,7 +656,19 @@ class CBGSpider:
                         character_data['all_rider_json'] = ''
                 else:
                     character_data['all_rider_json'] = ''
-                
+
+                # 处理法宝信息（保存到characters表）
+                if parsed_desc and parsed_desc.get('fabao_json'):
+                    # 使用法宝解析器处理法宝数据
+                    all_fabao = self.fabao_parser.process_character_fabao(parsed_desc, char.get('sellerNickname', ''))
+                    if all_fabao:
+                        character_data['all_fabao_json'] = json.dumps(all_fabao, ensure_ascii=False)
+                        self.logger.debug(f"保存法宝信息到characters表: {len(character_data['all_fabao_json'])} 字符")
+                    else:
+                        character_data['all_fabao_json'] = ''
+                else:
+                    character_data['all_fabao_json'] = ''    
+
                 # 处理锦衣信息（保存到characters表）
                 if parsed_desc and parsed_desc.get('ExAvt'):
                     # 构建锦衣数据，包含基础信息和特效信息
@@ -785,7 +806,9 @@ class CBGSpider:
                             'bid_status': safe_int(parsed_desc.get('bid')),
                             'ori_race': safe_int(parsed_desc.get('ori_race')),
                             'current_race': safe_int(parsed_desc.get('iRace')),
+                            'sum_amount': safe_int(parsed_desc.get('iSumAmount')),
                             'version_code': safe_str(parsed_desc.get('equip_desc_version_code')),
+                            'pet': json.dumps(parsed_desc.get('pet', {}), ensure_ascii=False),
                             'all_skills_json': json.dumps(parsed_desc.get('all_skills', {}), ensure_ascii=False),
                             'all_equip_json': json.dumps(parsed_desc.get('AllEquip', {}), ensure_ascii=False),
                             'all_summon_json': json.dumps(parsed_desc.get('AllSummon', {}), ensure_ascii=False),
@@ -1107,6 +1130,10 @@ class CBGSpider:
                 exported_files.append(json_file)
             
         return exported_files
+    
+    def parse_yushoushu_skill(self, skills_data):
+        """解析育兽术技能数据"""
+        return self.common_parser.parse_yushoushu_skill(skills_data)
     
     def parse_life_skills(self, skills_data):
         """解析生活技能数据"""

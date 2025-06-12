@@ -242,7 +242,43 @@ class CommonParser:
         except Exception as e:
             self.logger.error(f"解析生活技能时出错: {e}")
             return ""
-    
+        
+    def parse_yushoushu_skill(self, skills_data):
+        """解析育兽术技能数据
+        
+        Args:
+            skills_data (dict|str): 技能数据，可以是字典或JSON字符串
+            
+        Returns:
+            int: 返回技能等级
+        """
+        try:
+            # 如果输入是字符串，尝试解析为字典
+            if isinstance(skills_data, str):
+                if not skills_data:
+                    return ""
+                try:
+                    skills_data = json.loads(skills_data)
+                except json.JSONDecodeError:
+                    self.logger.warning(f"无法解析技能数据: {skills_data}")
+                    return ""
+            
+            if not isinstance(skills_data, dict):
+                self.logger.warning(f"技能数据格式错误: {type(skills_data)}")
+                return ""
+            
+            # 提取育兽术技能
+            for skill_id, level in skills_data.items():
+                # 确保skill_id是字符串
+                skill_id = str(skill_id)
+                if skill_id == "221":
+                    return level
+            return 0
+        
+        except Exception as e:
+            self.logger.error(f"解析育兽术技能时出错: {e}")
+            return 0
+        
     def parse_school_skills(self, skills_data):
         """解析师门技能数据
         

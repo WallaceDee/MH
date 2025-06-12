@@ -88,7 +88,7 @@ class CBGExcelExporter:
                 c.school_skills as 师门技能,
                 c.life_skills as 生活技能,
                 c.ju_qing_skills as 剧情技能,
-
+                c.yushoushu_skill as 育兽术,
                 -- 装备信息
                 c.all_equip_json as 装备信息,
                 -- 神器信息
@@ -97,6 +97,8 @@ class CBGExcelExporter:
                 c.all_pets_json as 宝宝信息,
                 -- 坐骑信息
                 c.all_rider_json as 坐骑信息,
+                -- 法宝信息
+                c.all_fabao_json as 法宝信息,
                  -- 锦衣信息
                 c.ex_avt_json as 锦衣信息,
                 

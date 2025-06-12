@@ -82,12 +82,14 @@ DB_SCHEMA_CONFIG = {
             life_skills TEXT DEFAULT '',        -- 生活技能
             school_skills TEXT DEFAULT '',      -- 师门技能
             ju_qing_skills TEXT DEFAULT '',     -- 剧情技能
+            yushoushu_skill INTEGER DEFAULT 0,  -- 育兽术技能
             
             all_pets_json TEXT DEFAULT '',      -- 所有宝宝信息（JSON格式）
             all_equip_json TEXT DEFAULT '',    -- 所有装备信息（JSON格式）
             all_shenqi_json TEXT DEFAULT '',    -- 所有神器信息（JSON格式）
             all_rider_json TEXT DEFAULT '',     -- 所有坐骑信息（JSON格式）
             ex_avt_json TEXT DEFAULT '',        -- 所有锦衣信息（JSON格式）
+            all_fabao_json TEXT DEFAULT '',    -- 所有法宝信息（JSON格式）
             
             -- 元数据
             create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -224,9 +226,11 @@ DB_SCHEMA_CONFIG = {
             bid_status INTEGER,             -- 靓号状态(bid)
             ori_race INTEGER,               -- 原始种族(ori_race)
             current_race INTEGER,           -- 当前种族(iRace)
+            sum_amount INTEGER,             -- 最大召唤兽携带数量(iSumAmount)
             version_code TEXT,              -- 版本码(equip_desc_version_code)
             
             -- JSON数据字段
+            pet TEXT,                       -- 特殊宠物JSON(pet)
             all_skills_json TEXT,           -- 所有技能JSON(all_skills)
             all_equip_json TEXT,            -- 所有装备JSON(AllEquip)
             all_summon_json TEXT,           -- 所有召唤兽JSON(AllSummon)
