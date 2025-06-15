@@ -6,3 +6,5 @@ web/yarn-error.log
 web/yarn-debug.log
 data/
 output/
+**/__pycache__/
+*.pyc

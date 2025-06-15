@@ -50,26 +50,47 @@ class SmartDBHelper:
             self.logger.error(f"获取表{table_name}列名失败: {e}")
             return []
     
-    def validate_data_types(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """验证和转换数据类型"""
+    def get_field_type(self, field_name: str, table_name: str = 'large_equip_desc_data') -> str:
+        """从数据库schema中获取字段类型"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(f"PRAGMA table_info({table_name})")
+                columns_info = cursor.fetchall()
+                # 查找匹配的字段
+                for col in columns_info:
+                    if col[1] == field_name:  # col[1] 是字段名
+                        return col[2].upper()  # col[2] 是字段类型
+                return 'TEXT'  # 如果找不到字段，默认返回TEXT类型
+        except Exception as e:
+            self.logger.error(f"获取字段 {field_name} 类型失败: {e}")
+            return 'TEXT'
+    
+    def validate_data_types(self, data: Dict[str, Any], table_name: str = 'large_equip_desc_data') -> Dict[str, Any]:
+        """验证并转换数据类型"""
         validated_data = {}
-        
         for key, value in data.items():
             if value is None:
-                validated_data[key] = None
-            elif isinstance(value, (dict, list)):
-                # 复杂数据类型转为JSON字符串
-                validated_data[key] = json.dumps(value, ensure_ascii=False)
-            elif isinstance(value, bool):
-                # 布尔值转为整数
-                validated_data[key] = 1 if value else 0
-            elif isinstance(value, (int, float, str)):
-                # 基本数据类型直接使用
                 validated_data[key] = value
+                continue
+                
+            # 获取字段类型
+            field_type = self.get_field_type(key, table_name)
+            
+            # 根据字段类型进行转换
+            if field_type == 'INTEGER':
+                try:
+                    validated_data[key] = int(float(value))
+                except (ValueError, TypeError):
+                    validated_data[key] = 0
+            elif field_type == 'REAL':
+                try:
+                    validated_data[key] = float(value)
+                except (ValueError, TypeError):
+                    validated_data[key] = 0.0
             else:
-                # 其他类型转为字符串
-                validated_data[key] = str(value)
-        
+                validated_data[key] = value
+                
         return validated_data
     
     def build_insert_sql(self, table_name: str, data: Dict[str, Any], 

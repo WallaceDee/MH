@@ -3,9 +3,8 @@
 """
 
 from .character_evaluator import CharacterEvaluator
-from .level_config import LevelConfig
 
-__all__ = ['CharacterEvaluator', 'LevelConfig']
+__all__ = ['CharacterEvaluator']
 
 """
 角色评估模块

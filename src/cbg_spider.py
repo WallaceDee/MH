@@ -16,26 +16,26 @@ import pandas as pd
 from datetime import datetime
 from urllib.parse import urlencode
 import logging
-from .tools.setup_requests_session import setup_session
+from tools.setup_requests_session import setup_session
 import asyncio
 from playwright.async_api import async_playwright
 
 # 导入智能数据库助手
 try:
-    from .utils.smart_db_helper import CBGSmartDB
-    from .cbg_config import *
-    from .exporter.excel_exporter import CBGExcelExporter
-    from .exporter.json_exporter import CBGJSONExporter, export_single_character_to_json
-    from .parser.pet_parser import PetParser
-    from .parser.equipment_parser import EquipmentParser
-    from .parser.shenqi_parser import ShenqiParser
-    from .parser.rider_parser import RiderParser
-    from .parser.ex_avt_parser import ExAvtParser
-    from .parser.common_parser import CommonParser
-    from .parser.fabao_parser import FabaoParser
-    from .utils.lpc_helper import LPCHelper
-    from .utils.api_logger import log_api_request
-    from .utils.cookie_updater import update_cookies_with_playwright
+    from utils.smart_db_helper import CBGSmartDB
+    from cbg_config import *
+    from exporter.excel_exporter import CBGExcelExporter
+    from exporter.json_exporter import CBGJSONExporter, export_single_character_to_json
+    from parser.pet_parser import PetParser
+    from parser.equipment_parser import EquipmentParser
+    from parser.shenqi_parser import ShenqiParser
+    from parser.rider_parser import RiderParser
+    from parser.ex_avt_parser import ExAvtParser
+    from parser.common_parser import CommonParser
+    from parser.fabao_parser import FabaoParser
+    from utils.lpc_helper import LPCHelper
+    from utils.api_logger import log_api_request
+    from utils.cookie_updater import update_cookies_with_playwright
 except ImportError:
     from utils.smart_db_helper import CBGSmartDB
     from cbg_config import *
@@ -570,6 +570,10 @@ class CBGSpider:
                 yushoushu_skill = 0
 
                 large_equip_desc = char.get('large_equip_desc')
+                server_name = char.get('serverName')
+                if(server_name == '花样年华'):
+                    self.logger.info(f"{char.get('sellerNickname')} 服务器为花样年华,不予记录。")
+                    continue
                 if large_equip_desc:
                     try:
                         parsed_desc = self.parse_large_equip_desc(large_equip_desc)
@@ -591,7 +595,7 @@ class CBGSpider:
                 # 1. 保存角色基础信息
                 character_data = {
                     'equip_id': char.get('eid'),
-                    'server_name': char.get('serverName'),
+                    'server_name': server_name,
                     'seller_nickname': char.get('sellerNickname'),
                     'level': char.get('level'),
                     'price': char.get('price'),
@@ -867,6 +871,8 @@ class CBGSpider:
             list: 所有页面的数据列表
         """
         current_page = 1
+        total_characters = 0
+        successful_pages = 0
         
         # 获取搜索参数
         if search_params is None:
@@ -896,8 +902,6 @@ class CBGSpider:
                 self.logger.warning(f"第 {current_page} 页数据获取失败，停止爬取")
                 break
                 
-            total_characters = 0
-            successful_pages = 0
             # 保存数据
             saved_count = self.save_character_data(page_data)
             total_characters += saved_count

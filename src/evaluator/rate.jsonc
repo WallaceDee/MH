@@ -1,0 +1,19 @@
+{
+    "school_history": 0.2, // 历史门派
+    "qianyuandan": 0.85, // 乾元丹
+    "jiyuan": 0.2, // 机缘
+    "exp": 0.2, // 经验
+    "school_skills": 0.8, // 师门技能
+    "packet": 0.2, // 行囊
+    "learn_cash": 0.5, // 储备金
+    "xianyu": 0, // 仙玉
+    "cultivation": 1, // 修炼
+    "beast_cultivation": 1, // 召唤兽控制力
+    "life_skills": 0.5, // 生活技能
+    "qiangzhuang_shensu": 1, // 强壮神速
+    "lingyou": 0.4, // 灵佑
+    "rider": 0.8, // 坐骑
+    "pet_count": 0.2, // 召唤兽格子
+    "fabao": 0.7, // 法宝
+    "shenqi": 0.75 // 神器
+}
