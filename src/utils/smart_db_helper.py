@@ -90,14 +90,14 @@ class SmartDBHelper:
                     validated_data[key] = 0.0
             else:
                 validated_data[key] = value
-                
+        
         return validated_data
     
     def build_insert_sql(self, table_name: str, data: Dict[str, Any], 
                         on_conflict: str = "REPLACE") -> tuple:
         """构建INSERT SQL语句"""
-        # 验证数据类型
-        validated_data = self.validate_data_types(data)
+        # 验证数据类型，传递正确的表名
+        validated_data = self.validate_data_types(data, table_name)
         
         # 获取表的列名
         table_columns = self.get_table_columns(table_name)
@@ -153,13 +153,13 @@ class SmartDBHelper:
                     
                     # 获取表的列名（基于第一条数据）
                     table_columns = self.get_table_columns(table_name)
-                    first_data = self.validate_data_types(data[0])
+                    first_data = self.validate_data_types(data[0], table_name)
                     columns = [k for k in first_data.keys() if k in table_columns]
                     
                     # 为所有数据构建参数列表
                     all_params = []
                     for item in data:
-                        validated_item = self.validate_data_types(item)
+                        validated_item = self.validate_data_types(item, table_name)
                         # 按照相同的列顺序提取值
                         params = tuple(validated_item.get(col) for col in columns)
                         all_params.append(params)
@@ -214,15 +214,41 @@ class CBGSmartDB:
         
         return self.db_helper.insert_data('large_equip_desc_data', equip_data, on_conflict="REPLACE")
     
+    def save_equipment(self, equipment_data: Dict[str, Any]) -> bool:
+        """智能保存装备数据，使用REPLACE INTO实现完全覆盖"""
+        # 添加更新时间
+        equipment_data['update_time'] = datetime.now().isoformat()
+        
+        # 使用REPLACE INTO实现完全覆盖
+        return self.db_helper.insert_data('equipments', equipment_data, on_conflict="REPLACE")
+    
+    def save_equipments_batch(self, equipments_list: List[Dict[str, Any]]) -> bool:
+        """批量保存装备数据，使用REPLACE INTO实现完全覆盖"""
+        if not equipments_list:
+            return True
+        
+        # 为所有记录添加时间戳
+        timestamp = datetime.now().isoformat()
+        for equip in equipments_list:
+            equip['update_time'] = timestamp
+        
+        return self.db_helper.insert_data('equipments', equipments_list, on_conflict="REPLACE")
+    
     def save_pet_data(self, pet_data: Dict[str, Any]) -> bool:
         """智能保存宠物数据"""
         return self.db_helper.insert_data('pets', pet_data)
     
-    def save_api_log(self, log_data: Dict[str, Any]) -> bool:
-        """智能保存API日志"""
-        # 注意：API logs表的字段名是request_time，不是timestamp
-        log_data['request_time'] = datetime.now().isoformat()
-        return self.db_helper.insert_data('api_logs', log_data)
+    def save_pets_batch(self, pets_list: List[Dict[str, Any]]) -> bool:
+        """批量保存宠物数据，使用REPLACE INTO实现完全覆盖"""
+        if not pets_list:
+            return True
+        
+        # 为所有记录添加时间戳
+        timestamp = datetime.now().isoformat()
+        for pet in pets_list:
+            pet['update_time'] = timestamp
+        
+        return self.db_helper.insert_data('pets', pets_list, on_conflict="REPLACE")
 
 if __name__ == "__main__":
     # 简单测试

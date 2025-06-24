@@ -23,6 +23,14 @@ const routes = [
     meta: {
       title: '角色列表'
     }
+  },
+  {
+    path: '/equipments',
+    name: 'EquipmentList',
+    component: () => import('../views/EquipmentList.vue'),
+    meta: {
+      title: '装备列表'
+    }
   }
 ]
 

@@ -28,28 +28,6 @@ ROLE_ZHUAN_ZHI_CONFIG = {
     2: "渡劫"
 }
 
-# API相关配置
-API_CONFIG = {
-    'base_url': 'https://xyq.cbg.163.com/cgi-bin/recommend.py',
-    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-    'referer': 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py',
-    'delay_range': [1, 3]  # 请求间隔时间范围（秒）
-}
-
-# 请求头配置
-REQUEST_HEADERS = {
-    'Accept': '*/*',
-    'Accept-Language': 'zh-CN,zh;q=0.9',
-    'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache',
-    'Sec-Ch-Ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
-    'Sec-Ch-Ua-Mobile': '?0',
-    'Sec-Ch-Ua-Platform': '"macOS"',
-    'Sec-Fetch-Dest': 'script',
-    'Sec-Fetch-Mode': 'no-cors',
-    'Sec-Fetch-Site': 'same-origin'
-}
-
 # 数据库字段配置
 DB_SCHEMA_CONFIG = {
     'characters': '''
@@ -97,14 +75,515 @@ DB_SCHEMA_CONFIG = {
         )
     ''',
     
-    'api_logs': '''
-        CREATE TABLE IF NOT EXISTS api_logs (
+    'empty_characters': '''
+        CREATE TABLE IF NOT EXISTS characters (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            url TEXT,                       -- 请求URL
-            params TEXT,                    -- 请求参数JSON
-            status_code INTEGER,            -- 响应状态码
-            response_preview TEXT,          -- 响应预览
-            request_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- 请求时间
+            equip_id TEXT UNIQUE,           -- 装备ID，作为唯一标识
+            server_name TEXT,               -- 服务器名称
+            seller_nickname TEXT,           -- 卖家昵称
+            level INTEGER,                  -- 等级
+            price REAL,                     -- 价格
+            price_desc TEXT,                -- 价格描述
+            school TEXT,                    -- 门派
+            area_name TEXT,                 -- 区域名称
+            icon_index INTEGER,             -- 图标索引
+            kindid INTEGER,                 -- 种类ID
+         
+            game_ordersn TEXT,              -- 游戏订单号
+            pass_fair_show INTEGER DEFAULT 0,  -- 是否通过公示
+            fair_show_end_time TEXT,        -- 公示结束时间
+            accept_bargain INTEGER DEFAULT 0,  -- 接受还价
+            status_desc TEXT,                  -- 角色售卖状态
+            onsale_expire_time_desc TEXT,   -- 出售剩余时间
+            expire_time TEXT,                -- 角色到期时间
+            -- 角色基本信息
+            race TEXT,                      -- 种族
+            fly_status TEXT,                -- 飞升状态
+            collect_num INTEGER DEFAULT 0,  -- 收藏数
+            
+            -- 技能信息
+            life_skills TEXT DEFAULT '',        -- 生活技能
+            school_skills TEXT DEFAULT '',      -- 师门技能
+            ju_qing_skills TEXT DEFAULT '',     -- 剧情技能
+            yushoushu_skill INTEGER DEFAULT 0,  -- 育兽术技能
+            
+            all_pets_json TEXT DEFAULT '',      -- 所有宝宝信息（JSON格式）
+            all_equip_json TEXT DEFAULT '',    -- 所有装备信息（JSON格式）
+            all_shenqi_json TEXT DEFAULT '',    -- 所有神器信息（JSON格式）
+            all_rider_json TEXT DEFAULT '',     -- 所有坐骑信息（JSON格式）
+            ex_avt_json TEXT DEFAULT '',        -- 所有锦衣信息（JSON格式）
+            all_fabao_json TEXT DEFAULT '',    -- 所有法宝信息（JSON格式）
+            
+            -- 空号识别信息（空号数据库专用字段）
+            empty_reason TEXT DEFAULT '',       -- 空号识别原因
+            equip_count INTEGER DEFAULT 0,      -- 物品总数
+            high_level_pet_count INTEGER DEFAULT 0,  -- 高等级宠物数量
+            
+            -- 元数据
+            create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''',
+    
+    'pets': '''
+        CREATE TABLE IF NOT EXISTS pets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            eid TEXT UNIQUE,                    -- 宠物唯一标识符
+            equipid INTEGER,                    -- 宠物ID
+            equip_sn TEXT,                      -- 宠物序列号
+            
+            -- 服务器和卖家信息
+            server_name TEXT,                   -- 服务器名称
+            serverid INTEGER,                   -- 服务器ID
+            equip_server_sn TEXT,               -- 宠物服务器序列号
+            seller_nickname TEXT,               -- 卖家昵称
+            seller_roleid TEXT,                 -- 卖家角色ID
+            area_name TEXT,                     -- 区域名称
+            
+            -- 宠物基本信息
+            equip_name TEXT,                    -- 宠物名称
+            equip_type TEXT,                    -- 宠物类型
+            equip_type_name TEXT,               -- 宠物类型名称
+            equip_type_desc TEXT,               -- 宠物类型描述
+            level INTEGER,                      -- 宠物等级
+            equip_level INTEGER,                -- 宠物等级
+            equip_level_desc TEXT,              -- 宠物等级描述
+            level_desc TEXT,                    -- 等级描述
+            subtitle TEXT,                      -- 副标题
+            equip_pos INTEGER,                  -- 宠物位置
+            position INTEGER,                   -- 位置
+            school INTEGER,                     -- 门派限制
+            role_grade_limit INTEGER,           -- 角色等级限制
+            min_buyer_level INTEGER,            -- 最低购买者等级
+            equip_count INTEGER,                -- 宠物数量
+            
+            -- 价格和交易信息
+            price REAL,                         -- 价格
+            price_desc TEXT,                    -- 价格描述
+            unit_price_desc TEXT,               -- 单价描述
+            min_unit_price REAL,                -- 最低单价
+            price_explanation TEXT,             -- 价格说明（JSON格式）
+            accept_bargain INTEGER DEFAULT 0,   -- 接受还价
+            bargain_info TEXT,                  -- 还价信息（JSON格式）
+            
+            -- 状态和时间信息
+            equip_status INTEGER,               -- 宠物状态
+            equip_status_desc TEXT,             -- 宠物状态描述
+            status_desc TEXT,                   -- 状态描述
+            onsale_expire_time_desc TEXT,       -- 在售过期时间描述
+            time_left TEXT,                     -- 剩余时间
+            expire_time TEXT,                   -- 过期时间
+            create_time_equip TEXT,             -- 宠物创建时间
+            selling_time TEXT,                  -- 销售时间
+            selling_time_ago_desc TEXT,         -- 销售时间前描述
+            first_onsale_time TEXT,             -- 首次上架时间
+            
+            -- 公示相关
+            pass_fair_show INTEGER DEFAULT 0,   -- 是否通过公示
+            fair_show_time INTEGER DEFAULT 0,   -- 公示时间
+            fair_show_end_time TEXT,            -- 公示结束时间
+            fair_show_end_time_left TEXT,       -- 公示结束剩余时间
+            fair_show_poundage INTEGER DEFAULT 0, -- 公示手续费
+            
+            -- 宠物属性
+            hp INTEGER DEFAULT 0,               -- 气血
+            qixue INTEGER DEFAULT 0,            -- 气血（别名）
+            init_hp INTEGER DEFAULT 0,          -- 初始气血
+            mofa INTEGER DEFAULT 0,             -- 魔法
+            init_wakan INTEGER DEFAULT 0,       -- 初始魔力
+            mingzhong INTEGER DEFAULT 0,        -- 命中
+            fangyu INTEGER DEFAULT 0,           -- 防御
+            init_defense INTEGER DEFAULT 0,     -- 初始防御
+            defense INTEGER DEFAULT 0,          -- 防御（别名）
+            speed INTEGER DEFAULT 0,            -- 速度
+            minjie INTEGER DEFAULT 0,           -- 敏捷
+            init_dex INTEGER DEFAULT 0,         -- 初始敏捷
+            shanghai INTEGER DEFAULT 0,         -- 伤害
+            damage INTEGER DEFAULT 0,           -- 伤害（别名）
+            init_damage INTEGER DEFAULT 0,      -- 初始伤害
+            init_damage_raw INTEGER DEFAULT 0,  -- 原始初始伤害
+            all_damage INTEGER DEFAULT 0,       -- 全部伤害
+            magic_damage INTEGER DEFAULT 0,     -- 法术伤害
+            magic_defense INTEGER DEFAULT 0,    -- 法术防御
+            lingli INTEGER DEFAULT 0,           -- 灵力
+            fengyin INTEGER DEFAULT 0,          -- 封印
+            anti_fengyin INTEGER DEFAULT 0,     -- 抗封印
+            zongshang INTEGER DEFAULT 0,        -- 总伤
+            
+            -- 修炼相关
+            expt_gongji INTEGER DEFAULT 0,      -- 攻击修炼
+            expt_fangyu INTEGER DEFAULT 0,      -- 防御修炼
+            expt_fashu INTEGER DEFAULT 0,       -- 法术修炼
+            expt_kangfa INTEGER DEFAULT 0,      -- 抗法修炼
+            max_expt_gongji INTEGER DEFAULT 0,  -- 最大攻击修炼
+            max_expt_fangyu INTEGER DEFAULT 0,  -- 最大防御修炼
+            max_expt_fashu INTEGER DEFAULT 0,   -- 最大法术修炼
+            max_expt_kangfa INTEGER DEFAULT 0,  -- 最大抗法修炼
+            sum_exp INTEGER DEFAULT 0,          -- 总经验
+            
+            -- 宝宝修炼
+            bb_expt_gongji INTEGER DEFAULT 0,   -- 宝宝攻击修炼
+            bb_expt_fangyu INTEGER DEFAULT 0,   -- 宝宝防御修炼
+            bb_expt_fashu INTEGER DEFAULT 0,    -- 宝宝法术修炼
+            bb_expt_kangfa INTEGER DEFAULT 0,   -- 宝宝抗法修炼
+            
+            -- 附加属性
+            addon_tizhi INTEGER DEFAULT 0,      -- 附加体质
+            addon_liliang INTEGER DEFAULT 0,    -- 附加力量
+            addon_naili INTEGER DEFAULT 0,      -- 附加耐力
+            addon_minjie INTEGER DEFAULT 0,     -- 附加敏捷
+            addon_fali INTEGER DEFAULT 0,       -- 附加法力
+            addon_lingli INTEGER DEFAULT 0,     -- 附加灵力
+            addon_total INTEGER DEFAULT 0,      -- 附加总和
+            addon_status INTEGER DEFAULT 0,     -- 附加状态
+            addon_skill_chance INTEGER DEFAULT 0, -- 附加技能几率
+            addon_effect_chance INTEGER DEFAULT 0, -- 附加效果几率
+            
+            -- 宝石相关
+            gem_level INTEGER DEFAULT 0,        -- 宝石等级
+            xiang_qian_level INTEGER DEFAULT 0, -- 镶嵌等级
+            gem_value INTEGER DEFAULT 0,        -- 宝石值
+            
+            -- 强化相关
+            jinglian_level INTEGER DEFAULT 0,   -- 精炼等级
+            
+            -- 特技和套装
+            special_skill INTEGER DEFAULT 0,    -- 特技
+            special_effect INTEGER DEFAULT 0,   -- 特效
+            suit_skill INTEGER DEFAULT 0,       -- 套装技能
+            suit_effect INTEGER DEFAULT 0,      -- 套装效果
+            
+            -- 其他信息
+            collect_num INTEGER DEFAULT 0,      -- 收藏数
+            has_collect INTEGER DEFAULT 0,      -- 是否收藏
+            score INTEGER DEFAULT 0,            -- 评分
+            icon_index INTEGER DEFAULT 0,       -- 图标索引
+            icon INTEGER DEFAULT 0,             -- 图标
+            equip_face_img TEXT,                -- 宠物头像图片
+            kindid INTEGER,                     -- 种类ID
+            game_channel TEXT,                  -- 游戏渠道
+            
+            -- 订单相关
+            game_ordersn TEXT,                  -- 游戏订单号
+            whole_game_ordersn TEXT,            -- 完整游戏订单号
+            
+            -- 跨服相关
+            allow_cross_buy INTEGER DEFAULT 0,  -- 允许跨服购买
+            cross_server_poundage INTEGER DEFAULT 0,      -- 跨服手续费
+            cross_server_poundage_origin INTEGER DEFAULT 0, -- 原始跨服手续费
+            cross_server_poundage_discount REAL DEFAULT 0, -- 跨服手续费折扣
+            cross_server_poundage_discount_label TEXT,    -- 跨服手续费折扣标签
+            cross_server_poundage_display_mode INTEGER DEFAULT 0, -- 跨服手续费显示模式
+            cross_server_activity_conf_discount REAL DEFAULT 0,  -- 跨服活动配置折扣
+            
+            -- 活动相关
+            activity_type INTEGER DEFAULT 0,    -- 活动类型
+            joined_seller_activity INTEGER DEFAULT 0, -- 参与卖家活动
+            
+            -- 拆分相关
+            is_split_sale INTEGER DEFAULT 0,    -- 是否拆分销售
+            is_split_main_role INTEGER DEFAULT 0, -- 是否拆分主角
+            is_split_independent_role INTEGER DEFAULT 0, -- 是否独立角色拆分
+            is_split_independent_equip INTEGER DEFAULT 0, -- 是否独立宠物拆分
+            split_equip_sold_happen INTEGER DEFAULT 0,   -- 拆分宠物销售发生
+            show_split_equip_sold_remind INTEGER DEFAULT 0, -- 显示拆分宠物销售提醒
+            
+            -- 保护相关
+            is_onsale_protection_period INTEGER DEFAULT 0, -- 是否在售保护期
+            onsale_protection_end_time TEXT,    -- 在售保护结束时间
+            is_vip_protection INTEGER DEFAULT 0, -- 是否VIP保护
+            is_time_lock INTEGER DEFAULT 0,     -- 是否时间锁定
+            
+            -- 测试服相关
+            equip_in_test_server INTEGER DEFAULT 0,        -- 宠物在测试服
+            buyer_in_test_server INTEGER DEFAULT 0,        -- 买家在测试服
+            equip_in_allow_take_away_server INTEGER DEFAULT 0, -- 宠物在允许带走服务器
+            
+            -- 其他标识
+            is_weijianding INTEGER DEFAULT 0,   -- 是否未鉴定
+            is_show_alipay_privilege INTEGER DEFAULT 0,    -- 是否显示支付宝特权
+            is_seller_redpacket_flag INTEGER DEFAULT 0,    -- 是否卖家红包标志
+            is_show_expert_desc INTEGER DEFAULT 0,         -- 是否显示专家描述
+            is_show_special_highlight INTEGER DEFAULT 0,   -- 是否显示特殊高亮
+            is_xyq_game_role_kunpeng_reach_limit INTEGER DEFAULT 0, -- 是否达到鲲鹏限制
+            
+            -- 版本和存储相关
+            equip_onsale_version INTEGER DEFAULT 0, -- 宠物上架版本
+            storage_type INTEGER DEFAULT 0,         -- 存储类型
+            agent_trans_time INTEGER DEFAULT 0,     -- 代理传输时间
+            
+            -- KOL相关
+            kol_article_id TEXT,                -- KOL文章ID
+            kol_share_id TEXT,                  -- KOL分享ID
+            kol_share_time TEXT,                -- KOL分享时间
+            kol_share_status TEXT,              -- KOL分享状态
+            
+            -- 推荐相关
+            reco_request_id TEXT,               -- 推荐请求ID
+            appointed_roleid TEXT,              -- 指定角色ID
+            
+            -- 团队相关
+            play_team_cnt INTEGER DEFAULT 0,    -- 游戏团队数量
+            
+            -- 随机抽奖相关
+            random_draw_finish_time TEXT,       -- 随机抽奖完成时间
+            
+            -- 详细描述
+            desc TEXT,                          -- 描述
+            large_equip_desc TEXT,              -- 大宠物描述
+            desc_sumup TEXT,                    -- 描述总结
+            desc_sumup_short TEXT,              -- 描述总结简短
+            diy_desc TEXT,                      -- 自定义描述
+            rec_desc TEXT,                      -- 推荐描述
+            diy_desc_pay_info TEXT,             -- 自定义描述支付信息（JSON格式）
+            
+            -- 其他复杂数据（JSON格式）
+            other_info TEXT,                    -- 其他信息
+            video_info TEXT,                    -- 视频信息（JSON格式）
+            agg_added_attrs TEXT,               -- 聚合附加属性（JSON格式）
+            dynamic_tags TEXT,                  -- 动态标签（JSON格式）
+            highlight TEXT,                     -- 高亮信息（JSON格式）
+            tag_key TEXT,                       -- 标签键（JSON格式）
+            tag TEXT,                           -- 标签
+            
+            -- 搜索相关
+            search_type TEXT,                   -- 搜索类型
+            
+            -- 元数据
+            raw_data_json TEXT,                 -- 原始数据（JSON格式）
+            create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''',
+    
+    'equipments': '''
+        CREATE TABLE IF NOT EXISTS equipments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            eid TEXT UNIQUE,                    -- 装备唯一标识符
+            equipid INTEGER,                    -- 装备ID
+            equip_sn TEXT,                      -- 装备序列号
+            
+            -- 服务器和卖家信息
+            server_name TEXT,                   -- 服务器名称
+            serverid INTEGER,                   -- 服务器ID
+            equip_server_sn TEXT,               -- 装备服务器序列号
+            seller_nickname TEXT,               -- 卖家昵称
+            seller_roleid TEXT,                 -- 卖家角色ID
+            area_name TEXT,                     -- 区域名称
+            
+            -- 装备基本信息
+            equip_name TEXT,                    -- 装备名称
+            equip_type TEXT,                    -- 装备类型
+            equip_type_name TEXT,               -- 装备类型名称
+            equip_type_desc TEXT,               -- 装备类型描述
+            level INTEGER,                      -- 装备等级
+            equip_level INTEGER,                -- 装备等级
+            equip_level_desc TEXT,              -- 装备等级描述
+            level_desc TEXT,                    -- 等级描述
+            subtitle TEXT,                      -- 副标题
+            equip_pos INTEGER,                  -- 装备位置
+            position INTEGER,                   -- 位置
+            school INTEGER,                     -- 门派限制
+            role_grade_limit INTEGER,           -- 角色等级限制
+            min_buyer_level INTEGER,            -- 最低购买者等级
+            equip_count INTEGER,                -- 装备数量
+            
+            -- 价格和交易信息
+            price REAL,                         -- 价格
+            price_desc TEXT,                    -- 价格描述
+            unit_price_desc TEXT,               -- 单价描述
+            min_unit_price REAL,                -- 最低单价
+            price_explanation TEXT,             -- 价格说明（JSON格式）
+            accept_bargain INTEGER DEFAULT 0,   -- 接受还价
+            bargain_info TEXT,                  -- 还价信息（JSON格式）
+            
+            -- 状态和时间信息
+            equip_status INTEGER,               -- 装备状态
+            equip_status_desc TEXT,             -- 装备状态描述
+            status_desc TEXT,                   -- 状态描述
+            onsale_expire_time_desc TEXT,       -- 在售过期时间描述
+            time_left TEXT,                     -- 剩余时间
+            expire_time TEXT,                   -- 过期时间
+            create_time_equip TEXT,             -- 装备创建时间
+            selling_time TEXT,                  -- 销售时间
+            selling_time_ago_desc TEXT,         -- 销售时间前描述
+            first_onsale_time TEXT,             -- 首次上架时间
+            
+            -- 公示相关
+            pass_fair_show INTEGER DEFAULT 0,   -- 是否通过公示
+            fair_show_time INTEGER DEFAULT 0,   -- 公示时间
+            fair_show_end_time TEXT,            -- 公示结束时间
+            fair_show_end_time_left TEXT,       -- 公示结束剩余时间
+            fair_show_poundage INTEGER DEFAULT 0, -- 公示手续费
+            
+            -- 装备属性
+            hp INTEGER DEFAULT 0,               -- 气血
+            qixue INTEGER DEFAULT 0,            -- 气血（别名）
+            init_hp INTEGER DEFAULT 0,          -- 初始气血
+            mofa INTEGER DEFAULT 0,             -- 魔法
+            init_wakan INTEGER DEFAULT 0,       -- 初始魔力
+            mingzhong INTEGER DEFAULT 0,        -- 命中
+            fangyu INTEGER DEFAULT 0,           -- 防御
+            init_defense INTEGER DEFAULT 0,     -- 初始防御
+            defense INTEGER DEFAULT 0,          -- 防御（别名）
+            speed INTEGER DEFAULT 0,            -- 速度
+            minjie INTEGER DEFAULT 0,           -- 敏捷
+            init_dex INTEGER DEFAULT 0,         -- 初始敏捷
+            shanghai INTEGER DEFAULT 0,         -- 伤害
+            damage INTEGER DEFAULT 0,           -- 伤害（别名）
+            init_damage INTEGER DEFAULT 0,      -- 初始伤害
+            init_damage_raw INTEGER DEFAULT 0,  -- 原始初始伤害
+            all_damage INTEGER DEFAULT 0,       -- 总伤害
+            magic_damage INTEGER DEFAULT 0,     -- 法术伤害
+            magic_defense INTEGER DEFAULT 0,    -- 法术防御
+            lingli INTEGER DEFAULT 0,           -- 灵力
+            fengyin INTEGER DEFAULT 0,          -- 封印
+            anti_fengyin INTEGER DEFAULT 0,     -- 抗封印
+            zongshang INTEGER DEFAULT 0,        -- 总伤
+            
+            -- 修炼相关
+            expt_gongji INTEGER DEFAULT 0,      -- 攻击修炼
+            expt_fangyu INTEGER DEFAULT 0,      -- 防御修炼
+            expt_fashu INTEGER DEFAULT 0,       -- 法术修炼
+            expt_kangfa INTEGER DEFAULT 0,      -- 抗法修炼
+            max_expt_gongji INTEGER DEFAULT 0,  -- 最大攻击修炼
+            max_expt_fangyu INTEGER DEFAULT 0,  -- 最大防御修炼
+            max_expt_fashu INTEGER DEFAULT 0,   -- 最大法术修炼
+            max_expt_kangfa INTEGER DEFAULT 0,  -- 最大抗法修炼
+            sum_exp INTEGER DEFAULT 0,          -- 总经验
+            
+            -- 宝宝修炼相关
+            bb_expt_gongji INTEGER DEFAULT 0,   -- 宝宝攻击修炼
+            bb_expt_fangyu INTEGER DEFAULT 0,   -- 宝宝防御修炼
+            bb_expt_fashu INTEGER DEFAULT 0,    -- 宝宝法术修炼
+            bb_expt_kangfa INTEGER DEFAULT 0,   -- 宝宝抗法修炼
+            
+            -- 附加属性
+            addon_tizhi INTEGER DEFAULT 0,      -- 附加体质
+            addon_liliang INTEGER DEFAULT 0,    -- 附加力量
+            addon_naili INTEGER DEFAULT 0,      -- 附加耐力
+            addon_minjie INTEGER DEFAULT 0,     -- 附加敏捷
+            addon_fali INTEGER DEFAULT 0,       -- 附加法力
+            addon_lingli INTEGER DEFAULT 0,     -- 附加灵力
+            addon_total INTEGER DEFAULT 0,      -- 附加总和
+            addon_status INTEGER DEFAULT 0,     -- 附加状态
+            addon_skill_chance INTEGER DEFAULT 0, -- 附加技能几率
+            addon_effect_chance INTEGER DEFAULT 0, -- 附加效果几率
+            
+            -- 宝石相关
+            gem_level INTEGER DEFAULT 0,        -- 宝石等级
+            gem_value TEXT,                     -- 宝石数值（JSON格式）
+            xiang_qian_level INTEGER DEFAULT 0, -- 镶嵌等级
+            
+            -- 强化相关
+            jinglian_level INTEGER DEFAULT 0,   -- 精炼等级
+            
+            -- 特技和套装
+            special_skill INTEGER DEFAULT 0,    -- 特技
+            special_effect TEXT,                 -- 特效（JSON格式）
+            suit_skill INTEGER DEFAULT 0,       -- 套装技能
+            suit_effect INTEGER DEFAULT 0,      -- 套装效果
+            
+            -- 其他信息
+            collect_num INTEGER DEFAULT 0,      -- 收藏数
+            has_collect INTEGER DEFAULT 0,      -- 是否已收藏
+            score INTEGER DEFAULT 0,            -- 评分
+            icon_index INTEGER,                 -- 图标索引
+            icon TEXT,                          -- 图标
+            equip_face_img TEXT,                -- 装备头像图片
+            kindid INTEGER,                     -- 种类ID
+            game_channel TEXT,                  -- 游戏渠道
+            
+            -- 订单相关
+            game_ordersn TEXT,                  -- 游戏订单号
+            whole_game_ordersn TEXT,            -- 完整游戏订单号
+            
+            -- 跨服相关
+            allow_cross_buy INTEGER DEFAULT 0,  -- 允许跨服购买
+            cross_server_poundage INTEGER DEFAULT 0, -- 跨服手续费
+            cross_server_poundage_origin INTEGER DEFAULT 0, -- 原始跨服手续费
+            cross_server_poundage_discount INTEGER DEFAULT 0, -- 跨服手续费折扣
+            cross_server_poundage_discount_label TEXT, -- 跨服手续费折扣标签
+            cross_server_poundage_display_mode INTEGER DEFAULT 0, -- 跨服手续费显示模式
+            cross_server_activity_conf_discount REAL DEFAULT 0, -- 跨服活动配置折扣
+            
+            -- 活动相关
+            activity_type TEXT,                 -- 活动类型
+            joined_seller_activity INTEGER DEFAULT 0, -- 参与卖家活动
+            
+            -- 拆分相关
+            is_split_sale INTEGER DEFAULT 0,    -- 是否拆分销售
+            is_split_main_role INTEGER DEFAULT 0, -- 是否拆分主角色
+            is_split_independent_role INTEGER DEFAULT 0, -- 是否拆分独立角色
+            is_split_independent_equip INTEGER DEFAULT 0, -- 是否拆分独立装备
+            split_equip_sold_happen INTEGER DEFAULT 0, -- 拆分装备售出发生
+            show_split_equip_sold_remind INTEGER DEFAULT 0, -- 显示拆分装备售出提醒
+            
+            -- 保护相关
+            is_onsale_protection_period INTEGER DEFAULT 0, -- 是否在售保护期
+            onsale_protection_end_time TEXT,    -- 在售保护结束时间
+            is_vip_protection INTEGER DEFAULT 0, -- 是否VIP保护
+            is_time_lock INTEGER DEFAULT 0,     -- 是否时间锁定
+            
+            -- 测试服相关
+            equip_in_test_server INTEGER DEFAULT 0, -- 装备在测试服
+            buyer_in_test_server INTEGER DEFAULT 0, -- 购买者在测试服
+            equip_in_allow_take_away_server INTEGER DEFAULT 0, -- 装备在允许带走服务器
+            
+            -- 其他标识
+            is_weijianding INTEGER DEFAULT 0,   -- 是否未鉴定
+            is_show_alipay_privilege INTEGER DEFAULT 0, -- 是否显示支付宝特权
+            is_seller_redpacket_flag INTEGER DEFAULT 0, -- 卖家红包标志
+            is_show_expert_desc INTEGER DEFAULT -1, -- 是否显示专家描述
+            is_show_special_highlight INTEGER DEFAULT 0, -- 是否显示特殊高亮
+            is_xyq_game_role_kunpeng_reach_limit INTEGER DEFAULT 0, -- 是否鲲鹏达到限制
+            
+            -- 版本和存储相关
+            equip_onsale_version INTEGER DEFAULT 0, -- 装备在售版本
+            storage_type INTEGER DEFAULT 0,     -- 存储类型
+            agent_trans_time INTEGER DEFAULT 0, -- 代理传输时间
+            
+            -- KOL相关
+            kol_article_id TEXT,                -- KOL文章ID
+            kol_share_id TEXT,                  -- KOL分享ID
+            kol_share_time TEXT,                -- KOL分享时间
+            kol_share_status TEXT,              -- KOL分享状态
+            
+            -- 推荐相关
+            reco_request_id TEXT,               -- 推荐请求ID
+            appointed_roleid TEXT,              -- 指定角色ID
+            
+            -- 团队相关
+            play_team_cnt INTEGER DEFAULT 0,    -- 游戏团队数量
+            
+            -- 随机抽奖相关
+            random_draw_finish_time TEXT,       -- 随机抽奖完成时间
+            
+            -- 详细描述
+            desc TEXT,                          -- 描述
+            large_equip_desc TEXT,              -- 大装备描述
+            desc_sumup TEXT,                    -- 描述总结
+            desc_sumup_short TEXT,              -- 描述总结简短
+            diy_desc TEXT,                      -- 自定义描述
+            rec_desc TEXT,                      -- 推荐描述
+            diy_desc_pay_info TEXT,             -- 自定义描述支付信息（JSON格式）
+            
+            -- 其他复杂数据（JSON格式）
+            other_info TEXT,                    -- 其他信息
+            video_info TEXT,                    -- 视频信息（JSON格式）
+            agg_added_attrs TEXT,               -- 聚合附加属性（JSON格式）
+            dynamic_tags TEXT,                  -- 动态标签（JSON格式）
+            highlight TEXT,                     -- 高亮信息（JSON格式）
+            tag_key TEXT,                       -- 标签键（JSON格式）
+            tag TEXT,                           -- 标签
+            
+            -- 搜索相关
+            search_type TEXT,                   -- 搜索类型
+            
+            -- 元数据
+            raw_data_json TEXT,                 -- 原始数据（JSON格式）
+            create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''',
     
@@ -257,16 +736,9 @@ DB_SCHEMA_CONFIG = {
     '''
 }
 
-# 文件路径配置
-FILE_PATHS = {
-    'cookies_path': 'config/cookies.txt',
-    'proxy_list_path': 'config/proxy_list.txt',
-    'db_filename': 'cbg_data.db',  # 固定的数据库文件名
-    'log_filename': 'cbg_spider.log'
-}
 
-# 表创建顺序（处理外键依赖关系）
-DB_TABLE_ORDER = ['characters', 'api_logs', 'large_equip_desc_data']
+# 数据库表创建顺序（处理外键依赖关系）
+DB_TABLE_ORDER = ['characters', 'pets', 'equipments', 'large_equip_desc_data']
 
 # 数据库表结构配置 - 别名引用
 DB_TABLE_SCHEMAS = DB_SCHEMA_CONFIG 

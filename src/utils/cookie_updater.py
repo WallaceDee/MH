@@ -2,13 +2,14 @@ import asyncio
 from playwright.async_api import async_playwright
 import os
 import logging
+import json
 
 # 获取一个logger实例
 logger = logging.getLogger(__name__)
 
 async def _update_cookies_internal():
     """
-    使用Playwright启动浏览器，让用户登录并获取Cookie。
+    使用Playwright启动浏览器，让用户登录并获取Cookie和LoginInfo。
     """
     try:
         async with async_playwright() as p:
@@ -41,18 +42,45 @@ async def _update_cookies_internal():
             print("#"*60 + "\n")
             input("登录完成后请按 Enter/回车键继续...")
 
+            # 收集 cookies
             cookies = await context.cookies()
             cookie_str = '; '.join([f"{cookie['name']}={cookie['value']}" for cookie in cookies])
 
-            # 找到项目根目录下的 config/cookies.txt
+            # 收集 window.LoginInfo 对象
+            login_info = None
+            try:
+                login_info = await page.evaluate("() => window.LoginInfo")
+                if login_info:
+                    logger.info("成功获取到 window.LoginInfo 对象")
+                else:
+                    logger.warning("window.LoginInfo 对象为空或不存在")
+            except Exception as e:
+                logger.warning(f"获取 window.LoginInfo 失败: {e}")
+
+            # 找到项目根目录
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            cookie_path = os.path.join(project_root, 'config', 'cookies.txt')
             
+            # 保存 cookies
+            cookie_path = os.path.join(project_root, 'config', 'cookies.txt')
             os.makedirs(os.path.dirname(cookie_path), exist_ok=True)
             with open(cookie_path, 'w', encoding='utf-8') as f:
                 f.write(cookie_str)
-
             logger.info(f"Cookie已成功更新并保存到 {cookie_path}")
+
+            # 保存 LoginInfo
+            if login_info:
+                login_info_path = os.path.join(project_root, 'web', 'public', 'assets', 'loginInfo.js')
+                os.makedirs(os.path.dirname(login_info_path), exist_ok=True)
+                
+                # 生成 JavaScript 文件内容
+                js_content = f"// 自动生成的登录信息文件\n// 生成时间: {asyncio.get_event_loop().time()}\n\nwindow.LoginInfo = {json.dumps(login_info, ensure_ascii=False, indent=2)};\n"
+                
+                with open(login_info_path, 'w', encoding='utf-8') as f:
+                    f.write(js_content)
+                logger.info(f"LoginInfo已成功保存到 {login_info_path}")
+            else:
+                logger.warning("未能获取到有效的 LoginInfo 数据，跳过保存")
+
             await browser.close()
             return True
     except Exception as e:

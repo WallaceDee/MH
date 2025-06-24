@@ -1,12 +1,9 @@
 {
-  "callback": "Request.JSONP.request_map.request_0",
-  "_": "1749978224534",
-  "level_min": "159",
-  "level_max": "159",
-  "server_type": "3",
-  "act": "recommd_by_role",
-  "page": "1",
-  "count": "15",
-  "search_type": "overall_search_role",
-  "view_loc": "overall_search"
+  "level_min": 109,
+  "level_max": 109,
+  "bb_expt_gongji": 17,
+  "bb_expt_fangyu": 17,
+  "bb_expt_fashu": 17,
+  "bb_expt_kangfa": 17,
+  "server_type": "3"
 }

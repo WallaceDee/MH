@@ -9,11 +9,13 @@ __description__ = "梦幻西游藏宝阁智能爬虫系统"
 
 # 导出主要类
 from .cbg_spider import CBGSpider
+from .spider.equip import CBGEquipSpider
 from .utils.smart_db_helper import CBGSmartDB, SmartDBHelper
 from .proxy_rotation_system import ProxyRotationManager
 from .proxy_source_manager import ProxySourceManager
 
 __all__ = [
+    'CBGEquipSpider',
     'CBGSpider',
     'CBGSmartDB', 
     'SmartDBHelper',

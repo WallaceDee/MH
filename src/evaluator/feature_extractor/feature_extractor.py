@@ -5,7 +5,11 @@ from datetime import datetime
 import logging
 from typing import Dict, Any, Union, List
 import os
+from src.utils.jsonc_loader import load_jsonc_from_config_dir, load_jsonc_relative_to_file
 
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class FeatureExtractor:
     """梦幻西游账号特征提取器"""
@@ -14,48 +18,10 @@ class FeatureExtractor:
         """初始化特征提取器"""
         print("初始化特征提取器...")
         self.logger = logging.getLogger(__name__)
-        
+
         # 加载规则配置
-        config_path = os.path.join(os.path.dirname(__file__), 'rule_setting.json')
-        with open(config_path, 'r', encoding='utf-8') as f:
-            self.config = json.load(f)
-        
-        # 定义高价值特技
-        self.premium_skills = ['罗汉金钟', '晶清诀', '四海升平', '慈航普度', '笑里藏刀']
-
-        # 定义特殊宝宝技能
-        self.premium_pet_skills = ['净台妙谛', '死亡召唤', '力劈华山', '善恶有报', '须弥真言']
-
-        # 定义限量锦衣价值
-        self.limited_skin_values = {
-            '青花瓷': 500,
-            '浪淘沙': 400,
-            '云龙梦': 300,
-            '绯雪织': 300,
-            '冰寒绡': 200
-        }
-
-        # 定义门派热度系数
-        self.school_heat = {
-            '大唐官府': 1.2,
-            '方寸山': 1.1,
-            '化生寺': 1.0,
-            '女儿村': 1.1,
-            '天宫': 1.0,
-            '龙宫': 1.3,
-            '五庄观': 0.9,
-            '普陀山': 1.0,
-            '阴曹地府': 1.1,
-            '魔王寨': 1.2,
-            '狮驼岭': 1.0,
-            '盘丝洞': 0.9,
-            '神木林': 1.1,
-            '凌波城': 1.2,
-            '无底洞': 1.0,
-            '女魃墓': 1.1,
-            '天机城': 0.9,
-            '花果山': 1.2
-        }
+        self.config = load_jsonc_relative_to_file(
+            __file__, '../config/rule_setting.jsonc')
 
         # 从配置文件加载高价值法宝
         self.premium_fabao = self.config.get('PremiumFabao', [])
@@ -89,21 +55,21 @@ class FeatureExtractor:
                 - school_skills (List[int]): 师门技能等级列表
                 - qiangzhuang&shensu (List[int]): 强壮神速技能等级
                 - life_skills (List[int]): 生活技能等级列表(≥80级)
-                - total_gem_level (int): 宝石总等级
-                - premium_skill_count (int): 特技数量
-                - set_bonus_count (int): 套装数量
-                - total_equip_score (int): 装备总分
-                - avg_gem_level (float): 平均宝石等级(当有装备时)
-                - premium_pet_count (int): 极品宠物数量
-                - total_pet_score (float): 宠物总分
-                - max_pet_score (float): 最高宠物分数
                 - lingyou_count (int): 灵佑数量
-                - avg_pet_score (float): 平均宠物分数(当有宠物时)
-                - limited_skin_value (int): 限量锦衣数量
                 - hours_listed (int): 上架时间(小时)
                 - collect_num (int): 收藏数量
                 - allow_pet_count (int): 最大召唤兽携带数量
                 - premium_fabao_count (int): 高价值法宝数量
+                -- 规则引擎使用
+                - limited_skin_value (int): 限量锦衣价值（规则引擎使用）
+                - limited_huge_horse_value (int): 限量祥瑞价值（规则引擎使用）
+                - limited_other_value (int): 限量其他价值（规则引擎使用）
+                --市场锚定法使用
+                - limited_skin_score (int): 限量锦衣得分（市场锚定法使用）
+                - limited_other_score (int): 限量其他得分（市场锚定法使用）
+                - limited_skin_score (int): 限量祥瑞得分（市场锚定法使用）
+                - shenqi_score (float): 神器得分（归一化0-100）
+
         """
         try:
             features = {}
@@ -117,17 +83,22 @@ class FeatureExtractor:
             # 三、技能体系特征
             features.update(self._extract_skill_features(character_data))
 
-            # # 四、装备特征体系
-            # features.update(self._extract_equipment_features(character_data))
+            # 四、外观与增值特征
+            features.update(self._extract_appearance_features(character_data))
 
-            # # 五、召唤兽特征
-            # features.update(self._extract_pet_features(character_data))
+            # 五、市场行为特征
+            features.update(self._extract_market_features(character_data))
 
-            # # 六、外观与增值特征
-            # features.update(self._extract_appearance_features(character_data))
-
-            # # 七、市场行为特征
-            # features.update(self._extract_market_features(character_data))
+            # 六、神器得分（归一化0-100）
+            value_map = self.config.get('ShenqiAttr2Value', {})
+            shenqi = features.get('shenqi', [0,0,0,0,0,0,0,0])
+            keys = [
+                "allTheSameCount", "same9Count", "3attr", "3", "2attr", "2", "1attr", "1"
+            ]
+            raw_score = sum(shenqi[i] * value_map.get(keys[i], 0) for i in range(8))
+            max_score = 50000
+            shenqi_score = min(raw_score / max_score * 100, 100) if max_score > 0 else 0
+            features['shenqi_score'] = round(shenqi_score, 2)
 
             return features
 
@@ -152,7 +123,7 @@ class FeatureExtractor:
                 schoolHistoryCount = 0  # 如果没有转职记录，默认为0个门派
         except (json.JSONDecodeError, TypeError):
             schoolHistoryCount = 0
-            
+
         # 高成长坐骑 字段data.get('all_rider_json') 格式{"1": {"all_skills": {}, "iType": 505, "exgrow": 12635, "ExtraGrow": 0, "iGrade": 96, "mattrib": "魔力"}, "2": {"all_skills": {"600": 3}, "iType": 504, "exgrow": 13069, "ExtraGrow": 0, "iGrade": 150, "mattrib": "敏捷"}}
         # 统计exgrow>=2.3数量
         try:
@@ -184,22 +155,17 @@ class FeatureExtractor:
         # wuxingshi_level==1 且 wuxingshi_affix>0 则 1attrCount+=1，否则wuxingshi_level==1,1Count+=1
         # wuxingshi_level==2 且 wuxingshi_affix>0 则 2attrCount+=1，否则wuxingshi_level==2,2Count+=1
         # wuxingshi_level==3 且 wuxingshi_affix>0 则 3attrCount+=1，否则wuxingshi_level==3,3Count+=1
-        shenqi = {
-            "same9Count": 0,
-            "allTheSameCount":0,
-            "1Count": 0,
-            "1attrCount": 0,
-            "2Count": 0,
-            "2attrCount": 0,
-            "3Count": 0,
-            "3attrCount": 0
-        }
+        # allTheSameCount,same9Count,3attrCount,3Count,2attrCount,2Count,1attrCount,1Count
+        shenqi = [0, 0, 0, 0, 0, 0, 0, 0]
 
         try:
-            shenqi_data = json.loads(data.get('shenqi_json', '{}'))
+            shenqi_json = data.get('shenqi_json', '{}')
+            if shenqi_json is None or shenqi_json == '':
+                shenqi_json = '{}'
+            shenqi_data = json.loads(shenqi_json)
             # 记录已经统计过的id
             counted_ids = set()
-            
+
             for suit in shenqi_data.get('suit', []):
                 # 统计相同id的数量
                 id_counts = {}
@@ -209,16 +175,17 @@ class FeatureExtractor:
                     for wuxing in component.get('wuxing', []):
                         wuxing_id = wuxing.get('id')
                         if wuxing_id:
-                            id_counts[wuxing_id] = id_counts.get(wuxing_id, 0) + 1
-                
+                            id_counts[wuxing_id] = id_counts.get(
+                                wuxing_id, 0) + 1
+
                 # 检查是否有12个相同的id
                 for wuxing_id, count in id_counts.items():
                     if count >= 12 and wuxing_id not in counted_ids:
-                        shenqi['allTheSameCount'] += 1
+                        shenqi[0] += 1  # allTheSameCount
                         counted_ids.add(wuxing_id)
                         break  # 找到一个12个的就跳出循环
                     elif count >= 9 and wuxing_id not in counted_ids:
-                        shenqi['same9Count'] += 1
+                        shenqi[1] += 1  # same9Count
                         counted_ids.add(wuxing_id)
                         break  # 找到一个9个的就跳出循环
 
@@ -227,26 +194,49 @@ class FeatureExtractor:
                     for wuxing in component.get('wuxing', []):
                         level = wuxing.get('wuxingshi_level', 0)
                         affix = wuxing.get('wuxingshi_affix', 0)
-                        
+
                         if level == 1:
                             if affix > 0:
-                                shenqi['1attrCount'] += 1
+                                shenqi[6] += 1  # 1attrCount
                             else:
-                                shenqi['1Count'] += 1
+                                shenqi[7] += 1  # 1Count
                         elif level == 2:
                             if affix > 0:
-                                shenqi['2attrCount'] += 1
+                                shenqi[4] += 1  # 2attrCount
                             else:
-                                shenqi['2Count'] += 1
+                                shenqi[5] += 1  # 2Count
                         elif level == 3:
                             if affix > 0:
-                                shenqi['3attrCount'] += 1
+                                shenqi[2] += 1  # 3attrCount
                             else:
-                                shenqi['3Count'] += 1
+                                shenqi[3] += 1  # 3Count
 
         except Exception as e:
             self.logger.error(f"神器统计失败: {e}")
             print(f"错误详情: {str(e)}")
+
+        try:
+            special_pets_raw = data.get('pet', '[]')
+            if not special_pets_raw or special_pets_raw == '':
+                pets = []
+            else:
+                try:
+                    pets = json.loads(special_pets_raw)
+                except (json.JSONDecodeError, TypeError):
+                    pets = []
+            if not isinstance(pets, list):
+                pets = []
+            lingyou_count = 0
+            for pet in pets:
+                skills = pet.get('all_skills', [])
+                for skill in skills:
+                    if skill['name'] == '灵佑':
+                        lingyou_count += skill.get('value', 0)
+
+        except Exception as e:
+            self.logger.error(f"灵佑统计失败: {e}")
+            print(f"错误详情: {str(e)}")
+            lingyou_count = 0
 
         # 将浮点数转换为整数
         def safe_float_to_int(value, default=0):
@@ -258,23 +248,34 @@ class FeatureExtractor:
                 return default
 
         all_new_point = safe_float_to_int(data.get('all_new_point'))
+
+        # 性别 "1":男, "0":女
+        icon_id = data.get('character_icon')
+        gender = self.get_gender(icon_id)
+
         features = {
             'level': safe_float_to_int(data.get('level')),  # 等级
             'sum_exp': safe_float_to_int(data.get('sum_exp')),  # 总经验(亿)
-            'three_fly_lv': safe_float_to_int(data.get('three_fly_lv')),  # 化圣等级
+            # 化圣等级
+            'three_fly_lv': safe_float_to_int(data.get('three_fly_lv')),
             'school_history_count': schoolHistoryCount,  # 历史门派个数
             'all_new_point': all_new_point,  # 乾元丹
             'qianyuandan_breakthrough': qianyuandanBreakthrough,  # 乾元丹突破
-            'jiyuan_amount': safe_float_to_int(data.get('jiyuan_amount')) + safe_float_to_int(data.get('add_point')),   # 月饼粽子机缘
+            # 月饼粽子机缘
+            'jiyuan_amount': safe_float_to_int(data.get('jiyuan_amount')) + safe_float_to_int(data.get('add_point')),
             'packet_page': safe_float_to_int(data.get('packet_page')),  # 行囊拓展
-            'xianyu_amount': safe_float_to_int(data.get('xianyu_amount')),  # 仙玉
+            # 仙玉
+            'xianyu_amount': safe_float_to_int(data.get('xianyu_amount')),
             'learn_cash': safe_float_to_int(data.get('learn_cash')),  # 储备金
             'hight_grow_rider_count': hightGrowRiderCount,
-            'allow_pet_count': safe_float_to_int(data.get('allow_pet_count')),  # 最大召唤兽携带数量
+            # 最大召唤兽携带数量
+            'allow_pet_count': safe_float_to_int(data.get('allow_pet_count')),
             'premium_fabao_count': premiumFabaoCount,  # 高价值法宝数量
-            'shenqi': shenqi
+            'shenqi': shenqi,
+            'gender': gender,
+            'lingyou_count': lingyou_count  # 灵佑数量
         }
-        features.update(shenqi)
+
         return features
 
     def _extract_cultivation_features(self, data):
@@ -298,13 +299,11 @@ class FeatureExtractor:
             max_expt2 = data.get('max_expt2', 0)
             max_expt3 = data.get('max_expt3', 0)
             max_expt4 = data.get('max_expt4', 0)
-            max_expt5 = data.get('max_expt5', 0)
-            
+
             features['max_expt1'] = max_expt1
             features['max_expt2'] = max_expt2
             features['max_expt3'] = max_expt3
             features['max_expt4'] = max_expt4
-            features['max_expt5'] = max_expt5
             # 控制力
             beast_ski1 = data.get('beast_ski1', 0)
             beast_ski2 = data.get('beast_ski2', 0)
@@ -329,7 +328,6 @@ class FeatureExtractor:
             features['max_expt2'] = 0
             features['max_expt3'] = 0
             features['max_expt4'] = 0
-            features['max_expt5'] = 0
             features['beast_ski1'] = 0
             features['beast_ski2'] = 0
             features['beast_ski3'] = 0
@@ -340,7 +338,7 @@ class FeatureExtractor:
     def _extract_skill_features(self, data):
         """提取技能体系特征"""
         features = {
-            'school_skills': [0, 0, 0, 0, 0, 0, 0],
+            'school_skills': [0, 0, 0, 0, 0, 0, 0],  # 师门技能
             'qiangzhuang&shensu': [0, 0],  # 强壮神速
             'life_skills': []  # 等级高于80的技能
         }
@@ -393,131 +391,270 @@ class FeatureExtractor:
 
         return features
 
-    def _extract_equipment_features(self, data):
-        """提取装备特征体系"""
-        features = {
-            'total_gem_level': 0,
-            'premium_skill_count': 0,
-            'set_bonus_count': 0,
-            'total_equip_score': 0
-        }
-
-        try:
-            equips_raw = data.get('all_equip_json_desc', '{}')
-            if not equips_raw or equips_raw == '':
-                equips = {}
-            else:
-                try:
-                    equips = json.loads(equips_raw)
-                    equips = equips.get('人物装备')
-                except (json.JSONDecodeError, TypeError):
-                    equips = {}
-            if not isinstance(equips, list):
-                return features
-            for equip in equips:
-                if not isinstance(equip, dict):
-                    continue
-                  # 宝石等级
-                features['total_gem_level'] += equip['属性'].get('锻炼等级', 0)
-                # 特技统计
-                if equip['属性'].get('特技') in self.premium_skills:
-                    features['premium_skill_count'] += 1
-                # 套装统计
-                if equip['属性'].get('套装效果'):
-                    features['set_bonus_count'] += 1
-
-            # 计算平均值
-            if equips:
-                features['avg_gem_level'] = features['total_gem_level'] / \
-                    len(equips)
-        except Exception as e:
-            self.logger.warning(f"装备特征提取失败: {e}")
-        return features
-
-    def _extract_pet_features(self, data):
-        """提取召唤兽特征"""
-        features = {
-            'premium_pet_count': 0,
-            'total_pet_score': 0,
-            'max_pet_score': 0,
-            'lingyou_count': 0
-        }
-        try:
-            pets_raw = data.get('all_pets_json', '[]')
-            if not pets_raw or pets_raw == '':
-                pets = []
-            else:
-                try:
-                    pets = json.loads(pets_raw)
-                except (json.JSONDecodeError, TypeError):
-                    pets = []
-            if not isinstance(pets, list):
-                return features
-            for pet in pets:
-                if not isinstance(pet, dict):
-                    continue
-                # 获取宝宝等级
-                pet_level = pet['详细信息'].get('等级', 0)
-                if pet_level < 100:  # 跳过100级以下的宝宝
-                    continue
-                # 特殊技能统计
-                if any(skill in pet.get('技能', []) for skill in self.premium_pet_skills):
-                    features['premium_pet_count'] += 1
-                # 宝宝评分
-                pet_score = self._calculate_pet_score(pet)
-                features['total_pet_score'] += pet_score
-                features['max_pet_score'] = max(
-                    features['max_pet_score'], pet_score)
-            # 计算平均值
-            if pets:
-                features['avg_pet_score'] = features['total_pet_score'] / \
-                    len(pets)
-        except Exception as e:
-            self.logger.warning(f"召唤兽特征提取失败: {e}")
-
-        try:
-            special_pets_raw = data.get('pet', '[]')
-            if not special_pets_raw or special_pets_raw == '':
-                pets = []
-            else:
-                try:
-                    pets = json.loads(special_pets_raw)
-                except (json.JSONDecodeError, TypeError):
-                    pets = []
-            if not isinstance(pets, list):
-                return features
-            lingyou_count = 0
-            for pet in pets:
-                skills = pet.get('all_skills', [])
-                for skill in skills:
-                    if skill['name'] == '灵佑':
-                        lingyou_count += skill.get('value', 0)
-            features['lingyou_count'] = lingyou_count
-        except Exception as e:
-            self.logger.warning(f"特殊宠物特征提取失败: {e}")
-        return features
-
     def _extract_appearance_features(self, character_data):
-        """提取外观特征"""
-        features = {}
+        """提取外观特征，基于价值配置转化为0-100标准化得分"""
+        features = {
+            'limited_skin_value': 0,      # 限量锦衣价值得分
+            'limited_huge_horse_value': 0,     # 限量祥瑞价值得分
+            'limited_other_value': 0,        # 限量其他价值得分
+            'limited_skin_score': 0,        # 限量锦衣得分
+            'limited_huge_horse_score': 0,  # 限量祥瑞得分
+            'limited_other_score': 0,       # 限量其他得分
+        }
 
         try:
+            # 获取角色性别用于价值计算
+            icon_id = character_data.get('character_icon')
+            gender = self.get_gender(icon_id)  # "0":女, "1":男
+
             # 处理锦衣数据
-            skins = character_data.get('skins', {})
-            if isinstance(skins, dict):
-                limited_skins = skins.get('锦衣', {}).get('限量', [])
-                if isinstance(limited_skins, list):
-                    features['limited_skin_value'] = len(limited_skins)
-                else:
-                    features['limited_skin_value'] = 0
-            else:
-                features['limited_skin_value'] = 0
+            skins_str = character_data.get('ex_avt_json', '{}')
+            if skins_str and skins_str.strip():
+                try:
+                    skins = json.loads(skins_str)
+                    if isinstance(skins, dict):
+                        skin_total_value = 0
+                        config = self._load_appearance_config()
+                        limited_avt_widget = config.get(
+                            'limited_avt_widget', {})
+
+                        # 使用新的变体组合计算逻辑
+                        skin_total_value = self._calculate_skin_variant_value(
+                            skins, gender, config)
+
+                        # 处理特殊挂件（恶魔猪猪等）
+                        for skin_id, skin_item in skins.items():
+                            if isinstance(skin_item, dict):
+                                skin_name = skin_item.get('cName', '未知锦衣')
+                                if skin_name in limited_avt_widget:
+                                    skin_total_value += limited_avt_widget.get(
+                                        skin_name, 0)
+                        # 锦衣总价值 规则引擎使用
+                        features['limited_skin_value'] = skin_total_value
+                        # 转化为标准化得分 市场锚定法使用
+                        features['limited_skin_score'] = self._calculate_appearance_score(
+                            skin_total_value)
+
+                except (json.JSONDecodeError, TypeError) as e:
+                    self.logger.warning(f"解析锦衣数据失败: {e}")
+
+            # 处理祥瑞数据
+            huge_horse_str = character_data.get('huge_horse_json', '{}')
+            if huge_horse_str and huge_horse_str.strip():
+                try:
+                    huge_horses = json.loads(huge_horse_str)
+                    huge_horses_value = 0
+
+                    if isinstance(huge_horses, dict):
+                        # 字典格式处理（实际数据格式）
+                        for horse_id, horse_data in huge_horses.items():
+                            if isinstance(horse_data, dict):
+                                huge_horse_name = horse_data.get(
+                                    'cName', '未知祥瑞')
+                                huge_horse_value = self._get_appearance_item_value(
+                                    huge_horse_name, gender, 'limited_huge_horses', '祥瑞')
+                                huge_horses_value += huge_horse_value
+
+                    # 祥瑞总价值 规则引擎使用
+                    features['limited_huge_horse_value'] = huge_horses_value
+                    # 转化为标准化得分 市场锚定法使用
+                    features['limited_huge_horse_score'] = self._calculate_appearance_score(
+                        huge_horses_value)
+                except (json.JSONDecodeError, TypeError) as e:
+                    self.logger.warning(f"解析祥瑞数据失败: {e}")
 
         except Exception as e:
             self.logger.error(f"提取外观特征失败: {e}")
-            features['limited_skin_value'] = 0
+            # 保持默认值
 
         return features
+
+    def _get_appearance_item_value(self, item_name, gender, config_key, item_type="外观"):
+        """
+        获取外观物品价值（元）- 通用方法
+
+        Args:
+            item_name (str): 物品名称
+            gender (str): 角色性别 "0":女, "1":男
+            config_key (str): 配置文件中的键名 (如 'limited_skins', 'limited_huge_horses')
+            item_type (str): 物品类型，用于错误日志 (如 '锦衣', '祥瑞')
+
+        Returns:
+            int: 物品价值（元）
+        """
+        try:
+            # 加载配置文件
+            config = self._load_appearance_config()
+            items_config = config.get(config_key, {})
+
+            # 首先尝试直接匹配
+            if item_name in items_config:
+                item_config = items_config[item_name]
+                return self._calculate_item_price(item_config, item_name, gender)
+
+            # 如果没有直接匹配，尝试去掉染色后缀匹配基础名称
+            if '·' in item_name:
+                base_name = item_name.split('·')[0]  # 取"·"前面的部分作为基础名称
+                if base_name in items_config:
+                    item_config = items_config[base_name]
+                    # 传入原始名称用于判断是否染色
+                    return self._calculate_item_price(item_config, item_name, gender)
+
+            return 0
+
+        except Exception as e:
+            self.logger.error(f"获取{item_type}价值失败: {e}")
+            return 0
+
+    def _calculate_skin_variant_value(self, skins, gender, config):
+        """
+        计算锦衣变体组合价值
+
+        优化规则：
+        - 如果只有基础版本：统计基础价格
+        - 如果有基础版本 + 1种变体：统计变体价格
+        - 如果有基础版本 + n种变体：统计 变体价格*n - 基础价格
+
+        Args:
+            skins: 锦衣数据字典
+            gender: 性别
+            config: 配置文件
+
+        Returns:
+            int: 总价值（元）
+        """
+        limited_skins = config.get('limited_skins', {})
+        skin_groups = {}  # 按基础名称分组
+
+        # 按基础名称分组锦衣
+        for skin_id, skin_item in skins.items():
+            if isinstance(skin_item, dict):
+                skin_name = skin_item.get('cName', '未知锦衣')
+
+                # 跳过非限量锦衣
+                base_name = skin_name.split(
+                    '·')[0] if '·' in skin_name else skin_name
+                if base_name not in limited_skins:
+                    continue
+
+                if base_name not in skin_groups:
+                    skin_groups[base_name] = {
+                        'base': False,  # 是否有基础版本
+                        'variants': [],  # 变体列表
+                        'config': limited_skins[base_name]
+                    }
+
+                if '·' in skin_name:
+                    # 变体版本
+                    skin_groups[base_name]['variants'].append(skin_name)
+                else:
+                    # 基础版本
+                    skin_groups[base_name]['base'] = True
+
+        total_value = 0
+
+        # 计算每个基础锦衣组的价值
+        for base_name, group_info in skin_groups.items():
+            has_base = group_info['base']
+            variant_count = len(group_info['variants'])
+            config_item = group_info['config']
+
+            if variant_count == 0:
+                # 只有基础版本
+                if has_base:
+                    value = self._calculate_item_price(
+                        config_item, base_name, gender)
+                    total_value += value
+            elif variant_count == 1:
+                # 有基础版本 + 1种变体：统计变体价格
+                variant_name = group_info['variants'][0]
+                value = self._calculate_item_price(
+                    config_item, variant_name, gender)
+                total_value += value
+            else:
+                # 有基础版本 + n种变体：统计 变体价格*n - 基础价格
+                variant_price = self._calculate_item_price(
+                    config_item, group_info['variants'][0], gender)  # 变体价格
+                base_price = self._calculate_item_price(
+                    config_item, base_name, gender)  # 基础价格
+                total_value += variant_price * variant_count - base_price
+
+        # 处理非变体锦衣（不支持变体的锦衣直接累加）
+        for skin_id, skin_item in skins.items():
+            if isinstance(skin_item, dict):
+                skin_name = skin_item.get('cName', '未知锦衣')
+                base_name = skin_name.split(
+                    '·')[0] if '·' in skin_name else skin_name
+
+                # 如果配置中不支持变体（非数组格式），直接按原逻辑计算
+                if base_name in limited_skins:
+                    config_item = limited_skins[base_name]
+                    if not isinstance(config_item, list):  # 非数组格式，不支持变体
+                        # 确保不重复计算已处理的变体锦衣
+                        if base_name not in skin_groups:
+                            value = self._calculate_item_price(
+                                config_item, skin_name, gender)
+                            total_value += value
+
+        return total_value
+
+    def _calculate_item_price(self, item_config, item_name, gender):
+        """
+        根据配置计算物品价格
+
+        Args:
+            item_config: 配置项（dict/list/int/float）
+            item_name: 物品名称（用于判断是否染色版本）
+            gender: 性别
+
+        Returns:
+            int: 价格
+        """
+        if isinstance(item_config, dict):
+            # 男女价格不同的情况
+            return item_config.get(gender, 0)
+        elif isinstance(item_config, list):
+            # 数组格式：[基础价格, 染色/特殊价格]
+            if '·' in item_name:  # 染色/特殊版本
+                return item_config[1] if len(item_config) > 1 else item_config[0]
+            else:  # 基础版本
+                return item_config[0]
+        elif isinstance(item_config, (int, float)):
+            # 统一价格
+            return item_config
+        else:
+            return 0
+
+    def _calculate_appearance_score(self, value_yuan):
+        """
+        将外观价值（元）转化为标准化得分
+        参考calculate_skin_score逻辑
+        - 100元以下：10-20分
+        - 100-1000元：20-40分  
+        - 1000-10000元：40-70分
+        - 10000元以上：70-100分
+        """
+        if value_yuan <= 0:
+            return 0
+        elif value_yuan < 100:
+            return 10 + (value_yuan / 100) * 10
+        elif value_yuan < 1000:
+            return 20 + ((value_yuan - 100) / 900) * 20
+        elif value_yuan < 10000:
+            return 40 + ((value_yuan - 1000) / 9000) * 30
+        else:
+            return 70 + min(((value_yuan - 10000) / 50000) * 30, 30)
+
+    def _load_appearance_config(self):
+        """加载外观价值配置文件"""
+        try:
+            # 构建相对路径：从evaluator目录到config/ex_avt_value.jsonc
+            relative_path = os.path.join('..','config', 'ex_avt_value.jsonc')
+            return load_jsonc_relative_to_file(__file__, relative_path)
+
+        except Exception as e:
+            self.logger.error(f"加载外观配置文件失败: {e}")
+            return {}
 
     def _extract_market_features(self, data):
         """提取市场行为特征"""
@@ -535,55 +672,64 @@ class FeatureExtractor:
             now = datetime.now()
             time_until_expire = expire_time - now
             hours_until_expire = time_until_expire.total_seconds() / 3600
-            # features['hours_listed'] = (14 * 24) - hours_until_expire
+            features['hours_listed'] = (14 * 24) - hours_until_expire
 
         # 收藏
-            # features['collect_num'] = data.get('collect_num', 0)
+            features['collect_num'] = data.get('collect_num', 0)
 
         return features
 
-    def _parse_ascension(self, ascension_str):
-        """解析化圣等级"""
-        if not ascension_str:
-            return 0
-        match = re.search(r'化圣(\d+)', ascension_str)
-        return int(match.group(1)) if match else 0
+    def get_gender(self, icon_id):
+        """
+        根据图标ID获取角色性别
+        完全参考JavaScript逻辑实现，将所有逻辑整合在一个函数内
 
-    def _parse_money(self, money_str):
-        """解析金钱字符串为数值"""
-        if not money_str:
-            return 0
-        return int(money_str.replace(',', ''))
+        Args:
+            icon_id (int): 角色图标ID
 
-    def _parse_cultivation(self, cult_str):
-        """解析修炼字符串"""
-        if not cult_str:
-            return 0
-        match = re.search(r'(\d+)/\d+', cult_str)
-        return int(match.group(1)) if match else 0
+        Returns:
+            str: "0"(女性) 或 "1"(男性)
+        """
+        try:
+            # 输入验证
+            if icon_id is None:
+                return "0"
 
-    def _calculate_pet_score(self, pet):
-        """计算宝宝评分"""
-        if not isinstance(pet, dict):
-            return 0
+            type_id = int(icon_id)
 
-        # 基础资质评分
-        base_score = (
-            pet['资质'].get('攻击资质', 0) +
-            pet['资质'].get('速度资质', 0) +
-            pet['资质'].get('防御资质', 0)
-        ) / 3
+            # 角色图标ID范围修正逻辑（对应JavaScript的get_role_iconid函数）
+            need_fix_range = [
+                [13, 24],   # 第一个门派范围
+                [37, 48],   # 第二个门派范围
+                [61, 72],   # 第三个门派范围
+                [213, 224],  # 第四个门派范围
+                [237, 248],  # 第五个门派范围
+                [261, 272]  # 第六个门派范围
+            ]
 
-        # 成长系数
-        growth = pet['详细信息'].get('成长', 1.0)
+            # 检查type_id是否在需要修正的范围内，如果是则减12
+            for range_start, range_end in need_fix_range:
+                if range_start <= type_id <= range_end:
+                    type_id = type_id - 12
+                    break
 
-        # 技能数量
-        skill_count = len(pet.get('技能', []))
+            # 性别信息映射，与JavaScript保持一致
+            gender_info = {
+                "0": ["1", "2", "5", "6", "9", "10", "201", "205", "209"],      # 女性
+                "1": ["3", "4", "7", "8", "11", "12", "203", "207", "208", "211"]  # 男性
+            }
 
-        # 特殊技能加成
-        special_skill_bonus = sum(
-            2 for skill in pet.get('技能', [])
-            if skill in self.premium_pet_skills
-        )
+            # 转换为字符串进行查找
+            type_id_str = str(type_id)
 
-        return base_score * growth * (1 + 0.1 * skill_count) * (1 + 0.2 * special_skill_bonus)
+            # 在gender_info中查找对应的性别
+            for gender_key, id_list in gender_info.items():
+                if type_id_str in id_list:
+                    return gender_key
+
+            # 默认返回"0"(女性)
+            return "0"
+
+        except (ValueError, TypeError) as e:
+            self.logger.error(f"获取角色性别失败: {e}")
+            return "0"

@@ -11,6 +11,18 @@ import json
 from datetime import datetime
 import logging
 
+# 导入CBG链接生成器
+try:
+    from ..utils.cbg_link_generator import CBGLinkGenerator
+except ImportError:
+    try:
+        from utils.cbg_link_generator import CBGLinkGenerator
+    except ImportError:
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+        from cbg_link_generator import CBGLinkGenerator
+
 
 class CBGJSONExporter:
     """CBG数据JSON导出器"""
@@ -174,12 +186,9 @@ class CBGJSONExporter:
             ORDER BY c.price_desc DESC
         '''
     
-    def prepare_export_data(self, generate_link_callback=None):
+    def prepare_export_data(self):
         """
         准备导出数据：从数据库获取合并后的数据
-        
-        Args:
-            generate_link_callback: 生成链接的回调函数
             
         Returns:
             list: 合并后的数据列表（字典格式）
@@ -208,13 +217,12 @@ class CBGJSONExporter:
             self.logger.error(f"准备导出数据失败: {e}")
             return []  # 返回空列表
     
-    def format_export_data(self, data_list, generate_link_callback=None):
+    def format_export_data(self, data_list):
         """
         格式化导出数据
         
         Args:
             data_list: 原始数据列表
-            generate_link_callback: 生成链接的回调函数
             
         Returns:
             list: 格式化后的导出数据
@@ -243,9 +251,9 @@ class CBGJSONExporter:
                     else:
                         formatted_dict[key] = value
                 
-                # 如果有生成链接的回调，添加CBG链接
-                if generate_link_callback and data_dict.get('_internal_equip_id'):
-                    cbg_link = generate_link_callback(data_dict['_internal_equip_id'])
+                # 添加CBG链接
+                if data_dict.get('_internal_equip_id'):
+                    cbg_link = CBGLinkGenerator.generate_cbg_link(data_dict['_internal_equip_id'])
                     if cbg_link:
                         formatted_dict['CBG链接'] = cbg_link
                 
@@ -289,13 +297,12 @@ class CBGJSONExporter:
         self.logger.info(f"数据已导出到: {filepath}")
         self.logger.info(f"角色数据: {len(data_list)} 条")
     
-    def export_to_json(self, filename=None, generate_link_callback=None, pretty=True):
+    def export_to_json(self, filename=None, pretty=True):
         """
         导出数据到JSON文件
         
         Args:
             filename: 文件名，如果为None则自动生成
-            generate_link_callback: 生成CBG链接的回调函数
             pretty: 是否格式化输出JSON
             
         Returns:
@@ -303,14 +310,14 @@ class CBGJSONExporter:
         """
         try:
             # 1. 准备数据：合并角色基础信息和详细信息  
-            data_list = self.prepare_export_data(generate_link_callback)
+            data_list = self.prepare_export_data()
             
             if not data_list:
                 self.logger.warning("没有数据可导出")
                 return None
                 
             # 2. 格式化数据
-            formatted_data = self.format_export_data(data_list, generate_link_callback)
+            formatted_data = self.format_export_data(data_list)
             
             # 3. 生成文件名
             if filename is None:
@@ -336,13 +343,12 @@ class CBGJSONExporter:
             self.logger.error(f"JSON导出失败: {e}")
             return None
     
-    def export_single_character_json(self, character_data, generate_link_callback=None, pretty=True):
+    def export_single_character_json(self, character_data, pretty=True):
         """
         为单个角色导出JSON数据到role_json文件夹
         
         Args:
             character_data: 单个角色的数据字典
-            generate_link_callback: 生成CBG链接的回调函数
             pretty: 是否格式化输出JSON
             
         Returns:
@@ -354,7 +360,7 @@ class CBGJSONExporter:
             os.makedirs(role_json_dir, exist_ok=True)
             
             # 2. 格式化单个角色数据
-            formatted_data = self.format_single_character_data(character_data, generate_link_callback)
+            formatted_data = self.format_single_character_data(character_data)
             
             # 3. 生成文件名（基于角色名和equip_id）
             character_name = formatted_data.get('seller_nickname', '未知角色')
@@ -392,13 +398,12 @@ class CBGJSONExporter:
             self.logger.error(f"保存单个角色JSON失败: {e}")
             return None
     
-    def format_single_character_data(self, character_data, generate_link_callback=None):
+    def format_single_character_data(self, character_data):
         """
         格式化单个角色的数据
         
         Args:
             character_data: 单个角色的原始数据字典
-            generate_link_callback: 生成链接的回调函数
             
         Returns:
             dict: 格式化后的角色数据
@@ -424,9 +429,9 @@ class CBGJSONExporter:
                 else:
                     formatted_dict[key] = value
             
-            # 如果有生成链接的回调，添加CBG链接
-            if generate_link_callback and character_data.get('_internal_equip_id'):
-                cbg_link = generate_link_callback(character_data['_internal_equip_id'])
+            # 添加CBG链接
+            if character_data.get('_internal_equip_id'):
+                cbg_link = CBGLinkGenerator.generate_cbg_link(character_data['_internal_equip_id'])
                 if cbg_link:
                     formatted_dict['CBG链接'] = cbg_link
             
@@ -501,7 +506,7 @@ def create_json_exporter(db_path, output_dir, logger=None):
 
 
 def export_cbg_data_to_json(db_path, output_dir, filename=None, 
-                           generate_link_callback=None, logger=None, pretty=True):
+                           logger=None, pretty=True):
     """
     直接导出CBG数据到JSON的便利函数
     
@@ -509,7 +514,6 @@ def export_cbg_data_to_json(db_path, output_dir, filename=None,
         db_path: 数据库路径
         output_dir: 输出目录
         filename: 文件名
-        generate_link_callback: 生成链接的回调函数
         logger: 日志对象
         pretty: 是否格式化输出JSON
         
@@ -517,18 +521,17 @@ def export_cbg_data_to_json(db_path, output_dir, filename=None,
         str: 导出文件路径，失败时返回None
     """
     exporter = CBGJSONExporter(db_path, output_dir, logger)
-    return exporter.export_to_json(filename, generate_link_callback, pretty)
+    return exporter.export_to_json(filename, pretty)
 
 
 def export_single_character_to_json(character_data, output_dir, 
-                                   generate_link_callback=None, logger=None, pretty=True):
+                                   logger=None, pretty=True):
     """
     直接导出单个角色数据到JSON的便利函数
     
     Args:
         character_data: 单个角色的数据字典
         output_dir: 输出目录
-        generate_link_callback: 生成链接的回调函数
         logger: 日志对象
         pretty: 是否格式化输出JSON
         
@@ -537,4 +540,4 @@ def export_single_character_to_json(character_data, output_dir,
     """
     # 创建一个临时的导出器实例（不需要数据库路径）
     exporter = CBGJSONExporter(None, output_dir, logger)
-    return exporter.export_single_character_json(character_data, generate_link_callback, pretty)
+    return exporter.export_single_character_json(character_data, pretty)

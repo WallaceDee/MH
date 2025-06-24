@@ -70,8 +70,6 @@ class ShenqiParser:
             中文格式的神器信息
         """
         try:
-            self.logger.info(f"开始解析角色 {character_name or '未知'} 的神器信息")
-            
             # 从parsed_data中获取shenqi信息
             shenqi_data = parsed_data.get('shenqi', {})
             if not shenqi_data:

@@ -1,6 +1,6 @@
 {
   "RMB2MHB": 15,
-  "MARKET_FACTOR": 0.437,
+  "MARKET_FACTOR": 0.5,
   "PremiumFabaoValuePerCount": 150,
   "LearnCash2CashRate": 0.7,
   "XiulianguoValuePerCount": 80,

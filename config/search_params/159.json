@@ -14,5 +14,5 @@
   "skill_qiang_zhuang": "40",
   "school_skill_num": "6",
   "school_skill_level": "164",
-  "order_by": "price%20ASC"
+  "order_by": "price ASC"
 }

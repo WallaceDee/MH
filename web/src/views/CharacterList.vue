@@ -232,7 +232,7 @@
       </el-collapse>
     </div>
 
-    <el-table v-loading="loading" :data="characterList" border style="width: 100%" max-height="720" @sort-change="handleSortChange">
+    <el-table v-loading="loading" :data="characterList" border style="width: 100%" @sort-change="handleSortChange">
       <!-- 基本信息 -->
       <el-table-column prop="character_name" label="角色名" width="120">
         <template slot-scope="scope">
@@ -282,8 +282,24 @@
           </el-popover>
         </template>
       </el-table-column>
-       <!-- 特殊宠物 -->
-       <el-table-column label="特殊宠物" width="120">
+      <!-- 锦衣祥瑞 -->
+      <el-table-column label="锦衣祥瑞" width="120">
+        <template slot-scope="scope">
+          <el-popover placement="top" width="400" trigger="click">
+            <el-button type="text"
+              slot="reference">{{ `${getExAvtJsonDesc(scope.row.ex_avt_json).length}件锦衣/${getExAvtJsonDesc(scope.row.huge_horse_json).length}只祥瑞` }}</el-button>
+            <el-descriptions :column="1" border>
+              <el-descriptions-item label="锦衣">{{ getExAvtJsonDesc(scope.row.ex_avt_json).join('、')
+                }}</el-descriptions-item>
+              <el-descriptions-item label="祥瑞"> {{ getExAvtJsonDesc(scope.row.huge_horse_json).join('、')
+                }}</el-descriptions-item>
+            </el-descriptions>
+          </el-popover>
+        </template>
+      </el-table-column>
+
+      <!-- 特殊宠物 -->
+      <el-table-column label="特殊宠物" width="120">
         <template slot-scope="scope">
           <el-popover placement="top" width="400" trigger="click" :content="scope.row.pet">
             <div class="equip-desc" slot="reference" @click="copyText(scope.row.pet)">{{
@@ -331,9 +347,9 @@
       </el-table-column>
       <!-- 时间信息 -->
       <el-table-column prop="create_time" label="创建时间" width="200" />
-      <el-table-column prop="server" label="操作" width="150" fixed="right">
+      <el-table-column prop="server" label="操作" width="150">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" @click="handleExportSingleJSON(scope.row)"
+          <el-button size="mini" type="primary" @click="handleExportSingleJSON(scope.row)"
             :loading="scope.row.exportLoading">
             导出JSON
           </el-button>
@@ -426,6 +442,16 @@ export default {
   },
 
   methods: {
+    getExAvtJsonDesc(ex_avt_json) {
+      const ex_avt_json_obj = eval(`(${ex_avt_json})`)
+      console.log(ex_avt_json_obj)
+      const exAvtJsonDesc = []
+      for (const key in ex_avt_json_obj) {
+        const item = ex_avt_json_obj[key]
+        exAvtJsonDesc.push(item.cName)
+      }
+      return exAvtJsonDesc
+    },
     handleSortChange({ prop, order }) {
       this.sortState[prop] = order
 

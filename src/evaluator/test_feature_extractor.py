@@ -1,6 +1,14 @@
+import sys
+import os
+
+# 添加项目根目录到Python路径，解决模块导入问题
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到项目根目录
+sys.path.insert(0, project_root)
+
 import sqlite3
 import json
-from feature_extractor import FeatureExtractor
+from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
 import pandas as pd
 from datetime import datetime
 import logging
@@ -15,7 +23,7 @@ def test_feature_extraction():
     extractor = FeatureExtractor()
     
     # 连接数据库
-    db_path = 'data/cbg_data_202506.db'
+    db_path = 'data/cbg_characters_202506.db'
     logger.info(f"正在连接数据库: {db_path}")
     
     try:

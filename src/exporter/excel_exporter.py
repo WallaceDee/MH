@@ -12,6 +12,18 @@ from datetime import datetime
 import logging
 import json
 
+# 导入CBG链接生成器
+try:
+    from ..utils.cbg_link_generator import CBGLinkGenerator
+except ImportError:
+    try:
+        from utils.cbg_link_generator import CBGLinkGenerator
+    except ImportError:
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+        from cbg_link_generator import CBGLinkGenerator
+
 
 class CBGExcelExporter:
     """CBG数据Excel导出器"""
@@ -170,12 +182,9 @@ class CBGExcelExporter:
             ORDER BY c.price DESC
         '''
     
-    def prepare_export_data(self, generate_link_callback=None):
+    def prepare_export_data(self):
         """
         准备导出数据：从数据库获取合并后的数据
-        
-        Args:
-            generate_link_callback: 生成链接的回调函数
             
         Returns:
             DataFrame: 合并后的数据
@@ -193,7 +202,7 @@ class CBGExcelExporter:
             self.logger.error(f"准备导出数据失败: {e}")
             return pd.DataFrame()  # 返回空DataFrame
     
-    def save_to_excel_with_style(self, export_df, excel_path, merged_data_df=None, generate_link_callback=None):
+    def save_to_excel_with_style(self, export_df, excel_path, merged_data_df=None):
         """
         保存数据到Excel并应用样式
         
@@ -201,7 +210,6 @@ class CBGExcelExporter:
             export_df: 要导出的DataFrame
             excel_path: Excel文件路径
             merged_data_df: 包含内部ID的原始数据(用于超链接)
-            generate_link_callback: 生成链接的回调函数
         """
         try:
             # 创建Excel文件
@@ -213,9 +221,9 @@ class CBGExcelExporter:
                 workbook = writer.book
                 worksheet = writer.sheets['角色数据']
                 
-                # 如果有原始数据和链接生成函数，添加超链接
-                if merged_data_df is not None and generate_link_callback:
-                    self.add_hyperlinks_to_worksheet(worksheet, merged_data_df, export_df, generate_link_callback)
+                # 如果有原始数据，添加超链接
+                if merged_data_df is not None:
+                    self.add_hyperlinks_to_worksheet(worksheet, merged_data_df, export_df)
                 
                 # 调整列宽
                 self.adjust_column_widths(worksheet)
@@ -250,7 +258,7 @@ class CBGExcelExporter:
             raise
     
     
-    def add_hyperlinks_to_worksheet(self, worksheet, merged_data_df, export_df, generate_link_callback=None):
+    def add_hyperlinks_to_worksheet(self, worksheet, merged_data_df, export_df):
         """
         为Excel工作表添加超链接
         
@@ -258,11 +266,7 @@ class CBGExcelExporter:
             worksheet: Excel工作表对象
             merged_data_df: 包含内部ID的原始数据
             export_df: 导出数据
-            generate_link_callback: 生成链接的回调函数
         """
-        if not generate_link_callback:
-            return
-            
         # 为角色名列添加CBG超链接
         if '角色名' in export_df.columns:
             role_name_col_idx = export_df.columns.get_loc('角色名') + 1  # Excel列索引从1开始
@@ -272,7 +276,7 @@ class CBGExcelExporter:
                 role_name = row['角色名']
                 
                 if eid and role_name:
-                    cbg_link = generate_link_callback(eid)
+                    cbg_link = CBGLinkGenerator.generate_cbg_link(eid)
                     if cbg_link:
                         # 获取单元格
                         cell = worksheet.cell(row=row_idx, column=role_name_col_idx)
@@ -303,20 +307,19 @@ class CBGExcelExporter:
         self.logger.info(f"角色数据: {len(export_df)} 条")
         self.logger.info(f"已为角色名列添加CBG分享链接超链接")
     
-    def export_to_excel(self, filename=None, generate_link_callback=None):
+    def export_to_excel(self, filename=None):
         """
         导出数据到Excel文件
         
         Args:
             filename: 文件名，如果为None则自动生成
-            generate_link_callback: 生成CBG链接的回调函数
             
         Returns:
             str: 生成的Excel文件路径，失败时返回None
         """
         try:
             # 1. 准备数据：合并角色基础信息和详细信息  
-            merged_data_df = self.prepare_export_data(generate_link_callback)
+            merged_data_df = self.prepare_export_data()
             
             if merged_data_df.empty:
                 self.logger.warning("没有数据可导出")
@@ -337,7 +340,7 @@ class CBGExcelExporter:
             excel_path = os.path.join(self.output_dir, filename)
             
             # 5. 导出到Excel，应用样式
-            self.save_to_excel_with_style(export_df, excel_path, merged_data_df, generate_link_callback)
+            self.save_to_excel_with_style(export_df, excel_path, merged_data_df)
             
             self.logger.info(f"Excel导出成功: {excel_path}")
             return excel_path
@@ -388,7 +391,7 @@ def create_excel_exporter(db_path, output_dir, logger=None):
 
 
 def export_cbg_data_to_excel(db_path, output_dir, filename=None, 
-                           generate_link_callback=None, logger=None):
+                           logger=None):
     """
     直接导出CBG数据到Excel的便利函数
     
@@ -396,11 +399,10 @@ def export_cbg_data_to_excel(db_path, output_dir, filename=None,
         db_path: 数据库路径
         output_dir: 输出目录
         filename: 文件名
-        generate_link_callback: 生成链接的回调函数
         logger: 日志对象
         
     Returns:
         str: 导出文件路径，失败时返回None
     """
     exporter = CBGExcelExporter(db_path, output_dir, logger)
-    return exporter.export_to_excel(filename, generate_link_callback) 
+    return exporter.export_to_excel(filename) 

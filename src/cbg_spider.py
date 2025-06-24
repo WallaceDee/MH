@@ -6,6 +6,13 @@
 """
 
 import os
+import sys
+
+# 添加项目根目录到Python路径，解决模块导入问题
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)  # 向上一级到项目根目录
+sys.path.insert(0, project_root)
+
 import requests
 import json
 import sqlite3
@@ -16,41 +23,27 @@ import pandas as pd
 from datetime import datetime
 from urllib.parse import urlencode
 import logging
-from tools.setup_requests_session import setup_session
+from src.tools.setup_requests_session import setup_session
 import asyncio
 from playwright.async_api import async_playwright
+from src.utils.smart_db_helper import CBGSmartDB
 
-# 导入智能数据库助手
-try:
-    from utils.smart_db_helper import CBGSmartDB
-    from cbg_config import *
-    from exporter.excel_exporter import CBGExcelExporter
-    from exporter.json_exporter import CBGJSONExporter, export_single_character_to_json
-    from parser.pet_parser import PetParser
-    from parser.equipment_parser import EquipmentParser
-    from parser.shenqi_parser import ShenqiParser
-    from parser.rider_parser import RiderParser
-    from parser.ex_avt_parser import ExAvtParser
-    from parser.common_parser import CommonParser
-    from parser.fabao_parser import FabaoParser
-    from utils.lpc_helper import LPCHelper
-    from utils.api_logger import log_api_request
-    from utils.cookie_updater import update_cookies_with_playwright
-except ImportError:
-    from utils.smart_db_helper import CBGSmartDB
-    from cbg_config import *
-    from exporter.excel_exporter import CBGExcelExporter
-    from exporter.json_exporter import CBGJSONExporter, export_single_character_to_json
-    from parser.pet_parser import PetParser
-    from parser.equipment_parser import EquipmentParser
-    from parser.shenqi_parser import ShenqiParser
-    from parser.rider_parser import RiderParser
-    from parser.ex_avt_parser import ExAvtParser
-    from parser.common_parser import CommonParser
-    from parser.fabao_parser import FabaoParser
-    from utils.lpc_helper import LPCHelper
-    from utils.api_logger import log_api_request
-    from utils.cookie_updater import update_cookies_with_playwright
+# 导入数据库配置
+from src.cbg_config import DB_TABLE_SCHEMAS, DB_TABLE_ORDER
+
+# 导入解析器类
+from src.parser.pet_parser import PetParser
+from src.parser.equipment_parser import EquipmentParser
+from src.parser.shenqi_parser import ShenqiParser
+from src.parser.rider_parser import RiderParser
+from src.parser.ex_avt_parser import ExAvtParser
+from src.parser.common_parser import CommonParser
+from src.parser.fabao_parser import FabaoParser
+from src.utils.lpc_helper import LPCHelper
+
+# 导入导出器类
+from src.exporter.excel_exporter import CBGExcelExporter
+from src.exporter.json_exporter import CBGJSONExporter, export_single_character_to_json
 
 # 定义一个特殊的标记，用于表示登录已过期
 LOGIN_EXPIRED_MARKER = "LOGIN_EXPIRED"
@@ -58,32 +51,32 @@ LOGIN_EXPIRED_MARKER = "LOGIN_EXPIRED"
 class CBGSpider:
     def __init__(self):
         self.session = setup_session()
-        self.base_url = API_CONFIG['base_url']
+        self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
         
         # 使用按月分割的数据库文件路径
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         current_month = datetime.now().strftime('%Y%m')
-        db_filename = f"{FILE_PATHS['db_filename'].replace('.db', '')}_{current_month}.db"
+        
+        # 正常角色数据库路径
+        db_filename = f"cbg_characters_{current_month}.db"
         self.db_path = os.path.join(project_root, 'data', db_filename)
+        
+        # 空号数据库路径（单独的数据库文件）
+        empty_db_filename = f"empty_characters_{current_month}.db"
+        self.empty_db_path = os.path.join(project_root, 'data', empty_db_filename)
         
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         
-        # 初始化智能数据库助手
+        # 初始化智能数据库助手（正常角色）
         self.smart_db = CBGSmartDB(self.db_path)
         
-        # 配置日志
-        log_file = os.path.join(self.output_dir, FILE_PATHS['log_filename'])
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file, encoding='utf-8'),
-                logging.StreamHandler()
-            ]
-        )
-        self.logger = logging.getLogger(__name__)
+        # 初始化空号数据库助手（空号专用）
+        self.empty_smart_db = CBGSmartDB(self.empty_db_path)
+        
+        # 配置专用的日志器，避免与其他模块冲突
+        self.logger = self._setup_logger()
         
         # 初始化宠物解析器
         self.pet_parser = PetParser(self.logger)
@@ -113,35 +106,50 @@ class CBGSpider:
         self.setup_session()
         self.init_database()
         self.retry_attempts = 1 # 为登录失败重试设置次数
-    
-    def save_debug_file(self, parsed_data, character_name, save_debug=False):
-        """保存调试文件"""
-        if not save_debug or not parsed_data:
-            return
-            
-        try:
-            debug_dir = os.path.join(self.output_dir, 'original_role_json')
-            os.makedirs(debug_dir, exist_ok=True)
-            
-            # 生成文件名（基于角色名称和时间戳）
-            char_name = character_name or 'unknown'
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"{char_name}_{timestamp}.json"
-            filepath = os.path.join(debug_dir, filename)
-            
-            # 保存JSON数据到文件
-            with open(filepath, 'w', encoding='utf-8') as f:
-                f.write(json.dumps(parsed_data, ensure_ascii=False, indent=2))
-            
-            self.logger.debug(f"调试文件已保存: {filepath}")
-            
-        except Exception as e:
-            self.logger.error(f"保存调试文件失败: {e}")
-    
+
+    def _setup_logger(self):
+        """设置专用的日志器"""
+        # 创建专用的日志器
+        logger = logging.getLogger(f'CBGSpider_{id(self)}')
+        logger.setLevel(logging.INFO)
+        
+        # 清除可能存在的处理器，避免重复日志
+        if logger.handlers:
+            logger.handlers.clear()
+        
+        # 创建文件处理器
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        log_file = os.path.join(self.output_dir, f'cbg_spider_{timestamp}.log')
+        file_handler = logging.FileHandler(log_file, encoding='utf-8', mode='w')
+        file_handler.setLevel(logging.INFO)
+        
+        # 创建控制台处理器
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        
+        # 创建格式器
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        console_handler.setFormatter(formatter)
+        
+        # 添加处理器到日志器
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
+        
+        # 防止日志传播到根日志器，避免重复输出
+        logger.propagate = False
+        
+        # 测试日志写入
+        logger.info("🎉 CBG角色爬虫日志系统初始化完成")
+        logger.info(f"📁 日志文件路径: {log_file}")
+        
+        return logger
+
     def create_output_dir(self):
-        """创建输出目录"""
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        output_dir = os.path.join('output', timestamp)
+        """创建输出目录 - 按年月分组"""
+        current_date = datetime.now()
+        year_month = current_date.strftime('%Y%m')  # 202506
+        output_dir = os.path.join('output', year_month)
         os.makedirs(output_dir, exist_ok=True)
         return output_dir
     
@@ -152,7 +160,7 @@ class CBGSpider:
         try:
             # 获取项目根目录
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            cookies_path = os.path.join(project_root, FILE_PATHS['cookies_path'])
+            cookies_path = os.path.join(project_root, 'config/cookies.txt')
             
             with open(cookies_path, 'r', encoding='utf-8') as f:
                 cookie_content = f.read().strip()
@@ -193,22 +201,62 @@ class CBGSpider:
     def init_database(self):
         """初始化数据库和表结构"""
         try:
+            # 初始化正常角色数据库
+            self.init_normal_database()
+            
+            # 初始化空号数据库
+            self.init_empty_database()
+            
+            self.logger.info("所有数据库表初始化完成")
+            
+        except Exception as e:
+            self.logger.error(f"初始化数据库失败: {e}")
+            raise
+    
+    def init_normal_database(self):
+        """初始化正常角色数据库"""
+        try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # 按照指定顺序创建表（处理外键依赖关系）
-            for table_name in DB_TABLE_ORDER:
+            # 创建正常角色相关的表（排除empty_characters表）
+            normal_tables = [table for table in DB_TABLE_ORDER if table != 'empty_characters']
+            
+            for table_name in normal_tables:
                 if table_name in DB_TABLE_SCHEMAS:
                     cursor.execute(DB_TABLE_SCHEMAS[table_name])
-                    self.logger.debug(f"创建表: {table_name}")
+                    self.logger.debug(f"正常角色数据库创建表: {table_name}")
                 else:
                     self.logger.warning(f"未找到表 {table_name} 的结构定义")
             
             conn.commit()
-            self.logger.info("数据库表初始化完成")
+            self.logger.info(f"正常角色数据库初始化完成: {os.path.basename(self.db_path)}")
             
         except Exception as e:
-            self.logger.error(f"初始化数据库失败: {e}")
+            self.logger.error(f"初始化正常角色数据库失败: {e}")
+            raise
+        finally:
+            conn.close()
+    
+    def init_empty_database(self):
+        """初始化空号数据库"""
+        try:
+            conn = sqlite3.connect(self.empty_db_path)
+            cursor = conn.cursor()
+            
+            # 在空号数据库中创建characters表（使用empty_characters表结构）
+            cursor.execute(DB_TABLE_SCHEMAS['empty_characters'])
+            self.logger.debug(f"空号数据库创建表: characters")
+            
+            # 也创建large_equip_desc_data表，以防需要存储详细数据
+            cursor.execute(DB_TABLE_SCHEMAS['large_equip_desc_data'])
+            self.logger.debug(f"空号数据库创建表: large_equip_desc_data")
+            
+            conn.commit()
+            self.logger.info(f"空号数据库初始化完成: {os.path.basename(self.empty_db_path)}")
+            
+        except Exception as e:
+            self.logger.error(f"初始化空号数据库失败: {e}")
             raise
         finally:
             conn.close()
@@ -358,19 +406,7 @@ class CBGSpider:
             if not isinstance(data, dict):
                 self.logger.error("解析JSONP响应失败：响应不是一个有效的JSON对象")
                 return None
-                
-            # 检查API响应状态
-            if data.get('status') != 1:
-                self.logger.error(data)
-                # 检查是否是登录过期
-                msg = data.get('msg', 'N/A')
-                self.logger.error(f"API返回错误状态: {data.get('status')}, 消息: {msg}")
-                # 检查是否是登录过期
-                if data.get('status') == 2:
-                    self.logger.warning("检测到登录状态失效 (relogin)。")
-                    return LOGIN_EXPIRED_MARKER
-                return None
-                
+
             equip_list = data.get('equip_list', [])
             
             if not equip_list:
@@ -491,7 +527,6 @@ class CBGSpider:
                             char['equipments'].append(equipment)
                     
                     # 解析宝宝信息
-                    self.logger.debug(f"开始解析宝宝信息")
                     
                     # 从large_equip_desc中解析宝宝信息
                     large_desc = equip.get('large_equip_desc', '')
@@ -500,26 +535,12 @@ class CBGSpider:
                             parsed_data = self.parse_large_equip_desc(large_desc)
                             
                             # 使用装备解析器的统一处理方法
-                            if parsed_data and 'AllEquip' in parsed_data:
-                                equip_info = self.equipment_parser.process_character_equipment(
-                                    parsed_data, char.get('sellerNickname', '未知')
-                                )
-                                char['all_equips'] = equip_info
-                            else:
-                                print(f"⚔️ [装备解析] 角色: {char.get('sellerNickname', '未知')}")
-                                print("=" * 80)
-                                print("✅ 装备解析完成! 总计: 使用中0件, 未使用0件, 拆分销售0件")
-                                print("-" * 80)
-                                char['all_equips'] = {"装备总数": 0, "使用中装备": [], "未使用装备": [], "拆分销售装备": []}
-                            
-                            # 保存调试文件（如果需要）
-                            self.save_debug_file(parsed_data, char.get('sellerNickname', '未知'), save_debug=True)
-                            
+                            char['all_equips'] = self.equipment_parser.process_character_equipment(parsed_data, char.get('sellerNickname', '未知'))
                             # 使用宠物解析器的统一处理方法
                             char['pets'] = self.pet_parser.process_character_pets(parsed_data, char.get('sellerNickname', '未知'))
                                 
                         except Exception as e:
-                            self.logger.error(f"解析宝宝信息失败: {e}")
+                            self.logger.error(f"解析装备/宝宝信息失败: {e}")
                             char['pets'] = []
                             char['all_equips'] = {"装备总数": 0, "使用中装备": [], "未使用装备": [], "拆分销售装备": []}
                     else:
@@ -550,16 +571,26 @@ class CBGSpider:
             try:
                 # 检查是否需要切换数据库（检查当前月份是否变化）
                 current_month = datetime.now().strftime('%Y%m')
-                current_db_filename = f"{FILE_PATHS['db_filename'].replace('.db', '')}_{current_month}.db"
+                current_db_filename = f"cbg_characters_{current_month}.db"
+                current_empty_db_filename = f"empty_characters_{current_month}.db"
                 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 current_db_path = os.path.join(project_root, 'data', current_db_filename)
+                current_empty_db_path = os.path.join(project_root, 'data', current_empty_db_filename)
                 
                 # 如果当前数据库路径与实例的数据库路径不同，需要重新初始化数据库连接
-                if current_db_path != self.db_path:
-                    self.logger.info(f"检测到月份变化，切换到新的数据库: {current_db_filename}")
+                if current_db_path != self.db_path or current_empty_db_path != self.empty_db_path:
+                    self.logger.info(f"检测到月份变化，切换到新的数据库:")
+                    self.logger.info(f"  正常角色数据库: {current_db_filename}")
+                    self.logger.info(f"  空号数据库: {current_empty_db_filename}")
+                    
+                    # 更新数据库路径
                     self.db_path = current_db_path
+                    self.empty_db_path = current_empty_db_path
+                    
                     # 重新初始化数据库连接
                     self.smart_db = CBGSmartDB(self.db_path)
+                    self.empty_smart_db = CBGSmartDB(self.empty_db_path)
+                    
                     # 确保新数据库的表结构已创建
                     self.init_database()
                 
@@ -700,13 +731,34 @@ class CBGSpider:
                 else:
                     character_data['ex_avt_json'] = ''
                 
-                # 使用智能数据库助手保存角色数据
-                try:
-                    self.smart_db.save_character(character_data)
-                except Exception as e:
-                    self.logger.error(f"保存角色数据失败: {char.get('eid')}, 错误: {e}")
+                # 空号识别逻辑
+                is_empty_character = self.is_empty_character(char, all_equips, pets)
+                
+                if is_empty_character:
+                    # 如果是空号，添加空号识别信息并保存到空号数据库
+                    empty_reason = self.get_empty_reason(char, all_equips, pets)
+                    character_data['empty_reason'] = empty_reason
+                    character_data['equip_count'] = all_equips.get('物品总数', 0) if all_equips else 0
+                    character_data['high_level_pet_count'] = self.count_high_level_pets(pets)
+                    
+                    # 保存到空号数据库的characters表
+                    try:
+                        self.empty_smart_db.save_character(character_data)
+                        self.logger.info(f"识别并保存空号角色: ￥{char.get('price')} - {char.get('sellerNickname')} - {empty_reason}")
+                        saved_count += 1
+                    except Exception as e:
+                        self.logger.error(f"保存空号数据失败: ￥{char.get('price')}, 错误: {e}")
+                else:
+                    # 如果不是空号，保存到正常角色数据库
+                    try:
+                        self.smart_db.save_character(character_data)
+                        self.logger.info(f"识别并保存角色: ￥{char.get('price')} - {char.get('sellerNickname')}")
+                        saved_count += 1
+                    except Exception as e:
+                        self.logger.error(f"保存角色数据失败: ￥{char.get('price')}, 错误: {e}")
                 
                 # 2. 处理详细装备数据（如果存在）
+                # 注意：即使是空号，也要尝试解析详细数据（如果API返回了的话）
                 if large_equip_desc:
                     try:
                         # 创建详细装备数据字典
@@ -831,30 +883,41 @@ class CBGSpider:
                             'raw_data_json': json.dumps(parsed_desc, ensure_ascii=False)
                         }
                         
-                        # 使用智能数据库助手保存详细装备数据
-                        self.smart_db.save_large_equip_data(equip_data)
+                        # 根据是否为空号选择对应的数据库保存详细装备数据
+                        if is_empty_character:
+                            # 空号数据保存到空号数据库
+                            self.logger.debug(f"保存空号详细数据到空号数据库: {char.get('eid')}")
+                            success = self.empty_smart_db.save_large_equip_data(equip_data)
+                            if success:
+                                self.logger.debug(f"空号详细数据保存成功: {char.get('eid')}")
+                            else:
+                                self.logger.error(f"空号详细数据保存失败: {char.get('eid')}")
+                        else:
+                            # 正常角色数据保存到正常数据库
+                            self.logger.debug(f"保存正常角色详细数据到正常数据库: {char.get('eid')}")
+                            success = self.smart_db.save_large_equip_data(equip_data)
+                            if success:
+                                self.logger.debug(f"正常角色详细数据保存成功: {char.get('eid')}")
+                            else:
+                                self.logger.error(f"正常角色详细数据保存失败: {char.get('eid')}")
                         
                     except Exception as e:
                         self.logger.error(f"解析装备详细信息时出错: {str(e)}")
                 
-                # 如果代码执行到这里，说明角色保存成功，增加计数
-                saved_count += 1
-                
                 # 为每个角色单独导出JSON数据到role_json文件夹
-                try:
-                    # 使用json_exporter中的方法导出
-                    self._export_single_character_json(character_data, large_equip_desc, parsed_desc)
+                # try:
+                #     # 使用json_exporter中的方法导出
+                #     self._export_single_character_json(character_data, large_equip_desc, parsed_desc)
                     
-                except Exception as e:
-                    self.logger.warning(f"保存角色 {character_data.get('equip_id')} 的单独JSON失败: {e}")
+                # except Exception as e:
+                #     self.logger.warning(f"保存角色 {character_data.get('equip_id')} 的单独JSON失败: {e}")
                 
             except Exception as e:
                 self.logger.error(f"保存角色 {char.get('eid')} 时出错: {str(e)}")
                 continue
                 
-        self.logger.info(f"✅ 使用智能数据库助手成功保存{saved_count}条角色数据")
-        if saved_count > 0:
-            self.logger.info(f"🗂️ 每个角色的单独JSON文件已保存到 {self.output_dir}/role_json/ 文件夹")
+        # if saved_count > 0:
+        #     self.logger.info(f"🗂️ 每个角色的单独JSON文件已保存到 {self.output_dir}/role_json/ 文件夹")
         return saved_count
     
     def crawl_all_pages(self, max_pages=10, delay_range=None, search_params=None, use_browser=False):
@@ -870,6 +933,26 @@ class CBGSpider:
         Returns:
             list: 所有页面的数据列表
         """
+        # 首先验证Cookie有效性
+        self.logger.info("正在验证Cookie有效性...")
+        from src.tools.search_form_helper import verify_cookie_validity
+        if not verify_cookie_validity():
+            self.logger.warning("Cookie验证失败，正在更新Cookie...")
+            # 使用异步方式更新Cookie
+            async def update_cookie():
+                from src.utils.cookie_updater import _update_cookies_internal
+                return await _update_cookies_internal()
+            
+            if not asyncio.run(update_cookie()):
+                self.logger.error("Cookie更新失败，无法继续爬取")
+                return 0
+            else:
+                self.logger.info("Cookie更新成功，重新设置会话")
+                # 重新设置会话
+                self.setup_session()
+        else:
+            self.logger.info("Cookie验证通过")
+
         current_page = 1
         total_characters = 0
         successful_pages = 0
@@ -880,7 +963,7 @@ class CBGSpider:
                 if use_browser:
                     # 使用浏览器监听模式
                     self.logger.info("启动浏览器监听模式收集参数...")
-                    from utils.search_form_helper import get_search_params
+                    from src.tools.search_form_helper import get_search_params
                     search_params = get_search_params()
                     if not search_params:
                         search_params = {'server_type': 3}
@@ -951,6 +1034,7 @@ class CBGSpider:
                 'page': page,
                 'count': 15,
                 'search_type': 'overall_search_role',
+                "order_by": "price ASC"
             }
             
             # 构建完整URL
@@ -995,30 +1079,9 @@ class CBGSpider:
             if not response_text:
                 self.logger.error("请求失败，未获取到响应")
                 return None
-            
-            # 记录API请求
-            log_api_request(url, params, 200, response_text[:200], 
-                          self.logger, self.smart_db)
-            
+
             # 解析响应
             parsed_result = self.parse_jsonp_response(response_text)
-            
-            # 如果检测到登录过期
-            if parsed_result == LOGIN_EXPIRED_MARKER:
-                if self.retry_attempts > 0:
-                    self.retry_attempts -= 1
-                    self.logger.info("尝试自动更新Cookie并重试...")
-                    
-                    # 调用Playwright更新Cookie
-                    if update_cookies_with_playwright():
-                        self.logger.info("Cookie更新成功，重新加载会话并重试请求。")
-                        return self.fetch_page(page, search_params) # 重试一次
-                    else:
-                        self.logger.error("Cookie更新失败。无法继续。")
-                        return None
-                else:
-                    self.logger.error("已达到重试次数上限，停止重试。")
-                    return None
             
             return parsed_result
                 
@@ -1026,32 +1089,7 @@ class CBGSpider:
             self.logger.error(f"获取第{page}页数据时出错: {e}")
             return None
     
-    def extract_server_id_from_eid(self, eid):
-        """从eid中提取服务器ID"""
-        try:
-            if eid and '-' in eid:
-                parts = eid.split('-')
-                if len(parts) >= 2:
-                    return parts[1]
-        except Exception:
-            pass
-        return None
-    
-    def generate_cbg_link(self, eid):
-        """生成CBG角色分享链接"""
-        if not eid:
-            return None
-        
-        server_id = self.extract_server_id_from_eid(eid)
-        if not server_id:
-            return None
-        
-        # 构建基础CBG链接
-        base_url = "https://xyq.cbg.163.com/equip"
-        params = f"s={server_id}&eid={eid}"
-        link = f"{base_url}?{params}"
-        
-        return link
+
     
     def export_to_excel(self, filename=None, months=None):
         """
@@ -1071,7 +1109,7 @@ class CBGSpider:
         if months is None:
             db_files = [f for f in os.listdir(data_dir) if f.endswith('.db')]
         else:
-            db_files = [f"{FILE_PATHS['db_filename'].replace('.db', '')}_{month}.db" for month in months]
+            db_files = [f"cbg_characters_{month}.db" for month in months]
         
         exported_files = []
         for db_file in db_files:
@@ -1085,8 +1123,7 @@ class CBGSpider:
             
             # 使用导出器导出数据
             excel_file = excel_exporter.export_to_excel(
-                filename=f"{filename}_{db_file.replace('.db', '')}" if filename else None,
-                generate_link_callback=self.generate_cbg_link
+                filename=f"{filename}_{db_file.replace('.db', '')}" if filename else None
             )
             if excel_file:
                 exported_files.append(excel_file)
@@ -1112,7 +1149,7 @@ class CBGSpider:
         if months is None:
             db_files = [f for f in os.listdir(data_dir) if f.endswith('.db')]
         else:
-            db_files = [f"{FILE_PATHS['db_filename'].replace('.db', '')}_{month}.db" for month in months]
+            db_files = [f"cbg_characters_{month}.db" for month in months]
         
         exported_files = []
         for db_file in db_files:
@@ -1127,7 +1164,6 @@ class CBGSpider:
             # 使用导出器导出数据
             json_file = json_exporter.export_to_json(
                 filename=f"{filename}_{db_file.replace('.db', '')}" if filename else None,
-                generate_link_callback=self.generate_cbg_link,
                 pretty=pretty
             )
             if json_file:
@@ -1164,9 +1200,117 @@ class CBGSpider:
         return self.common_parser.get_farm_level_name(level)
     
     def get_house_real_owner_name(self, owner_status):
-        """转换房屋真实拥有者状态为中文名称"""
-        return self.common_parser.get_house_real_owner_name(owner_status)
+        """获取房屋真实拥有者名称"""
+        owner_names = {0: "无", 1: "自己", 2: "配偶"}
+        return owner_names.get(owner_status, "未知")
     
+    def is_empty_character(self, char_data, all_equips, pets):
+        """
+        判断是否为空号
+        空号条件：物品个数等于0，且宠物等级大于100的数量为0
+        
+        Args:
+            char_data: 角色基础数据
+            all_equips: 装备数据
+            pets: 宠物数据
+            
+        Returns:
+            bool: True表示是空号，False表示不是空号
+        """
+        try:
+            # 检查物品个数
+            equip_count = 0
+            if all_equips and isinstance(all_equips, dict):
+                equip_count = all_equips.get('物品总数', 0)
+            
+            # 检查高等级宠物数量（等级大于100）
+            high_level_pet_count = self.count_high_level_pets(pets)
+            
+            # 空号判断：物品个数为0 且 高等级宠物数量为0
+            is_empty = (equip_count == 0) and (high_level_pet_count == 0)
+            
+            if is_empty:
+                self.logger.debug(f"识别空号: {char_data.get('sellerNickname')} - 物品数:{equip_count}, 高级宠物数:{high_level_pet_count}")
+            
+            return is_empty
+            
+        except Exception as e:
+            self.logger.error(f"判断空号时出错: {e}")
+            return False
+    
+    def count_high_level_pets(self, pets):
+        """
+        统计等级大于100的宠物数量
+        
+        Args:
+            pets: 宠物数据列表
+            
+        Returns:
+            int: 高等级宠物数量
+        """
+        try:
+            if not pets or not isinstance(pets, list):
+                return 0
+            
+            high_level_count = 0
+            for pet in pets:
+                if isinstance(pet, dict):
+                    # 从宠物数据中获取等级
+                    pet_level = pet.get('等级', 0)
+                    if isinstance(pet_level, (int, float)) and pet_level > 100:
+                        high_level_count += 1
+                    elif isinstance(pet_level, str):
+                        try:
+                            level_num = int(pet_level)
+                            if level_num > 100:
+                                high_level_count += 1
+                        except ValueError:
+                            continue
+            
+            return high_level_count
+            
+        except Exception as e:
+            self.logger.error(f"统计高等级宠物时出错: {e}")
+            return 0
+    
+    def get_empty_reason(self, char_data, all_equips, pets):
+        """
+        获取空号识别原因
+        
+        Args:
+            char_data: 角色基础数据
+            all_equips: 装备数据
+            pets: 宠物数据
+            
+        Returns:
+            str: 空号识别原因
+        """
+        try:
+            reasons = []
+            
+            # 检查物品数量
+            equip_count = 0
+            if all_equips and isinstance(all_equips, dict):
+                equip_count = all_equips.get('物品总数', 0)
+            
+            if equip_count == 0:
+                reasons.append("无物品")
+            
+            # 检查高等级宠物
+            high_level_pet_count = self.count_high_level_pets(pets)
+            if high_level_pet_count == 0:
+                total_pets = len(pets) if pets else 0
+                if total_pets == 0:
+                    reasons.append("无宠物")
+                else:
+                    reasons.append(f"无高级宠物(共{total_pets}只宠物)")
+            
+            return " + ".join(reasons) if reasons else "空号"
+            
+        except Exception as e:
+            self.logger.error(f"获取空号原因时出错: {e}")
+            return "识别异常"
+
     def _export_single_character_json(self, character_data, large_equip_desc, parsed_desc):
         """
         内部方法：为单个角色导出JSON数据到role_json文件夹
@@ -1186,7 +1330,6 @@ class CBGSpider:
             return export_single_character_to_json(
                 character_data=full_character_data,
                 output_dir=self.output_dir,
-                generate_link_callback=self.generate_cbg_link,
                 logger=self.logger
             )
             

@@ -57,8 +57,6 @@ class RiderParser:
             中文格式的坐骑信息
         """
         try:
-            self.logger.info(f"开始解析角色 {character_name or '未知'} 的坐骑信息")
-            
             # 从parsed_data中获取rider信息
             rider_data = parsed_data.get('rider', {})
             if not rider_data:

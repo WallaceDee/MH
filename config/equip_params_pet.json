@@ -1,0 +1,9 @@
+{
+  "level_min": 0,
+  "level_max": 180,
+  "search_type": "overall_search_pet",
+  "server_type": 3,
+  "evol_skill_mode": 0,
+  "count": 15,
+  "view_loc": "overall_search"
+}

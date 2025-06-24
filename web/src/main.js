@@ -10,8 +10,7 @@ Vue.config.productionTip = false
 
 Vue.use(ElementUI, { size: 'mini'})
 
-// 配置axios
-axios.defaults.baseURL = 'http://localhost:5000'
+
 Vue.prototype.$http = axios
 
 new Vue({

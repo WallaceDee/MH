@@ -93,15 +93,15 @@ class DataUpdater:
                     # 更新各个字段
                     updates = {}
                     
-                    # 更新育兽术
-                    yushoushu_skill = self.common_parser.parse_yushoushu_skill(parsed_desc.get('all_skills', {}))
-                    self.logger.info(f"更新角色 {equip_id} 的育兽术数据成功: {yushoushu_skill}")
-                    updates['yushoushu_skill'] = yushoushu_skill
+                    # # 更新育兽术
+                    # yushoushu_skill = self.common_parser.parse_yushoushu_skill(parsed_desc.get('all_skills', {}))
+                    # self.logger.info(f"更新角色 {equip_id} 的育兽术数据成功: {yushoushu_skill}")
+                    # updates['yushoushu_skill'] = yushoushu_skill
                     
-                    # # 更新法宝数据
-                    # fabao = self.fabao_parser.process_character_fabao(parsed_desc, seller_nickname)
-                    # if fabao:
-                    #     updates['all_fabao_json'] = json.dumps(fabao, ensure_ascii=False)
+                    # 更新法宝数据
+                    fabao = self.fabao_parser.process_character_fabao(parsed_desc, seller_nickname)
+                    if fabao:
+                        updates['all_fabao_json'] = json.dumps(fabao, ensure_ascii=False)
                     
                     # # 更新宠物数据
                     # pets = self.pet_parser.process_character_pets(parsed_desc, seller_nickname)
@@ -130,26 +130,26 @@ class DataUpdater:
                     #     if all_rider and all_rider.get('坐骑列表'):
                     #         updates['all_rider_json'] = json.dumps(all_rider, ensure_ascii=False)
                     
-                    # # 更新锦衣数据
-                    # if parsed_desc and parsed_desc.get('ExAvt'):
-                    #     ex_avt_data = {
-                    #         'ExAvt': parsed_desc.get('ExAvt'),
-                    #         'basic_info': {
-                    #             'total_avatar': parsed_desc.get('total_avatar', 0),
-                    #             'xianyu': parsed_desc.get('xianyu', 0),
-                    #             'xianyu_score': parsed_desc.get('xianyu_score', 0),
-                    #             'qicai_score': parsed_desc.get('qicai_score', 0)
-                    #         },
-                    #         'chat_effect': parsed_desc.get('chat_effect'),
-                    #         'icon_effect': parsed_desc.get('icon_effect'),
-                    #         'title_effect': parsed_desc.get('title_effect'),
-                    #         'perform_effect': parsed_desc.get('perform_effect'),
-                    #         'achieve_show': parsed_desc.get('achieve_show', []),
-                    #         'avt_widget': parsed_desc.get('avt_widget', {})
-                    #     }
-                    #     all_ex_avt = self.ex_avt_parser.process_character_clothes(ex_avt_data, seller_nickname)
-                    #     if all_ex_avt:
-                    #         updates['ex_avt_json'] = json.dumps(all_ex_avt, ensure_ascii=False)
+                    # 更新锦衣数据
+                    if parsed_desc and parsed_desc.get('ExAvt'):
+                        ex_avt_data = {
+                            'ExAvt': parsed_desc.get('ExAvt'),
+                            'basic_info': {
+                                'total_avatar': parsed_desc.get('total_avatar', 0),
+                                'xianyu': parsed_desc.get('xianyu', 0),
+                                'xianyu_score': parsed_desc.get('xianyu_score', 0),
+                                'qicai_score': parsed_desc.get('qicai_score', 0)
+                            },
+                            'chat_effect': parsed_desc.get('chat_effect'),
+                            'icon_effect': parsed_desc.get('icon_effect'),
+                            'title_effect': parsed_desc.get('title_effect'),
+                            'perform_effect': parsed_desc.get('perform_effect'),
+                            'achieve_show': parsed_desc.get('achieve_show', []),
+                            'avt_widget': parsed_desc.get('avt_widget', {})
+                        }
+                        all_ex_avt = self.ex_avt_parser.process_character_clothes(ex_avt_data, seller_nickname)
+                        if all_ex_avt:
+                            updates['ex_avt_json'] = json.dumps(all_ex_avt, ensure_ascii=False)
                     
                     # 执行更新
                     if updates:
@@ -437,7 +437,7 @@ def main():
     
     # 获取当前月份
     current_month = datetime.now().strftime('%Y%m')
-    db_filename = f"cbg_data_{current_month}.db"
+    db_filename = f"empty_characters_{current_month}.db"
     db_path = os.path.join(project_root, 'data', db_filename)
     
     # 创建更新器
@@ -445,7 +445,7 @@ def main():
     
     # 更新所有数据
     # updater.add_column_to_characters('sum_amount','INTEGER')
-    updater.add_column_to_table('large_equip_desc_data','pet','TEXT')
+    # updater.add_column_to_table('large_equip_desc_data','pet','TEXT')
     updater.update_character_data()
     # updater.drop_column_from_table('characters','sum_amount')
 if __name__ == "__main__":

@@ -15,5 +15,7 @@
     "rider": 0.8, // 坐骑
     "pet_count": 0.2, // 召唤兽格子
     "fabao": 0.7, // 法宝
-    "shenqi": 0.75 // 神器
+    "shenqi": 0.75, // 神器
+    "limited_skin": 0.6, // 限量锦衣
+    "limited_huge_horse": 0.7 // 限量祥瑞
 }

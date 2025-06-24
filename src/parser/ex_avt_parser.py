@@ -57,8 +57,6 @@ class ExAvtParser:
             中文格式的锦衣信息
         """
         try:
-            self.logger.info(f"开始解析角色 {character_name or '未知'} 的锦衣信息")
-            
             # 从parsed_data中获取ExAvt信息
             clothes_data = parsed_data.get('ExAvt', {})
             if not clothes_data:
@@ -99,7 +97,6 @@ class ExAvtParser:
         
         Args:
             clothes_data: 锦衣数据字典
-            total_avatar: 总数
             chat_effect: 冒泡框
             icon_effect: 头像框
             title_effect: 称谓特效
@@ -194,38 +191,29 @@ class ExAvtParser:
                         new_clothes_list = [widget_map]
             
             # 构建返回结果
-            result = {
-                "总数": total_avatar or len(clothes_data),
-                "锦衣数量": len(clothes_data)
-            }
+            result = {}
+            # 简化锦衣信息：只保留name
+            simplified_clothes_list = {}
+            for clothes_type in new_clothes_list:
+                simplified_clothes_list[clothes_type.get("title")] = [item.get("name", "") for item in clothes_type.get("list", [])]
             
-            # 根据是否有title_effect决定返回格式
-            if title_effect:
-                # 简化锦衣信息：只保留name
-                simplified_clothes_list = {}
-                for clothes_type in new_clothes_list:
-                    simplified_clothes_list[clothes_type.get("title")] = [item.get("name", "") for item in clothes_type.get("list", [])]
-                
-                result["锦衣"] = simplified_clothes_list
-                # 特效字段只保留name
-                result["冒泡框"] = self._extract_name_only(chat_effect)
-                result["头像框"] = self._extract_name_only(icon_effect)
-                result["称谓特效"] = self._extract_name_only(title_effect)
-                result["施法/攻击特效"] = self._extract_name_only(perform_effect)
-                
-                # 处理彩饰-队标（只保留client_type=201的name）
-                filtered_achieve = []
-                if achieve_show:
-                    for item in achieve_show:
-                        if isinstance(item, dict) and item.get('client_type') == 201:
-                            name = self._extract_name_only(item)
-                            if name:
-                                filtered_achieve.append(name)
-                result["彩饰-队标"] = filtered_achieve
-            else:
-                # 简化锦衣信息：只保留name
-                result["锦衣列表"] = [item.get("name", "") for item in self._sort_clothes_list(old_clothes_list)]
+            result["锦衣"] = simplified_clothes_list
+            # 特效字段只保留name
+            result["冒泡框"] = self._extract_name_only(chat_effect)
+            result["头像框"] = self._extract_name_only(icon_effect)
+            result["称谓特效"] = self._extract_name_only(title_effect)
+            result["施法/攻击特效"] = self._extract_name_only(perform_effect)
             
+            # 处理彩饰-队标（只保留client_type=201的name）
+            filtered_achieve = []
+            if achieve_show:
+                for item in achieve_show:
+                    if isinstance(item, dict) and item.get('client_type') == 201:
+                        name = self._extract_name_only(item)
+                        if name:
+                            filtered_achieve.append(name)
+            result["彩饰-队标"] = filtered_achieve
+
             return result
             
         except Exception as e:
@@ -264,9 +252,11 @@ class ExAvtParser:
     def _empty_clothes_info(self):
         """返回空的锦衣信息结构"""
         return {
-            "总数": 0,
-            "锦衣数量": 0,
-            "锦衣列表": []
+            "锦衣":[],
+            "冒泡框":[],
+            "头像框":[],
+            "称谓特效":[],
+            "施法/攻击特效":[]
         }
     
     @lru_cache(maxsize=1)

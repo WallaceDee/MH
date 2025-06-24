@@ -12,6 +12,18 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 import sqlite3
 
+# 导入CBG链接生成器
+try:
+    from ..utils.cbg_link_generator import CBGLinkGenerator
+except ImportError:
+    try:
+        from utils.cbg_link_generator import CBGLinkGenerator
+    except ImportError:
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+        from cbg_link_generator import CBGLinkGenerator
+
 class CharacterAPI:
     def __init__(self):
         self.data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
@@ -56,7 +68,7 @@ class CharacterAPI:
             str: 数据库文件路径
         """
         year, month = self._validate_year_month(year, month)
-        return os.path.join(self.data_dir, f'cbg_data_{year}{month:02d}.db')
+        return os.path.join(self.data_dir, f'cbg_characters_{year}{month:02d}.db')
     
     def get_characters(self, page: int = 1, page_size: int = 10, year: Optional[int] = None, month: Optional[int] = None,
                       level_min: Optional[int] = None, level_max: Optional[int] = None,
@@ -361,19 +373,6 @@ class CharacterAPI:
             # 创建JSON导出器
             json_exporter = CBGJSONExporter(db_file, temp_dir)
             
-            # 生成CBG链接的回调函数
-            def generate_cbg_link(equip_id):
-                if not equip_id:
-                    return None
-                try:
-                    if '-' in str(equip_id):
-                        server_id = str(equip_id).split('-')[1]
-                    else:
-                        server_id = str(equip_id)[:12]
-                    return f"https://xyq.cbg.163.com/equip?s={server_id}&eid={equip_id}"
-                except Exception:
-                    return None
-            
             # 如果需要过滤数据，先获取符合条件的数据
             if any(v is not None for v in kwargs.values() if v != export_all):
                 # 有过滤条件，使用现有的查询逻辑获取数据
@@ -383,14 +382,14 @@ class CharacterAPI:
                 
                 # 临时替换JSON导出器的准备数据方法
                 original_prepare = json_exporter.prepare_export_data
-                json_exporter.prepare_export_data = lambda generate_link_callback=None: filtered_data
+                json_exporter.prepare_export_data = lambda: filtered_data
             
             # 生成时间戳文件名
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             filename = f'cbg_characters_{year}{month:02d}_{timestamp}.json'
             
             # 执行导出
-            json_path = json_exporter.export_to_json(filename, generate_cbg_link, pretty=True)
+            json_path = json_exporter.export_to_json(filename, pretty=True)
             
             return json_path
             
@@ -544,21 +543,8 @@ class CharacterAPI:
             # 创建JSON导出器
             json_exporter = CBGJSONExporter(db_file, temp_dir)
             
-            # 生成CBG链接的回调函数
-            def generate_cbg_link(equip_id):
-                if not equip_id:
-                    return None
-                try:
-                    if '-' in str(equip_id):
-                        server_id = str(equip_id).split('-')[1]
-                    else:
-                        server_id = str(equip_id)[:12]
-                    return f"https://xyq.cbg.163.com/equip?s={server_id}&eid={equip_id}"
-                except Exception:
-                    return None
-            
             # 格式化单个角色数据
-            formatted_data = json_exporter.format_export_data([character_data], generate_cbg_link)
+            formatted_data = json_exporter.format_export_data([character_data])
             
             if not formatted_data:
                 return None

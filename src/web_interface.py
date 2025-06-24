@@ -460,6 +460,159 @@ def export_single_character_json():
             "message": "导出单个角色JSON文件失败"
         }), 500
 
+@app.route('/api/equipments')
+def get_equipments():
+    """获取装备列表（分页）"""
+    try:
+        # 获取查询参数
+        page = request.args.get('page', 1, type=int)
+        page_size = request.args.get('page_size', 10, type=int)
+        year = request.args.get('year', type=int)
+        month = request.args.get('month', type=int)
+        
+        # 装备基本参数
+        level_min = request.args.get('level_min', type=int)
+        level_max = request.args.get('level_max', type=int)
+        price_min = request.args.get('price_min', type=int)
+        price_max = request.args.get('price_max', type=int)
+        
+        # 新增筛选参数
+        # 装备类型（多选）
+        equip_type = request.args.getlist('equip_type') or request.args.getlist('equip_type[]')
+        
+        # 特技（多选）
+        equip_special_skills = request.args.getlist('equip_special_skills') or request.args.getlist('equip_special_skills[]')
+        
+        # 特效（多选）
+        equip_special_effect = request.args.getlist('equip_special_effect') or request.args.getlist('equip_special_effect[]')
+        
+        # 套装参数（级联选择器处理后的不同类型）
+        suit_effect = request.args.get('suit_effect', type=str)
+        suit_added_status = request.args.get('suit_added_status', type=str)
+        suit_transform_skills = request.args.get('suit_transform_skills', type=str)
+        suit_transform_charms = request.args.get('suit_transform_charms', type=str)
+        
+        # 宝石参数
+        gem_value = request.args.get('gem_value', type=str)
+        gem_level = request.args.get('gem_level', type=int)
+        
+        # 排序参数
+        sort_by = request.args.get('sort_by', type=str)
+        sort_order = request.args.get('sort_order', type=str)
+        
+        # 调用API获取数据
+        from src.api.equipment_api import EquipmentAPI
+        api = EquipmentAPI()
+        result = api.get_equipments(
+            page=page,
+            page_size=page_size,
+            year=year,
+            month=month,
+            level_min=level_min,
+            level_max=level_max,
+            price_min=price_min,
+            price_max=price_max,
+            equip_type=equip_type if equip_type else None,
+            equip_special_skills=equip_special_skills if equip_special_skills else None,
+            equip_special_effect=equip_special_effect if equip_special_effect else None,
+            suit_effect=suit_effect,
+            suit_added_status=suit_added_status,
+            suit_transform_skills=suit_transform_skills,
+            suit_transform_charms=suit_transform_charms,
+            gem_value=gem_value,
+            gem_level=gem_level,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+        
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "获取装备列表失败"
+        }), 500
+
+@app.route('/api/equipments/export/json')
+def export_equipments_json():
+    """导出装备数据为JSON文件"""
+    try:
+        # 获取所有查询参数（与get_equipments相同）
+        year = request.args.get('year', type=int)
+        month = request.args.get('month', type=int)
+        level_min = request.args.get('level_min', type=int)
+        level_max = request.args.get('level_max', type=int)
+        price_min = request.args.get('price_min', type=int)
+        price_max = request.args.get('price_max', type=int)
+        
+        # 排序参数
+        sort_by = request.args.get('sort_by', type=str)
+        sort_order = request.args.get('sort_order', type=str)
+        
+        # 导出参数
+        export_all = request.args.get('export_all', 'false').lower() == 'true'
+        
+        # 调用导出API
+        from src.api.equipment_api import EquipmentAPI
+        api = EquipmentAPI()
+        
+        # 注意：当前EquipmentAPI没有export_equipments_json方法，需要实现或者调用get_equipments然后手动导出
+        # 这里暂时返回错误信息，提示需要实现export_equipments_json方法
+        return jsonify({
+            "error": "export_equipments_json方法尚未实现",
+            "message": "装备导出功能还需要完善"
+        }), 501
+        
+        if json_path and os.path.exists(json_path):
+            return send_file(json_path, as_attachment=True, download_name=os.path.basename(json_path))
+        else:
+            return jsonify({
+                "error": "导出失败，没有找到匹配的数据或生成文件失败"
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "导出装备JSON文件失败"
+        }), 500
+
+@app.route('/api/equipments/export/single/json')
+def export_single_equipment_json():
+    """导出单个装备数据为JSON文件"""
+    try:
+        # 获取参数
+        year = request.args.get('year', type=int)
+        month = request.args.get('month', type=int)
+        eid = request.args.get('eid')
+        
+        if not eid:
+            return jsonify({
+                "error": "缺少eid参数"
+            }), 400
+        
+        # 调用API导出单个装备
+        from src.api.equipment_api import EquipmentAPI
+        api = EquipmentAPI()
+        
+        # 注意：当前EquipmentAPI没有export_single_equipment_json方法，需要实现
+        # 这里暂时返回错误信息，提示需要实现该方法
+        return jsonify({
+            "error": "export_single_equipment_json方法尚未实现",
+            "message": "单个装备导出功能还需要完善"
+        }), 501
+        
+        if json_path and os.path.exists(json_path):
+            return send_file(json_path, as_attachment=True, download_name=os.path.basename(json_path))
+        else:
+            return jsonify({
+                "error": "导出失败，没有找到匹配的装备数据"
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "导出单个装备JSON文件失败"
+        }), 500
+
 def main():
     """启动API服务器"""
     print("🌐 CBG爬虫API服务器启动中...")
