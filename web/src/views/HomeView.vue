@@ -172,7 +172,7 @@ export default {
       if (this.isRunning) return
       
       try {
-        const response = await this.$http.post('/api/start_basic_spider', {
+        const response = await this.$http.post('/api/spider/start_basic_spider', {
           pages: this.basicForm.pages,
           export_excel: this.basicForm.exports.includes('excel'),
           export_json: this.basicForm.exports.includes('json')
@@ -193,7 +193,7 @@ export default {
       if (this.isRunning) return
       
       try {
-        const response = await this.$http.post('/api/start_proxy_spider', {
+        const response = await this.$http.post('/api/spider/start_proxy_spider', {
           pages: this.proxyForm.pages
         })
         
@@ -212,7 +212,7 @@ export default {
       if (this.isRunning) return
       
       try {
-        const response = await this.$http.post('/api/manage_proxies')
+        const response = await this.$http.post('/api/spider/manage_proxies')
         
         if (response.data.error) {
           this.$message.error(response.data.error)
@@ -232,7 +232,7 @@ export default {
 
     async updateStatus() {
       try {
-        const response = await this.$http.get('/api/status')
+        const response = await this.$http.get('/api/spider/status')
         this.taskStatus = response.data
         
         this.isRunning = this.taskStatus.status === 'running'
@@ -251,7 +251,7 @@ export default {
     async refreshItems() {
       this.itemsLoading = true
       try {
-        const response = await this.$http.get('/api/files')
+        const response = await this.$http.get('/api/spider/files')
         this.items = response.data.items || []
       } catch (error) {
         this.$message.error('获取列表失败: ' + error.message)
@@ -263,7 +263,7 @@ export default {
     async loadSystemInfo() {
       this.systemInfoLoading = true
       try {
-        const response = await this.$http.get('/api/system_info')
+        const response = await this.$http.get('/api/spider/system_info')
         this.systemInfo = response.data
       } catch (error) {
         this.$message.error('获取系统信息失败: ' + error.message)
@@ -273,7 +273,7 @@ export default {
     },
 
     downloadFile(filename) {
-      window.open(`${this.$http.defaults.baseURL}/api/download/${filename}`)
+      window.open(`${this.$http.defaults.baseURL}/api/spider/download/${filename}`)
     },
 
     formatFileSize(bytes) {

@@ -1,78 +1,78 @@
 // 自动生成的登录信息文件
-// 生成时间: 1380517.1060006
+// 生成时间: 1579607.781
 
 window.LoginInfo = {
   "area_id": 43,
-  "uid": 1635401,
+  "uid": 1646709,
   "server_name": "进贤门",
   "server_type": 3,
-  "roleid": "23387570",
+  "roleid": "23388977",
   "area_name": "广东2区",
-  "block_urs": "ch****01@163.com",
+  "block_urs": "ch****02@163.com",
   "user_icon": "2",
-  "user_msg_num": 5,
-  "safe_code": "rbdtrkUk",
+  "user_msg_num": 4,
+  "safe_code": "mtLgdgK2",
   "user_level": "0",
   "user_roles": {
-    "23157594": {
+    "23157600": {
       "color": "0",
-      "roleid": "23157594",
+      "roleid": "23157600",
       "racename": "人",
-      "grade": 35,
+      "grade": 29,
       "race": "1",
-      "nickname": "热血青年_辉",
+      "nickname": "热血青年_华",
       "icon": 1
     },
-    "23157818": {
+    "23157820": {
       "color": "0",
-      "roleid": "23157818",
+      "roleid": "23157820",
       "racename": "人",
-      "grade": 50,
+      "grade": 51,
       "race": "1",
-      "nickname": "废青华",
+      "nickname": "废青辉",
       "icon": 2
     },
-    "23387570": {
+    "23388977": {
       "color": "0",
-      "roleid": "23387570",
+      "roleid": "23388977",
       "racename": "人",
       "grade": 0,
       "race": "1",
-      "nickname": "☆柏μ纬灏3",
+      "nickname": "≌崔承煜ㄤ3",
       "icon": 2
     },
-    "23387585": {
+    "23389376": {
       "color": "0",
-      "roleid": "23387585",
+      "roleid": "23389376",
+      "racename": "人",
+      "grade": 8,
+      "race": "1",
+      "nickname": "ю朱迎梦ㄕ3",
+      "icon": 2
+    },
+    "23389404": {
+      "color": "0",
+      "roleid": "23389404",
       "racename": "人",
       "grade": 0,
       "race": "1",
-      "nickname": "Ⅱ商〓奔3",
+      "nickname": "％湛к映秋3",
       "icon": 2
     },
-    "23388090": {
+    "23389467": {
       "color": "0",
-      "roleid": "23388090",
+      "roleid": "23389467",
       "racename": "人",
       "grade": 0,
       "race": "1",
-      "nickname": "℃敖四红≈3",
-      "icon": 2
-    },
-    "23388209": {
-      "color": "0",
-      "roleid": "23388209",
-      "racename": "人",
-      "grade": 0,
-      "race": "1",
-      "nickname": "ǚ阚冰彤∫3",
+      "nickname": "阚γ映秋ㄎ3",
       "icon": 2
     }
   },
   "is_server_open_wallet": true,
-  "urs": "chenguohuacgh001@163.com",
+  "urs": "chenguohuacgh002@163.com",
   "login": true,
-  "nickname": "☆柏μ纬灏3",
+  "nickname": "≌崔承煜ㄤ3",
   "serverid": 77,
   "serversn": 420,
   "pass_mb_check": 1

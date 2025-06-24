@@ -249,7 +249,7 @@ DB_SCHEMA_CONFIG = {
             
             -- 特技和套装
             special_skill INTEGER DEFAULT 0,    -- 特技
-            special_effect INTEGER DEFAULT 0,   -- 特效
+            special_effect TEXT DEFAULT 0,      -- 特效
             suit_skill INTEGER DEFAULT 0,       -- 套装技能
             suit_effect INTEGER DEFAULT 0,      -- 套装效果
             
@@ -480,7 +480,7 @@ DB_SCHEMA_CONFIG = {
             
             -- 特技和套装
             special_skill INTEGER DEFAULT 0,    -- 特技
-            special_effect TEXT,                 -- 特效（JSON格式）
+            special_effect TEXT,                -- 特效（JSON格式）
             suit_skill INTEGER DEFAULT 0,       -- 套装技能
             suit_effect INTEGER DEFAULT 0,      -- 套装效果
             

@@ -565,32 +565,32 @@ class MarketAnchorEValuator:
             anchor_prices = [anchor['price'] for anchor in anchors]
             anchor_similarities = [anchor['similarity'] for anchor in anchors]
             
-            # 根据策略计算估价
+                        # 根据策略计算估价
             if strategy == 'competitive':
                 # 竞争性定价：25%分位数 × 0.9
-                estimated_price = np.percentile(anchor_prices, 25) * 0.9
+                estimated_price = float(np.percentile(anchor_prices, 25) * 0.9)
             elif strategy == 'premium':
                 # 溢价定价：75%分位数 × 0.95 (下调系数，避免过度溢价)
-                estimated_price = np.percentile(anchor_prices, 75) * 0.7
+                estimated_price = float(np.percentile(anchor_prices, 75) * 0.7)
             else:  # fair_value
                 # 公允价值：相似度加权中位数 × 0.93 (稍微下调，更贴近成交价)
                 base_price = self._weighted_median(anchor_prices, anchor_similarities)
-                estimated_price = base_price * 0.7
-            
+                estimated_price = float(base_price * 0.7)
+
             # 计算置信度
             confidence = self._calculate_confidence(anchors, len(anchor_prices))
-            
+
             # 构建结果
             result = {
                 'estimated_price': round(estimated_price, 1),
                 'anchor_count': len(anchors),
                 'price_range': {
-                    'min': min(anchor_prices),
-                    'max': max(anchor_prices),
-                    'mean': np.mean(anchor_prices),
-                    'median': np.median(anchor_prices)
+                    'min': float(min(anchor_prices)),
+                    'max': float(max(anchor_prices)),
+                    'mean': float(np.mean(anchor_prices)),
+                    'median': float(np.median(anchor_prices))
                 },
-                'confidence': confidence,
+                'confidence': float(confidence),
                 'strategy_used': strategy,
                 'fallback_used': False,
                 'anchors': anchors[:5]  # 返回前5个最相似的锚点用于展示
@@ -646,23 +646,23 @@ class MarketAnchorEValuator:
         # 基础置信度基于锚点数量
         base_confidence = min(anchor_count / 20.0, 1.0)  # 20个锚点达到满分
         
-        # 相似度加成
+                # 相似度加成
         if anchors:
-            avg_similarity = np.mean([anchor['similarity'] for anchor in anchors])
+            avg_similarity = float(np.mean([anchor['similarity'] for anchor in anchors]))
             similarity_bonus = avg_similarity * 0.3
         else:
             similarity_bonus = 0
-        
+
         # 价格稳定性加成
         if len(anchors) >= 3:
             prices = [anchor['price'] for anchor in anchors]
-            price_cv = np.std(prices) / np.mean(prices) if np.mean(prices) > 0 else 1.0
+            price_cv = float(np.std(prices) / np.mean(prices)) if np.mean(prices) > 0 else 1.0
             stability_bonus = max(0, (0.5 - price_cv) * 0.4)  # CV低于0.5时有加成
         else:
             stability_bonus = 0
-        
+
         final_confidence = min(base_confidence + similarity_bonus + stability_bonus, 1.0)
-        return final_confidence
+        return float(final_confidence)
     
   
     
@@ -701,11 +701,11 @@ class MarketAnchorEValuator:
             similarities = [anchor['similarity'] for anchor in anchors]
             
             # 计算统计量
-            min_price = min(prices)
-            max_price = max(prices)
-            median_price = np.median(prices)
-            percentile_25 = np.percentile(prices, 25)
-            percentile_75 = np.percentile(prices, 75)
+            min_price = float(min(prices))
+            max_price = float(max(prices))
+            median_price = float(np.median(prices))
+            percentile_25 = float(np.percentile(prices, 25))
+            percentile_75 = float(np.percentile(prices, 75))
             
             # 计算推荐价格
             competitive_result = self.calculate_value(target_features, 'competitive')
@@ -717,11 +717,11 @@ class MarketAnchorEValuator:
             
             # 构建报告
             report = {
-                'min_price': float(min_price),
-                'max_price': float(max_price),
-                'median_price': float(median_price),
-                'percentile_25': float(percentile_25),
-                'percentile_75': float(percentile_75),
+                'min_price': min_price,
+                'max_price': max_price,
+                'median_price': median_price,
+                'percentile_25': percentile_25,
+                'percentile_75': percentile_75,
                 'recommended_competitive': competitive_result['estimated_price'],
                 'recommended_fair': fair_result['estimated_price'],
                 'anchor_count': len(anchors),
@@ -732,10 +732,10 @@ class MarketAnchorEValuator:
                 'anchor_details': [
                     {
                         'equip_id': anchor['equip_id'],
-                        'price': anchor['price'],
-                        'similarity': round(anchor['similarity'], 3),
-                        'level': anchor['features'].get('level', 0),
-                        'cultivation': anchor['features'].get('total_cultivation', 0)
+                        'price': float(anchor['price']),
+                        'similarity': round(float(anchor['similarity']), 3),
+                        'level': int(anchor['features'].get('level', 0)),
+                        'cultivation': int(anchor['features'].get('total_cultivation', 0))
                     }
                     for anchor in anchors[:10]  # 返回前10个详细信息
                 ]

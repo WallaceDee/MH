@@ -478,7 +478,7 @@ def get_equipments():
         
         # 新增筛选参数
         # 装备类型（多选）
-        equip_type = request.args.getlist('equip_type') or request.args.getlist('equip_type[]')
+        kindid = request.args.getlist('kindid') or request.args.getlist('kindid[]')
         
         # 特技（多选）
         equip_special_skills = request.args.getlist('equip_special_skills') or request.args.getlist('equip_special_skills[]')
@@ -512,7 +512,7 @@ def get_equipments():
             level_max=level_max,
             price_min=price_min,
             price_max=price_max,
-            equip_type=equip_type if equip_type else None,
+            kindid=kindid if kindid else None,
             equip_special_skills=equip_special_skills if equip_special_skills else None,
             equip_special_effect=equip_special_effect if equip_special_effect else None,
             suit_effect=suit_effect,
@@ -611,6 +611,90 @@ def export_single_equipment_json():
         return jsonify({
             "error": str(e),
             "message": "导出单个装备JSON文件失败"
+        }), 500
+
+@app.route('/api/equipments/similar', methods=['POST'])
+def find_similar_equipments():
+    """查找相似装备"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({
+                "error": "请求数据不能为空"
+            }), 400
+        
+        equipment_data = data.get('equipment_data')
+        similarity_threshold = data.get('similarity_threshold', 0.7)
+        max_anchors = data.get('max_anchors', 30)
+        
+        if not equipment_data:
+            return jsonify({
+                "error": "缺少equipment_data参数"
+            }), 400
+        
+        # 调用装备API的锚点查找方法
+        from src.api.equipment_api import EquipmentAPI
+        api = EquipmentAPI()
+        result = api.find_equipment_anchors(
+            equipment_data=equipment_data,
+            similarity_threshold=similarity_threshold,
+            max_anchors=max_anchors
+        )
+        
+        # 包装返回格式以保持与其他API一致
+        if "error" in result:
+            return jsonify(result)
+        else:
+            return jsonify({
+                "data": result,
+                "success": True
+            })
+        
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "查找相似装备失败"
+        }), 500
+
+@app.route('/api/equipments/valuation', methods=['POST'])
+def get_equipment_valuation():
+    """获取装备估价"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({
+                "error": "请求数据不能为空"
+            }), 400
+        
+        equipment_data = data.get('equipment_data')
+        strategy = data.get('strategy', 'fair_value')
+        
+        if not equipment_data:
+            return jsonify({
+                "error": "缺少equipment_data参数"
+            }), 400
+        
+        # 调用装备API的估价方法
+        from src.api.equipment_api import EquipmentAPI
+        api = EquipmentAPI()
+        result = api.get_equipment_valuation(
+            equipment_data=equipment_data,
+            strategy=strategy
+        )
+        
+        # 包装返回格式以保持与其他API一致
+        if "error" in result:
+            return jsonify(result)
+        else:
+            return jsonify({
+                "data": result,
+                "success": True
+            })
+        
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "装备估价失败"
         }), 500
 
 def main():

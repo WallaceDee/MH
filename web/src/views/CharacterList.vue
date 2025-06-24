@@ -286,13 +286,14 @@
       <el-table-column label="锦衣祥瑞" width="120">
         <template slot-scope="scope">
           <el-popover placement="top" width="400" trigger="click">
-            <el-button type="text"
-              slot="reference">{{ `${getExAvtJsonDesc(scope.row.ex_avt_json).length}件锦衣/${getExAvtJsonDesc(scope.row.huge_horse_json).length}只祥瑞` }}</el-button>
+            <el-button type="text" slot="reference">{{
+              `${getExAvtJsonDesc(scope.row.ex_avt_json).length}件锦衣/${getExAvtJsonDesc(scope.row.huge_horse_json).length}只祥瑞`
+              }}</el-button>
             <el-descriptions :column="1" border>
               <el-descriptions-item label="锦衣">{{ getExAvtJsonDesc(scope.row.ex_avt_json).join('、')
-                }}</el-descriptions-item>
+              }}</el-descriptions-item>
               <el-descriptions-item label="祥瑞"> {{ getExAvtJsonDesc(scope.row.huge_horse_json).join('、')
-                }}</el-descriptions-item>
+              }}</el-descriptions-item>
             </el-descriptions>
           </el-popover>
         </template>
@@ -437,7 +438,7 @@ export default {
     }
   },
 
-  created() {
+  mounted() {
     this.fetchData()
   },
 
@@ -472,112 +473,58 @@ export default {
       this.loading = true
       try {
         const [year, month] = this.searchForm.selectedDate.split('-')
-        const params = new URLSearchParams({
+        const params = {
           page: this.currentPage,
           page_size: this.pageSize,
           year,
           month
-        })
+        }
 
+        // 添加搜索条件
         if (this.searchForm.level_min) {
-          params.append('level_min', this.searchForm.level_min)
+          params.level_min = this.searchForm.level_min
         }
         if (this.searchForm.level_max) {
-          params.append('level_max', this.searchForm.level_max)
+          params.level_max = this.searchForm.level_max
         }
         if (this.searchForm.school_skill_num) {
-          params.append('school_skill_num', this.searchForm.school_skill_num)
+          params.school_skill_num = this.searchForm.school_skill_num
         }
         if (this.searchForm.school_skill_level) {
-          params.append('school_skill_level', this.searchForm.school_skill_level)
+          params.school_skill_level = this.searchForm.school_skill_level
         }
         // 角色修炼参数
-        if (this.searchForm.expt_gongji) params.append('expt_gongji', this.searchForm.expt_gongji)
-        if (this.searchForm.expt_fangyu) params.append('expt_fangyu', this.searchForm.expt_fangyu)
-        if (this.searchForm.expt_fashu) params.append('expt_fashu', this.searchForm.expt_fashu)
-        if (this.searchForm.expt_kangfa) params.append('expt_kangfa', this.searchForm.expt_kangfa)
-        if (this.searchForm.expt_total) params.append('expt_total', this.searchForm.expt_total)
-        if (this.searchForm.max_expt_gongji)
-          params.append('max_expt_gongji', this.searchForm.max_expt_gongji)
-        if (this.searchForm.max_expt_fangyu)
-          params.append('max_expt_fangyu', this.searchForm.max_expt_fangyu)
-        if (this.searchForm.max_expt_fashu)
-          params.append('max_expt_fashu', this.searchForm.max_expt_fashu)
-        if (this.searchForm.max_expt_kangfa)
-          params.append('max_expt_kangfa', this.searchForm.max_expt_kangfa)
-        if (this.searchForm.expt_lieshu) params.append('expt_lieshu', this.searchForm.expt_lieshu)
+        if (this.searchForm.expt_gongji) params.expt_gongji = this.searchForm.expt_gongji
+        if (this.searchForm.expt_fangyu) params.expt_fangyu = this.searchForm.expt_fangyu
+        if (this.searchForm.expt_fashu) params.expt_fashu = this.searchForm.expt_fashu
+        if (this.searchForm.expt_kangfa) params.expt_kangfa = this.searchForm.expt_kangfa
+        if (this.searchForm.expt_total) params.expt_total = this.searchForm.expt_total
+        if (this.searchForm.max_expt_gongji) params.max_expt_gongji = this.searchForm.max_expt_gongji
+        if (this.searchForm.max_expt_fangyu) params.max_expt_fangyu = this.searchForm.max_expt_fangyu
+        if (this.searchForm.max_expt_fashu) params.max_expt_fashu = this.searchForm.max_expt_fashu
+        if (this.searchForm.max_expt_kangfa) params.max_expt_kangfa = this.searchForm.max_expt_kangfa
+        if (this.searchForm.expt_lieshu) params.expt_lieshu = this.searchForm.expt_lieshu
         // 召唤兽修炼参数
-        if (this.searchForm.bb_expt_gongji)
-          params.append('bb_expt_gongji', this.searchForm.bb_expt_gongji)
-        if (this.searchForm.bb_expt_fangyu)
-          params.append('bb_expt_fangyu', this.searchForm.bb_expt_fangyu)
-        if (this.searchForm.bb_expt_fashu)
-          params.append('bb_expt_fashu', this.searchForm.bb_expt_fashu)
-        if (this.searchForm.bb_expt_kangfa)
-          params.append('bb_expt_kangfa', this.searchForm.bb_expt_kangfa)
-        if (this.searchForm.bb_expt_total)
-          params.append('bb_expt_total', this.searchForm.bb_expt_total)
-        if (this.searchForm.skill_drive_pet)
-          params.append('skill_drive_pet', this.searchForm.skill_drive_pet)
-        if (this.searchForm.skill_qiang_shen)
-          params.append('skill_qiang_shen', this.searchForm.skill_qiang_shen)
-        if (this.searchForm.skill_qiang_zhuang)
-          params.append('skill_qiang_zhuang', this.searchForm.skill_qiang_zhuang)
-        if (this.searchForm.skill_shensu)
-          params.append('skill_shensu', this.searchForm.skill_shensu)
-        if (this.searchForm.skill_ming_xiang)
-          params.append('skill_ming_xiang', this.searchForm.skill_ming_xiang)
-        if (this.searchForm.skill_anqi) params.append('skill_anqi', this.searchForm.skill_anqi)
-        if (this.searchForm.skill_dazao) params.append('skill_dazao', this.searchForm.skill_dazao)
-        if (this.searchForm.skill_caifeng)
-          params.append('skill_caifeng', this.searchForm.skill_caifeng)
-        if (this.searchForm.skill_qiaojiang)
-          params.append('skill_qiaojiang', this.searchForm.skill_qiaojiang)
-        if (this.searchForm.skill_lianjin)
-          params.append('skill_lianjin', this.searchForm.skill_lianjin)
-        if (this.searchForm.skill_yangsheng)
-          params.append('skill_yangsheng', this.searchForm.skill_yangsheng)
-        if (this.searchForm.skill_pengren)
-          params.append('skill_pengren', this.searchForm.skill_pengren)
-        if (this.searchForm.skill_zhongyao)
-          params.append('skill_zhongyao', this.searchForm.skill_zhongyao)
-        if (this.searchForm.skill_lingshi)
-          params.append('skill_lingshi', this.searchForm.skill_lingshi)
-        if (this.searchForm.skill_jianshen)
-          params.append('skill_jianshen', this.searchForm.skill_jianshen)
-        if (this.searchForm.skill_taoli) params.append('skill_taoli', this.searchForm.skill_taoli)
-        if (this.searchForm.skill_zhuibu)
-          params.append('skill_zhuibu', this.searchForm.skill_zhuibu)
-        if (this.searchForm.skill_ronglian)
-          params.append('skill_ronglian', this.searchForm.skill_ronglian)
-        if (this.searchForm.skill_cuiling)
-          params.append('skill_cuiling', this.searchForm.skill_cuiling)
-        if (this.searchForm.skill_wind_sense)
-          params.append('skill_wind_sense', this.searchForm.skill_wind_sense)
-        if (this.searchForm.skill_rain_sense)
-          params.append('skill_rain_sense', this.searchForm.skill_rain_sense)
-        if (this.searchForm.skill_snow_sense)
-          params.append('skill_snow_sense', this.searchForm.skill_snow_sense)
-        if (this.searchForm.equip_num !== undefined)
-          params.append('equip_num', this.searchForm.equip_num)
-        if (this.searchForm.pet_num !== undefined)
-          params.append('pet_num', this.searchForm.pet_num)
-        if (this.searchForm.pet_num_level !== undefined)
-          params.append('pet_num_level', this.searchForm.pet_num_level)
-        if (this.searchForm.sort_by) {
-          params.append('sort_by', this.searchForm.sort_by)
-          params.append('sort_order', this.searchForm.sort_order)
-        }
-        const response = await fetch(`/api/characters?${params.toString()}`)
-        const data = await response.json()
+        if (this.searchForm.bb_expt_gongji) params.bb_expt_gongji = this.searchForm.bb_expt_gongji
+        if (this.searchForm.bb_expt_fangyu) params.bb_expt_fangyu = this.searchForm.bb_expt_fangyu
+        if (this.searchForm.bb_expt_fashu) params.bb_expt_fashu = this.searchForm.bb_expt_fashu
+        if (this.searchForm.bb_expt_kangfa) params.bb_expt_kangfa = this.searchForm.bb_expt_kangfa
+        if (this.searchForm.bb_expt_total) params.bb_expt_total = this.searchForm.bb_expt_total
+        if (this.searchForm.skill_drive_pet) params.skill_drive_pet = this.searchForm.skill_drive_pet
+        // 排序参数
+        if (this.searchForm.sort_by) params.sort_by = this.searchForm.sort_by
+        if (this.searchForm.sort_order) params.sort_order = this.searchForm.sort_order
 
-        if (data.error) {
-          this.$message.error(data.error)
-          return
-        }
+        // 使用新的API
+        const response = await this.$api.character.getCharacterList(params)
 
-        this.characterList = data.data
-        this.total = data.total
+        if (response.code === 200) {
+          // 现在直接使用response.data和response.items
+          this.characterList = response.data.data || []
+          this.total = response.data.total || 0
+        } else {
+          this.$message.error(response.message || '获取数据失败')
+        }
       } catch (error) {
         this.$message.error('获取数据失败：' + error.message)
       } finally {
@@ -713,126 +660,50 @@ export default {
       this.exportLoading = true
       try {
         const [year, month] = this.searchForm.selectedDate.split('-')
-        const params = new URLSearchParams({
+        const data = {
           year,
           month,
-          export_all: 'true' // 导出所有匹配的数据，不分页
-        })
-
-        // 添加所有搜索条件参数
-        if (this.searchForm.level_min) {
-          params.append('level_min', this.searchForm.level_min)
-        }
-        if (this.searchForm.level_max) {
-          params.append('level_max', this.searchForm.level_max)
-        }
-        if (this.searchForm.school_skill_num) {
-          params.append('school_skill_num', this.searchForm.school_skill_num)
-        }
-        if (this.searchForm.school_skill_level) {
-          params.append('school_skill_level', this.searchForm.school_skill_level)
-        }
-        // 角色修炼参数
-        if (this.searchForm.expt_gongji) params.append('expt_gongji', this.searchForm.expt_gongji)
-        if (this.searchForm.expt_fangyu) params.append('expt_fangyu', this.searchForm.expt_fangyu)
-        if (this.searchForm.expt_fashu) params.append('expt_fashu', this.searchForm.expt_fashu)
-        if (this.searchForm.expt_kangfa) params.append('expt_kangfa', this.searchForm.expt_kangfa)
-        if (this.searchForm.expt_total) params.append('expt_total', this.searchForm.expt_total)
-        if (this.searchForm.max_expt_gongji)
-          params.append('max_expt_gongji', this.searchForm.max_expt_gongji)
-        if (this.searchForm.max_expt_fangyu)
-          params.append('max_expt_fangyu', this.searchForm.max_expt_fangyu)
-        if (this.searchForm.max_expt_fashu)
-          params.append('max_expt_fashu', this.searchForm.max_expt_fashu)
-        if (this.searchForm.max_expt_kangfa)
-          params.append('max_expt_kangfa', this.searchForm.max_expt_kangfa)
-        if (this.searchForm.expt_lieshu) params.append('expt_lieshu', this.searchForm.expt_lieshu)
-        // 召唤兽修炼参数
-        if (this.searchForm.bb_expt_gongji)
-          params.append('bb_expt_gongji', this.searchForm.bb_expt_gongji)
-        if (this.searchForm.bb_expt_fangyu)
-          params.append('bb_expt_fangyu', this.searchForm.bb_expt_fangyu)
-        if (this.searchForm.bb_expt_fashu)
-          params.append('bb_expt_fashu', this.searchForm.bb_expt_fashu)
-        if (this.searchForm.bb_expt_kangfa)
-          params.append('bb_expt_kangfa', this.searchForm.bb_expt_kangfa)
-        if (this.searchForm.bb_expt_total)
-          params.append('bb_expt_total', this.searchForm.bb_expt_total)
-        if (this.searchForm.skill_drive_pet)
-          params.append('skill_drive_pet', this.searchForm.skill_drive_pet)
-        // 生活技能参数
-        if (this.searchForm.skill_qiang_shen)
-          params.append('skill_qiang_shen', this.searchForm.skill_qiang_shen)
-        if (this.searchForm.skill_qiang_zhuang)
-          params.append('skill_qiang_zhuang', this.searchForm.skill_qiang_zhuang)
-        if (this.searchForm.skill_shensu)
-          params.append('skill_shensu', this.searchForm.skill_shensu)
-        if (this.searchForm.skill_ming_xiang)
-          params.append('skill_ming_xiang', this.searchForm.skill_ming_xiang)
-        if (this.searchForm.skill_anqi) params.append('skill_anqi', this.searchForm.skill_anqi)
-        if (this.searchForm.skill_dazao) params.append('skill_dazao', this.searchForm.skill_dazao)
-        if (this.searchForm.skill_caifeng)
-          params.append('skill_caifeng', this.searchForm.skill_caifeng)
-        if (this.searchForm.skill_qiaojiang)
-          params.append('skill_qiaojiang', this.searchForm.skill_qiaojiang)
-        if (this.searchForm.skill_lianjin)
-          params.append('skill_lianjin', this.searchForm.skill_lianjin)
-        if (this.searchForm.skill_yangsheng)
-          params.append('skill_yangsheng', this.searchForm.skill_yangsheng)
-        if (this.searchForm.skill_pengren)
-          params.append('skill_pengren', this.searchForm.skill_pengren)
-        if (this.searchForm.skill_zhongyao)
-          params.append('skill_zhongyao', this.searchForm.skill_zhongyao)
-        if (this.searchForm.skill_lingshi)
-          params.append('skill_lingshi', this.searchForm.skill_lingshi)
-        if (this.searchForm.skill_jianshen)
-          params.append('skill_jianshen', this.searchForm.skill_jianshen)
-        if (this.searchForm.skill_taoli) params.append('skill_taoli', this.searchForm.skill_taoli)
-        if (this.searchForm.skill_zhuibu)
-          params.append('skill_zhuibu', this.searchForm.skill_zhuibu)
-        if (this.searchForm.skill_ronglian)
-          params.append('skill_ronglian', this.searchForm.skill_ronglian)
-        if (this.searchForm.skill_cuiling)
-          params.append('skill_cuiling', this.searchForm.skill_cuiling)
-        if (this.searchForm.skill_wind_sense)
-          params.append('skill_wind_sense', this.searchForm.skill_wind_sense)
-        if (this.searchForm.skill_rain_sense)
-          params.append('skill_rain_sense', this.searchForm.skill_rain_sense)
-        if (this.searchForm.skill_snow_sense)
-          params.append('skill_snow_sense', this.searchForm.skill_snow_sense)
-        // 其他参数
-        if (this.searchForm.equip_num !== undefined)
-          params.append('equip_num', this.searchForm.equip_num)
-        if (this.searchForm.pet_num !== undefined)
-          params.append('pet_num', this.searchForm.pet_num)
-        if (this.searchForm.pet_num_level !== undefined)
-          params.append('pet_num_level', this.searchForm.pet_num_level)
-        if (this.searchForm.sort_by) {
-          params.append('sort_by', this.searchForm.sort_by)
-          params.append('sort_order', this.searchForm.sort_order)
+          export_all: true, // 导出所有匹配的数据，不分页
+          // 添加所有搜索条件参数
+          ...(this.searchForm.level_min && { level_min: this.searchForm.level_min }),
+          ...(this.searchForm.level_max && { level_max: this.searchForm.level_max }),
+          ...(this.searchForm.school_skill_num && { school_skill_num: this.searchForm.school_skill_num }),
+          ...(this.searchForm.school_skill_level && { school_skill_level: this.searchForm.school_skill_level }),
+          // 角色修炼参数
+          ...(this.searchForm.expt_gongji && { expt_gongji: this.searchForm.expt_gongji }),
+          ...(this.searchForm.expt_fangyu && { expt_fangyu: this.searchForm.expt_fangyu }),
+          ...(this.searchForm.expt_fashu && { expt_fashu: this.searchForm.expt_fashu }),
+          ...(this.searchForm.expt_kangfa && { expt_kangfa: this.searchForm.expt_kangfa }),
+          ...(this.searchForm.expt_total && { expt_total: this.searchForm.expt_total }),
+          ...(this.searchForm.max_expt_gongji && { max_expt_gongji: this.searchForm.max_expt_gongji }),
+          ...(this.searchForm.max_expt_fangyu && { max_expt_fangyu: this.searchForm.max_expt_fangyu }),
+          ...(this.searchForm.max_expt_fashu && { max_expt_fashu: this.searchForm.max_expt_fashu }),
+          ...(this.searchForm.max_expt_kangfa && { max_expt_kangfa: this.searchForm.max_expt_kangfa }),
+          ...(this.searchForm.expt_lieshu && { expt_lieshu: this.searchForm.expt_lieshu }),
+          // 召唤兽修炼参数
+          ...(this.searchForm.bb_expt_gongji && { bb_expt_gongji: this.searchForm.bb_expt_gongji }),
+          ...(this.searchForm.bb_expt_fangyu && { bb_expt_fangyu: this.searchForm.bb_expt_fangyu }),
+          ...(this.searchForm.bb_expt_fashu && { bb_expt_fashu: this.searchForm.bb_expt_fashu }),
+          ...(this.searchForm.bb_expt_kangfa && { bb_expt_kangfa: this.searchForm.bb_expt_kangfa }),
+          ...(this.searchForm.bb_expt_total && { bb_expt_total: this.searchForm.bb_expt_total }),
+          ...(this.searchForm.skill_drive_pet && { skill_drive_pet: this.searchForm.skill_drive_pet }),
+          // 排序参数
+          ...(this.searchForm.sort_by && { sort_by: this.searchForm.sort_by }),
+          ...(this.searchForm.sort_order && { sort_order: this.searchForm.sort_order })
         }
 
-        const response = await fetch(`/api/characters/export/json?${params.toString()}`)
+        // 使用新的API导出
+        const response = await this.$api.character.exportCharactersJson(data)
 
-        if (!response.ok) {
-          throw new Error(`导出失败: ${response.status} ${response.statusText}`)
+        if (response.success) {
+          this.$message({
+            message: 'JSON导出成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$message.error(response.message || '导出失败')
         }
-
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `cbg_characters_${this.searchForm.selectedDate.replace('-', '')}_${new Date().getTime()}.json`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
-
-        this.$message({
-          message: 'JSON导出成功',
-          type: 'success',
-          duration: 2000
-        })
       } catch (error) {
         this.$message.error('导出失败：' + error.message)
       } finally {
@@ -846,39 +717,20 @@ export default {
 
       try {
         const [year, month] = this.searchForm.selectedDate.split('-')
-        const params = new URLSearchParams({
-          year,
-          month,
-          equip_id: character.equip_id
-        })
+        const params = { year, month }
 
-        const response = await fetch(`/api/characters/export/single/json?${params.toString()}`)
+        // 使用新的API导出单个角色
+        const response = await this.$api.character.exportSingleCharacterJson(character.equip_id, params)
 
-        if (!response.ok) {
-          throw new Error(`导出失败: ${response.status} ${response.statusText}`)
+        if (response.success) {
+          this.$message({
+            message: '角色JSON导出成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$message.error(response.message || '导出失败')
         }
-
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-
-        // 使用角色名和服务器名作为文件名
-        const characterName = character.seller_nickname || '未知角色'
-        const serverName = (character.area_name + '_' + character.server_name).replace(/[/\\:*?"<>|]/g, '_')
-        const timestamp = new Date().getTime()
-        link.download = `${characterName}_${serverName}_${timestamp}.json`
-
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
-
-        this.$message({
-          message: '角色JSON导出成功',
-          type: 'success',
-          duration: 2000
-        })
       } catch (error) {
         this.$message.error('导出失败：' + error.message)
       } finally {

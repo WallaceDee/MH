@@ -1,6 +1,8 @@
 {
-  "level_min": 60,
-  "level_max": 160,
-  "server_type": "3",
-  "sum_attr_without_melt": 1
+  "server_id": 77,
+  "areaid": 43,
+  "kindid": "19",
+  "view_loc": "equip_list",
+  "hide_lingshi": 1,
+  "server_name": "进贤门"
 }
