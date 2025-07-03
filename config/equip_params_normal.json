@@ -1,8 +1,10 @@
 {
   "server_id": 77,
   "areaid": 43,
-  "kindid": "19",
-  "view_loc": "equip_list",
-  "hide_lingshi": 1,
-  "server_name": "进贤门"
+  "kindid": "61",
+  "view_loc": "search_cond",
+  "server_name": "进贤门",
+  "price_min":5000,
+  "added_attr_logic": "and",
+  "search_type": "search_lingshi"
 }

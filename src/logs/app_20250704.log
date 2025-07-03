@@ -1,0 +1,29 @@
+2025-07-04 00:16:31,134 - werkzeug - WARNING -  * Debugger is active!
+2025-07-04 00:16:31,145 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-04 00:16:34,944 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-04 00:16:34,944 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-04 00:16:34,953 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-04 00:16:34,953 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-04 00:16:34,969 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-04 00:16:34,969 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-04 00:16:34,983 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-04 00:16:34,983 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-04 00:16:34,985 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-04 00:16:34,985 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-04 00:16:34,986 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-04 00:16:34,986 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-04 00:16:34,988 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-04 00:16:34,988 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-04 00:16:35,049 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-04 00:16:35,049 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-04 00:16:35,062 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-04 00:16:35,062 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-04 00:16:35,064 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-04 00:16:35,064 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-04 00:16:35,080 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-04 00:16:35,080 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-04 00:16:35,086 - werkzeug - INFO - 127.0.0.1 - - [04/Jul/2025 00:16:35] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-04 00:16:37,163 - evaluator.mark_anchor.equip.index - WARNING - 数据处理统计: 总数=7, 成功=6, 失败=0, 排除自身=1
+2025-07-04 00:16:37,165 - evaluator.mark_anchor.equip.index - ERROR - 未找到装备市场锚点
+2025-07-04 00:16:37,166 - werkzeug - INFO - 127.0.0.1 - - [04/Jul/2025 00:16:37] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
+2025-07-04 00:19:12,620 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\mark_anchor\\equip\\plugins\\lingshi_plugin.py', reloading

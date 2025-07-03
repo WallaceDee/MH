@@ -16,7 +16,7 @@ project_root = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(project_root, 'src')
 sys.path.insert(0, src_path)
 
-def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_browser=True, delay_range=(1, 3)):
+def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_browser=True, delay_range=(5, 8)):
     """运行基础爬虫"""
     print("启动基础CBG爬虫...")
     
@@ -228,10 +228,10 @@ def main():
                        help='使用浏览器设置搜索参数 (仅对装备和召唤兽爬虫有效，默认启用)')
     parser.add_argument('--no-browser', action='store_true',
                        help='禁用浏览器模式，使用本地或默认参数')
-    parser.add_argument('--delay-min', type=float, default=1.0,
-                       help='请求延迟最小值(秒) (默认: 1.0)')
-    parser.add_argument('--delay-max', type=float, default=3.0,
-                       help='请求延迟最大值(秒) (默认: 3.0)')
+    parser.add_argument('--delay-min', type=float, default=5.0,
+                       help='请求延迟最小值(秒) (默认: 5.0)')
+    parser.add_argument('--delay-max', type=float, default=8.0,
+                       help='请求延迟最大值(秒) (默认: 8.0)')
     
     args = parser.parse_args()
     

@@ -205,7 +205,8 @@ class EquipmentController:
             logger.error(f"查找装备锚点时出错: {e}")
             return {"error": f"查找装备锚点时出错: {str(e)}"}
     
-    def get_equipment_valuation(self, equipment_data: Dict, strategy: str = 'fair_value') -> Dict:
+    def get_equipment_valuation(self, equipment_data: Dict, strategy: str = 'fair_value', 
+                               similarity_threshold: float = 0.7, max_anchors: int = 30) -> Dict:
         """获取装备估价"""
         try:
             # 验证策略参数
@@ -213,10 +214,20 @@ class EquipmentController:
             if strategy not in valid_strategies:
                 return {"error": f"无效的估价策略: {strategy}，有效策略: {', '.join(valid_strategies)}"}
             
+            # 验证相似度阈值
+            if not 0.0 <= similarity_threshold <= 1.0:
+                return {"error": "相似度阈值必须在0.0-1.0之间"}
+            
+            # 验证最大锚点数量
+            if not 1 <= max_anchors <= 100:
+                return {"error": "最大锚点数量必须在1-100之间"}
+            
             # 调用服务层
             result = self.service.get_equipment_valuation(
                 equipment_data=equipment_data,
-                strategy=strategy
+                strategy=strategy,
+                similarity_threshold=similarity_threshold,
+                max_anchors=max_anchors
             )
             
             return result

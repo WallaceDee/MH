@@ -3,46 +3,125 @@
     <div class="filters">
       <!-- 筛选和搜索表单 -->
       <el-form :inline="true" :model="filters" @submit.native.prevent="fetchEquipments" size="mini">
+        <el-form-item label="选择月份">
+              <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="选择月份"
+                format="yyyy-MM" value-format="yyyy-MM" />
+            </el-form-item>
         <el-form-item label="等级范围">
-          <div style="width:500px;">
-            <el-slider v-model="filters.level_range" range :min="60" :max="160" :step="5" show-input show-input-controls
-              :marks="levelMarks" @change="handleLevelRangeChange" />
+          <div style="width: 500px">
+            <el-slider
+              v-model="filters.level_range"
+              range
+              :min="60"
+              :max="160"
+              :step="5"
+              show-input
+              show-input-controls
+              :marks="levelMarks"
+              @change="handleLevelRangeChange"
+            />
           </div>
         </el-form-item>
         <el-form-item label="价格范围">
-          <el-input-number v-model="filters.price_min" placeholder="最低价格" :min="0" :controls="false"></el-input-number>
+          <el-input-number
+            v-model="filters.price_min"
+            placeholder="最低价格"
+            :min="0"
+            :controls="false"
+          ></el-input-number>
           -
-          <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
+          <el-input-number
+            v-model="filters.price_max"
+            placeholder="最高价格"
+            :min="0"
+            :controls="false"
+          ></el-input-number>
         </el-form-item>
+        -{{ filters.kindid }}-
         <el-form-item label="类型">
-          <el-select v-model="filters.kindid" placeholder="请选择类型" multiple clearable filterable>
-            <el-option v-for="[value, label] in weapon_armors" :key="value" :label="label" :value="value">
+          <el-select
+            v-model="filters.kindid"
+            placeholder="请选择类型"
+            multiple
+            clearable
+            filterable
+          >
+            <el-option
+              v-for="[value, label] in weapon_armors"
+              :key="value"
+              :label="label"
+              :value="value"
+            >
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="特技">
-          <el-select v-model="filters.equip_special_skills" placeholder="请选择特技" multiple clearable filterable>
-            <el-option v-for="[value, label] in equip_special_skills" :key="value" :label="label" :value="value">
+          <el-select
+            v-model="filters.equip_special_skills"
+            placeholder="请选择特技"
+            multiple
+            clearable
+            filterable
+          >
+            <el-option
+              v-for="[value, label] in equip_special_skills"
+              :key="value"
+              :label="label"
+              :value="value"
+            >
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="特效">
-          <el-select v-model="filters.equip_special_effect" placeholder="请选择特效" multiple clearable filterable>
-            <el-option v-for="(label, value) in equip_special_effect" :key="value" :label="label" :value="value">
+          <el-select
+            v-model="filters.equip_special_effect"
+            placeholder="请选择特效"
+            multiple
+            clearable
+            filterable
+          >
+            <el-option
+              v-for="(label, value) in equip_special_effect"
+              :key="value"
+              :label="label"
+              :value="value"
+            >
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="套装">
-          <el-cascader v-model="filters.suit_effect" :options="suitOptions" placeholder="请选择套装效果" separator="" clearable
-            filterable @change="handleSuitChange" />
+          <el-cascader
+            v-model="filters.suit_effect"
+            :options="suitOptions"
+            placeholder="请选择套装效果"
+            separator=""
+            clearable
+            filterable
+            @change="handleSuitChange"
+          />
         </el-form-item>
         <el-form-item label="镶嵌宝石">
-          <el-select v-model="filters.gem_value" placeholder="镶嵌宝石" clearable filterable style="width: 100px">
-            <el-option v-for="(gemName, value) in gems_name" :key="value" :value="value" :label="gemName">
+          <el-select
+            v-model="filters.gem_value"
+            placeholder="镶嵌宝石"
+            clearable
+            filterable
+            style="width: 100px"
+          >
+            <el-option
+              v-for="(gemName, value) in gems_name"
+              :key="value"
+              :value="value"
+              :label="gemName"
+            >
               <el-row type="flex" justify="space-between">
                 <el-col style="width: 34px; height: 34px; margin-right: 10px">
-                  <el-image style="width: 34px; height: 34px; cursor: pointer"
-                    :src="getImageUrl(gem_image[value] + '.gif')" fit="cover" referrerpolicy="no-referrer">
+                  <el-image
+                    style="width: 34px; height: 34px; cursor: pointer"
+                    :src="getImageUrl(gem_image[value] + '.gif')"
+                    fit="cover"
+                    referrerpolicy="no-referrer"
+                  >
                   </el-image>
                 </el-col>
                 <el-col style="width: 100px">
@@ -51,8 +130,16 @@
               </el-row>
             </el-option>
           </el-select>
-          <el-input-number size="mini" v-model="filters.gem_level" :min="0" :max="16" :step="1" style="width: 120px"
-            placeholder="锻练等级" controls-position="right"></el-input-number>
+          <el-input-number
+            size="mini"
+            v-model="filters.gem_level"
+            :min="0"
+            :max="16"
+            :step="1"
+            style="width: 120px"
+            placeholder="锻练等级"
+            controls-position="right"
+          ></el-input-number>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchEquipments">查询</el-button>
@@ -61,33 +148,24 @@
     </div>
 
     <el-table :data="equipments" stripe style="width: 100%" @sort-change="handleSortChange">
+      <el-table-column prop="eid" label="操作" width="100" fixed>
+        <template #default="scope">
+          <el-link :href="getCBGLink(scope.row.eid)" type="danger" target="_blank">藏宝阁</el-link>
+          <el-divider direction="vertical"></el-divider>
+          <similar-equipment-modal
+            :equipment="scope.row"
+            :similar-data="similarEquipments[scope.row.eid]"
+            :valuation="equipmentValuations[scope.row.eid]"
+            :error="similarError[scope.row.eid]"
+            :loading="loadingSimilar[scope.row.eid]"
+            @show="loadSimilarEquipments"
+            @retry="retryWithNewThreshold"
+          />
+        </template>
+      </el-table-column>
       <el-table-column fixed label="装备" width="70">
         <template #default="scope">
-          <el-popover placement="right" :width="450" trigger="hover" :visible-arrow="false"
-            :content="parseEquipDesc(scope.row.large_equip_desc)" raw-content popper-class="equip-desc-popper">
-            <template #reference>
-              <el-image style="width: 50px; height: 50px; cursor: pointer" :src="getImageUrl(scope.row.equip_face_img)"
-                fit="cover" referrerpolicy="no-referrer">
-              </el-image>
-            </template>
-            <div class="equip-desc-content">
-              <el-row type="flex" justify="space-between">
-                <el-col style="width: 120px; margin-right: 20px">
-                  <el-image style="width: 120px; height: 120px" :src="getImageUrl(scope.row.equip_face_img, 'big')"
-                    fit="cover" referrerpolicy="no-referrer">
-                  </el-image>
-                </el-col>
-                <el-col>
-                  <p>{{ scope.row.equip_name }}</p>
-                  <p v-for="(name_desc, index) in scope.row.equip_type_desc.split('#r')" :key="index"
-                    style="color: #fff">
-                    {{ name_desc }}
-                  </p>
-                  <div v-html="parseEquipDesc(scope.row.large_equip_desc)"></div>
-                </el-col>
-              </el-row>
-            </div>
-          </el-popover>
+          <equipment-image :equipment="scope.row" />
         </template>
       </el-table-column>
       <el-table-column fixed prop="price" label="价格 (元)" width="160" sortable="custom">
@@ -95,141 +173,37 @@
           <div v-html="formatFullPrice(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="eid" label="操作" width="200">
-        <template #default="scope">
-          <el-link :href="getCBGLink(scope.row.eid)" type="danger">藏宝阁</el-link>
-          <el-divider direction="vertical"></el-divider>
-          <el-popover placement="left" width="600" trigger="click" popper-class="similar-equip-popper"
-            @show="loadSimilarEquipments(scope.row)">
-            <template #reference>
-              <el-link type="success">查看相似</el-link>
-            </template>
 
-            <!-- 相似装备表格 -->
-            <div v-if="similarEquipments[scope.row.eid]">
-              <div class="similar-header">
-                <h4>相似装备 (共{{ similarEquipments[scope.row.eid].anchor_count }}个)</h4>
-                <p>相似度阈值: {{ similarEquipments[scope.row.eid].similarity_threshold }}</p>
-                
-                <!-- 装备估价信息 -->
-                <div v-if="equipmentValuations[scope.row.eid]" class="valuation-info">
-                  <div class="valuation-main">
-                    <span class="valuation-label">装备估价:</span>
-                    <span class="valuation-price">{{ equipmentValuations[scope.row.eid].estimated_price_yuan }}元</span>
-                    <span class="valuation-strategy">({{ getStrategyName(equipmentValuations[scope.row.eid].strategy) }})</span>
-                  </div>
-                  <div class="valuation-details">
-                    <span>置信度: {{ (equipmentValuations[scope.row.eid].confidence * 100).toFixed(1) }}%</span>
-                    <span>基于{{ equipmentValuations[scope.row.eid].anchor_count }}个锚点</span>
-                  </div>
-                </div>
-                
-                <div v-if="similarEquipments[scope.row.eid].statistics" class="stats">
-                  <span>价格范围: <span
-                      v-html="formatPrice(similarEquipments[scope.row.eid].statistics.price_range.min)"></span> -
-                    <span
-                      v-html="formatPrice(similarEquipments[scope.row.eid].statistics.price_range.max)"></span></span>
-                  <span>平均相似度: {{ similarEquipments[scope.row.eid].statistics.similarity_range.avg }}</span>
-                </div>
-              </div>
-              <div
-                v-if="!similarEquipments[scope.row.eid].anchors || similarEquipments[scope.row.eid].anchors.length === 0"
-                class="no-similar">
-                <el-empty description="未找到相似装备" :image-size="60" />
-              </div>
-              <el-table v-else :data="similarEquipments[scope.row.eid].anchors" stripe max-height="400" style="width: 100%"
-                sortable :sort-by="['price', 'similarity']" :sort-order="['ascending', 'descending']">
-                <el-table-column fixed label="装备" width="70">
-                  <template #default="similarScope">
-                    <el-popover placement="right" :width="450" trigger="hover" :visible-arrow="false"
-                      :content="parseEquipDesc(similarScope.row.large_equip_desc)" raw-content
-                      popper-class="equip-desc-popper">
-                      <template #reference>
-                        <el-image style="width: 50px; height: 50px; cursor: pointer"
-                          :src="getImageUrl(similarScope.row.equip_face_img)" fit="cover" referrerpolicy="no-referrer">
-                        </el-image>
-                      </template>
-                      <div class="equip-desc-content">
-                        <el-row type="flex" justify="space-between">
-                          <el-col style="width: 120px; margin-right: 20px">
-                            <el-image style="width: 120px; height: 120px"
-                              :src="getImageUrl(similarScope.row.equip_face_img, 'big')" fit="cover"
-                              referrerpolicy="no-referrer">
-                            </el-image>
-                          </el-col>
-                          <el-col>
-                            <p>{{ similarScope.row.equip_name }}</p>
-                            <p v-for="(name_desc, index) in similarScope.row.equip_type_desc.split('#r')" :key="index"
-                              style="color: #fff">
-                              {{ name_desc }}
-                            </p>
-                            <div v-html="parseEquipDesc(similarScope.row.large_equip_desc)"></div>
-                          </el-col>
-                        </el-row>
-                      </div>
-                    </el-popover>
-                  </template>
-                </el-table-column>
-                <el-table-column fixed prop="price" label="价格 (元)" width="160" sortable>
-                  <template #default="similarScope">
-                    <div v-html="formatFullPrice(similarScope.row)"></div>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="similarity" label="相似度" width="80" sortable>
-                  <template #default="similarScope">
-                    <el-tag :type="getSimilarityTagType(similarScope.row.similarity)">
-                      {{ similarScope.row.similarity }}
-                    </el-tag>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="equip_level" label="等级" width="60"></el-table-column>
-                <el-table-column label="特技/特效/套装" width="120">
-                  <template #default="similarScope">
-                    <div class="special-info">
-                      <div class="equip_desc_blue" v-html="formatSpecialSkillsAndEffects(similarScope.row.special_effect, similarScope.row.special_skill)
-                        "></div>
-                      <span v-if="similarScope.row.suit_effect && similarScope.row.suit_effect !== 0" class="suit">
-                        {{ formatSuitEffect(similarScope.row.suit_effect) }}
-                      </span>
-                    </div>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="server_name" label="服务器" width="100"></el-table-column>
-                <el-table-column label="操作" width="80">
-                  <template #default="similarScope">
-                    <el-button type="text" @click="openCBG(similarScope.row.eid)" class="cbg-link">
-                      查看
-                    </el-button>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-
-            <div v-else-if="similarError[scope.row.eid]" class="error-info">
-              <el-alert type="error" :title="similarError[scope.row.eid]" show-icon />
-            </div>
-
-            <div v-else class="loading-info">
-              <el-skeleton :rows="5" animated />
-            </div>
-          </el-popover>
-        </template>
-      </el-table-column>
       <el-table-column prop="baoshi" label="宝石" width="100">
         <template #default="scope">
           <div class="gem-container">
-            <el-badge v-if="scope.row.gem_level" :value="scope.row.gem_level * 1" class="gem-badge" type="warning">
+            <el-badge
+              v-if="scope.row.gem_level"
+              :value="scope.row.gem_level * 1"
+              class="gem-badge"
+              type="warning"
+            >
               <div class="gem-images">
-                <el-image v-for="gemImgSrc in getGemImageByGemValue(scope.row.gem_value)" :key="gemImgSrc"
-                  style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px;" :src="gemImgSrc" fit="cover"
-                  referrerpolicy="no-referrer">
+                <el-image
+                  v-for="gemImgSrc in getGemImageByGemValue(scope.row.gem_value)"
+                  :key="gemImgSrc"
+                  style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px"
+                  :src="gemImgSrc"
+                  fit="cover"
+                  referrerpolicy="no-referrer"
+                >
                 </el-image>
               </div>
             </el-badge>
             <div v-else class="gem-images">
-              <el-image v-for="gemImgSrc in getGemImageByGemValue(scope.row.gem_value)" :key="gemImgSrc"
-                style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px;" :src="gemImgSrc" fit="cover"
-                referrerpolicy="no-referrer">
+              <el-image
+                v-for="gemImgSrc in getGemImageByGemValue(scope.row.gem_value)"
+                :key="gemImgSrc"
+                style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px"
+                :src="gemImgSrc"
+                fit="cover"
+                referrerpolicy="no-referrer"
+              >
               </el-image>
             </div>
           </div>
@@ -237,8 +211,14 @@
       </el-table-column>
       <el-table-column prop="tejigui" label="特技/特效" width="120">
         <template #default="scope">
-          <div class="equip_desc_blue" v-html="formatSpecialSkillsAndEffects(scope.row.special_effect, scope.row.special_skill)
-            "></div>
+          <div
+            class="equip_desc_blue"
+            :data-specia-effet="scope.row.special_effect"
+            :data-special-skill="scope.row.special_skill"
+            v-html="
+              formatSpecialSkillsAndEffects(scope.row.special_effect, scope.row.special_skill)
+            "
+          ></div>
         </template>
       </el-table-column>
       <el-table-column prop="taozhuang" label="套装" width="160">
@@ -252,38 +232,80 @@
           <div class="equip_desc_yellow" v-html="formatAddedAttrs(scope.row.agg_added_attrs)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="equip_level" label="等级" width="80" sortable="custom"></el-table-column>
-      <el-table-column prop="all_damage" label="总伤" width="100" sortable="custom"></el-table-column>
-      <el-table-column prop="init_damage" label="初伤" width="100" sortable="custom"></el-table-column>
-      <el-table-column prop="init_wakan" label="初灵" width="100" sortable="custom"></el-table-column>
-      <el-table-column prop="init_defense" label="初防" width="100" sortable="custom"></el-table-column>
+      <el-table-column
+        prop="equip_level"
+        label="等级"
+        width="80"
+        sortable="custom"
+      ></el-table-column>
+      <el-table-column
+        prop="all_damage"
+        label="总伤"
+        width="100"
+        sortable="custom"
+      ></el-table-column>
+      <el-table-column
+        prop="init_damage"
+        label="初伤"
+        width="100"
+        sortable="custom"
+      ></el-table-column>
+      <el-table-column
+        prop="init_wakan"
+        label="初灵"
+        width="100"
+        sortable="custom"
+      ></el-table-column>
+      <el-table-column
+        prop="init_defense"
+        label="初防"
+        width="100"
+        sortable="custom"
+      ></el-table-column>
       <el-table-column prop="init_hp" label="初血" width="100" sortable="custom"></el-table-column>
       <el-table-column prop="init_dex" label="初敏" width="100" sortable="custom"></el-table-column>
       <el-table-column prop="server_name" label="服务器" width="120"></el-table-column>
     </el-table>
     <div class="pagination-container">
-      <el-pagination @current-change="handlePageChange" :current-page="pagination.page" @size-change="handleSizeChange"
-        :page-size="pagination.page_size" :page-sizes="[10, 100, 200, 300, 400]"
-        layout="total, sizes, prev, pager, next, jumper" :total="pagination.total">
+      <el-pagination
+        @current-change="handlePageChange"
+        :current-page="pagination.page"
+        @size-change="handleSizeChange"
+        :page-size="pagination.page_size"
+        :page-sizes="[10, 100, 200, 300, 400]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="pagination.total"
+      >
       </el-pagination>
     </div>
   </div>
 </template>
 
 <script>
+import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
+import EquipmentImage from '@/components/EquipmentImage.vue'
+import dayjs from 'dayjs'
+//CBG_GAME_CONFIG.pet_equip_class0
+
+var lingshiKinds = [[61, '戒指'], [62, '耳饰'], [63, '手镯'], [64, '佩饰']]
 export default {
   name: 'EquipmentList',
+  components: {
+    SimilarEquipmentModal,
+    EquipmentImage
+  },
   data() {
     return {
-      weapon_armors: window.AUTO_SEARCH_CONFIG.weapon_armors,
+      weapon_armors: window.AUTO_SEARCH_CONFIG.weapon_armors.concat(lingshiKinds),
       equip_special_skills: window.AUTO_SEARCH_CONFIG.equip_special_skills,
       equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
       equipments: [],
       filters: {
+        selectedDate: dayjs().format('YYYY-MM'),
         level_range: [60, 160],
         price_min: undefined,
         price_max: undefined,
-        kindid: [],
+        kindid: [61],
         equip_special_skills: [],
         equip_special_effect: [],
         suit_effect: [],
@@ -300,7 +322,7 @@ export default {
       levelMarks: {
         80: '80',
         100: '100',
-        120: '120',
+        120: '120'
       },
       suitOptions: [],
       gems_name: window.AUTO_SEARCH_CONFIG.gems_name,
@@ -333,13 +355,13 @@ export default {
       // return `https://xyq-m.cbg.163.com/cgi/mweb/equip/${eid.split('-')[1]}/${eid}&shareSource=cbg&tfid=f_equip_list&tcid=c_equip_list`
       return `https://xyq-m.cbg.163.com/cgi/mweb/equip/${eid.split('-')[1]}/${eid}`
     },
-    getImageUrl(equip_face_img, size = 'small') {
-      return `https://cbg-xyq.res.netease.com/images/${size}/${equip_face_img}`
-    },
+
     async fetchEquipments() {
+      const [year, month] = this.filters.selectedDate.split('-')
       try {
         const params = {
           ...this.filters,
+          year, month ,
           page: this.pagination.page,
           page_size: this.pagination.page_size
         }
@@ -352,7 +374,11 @@ export default {
         }
 
         // 处理套装级联选择器的值
-        if (this.filters.suit_effect && Array.isArray(this.filters.suit_effect) && this.filters.suit_effect.length === 2) {
+        if (
+          this.filters.suit_effect &&
+          Array.isArray(this.filters.suit_effect) &&
+          this.filters.suit_effect.length === 2
+        ) {
           const [suitType, suitValue] = this.filters.suit_effect
           const actualValue = suitValue.split('_').pop() // 提取真实的套装ID
 
@@ -367,7 +393,12 @@ export default {
           }
 
           // 只有在没有设置任何套装参数时才删除原始的suit_effect
-          if (!params.suit_added_status && !params.suit_effect && !params.suit_transform_skills && !params.suit_transform_charms) {
+          if (
+            !params.suit_added_status &&
+            !params.suit_effect &&
+            !params.suit_transform_skills &&
+            !params.suit_transform_charms
+          ) {
             delete params.suit_effect
           }
         } else {
@@ -377,7 +408,11 @@ export default {
 
         // 移除空的筛选条件
         Object.keys(params).forEach((key) => {
-          if (params[key] === null || params[key] === '' || (Array.isArray(params[key]) && params[key].length === 0)) {
+          if (
+            params[key] === null ||
+            params[key] === '' ||
+            (Array.isArray(params[key]) && params[key].length === 0)
+          ) {
             delete params[key]
           }
         })
@@ -411,12 +446,7 @@ export default {
       this.filters.sort_order = order === 'ascending' ? 'asc' : 'desc'
       this.fetchEquipments()
     },
-    parseEquipDesc(desc) {
-      if (!desc) return ''
-      if (typeof window.parse_style_info === 'function') {
-        return window.parse_style_info(desc, '#Y')
-      }
-    },
+
     // 格式化价格
     formatPrice(price) {
       const priceFloat = parseFloat(price / 100)
@@ -624,7 +654,9 @@ export default {
       if (window.AUTO_SEARCH_CONFIG) {
         // 附加状态
         if (window.AUTO_SEARCH_CONFIG.suit_added_status) {
-          const addedStatusOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_added_status).map(([value, label]) => ({
+          const addedStatusOptions = Object.entries(
+            window.AUTO_SEARCH_CONFIG.suit_added_status
+          ).map(([value, label]) => ({
             value: `added_status_${value}`,
             label: label
           }))
@@ -640,10 +672,12 @@ export default {
 
         // 追加法术
         if (window.AUTO_SEARCH_CONFIG.suit_effects) {
-          const suitEffectsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_effects).map(([value, label]) => ({
-            value: `suit_effects_${value}`,
-            label: label
-          }))
+          const suitEffectsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_effects).map(
+            ([value, label]) => ({
+              value: `suit_effects_${value}`,
+              label: label
+            })
+          )
 
           if (suitEffectsOptions.length > 0) {
             suitOptions.push({
@@ -656,7 +690,9 @@ export default {
 
         // 变身术
         if (window.AUTO_SEARCH_CONFIG.suit_transform_skills) {
-          const transformSkillsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_transform_skills).map(([value, label]) => ({
+          const transformSkillsOptions = Object.entries(
+            window.AUTO_SEARCH_CONFIG.suit_transform_skills
+          ).map(([value, label]) => ({
             value: `transform_skills_${value}`,
             label: label
           }))
@@ -672,7 +708,9 @@ export default {
 
         // 变化咒
         if (window.AUTO_SEARCH_CONFIG.suit_transform_charms) {
-          const transformCharmsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_transform_charms).map(([value, label]) => ({
+          const transformCharmsOptions = Object.entries(
+            window.AUTO_SEARCH_CONFIG.suit_transform_charms
+          ).map(([value, label]) => ({
             value: `transform_charms_${value}`,
             label: label
           }))
@@ -699,67 +737,143 @@ export default {
         return
       }
 
-      // 设置加载状态
-      this.$set(this.loadingSimilar, eid, true)
-      this.$set(this.similarError, eid, null)
+      // 使用默认相似度阈值0.85加载
+      await this.loadEquipmentValuation(equipment, 0.8)
+    },
+
+    // 重试查找相似装备
+    async retryWithNewThreshold(eid, newThreshold) {
+      // 获取保存的装备数据
+      const similarData = this.similarEquipments[eid]
+      if (!similarData || !similarData.equipment) {
+        this.$message.error('装备数据丢失，请重新点击查看相似')
+        return
+      }
+
+      const equipment = similarData.equipment
+      // 使用新的相似度阈值重新加载
+      await this.loadEquipmentValuation(equipment, newThreshold, true)
+    },
+
+    // 统一的装备估价加载方法
+    async loadEquipmentValuation(equipment, similarityThreshold = 0.85, isRetry = false) {
+      const eid = equipment.eid
 
       try {
-        // 并行请求相似装备和估价信息
-        const [similarResponse, valuationResponse] = await Promise.all([
-          // 获取相似装备
-          this.$api.equipment.findEquipmentAnchors({
-            equipment_data: equipment,
-            similarity_threshold: 0.6,
-            max_anchors: 20
-          }),
-          // 获取估价信息
-          this.$api.equipment.getEquipmentValuation({
-            equipment_data: equipment,
-            strategy: 'fair_value'
-          })
-        ])
+        this.$set(this.loadingSimilar, eid, true)
+        this.$set(this.similarError, eid, null)
 
-        // 处理相似装备响应
-        if (similarResponse.code === 200) {
-          this.$set(this.similarEquipments, eid, similarResponse.data)
-        } else {
-          this.$set(this.similarError, eid, similarResponse.message || '加载相似装备失败')
-        }
+        // 获取估价信息（包含相似装备）
+        const valuationResponse = await this.$api.equipment.getEquipmentValuation({
+          equipment_data: equipment,
+          strategy: 'fair_value',
+          similarity_threshold: similarityThreshold,
+          max_anchors: 30
+        })
 
         // 处理估价响应
         if (valuationResponse.code === 200) {
-          this.$set(this.equipmentValuations, eid, valuationResponse.data)
+          const data = valuationResponse.data
+          this.$set(this.equipmentValuations, eid, data)
+
+          // 从估价结果中提取相似装备信息
+          if (data.anchors && data.anchors.length > 0) {
+            this.$set(this.similarEquipments, eid, {
+              anchor_count: data.anchor_count,
+              similarity_threshold: data.similarity_threshold,
+              anchors: data.anchors,
+              statistics: {
+                price_range: {
+                  min: Math.min(...data.anchors.map((a) => a.price || 0)),
+                  max: Math.max(...data.anchors.map((a) => a.price || 0))
+                },
+                similarity_range: {
+                  min: Math.min(...data.anchors.map((a) => a.similarity || 0)),
+                  max: Math.max(...data.anchors.map((a) => a.similarity || 0)),
+                  avg:
+                    data.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                    data.anchors.length
+                }
+              }
+            })
+            
+            if (isRetry) {
+              this.$message.success(`成功找到 ${data.anchor_count} 个相似装备`)
+            }
+          } else {
+            this.$set(this.similarEquipments, eid, {
+              anchor_count: 0,
+              similarity_threshold: data.similarity_threshold || similarityThreshold,
+              anchors: [],
+              statistics: {
+                price_range: { min: 0, max: 0 },
+                similarity_range: { min: 0, max: 0, avg: 0 }
+              },
+              message: isRetry ? '仍未找到符合条件的市场锚点，请尝试更低的相似度阈值' : '未找到符合条件的市场锚点，建议降低相似度阈值',
+              canRetry: true,
+              equipment: equipment
+            })
+            
+            if (isRetry) {
+              this.$message.warning('仍未找到相似装备，请尝试更低的相似度阈值')
+            }
+          }
+        } else if (valuationResponse.code === 400) {
+          // 400错误也要显示界面，只是没有锚点数据
+          this.$set(this.similarEquipments, eid, {
+            anchor_count: 0,
+            similarity_threshold: similarityThreshold,
+            anchors: [],
+            statistics: {
+              price_range: { min: 0, max: 0 },
+              similarity_range: { min: 0, max: 0, avg: 0 }
+            },
+            message: valuationResponse.message || '未找到符合条件的市场锚点，建议降低相似度阈值',
+            canRetry: true,
+            equipment: equipment
+          })
+          // 清空估价信息，因为无法估价
+          this.$set(this.equipmentValuations, eid, null)
+          
+          if (isRetry) {
+            this.$message.error(valuationResponse.message || '查找相似装备失败')
+          }
         } else {
-          console.warn('装备估价获取失败:', valuationResponse.message)
-          // 估价失败不影响相似装备显示，只记录警告
+          this.$set(this.similarError, eid, valuationResponse.message || '加载估价和相似装备失败')
+          
+          if (isRetry) {
+            this.$set(this.similarEquipments, eid, {
+              anchor_count: 0,
+              similarity_threshold: similarityThreshold,
+              anchors: [],
+              statistics: {
+                price_range: { min: 0, max: 0 },
+                similarity_range: { min: 0, max: 0, avg: 0 }
+              },
+              message: valuationResponse.message || '查找失败，请重试',
+              canRetry: true,
+              equipment: equipment
+            })
+            this.$message.error(valuationResponse.message || '查找相似装备失败')
+          }
         }
 
-        console.log('相似装备数据:', similarResponse.data)
-        console.log('估价数据:', valuationResponse.data)
+        console.log('估价和相似装备数据:', valuationResponse.data)
       } catch (error) {
         console.error('加载相似装备或估价失败:', error)
         this.$set(this.similarError, eid, `加载失败: ${error.message}`)
+        
+        if (isRetry) {
+          this.$message.error(`重试失败: ${error.message}`)
+        }
       } finally {
         this.$set(this.loadingSimilar, eid, false)
       }
     },
 
-    // 获取相似度标签类型
-    getSimilarityTagType(similarity) {
-      if (similarity >= 0.9) return 'success'
-      if (similarity >= 0.8) return 'warning'
-      if (similarity >= 0.7) return 'info'
-      return 'danger'
-    },
-
-    // 获取估价策略显示名称
-    getStrategyName(strategy) {
-      const strategyNames = {
-        'fair_value': '公允价值',
-        'competitive': '竞争价格',
-        'premium': '溢价估值'
-      }
-      return strategyNames[strategy] || strategy
+    // 获取图片URL方法
+    getImageUrl(imageName, size = 'small') {
+      return `https://cbg-xyq.res.netease.com/images/${size}/${imageName}`
     }
   },
   mounted() {
@@ -835,7 +949,6 @@ export default {
 }
 
 @keyframes blink {
-
   0%,
   50% {
     opacity: 1;
@@ -850,110 +963,6 @@ export default {
 /* 相似装备弹窗样式 */
 :global(.similar-equip-popper) {
   padding: 16px;
-}
-
-.similar-header {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.similar-header h4 {
-  margin: 0 0 8px 0;
-  color: #303133;
-  font-size: 16px;
-}
-
-.similar-header p {
-  margin: 0 0 8px 0;
-  color: #606266;
-  font-size: 14px;
-}
-
-.stats {
-  display: flex;
-  gap: 20px;
-  font-size: 12px;
-  color: #909399;
-}
-
-/* 估价信息样式 */
-.valuation-info {
-  margin: 12px 0;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 4px solid #409eff;
-}
-
-.valuation-main {
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-.valuation-label {
-  color: #606266;
-  font-weight: 500;
-}
-
-.valuation-price {
-  color: #e6a23c;
-  font-weight: 600;
-  font-size: 16px;
-  margin: 0 8px;
-}
-
-.valuation-strategy {
-  color: #909399;
-  font-size: 12px;
-}
-
-.valuation-details {
-  display: flex;
-  gap: 15px;
-  font-size: 12px;
-  color: #909399;
-}
-
-.equip-name {
-  font-weight: 500;
-}
-
-.price-text {
-  color: #f56c6c;
-  font-weight: 600;
-}
-
-.special-info {
-  font-size: 12px;
-  color: #409eff;
-}
-
-.special-info .skill {
-  margin-bottom: 2px;
-}
-
-
-.cbg-link {
-  color: #409eff;
-  padding: 0;
-}
-
-.cbg-link:hover {
-  color: #66b1ff;
-}
-
-.no-similar {
-  text-align: center;
-  padding: 40px 0;
-}
-
-.error-info {
-  padding: 20px 0;
-}
-
-.loading-info {
-  padding: 20px;
 }
 
 /* 宝石显示样式 */

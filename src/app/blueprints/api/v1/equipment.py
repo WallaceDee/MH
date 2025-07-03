@@ -124,8 +124,15 @@ def get_equipment_valuation():
             return error_response("请提供装备数据")
         
         strategy = data.get('strategy', 'fair_value')
+        similarity_threshold = data.get('similarity_threshold', 0.7)
+        max_anchors = data.get('max_anchors', 30)
         
-        result = controller.get_equipment_valuation(equipment_data, strategy)
+        result = controller.get_equipment_valuation(
+            equipment_data, 
+            strategy, 
+            similarity_threshold, 
+            max_anchors
+        )
         
         if "error" in result:
             return error_response(result["error"])

@@ -16,6 +16,7 @@ from datetime import datetime
 from urllib.parse import urlencode
 import asyncio
 from playwright.async_api import async_playwright
+import re
 
 # 添加项目根目录到Python路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +36,8 @@ from src.tools.search_form_helper import (
     verify_cookie_validity,
 )
 
+# 导入特征提取器
+from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
 
 class CBGEquipSpider:
     def __init__(self):
@@ -55,6 +58,9 @@ class CBGEquipSpider:
         
         # 初始化智能数据库助手
         self.smart_db = CBGSmartDB(self.db_path)
+        
+        # 初始化特征提取器
+        self.lingshi_feature_extractor = LingshiFeatureExtractor()
         
         # 配置专用的日志器，避免与其他模块冲突
         self.logger = self._setup_logger()
@@ -201,6 +207,32 @@ class CBGEquipSpider:
             equipments = []
             for equip in equip_list:
                 try:
+                    # 特征提取：当kindid是61、62、63、64时，提取灵饰特征
+                    kindid = equip.get('kindid', 0)
+                    extracted_attrs = []
+                    
+                    if kindid in [61, 62, 63, 64]:  # 灵饰装备类型
+                        try:
+                            # 使用特征提取器提取附加属性
+                            added_attrs_features = self.lingshi_feature_extractor._extract_added_attrs_features(equip)
+                            extracted_attrs = added_attrs_features.get('attrs', [])
+                            
+                            if extracted_attrs:
+                                self.logger.debug(f"成功提取灵饰装备(kindid:{kindid})的附加属性: {len(extracted_attrs)}个")
+                                # 记录提取到的具体属性
+                                for i, attr in enumerate(extracted_attrs):
+                                    self.logger.debug(f"  属性{i+1}: {attr['attr_type']} +{attr['attr_value']}")
+                            else:
+                                self.logger.debug(f"灵饰装备(kindid:{kindid})未提取到附加属性")
+                                
+                        except Exception as e:
+                            self.logger.warning(f"提取灵饰装备特征失败 (kindid:{kindid}): {e}")
+                            # 如果特征提取失败，使用原始数据
+                            extracted_attrs = equip.get('agg_added_attrs', [])
+                    else:
+                        # 非灵饰装备，使用原始数据
+                        extracted_attrs = equip.get('agg_added_attrs', [])
+                    
                     # 直接保存所有原始字段，不做解析
                     equipment = {
                         # 基本字段直接映射
@@ -410,7 +442,7 @@ class CBGEquipSpider:
                         'diy_desc_pay_info': json.dumps(equip.get('diy_desc_pay_info'), ensure_ascii=False) if equip.get('diy_desc_pay_info') else '',
                         'other_info': equip.get('other_info', ''),
                         'video_info': json.dumps(equip.get('video_info'), ensure_ascii=False) if equip.get('video_info') else '',
-                        'agg_added_attrs': json.dumps(equip.get('agg_added_attrs'), ensure_ascii=False) if equip.get('agg_added_attrs') else '',
+                        'agg_added_attrs': json.dumps(extracted_attrs, ensure_ascii=False) if extracted_attrs else '',
                         'dynamic_tags': json.dumps(equip.get('dynamic_tags'), ensure_ascii=False) if equip.get('dynamic_tags') else '',
                         'highlight': json.dumps(equip.get('highlight'), ensure_ascii=False) if equip.get('highlight') else '',
                         'tag_key': equip.get('tag_key', ''),
@@ -709,13 +741,14 @@ class CBGEquipSpider:
 
 def main():
     """主函数，用于测试"""
+    
     async def run_test():
         spider = CBGEquipSpider()
         
         # --- 测试配置 ---
-        equip_type_to_test = 'normal'  # 可选: 'normal', 'lingshi', 'pet'
+        equip_type_to_test = 'lingshi'  # 可选: 'normal', 'lingshi', 'pet'
         use_browser_for_test = True   # 是否使用浏览器获取参数
-        max_pages_to_crawl = 2
+        max_pages_to_crawl = 1
         # ----------------
         
         print(f"\n--- 正在测试: {equip_type_to_test} 装备爬虫 ---")
@@ -732,7 +765,8 @@ def main():
             print(f"--- ❌ {equip_type_to_test} 装备爬虫测试失败: {e} ---")
             import traceback
             traceback.print_exc()
-
+    
+    # 运行测试
     asyncio.run(run_test())
 
 if __name__ == '__main__':

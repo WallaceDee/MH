@@ -445,7 +445,6 @@ export default {
   methods: {
     getExAvtJsonDesc(ex_avt_json) {
       const ex_avt_json_obj = eval(`(${ex_avt_json})`)
-      console.log(ex_avt_json_obj)
       const exAvtJsonDesc = []
       for (const key in ex_avt_json_obj) {
         const item = ex_avt_json_obj[key]

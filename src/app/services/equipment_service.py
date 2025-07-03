@@ -19,9 +19,11 @@ logger = logging.getLogger(__name__)
 try:
     from evaluator.mark_anchor.equip.index import EquipAnchorEvaluator
     from evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
+    from evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
 except ImportError:
     EquipAnchorEvaluator = None
     EquipFeatureExtractor = None
+    LingshiFeatureExtractor = None
     logger.warning("无法导入装备锚点估价器或特征提取器")
 
 
@@ -32,13 +34,22 @@ class EquipmentService:
         self.data_dir = os.path.join(self.project_root, 'data')
         
         # 初始化特征提取器
-        self.feature_extractor = None
+        self.equip_feature_extractor = None
+        self.lingshi_feature_extractor = None
+        
         if EquipFeatureExtractor:
             try:
-                self.feature_extractor = EquipFeatureExtractor()
+                self.equip_feature_extractor = EquipFeatureExtractor()
                 logger.info("装备特征提取器初始化成功")
             except Exception as e:
                 logger.error(f"装备特征提取器初始化失败: {e}")
+        
+        if LingshiFeatureExtractor:
+            try:
+                self.lingshi_feature_extractor = LingshiFeatureExtractor()
+                logger.info("灵饰特征提取器初始化成功")
+            except Exception as e:
+                logger.error(f"灵饰特征提取器初始化失败: {e}")
         
         # 初始化装备锚点估价器
         self.evaluator = None
@@ -48,6 +59,17 @@ class EquipmentService:
                 logger.info("装备锚点估价器初始化成功")
             except Exception as e:
                 logger.error(f"装备锚点估价器初始化失败: {e}")
+    
+    def _get_feature_extractor(self, kindid: int):
+        """根据装备类型获取对应的特征提取器"""
+        # 灵饰装备：kindid=61,62,63,64
+        if kindid in [61, 62, 63, 64]:
+            return self.lingshi_feature_extractor
+        else:
+            # 普通装备
+            return self.equip_feature_extractor
+    
+
     
     def _validate_year_month(self, year: Optional[int], month: Optional[int]) -> Tuple[int, int]:
         """验证并获取有效的年月"""
@@ -339,16 +361,21 @@ class EquipmentService:
                     "anchor_count": 0
                 }
             
-            if not self.feature_extractor:
+            # 根据kindid获取对应的特征提取器
+            kindid = equipment_data.get('kindid', 0)
+            feature_extractor = self._get_feature_extractor(kindid)
+            
+            if not feature_extractor:
+                extractor_type = "灵饰" if kindid in [61, 62, 63, 64] else "装备"
                 return {
-                    "error": "装备特征提取器未初始化",
+                    "error": f"{extractor_type}特征提取器未初始化",
                     "anchors": [],
                     "anchor_count": 0
                 }
             
             # 使用特征提取器提取特征
             try:
-                equipment_features = self.feature_extractor.extract_features(equipment_data)
+                equipment_features = feature_extractor.extract_features(equipment_data)
             except Exception as e:
                 return {
                     "error": f"特征提取失败: {str(e)}",
@@ -463,7 +490,9 @@ class EquipmentService:
             }
 
     def get_equipment_valuation(self, equipment_data: Dict,
-                               strategy: str = 'fair_value') -> Dict:
+                               strategy: str = 'fair_value',
+                               similarity_threshold: float = 0.7,
+                               max_anchors: int = 30) -> Dict:
         """获取装备估价"""
         try:
             if not self.evaluator:
@@ -473,16 +502,21 @@ class EquipmentService:
                     "estimated_price_yuan": 0
                 }
             
-            if not self.feature_extractor:
+            # 根据kindid获取对应的特征提取器
+            kindid = equipment_data.get('kindid', 0)
+            feature_extractor = self._get_feature_extractor(kindid)
+            
+            if not feature_extractor:
+                extractor_type = "灵饰" if kindid in [61, 62, 63, 64] else "装备"
                 return {
-                    "error": "装备特征提取器未初始化",
+                    "error": f"{extractor_type}特征提取器未初始化",
                     "estimated_price": 0,
                     "estimated_price_yuan": 0
                 }
             
             # 使用特征提取器提取特征
             try:
-                equipment_features = self.feature_extractor.extract_features(equipment_data)
+                equipment_features = feature_extractor.extract_features(equipment_data)
             except Exception as e:
                 return {
                     "error": f"特征提取失败: {str(e)}",
@@ -503,10 +537,27 @@ class EquipmentService:
                     "estimated_price_yuan": 0
                 }
             
+            # 验证相似度阈值和最大锚点数量
+            if not 0.0 <= similarity_threshold <= 1.0:
+                return {
+                    "error": "相似度阈值必须在0.0-1.0之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            if not 1 <= max_anchors <= 100:
+                return {
+                    "error": "最大锚点数量必须在1-100之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
             # 调用估价方法
             result = self.evaluator.calculate_value(
                 target_features=equipment_features,
-                strategy=strategy
+                strategy=strategy,
+                similarity_threshold=similarity_threshold,
+                max_anchors=max_anchors
             )
             
             # 格式化返回结果
@@ -519,34 +570,28 @@ class EquipmentService:
             
             estimated_price = result.get("estimated_price", 0)
             
-            # 处理锚点预览数据，确保可序列化
-            anchors_raw = result.get("anchors", [])[:5]
-            anchors_preview = []
-            for anchor in anchors_raw:
-                # 创建一个干净的锚点信息，去除不能序列化的字段
-                clean_anchor = {
-                    "equip_sn": anchor.get("equip_sn"),
-                    "similarity": float(anchor.get("similarity", 0)),
-                    "price": float(anchor.get("price", 0))
-                }
-                # 如果有features字段，提取一些关键信息而不是整个pandas对象
-                if "features" in anchor and anchor["features"]:
-                    features = anchor["features"]
-                    if isinstance(features, dict):
-                        clean_anchor.update({
-                            "equip_level": int(features.get("equip_level", 0)),
-                            "kindid": int(features.get("kindid", 0)),
-                            "equip_name": str(features.get("equip_name", "未知装备"))
-                        })
-                anchors_preview.append(clean_anchor)
+            # 获取完整的锚点信息（使用用户指定的参数）
+            anchors_result = self.find_equipment_anchors(
+                equipment_data=equipment_data,
+                similarity_threshold=similarity_threshold,
+                max_anchors=max_anchors
+            )
+            
+            # 处理锚点信息
+            anchors = anchors_result.get("anchors", [])
+            anchor_count = anchors_result.get("anchor_count", 0)
             
             return {
                 "estimated_price": estimated_price,
                 "estimated_price_yuan": round(estimated_price / 100, 2),
                 "strategy": strategy,
-                "anchor_count": result.get("anchor_count", 0),
+                "anchor_count": anchor_count,
                 "confidence": result.get("confidence", 0),
-                "anchors_preview": anchors_preview
+                "similarity_threshold": similarity_threshold,
+                "max_anchors": max_anchors,
+                "anchors": anchors,  # 返回完整的锚点信息
+                "price_range": result.get("price_range", {}),
+                "fallback_used": result.get("fallback_used", False)
             }
             
         except Exception as e:

@@ -520,13 +520,17 @@ class MarketAnchorEValuator:
     
     def calculate_value(self, 
                        target_features: Dict[str, Any],
-                       strategy: str = 'fair_value') -> Dict[str, Any]:
+                       strategy: str = 'fair_value',
+                       similarity_threshold: float = 0.7,
+                       max_anchors: int = 30) -> Dict[str, Any]:
         """
         计算角色价值
         
         Args:
             target_features: 目标角色特征字典
             strategy: 定价策略 ('competitive', 'fair_value', 'premium')
+            similarity_threshold: 相似度阈值（0-1）
+            max_anchors: 最大锚点数量
             
         Returns:
             Dict[str, Any]: 估价结果，包含：
@@ -538,10 +542,10 @@ class MarketAnchorEValuator:
                 - fallback_used: 是否使用了保底估价
         """
         try:
-            print(f"开始计算角色价值，策略: {strategy}")
+            print(f"开始计算角色价值，策略: {strategy}，相似度阈值: {similarity_threshold}，最大锚点数: {max_anchors}")
             
             # 寻找市场锚点
-            anchors = self.find_market_anchors(target_features)
+            anchors = self.find_market_anchors(target_features, similarity_threshold, max_anchors)
             
             if len(anchors) == 0:
                 self.logger.error(f"未找到市场锚点")
@@ -708,8 +712,8 @@ class MarketAnchorEValuator:
             percentile_75 = float(np.percentile(prices, 75))
             
             # 计算推荐价格
-            competitive_result = self.calculate_value(target_features, 'competitive')
-            fair_result = self.calculate_value(target_features, 'fair_value')
+            competitive_result = self.calculate_value(target_features, 'competitive', max_anchors=len(anchors))
+            fair_result = self.calculate_value(target_features, 'fair_value', max_anchors=len(anchors))
             
             # 生成价格分布直方图数据
             hist_bins = 10

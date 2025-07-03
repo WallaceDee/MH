@@ -1,0 +1,652 @@
+2025-07-02 00:24:56,997 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:24:57,003 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:25:54,966 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:25:56,850 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:25:56,856 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:31:29,941 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:31:32,229 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:31:32,236 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:31:55,037 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:31:57,127 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:31:57,133 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:39:28,491 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '2', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:28,491 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '2', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:28,493 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:28,493 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:28,495 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:28,495 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:28,496 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:28,496 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:28,497 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:28,497 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:28,498 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:28,498 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:28,499 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:28,499 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:28,510 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:28,510 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:28,511 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:28,511 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:28,513 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 10]
+2025-07-02 00:39:28,513 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 10]
+2025-07-02 00:39:28,529 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:28,529 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:28,533 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:39:28] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=desc&year=2025&month=07&page=2&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:39:29,217 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '111', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:29,217 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '111', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:29,222 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:29,222 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:29,224 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:29,224 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:29,225 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:29,225 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:29,226 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:29,226 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:29,227 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:29,227 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:29,228 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:29,228 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:29,245 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:29,245 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:29,247 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:29,247 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:29,248 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1100]
+2025-07-02 00:39:29,248 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1100]
+2025-07-02 00:39:29,415 - app.services.equipment_service - INFO - 查询到的装备数量: 2
+2025-07-02 00:39:29,415 - app.services.equipment_service - INFO - 查询到的装备数量: 2
+2025-07-02 00:39:29,419 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:39:29] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=desc&year=2025&month=07&page=111&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:39:32,626 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '110', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:32,626 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '110', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:32,628 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:32,628 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:32,631 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:32,631 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:32,632 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:32,632 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:32,633 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:32,633 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:32,637 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:32,637 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:32,642 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:32,642 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:32,650 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:32,650 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:32,656 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:32,656 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:32,657 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1090]
+2025-07-02 00:39:32,657 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1090]
+2025-07-02 00:39:32,841 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:32,841 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:32,846 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:39:32] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=desc&year=2025&month=07&page=110&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:39:42,123 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '109', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:42,123 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '109', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:42,125 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:42,125 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:42,126 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:42,126 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:42,127 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:42,127 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:42,128 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:42,128 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:42,129 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:42,129 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:42,130 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:42,130 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:42,143 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:42,143 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:42,144 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:42,144 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:42,145 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1080]
+2025-07-02 00:39:42,145 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1080]
+2025-07-02 00:39:42,343 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:42,343 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:42,349 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:39:42] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=desc&year=2025&month=07&page=109&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:39:54,993 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '110', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:54,993 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '110', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:54,995 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:54,995 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:39:54,997 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:54,997 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:39:54,998 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:54,998 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:39:54,999 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:54,999 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:39:55,000 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:55,000 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:39:55,001 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:55,001 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:39:55,012 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:55,012 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:39:55,013 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:55,013 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:39:55,014 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1090]
+2025-07-02 00:39:55,014 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1090]
+2025-07-02 00:39:55,175 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:55,175 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:39:55,180 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:39:55] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=desc&year=2025&month=07&page=110&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:00,560 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:40:02,496 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:40:02,503 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:40:13,775 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:13,775 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:13,776 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:13,776 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:13,779 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:13,779 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:13,779 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:13,779 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:13,781 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:40:13,781 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:40:13,782 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:40:13,782 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 00:40:13,783 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:40:13,783 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 00:40:13,794 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:40:13,794 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 00:40:13,795 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:13,795 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:13,796 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1070]
+2025-07-02 00:40:13,796 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 1070]
+2025-07-02 00:40:13,951 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:13,951 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:13,957 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:13] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:20,525 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:20,525 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:20,527 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:20,527 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:20,529 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:20,529 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:20,530 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:20,530 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:20,531 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:40:20,531 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 00:40:20,532 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:20,532 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:20,533 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:20,533 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:20,534 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61', '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:20,534 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61', '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:20,545 - app.services.equipment_service - INFO - 查询到的总数: 14
+2025-07-02 00:40:20,545 - app.services.equipment_service - INFO - 查询到的总数: 14
+2025-07-02 00:40:20,546 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:20,546 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:20,547 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:20,547 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:20,557 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:20,557 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:20,559 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:20] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&equip_special_effect[]=1&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:23,414 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:23,414 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:23,417 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:23,417 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:23,419 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:23,419 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:23,420 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:23,420 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:23,424 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:23,424 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:23,425 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:23,425 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:23,428 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:23,428 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:23,436 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:23,436 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:23,438 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:23,438 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:23,442 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:23,442 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:23,450 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:23,450 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:23,452 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:23] "GET /api/v1/equipment/?selectedDate=2025-07&equip_special_effect[]=1&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:25,291 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:25,291 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:25,293 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:25,293 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:25,295 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:25,295 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:25,296 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:25,296 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:25,297 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:25,297 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:25,298 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:25,298 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:25,300 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:25,300 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:25,309 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:25,309 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:25,310 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:25,310 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:25,312 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:25,312 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:25,320 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:25,320 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:25,324 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:25] "GET /api/v1/equipment/?selectedDate=2025-07&equip_special_effect[]=1&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:26,527 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:26,527 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:26,530 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:26,530 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:26,532 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:26,532 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:26,533 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:26,533 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:26,534 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:26,534 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:26,535 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:26,535 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:26,537 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:26,537 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:26,546 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:26,546 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:26,548 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:26,548 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:26,549 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:26,549 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:26,560 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:26,560 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:26,562 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:26] "GET /api/v1/equipment/?selectedDate=2025-07&equip_special_effect[]=1&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:27,056 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:27,056 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'equip_special_effect': ['1'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:27,058 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:27,058 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': ['1'], 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:27,060 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:27,060 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:27,061 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:27,061 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=['1']
+2025-07-02 00:40:27,062 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:27,062 - app.services.equipment_service - INFO - 添加特效筛选: ['1']
+2025-07-02 00:40:27,063 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:27,063 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?))
+2025-07-02 00:40:27,064 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:27,064 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]']
+2025-07-02 00:40:27,075 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:27,075 - app.services.equipment_service - INFO - 查询到的总数: 19
+2025-07-02 00:40:27,076 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:27,076 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND ((special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:27,077 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:27,077 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '[1]', '[1,%', '%,1,%', '%,1]', 10, 1070]
+2025-07-02 00:40:27,085 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:27,085 - app.services.equipment_service - INFO - 查询到的装备数量: 0
+2025-07-02 00:40:27,087 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:27] "GET /api/v1/equipment/?selectedDate=2025-07&equip_special_effect[]=1&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:31,254 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:31,254 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:31,257 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:31,257 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': None, 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:31,259 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:31,259 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:31,261 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:31,261 - app.services.equipment_service - INFO - 多选参数: kindid=None, equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:31,262 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?)
+2025-07-02 00:40:31,262 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?)
+2025-07-02 00:40:31,263 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160]
+2025-07-02 00:40:31,263 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160]
+2025-07-02 00:40:31,271 - app.services.equipment_service - INFO - 查询到的总数: 1666
+2025-07-02 00:40:31,271 - app.services.equipment_service - INFO - 查询到的总数: 1666
+2025-07-02 00:40:31,274 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:31,274 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:31,275 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, 10, 1070]
+2025-07-02 00:40:31,275 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, 10, 1070]
+2025-07-02 00:40:31,543 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:31,543 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:31,548 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:31] "GET /api/v1/equipment/?selectedDate=2025-07&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:46,073 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:46,073 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '108', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:46,075 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:46,075 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:46,077 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:46,077 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:46,078 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:46,078 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:46,079 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:46,079 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:46,080 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:46,080 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:46,081 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:46,081 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:46,090 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:46,090 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:46,092 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:46,092 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:46,095 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 1070]
+2025-07-02 00:40:46,095 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 1070]
+2025-07-02 00:40:46,239 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:46,239 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:46,247 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:46] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=108&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:50,566 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '114', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:50,566 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '114', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:50,568 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:50,568 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:50,570 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:50,570 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:50,571 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:50,571 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:50,572 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:50,572 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:50,574 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:50,574 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:50,575 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:50,575 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:50,584 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:50,584 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:50,585 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:50,585 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:50,586 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 1130]
+2025-07-02 00:40:50,586 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 1130]
+2025-07-02 00:40:50,746 - app.services.equipment_service - INFO - 查询到的装备数量: 6
+2025-07-02 00:40:50,746 - app.services.equipment_service - INFO - 查询到的装备数量: 6
+2025-07-02 00:40:50,750 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:50] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=114&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:54,543 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '113', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:54,543 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '113', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:54,545 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:54,545 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:54,547 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:54,547 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:54,548 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:54,548 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:54,549 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:54,549 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:54,551 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:54,551 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:54,553 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:54,553 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:54,561 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:54,561 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:54,562 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:54,562 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:54,564 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 1120]
+2025-07-02 00:40:54,564 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 1120]
+2025-07-02 00:40:54,705 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:54,705 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:54,713 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:54] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=113&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:40:56,823 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:56,823 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:56,828 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:56,828 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:40:56,830 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:56,830 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:40:56,831 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:56,831 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:40:56,832 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:56,832 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:40:56,833 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:56,833 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:40:56,834 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:56,834 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:40:56,847 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:56,847 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:40:56,850 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:56,850 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:40:56,851 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 0]
+2025-07-02 00:40:56,851 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 0]
+2025-07-02 00:40:56,864 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:56,864 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:40:56,869 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:40:56] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=1&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:41:32,716 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:41:34,813 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:41:34,819 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:45:15,149 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '4', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:15,149 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '4', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:15,151 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:15,151 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:15,152 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:15,152 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:15,153 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:15,153 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:15,155 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:15,155 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:15,156 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:15,156 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:15,157 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:15,157 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:15,167 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:15,167 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:15,169 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:15,169 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:15,170 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 30]
+2025-07-02 00:45:15,170 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 30]
+2025-07-02 00:45:15,185 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:15,185 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:15,191 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:45:15] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=4&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:45:22,075 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '6', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:22,075 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '6', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:22,081 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:22,081 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:22,083 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:22,083 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:22,084 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:22,084 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:22,085 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:22,085 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:22,087 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:22,087 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:22,088 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:22,088 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:22,100 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:22,100 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:22,101 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:22,101 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:22,102 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 50]
+2025-07-02 00:45:22,102 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 50]
+2025-07-02 00:45:22,120 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:22,120 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:22,124 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:45:22] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=6&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:45:26,498 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '8', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:26,498 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '8', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:26,500 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:26,500 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:26,502 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:26,502 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:26,505 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:26,505 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:26,506 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:26,506 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:26,507 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:26,507 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:26,508 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:26,508 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:26,519 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:26,519 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:26,520 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:26,520 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:26,521 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 70]
+2025-07-02 00:45:26,521 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 70]
+2025-07-02 00:45:26,542 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:26,542 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:26,551 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:45:26] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=8&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:45:30,463 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '9', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:30,463 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '9', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:30,466 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:30,466 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:30,468 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:30,468 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:30,469 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:30,469 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:30,470 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:30,470 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:30,471 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:30,471 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:30,473 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:30,473 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:30,490 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:30,490 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:30,498 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:30,498 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:30,499 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 80]
+2025-07-02 00:45:30,499 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 80]
+2025-07-02 00:45:30,522 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:30,522 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:30,526 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:45:30] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=9&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:45:31,391 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '14', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:31,391 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '14', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['64', '63', '61', '62'], 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:31,393 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:31,393 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['64', '63', '61', '62'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-02 00:45:31,397 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:31,397 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 00:45:31,399 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:31,399 - app.services.equipment_service - INFO - 多选参数: kindid=['64', '63', '61', '62'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 00:45:31,402 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:31,402 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?,?,?,?), 值: ['64', '63', '61', '62']
+2025-07-02 00:45:31,404 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:31,404 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?)
+2025-07-02 00:45:31,405 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:31,405 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '64', '63', '61', '62']
+2025-07-02 00:45:31,418 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:31,418 - app.services.equipment_service - INFO - 查询到的总数: 1136
+2025-07-02 00:45:31,419 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:31,419 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?,?,?,?) ORDER BY price DESC LIMIT ? OFFSET ?
+2025-07-02 00:45:31,420 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 130]
+2025-07-02 00:45:31,420 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '64', '63', '61', '62', 10, 130]
+2025-07-02 00:45:31,451 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:31,451 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 00:45:31,456 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 00:45:31] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=64&kindid[]=63&kindid[]=61&kindid[]=62&sort_by=price&sort_order=desc&year=2025&month=07&page=14&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 00:47:10,513 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:47:12,493 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:47:12,499 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:47:42,292 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:47:44,697 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:47:44,704 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:48:08,124 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:48:10,194 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:48:10,201 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:48:41,264 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\lingshi_feature_extractor.py', reloading
+2025-07-02 00:48:43,454 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:48:43,462 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:55:08,868 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\test_feature_extractor.py', reloading
+2025-07-02 00:55:11,211 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:55:11,218 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:55:24,777 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\test_feature_extractor.py', reloading
+2025-07-02 00:55:26,779 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:55:26,788 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:55:53,842 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\test_feature_extractor.py', reloading
+2025-07-02 00:55:56,184 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:55:56,194 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:58:36,531 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\test_feature_extractor.py', reloading
+2025-07-02 00:58:38,484 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:58:38,492 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 00:58:53,122 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\test_feature_extractor.py', reloading
+2025-07-02 00:58:55,215 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 00:58:55,225 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 22:53:02,116 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.10.54:5000
+2025-07-02 22:53:02,118 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-02 22:53:02,122 - werkzeug - INFO -  * Restarting with stat
+2025-07-02 22:53:04,028 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 22:53:04,038 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 22:54:49,127 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:54:49,127 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:54:49,129 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:54:49,129 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:54:49,137 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 22:54:49,137 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 22:54:49,138 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 22:54:49,138 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 22:54:49,140 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 22:54:49,140 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 22:54:49,142 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 22:54:49,142 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 22:54:49,143 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 22:54:49,143 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 22:54:49,362 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 22:54:49,362 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 22:54:49,364 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-02 22:54:49,364 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-02 22:54:49,365 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-02 22:54:49,365 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-02 22:54:49,392 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 22:54:49,392 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 22:54:49,399 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:54:49] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 22:54:51,411 - evaluator.mark_anchor.equip.index - ERROR - 未找到装备市场锚点
+2025-07-02 22:54:51,412 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:54:51] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
+2025-07-02 22:55:38,127 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\mark_anchor\\lingshi\\lingshi_market_data_collector.py', reloading
+2025-07-02 22:55:38,325 - werkzeug - INFO -  * Restarting with stat
+2025-07-02 22:55:40,248 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 22:55:40,255 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 22:55:41,603 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:55:41,603 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:55:41,638 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:55:41,638 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 22:55:41,640 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 22:55:41,640 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 22:55:41,646 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 22:55:41,646 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 22:55:41,647 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 22:55:41,647 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 22:55:41,648 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 22:55:41,648 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 22:55:41,648 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 22:55:41,648 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 22:55:41,657 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 22:55:41,657 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 22:55:41,657 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-02 22:55:41,657 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-02 22:55:41,658 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-02 22:55:41,658 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-02 22:55:41,667 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 22:55:41,667 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 22:55:41,673 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:55:41] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 22:55:43,310 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202507.db): Execution failed on sql 'SELECT * FROM lingshis WHERE 1=1 AND kindid = ? LIMIT 1000': no such table: lingshis
+2025-07-02 22:55:43,312 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202506.db): Execution failed on sql 'SELECT * FROM lingshis WHERE 1=1 AND kindid = ? LIMIT 1000': no such table: lingshis
+2025-07-02 22:55:43,314 - evaluator.mark_anchor.equip.index - ERROR - 未找到装备市场锚点
+2025-07-02 22:55:43,315 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:55:43] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
+2025-07-02 22:57:17,582 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\mark_anchor\\lingshi\\lingshi_market_data_collector.py', reloading
+2025-07-02 22:57:17,848 - werkzeug - INFO -  * Restarting with stat
+2025-07-02 22:57:19,850 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 22:57:19,857 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 22:57:20,134 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202507.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:20,136 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202506.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:20,137 - evaluator.mark_anchor.equip.index - ERROR - 未找到装备市场锚点
+2025-07-02 22:57:20,139 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:57:20] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
+2025-07-02 22:57:28,432 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202507.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:28,433 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202506.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:28,435 - evaluator.mark_anchor.equip.index - ERROR - 未找到装备市场锚点
+2025-07-02 22:57:28,436 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:57:28] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
+2025-07-02 22:57:32,921 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202507.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:32,923 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202506.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:32,924 - evaluator.mark_anchor.equip.index - ERROR - 未找到装备市场锚点
+2025-07-02 22:57:32,925 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:57:32] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
+2025-07-02 22:57:37,036 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202507.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:37,037 - lingshi.lingshi_market_data_collector - ERROR - 查询数据库失败 (E:\workspace\mh\data\cbg_equip_202506.db): Execution failed on sql 'SELECT * FROM equipments WHERE 1=1 AND kindid = ? LIMIT 1000': Error binding parameter 1: type 'dict' is not supported
+2025-07-02 22:57:37,039 - evaluator.mark_anchor.equip.index - ERROR - 未找到装备市场锚点
+2025-07-02 22:57:37,040 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 22:57:37] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
+2025-07-02 23:04:49,407 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\mark_anchor\\equip\\index.py', reloading
+2025-07-02 23:04:49,598 - werkzeug - INFO -  * Restarting with stat
+2025-07-02 23:04:51,392 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 23:04:51,399 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 23:06:50,613 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_fix.py', reloading
+2025-07-02 23:06:50,886 - werkzeug - INFO -  * Restarting with stat
+2025-07-02 23:06:52,771 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 23:06:52,778 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 23:38:01,284 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\mark_anchor\\equip\\index.py', reloading
+2025-07-02 23:38:01,482 - werkzeug - INFO -  * Restarting with stat
+2025-07-02 23:38:03,423 - werkzeug - WARNING -  * Debugger is active!
+2025-07-02 23:38:03,428 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-02 23:38:05,942 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 23:38:05,942 - app.controllers.equipment_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '60', 'level_max': '160', 'kindid': ['61'], 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 23:38:05,948 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 23:38:05,948 - app.controllers.equipment_controller - INFO - 处理后的筛选参数: {'level_min': 60, 'level_max': 160, 'price_min': None, 'price_max': None, 'kindid': ['61'], 'equip_special_skills': None, 'equip_special_effect': None, 'suit_effect': None, 'suit_added_status': None, 'suit_transform_skills': None, 'suit_transform_charms': None, 'gem_value': None, 'gem_level': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-02 23:38:05,949 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 23:38:05,949 - app.services.equipment_service - INFO - 开始处理筛选条件，参数: level_min=60, level_max=160, price_min=None, price_max=None
+2025-07-02 23:38:05,950 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 23:38:05,950 - app.services.equipment_service - INFO - 多选参数: kindid=['61'], equip_special_skills=None, equip_special_effect=None
+2025-07-02 23:38:05,950 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 23:38:05,950 - app.services.equipment_service - INFO - 添加装备类型筛选: kindid IN (?), 值: ['61']
+2025-07-02 23:38:05,950 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 23:38:05,950 - app.services.equipment_service - INFO - 生成的WHERE子句: WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?)
+2025-07-02 23:38:05,951 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 23:38:05,951 - app.services.equipment_service - INFO - SQL参数: [60, 60, 160, 160, '61']
+2025-07-02 23:38:05,960 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 23:38:05,960 - app.services.equipment_service - INFO - 查询到的总数: 1102
+2025-07-02 23:38:05,961 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-02 23:38:05,961 - app.services.equipment_service - INFO - 完整查询SQL: SELECT * FROM equipments WHERE (level >= ? OR equip_level >= ?) AND (level <= ? OR equip_level <= ?) AND kindid IN (?) ORDER BY price ASC LIMIT ? OFFSET ?
+2025-07-02 23:38:05,961 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-02 23:38:05,961 - app.services.equipment_service - INFO - 查询参数: [60, 60, 160, 160, '61', 10, 0]
+2025-07-02 23:38:05,973 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 23:38:05,973 - app.services.equipment_service - INFO - 查询到的装备数量: 10
+2025-07-02 23:38:05,978 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 23:38:05] "GET /api/v1/equipment/?selectedDate=2025-07&kindid[]=61&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=60&level_max=160 HTTP/1.1" 200 -
+2025-07-02 23:38:10,115 - evaluator.mark_anchor.equip.index - WARNING - 数据处理统计: 总数=307, 成功=306, 失败=0, 排除自身=1
+2025-07-02 23:38:10,897 - evaluator.mark_anchor.equip.index - WARNING - 数据处理统计: 总数=307, 成功=306, 失败=0, 排除自身=1
+2025-07-02 23:38:11,148 - werkzeug - INFO - 127.0.0.1 - - [02/Jul/2025 23:38:11] "POST /api/v1/equipment/valuation HTTP/1.1" 200 -
+2025-07-03 00:09:40,080 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\mark_anchor\\lingshi\\lingshi_market_data_collector.py', reloading
+2025-07-03 00:09:40,309 - werkzeug - INFO -  * Restarting with stat
+2025-07-03 00:09:51,794 - werkzeug - INFO -  * Restarting with stat

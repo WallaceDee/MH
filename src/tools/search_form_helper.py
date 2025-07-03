@@ -267,58 +267,366 @@ def _collect_params_base_sync(url, collector_logic):
 
 
 async def _collect_lingshi_logic(page):
-    """灵饰参数收集的具体逻辑"""
-    # 灵饰的JS对象通常是 OverallSearchLingshi
-    js_obj = "OverallSearchLingshi"
-    params = {}
-
-    # 等级
-    params['level_min'] = await page.evaluate(f'() => {js_obj}.level_slider.value.min')
-    params['level_max'] = await page.evaluate(f'() => {js_obj}.level_slider.value.max')
+    """灵饰参数收集的具体逻辑 - 直接模拟原始JavaScript逻辑"""
+    params_dict = {}
     
-    # 灵饰类型
-    kind_value = await page.evaluate(f'() => {js_obj}.kind_checker.get_value()')
-    if kind_value: params['kindid'] = kind_value
-
-    # 主属性
-    main_attr_type = await page.evaluate(f"() => document.querySelector('#txt_main_attr_type').value")
-    main_attr_value = await page.evaluate(f"() => document.querySelector('#txt_main_attr_value').value")
-    if main_attr_type and main_attr_value:
-        params['main_attr_type'] = main_attr_type
-        params['main_attr_value'] = int(main_attr_value)
+    print("🚀 开始收集灵饰参数...")
     
-    # 附加属性
-    addon_attr = await page.evaluate(f'() => {js_obj}.addon_attr_checker.get_value()')
-    if addon_attr:
-        params['addon_attr'] = addon_attr
-        params['addon_attr_value_min'] = int(await page.evaluate(f"() => document.querySelector('#txt_addon_attr_value_min').value") or 0)
-
-    # 附加属性条数
-    params['addon_attr_num'] = await page.evaluate(f"() => document.querySelector('#txt_addon_attr_num').value or 'all'")
-
-    # 特效
-    special_effect = await page.evaluate(f'() => {js_obj}.special_effect_checker.get_value()')
-    if special_effect: params['special_effect'] = special_effect
-
-    # 精炼等级
-    gem_level = await page.evaluate(f"() => document.querySelector('#txt_gem_level').value")
-    if gem_level: params['gem_level'] = int(gem_level)
-
-    # 修理失败次数
-    repair_fail = await page.evaluate(f"() => document.querySelector('#txt_repair_fail').value")
-    if repair_fail: params['repair_fail'] = int(repair_fail)
-
-    # 价格
-    price_min = await page.evaluate(f"() => document.querySelector('#txt_price_min').value")
-    price_max = await page.evaluate(f"() => document.querySelector('#txt_price_max').value")
-    if price_min: params['price_min'] = int(price_min) * 100
-    if price_max: params['price_max'] = int(price_max) * 100
-
-    # 服务器
-    serverid = await page.evaluate(f'() => {js_obj}.select_server.get_serverid()')
-    if serverid: params['serverid'] = serverid
+    # 1. 等级范围参数 - 从LevelSlider对象获取
+    try:
+        # 按照原JS逻辑：arg['equip_level_min'] = this.level_slider.value.min;
+        level_values = await page.evaluate('''
+            () => {
+                if (window.OverallLingshiSearcher && window.OverallLingshiSearcher.level_slider && window.OverallLingshiSearcher.level_slider.value) {
+                    return {
+                        min: window.OverallLingshiSearcher.level_slider.value.min,
+                        max: window.OverallLingshiSearcher.level_slider.value.max
+                    };
+                }
+                return { min: 60, max: 160 };  // 默认值
+            }
+        ''')
+        
+        params_dict['equip_level_min'] = level_values['min']
+        params_dict['equip_level_max'] = level_values['max']
+        print(f"✅ 等级范围: {level_values['min']}-{level_values['max']}")
+    except Exception as e:
+        print(f"❌ 获取等级范围参数失败: {e}")
+        params_dict['equip_level_min'] = 60
+        params_dict['equip_level_max'] = 160
     
-    return params
+    # 2. 收集各种选择器参数
+    check_panels = [
+        ['pass_fair_show', 'fair_show_panel', True],
+        ['server_type', 'server_type_panel', True],
+        ['kindid', 'kind_panel', True],
+        ['added_attr_num', 'added_attr_num_panel', False],
+        ['added_attr_repeat_num', 'added_attr_repeat_num_panel', False]
+    ]
+    
+    for param_name, panel_id, check_all_skip in check_panels:
+        try:
+            value = await page.evaluate(f'''
+                () => {{
+                    const panel = document.getElementById('{panel_id}');
+                    if (!panel) return null;
+                    
+                    // 查找带有'on'类的li元素（ButtonChecker的选中标识）
+                    const liElements = panel.querySelectorAll('li');
+                    const selectedValues = [];
+                    
+                    for (let li of liElements) {{
+                        if (li.classList.contains('on')) {{
+                            // 获取文本内容
+                            let text = '';
+                            const span = li.querySelector('span');
+                            if (span) {{
+                                text = span.textContent.trim();
+                            }}
+                            
+                            // 根据参数类型进行转换
+                            let value = text;
+                            if ('{param_name}' === 'kindid' && window.Kinds) {{
+                                for (let item of window.Kinds) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'server_type' && window.ServerTypes) {{
+                                for (let item of window.ServerTypes) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'pass_fair_show' && window.FairShowStatus) {{
+                                for (let item of window.FairShowStatus) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'added_attr_num' || '{param_name}' === 'added_attr_repeat_num') {{
+                                // 附加属性条数直接使用数字
+                                value = text.replace('条', '');
+                            }}
+                            
+                            selectedValues.push(value);
+                        }}
+                    }}
+                    
+                    // 检查是否全选（需要跳过的情况）
+                    if ({str(check_all_skip).lower()}) {{
+                        const totalItems = liElements.length;
+                        if (selectedValues.length === totalItems) {{
+                            return null;  // 全选时跳过
+                        }}
+                    }}
+                    
+                    return selectedValues.length > 0 ? selectedValues.join(',') : null;
+                }}
+            ''')
+            
+            if value:
+                params_dict[param_name] = value
+                print(f"✅ {param_name}: {value}")
+            else:
+                print(f"⚠️ {param_name}: 无选择")
+        except Exception as e:
+            print(f"❌ 获取{param_name}参数失败: {e}")
+    
+    # 3. 附加属性逻辑
+    try:
+        # 获取附加属性逻辑选择
+        added_attr_logic = await page.evaluate('''
+            () => {
+                const checkedRadio = document.querySelector('input[name="added_attr_logic"]:checked');
+                return checkedRadio ? checkedRadio.value : null;
+            }
+        ''')
+        
+        if added_attr_logic:
+            params_dict['added_attr_logic'] = added_attr_logic
+            print(f"✅ 附加属性逻辑: {added_attr_logic}")
+            
+            # 根据逻辑类型处理附加属性
+            if added_attr_logic == 'detail':
+                # 详细属性模式
+                for i in range(1, 4):
+                    attr_value = await page.evaluate(f'''
+                        () => {{
+                            const select = document.getElementById('sel_add_attr{i}');
+                            return select ? select.value : '';
+                        }}
+                    ''')
+                    if attr_value:
+                        key = f'added_attr.{attr_value}'
+                        params_dict[key] = (params_dict.get(key, 0) + 1)
+                        print(f"✅ 详细附加属性{i}: {attr_value}")
+            else:
+                # 简单模式 - 收集两个面板的附加属性
+                added_attr_values = await page.evaluate('''
+                    () => {
+                        const panel1 = document.getElementById('added_attr1_panel');
+                        const panel2 = document.getElementById('added_attr2_panel');
+                        const selectedValues = [];
+                        
+                        [panel1, panel2].forEach(panel => {
+                            if (panel) {
+                                const liElements = panel.querySelectorAll('li.on');
+                                liElements.forEach(li => {
+                                    const span = li.querySelector('span');
+                                    if (span) {
+                                        const text = span.textContent.trim();
+                                        // 根据文本找到对应的数值
+                                        if (window.AddedAttr1) {
+                                            for (let item of window.AddedAttr1) {
+                                                if (item[1] === text) {
+                                                    selectedValues.push(item[0]);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (window.AddedAttr2) {
+                                            for (let item of window.AddedAttr2) {
+                                                if (item[1] === text) {
+                                                    selectedValues.push(item[0]);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        
+                        return selectedValues;
+                    }
+                ''')
+                
+                for attr_value in added_attr_values:
+                    key = f'added_attr.{attr_value}'
+                    params_dict[key] = 1
+                    print(f"✅ 附加属性: {attr_value}")
+        else:
+            print("⚠️ 附加属性逻辑: 无选择")
+    except Exception as e:
+        print(f"❌ 获取附加属性逻辑参数失败: {e}")
+    
+    # 4. 特效
+    try:
+        if await page.evaluate('() => document.getElementById("chk_has_eazy_effect")?.checked'):
+            params_dict['special_effect'] = 1
+            print("✅ 特效: 超级简易")
+        else:
+            print("⚠️ 特效: 无选择")
+    except Exception as e:
+        print(f"❌ 获取特效参数失败: {e}")
+    
+    # 5. 收集数值输入参数 - 完全按照原始JavaScript逻辑
+    txt_int_items = [
+        ['basic_attr_value', 0, 10000, '技能数量'],
+        ['price_min', 0, 99999, '价格'],
+        ['price_max', 0, 99999, '价格'],
+        ['jinglian_level', 0, 16, '精炼等级'],
+        ['suit_effect_level', 0, 99, '套装等级']
+    ]
+    
+    for item_name, min_val, max_val, desc in txt_int_items:
+        try:
+            value = await page.evaluate(f'''
+                () => {{
+                    const el = document.getElementById('txt_{item_name}');
+                    return el ? el.value : '';
+                }}
+            ''')
+            
+            if value:
+                # 验证整数格式
+                if not value.isdigit():
+                    print(f"❌ {desc}必须是整数: {value}")
+                    continue
+                
+                int_value = int(value)
+                if not (min_val <= int_value <= max_val):
+                    print(f"❌ {desc}超出取值范围 {min_val}-{max_val}: {int_value}")
+                    continue
+                
+                params_dict[item_name] = int_value
+                print(f"✅ {desc}: {int_value}")
+            else:
+                print(f"⚠️ {desc}: 无值")
+        except Exception as e:
+            print(f"❌ 获取{item_name}参数失败: {e}")
+    
+    # 6. 基础属性类型和值
+    try:
+        basic_attr_type = await page.evaluate('''
+            () => {
+                const select = document.getElementById('sel_basic_attr_type');
+                return select ? select.value : '';
+            }
+        ''')
+        
+        if basic_attr_type:
+            params_dict[basic_attr_type] = params_dict.get('basic_attr_value', 1)
+            print(f"✅ 基础属性类型: {basic_attr_type}")
+        else:
+            print("⚠️ 基础属性类型: 无选择")
+    except Exception as e:
+        print(f"❌ 获取基础属性类型参数失败: {e}")
+    
+    # 7. 综合属性
+    try:
+        synthesized_attr_type = await page.evaluate('''
+            () => {
+                const select = document.getElementById('synthesized_attr_type');
+                return select ? select.value : '';
+            }
+        ''')
+        
+        if synthesized_attr_type:
+            synthesized_attr_value = await page.evaluate('''
+                () => {
+                    const input = document.getElementById('txt_synthesized_attr_value');
+                    return input ? input.value : '1';
+                }
+            ''')
+            
+            params_dict['synthesized_attr_total'] = {
+                synthesized_attr_type: synthesized_attr_value or "1"
+            }
+            print(f"✅ 综合属性: {synthesized_attr_type} = {synthesized_attr_value}")
+        else:
+            print("⚠️ 综合属性: 无选择")
+    except Exception as e:
+        print(f"❌ 获取综合属性参数失败: {e}")
+    
+    # 8. 修理失败次数
+    try:
+        repair_fail = await page.evaluate('''
+            () => {
+                const input = document.getElementById('txt_repair_fail');
+                return input ? input.value : '';
+            }
+        ''')
+        
+        if repair_fail:
+            if not repair_fail.isdigit() or int(repair_fail) > 3:
+                print(f"❌ 修理失败取值范围是0~3的整数: {repair_fail}")
+            else:
+                params_dict['repair_fail'] = int(repair_fail)
+                print(f"✅ 修理失败次数: {repair_fail}")
+        else:
+            print("⚠️ 修理失败次数: 无值")
+    except Exception as e:
+        print(f"❌ 获取修理失败参数失败: {e}")
+    
+    # 9. 套装效果
+    try:
+        suit_effect = await page.evaluate('''
+            () => {
+                const select = document.getElementById('sel_suit_effect');
+                return select ? select.value : '';
+            }
+        ''')
+        
+        if suit_effect:
+            params_dict['suit_effect'] = suit_effect
+            print(f"✅ 套装效果: {suit_effect}")
+        else:
+            print("⚠️ 套装效果: 无选择")
+    except Exception as e:
+        print(f"❌ 获取套装效果参数失败: {e}")
+    
+    # 10. 价格处理（原JS: if (arg['price_min']) arg['price_min'] = arg['price_min'] * 100;）
+    if 'price_min' in params_dict: 
+        params_dict['price_min'] *= 100
+        print(f"  价格转换: price_min *= 100 = {params_dict['price_min']}")
+    if 'price_max' in params_dict: 
+        params_dict['price_max'] *= 100
+        print(f"  价格转换: price_max *= 100 = {params_dict['price_max']}")
+    
+    # 11. 服务器相关
+    try:
+        # 指定服务器
+        serverid = await page.evaluate('''
+            () => {
+                if (window.OverallLingshiSearcher && window.OverallLingshiSearcher.select_server) {
+                    return window.OverallLingshiSearcher.select_server.get_serverid();
+                }
+                return null;
+            }
+        ''')
+        if serverid: 
+            params_dict['serverid'] = serverid
+            print(f"✅ 服务器ID: {serverid}")
+        else:
+            print("⚠️ 服务器ID: 无值")
+    except Exception as e:
+        print(f"❌ 获取服务器ID参数失败: {e}")
+    
+    # 跨服购买服务器ID
+    try:
+        cross_buy_serverid = await page.evaluate("() => document.getElementById('user_serverid')?.value || ''")
+        if cross_buy_serverid: 
+            params_dict['cross_buy_serverid'] = cross_buy_serverid
+            print(f"✅ 跨服购买服务器ID: {cross_buy_serverid}")
+        else:
+            print("⚠️ 跨服购买服务器ID: 无值")
+    except Exception as e:
+        print(f"❌ 获取跨服购买服务器ID参数失败: {e}")
+    
+    # 12. 清理临时参数
+    if 'basic_attr_value' in params_dict:
+        del params_dict['basic_attr_value']
+    
+    print(f"\n📊 灵饰参数收集完成，共获取 {len(params_dict)} 个参数:")
+    for key, value in params_dict.items():
+        print(f"  {key}: {value}")
+    
+    return params_dict
 
 async def _collect_pet_equip_logic(page):
     """收集召唤兽装备搜索逻辑"""
@@ -930,7 +1238,7 @@ async def get_equip_search_params_async(use_browser=True):
     return await _get_params_async('normal', use_browser, _collect_normal_equip_logic, URL)
 
 async def get_lingshi_search_params_async(use_browser=True):
-    URL = 'https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_lingshi'
+    URL = 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_overall_search_lingshi'
     return await _get_params_async('lingshi', use_browser, _collect_lingshi_logic, URL)
 
 async def get_pet_search_params_async(use_browser=True):
@@ -947,7 +1255,7 @@ def get_equip_search_params_sync(use_browser=True):
     return _get_params_sync('normal', use_browser, _collect_normal_equip_logic, URL)
 
 def get_lingshi_search_params_sync(use_browser=True):
-    URL = 'https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_lingshi'
+    URL = 'https://xyq.cbg.163.com/xyq_overall_search.py?act=show_overall_search_lingshi'
     return _get_params_sync('lingshi', use_browser, _collect_lingshi_logic, URL)
 
 def get_pet_search_params_sync(use_browser=True):

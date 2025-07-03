@@ -26,6 +26,9 @@ from src.utils.lpc_helper import LPCHelper
 from src.parser.common_parser import CommonParser
 from src.parser.fabao_parser import FabaoParser
 
+# 导入特征提取器
+from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
+
 class DataUpdater:
     def __init__(self, db_path, logger=None):
         self.db_path = db_path
@@ -40,6 +43,9 @@ class DataUpdater:
         self.lpc_helper = LPCHelper(self.logger)
         self.common_parser = CommonParser(self.logger)
         self.fabao_parser = FabaoParser(self.logger)
+        
+        # 初始化特征提取器
+        self.lingshi_feature_extractor = LingshiFeatureExtractor()
 
     def update_character_data(self, character_id=None):
         """
@@ -426,6 +432,241 @@ class DataUpdater:
             bool: 是否删除成功
         """
         return self.drop_column_from_table('large_equip_desc_data', column_name)
+    
+    def update_equipment_features(self, equip_db_path=None):
+        """
+        更新装备数据库中的特征数据
+        
+        使用特征提取器重新提取灵饰装备的附加属性特征，并覆盖agg_added_attrs字段
+        
+        Args:
+            equip_db_path: 装备数据库路径，如果为None则使用默认路径
+            
+        Returns:
+            int: 更新的装备数量
+        """
+        try:
+            # 如果没有指定数据库路径，使用默认路径
+            if equip_db_path is None:
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                current_month = datetime.now().strftime('%Y%m')
+                equip_db_path = os.path.join(project_root, 'data', f'cbg_equip_{current_month}.db')
+            
+            self.logger.info(f"开始更新装备数据库: {equip_db_path}")
+            
+            # 连接装备数据库
+            conn = sqlite3.connect(equip_db_path)
+            cursor = conn.cursor()
+            
+            # 获取所有灵饰装备数据 (kindid: 61, 62, 63, 64)
+            cursor.execute("""
+                SELECT eid, kindid, large_equip_desc, agg_added_attrs
+                FROM equipments 
+                WHERE kindid IN (61, 62, 63, 64)
+                AND large_equip_desc IS NOT NULL 
+                AND large_equip_desc != ''
+            """)
+            
+            equipments = cursor.fetchall()
+            self.logger.info(f"找到 {len(equipments)} 个灵饰装备需要更新特征")
+            
+            updated_count = 0
+            error_count = 0
+            
+            for equip in equipments:
+                try:
+                    eid = equip[0]
+                    kindid = equip[1]
+                    large_equip_desc = equip[2]
+                    old_agg_added_attrs = equip[3]
+                    
+                    # 构建装备数据字典
+                    equip_data = {
+                        'kindid': kindid,
+                        'large_equip_desc': large_equip_desc
+                    }
+                    
+                    # 使用特征提取器提取附加属性
+                    added_attrs_features = self.lingshi_feature_extractor._extract_added_attrs_features(equip_data)
+                    extracted_attrs = added_attrs_features.get('attrs', [])
+                    
+                    # 转换为JSON字符串
+                    new_agg_added_attrs = json.dumps(extracted_attrs, ensure_ascii=False) if extracted_attrs else ''
+                    
+                    # 检查是否有变化
+                    if new_agg_added_attrs != old_agg_added_attrs:
+                        # 更新数据库
+                        cursor.execute(
+                            "UPDATE equipments SET agg_added_attrs = ? WHERE eid = ?",
+                            (new_agg_added_attrs, eid)
+                        )
+                        
+                        updated_count += 1
+                        
+                        # 记录详细信息
+                        if extracted_attrs:
+                            attr_info = []
+                            for attr in extracted_attrs:
+                                attr_info.append(f"{attr['attr_type']}+{attr['attr_value']}")
+                            self.logger.info(f"更新装备 {eid} (kindid:{kindid}): {', '.join(attr_info)}")
+                        else:
+                            self.logger.info(f"更新装备 {eid} (kindid:{kindid}): 清空附加属性")
+                    else:
+                        self.logger.debug(f"装备 {eid} (kindid:{kindid}): 特征无变化，跳过")
+                        
+                except Exception as e:
+                    error_count += 1
+                    self.logger.error(f"更新装备 {eid} 特征时出错: {e}")
+                    continue
+            
+            # 提交更改
+            conn.commit()
+            
+            self.logger.info(f"装备特征更新完成:")
+            self.logger.info(f"  - 总装备数: {len(equipments)}")
+            self.logger.info(f"  - 成功更新: {updated_count}")
+            self.logger.info(f"  - 错误数量: {error_count}")
+            
+            return updated_count
+            
+        except Exception as e:
+            self.logger.error(f"更新装备特征时出错: {e}")
+            if 'conn' in locals():
+                conn.rollback()
+            return 0
+        finally:
+            if 'conn' in locals():
+                conn.close()
+    
+    def update_equipment_features_batch(self, batch_size=100, equip_db_path=None):
+        """
+        批量更新装备数据库中的特征数据
+        
+        分批处理大量数据，避免内存占用过高
+        
+        Args:
+            batch_size: 每批处理的装备数量
+            equip_db_path: 装备数据库路径，如果为None则使用默认路径
+            
+        Returns:
+            int: 更新的装备数量
+        """
+        try:
+            # 如果没有指定数据库路径，使用默认路径
+            if equip_db_path is None:
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                current_month = datetime.now().strftime('%Y%m')
+                equip_db_path = os.path.join(project_root, 'data', f'cbg_equip_{current_month}.db')
+            
+            self.logger.info(f"开始批量更新装备数据库: {equip_db_path}")
+            
+            # 连接装备数据库
+            conn = sqlite3.connect(equip_db_path)
+            cursor = conn.cursor()
+            
+            # 获取总数量
+            cursor.execute("""
+                SELECT COUNT(*) 
+                FROM equipments 
+                WHERE kindid IN (61, 62, 63, 64)
+                AND large_equip_desc IS NOT NULL 
+                AND large_equip_desc != ''
+            """)
+            total_count = cursor.fetchone()[0]
+            
+            self.logger.info(f"总共需要处理 {total_count} 个灵饰装备")
+            
+            updated_count = 0
+            error_count = 0
+            processed_count = 0
+            
+            # 分批处理
+            offset = 0
+            while offset < total_count:
+                # 获取当前批次的装备
+                cursor.execute("""
+                    SELECT eid, kindid, large_equip_desc, agg_added_attrs
+                    FROM equipments 
+                    WHERE kindid IN (61, 62, 63, 64)
+                    AND large_equip_desc IS NOT NULL 
+                    AND large_equip_desc != ''
+                    ORDER BY eid
+                    LIMIT ? OFFSET ?
+                """, (batch_size, offset))
+                
+                equipments = cursor.fetchall()
+                
+                if not equipments:
+                    break
+                
+                self.logger.info(f"处理第 {offset//batch_size + 1} 批，共 {len(equipments)} 个装备")
+                
+                # 处理当前批次
+                for equip in equipments:
+                    try:
+                        eid = equip[0]
+                        kindid = equip[1]
+                        large_equip_desc = equip[2]
+                        old_agg_added_attrs = equip[3]
+                        
+                        # 构建装备数据字典
+                        equip_data = {
+                            'kindid': kindid,
+                            'large_equip_desc': large_equip_desc
+                        }
+                        
+                        # 使用特征提取器提取附加属性
+                        added_attrs_features = self.lingshi_feature_extractor._extract_added_attrs_features(equip_data)
+                        extracted_attrs = added_attrs_features.get('attrs', [])
+                        
+                        # 转换为JSON字符串
+                        new_agg_added_attrs = json.dumps(extracted_attrs, ensure_ascii=False) if extracted_attrs else ''
+                        
+                        # 检查是否有变化
+                        if new_agg_added_attrs != old_agg_added_attrs:
+                            # 更新数据库
+                            cursor.execute(
+                                "UPDATE equipments SET agg_added_attrs = ? WHERE eid = ?",
+                                (new_agg_added_attrs, eid)
+                            )
+                            updated_count += 1
+                        
+                        processed_count += 1
+                        
+                        # 每处理100个装备显示一次进度
+                        if processed_count % 100 == 0:
+                            self.logger.info(f"已处理 {processed_count}/{total_count} 个装备，更新 {updated_count} 个")
+                            
+                    except Exception as e:
+                        error_count += 1
+                        self.logger.error(f"更新装备 {eid} 特征时出错: {e}")
+                        continue
+                
+                # 提交当前批次的更改
+                conn.commit()
+                
+                # 移动到下一批
+                offset += batch_size
+                
+                # 短暂休息，避免过度占用资源
+                time.sleep(0.1)
+            
+            self.logger.info(f"批量装备特征更新完成:")
+            self.logger.info(f"  - 总装备数: {total_count}")
+            self.logger.info(f"  - 已处理: {processed_count}")
+            self.logger.info(f"  - 成功更新: {updated_count}")
+            self.logger.info(f"  - 错误数量: {error_count}")
+            
+            return updated_count
+            
+        except Exception as e:
+            self.logger.error(f"批量更新装备特征时出错: {e}")
+            if 'conn' in locals():
+                conn.rollback()
+            return 0
+        finally:
+            if 'conn' in locals():
+                conn.close()
 
 def main():
     """简单的测试函数"""
@@ -437,16 +678,44 @@ def main():
     
     # 获取当前月份
     current_month = datetime.now().strftime('%Y%m')
-    db_filename = f"empty_characters_{current_month}.db"
-    db_path = os.path.join(project_root, 'data', db_filename)
+    
+    # 角色数据库路径
+    char_db_filename = f"empty_characters_{current_month}.db"
+    char_db_path = os.path.join(project_root, 'data', char_db_filename)
+    
+    # 装备数据库路径
+    equip_db_filename = f"cbg_equip_{current_month}.db"
+    equip_db_path = os.path.join(project_root, 'data', equip_db_filename)
     
     # 创建更新器
-    updater = DataUpdater(db_path, logger)
+    updater = DataUpdater(char_db_path, logger)
     
-    # 更新所有数据
+    # 测试装备特征更新功能
+    print("🔧 开始测试装备特征更新功能...")
+    
+    # 检查装备数据库是否存在
+    if os.path.exists(equip_db_path):
+        print(f"📁 找到装备数据库: {equip_db_path}")
+        
+        # 使用批量更新方法（推荐用于大量数据）
+        print("🚀 开始批量更新装备特征...")
+        updated_count = updater.update_equipment_features_batch(batch_size=50, equip_db_path=equip_db_path)
+        print(f"✅ 批量更新完成，共更新 {updated_count} 个装备")
+        
+        # 或者使用普通更新方法（适用于小量数据）
+        # print("🚀 开始更新装备特征...")
+        # updated_count = updater.update_equipment_features(equip_db_path=equip_db_path)
+        # print(f"✅ 更新完成，共更新 {updated_count} 个装备")
+        
+    else:
+        print(f"❌ 装备数据库不存在: {equip_db_path}")
+        print("请先运行装备爬虫获取数据")
+    
+    # 原有的角色数据更新功能（已注释）
     # updater.add_column_to_characters('sum_amount','INTEGER')
     # updater.add_column_to_table('large_equip_desc_data','pet','TEXT')
-    updater.update_character_data()
+    # updater.update_character_data()
     # updater.drop_column_from_table('characters','sum_amount')
+
 if __name__ == "__main__":
     main() 
