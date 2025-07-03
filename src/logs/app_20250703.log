@@ -5117,3 +5117,4 @@
 2025-07-04 00:15:54,977 - werkzeug - INFO - 127.0.0.1 - - [04/Jul/2025 00:15:54] "[31m[1mPOST /api/v1/equipment/valuation HTTP/1.1[0m" 400 -
 2025-07-04 00:16:28,758 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\mark_anchor\\equip\\index.py', reloading
 2025-07-04 00:16:29,004 - werkzeug - INFO -  * Restarting with stat
+2025-07-04 00:20:20,037 - werkzeug - INFO -  * Restarting with stat
