@@ -172,9 +172,18 @@ class EquipMarketDataCollector:
                         query += " AND special_skill = ?"
                         params.append(special_skill)
 
-                    if suit_effect is not None and suit_effect > 0:
-                        query += " AND suit_effect = ?"
-                        params.append(suit_effect)
+                    if suit_effect is not None:
+                        # 将字符串转换为数字后再比较（pet_equip除外，其他都是数字字符串）
+                        try:
+                            suit_effect_num = int(suit_effect) if suit_effect is not None else 0
+                            if suit_effect_num > 0:
+                                query += " AND suit_effect = ?"
+                                params.append(suit_effect_num)
+                        except (ValueError, TypeError):
+                            # 如果转换失败（可能是pet_equip的字符串套装），直接使用原值
+                            if suit_effect and str(suit_effect).strip():
+                                query += " AND suit_effect = ?"
+                                params.append(suit_effect)
 
                     if require_high_value_suits:
                         # 强制包含高价值套装：只搜索魔力套和敏捷套装备
@@ -403,12 +412,21 @@ class EquipMarketDataCollector:
             target_has_high_value_suits = False
             target_has_precise_filter_suits = False
             
-            if suit_effect and suit_effect > 0:
-                # 检查是否包含高价值套装
-                if suit_effect in high_value_suits:
+            # 处理suit_effect：尝试转换为数字，如果失败则保持原值
+            suit_effect_value = None
+            if suit_effect:
+                try:
+                    suit_effect_value = int(suit_effect)
+                except (ValueError, TypeError):
+                    # 转换失败（可能是pet_equip的字符串套装），保持原值
+                    suit_effect_value = suit_effect
+            
+            if suit_effect_value:
+                # 检查是否包含高价值套装（只对数字套装有效）
+                if isinstance(suit_effect_value, int) and suit_effect_value in high_value_suits:
                     target_has_high_value_suits = True
-                # 检查是否包含精确筛选套装
-                elif suit_effect in precise_filter_suits:
+                # 检查是否包含精确筛选套装（只对数字套装有效）
+                elif isinstance(suit_effect_value, int) and suit_effect_value in precise_filter_suits:
                     target_has_precise_filter_suits = True
             
             # 套装筛选逻辑
@@ -418,7 +436,7 @@ class EquipMarketDataCollector:
                 print(f"目标装备包含高价值套装 {suit_effect}，强制只搜索高价值套装装备")
             elif target_has_precise_filter_suits:
                 # 情况2：目标装备有精确筛选套装 → 精确筛选该套装装备，排除其他高价值套装
-                exclude_suit_effect = high_value_suits + [s for s in precise_filter_suits if s != suit_effect]
+                exclude_suit_effect = high_value_suits + [s for s in precise_filter_suits if s != suit_effect_value]
                 print(f"目标装备包含精确筛选套装 {suit_effect}，将精确筛选该套装，排除其他精确筛选套装和高价值套装")
             else:
                 # 情况3：目标装备没有套装或有其他套装 → 排除高价值套装和精确筛选套装
@@ -456,7 +474,7 @@ class EquipMarketDataCollector:
             self.logger.error(f"获取相似度计算市场数据失败: {e}")
             return pd.DataFrame()
 
-    def _should_filter_suit_effect(self, suit_effect: int) -> bool:
+    def _should_filter_suit_effect(self, suit_effect: Union[int, str]) -> bool:
         """
         判断套装效果是否应该被用于筛选
         
@@ -464,14 +482,21 @@ class EquipMarketDataCollector:
         其他套装效果在相似度计算时进行聚类处理
         
         Args:
-            suit_effect: 套装效果ID
+            suit_effect: 套装效果ID（数字或数字字符串，pet_equip可能是纯字符串）
             
         Returns:
             bool: 是否应该筛选此套装效果
         """
         # 允许精确筛选的套装效果：定心术、变身术、碎星诀、天神护体、满天花雨、浪涌
         allowed_suit_effects = [4002, 4011, 4017, 4019, 3011, 3050]
-        return suit_effect in allowed_suit_effects
+        
+        # 尝试转换为数字进行比较
+        try:
+            suit_effect_num = int(suit_effect)
+            return suit_effect_num in allowed_suit_effects
+        except (ValueError, TypeError):
+            # 转换失败（可能是pet_equip的字符串套装），不进行精确筛选
+            return False
 
     def get_market_data_with_business_rules(self,
                                            target_features: Dict[str, Any],

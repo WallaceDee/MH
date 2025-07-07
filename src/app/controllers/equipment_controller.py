@@ -69,6 +69,18 @@ class EquipmentController:
                 else:
                     kindid = None
             
+            # 宠物装备类型参数（多选）
+            equip_type = params.get('equip_type')
+            if equip_type:
+                if isinstance(equip_type, str):
+                    # 如果是字符串，按逗号分割
+                    equip_type = [item.strip() for item in equip_type.split(',') if item.strip()]
+                elif isinstance(equip_type, list):
+                    # 如果已经是列表，直接使用
+                    equip_type = [int(item) for item in equip_type if item]
+                else:
+                    equip_type = None
+            
             equip_special_skills = params.get('equip_special_skills')
             if equip_special_skills:
                 if isinstance(equip_special_skills, str):
@@ -113,6 +125,7 @@ class EquipmentController:
                 'price_min': price_min,
                 'price_max': price_max,
                 'kindid': kindid,
+                'equip_type': equip_type,
                 'equip_special_skills': equip_special_skills,
                 'equip_special_effect': equip_special_effect,
                 'suit_effect': suit_effect,
@@ -137,6 +150,7 @@ class EquipmentController:
                 price_min=price_min,
                 price_max=price_max,
                 kindid=kindid,
+                equip_type=equip_type,
                 equip_special_skills=equip_special_skills,
                 equip_special_effect=equip_special_effect,
                 suit_effect=suit_effect,

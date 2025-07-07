@@ -77,6 +77,10 @@ def get_all_plugins() -> List[EquipmentTypePlugin]:
         # 灵饰插件
         from .lingshi_plugin import LingshiPlugin
         plugins.append(LingshiPlugin())
+
+        # 宠物装备插件
+        from .pet_equip_plugin import PetEquipPlugin
+        plugins.append(PetEquipPlugin())
         
         print(f"已自动加载 {len(plugins)} 个装备类型插件")
         

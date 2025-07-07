@@ -29,6 +29,7 @@ def get_equipments():
             'price_max': request.args.get('price_max'),
             # 修复多选参数 - 使用getlist获取数组参数
             'kindid': request.args.getlist('kindid') or request.args.getlist('kindid[]') or None,
+            'equip_type': request.args.getlist('equip_type') or request.args.getlist('equip_type[]') or None,  # 宠物装备类型（多选）
             'equip_special_skills': request.args.getlist('equip_special_skills') or request.args.getlist('equip_special_skills[]') or None,
             'equip_special_effect': request.args.getlist('equip_special_effect') or request.args.getlist('equip_special_effect[]') or None,
             'suit_effect': request.args.get('suit_effect'),

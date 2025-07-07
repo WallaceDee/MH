@@ -629,29 +629,287 @@ async def _collect_lingshi_logic(page):
     return params_dict
 
 async def _collect_pet_equip_logic(page):
-    """收集召唤兽装备搜索逻辑"""
+    """收集召唤兽装备搜索逻辑 - 参考overall_search_pet_equips.js"""
     params_dict = {}
     
-    # 基础等级范围
-    level_min = await page.evaluate('() => document.getElementById("txt_level_min")?.value')
-    if level_min: params_dict['level_min'] = level_min
-
-    level_max = await page.evaluate('() => document.getElementById("txt_level_max")?.value')
-    if level_max: params_dict['level_max'] = level_max
-
-    # 价格范围
-    price_min = await page.evaluate('() => document.getElementById("txt_price_min")?.value')
-    if price_min: params_dict['price_min'] = price_min
-
-    price_max = await page.evaluate('() => document.getElementById("txt_price_max")?.value')
-    if price_max: params_dict['price_max'] = price_max
+    print("🚀 开始收集宠物装备参数...")
     
-    # 前端状态
-    if await page.evaluate('() => document.getElementById("front_status_pass_fair_show")?.checked'):
-        params_dict['front_status'] = 'pass_fair_show'
-    elif await page.evaluate('() => document.getElementById("front_status_fair_show")?.checked'):
-        params_dict['front_status'] = 'fair_show'
+    # 1. 等级范围参数 - 从LevelSlider对象获取
+    try:
+        # 按照原JS逻辑：args["level_min"] = SearchFormObj.level_slider.value.min;
+        level_values = await page.evaluate('''
+            () => {
+                if (window.SearchFormObj && window.SearchFormObj.level_slider && window.SearchFormObj.level_slider.value) {
+                    return {
+                        min: window.SearchFormObj.level_slider.value.min,
+                        max: window.SearchFormObj.level_slider.value.max
+                    };
+                }
+                return { min: 5, max: 145 };  // 默认值
+            }
+        ''')
+        
+        params_dict['level_min'] = level_values['min']
+        params_dict['level_max'] = level_values['max']
+        print(f"✅ 等级范围: {level_values['min']}-{level_values['max']}")
+    except Exception as e:
+        print(f"❌ 获取等级范围参数失败: {e}")
+        params_dict['level_min'] = 5
+        params_dict['level_max'] = 145
     
+    # 2. 装备类型选择
+    try:
+        # 原JS: var equip_pos = get_item_selected($$("#EquipPosBox li"));
+        equip_pos = await page.evaluate('''
+            () => {
+                const items = document.querySelectorAll("#EquipPosBox li");
+                const value_list = [];
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.classList.contains("on")) {
+                        value_list.push(item.getAttribute("data_value"));
+                    }
+                }
+                if (value_list.length == items.length) {
+                    return "";
+                } else {
+                    return value_list.join(",");
+                }
+            }
+        ''')
+        
+        if equip_pos:
+            params_dict['equip_pos'] = equip_pos
+            print(f"✅ 装备类型: {equip_pos}")
+        else:
+            print("⚠️ 装备类型: 无选择")
+    except Exception as e:
+        print(f"❌ 获取装备类型参数失败: {e}")
+    
+    # 3. 精魄灵石属性
+    try:
+        # 原JS: var xiangqian_stone_attr = get_item_selected($$('#xiangqian_stone_attr_panel li'));
+        xiangqian_stone_attr = await page.evaluate('''
+            () => {
+                const items = document.querySelectorAll('#xiangqian_stone_attr_panel li');
+                const value_list = [];
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.classList.contains("on")) {
+                        value_list.push(item.getAttribute("data_value"));
+                    }
+                }
+                if (value_list.length == items.length) {
+                    return "";
+                } else {
+                    return value_list.join(",");
+                }
+            }
+        ''')
+        
+        if xiangqian_stone_attr:
+            params_dict['xiangqian_stone_attr'] = xiangqian_stone_attr
+            print(f"✅ 精魄灵石属性: {xiangqian_stone_attr}")
+        else:
+            print("⚠️ 精魄灵石属性: 无选择")
+    except Exception as e:
+        print(f"❌ 获取精魄灵石属性参数失败: {e}")
+    
+    # 4. 附加属性选择
+    try:
+        # 原JS: var addon_el_list = $$("#addon_skill_box li");
+        addon_attrs = await page.evaluate('''
+            () => {
+                const items = document.querySelectorAll("#addon_skill_box li");
+                const result = {};
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.classList.contains("on")) {
+                        const attr_name = item.getAttribute("data_value");
+                        result[attr_name] = 1;
+                    }
+                }
+                return result;
+            }
+        ''')
+        
+        for attr_name, value in addon_attrs.items():
+            params_dict[attr_name] = value
+            print(f"✅ 附加属性: {attr_name}")
+        
+        if not addon_attrs:
+            print("⚠️ 附加属性: 无选择")
+    except Exception as e:
+        print(f"❌ 获取附加属性参数失败: {e}")
+    
+    # 5. 数值输入参数
+    try:
+        # 原JS: var args_config = [["speed", "速度"], ["fangyu", "防御"], ...];
+        int_inputs = [
+            ['speed', '速度'],
+            ['fangyu', '防御'], 
+            ['mofa', '魔法'],
+            ['shanghai', '伤害'],
+            ['hit_ratio', '命中率'],
+            ['hp', '气血'],
+            ['xiang_qian_level', '宝石'],
+            ['addon_sum_min', '属性总和'],
+            ['addon_minjie_reduce', '敏捷减少']
+        ]
+        
+        for field_name, display_name in int_inputs:
+            value = await page.evaluate(f'() => document.getElementById("{field_name}")?.value?.trim()')
+            if value and value.isdigit() and len(value) <= 9:
+                int_value = int(value)
+                if int_value > 0:
+                    params_dict[field_name] = int_value
+                    print(f"✅ {display_name}: {int_value}")
+    except Exception as e:
+        print(f"❌ 获取数值输入参数失败: {e}")
+    
+    # 6. 修理失败次数
+    try:
+        repair_failed_times = await page.evaluate('() => document.getElementById("repair_failed_times")?.value')
+        if repair_failed_times:
+            params_dict["repair_failed_times"] = repair_failed_times
+            print(f"✅ 修理失败次数: {repair_failed_times}")
+    except Exception as e:
+        print(f"❌ 获取修理失败次数参数失败: {e}")
+    
+    # 7. 价格范围
+    try:
+        # 原JS逻辑处理价格
+        price_min = await page.evaluate('() => document.getElementById("price_min")?.value?.trim()')
+        if price_min:
+            try:
+                price_min_value = float(price_min)
+                if price_min_value > 0:
+                    params_dict["price_min"] = int(price_min_value * 100)  # 转换为分
+                    print(f"✅ 最低价格: {price_min_value}")
+            except ValueError:
+                print("❌ 最低价格格式错误")
+        
+        price_max = await page.evaluate('() => document.getElementById("price_max")?.value?.trim()')
+        if price_max:
+            try:
+                price_max_value = float(price_max)
+                if price_max_value > 0:
+                    params_dict["price_max"] = int(price_max_value * 100)  # 转换为分
+                    print(f"✅ 最高价格: {price_max_value}")
+            except ValueError:
+                print("❌ 最高价格格式错误")
+        
+        # 价格范围检查
+        if params_dict.get("price_min") and params_dict.get("price_max"):
+            if params_dict["price_max"] < params_dict["price_min"]:
+                print("❌ 价格范围错误：最高价格小于最低价格")
+                params_dict.pop("price_min", None)
+                params_dict.pop("price_max", None)
+    except Exception as e:
+        print(f"❌ 获取价格参数失败: {e}")
+    
+    # 8. 附加状态
+    try:
+        addon_status = await page.evaluate('() => document.getElementById("addon_status")?.value')
+        if addon_status:
+            # 验证附加状态是否有效
+            is_valid = await page.evaluate(f'''
+                () => {{
+                    const valid_values = window.MO_SHOU_YAO_JUE || [];
+                    const equip_addon_status = window.EquipAddonStatus || [];
+                    return valid_values.includes("{addon_status}") || equip_addon_status.includes("{addon_status}");
+                }}
+            ''')
+            
+            if is_valid:
+                params_dict["addon_status"] = addon_status
+                print(f"✅ 附加状态: {addon_status}")
+            else:
+                print(f"❌ 附加状态无效: {addon_status}")
+    except Exception as e:
+        print(f"❌ 获取附加状态参数失败: {e}")
+    
+    # 9. 套装效果相关
+    try:
+        # 原JS: var $noSuitEffect = $('no_suit_effect'), $hasSuitEffect = $('has_suit_effect')
+        no_suit_effect = await page.evaluate('() => document.getElementById("no_suit_effect")?.checked')
+        if no_suit_effect:
+            params_dict['include_no_skill'] = 1
+            print("✅ 包含无套装效果")
+        
+        has_suit_effect = await page.evaluate('() => document.getElementById("has_suit_effect")?.checked')
+        has_suit_effect_disabled = await page.evaluate('() => document.getElementById("has_suit_effect")?.disabled')
+        
+        if has_suit_effect and not has_suit_effect_disabled:
+            params_dict['include_can_cover_skill'] = 1
+            print("✅ 包含可覆盖套装效果")
+        
+        # 属性总和包含伤害
+        include_damage = await page.evaluate('() => document.getElementById("addon_sum_include_damage")?.checked')
+        if include_damage:
+            params_dict['addon_sum_include_damage'] = 1
+            print("✅ 属性总和包含伤害")
+    except Exception as e:
+        print(f"❌ 获取套装效果参数失败: {e}")
+    
+    # 10. 服务器类型
+    try:
+        # 原JS: var check_items = [['server_type', this.server_type_checker, true]];
+        server_type = await page.evaluate('''
+            () => {
+                const items = document.querySelectorAll("#server_type_panel li");
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.classList.contains("on")) {
+                        return item.getAttribute("data_value");
+                    }
+                }
+                return null;
+            }
+        ''')
+        
+        if server_type:
+            params_dict['server_type'] = server_type
+            print(f"✅ 服务器类型: {server_type}")
+        else:
+            print("⚠️ 服务器类型: 无选择")
+    except Exception as e:
+        print(f"❌ 获取服务器类型参数失败: {e}")
+    
+    # 11. 指定服务器
+    try:
+        # 原JS: if (this.select_server.get_serverid()) { args['serverid'] = this.select_server.get_serverid(); }
+        serverid = await page.evaluate('''
+            () => {
+                if (window.SearchFormObj && window.SearchFormObj.select_server && window.SearchFormObj.select_server.get_serverid) {
+                    return window.SearchFormObj.select_server.get_serverid();
+                }
+                return null;
+            }
+        ''')
+        
+        if serverid:
+            params_dict['serverid'] = serverid
+            print(f"✅ 指定服务器: {serverid}")
+    except Exception as e:
+        print(f"❌ 获取指定服务器参数失败: {e}")
+    
+    # 12. 跨服购买
+    try:
+        # 原JS: if ($("user_serverid") && $("user_serverid").value) { args['cross_buy_serverid'] = $("user_serverid").value; }
+        user_serverid = await page.evaluate('() => document.getElementById("user_serverid")?.value')
+        if user_serverid:
+            params_dict['cross_buy_serverid'] = user_serverid
+            print(f"✅ 跨服购买服务器: {user_serverid}")
+    except Exception as e:
+        print(f"❌ 获取跨服购买参数失败: {e}")
+    
+    # 13. 参数验证
+    if not params_dict:
+        print("❌ 没有收集到任何搜索参数")
+        return params_dict
+    
+    print(f"✅ 成功收集到 {len(params_dict)} 个参数")
     return params_dict
 
 async def _collect_pet_logic(page):
@@ -1246,7 +1504,7 @@ async def get_pet_search_params_async(use_browser=True):
     return await _get_params_async('pet', use_browser, _collect_pet_logic, URL)
 
 async def get_pet_equip_search_params_async(use_browser=True):
-    URL = 'https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_pet_equip'
+    URL = 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_pet_equip_search_form'
     return await _get_params_async('pet_equip', use_browser, _collect_pet_equip_logic, URL)
 
 # 同步接口
@@ -1263,7 +1521,7 @@ def get_pet_search_params_sync(use_browser=True):
     return _get_params_sync('pet', use_browser, _collect_pet_logic, URL)
 
 def get_pet_equip_search_params_sync(use_browser=True):
-    URL = 'https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_pet_equip'
+    URL = 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_pet_equip_search_form'
     return _get_params_sync('pet_equip', use_browser, _collect_pet_equip_logic, URL)
 
 # 同步版本

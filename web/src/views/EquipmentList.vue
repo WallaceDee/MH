@@ -4,124 +4,57 @@
       <!-- 筛选和搜索表单 -->
       <el-form :inline="true" :model="filters" @submit.native.prevent="fetchEquipments" size="mini">
         <el-form-item label="选择月份">
-              <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="选择月份"
-                format="yyyy-MM" value-format="yyyy-MM" />
-            </el-form-item>
+          <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="选择月份"
+            format="yyyy-MM" value-format="yyyy-MM" />
+        </el-form-item>
         <el-form-item label="等级范围">
           <div style="width: 500px">
-            <el-slider
-              v-model="filters.level_range"
-              range
-              :min="60"
-              :max="160"
-              :step="5"
-              show-input
-              show-input-controls
-              :marks="levelMarks"
-              @change="handleLevelRangeChange"
-            />
+            <el-slider v-model="filters.level_range" range :min="60" :max="160" :step="5" show-input show-input-controls
+              :marks="levelMarks" @change="handleLevelRangeChange" />
           </div>
         </el-form-item>
         <el-form-item label="价格范围">
-          <el-input-number
-            v-model="filters.price_min"
-            placeholder="最低价格"
-            :min="0"
-            :controls="false"
-          ></el-input-number>
+          <el-input-number v-model="filters.price_min" placeholder="最低价格" :min="0" :controls="false"></el-input-number>
           -
-          <el-input-number
-            v-model="filters.price_max"
-            placeholder="最高价格"
-            :min="0"
-            :controls="false"
-          ></el-input-number>
+          <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
         </el-form-item>
-        -{{ filters.kindid }}-
         <el-form-item label="类型">
-          <el-select
-            v-model="filters.kindid"
-            placeholder="请选择类型"
-            multiple
-            clearable
-            filterable
-          >
-            <el-option
-              v-for="[value, label] in weapon_armors"
-              :key="value"
-              :label="label"
-              :value="value"
-            >
+          <el-select v-model="filters.kindid" placeholder="请选择类型" multiple clearable filterable
+            @change="handleKindidChange">
+            <el-option v-for="[value, label] in weapon_armors" :key="value" :label="label" :value="value">
             </el-option>
           </el-select>
         </el-form-item>
+        <!-- 宠物装备类型选择器 -->
+        <el-form-item v-if="showPetEquipType" label="宠物装备类型">
+          <el-cascader v-model="filters.equip_type" :options="petEquipTypeOptions" :props="cascaderProps"
+            placeholder="请选择宠物装备类型" multiple clearable filterable collapse-tags collapse-tags-tooltip>
+          </el-cascader>
+        </el-form-item>
         <el-form-item label="特技">
-          <el-select
-            v-model="filters.equip_special_skills"
-            placeholder="请选择特技"
-            multiple
-            clearable
-            filterable
-          >
-            <el-option
-              v-for="[value, label] in equip_special_skills"
-              :key="value"
-              :label="label"
-              :value="value"
-            >
+          <el-select v-model="filters.equip_special_skills" placeholder="请选择特技" multiple clearable filterable>
+            <el-option v-for="[value, label] in equip_special_skills" :key="value" :label="label" :value="value">
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="特效">
-          <el-select
-            v-model="filters.equip_special_effect"
-            placeholder="请选择特效"
-            multiple
-            clearable
-            filterable
-          >
-            <el-option
-              v-for="(label, value) in equip_special_effect"
-              :key="value"
-              :label="label"
-              :value="value"
-            >
+          <el-select v-model="filters.equip_special_effect" placeholder="请选择特效" multiple clearable filterable>
+            <el-option v-for="(label, value) in equip_special_effect" :key="value"
+              :label="value === '1' ? label + '/超级简易' : label" :value="value">
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="套装">
-          <el-cascader
-            v-model="filters.suit_effect"
-            :options="suitOptions"
-            placeholder="请选择套装效果"
-            separator=""
-            clearable
-            filterable
-            @change="handleSuitChange"
-          />
+          <el-cascader v-model="filters.suit_effect" :options="suitOptions" placeholder="请选择套装效果" separator="" clearable
+            filterable @change="handleSuitChange" />
         </el-form-item>
         <el-form-item label="镶嵌宝石">
-          <el-select
-            v-model="filters.gem_value"
-            placeholder="镶嵌宝石"
-            clearable
-            filterable
-            style="width: 100px"
-          >
-            <el-option
-              v-for="(gemName, value) in gems_name"
-              :key="value"
-              :value="value"
-              :label="gemName"
-            >
+          <el-select v-model="filters.gem_value" placeholder="镶嵌宝石" clearable filterable style="width: 100px">
+            <el-option v-for="(gemName, value) in gems_name" :key="value" :value="value" :label="gemName">
               <el-row type="flex" justify="space-between">
                 <el-col style="width: 34px; height: 34px; margin-right: 10px">
-                  <el-image
-                    style="width: 34px; height: 34px; cursor: pointer"
-                    :src="getImageUrl(gem_image[value] + '.gif')"
-                    fit="cover"
-                    referrerpolicy="no-referrer"
-                  >
+                  <el-image style="width: 34px; height: 34px; cursor: pointer"
+                    :src="getImageUrl(gem_image[value] + '.gif')" fit="cover" referrerpolicy="no-referrer">
                   </el-image>
                 </el-col>
                 <el-col style="width: 100px">
@@ -130,37 +63,22 @@
               </el-row>
             </el-option>
           </el-select>
-          <el-input-number
-            size="mini"
-            v-model="filters.gem_level"
-            :min="0"
-            :max="16"
-            :step="1"
-            style="width: 120px"
-            placeholder="锻练等级"
-            controls-position="right"
-          ></el-input-number>
+          <el-input-number size="mini" v-model="filters.gem_level" :min="0" :max="16" :step="1" style="width: 120px"
+            placeholder="锻练等级" controls-equip_type="right"></el-input-number>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchEquipments">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
-
-    <el-table :data="equipments" stripe style="width: 100%" @sort-change="handleSortChange">
+    <el-table :data="equipments" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey">
       <el-table-column prop="eid" label="操作" width="100" fixed>
         <template #default="scope">
           <el-link :href="getCBGLink(scope.row.eid)" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <similar-equipment-modal
-            :equipment="scope.row"
-            :similar-data="similarEquipments[scope.row.eid]"
-            :valuation="equipmentValuations[scope.row.eid]"
-            :error="similarError[scope.row.eid]"
-            :loading="loadingSimilar[scope.row.eid]"
-            @show="loadSimilarEquipments"
-            @retry="retryWithNewThreshold"
-          />
+          <similar-equipment-modal :equipment="scope.row" :similar-data="similarEquipments[scope.row.eid]"
+            :valuation="equipmentValuations[scope.row.eid]" :error="similarError[scope.row.eid]"
+            :loading="loadingSimilar[scope.row.eid]" @show="loadSimilarEquipments" @retry="retryWithNewThreshold" />
         </template>
       </el-table-column>
       <el-table-column fixed label="装备" width="70">
@@ -177,53 +95,28 @@
       <el-table-column prop="baoshi" label="宝石" width="100">
         <template #default="scope">
           <div class="gem-container">
-            <el-badge
-              v-if="scope.row.gem_level"
-              :value="scope.row.gem_level * 1"
-              class="gem-badge"
-              type="warning"
-            >
+            <el-badge v-if="scope.row.gem_level || scope.row.jinglian_level || scope.row.xiang_qian_level"
+              :value="scope.row.gem_level * 1 || scope.row.jinglian_level * 1 || scope.row.xiang_qian_level * 1"
+              class="gem-badge" type="warning">
               <div class="gem-images">
-                <el-image
-                  v-for="gemImgSrc in getGemImageByGemValue(scope.row.gem_value)"
-                  :key="gemImgSrc"
-                  style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px"
-                  :src="gemImgSrc"
-                  fit="cover"
-                  referrerpolicy="no-referrer"
-                >
+                <el-image v-for="gemImgSrc in getGemImageByGemValue(scope.row)" :key="gemImgSrc"
+                  style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px" :src="gemImgSrc" fit="cover"
+                  referrerpolicy="no-referrer">
                 </el-image>
               </div>
             </el-badge>
-            <div v-else class="gem-images">
-              <el-image
-                v-for="gemImgSrc in getGemImageByGemValue(scope.row.gem_value)"
-                :key="gemImgSrc"
-                style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px"
-                :src="gemImgSrc"
-                fit="cover"
-                referrerpolicy="no-referrer"
-              >
-              </el-image>
-            </div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="tejigui" label="特技/特效" width="120">
+      <el-table-column v-if="!showPetEquipType" prop="tejigui" label="特技/特效" width="120">
         <template #default="scope">
-          <div
-            class="equip_desc_blue"
-            :data-specia-effet="scope.row.special_effect"
-            :data-special-skill="scope.row.special_skill"
-            v-html="
-              formatSpecialSkillsAndEffects(scope.row.special_effect, scope.row.special_skill)
-            "
-          ></div>
+          <div class="equip_desc_blue" :data-specia-effet="scope.row.special_effect"
+            :data-special-skill="scope.row.special_skill" v-html="formatSpecialSkillsAndEffects(scope.row)"></div>
         </template>
       </el-table-column>
       <el-table-column prop="taozhuang" label="套装" width="160">
         <template #default="scope">
-          <div class="equip_desc_blue" v-html="formatSuitEffect(scope.row.suit_effect)"></div>
+          <div class="equip_desc_blue" v-html="formatSuitEffect(scope.row)"></div>
         </template>
       </el-table-column>
 
@@ -232,50 +125,53 @@
           <div class="equip_desc_yellow" v-html="formatAddedAttrs(scope.row.agg_added_attrs)"></div>
         </template>
       </el-table-column>
-      <el-table-column
-        prop="equip_level"
-        label="等级"
-        width="80"
-        sortable="custom"
-      ></el-table-column>
-      <el-table-column
-        prop="all_damage"
-        label="总伤"
-        width="100"
-        sortable="custom"
-      ></el-table-column>
-      <el-table-column
-        prop="init_damage"
-        label="初伤"
-        width="100"
-        sortable="custom"
-      ></el-table-column>
-      <el-table-column
-        prop="init_wakan"
-        label="初灵"
-        width="100"
-        sortable="custom"
-      ></el-table-column>
-      <el-table-column
-        prop="init_defense"
-        label="初防"
-        width="100"
-        sortable="custom"
-      ></el-table-column>
-      <el-table-column prop="init_hp" label="初血" width="100" sortable="custom"></el-table-column>
-      <el-table-column prop="init_dex" label="初敏" width="100" sortable="custom"></el-table-column>
+      <el-table-column prop="equip_level" label="等级" width="80" sortable="custom"></el-table-column>
+      <el-table-column prop="all_damage" label="总伤" width="100" sortable="custom"></el-table-column>
+      <el-table-column prop="init_damage" label="初伤" width="100" sortable="custom">
+        <template #default="scope">
+          <span class="equip_desc_yellow">{{ scope.row.init_damage || scope.row.damage || scope.row.shanghai || ''}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="init_wakan" label="初灵" width="100" sortable="custom">
+        <template #default="scope">
+          <span class="equip_desc_yellow">{{
+            scope.row.init_wakan ||
+            (scope.row.magic_damage
+              ? `法术伤害
+            +${scope.row.magic_damage}`
+              : '')
+          }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="init_defense" label="初防" width="100" sortable="custom">
+        <template #default="scope">
+          <span class="equip_desc_yellow">{{
+            scope.row.init_defense ||
+            scope.row.defense ||
+            scope.row.fangyu ||
+            (scope.row.magic_defense
+              ? `法术防御
+            +${scope.row.magic_defense}`
+              : '')
+          }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="init_hp" label="初血" width="100" sortable="custom">
+        <template #default="scope">
+          <span class="equip_desc_yellow">{{ scope.row.init_hp || scope.row.qixue || ''}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="init_dex" label="初敏" width="100" sortable="custom">
+        <template #default="scope">
+          <span class="equip_desc_yellow">{{ scope.row.init_dex || scope.row.speed || ''}}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="server_name" label="服务器" width="120"></el-table-column>
     </el-table>
     <div class="pagination-container">
-      <el-pagination
-        @current-change="handlePageChange"
-        :current-page="pagination.page"
-        @size-change="handleSizeChange"
-        :page-size="pagination.page_size"
-        :page-sizes="[10, 100, 200, 300, 400]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total"
-      >
+      <el-pagination @current-change="handlePageChange" :current-page="pagination.page" @size-change="handleSizeChange"
+        :page-size="pagination.page_size" :page-sizes="[10, 100, 200, 300, 400]"
+        layout="total, sizes, prev, pager, next, jumper" :total="pagination.total">
       </el-pagination>
     </div>
   </div>
@@ -286,8 +182,58 @@ import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
 import EquipmentImage from '@/components/EquipmentImage.vue'
 import dayjs from 'dayjs'
 //CBG_GAME_CONFIG.pet_equip_class0
+window.petEquipTypes = [
+  {
+    key: '1',
+    catagory: '铠甲',
+    items: []
+  },
+  {
+    key: '2',
+    catagory: '项圈',
+    items: []
+  },
+  {
+    key: '3',
+    catagory: '护腕',
+    items: []
+  }
+]
 
-var lingshiKinds = [[61, '戒指'], [62, '耳饰'], [63, '手镯'], [64, '佩饰']]
+for (var keyIndex in window.CBG_GAME_CONFIG.equip_info) {
+  if (keyIndex >= 9101 && keyIndex <= 9316) {
+    const current = window.CBG_GAME_CONFIG.equip_info[keyIndex]
+    const level = current.desc.match(/等级(\d+)/)[1]
+    if (keyIndex >= 9101 && keyIndex <= 9116) {
+      window.petEquipTypes[0].items.push({
+        ...current,
+        keyIndex: parseInt(keyIndex),
+        level
+      })
+
+    } else if (keyIndex >= 9201 && keyIndex <= 9216) {
+      window.petEquipTypes[1].items.push({
+        ...current,
+        keyIndex: parseInt(keyIndex),
+        level
+      })
+
+    } else if (keyIndex >= 9301 && keyIndex <= 9316) {
+      window.petEquipTypes[2].items.push({
+        ...current,
+        keyIndex: parseInt(keyIndex),
+        level
+      })
+
+    }
+  }
+}
+var lingshiKinds = [
+  [61, '戒指'],
+  [62, '耳饰'],
+  [63, '手镯'],
+  [64, '佩饰']
+]
 export default {
   name: 'EquipmentList',
   components: {
@@ -296,7 +242,9 @@ export default {
   },
   data() {
     return {
-      weapon_armors: window.AUTO_SEARCH_CONFIG.weapon_armors.concat(lingshiKinds),
+      weapon_armors: window.AUTO_SEARCH_CONFIG.weapon_armors
+        .concat(lingshiKinds)
+        .concat([[29, '宠物装备']]),
       equip_special_skills: window.AUTO_SEARCH_CONFIG.equip_special_skills,
       equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
       equipments: [],
@@ -305,7 +253,8 @@ export default {
         level_range: [60, 160],
         price_min: undefined,
         price_max: undefined,
-        kindid: [61],
+        kindid: [29],
+        equip_type: [], // 宠物装备类型（多选）
         equip_special_skills: [],
         equip_special_effect: [],
         suit_effect: [],
@@ -338,16 +287,183 @@ export default {
         9: '4006',
         10: '4008',
         11: '4009',
-        12: '1108_4249'
+        12: '1108_4249',
+        4244: '4244',
+        '755_4036':'755_4036',
+        '756_4037':'756_4037',
+        '757_4038':'757_4038'
       },
       // 相似装备相关数据
       similarEquipments: {}, // 存储每个装备的相似装备数据
       loadingSimilar: {}, // 存储每个装备的加载状态
       similarError: {}, // 存储加载错误信息
-      equipmentValuations: {} // 存储装备估价信息
+      equipmentValuations: {}, // 存储装备估价信息
+
+      // 宠物装备类型配置
+      petEquipTypes: window.petEquipTypes,
+
+      // 级联选择器配置
+      cascaderProps: {
+        value: 'keyIndex',
+        label: 'name',
+        children: 'items',
+        multiple: true,
+        emitPath: false
+      },
+
+      // 表格重新渲染的key
+      tableKey: 0
+    }
+  },
+  computed: {
+    // 是否显示宠物装备类型选择器
+    showPetEquipType() {
+      return this.filters.kindid && this.filters.kindid.includes(29)
+    },
+
+    // 级联选择器选项数据
+    petEquipTypeOptions() {
+      return this.petEquipTypes.map(category => ({
+        keyIndex: category.key,
+        name: category.catagory,
+        items: category.items.map(item => ({
+          keyIndex: item.keyIndex,
+          name: `${item.name}（${item.level}级）`,
+          level: item.level
+        }))
+      }))
+    },
+
+    // 动态表格列配置
+    tableColumns() {
+      const baseColumns = [
+        {
+          prop: 'equip_name',
+          label: '装备名称',
+          width: '200',
+          fixed: 'left',
+          template: 'equip_name'
+        },
+        {
+          prop: 'price',
+          label: '价格',
+          width: '120',
+          sortable: 'custom',
+          template: 'price'
+        },
+        {
+          prop: 'gem_level',
+          label: '宝石',
+          width: '120',
+          template: 'gem_level'
+        }
+      ]
+
+      // 如果是宠物装备，添加特技/特效列
+      if (this.showPetEquipType) {
+        baseColumns.push({
+          prop: 'tejigui',
+          label: '特技/特效',
+          width: '120',
+          template: 'tejigui'
+        })
+      }
+
+      // 添加套装列
+      baseColumns.push({
+        prop: 'taozhuang',
+        label: '套装',
+        width: '160',
+        template: 'taozhuang'
+      })
+
+      // 添加其他固定列
+      const otherColumns = [
+        {
+          prop: 'fujia_shuxing',
+          label: '附加属性',
+          width: '150',
+          template: 'fujia_shuxing'
+        },
+        {
+          prop: 'equip_level',
+          label: '等级',
+          width: '80',
+          sortable: 'custom'
+        },
+        {
+          prop: 'all_damage',
+          label: '总伤',
+          width: '100',
+          sortable: 'custom'
+        },
+        {
+          prop: 'init_damage',
+          label: '初伤',
+          width: '100',
+          sortable: 'custom',
+          template: 'init_damage'
+        },
+        {
+          prop: 'init_wakan',
+          label: '初灵',
+          width: '100',
+          sortable: 'custom',
+          template: 'init_wakan'
+        },
+        {
+          prop: 'init_defense',
+          label: '初防',
+          width: '100',
+          sortable: 'custom',
+          template: 'init_defense'
+        },
+        {
+          prop: 'init_hp',
+          label: '初血',
+          width: '100',
+          sortable: 'custom'
+        },
+        {
+          prop: 'init_dex',
+          label: '初敏',
+          width: '100',
+          sortable: 'custom'
+        }
+      ]
+
+      baseColumns.push(...otherColumns)
+
+      // 如果是宠物装备，添加宠物装备类型列
+      if (this.showPetEquipType) {
+        baseColumns.push({
+          prop: 'equip_type',
+          label: '宠物装备类型',
+          width: '120',
+          template: 'equip_type'
+        })
+      }
+
+      // 添加服务器列
+      baseColumns.push({
+        prop: 'server_name',
+        label: '服务器',
+        width: '120'
+      })
+
+      return baseColumns
+    }
+  },
+  watch: {
+    // 监听showPetEquipType变化，强制重新渲染表格
+    showPetEquipType() {
+      this.tableKey += 1
     }
   },
   methods: {
+    isLingshi(kindid) {
+      return lingshiKinds.some(([id]) => id === kindid)
+    },
     openCBG(eid) {
       window.open(this.getCBGLink(eid), '_blank')
     },
@@ -361,7 +477,8 @@ export default {
       try {
         const params = {
           ...this.filters,
-          year, month ,
+          year,
+          month,
           page: this.pagination.page,
           page_size: this.pagination.page_size
         }
@@ -416,6 +533,16 @@ export default {
             delete params[key]
           }
         })
+
+        // 特殊处理：如果不是宠物装备，移除equip_type参数
+        if (!params.kindid || !params.kindid.includes(29)) {
+          delete params.equip_type
+        }
+
+        // 处理宠物装备类型多选参数
+        if (params.equip_type && Array.isArray(params.equip_type) && params.equip_type.length === 0) {
+          delete params.equip_type
+        }
 
         // 使用新的API
         const response = await this.$api.equipment.getEquipmentList(params)
@@ -519,15 +646,26 @@ export default {
     },
     // 解析宝石图片
     //太阳石  月亮石4003 光芒石4004 神秘石4005 红宝石4006 黄宝石4007 蓝宝石4008  绿宝石4009  舍利子4012 黑宝石4010 红玛瑙4011 翡翠石1108_4249
-    getGemImageByGemValue(gemValue) {
+    //星辉石 4244
+    getGemImageByGemValue({gem_value:gemValue,kindid,fangyu,speed}) {
       const gemIds = (() => {
         try {
-          return JSON.parse(gemValue || '[]')
+          if(kindid===29){
+            if(fangyu){
+              return ['755_4036']
+            }
+            if(speed){
+              return ['757_4038']
+            }
+            return ['756_4037']
+          }
+          return JSON.parse(gemValue || '["4244"]')
         } catch (e) {
           console.error('解析宝石数据失败:', e, gemValue)
         }
         return []
       })()
+      console.log(gemIds[0],this.getImageUrl(this.gem_image[gemIds[0]] + '.gif'))
       return gemIds.map((id) => {
         if (this.gem_image[id]) {
           return this.getImageUrl(this.gem_image[id] + '.gif')
@@ -539,8 +677,15 @@ export default {
       if (!aggAddedAttrs) return ''
 
       try {
-        const attrs = JSON.parse(aggAddedAttrs)
+        let attrs = JSON.parse(aggAddedAttrs)
         if (Array.isArray(attrs) && attrs.length > 0) {
+          attrs = attrs.map((a) => {
+            if (typeof a === 'string') {
+              return a
+            } else {
+              return `${a.attr_type} +${a.attr_value}`
+            }
+          })
           return attrs.join('<br />')
         }
       } catch (e) {
@@ -551,17 +696,53 @@ export default {
     },
 
     // 解析特技特效
-    formatSpecialSkillsAndEffects(specialEffect, specialSkill) {
+    formatSpecialSkillsAndEffects({
+      special_effect: specialEffect,
+      special_skill: specialSkill,
+      kindid,
+      large_equip_desc
+    }) {
+      console.log({ specialEffect, specialSkill })
       const specials = []
 
       // 处理特效（JSON字符串格式）
       if (specialEffect && specialEffect !== '') {
         try {
           const effects = JSON.parse(specialEffect)
+          const isLingshi = this.isLingshi(kindid)
+          console.log(large_equip_desc)
           if (Array.isArray(effects)) {
             effects.forEach((effect) => {
-              const effectName = this.getSpecialEffectName(parseInt(effect))
-              if (effectName) specials.push(`${effectName}`)
+              if (isLingshi) {
+                // 在large_equip_desc中提取特效
+                // 支持两种格式：
+                // 1. #c4DBAF4特效：超级简易#r (无等级)
+                // 2. #c4DBAF4特效：锐不可当（3级）#r (有等级)
+
+                // 先尝试匹配有等级的特效
+                const effectWithLevelMatch = large_equip_desc.match(
+                  /#c4DBAF4特效：([^#]+)（(\d+)级）#r/
+                )
+                if (effectWithLevelMatch) {
+                  const effectName = effectWithLevelMatch[1]
+                  const effectLevel = effectWithLevelMatch[2]
+                  specials.push(`${effectName}（${effectLevel}级）`)
+                } else {
+                  // 再尝试匹配无等级的特效
+                  const effectWithoutLevelMatch = large_equip_desc.match(/#c4DBAF4特效：([^#]+)#r/)
+                  if (effectWithoutLevelMatch) {
+                    const effectName = effectWithoutLevelMatch[1]
+                    specials.push(`${effectName}`)
+                  } else {
+                    // 如果都没有匹配到特效，使用默认处理方式
+                    const effectName = this.getSpecialEffectName(parseInt(effect), isLingshi)
+                    if (effectName) specials.push(`${effectName}`)
+                  }
+                }
+              } else {
+                const effectName = this.getSpecialEffectName(parseInt(effect), isLingshi)
+                if (effectName) specials.push(`${effectName}`)
+              }
             })
           }
         } catch (e) {
@@ -578,13 +759,18 @@ export default {
       return specials.join('<br />')
     },
     // 获取特效名称
-    getSpecialEffectName(id) {
-      // 直接使用全局变量
-      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_effect) {
-        const effectName = window.AUTO_SEARCH_CONFIG.equip_special_effect[id.toString()]
-        if (effectName) return effectName
+    getSpecialEffectName(id, isLingshi = false) {
+      if (isLingshi) {
+        if (id === 1) {
+          return '超级简易'
+        }
+      } else {
+        // 直接使用全局变量
+        if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_effect) {
+          const effectName = window.AUTO_SEARCH_CONFIG.equip_special_effect[id.toString()]
+          if (effectName) return effectName
+        }
       }
-
       return `特效${id}`
     },
     // 获取特技名称
@@ -601,7 +787,10 @@ export default {
       return `特技${id}`
     },
     // 解析套装信息
-    formatSuitEffect(suitEffect) {
+    formatSuitEffect({ suit_effect: suitEffect, addon_status, kindid }) {
+      if (kindid === 29) {
+        return addon_status
+      }
       if (!suitEffect) return ''
 
       if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_added_status) {
@@ -645,6 +834,14 @@ export default {
     },
     handleSuitChange(value) {
       this.filters.suit_effect = value
+      this.fetchEquipments()
+    },
+    // 处理装备类型变化
+    handleKindidChange(value) {
+      // 如果不再包含宠物装备，清空宠物装备类型选择
+      if (!value || !value.includes(29)) {
+        this.filters.equip_type = []
+      }
       this.fetchEquipments()
     },
     // 初始化套装选项
@@ -796,7 +993,7 @@ export default {
                 }
               }
             })
-            
+
             if (isRetry) {
               this.$message.success(`成功找到 ${data.anchor_count} 个相似装备`)
             }
@@ -809,11 +1006,13 @@ export default {
                 price_range: { min: 0, max: 0 },
                 similarity_range: { min: 0, max: 0, avg: 0 }
               },
-              message: isRetry ? '仍未找到符合条件的市场锚点，请尝试更低的相似度阈值' : '未找到符合条件的市场锚点，建议降低相似度阈值',
+              message: isRetry
+                ? '仍未找到符合条件的市场锚点，请尝试更低的相似度阈值'
+                : '未找到符合条件的市场锚点，建议降低相似度阈值',
               canRetry: true,
               equipment: equipment
             })
-            
+
             if (isRetry) {
               this.$message.warning('仍未找到相似装备，请尝试更低的相似度阈值')
             }
@@ -834,13 +1033,13 @@ export default {
           })
           // 清空估价信息，因为无法估价
           this.$set(this.equipmentValuations, eid, null)
-          
+
           if (isRetry) {
             this.$message.error(valuationResponse.message || '查找相似装备失败')
           }
         } else {
           this.$set(this.similarError, eid, valuationResponse.message || '加载估价和相似装备失败')
-          
+
           if (isRetry) {
             this.$set(this.similarEquipments, eid, {
               anchor_count: 0,
@@ -862,7 +1061,7 @@ export default {
       } catch (error) {
         console.error('加载相似装备或估价失败:', error)
         this.$set(this.similarError, eid, `加载失败: ${error.message}`)
-        
+
         if (isRetry) {
           this.$message.error(`重试失败: ${error.message}`)
         }
@@ -874,7 +1073,7 @@ export default {
     // 获取图片URL方法
     getImageUrl(imageName, size = 'small') {
       return `https://cbg-xyq.res.netease.com/images/${size}/${imageName}`
-    }
+    },
   },
   mounted() {
     this.loadEquipDescParser()
@@ -949,6 +1148,7 @@ export default {
 }
 
 @keyframes blink {
+
   0%,
   50% {
     opacity: 1;
@@ -974,7 +1174,7 @@ export default {
 }
 
 .gem-badge {
-  position: relative;
+  equip_type: relative;
 }
 
 .gem-images {

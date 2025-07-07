@@ -75,5 +75,10 @@ class EquipFeatureExtractor:
             import traceback
             print(traceback.format_exc())
             raise
-
-   
+    
+    def _extract_basic_features(self, equip_data: Dict[str, Any]) -> Dict[str, Union[int, float]]:
+        """
+        """
+        features = {}
+        
+        return features

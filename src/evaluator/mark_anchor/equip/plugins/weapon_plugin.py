@@ -283,7 +283,7 @@ class WeaponPlugin(EquipmentTypePlugin):
         return round(score, 1)
 
     # 130 140 修理失败影响价钱严重
-    def get_weight_overrides(self) -> Dict[str, float]:
+    def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
         """武器权重覆盖配置"""
         return {
             'init_damage_raw_score': 3.0,               # 初伤标准化得分很重要
@@ -296,17 +296,18 @@ class WeaponPlugin(EquipmentTypePlugin):
             'addon_naili': 1.0,                 # 耐力
         }
 
-    def get_tolerance_overrides(self) -> Dict[str, float]:
+    def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
         """武器相对容忍度覆盖配置（已废弃绝对容忍度）"""
         return {
             'init_damage_raw_score': 0.12,              # 初伤标准化得分容忍度小
             'all_damage_score': 0.12,          # 总伤害标准化得分容忍度小
-            'addon_total_score': 0.2,         # 附加属性总和标准化得分容忍度小
-            'addon_moli': 0.4,            # 武器没有附加属性
-            'addon_minjie': 0.4,            # 武器没有附加属性
-            'addon_liliang': 0.4,               # 武器没有附加属性
-            'addon_tizhi': 0.4,                 # 武器没有附加属性
-            'addon_naili': 0.4,                # 武器没有附加属性
+            'addon_total_score': 0.12,          # 附加属性总和标准化得分容忍度小
+            'addon_moli': 0.3,                 # 魔力
+            'addon_minjie': 0.3,               # 敏捷
+            'addon_liliang': 0.3,               # 力量
+            'addon_tizhi': 0.3,                 # 体质
+            'addon_naili': 0.3,                 # 耐力
+            'gem_score': 0.5,                  # 宝石得分容忍度中等
         }
 
     def calculate_custom_similarity(self,

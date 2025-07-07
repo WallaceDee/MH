@@ -20,10 +20,12 @@ try:
     from evaluator.mark_anchor.equip.index import EquipAnchorEvaluator
     from evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
     from evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
+    from evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
 except ImportError:
     EquipAnchorEvaluator = None
     EquipFeatureExtractor = None
     LingshiFeatureExtractor = None
+    PetEquipFeatureExtractor = None
     logger.warning("无法导入装备锚点估价器或特征提取器")
 
 
@@ -36,6 +38,7 @@ class EquipmentService:
         # 初始化特征提取器
         self.equip_feature_extractor = None
         self.lingshi_feature_extractor = None
+        self.pet_equip_feature_extractor = None
         
         if EquipFeatureExtractor:
             try:
@@ -51,6 +54,13 @@ class EquipmentService:
             except Exception as e:
                 logger.error(f"灵饰特征提取器初始化失败: {e}")
         
+        if PetEquipFeatureExtractor:
+            try:
+                self.pet_equip_feature_extractor = PetEquipFeatureExtractor()
+                logger.info("宠物装备特征提取器初始化成功")
+            except Exception as e:
+                logger.error(f"宠物装备特征提取器初始化失败: {e}")
+
         # 初始化装备锚点估价器
         self.evaluator = None
         if EquipAnchorEvaluator:
@@ -65,6 +75,8 @@ class EquipmentService:
         # 灵饰装备：kindid=61,62,63,64
         if kindid in [61, 62, 63, 64]:
             return self.lingshi_feature_extractor
+        elif kindid in [29]:
+            return self.pet_equip_feature_extractor
         else:
             # 普通装备
             return self.equip_feature_extractor
@@ -94,6 +106,7 @@ class EquipmentService:
                       level_min: Optional[int] = None, level_max: Optional[int] = None,
                       price_min: Optional[int] = None, price_max: Optional[int] = None,
                       kindid: Optional[List[str]] = None, 
+                      equip_type: Optional[List[int]] = None,  # 宠物装备类型（多选）
                       equip_special_skills: Optional[List[str]] = None,
                       equip_special_effect: Optional[List[str]] = None,
                       suit_effect: Optional[str] = None,
@@ -146,6 +159,13 @@ class EquipmentService:
                     conditions.append(f"kindid IN ({type_placeholders})")
                     params.extend(kindid)
                     logger.info(f"添加装备类型筛选: kindid IN ({type_placeholders}), 值: {kindid}")
+                
+                # 宠物装备类型筛选（多选）
+                if equip_type and len(equip_type) > 0:
+                    type_placeholders = ','.join(['?' for _ in equip_type])
+                    conditions.append(f"equip_type IN ({type_placeholders})")
+                    params.extend(equip_type)
+                    logger.info(f"添加宠物装备类型筛选: equip_type IN ({type_placeholders}), 值: {equip_type}")
                 
                 # 特技筛选（多选）
                 if equip_special_skills and len(equip_special_skills) > 0:

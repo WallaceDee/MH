@@ -108,7 +108,7 @@ class NecklacePlugin(EquipmentTypePlugin):
 
         return round(score, 1)
 
-    def get_weight_overrides(self) -> Dict[str, float]:
+    def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
         """饰品权重覆盖配置"""
         return {
             'init_wakan': 2.0,                # 初灵
@@ -116,7 +116,7 @@ class NecklacePlugin(EquipmentTypePlugin):
             'gem_score': 3.0,                   # 宝石重要但不是最重要
         }
 
-    def get_tolerance_overrides(self) -> Dict[str, float]:
+    def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
         """饰品相对容忍度覆盖配置（已废弃绝对容忍度）"""
         return {
             'init_wakan': 1,                  # 初灵

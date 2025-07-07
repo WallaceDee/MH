@@ -466,7 +466,7 @@ DB_SCHEMA_CONFIG = {
             addon_fali INTEGER DEFAULT 0,       -- 附加法力
             addon_lingli INTEGER DEFAULT 0,     -- 附加灵力
             addon_total INTEGER DEFAULT 0,      -- 附加总和
-            addon_status INTEGER DEFAULT 0,     -- 附加状态
+            addon_status TEXT,                 -- 附加状态（套装信息）
             addon_skill_chance INTEGER DEFAULT 0, -- 附加技能几率
             addon_effect_chance INTEGER DEFAULT 0, -- 附加效果几率
             

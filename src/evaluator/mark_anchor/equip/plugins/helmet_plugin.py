@@ -108,7 +108,7 @@ class HelmetPlugin(EquipmentTypePlugin):
 
         return round(score, 1)
 
-    def get_weight_overrides(self) -> Dict[str, float]:
+    def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
         """头盔/发钗权重覆盖配置"""
         return {
             'init_defense': 2.0,                # 初防
@@ -116,7 +116,7 @@ class HelmetPlugin(EquipmentTypePlugin):
             'gem_score': 3.0,                   # 宝石重要但不是最重要
         }
 
-    def get_tolerance_overrides(self) -> Dict[str, float]:
+    def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
         """头盔相对容忍度覆盖配置（已废弃绝对容忍度）"""
         return {
             'defense_score': 0.12,              # 防御标准化得分容忍度小

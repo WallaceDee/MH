@@ -115,7 +115,7 @@ class LingshiFeatureExtractor:
             #  五、特效
             features.update(self._extract_special_effect_features(equip_data))
 
-            # 五、其他特征（从large_equip_desc提取）
+            # 六、其他特征（从large_equip_desc提取）
             features.update(self._extract_other_features(equip_data))
 
             return features

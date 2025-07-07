@@ -151,7 +151,7 @@ class BeltPlugin(EquipmentTypePlugin):
 
         return round(score, 1)
 
-    def get_weight_overrides(self) -> Dict[str, float]:
+    def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
         """腰带权重覆盖配置"""
         return {
             'init_defense': 2.0,                # 初防
@@ -161,7 +161,7 @@ class BeltPlugin(EquipmentTypePlugin):
             'gem_score': 3.0,                   # 宝石重要但不是最重要
         }
 
-    def get_tolerance_overrides(self) -> Dict[str, float]:
+    def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
         """腰带相对容忍度覆盖配置（已废弃绝对容忍度）"""
         return {
             'hp_score': 0.20,                  # 敏捷标准化得分容忍度极小

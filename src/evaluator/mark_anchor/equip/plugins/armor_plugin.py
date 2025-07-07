@@ -184,7 +184,7 @@ class ArmorPlugin(EquipmentTypePlugin):
 
         return round(score, 1)
     # TODO: 130 140 修理失败影响价钱严重
-    def get_weight_overrides(self) -> Dict[str, float]:
+    def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
         """衣服权重覆盖配置"""
         return {
             'init_defense': 2.0,                # 初防
@@ -197,7 +197,7 @@ class ArmorPlugin(EquipmentTypePlugin):
             'addon_naili': 1.0,                 # 衣服没有附加属性
         }
 
-    def get_tolerance_overrides(self) -> Dict[str, float]:
+    def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
         """衣服相对容忍度覆盖配置（已废弃绝对容忍度）"""
         return {
             'dex_score': 0.08,                  # 敏捷标准化得分容忍度极小
