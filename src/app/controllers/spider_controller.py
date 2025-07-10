@@ -3,10 +3,12 @@
 
 """
 爬虫控制器
+基于run.py的功能提供完整的爬虫控制
 """
 
 import threading
 import logging
+from typing import Dict, Any, Optional
 from app.services.spider_service import SpiderService
 
 logger = logging.getLogger(__name__)
@@ -23,14 +25,44 @@ class SpiderController:
         """获取任务状态"""
         return self.service.get_task_status()
     
-    def start_basic_spider(self, max_pages=5, export_excel=True, export_json=True):
-        """启动基础爬虫"""
+    def get_spider_config(self):
+        """获取爬虫配置信息"""
+        return self.service.get_spider_config()
+    
+    def start_basic_spider(self,
+                          spider_type: str = 'role',
+                          equip_type: str = 'normal',
+                          max_pages: int = 5,
+                          use_browser: bool = True,
+                          delay_min: float = 5.0,
+                          delay_max: float = 8.0,
+                          cached_params: dict = None):
+        """
+        启动基础爬虫
+        
+        Args:
+            spider_type: 爬虫类型 (role, equip, pet)
+            equip_type: 装备类型 (normal, lingshi, pet) - 仅当spider_type='equip'时有效
+            max_pages: 爬取页数
+            use_browser: 是否使用浏览器
+            delay_min: 最小延迟
+            delay_max: 最大延迟
+            cached_params: 缓存的搜索参数
+        """
         if self.service.is_task_running():
             raise Exception("已有任务在运行中")
         
         def run_spider():
             try:
-                self.service.run_basic_spider(max_pages, export_excel, export_json)
+                self.service.run_basic_spider(
+                    spider_type=spider_type,
+                    equip_type=equip_type,
+                    max_pages=max_pages,
+                    use_browser=use_browser,
+                    delay_min=delay_min,
+                    delay_max=delay_max,
+                    cached_params=cached_params
+                )
             except Exception as e:
                 logger.error(f"基础爬虫执行失败: {e}")
         
@@ -38,9 +70,58 @@ class SpiderController:
         thread.start()
         self.current_task = thread
         
-        return {"task_id": id(thread)}
+        return {
+            "task_id": id(thread),
+            "config": {
+                "spider_type": spider_type,
+                "equip_type": equip_type if spider_type == 'equip' else None,
+                "max_pages": max_pages,
+                "use_browser": use_browser,
+                "delay_range": [delay_min, delay_max]
+            }
+        }
     
-    def start_proxy_spider(self, max_pages=5):
+    def start_role_spider(self, max_pages: int = 5, use_browser: bool = True, 
+                         delay_min: float = 5.0, delay_max: float = 8.0, 
+                         cached_params: dict = None):
+        """启动角色爬虫"""
+        return self.start_basic_spider(
+            spider_type='role',
+            max_pages=max_pages,
+            use_browser=use_browser,
+            delay_min=delay_min,
+            delay_max=delay_max,
+            cached_params=cached_params
+        )
+    
+    def start_equip_spider(self, equip_type: str = 'normal', max_pages: int = 5,
+                          use_browser: bool = True, delay_min: float = 5.0, 
+                          delay_max: float = 8.0, cached_params: dict = None):
+        """启动装备爬虫"""
+        return self.start_basic_spider(
+            spider_type='equip',
+            equip_type=equip_type,
+            max_pages=max_pages,
+            use_browser=use_browser,
+            delay_min=delay_min,
+            delay_max=delay_max,
+            cached_params=cached_params
+        )
+    
+    def start_pet_spider(self, max_pages: int = 5, use_browser: bool = True,
+                        delay_min: float = 5.0, delay_max: float = 8.0,
+                        cached_params: dict = None):
+        """启动召唤兽爬虫"""
+        return self.start_basic_spider(
+            spider_type='pet',
+            max_pages=max_pages,
+            use_browser=use_browser,
+            delay_min=delay_min,
+            delay_max=delay_max,
+            cached_params=cached_params
+        )
+    
+    def start_proxy_spider(self, max_pages: int = 5):
         """启动代理爬虫"""
         if self.service.is_task_running():
             raise Exception("已有任务在运行中")
@@ -55,7 +136,13 @@ class SpiderController:
         thread.start()
         self.current_task = thread
         
-        return {"task_id": id(thread)}
+        return {
+            "task_id": id(thread),
+            "config": {
+                "max_pages": max_pages,
+                "use_proxy": True
+            }
+        }
     
     def manage_proxies(self):
         """管理代理IP"""
@@ -71,4 +158,46 @@ class SpiderController:
         thread = threading.Thread(target=get_proxies)
         thread.start()
         
-        return {"task_id": id(thread)} 
+        return {"task_id": id(thread)}
+    
+    def run_tests(self):
+        """运行测试"""
+        if self.service.is_task_running():
+            raise Exception("已有任务在运行中")
+        
+        def run_tests():
+            try:
+                self.service.run_tests()
+            except Exception as e:
+                logger.error(f"测试执行失败: {e}")
+        
+        thread = threading.Thread(target=run_tests)
+        thread.start()
+        
+        return {"task_id": id(thread)}
+    
+    def stop_current_task(self):
+        """停止当前任务"""
+        try:
+            # 调用服务层的停止方法
+            result = self.service.stop_current_task()
+            
+            # 同时清理控制器层的线程引用
+            if self.current_task and self.current_task.is_alive():
+                logger.info("清理Python线程引用")
+                self.current_task = None
+            
+            return result
+        except Exception as e:
+            logger.error(f"停止任务失败: {e}")
+            return {"message": f"停止任务失败: {str(e)}"}
+    
+    def get_task_logs(self, lines: int = 100, log_type: str = 'current', spider_type: str = None, filename: str = None):
+        """获取任务日志"""
+        return self.service.get_task_logs(lines=lines, log_type=log_type, spider_type=spider_type, filename=filename)
+    
+
+    
+    def reset_task_status(self):
+        """重置任务状态"""
+        return self.service.reset_task_status() 

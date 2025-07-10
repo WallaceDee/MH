@@ -25,6 +25,14 @@ const routes = [
     meta: {
       title: '装备列表'
     }
+  },
+  {
+    path: '/pets',
+    name: 'PetList',
+    component: () => import('../views/PetList.vue'),
+    meta: {
+      title: '召唤兽列表'
+    }
   }
 ]
 

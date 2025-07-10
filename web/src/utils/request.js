@@ -52,8 +52,10 @@ request.interceptors.response.use(
     
     Message.error(message)
     return {
-      success: false,
-      message
+      code: error.response?.status || 500,
+      data: null,
+      message: message,
+      timestamp: Date.now()
     }
   }
 )

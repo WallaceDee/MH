@@ -38,9 +38,47 @@ async def _update_cookies_internal():
 
             print("\n" + "#"*60)
             print("### 请在弹出的浏览器窗口中手动登录您的藏宝阁账号。 ###")
-            print("### 登录成功后，回到此控制台窗口，按 Enter/回车键。 ###")
+            print("### 登录成功后会自动收集Cookie，无需手动操作。 ###")
             print("#"*60 + "\n")
-            input("登录完成后请按 Enter/回车键继续...")
+
+            # 监听页面跳转到指定地址
+            target_url_pattern = 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search'
+            
+            # 等待页面跳转到目标地址或登录成功标志
+            try:
+                # 使用更灵活的URL匹配模式
+                await page.wait_for_url(lambda url: target_url_pattern in url, timeout=300000)  # 5分钟超时
+                current_url = page.url
+                logger.info(f"检测到页面跳转到目标地址: {current_url}")
+            except Exception as e:
+                logger.warning(f"等待页面跳转超时或失败: {e}")
+                # 如果超时，检查当前URL是否包含目标模式
+                current_url = page.url
+                if target_url_pattern in current_url:
+                    logger.info("当前页面已经是目标地址，继续处理")
+                else:
+                    # 尝试检测登录成功标志
+                    try:
+                        # 检查是否存在登录成功的元素或标志
+                        login_success = await page.evaluate("""
+                            () => {
+                                // 检查是否存在登录成功的标志
+                                const loginElements = document.querySelectorAll('[class*="login"], [class*="user"], [class*="avatar"]');
+                                const hasLoginInfo = window.LoginInfo && Object.keys(window.LoginInfo).length > 0;
+                                return loginElements.length > 0 || hasLoginInfo;
+                            }
+                        """)
+                        if login_success:
+                            logger.info("检测到登录成功标志，继续收集Cookie")
+                        else:
+                            logger.warning("页面未跳转到目标地址且未检测到登录成功标志，但继续尝试收集Cookie")
+                    except Exception as eval_error:
+                        logger.warning(f"检测登录状态失败: {eval_error}")
+                        logger.warning("页面未跳转到目标地址，但继续尝试收集Cookie")
+
+            # 等待页面完全加载
+            await page.wait_for_load_state('networkidle', timeout=10000)
+            logger.info("页面加载完成，开始收集Cookie...")
 
             # 收集 cookies
             cookies = await context.cookies()

@@ -61,6 +61,11 @@ class PetEquipPlugin(EquipmentTypePlugin):
             features, equip_level, config_data)
         derived.update(attr_scores)
 
+        # 根据套装suit_effect聚类
+        suit_effect = features.get('suit_effect', '')
+        suit_category = self._classify_suit_effect(suit_effect)
+        derived['suit_category'] = suit_category
+        
         return derived
 
     def _load_pet_equip_config(self) -> Dict[str, Any]:
@@ -175,12 +180,64 @@ class PetEquipPlugin(EquipmentTypePlugin):
 
         return scores
 
-    def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
+    def _classify_suit_effect(self, suit_effect: str) -> str:
+        """
+        根据套装效果分类
+        
+        Args:
+            suit_effect: 套装效果名称
+            
+        Returns:
+            str: 套装分类 ('无套装', '物理系', '法术系', '辅助系', '特殊系', '其他')
+        """
+        if not suit_effect or suit_effect.strip() == '':
+            return '无套装'
+        
+        # 转换为字符串并去除空格
+        effect_name = str(suit_effect).strip()
+        
+        # 物理系套装效果
+        physical_suits = [
+            '高级必杀', '高级偷袭', '高级吸血', '高级连击', '高级进击必杀'
+        ]
+        
+        # 法术系套装效果
+        magic_suits = [
+            '高级魔之心', '高级法术连击', '高级法术暴击', '高级法术波动', '高级进击法爆'
+        ]
+        
+        # 辅助系套装效果
+        support_suits = [
+            '高级神佑', '高级鬼混术'
+        ]
+        
+        # 特殊系套装效果
+        special_suits = [
+            '善恶有报', '力劈华山', '死亡召唤', '上古灵符', '壁垒击破', 
+            '嗜血追击', '剑荡四方', '夜舞倾城', '惊心一剑'
+        ]
+        
+        # 检查分类
+        if effect_name in physical_suits:
+            return '物理系'
+        elif effect_name in magic_suits:
+            return '法术系'
+        elif effect_name in support_suits:
+            return '辅助系'
+        elif effect_name in special_suits:
+            return '特殊系'
+        elif '高级'  in effect_name:
+            return '高级其他'
+        else:
+            return '其他'
+
+    def get_weight_overrides(self, kindid: int = None, target_features: Dict[str, Any] = None) -> Dict[str, float]:
         """
         获取权重覆盖配置
 
         Args:
             kindid: 装备类型ID，用于动态配置权重
+            target_features: 目标装备特征，用于动态调整权重
 
         Returns:
             Dict[str, float]: 要覆盖的权重配置
@@ -220,18 +277,45 @@ class PetEquipPlugin(EquipmentTypePlugin):
             # 忽略的特征
             'gem_level': 0,
             'equip_level': 0,             # 等级跨度大，不考虑
-            'suit_effect': 0,             # 没有套装（TODO: 钟灵石套装可以用这个）
+            'suit_effect': 0,             # 使用suit_category代替原始suit_effect
+            'suit_category': 1.5,         # 套装分类权重
             'hole_score': 0,              # 没有开运
         }
 
+        # 动态权重调整逻辑
+        if target_features:
+            shanghai = target_features.get('shanghai', 0)
+            addon_fali = target_features.get('addon_fali', 0)
+            addon_lingli = target_features.get('addon_lingli', 0)
+            
+            if shanghai > 20:
+                # 物理系装备：伤害>20，忽略法力和灵力附加属性
+                print(f"物理系宠物装备 (shanghai={shanghai}>20): 忽略法力和灵力权重")
+                base_weights['addon_fali'] = 0
+                base_weights['addon_fali_score'] = 0
+                base_weights['addon_lingli'] = 0
+                base_weights['addon_lingli_score'] = 0
+                
+            elif shanghai <= 20:
+                if addon_fali <= 0 and addon_lingli <= 0:
+                    # 无法系属性的装备：不忽略shanghai
+                    print(f"无法系属性装备 (shanghai={shanghai}<=20, 无法力/灵力): 保持伤害权重")
+                    # 保持shanghai_score的默认权重，不做修改
+                else:
+                    # 法系装备：有法力或灵力属性，忽略shanghai
+                    print(f"法系宠物装备 (shanghai={shanghai}<=20, 有法力/灵力): 忽略伤害权重")
+                    base_weights['shanghai'] = 0
+                    base_weights['shanghai_score'] = 0
+
         return base_weights
 
-    def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
+    def get_tolerance_overrides(self, kindid: int = None, target_features: Dict[str, Any] = None) -> Dict[str, float]:
         """
         获取相对容忍度覆盖配置
 
         Args:
             kindid: 装备类型ID，用于动态配置容忍度
+            target_features: 目标装备特征，用于动态调整容忍度
 
         Returns:
             Dict[str, float]: 相对容忍度覆盖
@@ -242,19 +326,19 @@ class PetEquipPlugin(EquipmentTypePlugin):
             'gem_score': 0.5,             # 宝石得分容忍度中等
             
             # 主属性标准化得分容忍度
-            'shanghai_score': 0.3,        # 伤害得分容忍度30%
-            'fangyu_score': 0.3,          # 防御得分容忍度30%
-            'speed_score': 0.3,           # 速度得分容忍度30%
-            'qixue_score': 0.3,           # 气血得分容忍度30%
+            'shanghai_score': 0.2,        # 伤害得分容忍度20%
+            'fangyu_score': 0.4,          # 防御得分容忍度20%
+            'speed_score': 0.2,           # 速度得分容忍度20%
+            'qixue_score': 0.2,           # 气血得分容忍度20%
             
             # 附加属性标准化得分容忍度
-            'addon_fali_score': 0.4,      # 法力附加得分容忍度40%
-            'addon_lingli_score': 0.4,    # 灵力附加得分容忍度40%
-            'addon_liliang_score': 0.4,   # 力量附加得分容忍度40%
-            'addon_minjie_score': 0.4,    # 敏捷附加得分容忍度40%
-            'addon_minjie':0.4,           # 敏捷附加原始值容忍度40%
-            'addon_naili_score': 0.4,     # 耐力附加得分容忍度40%
-            'addon_tizhi_score': 0.4,     # 体质附加得分容忍度40%
+            'addon_fali_score': 0.2,      # 法力附加得分容忍度20%
+            'addon_lingli_score': 0.2,    # 灵力附加得分容忍度20%
+            'addon_liliang_score': 0.2,   # 力量附加得分容忍度20%
+            'addon_minjie_score': 0.2,    # 敏捷附加得分容忍度20%
+            'addon_minjie':0.2,           # 敏捷附加原始值容忍度20%
+            'addon_naili_score': 0.2,     # 耐力附加得分容忍度20%
+            'addon_tizhi_score': 0.2,     # 体质附加得分容忍度20%
 
             # 原始数值完全忽略
             'shanghai': 1,                # 伤害原始值完全忽略
@@ -270,7 +354,34 @@ class PetEquipPlugin(EquipmentTypePlugin):
 
             # 忽略的特征
             'gem_level': 1,
+            'suit_effect': 1,             # 使用suit_category代替
+            'suit_category': 0,           # 套装分类必须完全匹配
         }
+
+        # 动态容忍度调整逻辑
+        if target_features:
+            shanghai = target_features.get('shanghai', 0)
+            addon_fali = target_features.get('addon_fali', 0)
+            addon_lingli = target_features.get('addon_lingli', 0)
+            
+            if shanghai > 20:
+                # 物理系装备：伤害>20，忽略法力和灵力附加属性
+                print(f"物理系宠物装备 (shanghai={shanghai}>20): 设置法力和灵力容忍度为1")
+                base_tolerances['addon_fali'] = 1
+                base_tolerances['addon_fali_score'] = 1
+                base_tolerances['addon_lingli'] = 1
+                base_tolerances['addon_lingli_score'] = 1
+                
+            elif shanghai <= 20:
+                if addon_fali <= 0 and addon_lingli <= 0:
+                    # 无法系属性的装备：不忽略shanghai
+                    print(f"无法系属性装备 (shanghai={shanghai}<=20, 无法力/灵力): 保持伤害容忍度")
+                    # 保持shanghai_score的默认容忍度，不做修改
+                else:
+                    # 法系装备：有法力或灵力属性，忽略shanghai
+                    print(f"法系宠物装备 (shanghai={shanghai}<=20, 有法力/灵力): 设置伤害容忍度为1")
+                    base_tolerances['shanghai'] = 1
+                    base_tolerances['shanghai_score'] = 1
 
         return base_tolerances
 
@@ -278,6 +389,56 @@ class PetEquipPlugin(EquipmentTypePlugin):
                                     feature_name: str,
                                     target_val: Any,
                                     market_val: Any) -> Optional[float]:
-        """宠物装备自定义相似度计算"""
+        """
+        宠物装备的自定义相似度计算
 
-        return None  # 其他特征使用默认计算
+        Args:
+            feature_name: 特征名称
+            target_val: 目标值
+            market_val: 市场值
+
+        Returns:
+            Optional[float]: 相似度分数，None表示使用默认计算方法
+        """
+        # 套装分类的自定义相似度计算
+        if feature_name == 'suit_category':
+            return self._calculate_suit_category_similarity(target_val, market_val)
+        
+        return None
+
+    def _calculate_suit_category_similarity(self, target_category: str, market_category: str) -> float:
+        """
+        计算套装分类的相似度
+        
+        同类套装相似度为1.0，不同类套装有部分相似度，完全不匹配为0
+        
+        Args:
+            target_category: 目标套装分类
+            market_category: 市场套装分类
+            
+        Returns:
+            float: 相似度分数 (0-1)
+        """
+        if target_category == market_category:
+            # 完全匹配
+            return 1.0
+        
+        # 定义套装分类的相似度规则（自动处理顺序）
+        def get_similarity(cat1: str, cat2: str) -> float:
+            # 无套装和其他套装的相似度
+            if cat1 == '无套装' or cat2 == '无套装':
+                return 0.75
+            
+            categories = {'物理系', '法术系','辅助系', '高级其他'}
+            if cat1 in categories and cat2 in categories:
+                return 0.5
+            
+            # 特殊系和其他分类的相似度
+            if cat1 == '特殊系' or cat2 == '特殊系':
+                return 0.2
+            
+            # 其他情况
+            return 0.1
+        
+        # 自动处理顺序，返回对称的相似度
+        return get_similarity(target_category, market_category)

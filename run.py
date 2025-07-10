@@ -16,33 +16,48 @@ project_root = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(project_root, 'src')
 sys.path.insert(0, src_path)
 
-def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_browser=True, delay_range=(5, 8)):
+def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_browser=True, delay_range=(5, 8), cached_params_file=None):
     """运行基础爬虫"""
     print("启动基础CBG爬虫...")
     
+    # 加载缓存参数
+    cached_params = None
+    if cached_params_file and os.path.exists(cached_params_file):
+        try:
+            import json
+            with open(cached_params_file, 'r', encoding='utf-8') as f:
+                cached_params = json.load(f)
+            print(f"已加载缓存参数: {len(cached_params)} 个参数")
+            # 删除临时文件
+            os.unlink(cached_params_file)
+        except Exception as e:
+            print(f"加载缓存参数失败: {e}")
+            if os.path.exists(cached_params_file):
+                os.unlink(cached_params_file)
+    
     try:
         from cbg_spider import CBGSpider
-        print("✅ 成功导入CBGSpider")
+        print("成功导入CBGSpider")
     except Exception as e:
-        print(f"❌ 导入CBGSpider失败: {e}")
+        print(f"导入CBGSpider失败: {e}")
         import traceback
         traceback.print_exc()
         return
     
     try:
         from src.spider.equip import CBGEquipSpider
-        print("✅ 成功导入CBGEquipSpider")
+        print("成功导入CBGEquipSpider")
     except Exception as e:
-        print(f"❌ 导入CBGEquipSpider失败: {e}")
+        print(f"导入CBGEquipSpider失败: {e}")
         import traceback
         traceback.print_exc()
         return
     
     try:
         from src.spider.pet import CBGPetSpider
-        print("✅ 成功导入CBGPetSpider")
+        print("成功导入CBGPetSpider")
     except Exception as e:
-        print(f"❌ 导入CBGPetSpider失败: {e}")
+        print(f"导入CBGPetSpider失败: {e}")
         import traceback
         traceback.print_exc()
         return
@@ -51,13 +66,13 @@ def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_b
         spider = CBGSpider()
         cbg_equip_spider = CBGEquipSpider()
         cbg_pet_spider = CBGPetSpider()
-        print("🔧 CBG爬虫初始化完成")
+        print("CBG爬虫初始化完成")
         
         # 爬取数据
         print("开始爬取数据...")
         if spider_type == 'role':
-            print(f"🎯 爬取角色数据，页数: {max_pages}")
-            spider.crawl_all_pages(max_pages=max_pages, delay_range=delay_range, use_browser=use_browser)
+            print(f"爬取角色数据，页数: {max_pages}")
+            spider.crawl_all_pages(max_pages=max_pages, delay_range=delay_range, use_browser=use_browser, search_params=cached_params)
         elif spider_type == 'equip':
             equip_type_names = {
                 'normal': '普通装备',
@@ -65,29 +80,31 @@ def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_b
                 'pet': '召唤兽装备'
             }
             equip_name = equip_type_names.get(equip_type, equip_type)
-            print(f"🎯 爬取{equip_name}数据，页数: {max_pages}")
+            print(f"爬取{equip_name}数据，页数: {max_pages}")
             if use_browser:
-                print("🌐 将启动浏览器进行参数设置...")
+                print("将启动浏览器进行参数设置...")
             cbg_equip_spider.crawl_all_pages(
                 max_pages=max_pages, 
                 delay_range=delay_range, 
                 use_browser=use_browser,
-                equip_type=equip_type
+                equip_type=equip_type,
+                cached_params=cached_params
             )
         elif spider_type == 'pet':
-            print(f"🎯 爬取召唤兽数据，页数: {max_pages}")
+            print(f"爬取召唤兽数据，页数: {max_pages}")
             if use_browser:
-                print("🌐 将启动浏览器进行参数设置...")
+                print("将启动浏览器进行参数设置...")
             cbg_pet_spider.crawl_all_pages(
                 max_pages=max_pages, 
                 delay_range=delay_range, 
-                use_browser=use_browser
+                use_browser=use_browser,
+                cached_params=cached_params
             )    
         else:
-            print(f"❌ 未知的爬虫类型: {spider_type}")
-            return
+                    print(f"未知的爬虫类型: {spider_type}")
+        return
             
-        print("✅ 数据爬取完成")
+        print("数据爬取完成")
         
         # # 导出Excel
         # print("\n正在导出Excel...")
@@ -95,7 +112,7 @@ def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_b
         # if excel_file:
         #     print(f"Excel文件已生成: {excel_file}")
         # else:
-        #     print("❌ Excel导出失败")
+        #     print("Excel导出失败")
         
         # # 导出JSON
         # print("\n正在导出JSON...")
@@ -103,18 +120,18 @@ def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_b
         # if json_file:
         #     print(f"JSON文件已生成: {json_file}")
         # else:
-        #     print("❌ JSON导出失败")
+        #     print("JSON导出失败")
         
-        print("✅ 基础爬虫完成！")
+        print("基础爬虫完成！")
         
     except Exception as e:
-        print(f"❌ 执行出错: {e}")
+        print(f"执行出错: {e}")
         import traceback
         traceback.print_exc()
 
 def run_proxy_spider(max_pages=5):
     """运行带代理的爬虫"""
-    print("🔄 启动带代理的CBG爬虫...")
+    print("启动带代理的CBG爬虫...")
     from cbg_crawler_with_proxy import EnhancedCBGCrawler
     
     crawler = EnhancedCBGCrawler()
@@ -122,17 +139,17 @@ def run_proxy_spider(max_pages=5):
 
 def run_proxy_manager():
     """运行代理管理器"""
-    print("🔧 启动代理IP管理器...")
+    print("启动代理IP管理器...")
     from proxy_source_manager import ProxySourceManager
     
     manager = ProxySourceManager()
     proxies = manager.get_all_proxies()
     manager.save_proxies_to_file(proxies)
-    print(f"✅ 获取到 {len(proxies)} 个代理IP")
+    print(f"获取到 {len(proxies)} 个代理IP")
 
 def run_tests():
     """运行测试"""
-    print("🧪 运行项目测试...")
+    print("运行项目测试...")
     import subprocess
     
     tests_path = os.path.join(project_root, 'tests', 'test_optimized_spider.py')
@@ -141,7 +158,7 @@ def run_tests():
 def show_help_examples():
     """显示使用示例"""
     print("\n" + "="*60)
-    print("📖 使用示例")
+    print("使用示例")
     print("="*60)
     print("1. 爬取角色数据:")
     print("   python run.py basic --type role --pages 10")
@@ -175,7 +192,7 @@ def show_help_examples():
     print("10. 运行测试:")
     print("    python run.py test")
     print()
-    print("💡 召唤兽爬虫特色功能:")
+    print("召唤兽爬虫特色功能:")
     print("   • 支持完整的宠物属性: 等级、气血、伤害、防御、速度、法伤、法防等")
     print("   • 支持宠物筛选条件: 宠物类型、技能数量、成长值、资质范围等")
     print("   • 支持浏览器手动设置复杂搜索条件")
@@ -186,7 +203,7 @@ def show_help_examples():
 def main():
     """主函数"""
     parser = argparse.ArgumentParser(
-        description='🎮 CBG智能爬虫系统 - 支持角色、装备、灵饰、召唤兽装备、召唤兽等多种数据爬取',
+        description='CBG智能爬虫系统 - 支持角色、装备、灵饰、召唤兽装备、召唤兽等多种数据爬取',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 使用示例:
@@ -232,6 +249,8 @@ def main():
                        help='请求延迟最小值(秒) (默认: 5.0)')
     parser.add_argument('--delay-max', type=float, default=8.0,
                        help='请求延迟最大值(秒) (默认: 8.0)')
+    parser.add_argument('--cached-params', type=str,
+                       help='缓存参数文件路径')
     
     args = parser.parse_args()
     
@@ -245,26 +264,26 @@ def main():
         return
     
     print("=" * 60)
-    print("🎮 CBG智能爬虫系统 v2.0.0")
+    print("CBG智能爬虫系统 v2.0.0")
     print("=" * 60)
-    print(f"📊 运行模式: {args.mode}")
+    print(f"运行模式: {args.mode}")
     
     if args.mode == 'basic':
-        print(f"🎯 爬虫类型: {args.type}")
+        print(f"爬虫类型: {args.type}")
         if args.type == 'equip':
             equip_type_names = {
                 'normal': '普通装备',
                 'lingshi': '灵饰', 
                 'pet': '召唤兽装备'
             }
-            print(f"🔧 装备类型: {equip_type_names.get(args.equip_type, args.equip_type)}")
+            print(f"装备类型: {equip_type_names.get(args.equip_type, args.equip_type)}")
         elif args.type == 'pet':
-            print(f"🐾 召唤兽爬虫: 支持完整宠物数据")
-            print(f"🔧 数据库: cbg_pets_{datetime.now().strftime('%Y%m')}.db")
-        print(f"📄 爬取页数: {args.pages}")
-        print(f"⏱️  延迟范围: {args.delay_min}-{args.delay_max}秒")
+            print(f"召唤兽爬虫: 支持完整宠物数据")
+            print(f"数据库: cbg_pets_{datetime.now().strftime('%Y%m')}.db")
+        print(f"爬取页数: {args.pages}")
+        print(f"延迟范围: {args.delay_min}-{args.delay_max}秒")
         if args.use_browser:
-            print("🌐 浏览器模式: 启用")
+            print("浏览器模式: 启用")
             if args.type == 'pet':
                 print("   • 可设置: 等级、价格、宠物类型、技能数、成长值、资质等筛选条件")
     
@@ -277,7 +296,8 @@ def main():
                 spider_type=args.type,
                 equip_type=args.equip_type,
                 use_browser=args.use_browser,
-                delay_range=(args.delay_min, args.delay_max)
+                delay_range=(args.delay_min, args.delay_max),
+                cached_params_file=args.cached_params
             )
         elif args.mode == 'proxy':
             run_proxy_spider(args.pages)
@@ -286,12 +306,12 @@ def main():
         elif args.mode == 'test':
             run_tests()
             
-        print("\n✅ 任务完成！")
+        print("\n任务完成！")
         
     except KeyboardInterrupt:
-        print("\n⚠️ 用户中断执行")
+        print("\n用户中断执行")
     except Exception as e:
-        print(f"\n❌ 执行出错: {e}")
+        print(f"\n执行出错: {e}")
         import traceback
         traceback.print_exc()
     

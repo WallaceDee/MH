@@ -618,7 +618,7 @@ class CBGEquipSpider:
             self.logger.error(f"获取装备第{page}页数据时出错: {e}")
             return None
 
-    async def crawl_all_pages_async(self, max_pages=10, delay_range=None, use_browser=False, equip_type='normal'):
+    async def crawl_all_pages_async(self, max_pages=10, delay_range=None, use_browser=False, equip_type='normal', cached_params=None):
         """
         异步爬取所有装备页面
         - equip_type: 'normal', 'lingshi', 'pet'
@@ -662,15 +662,20 @@ class CBGEquipSpider:
         if use_browser and os.path.exists(params_file):
             self.logger.info(f"强制浏览器模式，删除旧的参数文件: {params_file}")
             os.remove(params_file)
-            
-        search_params = await params_getter_async_map[equip_type](use_browser=use_browser)
+        
+        # 使用传入的缓存参数或获取新参数
+        if cached_params and not use_browser:
+            search_params = cached_params
+            self.logger.info(f"📊 使用传入的缓存参数: {len(search_params)} 个")
+        else:
+            search_params = await params_getter_async_map[equip_type](use_browser=use_browser)
+            if search_params:
+                self.logger.info(f"📊 使用搜索参数: {len(search_params)} 个")
 
         if not search_params:
             self.logger.error(f"无法获取 {equip_type} 装备的搜索参数，爬取中止")
             return
             
-        self.logger.info(f"📊 使用搜索参数: {len(search_params)} 个")
-        
         total_saved_count = 0
         successful_pages = 0
         
@@ -722,7 +727,7 @@ class CBGEquipSpider:
 
         self.logger.info(f"🎉 {equip_type} 装备爬取完成！成功页数: {successful_pages}/{max_pages}, 总装备数: {total_saved_count}")
 
-    def crawl_all_pages(self, max_pages=10, delay_range=None, use_browser=False, equip_type='normal'):
+    def crawl_all_pages(self, max_pages=10, delay_range=None, use_browser=False, equip_type='normal', cached_params=None):
         """
         同步启动异步装备爬虫的入口
         """
@@ -731,7 +736,8 @@ class CBGEquipSpider:
                 max_pages=max_pages,
                 delay_range=delay_range,
                 use_browser=use_browser,
-                equip_type=equip_type
+                equip_type=equip_type,
+                cached_params=cached_params
             ))
         except Exception as e:
             self.logger.error(f"启动装备爬虫失败: {e}")

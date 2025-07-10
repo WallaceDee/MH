@@ -2,10 +2,11 @@
   <el-container>
     <el-header>
       <div class="header-content">
-        <h1>CBG数据</h1>
         <el-menu mode="horizontal" :router="true" :default-active="$route.path">
+          <el-menu-item index="/">首页</el-menu-item>
           <el-menu-item index="/characters">角色列表</el-menu-item>
           <el-menu-item index="/equipments">装备列表</el-menu-item>
+          <el-menu-item index="/pets">召唤兽列表</el-menu-item>
         </el-menu>
       </div>
     </el-header>

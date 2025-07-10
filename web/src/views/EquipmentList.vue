@@ -333,126 +333,6 @@ export default {
         }))
       }))
     },
-
-    // 动态表格列配置
-    tableColumns() {
-      const baseColumns = [
-        {
-          prop: 'equip_name',
-          label: '装备名称',
-          width: '200',
-          fixed: 'left',
-          template: 'equip_name'
-        },
-        {
-          prop: 'price',
-          label: '价格',
-          width: '120',
-          sortable: 'custom',
-          template: 'price'
-        },
-        {
-          prop: 'gem_level',
-          label: '宝石',
-          width: '120',
-          template: 'gem_level'
-        }
-      ]
-
-      // 如果是宠物装备，添加特技/特效列
-      if (this.showPetEquipType) {
-        baseColumns.push({
-          prop: 'tejigui',
-          label: '特技/特效',
-          width: '120',
-          template: 'tejigui'
-        })
-      }
-
-      // 添加套装列
-      baseColumns.push({
-        prop: 'taozhuang',
-        label: '套装',
-        width: '160',
-        template: 'taozhuang'
-      })
-
-      // 添加其他固定列
-      const otherColumns = [
-        {
-          prop: 'fujia_shuxing',
-          label: '附加属性',
-          width: '150',
-          template: 'fujia_shuxing'
-        },
-        {
-          prop: 'equip_level',
-          label: '等级',
-          width: '80',
-          sortable: 'custom'
-        },
-        {
-          prop: 'all_damage',
-          label: '总伤',
-          width: '100',
-          sortable: 'custom'
-        },
-        {
-          prop: 'init_damage',
-          label: '初伤',
-          width: '100',
-          sortable: 'custom',
-          template: 'init_damage'
-        },
-        {
-          prop: 'init_wakan',
-          label: '初灵',
-          width: '100',
-          sortable: 'custom',
-          template: 'init_wakan'
-        },
-        {
-          prop: 'init_defense',
-          label: '初防',
-          width: '100',
-          sortable: 'custom',
-          template: 'init_defense'
-        },
-        {
-          prop: 'init_hp',
-          label: '初血',
-          width: '100',
-          sortable: 'custom'
-        },
-        {
-          prop: 'init_dex',
-          label: '初敏',
-          width: '100',
-          sortable: 'custom'
-        }
-      ]
-
-      baseColumns.push(...otherColumns)
-
-      // 如果是宠物装备，添加宠物装备类型列
-      if (this.showPetEquipType) {
-        baseColumns.push({
-          prop: 'equip_type',
-          label: '宠物装备类型',
-          width: '120',
-          template: 'equip_type'
-        })
-      }
-
-      // 添加服务器列
-      baseColumns.push({
-        prop: 'server_name',
-        label: '服务器',
-        width: '120'
-      })
-
-      return baseColumns
-    }
   },
   watch: {
     // 监听showPetEquipType变化，强制重新渲染表格
@@ -1073,6 +953,29 @@ export default {
     // 获取图片URL方法
     getImageUrl(imageName, size = 'small') {
       return `https://cbg-xyq.res.netease.com/images/${size}/${imageName}`
+    },
+    parseLogProgress(logs) {
+      // logs: 日志字符串数组
+      let currentPage = 0
+      let totalPages = 0
+      if (!Array.isArray(logs)) return { currentPage, totalPages }
+      for (let i = logs.length - 1; i >= 0; i--) {
+        const line = logs[i]
+        // 1. 匹配"正在爬取第 X/Y 页..."
+        const match1 = line.match(/正在爬取第\s*(\d+)\s*\/\s*(\d+)\s*页/)
+        if (match1) {
+          currentPage = parseInt(match1[1])
+          totalPages = parseInt(match1[2])
+          break
+        }
+        // 2. 匹配"总页数: Y"
+        const match2 = line.match(/总页数[:：]\s*(\d+)/)
+        if (match2) {
+          totalPages = parseInt(match2[1])
+          // 不break，继续往前找有没有X/Y格式
+        }
+      }
+      return { currentPage, totalPages }
     },
   },
   mounted() {

@@ -29,38 +29,20 @@ class SystemController:
         }
     
     def list_output_files(self):
-        """列出输出文件"""
-        data_dir = os.path.join(self.project_root, "data")
+        """递归列出output目录及所有子目录下的输出文件"""
         output_dir = os.path.join(self.project_root, "output")
-        
         files = []
-        
-        # 检查data目录
-        if os.path.exists(data_dir):
-            for file in os.listdir(data_dir):
-                if file.endswith(('.db', '.json', '.xlsx', '.csv')):
-                    file_path = os.path.join(data_dir, file)
+        for root, dirs, filenames in os.walk(output_dir):
+            for file in filenames:
+                if file.endswith(('.log', '.json', '.xlsx', '.csv')):
+                    file_path = os.path.join(root, file)
                     files.append({
                         "name": file,
                         "path": file_path,
                         "size": os.path.getsize(file_path),
                         "modified": datetime.fromtimestamp(os.path.getmtime(file_path)).isoformat(),
-                        "directory": "data"
+                        "directory": os.path.relpath(root, self.project_root)
                     })
-        
-        # 检查output目录
-        if os.path.exists(output_dir):
-            for file in os.listdir(output_dir):
-                if file.endswith(('.db', '.json', '.xlsx', '.csv')):
-                    file_path = os.path.join(output_dir, file)
-                    files.append({
-                        "name": file,
-                        "path": file_path,
-                        "size": os.path.getsize(file_path),
-                        "modified": datetime.fromtimestamp(os.path.getmtime(file_path)).isoformat(),
-                        "directory": "output"
-                    })
-        
         return files
     
     def get_file_path(self, filename):

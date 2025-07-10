@@ -45,6 +45,9 @@ from src.utils.lpc_helper import LPCHelper
 from src.exporter.excel_exporter import CBGExcelExporter
 from src.exporter.json_exporter import CBGJSONExporter, export_single_character_to_json
 
+# 导入统一日志工厂
+from src.spider.logger_factory import get_spider_logger, log_progress, log_page_complete, log_task_complete, log_error, log_warning, log_info, log_total_pages
+
 # 定义一个特殊的标记，用于表示登录已过期
 LOGIN_EXPIRED_MARKER = "LOGIN_EXPIRED"
 
@@ -75,8 +78,8 @@ class CBGSpider:
         # 初始化空号数据库助手（空号专用）
         self.empty_smart_db = CBGSmartDB(self.empty_db_path)
         
-        # 配置专用的日志器，避免与其他模块冲突
-        self.logger = self._setup_logger()
+        # 配置专用的日志器，使用统一日志工厂
+        self.logger, self.log_file = get_spider_logger('role')
         
         # 初始化宠物解析器
         self.pet_parser = PetParser(self.logger)
@@ -107,43 +110,7 @@ class CBGSpider:
         self.init_database()
         self.retry_attempts = 1 # 为登录失败重试设置次数
 
-    def _setup_logger(self):
-        """设置专用的日志器"""
-        # 创建专用的日志器
-        logger = logging.getLogger(f'CBGSpider_{id(self)}')
-        logger.setLevel(logging.INFO)
-        
-        # 清除可能存在的处理器，避免重复日志
-        if logger.handlers:
-            logger.handlers.clear()
-        
-        # 创建文件处理器
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        log_file = os.path.join(self.output_dir, f'cbg_spider_{timestamp}.log')
-        file_handler = logging.FileHandler(log_file, encoding='utf-8', mode='w')
-        file_handler.setLevel(logging.INFO)
-        
-        # 创建控制台处理器
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
-        
-        # 创建格式器
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        file_handler.setFormatter(formatter)
-        console_handler.setFormatter(formatter)
-        
-        # 添加处理器到日志器
-        logger.addHandler(file_handler)
-        logger.addHandler(console_handler)
-        
-        # 防止日志传播到根日志器，避免重复输出
-        logger.propagate = False
-        
-        # 测试日志写入
-        logger.info("🎉 CBG角色爬虫日志系统初始化完成")
-        logger.info(f"📁 日志文件路径: {log_file}")
-        
-        return logger
+
 
     def create_output_dir(self):
         """创建输出目录 - 按年月分组"""
@@ -166,14 +133,14 @@ class CBGSpider:
                 cookie_content = f.read().strip()
             if cookie_content:
                 self.session.headers.update({'Cookie': cookie_content})
-                self.logger.info("成功从config/cookies.txt文件加载Cookie")
+                log_info(self.logger, "成功从config/cookies.txt文件加载Cookie")
             else:
-                self.logger.warning("config/cookies.txt文件为空")
+                log_warning(self.logger, "config/cookies.txt文件为空")
                 
         except FileNotFoundError:
-            self.logger.error("未找到config/cookies.txt文件，请创建该文件并添加有效的Cookie")
+            log_error(self.logger, "未找到config/cookies.txt文件，请创建该文件并添加有效的Cookie")
         except Exception as e:
-            self.logger.error(f"读取config/cookies.txt文件失败: {e}")
+            log_error(self.logger, f"读取config/cookies.txt文件失败: {e}")
         
         # 设置请求头
         headers = {
@@ -192,9 +159,9 @@ class CBGSpider:
         # 如果有Cookie，添加到请求头中
         if cookie_content:
             headers['Cookie'] = cookie_content
-            self.logger.info("Cookie已添加到请求头")
+            log_info(self.logger, "Cookie已添加到请求头")
         else:
-            self.logger.warning("未找到有效的Cookie，可能影响数据获取")
+            log_warning(self.logger, "未找到有效的Cookie，可能影响数据获取")
         
         self.session.headers.update(headers)
     
@@ -207,10 +174,10 @@ class CBGSpider:
             # 初始化空号数据库
             self.init_empty_database()
             
-            self.logger.info("所有数据库表初始化完成")
-            
+            log_info(self.logger, "所有数据已初始化完毕")
+                
         except Exception as e:
-            self.logger.error(f"初始化数据库失败: {e}")
+            log_error(self.logger, f"初始化数据库失败: {e}")
             raise
     
     def init_normal_database(self):
@@ -225,15 +192,15 @@ class CBGSpider:
             for table_name in normal_tables:
                 if table_name in DB_TABLE_SCHEMAS:
                     cursor.execute(DB_TABLE_SCHEMAS[table_name])
-                    self.logger.debug(f"正常角色数据库创建表: {table_name}")
+                    # self.logger.debug(f"正常角色数据库创建表: {table_name}")
                 else:
-                    self.logger.warning(f"未找到表 {table_name} 的结构定义")
+                    log_warning(self.logger, f"未找到表 {table_name} 的结构定义")
             
             conn.commit()
-            self.logger.info(f"正常角色数据库初始化完成: {os.path.basename(self.db_path)}")
+            log_info(self.logger, f"正常角色数据库初始化完成: {os.path.basename(self.db_path)}")
             
         except Exception as e:
-            self.logger.error(f"初始化正常角色数据库失败: {e}")
+            log_error(self.logger, f"初始化正常角色数据库失败: {e}")
             raise
         finally:
             conn.close()
@@ -246,17 +213,17 @@ class CBGSpider:
             
             # 在空号数据库中创建characters表（使用empty_characters表结构）
             cursor.execute(DB_TABLE_SCHEMAS['empty_characters'])
-            self.logger.debug(f"空号数据库创建表: characters")
+            # self.logger.debug(f"空号数据库创建表: characters")
             
             # 也创建large_equip_desc_data表，以防需要存储详细数据
             cursor.execute(DB_TABLE_SCHEMAS['large_equip_desc_data'])
-            self.logger.debug(f"空号数据库创建表: large_equip_desc_data")
+            # self.logger.debug(f"空号数据库创建表: large_equip_desc_data")
             
             conn.commit()
-            self.logger.info(f"空号数据库初始化完成: {os.path.basename(self.empty_db_path)}")
+            log_info(self.logger, f"空号数据库初始化完成: {os.path.basename(self.empty_db_path)}")
             
         except Exception as e:
-            self.logger.error(f"初始化空号数据库失败: {e}")
+            log_error(self.logger, f"初始化空号数据库失败: {e}")
             raise
         finally:
             conn.close()
@@ -295,11 +262,11 @@ class CBGSpider:
                 if parsed_data and isinstance(parsed_data, dict) and len(parsed_data) > 0:
                     return self.extract_character_fields(parsed_data)
             
-            self.logger.warning(f"LPC->JS解析失败，原始数据前200字符: {clean_desc[:200]}")
+            log_warning(self.logger, f"LPC->JS解析失败，原始数据前200字符: {clean_desc[:200]}")
             return {}
             
         except Exception as e:
-            self.logger.warning(f"解析large_equip_desc失败: {e}")
+            log_warning(self.logger, f"解析large_equip_desc失败: {e}")
             return {}
     
     def extract_character_fields(self, parsed_data):
@@ -397,7 +364,7 @@ class CBGSpider:
             start = text.find('(') + 1
             end = text.rfind(')')
             if start <= 0 or end <= 0:
-                self.logger.error("响应不是有效的JSONP格式")
+                log_error(self.logger, "响应不是有效的JSONP格式")
                 return None
                 
             json_str = text[start:end]
@@ -563,7 +530,7 @@ class CBGSpider:
     def save_character_data(self, characters):
         """保存角色数据到数据库"""
         if not characters:
-            self.logger.warning("没有要保存的角色数据")
+            log_warning(self.logger, "没有要保存的角色数据")
             return 0
             
         saved_count = 0
@@ -579,9 +546,9 @@ class CBGSpider:
                 
                 # 如果当前数据库路径与实例的数据库路径不同，需要重新初始化数据库连接
                 if current_db_path != self.db_path or current_empty_db_path != self.empty_db_path:
-                    self.logger.info(f"检测到月份变化，切换到新的数据库:")
-                    self.logger.info(f"  正常角色数据库: {current_db_filename}")
-                    self.logger.info(f"  空号数据库: {current_empty_db_filename}")
+                    log_info(self.logger, f"检测到月份变化，切换到新的数据库:")
+                    log_info(self.logger, f"  正常角色数据库: {current_db_filename}")
+                    log_info(self.logger, f"  空号数据库: {current_empty_db_filename}")
                     
                     # 更新数据库路径
                     self.db_path = current_db_path
@@ -603,7 +570,7 @@ class CBGSpider:
                 large_equip_desc = char.get('large_equip_desc')
                 server_name = char.get('serverName')
                 if(server_name == '花样年华'):
-                    self.logger.info(f"{char.get('sellerNickname')} 服务器为花样年华,不予记录。")
+                    log_info(self.logger, f"{char.get('sellerNickname')} 服务器为花样年华,不予记录。")
                     continue
                 if large_equip_desc:
                     try:
@@ -618,7 +585,7 @@ class CBGSpider:
                                 yushoushu_skill = self.parse_yushoushu_skill(all_skills)
 
                     except Exception as e:
-                        self.logger.warning(f"解析角色 {char.get('eid')} 的技能信息失败: {e}")
+                        log_warning(self.logger, f"解析角色 {char.get('eid')} 的技能信息失败: {e}")
                 
                 # 解析large_equip_desc字段
                 parsed_desc = self.parse_large_equip_desc(char.get('large_equip_desc', ''))
@@ -656,7 +623,7 @@ class CBGSpider:
                 pets = char.get('pets', [])
                 if pets:
                     character_data['all_pets_json'] = json.dumps(pets, ensure_ascii=False)
-                    self.logger.debug(f"保存宝宝信息: 共{len(pets)}只宝宝，中文JSON格式")
+                    # self.logger.debug(f"保存宝宝信息: 共{len(pets)}只宝宝，中文JSON格式")
                 else:
                     character_data['all_pets_json'] = ''
                 
@@ -664,7 +631,7 @@ class CBGSpider:
                 all_equips = char.get('all_equips')
                 if all_equips:
                     character_data['all_equip_json'] = json.dumps(all_equips, ensure_ascii=False)
-                    self.logger.debug(f"保存装备信息到characters表: {len(json.dumps(all_equips, ensure_ascii=False))} 字符")
+                    # self.logger.debug(f"保存装备信息到characters表: {len(json.dumps(all_equips, ensure_ascii=False))} 字符")
                 else:
                     character_data['all_equip_json'] = ''
                 
@@ -674,7 +641,7 @@ class CBGSpider:
                     all_shenqi = self.shenqi_parser.process_character_shenqi(parsed_desc, char.get('sellerNickname', ''))
                     if all_shenqi and all_shenqi.get('神器名称'):
                         character_data['all_shenqi_json'] = json.dumps(all_shenqi, ensure_ascii=False)
-                        self.logger.debug(f"保存神器信息到characters表: {len(character_data['all_shenqi_json'])} 字符")
+                        # self.logger.debug(f"保存神器信息到characters表: {len(character_data['all_shenqi_json'])} 字符")
                     else:
                         character_data['all_shenqi_json'] = ''
                 else:
@@ -686,7 +653,7 @@ class CBGSpider:
                     all_rider = self.rider_parser.process_character_rider({'rider': parsed_desc.get('AllRider')}, char.get('sellerNickname', ''))
                     if all_rider and all_rider.get('坐骑列表'):
                         character_data['all_rider_json'] = json.dumps(all_rider, ensure_ascii=False)
-                        self.logger.debug(f"保存坐骑信息到characters表: {len(character_data['all_rider_json'])} 字符")
+                        # self.logger.debug(f"保存坐骑信息到characters表: {len(character_data['all_rider_json'])} 字符")
                     else:
                         character_data['all_rider_json'] = ''
                 else:
@@ -698,7 +665,7 @@ class CBGSpider:
                     all_fabao = self.fabao_parser.process_character_fabao(parsed_desc, char.get('sellerNickname', ''))
                     if all_fabao:
                         character_data['all_fabao_json'] = json.dumps(all_fabao, ensure_ascii=False)
-                        self.logger.debug(f"保存法宝信息到characters表: {len(character_data['all_fabao_json'])} 字符")
+                        # self.logger.debug(f"保存法宝信息到characters表: {len(character_data['all_fabao_json'])} 字符")
                     else:
                         character_data['all_fabao_json'] = ''
                 else:
@@ -727,7 +694,7 @@ class CBGSpider:
                     all_ex_avt = self.ex_avt_parser.process_character_clothes(ex_avt_data, char.get('sellerNickname', ''))
                     # 检查解析结果：ExAvtParser可能返回'锦衣'或'锦衣列表'字段
                     character_data['ex_avt_json'] = json.dumps(all_ex_avt, ensure_ascii=False)
-                    self.logger.debug(f"保存锦衣信息到characters表: {len(character_data['ex_avt_json'])} 字符")
+                    # self.logger.debug(f"保存锦衣信息到characters表: {len(character_data['ex_avt_json'])} 字符")
                 else:
                     character_data['ex_avt_json'] = ''
                 
@@ -744,18 +711,18 @@ class CBGSpider:
                     # 保存到空号数据库的characters表
                     try:
                         self.empty_smart_db.save_character(character_data)
-                        self.logger.info(f"识别并保存空号角色: ￥{char.get('price')} - {char.get('sellerNickname')} - {empty_reason}")
+                        log_info(self.logger, f"识别并保存空号角色: ￥{char.get('price')} - {char.get('sellerNickname')} - {empty_reason}")
                         saved_count += 1
                     except Exception as e:
-                        self.logger.error(f"保存空号数据失败: ￥{char.get('price')}, 错误: {e}")
+                        log_error(self.logger, f"保存空号数据失败: ￥{char.get('price')}, 错误: {e}")
                 else:
                     # 如果不是空号，保存到正常角色数据库
                     try:
                         self.smart_db.save_character(character_data)
-                        self.logger.info(f"识别并保存角色: ￥{char.get('price')} - {char.get('sellerNickname')}")
+                        log_info(self.logger, f"识别并保存角色: ￥{char.get('price')} - {char.get('sellerNickname')}")
                         saved_count += 1
                     except Exception as e:
-                        self.logger.error(f"保存角色数据失败: ￥{char.get('price')}, 错误: {e}")
+                        log_error(self.logger, f"保存角色数据失败: ￥{char.get('price')}, 错误: {e}")
                 
                 # 2. 处理详细装备数据（如果存在）
                 # 注意：即使是空号，也要尝试解析详细数据（如果API返回了的话）
@@ -957,32 +924,36 @@ class CBGSpider:
         total_characters = 0
         successful_pages = 0
         
+        # 输出总页数信息
+        log_total_pages(self.logger, max_pages)
+        
         # 获取搜索参数
         if search_params is None:
             try:
                 if use_browser:
                     # 使用浏览器监听模式
-                    self.logger.info("启动浏览器监听模式收集参数...")
+                    log_info(self.logger, "启动浏览器监听模式收集参数...")
                     from src.tools.search_form_helper import get_search_params
                     search_params = get_search_params()
                     if not search_params:
                         search_params = {'server_type': 3}
-                        self.logger.warning("未能收集到搜索参数，将使用默认参数")
+                        log_warning(self.logger, "未能收集到搜索参数，将使用默认参数")
                     else:
-                        self.logger.info(f"成功收集到搜索参数: {json.dumps(search_params, ensure_ascii=False)}")
+                        log_info(self.logger, f"成功收集到搜索参数: {json.dumps(search_params, ensure_ascii=False)}")
 
             except Exception as e:
-                self.logger.warning(f"加载搜索参数失败: {e}")
+                log_warning(self.logger, f"加载搜索参数失败: {e}")
                 search_params = {'server_type': 3}
         
         while current_page <= max_pages:
-            self.logger.info(f"正在爬取第 {current_page} 页...")
+            # 使用统一的进度日志格式
+            log_progress(self.logger, current_page, max_pages)
             
             # 获取当前页数据
             page_data = self.fetch_page(current_page, search_params)
             
             if not page_data:
-                self.logger.warning(f"第 {current_page} 页数据获取失败，停止爬取")
+                log_error(self.logger, f"第 {current_page} 页数据获取失败，停止爬取")
                 break
                 
             # 保存数据
@@ -990,7 +961,8 @@ class CBGSpider:
             total_characters += saved_count
             successful_pages += 1
             
-            self.logger.info(f"第 {current_page} 页完成，获取 {len(page_data)} 条数据，保存 {saved_count} 条")
+            # 使用统一的页面完成日志格式
+            log_page_complete(self.logger, current_page, len(page_data), saved_count)
     
             # 检查是否还有下一页
             # if len(page_data) < 15:  # 如果返回的数据少于15条，说明是最后一页
@@ -999,14 +971,15 @@ class CBGSpider:
                 
             current_page += 1
             
-            # 添加随机延迟
-            if delay_range:
+            # 添加随机延迟（最后一页完成后不需要等待）
+            if delay_range and current_page <= max_pages:
                 min_delay, max_delay = delay_range
                 delay = random.uniform(min_delay, max_delay)
-                self.logger.info(f"等待 {delay:.2f} 秒后继续...")
+                log_info(self.logger, f"等待 {delay:.2f} 秒后继续...")
                 time.sleep(delay)
         
-        self.logger.info(f"爬取完成！成功页数: {successful_pages}/{max_pages}, 总角色数: {total_characters}")
+        # 使用统一的任务完成日志格式
+        log_task_complete(self.logger, successful_pages, max_pages, total_characters, "角色")
         return total_characters
 
     def fetch_page(self, page=1, search_params=None):
@@ -1077,7 +1050,7 @@ class CBGSpider:
             response_text = asyncio.run(fetch_with_playwright())
             
             if not response_text:
-                self.logger.error("请求失败，未获取到响应")
+                log_error(self.logger, "请求失败，未获取到响应")
                 return None
 
             # 解析响应
@@ -1086,7 +1059,7 @@ class CBGSpider:
             return parsed_result
                 
         except Exception as e:
-            self.logger.error(f"获取第{page}页数据时出错: {e}")
+            log_error(self.logger, f"获取第{page}页数据时出错: {e}")
             return None
     
 
@@ -1115,7 +1088,7 @@ class CBGSpider:
         for db_file in db_files:
             db_path = os.path.join(data_dir, db_file)
             if not os.path.exists(db_path):
-                self.logger.warning(f"数据库文件不存在: {db_file}")
+                log_warning(self.logger, f"数据库文件不存在: {db_file}")
                 continue
                 
             # 为每个数据库创建Excel导出器
@@ -1155,7 +1128,7 @@ class CBGSpider:
         for db_file in db_files:
             db_path = os.path.join(data_dir, db_file)
             if not os.path.exists(db_path):
-                self.logger.warning(f"数据库文件不存在: {db_file}")
+                log_warning(self.logger, f"数据库文件不存在: {db_file}")
                 continue
                 
             # 为每个数据库创建JSON导出器
@@ -1230,12 +1203,13 @@ class CBGSpider:
             is_empty = (equip_count == 0) and (high_level_pet_count == 0)
             
             if is_empty:
-                self.logger.debug(f"识别空号: {char_data.get('sellerNickname')} - 物品数:{equip_count}, 高级宠物数:{high_level_pet_count}")
+                # self.logger.debug(f"识别空号: {char_data.get('sellerNickname')} - 物品数:{equip_count}, 高级宠物数:{high_level_pet_count}")
+                pass
             
             return is_empty
             
         except Exception as e:
-            self.logger.error(f"判断空号时出错: {e}")
+            log_error(self.logger, f"判断空号时出错: {e}")
             return False
     
     def count_high_level_pets(self, pets):
@@ -1270,7 +1244,7 @@ class CBGSpider:
             return high_level_count
             
         except Exception as e:
-            self.logger.error(f"统计高等级宠物时出错: {e}")
+            log_error(self.logger, f"统计高等级宠物时出错: {e}")
             return 0
     
     def get_empty_reason(self, char_data, all_equips, pets):
@@ -1308,7 +1282,7 @@ class CBGSpider:
             return " + ".join(reasons) if reasons else "空号"
             
         except Exception as e:
-            self.logger.error(f"获取空号原因时出错: {e}")
+            log_error(self.logger, f"获取空号原因时出错: {e}")
             return "识别异常"
 
     def _export_single_character_json(self, character_data, large_equip_desc, parsed_desc):
@@ -1334,12 +1308,12 @@ class CBGSpider:
             )
             
         except Exception as e:
-            self.logger.error(f"导出单个角色JSON失败: {e}")
+            log_error(self.logger, f"导出单个角色JSON失败: {e}")
             return None
 
 def main():
     """简单的测试函数 - 主要使用run.py启动"""
-    print("CBG爬虫模块")
+    print("CBG角色爬虫模块")
     print("请使用 'python run.py basic' 启动爬虫")
 
 if __name__ == "__main__":

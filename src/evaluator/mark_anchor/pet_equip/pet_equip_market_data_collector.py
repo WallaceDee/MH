@@ -123,6 +123,7 @@ class PetEquipMarketDataCollector:
                         server: Optional[str] = None,
                         fangyu: Optional[int] = 0,
                         speed: Optional[int] = 0,
+                        shanghai: Optional[int] = 0,
                         limit: int = 1000) -> pd.DataFrame:
         """
         获取市场灵饰数据，从多个数据库中合并数据
@@ -141,6 +142,8 @@ class PetEquipMarketDataCollector:
                 fangyu: 防御值筛选 >0 即铠甲
                 speed: 速度值筛选 >0 即项圈
                 以上都不是则是护腕
+            -- 属性过滤
+                shanghai==0 则 只能匹配shanghai小于20的    
             limit: 返回数据条数限制
 
         Returns:
@@ -173,6 +176,9 @@ class PetEquipMarketDataCollector:
                     if server is not None:
                         query += " AND server = ?"
                         params.append(server)
+
+                    if shanghai == 0:
+                        query += " AND shanghai < 20"
 
                     # 根据装备类型进行过滤
                     if fangyu > 0:
@@ -211,7 +217,8 @@ class PetEquipMarketDataCollector:
         根据目标特征获取用于相似度计算的市场数据（先类型分类）
         """
         kindid = target_features.get('kindid')
-
+        # 属性过滤
+        shanghai = target_features.get('shanghai', 0) 
         # 类型分类参数
         fangyu = target_features.get('fangyu', 0)
         speed = target_features.get('speed', 0)
@@ -222,6 +229,7 @@ class PetEquipMarketDataCollector:
             level_range = target_features.get('equip_level_range'),
             fangyu=fangyu,
             speed=speed,
+            shanghai=shanghai,
             limit=5000
         )
         if market_data.empty:

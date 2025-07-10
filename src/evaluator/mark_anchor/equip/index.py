@@ -191,12 +191,13 @@ class EquipmentTypePlugin(ABC):
         """
         return {}
 
-    def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
+    def get_weight_overrides(self, kindid: int = None, target_features: Dict[str, Any] = None) -> Dict[str, float]:
         """
         获取权重覆盖配置
 
         Args:
             kindid: 装备类型ID，用于动态配置权重
+            target_features: 目标装备特征，用于动态调整权重
 
         Returns:
             Dict[str, float]: 要覆盖的权重配置
@@ -208,19 +209,20 @@ class EquipmentTypePlugin(ABC):
         获取权重增量配置
 
         Args:
-            kindid: 装备类型ID，用于动态配置权重
+            kindid: 装备类型ID
 
         Returns:
-            Dict[str, float]: 要增加的权重配置（可以为负数）
+            Dict[str, float]: 权重增量配置
         """
         return {}
 
-    def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
+    def get_tolerance_overrides(self, kindid: int = None, target_features: Dict[str, Any] = None) -> Dict[str, float]:
         """
-        获取相对容忍度覆盖配置（已废弃绝对容忍度）
+        获取相对容忍度覆盖配置
 
         Args:
             kindid: 装备类型ID，用于动态配置容忍度
+            target_features: 目标装备特征，用于动态调整容忍度
 
         Returns:
             Dict[str, float]: 相对容忍度覆盖
@@ -331,8 +333,8 @@ class EquipmentPluginManager:
 
         return enhanced_features
 
-    def get_final_weights(self, kindid: int) -> Dict[str, float]:
-        """获取最终的特征权重配置"""
+    def get_final_weights(self, kindid: int, target_features: Dict[str, Any] = None) -> Dict[str, float]:
+        """获取最终的权重配置"""
         weights = self.base_config.base_feature_weights.copy()
 
         # 应用插件的权重配置
@@ -342,13 +344,19 @@ class EquipmentPluginManager:
             for key, increment in increments.items():
                 weights[key] = weights.get(key, 0) + increment
 
-            # 再应用覆盖
-            overrides = plugin.get_weight_overrides(kindid)
-            weights.update(overrides)
+            # 再应用覆盖，如果插件支持target_features参数则传递
+            if hasattr(plugin, 'get_weight_overrides'):
+                try:
+                    # 尝试传递target_features参数
+                    overrides = plugin.get_weight_overrides(kindid, target_features)
+                except TypeError:
+                    # 如果插件不支持target_features参数，则使用原有方式
+                    overrides = plugin.get_weight_overrides(kindid)
+                weights.update(overrides)
 
         return weights
 
-    def get_final_tolerances(self, kindid: int) -> Dict[str, float]:
+    def get_final_tolerances(self, kindid: int, target_features: Dict[str, Any] = None) -> Dict[str, float]:
         """获取最终的相对容忍度配置（不再使用绝对容忍度）"""
         relative_tolerances = self.base_config.base_relative_tolerances.copy()
 
@@ -360,9 +368,15 @@ class EquipmentPluginManager:
                 relative_tolerances[key] = relative_tolerances.get(
                     key, 0) + increment
 
-            # 再应用覆盖
-            rel_overrides = plugin.get_tolerance_overrides(kindid)
-            relative_tolerances.update(rel_overrides)
+            # 再应用覆盖，如果插件支持target_features参数则传递
+            if hasattr(plugin, 'get_tolerance_overrides'):
+                try:
+                    # 尝试传递target_features参数
+                    rel_overrides = plugin.get_tolerance_overrides(kindid, target_features)
+                except TypeError:
+                    # 如果插件不支持target_features参数，则使用原有方式
+                    rel_overrides = plugin.get_tolerance_overrides(kindid)
+                relative_tolerances.update(rel_overrides)
 
         return relative_tolerances
 
@@ -424,18 +438,19 @@ class EquipAnchorEvaluator:
         """添加装备类型插件"""
         self.plugin_manager.register_plugin(plugin)
 
-    def get_equip_type_configs(self, kindid: int) -> Tuple[Dict[str, float], Dict[str, float]]:
+    def get_equip_type_configs(self, kindid: int, target_features: Dict[str, Any] = None) -> Tuple[Dict[str, float], Dict[str, float]]:
         """
         根据装备类型获取相应的配置（通过插件系统）
 
         Args:
             kindid: 装备类型ID
+            target_features: 目标装备特征，用于动态调整配置
 
         Returns:
             Tuple[特征权重, 相对容忍度]
         """
-        feature_weights = self.plugin_manager.get_final_weights(kindid)
-        relative_tolerances = self.plugin_manager.get_final_tolerances(kindid)
+        feature_weights = self.plugin_manager.get_final_weights(kindid, target_features)
+        relative_tolerances = self.plugin_manager.get_final_tolerances(kindid, target_features)
 
         return feature_weights, relative_tolerances
 
@@ -691,7 +706,7 @@ class EquipAnchorEvaluator:
             # 获取装备类型相关配置（通过插件系统）
             kindid = target_features.get('kindid', 0)
             feature_weights, relative_tolerances = self.get_equip_type_configs(
-                kindid)
+                kindid, target_features)
 
             # 特征增强：添加派生特征
             enhanced_target_features = self.plugin_manager.get_enhanced_features(
