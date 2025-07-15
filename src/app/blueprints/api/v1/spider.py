@@ -35,8 +35,8 @@ API端点列表:
 """
 
 from flask import Blueprint, request
-from app.controllers.spider_controller import SpiderController
-from app.utils.response import success_response, error_response
+from src.app.controllers.spider_controller import SpiderController
+from src.app.utils.response import success_response, error_response
 
 spider_bp = Blueprint('spider', __name__)
 controller = SpiderController()
@@ -237,7 +237,7 @@ def get_logs():
 def get_log_files():
     """获取日志文件列表"""
     try:
-        from app.controllers.system_controller import SystemController
+        from src.app.controllers.system_controller import SystemController
         system_controller = SystemController()
         files = system_controller.list_output_files()
         
@@ -366,7 +366,7 @@ def stream_logs():
 def list_files():
     """列出输出文件"""
     try:
-        from app.controllers.system_controller import SystemController
+        from src.app.controllers.system_controller import SystemController
         system_controller = SystemController()
         files = system_controller.list_output_files()
         return success_response(data={"items": files})
@@ -378,7 +378,7 @@ def list_files():
 def download_file(filename):
     """下载文件"""
     try:
-        from app.controllers.system_controller import SystemController
+        from src.app.controllers.system_controller import SystemController
         from flask import send_file
         system_controller = SystemController()
         file_path = system_controller.get_file_path(filename)

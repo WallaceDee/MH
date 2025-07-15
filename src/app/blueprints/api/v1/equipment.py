@@ -6,8 +6,8 @@
 """
 
 from flask import Blueprint, request, jsonify
-from app.controllers.equipment_controller import EquipmentController
-from app.utils.response import success_response, error_response
+from src.app.controllers.equipment_controller import EquipmentController
+from src.app.utils.response import success_response, error_response
 
 equipment_bp = Blueprint('equipment', __name__)
 controller = EquipmentController()

@@ -426,7 +426,7 @@ function show_pet_skill_in_grade(pet_skills, sp_skill, row_len, col_len, conf, p
                         tipStr += ' data_cifu_icon="' + conf.pet_skill_url + fill_format(skill_id) + '.gif"';
                     }
                     tipStr += ' data_src="' + conf.pet_skill_url + fill_format(skill_id) + '.gif"';
-                    var content = "<img referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(skill_id) + ".gif\">";
+                    var content = "<img data-skill-id=" + skill_id + " referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(skill_id) + ".gif\">";
                     if (pet_attrs && pet_attrs.evol_skill_list && window.CBG_GAME_CONFIG.pet_skill_high_to_other_level_mapping) {
                         var cifu = pet_attrs.evol_skill_list;
                         cifu.forEach(function(item) {
@@ -450,9 +450,9 @@ function show_pet_skill_in_grade(pet_skills, sp_skill, row_len, col_len, conf, p
                         });
                         if (hashEvolSkllAll.contains(Number(skill_id))) {
                             if (hashLowEvolSkllAll.contains(Number(skill_id)) && all_skills.contains(String(findCorrespondingValue(hashBothEvolSkllAll, skill_id)))) {
-                                var content = "<img referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(skill_id) + ".gif\">";
+                                var content = "<img data-skill-id=" + skill_id + " referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(skill_id) + ".gif\">";
                             } else {
-                                var content = "<img referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(skill_id) + ".gif\"> <div class='evol_skill_icon' " + tipStr + " ></div>";
+                                var content = "<img data-skill-id=" + skill_id + " referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(skill_id) + ".gif\"> <div class='evol_skill_icon' " + tipStr + " ></div>";
                             }
                         }
                     }
@@ -479,12 +479,12 @@ function show_pet_skill_in_grade(pet_skills, sp_skill, row_len, col_len, conf, p
             var sp_cell = grid.rows[row_len - 1].cells[col_len - 1];
             if (hashEvolSkllAll && hashEvolSkllAll.contains(Number(sp_skill))) {
                 if (hashLowEvolSkllAll.contains(Number(sp_skill)) && all_skills.contains(String(findCorrespondingValue(hashBothEvolSkllAll, sp_skill)))) {
-                    var content = "<img referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(sp_skill) + ".gif\" class=\"on\">";
+                    var content = "<img data-skill-id=" + sp_skill + " referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(sp_skill) + ".gif\" class=\"on\">";
                 } else {
-                    var content = "<img referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(sp_skill) + ".gif\" class=\"on\"> <div class='evol_skill_icon'></div>";
+                    var content = "<img data-skill-id=" + sp_skill + " referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(sp_skill) + ".gif\" class=\"on\"> <div class='evol_skill_icon'></div>";
                 }
             } else {
-                var content = "<img referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(sp_skill) + ".gif\" class=\"on\">";
+                var content = "<img data-skill-id=" + sp_skill + " referrerpolicy=\"no-referrer\"" + tipStr + " src=\"" + conf.pet_skill_url + fill_format(sp_skill) + ".gif\" class=\"on\">";
             }
             sp_cell.innerHTML = content;
         }

@@ -11,7 +11,7 @@ sys.path.insert(0, project_root)
 
 try:
     from src.evaluator.hybrid_valuation_engine import HybridValuationEngine, ValuationResult
-    from src.evaluator.market_anchor_evaluator import MarketAnchorEValuator
+    from src.evaluator.market_anchor_evaluator import MarketAnchorEvaluator
     from src.evaluator.rule_evaluator import RuleEvaluator
 except ImportError as e:
     print(f"导入错误: {e}")

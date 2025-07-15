@@ -5,60 +5,43 @@
       <!-- 筛选和搜索表单 -->
       <el-form :inline="true" :model="filters" @submit.native.prevent="fetchPets" size="mini">
         <el-form-item label="选择月份">
-          <el-date-picker
-            v-model="filters.selectedDate"
-            :clearable="false"
-            type="month"
-            placeholder="选择月份"
-            format="yyyy-MM"
-            value-format="yyyy-MM"
-          />
+          <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="选择月份"
+            format="yyyy-MM" value-format="yyyy-MM" />
         </el-form-item>
         <el-form-item label="等级范围">
           <div style="width: 500px">
-            <el-slider
-              v-model="filters.level_range"
-              range
-              :min="0"
-              :max="180"
-              :step="5"
-              show-input
-              show-input-controls
-              :marks="levelMarks"
-              @change="handleLevelRangeChange"
-            />
+            <el-slider v-model="filters.level_range" range :min="0" :max="180" :step="5" show-input show-input-controls
+              :marks="levelMarks" @change="handleLevelRangeChange" />
           </div>
         </el-form-item>
         <el-form-item label="价格范围">
-          <el-input-number
-            v-model="filters.price_min"
-            placeholder="最低价格"
-            :min="0"
-            :controls="false"
-          ></el-input-number>
+          <el-input-number v-model="filters.price_min" placeholder="最低价格" :min="0" :controls="false"></el-input-number>
           -
-          <el-input-number
-            v-model="filters.price_max"
-            placeholder="最高价格"
-            :min="0"
-            :controls="false"
-          ></el-input-number>
+          <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
         </el-form-item>
-        <el-form-item label="召唤兽类型">
-          <el-select
-            v-model="filters.pet_type"
-            placeholder="请选择召唤兽类型"
-            multiple
-            clearable
-            filterable
-            @change="handlePetTypeChange"
-          >
-            <el-option
-              v-for="[value, label] in pet_types"
-              :key="value"
-              :label="label"
-              :value="value"
-            >
+        <el-form-item label="技能">
+            <el-cascader v-model="filters.skills" :options="skillOptions" :props="cascaderProps" :show-all-levels="false"
+              placeholder="请选择技能" multiple clearable filterable>
+              <template slot-scope="{ data }">
+                <el-row type="flex"  align="middle">
+                    <el-image v-if="data.value" :src="getSkillImage(data.value)" fit="cover" referrerpolicy="no-referrer" style="display: block;width: 24px;height: 24px;margin-right: 4px;"></el-image>
+                    <span>{{ data.label }}</span>
+                </el-row>
+              </template>
+            </el-cascader>
+        </el-form-item>
+        <el-form-item label="技能数量≥">
+          <el-input-number v-model="filters.pet_skill_count" placeholder="技能数量" :min="0" controls ></el-input-number>
+        </el-form-item>
+        <el-form-item label="成长">
+          <el-input-number v-model="filters.pet_growth" placeholder="成长" :min="1" :max="1.4" :step="0.1" controls></el-input-number>
+        </el-form-item>
+        <el-form-item label="灵性值≥">
+          <el-input-number v-model="filters.pet_lx" placeholder="灵性值" :min="0" controls ></el-input-number>
+        </el-form-item>
+        <el-form-item label="特性">
+          <el-select v-model="filters.pet_texing" placeholder="请选择特性" multiple clearable filterable>
+            <el-option v-for="([value,label]) in texing_type_list" :key="value" :label="label" :value="value">
             </el-option>
           </el-select>
         </el-form-item>
@@ -67,31 +50,19 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table
-      :data="pets"
-      stripe
-      style="width: 100%"
-      @sort-change="handleSortChange"
-      :key="tableKey"
-    >
+    <el-table :data="pets" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey">
       <el-table-column prop="eid" label="操作" width="100" fixed>
         <template #default="scope">
           <el-link :href="getCBGLink(scope.row.eid)" type="danger" target="_blank">藏宝阁</el-link>
+          <el-divider direction="vertical"></el-divider>
+          <similar-pet-modal :pet="scope.row" :similar-data="similarPets[scope.row.eid]"
+            :valuation="petValuations[scope.row.eid]" :error="similarError[scope.row.eid]"
+            :loading="loadingSimilar[scope.row.eid]" @show="loadSimilarPets" @retry="retryWithNewThreshold" />
         </template>
       </el-table-column>
       <el-table-column fixed label="召唤兽" width="70">
         <template #default="scope">
-          <PetInfoPopover
-            :key="scope.row.equip_sn"
-            :petData="scope.row.petData"
-            :equipFaceImg="scope.row.equip_face_img"
-            :enhanceInfo="getEnhanceInfo(scope.row)"
-            :visible="scope.row.showPopover"
-          >
-            <template #trigger>
-              <pet-image :pet="scope.row" />
-            </template>
-          </PetInfoPopover>
+          <pet-image :pet="scope.row.petData" :equipFaceImg="scope.row.equip_face_img" :enhanceInfo="getEnhanceInfo(scope.row)"/>
         </template>
       </el-table-column>
       <el-table-column fixed prop="price" label="价格 (元)" width="140" sortable="custom">
@@ -101,8 +72,10 @@
       </el-table-column>
       <el-table-column prop="level" label="等级" width="140" sortable="custom">
         <template #default="scope">
-          <p :class="scope.row.petData.is_baobao==='是'?'cBlue':'equip_desc_red'"><span>{{scope.row.petData.is_baobao==='是'?'':'野生'}}</span>
-            <span >{{scope.row.equip_name}}{{scope.row.petData.is_baobao==='是'?'宝宝':''}}/{{ scope.row.level }}级</span></p>
+          <p :class="scope.row.petData.is_baobao === '是' ? 'cBlue' : 'equip_desc_red'">
+            <span>{{ scope.row.petData.is_baobao === '是' ? '' : '野生' }}</span>
+            <span>{{ scope.row.equip_name }}{{ scope.row.petData.is_baobao === '是' ? '宝宝' : '' }}/{{ scope.row.level }}级</span>
+          </p>
           <p>参战等级：{{ scope.row.role_grade_limit }}级</p>
         </template>
       </el-table-column>
@@ -113,7 +86,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="skills" label="技能" width="220">
+      <el-table-column prop="skills" label="技能" width="280">
         <template #default="scope">
           <div class="pet-skills" v-html="formatSkills(scope.row)"></div>
         </template>
@@ -123,47 +96,56 @@
       <el-table-column prop="server_name" label="服务器" width="120"></el-table-column>
     </el-table>
     <div class="pagination-container">
-      <el-pagination
-        @current-change="handlePageChange"
-        :current-page="pagination.page"
-        @size-change="handleSizeChange"
-        :page-size="pagination.page_size"
-        :page-sizes="[10, 100, 200, 300, 400]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="pagination.total"
-      >
+      <el-pagination @current-change="handlePageChange" :current-page="pagination.page" @size-change="handleSizeChange"
+        :page-size="pagination.page_size" :page-sizes="[10, 100, 200, 300, 400]"
+        layout="total, sizes, prev, pager, next, jumper" :total="pagination.total">
       </el-pagination>
     </div>
   </div>
 </template>
 
 <script>
-import PetImage from '@/components/PetImage.vue'
-import PetInfoPopover from '@/components/PetInfoPopover.vue'
+import SimilarPetModal from '@/components/SimilarPetModal.vue'
 import dayjs from 'dayjs'
+import PetImage from '@/components/PetImage.vue'
 
+const skillOptions = []
+const pet_skill_classification = window.AUTO_SEARCH_CONFIG.pet_skill_classification
+for(const lowOrHightKey in pet_skill_classification){
+  for(const label in pet_skill_classification[lowOrHightKey]){
+    skillOptions.push({
+      value:'',
+      label:lowOrHightKey.replace('技能','')+label,
+      children:pet_skill_classification[lowOrHightKey][label]
+    })
+  }
+}
+skillOptions.reverse()
 export default {
   name: 'PetList',
   components: {
-    PetImage,
-    PetInfoPopover
+    SimilarPetModal,
+    PetImage
   },
   data() {
     return {
-      pet_types: [
-        [1, '攻宠'],
-        [2, '法宠'],
-        [3, '血宠'],
-        [4, '速宠'],
-        [5, '特殊宠']
-      ],
+        // 级联选择器配置
+      cascaderProps: {
+        multiple: true,
+        checkStrictly: false, // 不允许选择非叶子节点，只能选择叶子节点
+        emitPath: false       // 只返回最后一级的值（技能ID），而不是完整路径
+      },
+      texing_type_list:window.AUTO_SEARCH_CONFIG.texing_type_list,
+      skillOptions,
       pets: [],
       filters: {
+        pet_skill_count:0,
+        pet_growth:1.0,
         selectedDate: dayjs().format('YYYY-MM'),
-        level_range: [150, 180],
+        level_range: [0, 180],
+        skills:[],
         price_min: undefined,
         price_max: undefined,
-        pet_type: [],
         sort_by: 'price',
         sort_order: 'asc'
       },
@@ -178,10 +160,23 @@ export default {
         120: '120',
         150: '150'
       },
-      tableKey: 0
+      tableKey: 0,
+      // 相似宠物相关数据
+      similarPets: {}, // 存储每个宠物的相似宠物数据
+      loadingSimilar: {}, // 存储每个宠物的加载状态
+      similarError: {}, // 存储加载错误信息
+      petValuations: {}, // 存储宠物估价信息
     }
   },
   methods: {
+    getSkillImage(skillId=0) {
+      if(skillId===0){
+        return ''
+      }
+      // skillId少于4位数要补0
+      const paddedId = skillId.toString().padStart(4, '0')
+      return `https://cbg-xyq.res.netease.com/images/skill/${paddedId}.gif`
+    },
     tableRowClassName({ row }) {
       if (row.petData.is_baobao === '否') {
         return 'warning-row'
@@ -233,6 +228,13 @@ export default {
           delete params.level_range
         }
 
+        // 处理技能过滤参数
+        if (this.filters.skills && Array.isArray(this.filters.skills) && this.filters.skills.length > 0) {
+          // 由于设置了emitPath: false，cascader直接返回技能ID
+          params.pet_skills = this.filters.skills
+          delete params.skills
+        }
+
         // 移除空的筛选条件
         Object.keys(params).forEach((key) => {
           if (
@@ -248,16 +250,16 @@ export default {
         const response = await this.$api.pet.getPetList(params)
 
         if (response.code === 200) {
-          this.pets =
-            response.data.data.map((item) => {
-              console.log(this.parsePetInfo(item.desc))
-              return ({
+          this.pets = response.data.data.map((item) => {
+            return ({
               ...item,
               petData: this.parsePetInfo(item.desc)
             })
-            }) || []
+          }) || []
           this.pagination.total = response.data.total || 0
           this.pagination.page = response.data.page || this.pagination.page
+
+          console.log(this.pets.map(item => ({ desc: item.desc, petData: item.petData })))
         } else {
           this.$message.error(response.message || '获取召唤兽列表失败')
         }
@@ -328,7 +330,7 @@ export default {
           petData.all_skill,
           petData.sp_skill,
           2,
-          6,
+          8,
           {
             pet_skill_url: 'https://cbg-xyq.res.netease.com/images/skill/',
             notice_node_name: 'pet_tip_notice_msg',
@@ -369,22 +371,11 @@ export default {
       this.fetchPets()
     },
 
-    // 处理宠物点击事件
-    handlePetClick(pet) {
-      try {
-        // 解析宠物数据
-        const petData = this.parsePetInfo(pet.desc)
-        this.$set(pet, 'petData', petData)
-      } catch (error) {
-        console.error('解析宠物数据失败:', error)
-        this.$message.error('获取宠物详细信息失败')
-      }
-    },
-
     // 获取增强信息
     getEnhanceInfo(pet) {
       var equip_display_conf = {
-        pet: { skill_id_list: [661], is_baobao: 1 },
+        // 高亮技能
+        pet: { skill_id_list: [571, 661], is_baobao: 1 },
         search: { is_hide_unreasonable_price_equips: 1 }
       }
       var enhanceInfo = equip_display_conf.pet || {}
@@ -399,27 +390,163 @@ export default {
       return {
         time_lock: pet.time_lock || false,
         time_lock_days: pet.time_lock_days || 90,
-        is_baobao: pet.petData.is_baobao==='是' || false,
+        is_baobao: pet.petData.is_baobao === '是' || false,
         skill_id_list: enhanceInfo.skill_id_list || []
+      }
+    },
+
+    // 加载相似宠物
+    async loadSimilarPets(pet) {
+      const eid = pet.eid
+
+      // 如果已经加载过，直接返回
+      if (this.similarPets[eid] && this.petValuations[eid]) {
+        return
+      }
+
+      // 使用默认相似度阈值0.8加载
+      await this.loadPetValuation(pet, 0.8)
+    },
+
+    // 重试查找相似宠物
+    async retryWithNewThreshold(eid, newThreshold) {
+      // 获取保存的宠物数据
+      const similarData = this.similarPets[eid]
+      if (!similarData || !similarData.pet) {
+        this.$message.error('宠物数据丢失，请重新点击查看相似')
+        return
+      }
+
+      const pet = similarData.pet
+      // 使用新的相似度阈值重新加载
+      await this.loadPetValuation(pet, newThreshold, true)
+    },
+
+    // 统一的宠物估价加载方法
+    async loadPetValuation(pet, similarityThreshold = 0.8, isRetry = false) {
+      const eid = pet.eid
+
+      try {
+        this.$set(this.loadingSimilar, eid, true)
+        this.$set(this.similarError, eid, null)
+
+        // 获取估价信息（包含相似宠物）
+        const valuationResponse = await this.$api.pet.getPetValuation({
+          pet_data: pet,
+          strategy: 'fair_value',
+          similarity_threshold: similarityThreshold,
+          max_anchors: 30
+        })
+        // 处理估价响应
+        if (valuationResponse.code === 200) {
+          const data = valuationResponse.data
+          this.$set(this.petValuations, eid, data)
+
+          // 从估价结果中提取相似宠物信息
+          if (data.anchors && data.anchors.length > 0) {
+            this.$set(this.similarPets, eid, {
+              anchor_count: data.anchor_count,
+              similarity_threshold: data.similarity_threshold,
+              anchors: data.anchors.map((item) =>({...item, petData: this.parsePetInfo(item.desc)})),
+              statistics: {
+                price_range: {
+                  min: Math.min(...data.anchors.map((a) => a.price || 0)),
+                  max: Math.max(...data.anchors.map((a) => a.price || 0))
+                },
+                similarity_range: {
+                  min: Math.min(...data.anchors.map((a) => a.similarity || 0)),
+                  max: Math.max(...data.anchors.map((a) => a.similarity || 0)),
+                  avg:
+                    data.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                    data.anchors.length
+                }
+              }
+            })
+
+            if (isRetry) {
+              this.$message.success(`成功找到 ${data.anchor_count} 个相似宠物`)
+            }
+          } else {
+            this.$set(this.similarPets, eid, {
+              anchor_count: 0,
+              similarity_threshold: data.similarity_threshold || similarityThreshold,
+              anchors: [],
+              statistics: {
+                price_range: { min: 0, max: 0 },
+                similarity_range: { min: 0, max: 0, avg: 0 }
+              },
+              message: isRetry
+                ? '仍未找到符合条件的市场锚点，请尝试更低的相似度阈值'
+                : '未找到符合条件的市场锚点，建议降低相似度阈值',
+              canRetry: true,
+              pet: pet
+            })
+
+            if (isRetry) {
+              this.$message.warning('仍未找到相似宠物，请尝试更低的相似度阈值')
+            }
+          }
+        } else if (valuationResponse.code === 400) {
+          // 400错误也要显示界面，只是没有锚点数据
+          this.$set(this.similarPets, eid, {
+            anchor_count: 0,
+            similarity_threshold: similarityThreshold,
+            anchors: [],
+            statistics: {
+              price_range: { min: 0, max: 0 },
+              similarity_range: { min: 0, max: 0, avg: 0 }
+            },
+            message: valuationResponse.message || '未找到符合条件的市场锚点，建议降低相似度阈值',
+            canRetry: true,
+            pet: pet
+          })
+          // 清空估价信息，因为无法估价
+          this.$set(this.petValuations, eid, null)
+
+          if (isRetry) {
+            this.$message.error(valuationResponse.message || '查找相似宠物失败')
+          }
+        } else {
+          this.$set(this.similarError, eid, valuationResponse.message || '加载估价和相似宠物失败')
+
+          if (isRetry) {
+            this.$set(this.similarPets, eid, {
+              anchor_count: 0,
+              similarity_threshold: similarityThreshold,
+              anchors: [],
+              statistics: {
+                price_range: { min: 0, max: 0 },
+                similarity_range: { min: 0, max: 0, avg: 0 }
+              },
+              message: valuationResponse.message || '查找失败，请重试',
+              canRetry: true,
+              pet: pet
+            })
+            this.$message.error(valuationResponse.message || '查找相似宠物失败')
+          }
+        }
+
+        console.log('估价和相似宠物数据:', valuationResponse.data)
+      } catch (error) {
+        console.error('加载相似宠物或估价失败:', error)
+        this.$set(this.similarError, eid, `加载失败: ${error.message}`)
+
+        if (isRetry) {
+          this.$message.error(`重试失败: ${error.message}`)
+        }
+      } finally {
+        this.$set(this.loadingSimilar, eid, false)
       }
     },
   },
   mounted() {
     this.fetchPets()
+    window.parsePetInfo = this.parsePetInfo
   }
 }
 </script>
 
 <style scoped>
-:global(.el-table .warning-row) {
-  background: #DCDFE6;
-  border:1px dashed #606266;
-}
-
-.pet-list-view {
-  padding: 20px;
-}
-
 .filters {
   margin-bottom: 20px;
 }
@@ -430,23 +557,6 @@ export default {
   justify-content: center;
 }
 
-/* 召唤兽名称样式 */
-.pet-name {
-  font-weight: bold;
-  color: #409eff;
-}
-
-/* 召唤兽等级样式 */
-.pet-level {
-  color: #67c23a;
-  font-weight: bold;
-}
-
-/* 成长值样式 */
-.pet-growth {
-  color: #e6a23c;
-  font-weight: bold;
-}
 
 /* 技能样式 */
 :global(.pet-skills .tb03 td) {
@@ -465,14 +575,8 @@ export default {
   border: 1px solid #c00;
 }
 
-.skill-item {
-  display: inline-block;
-  background-color: #f0f9ff;
-  color: #409eff;
-  padding: 2px 6px;
-  margin: 1px;
-  border-radius: 3px;
-  font-size: 12px;
-  border: 1px solid #d1ecf1;
+/* 相似宠物弹窗样式 */
+:global(.similar-pet-popper) {
+  padding: 16px;
 }
 </style>

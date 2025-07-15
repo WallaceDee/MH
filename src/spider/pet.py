@@ -31,12 +31,17 @@ from src.tools.search_form_helper import (
     verify_cookie_validity,
 )
 
+# 导入宠物描述解析相关模块
+from src.spider.helper.decode_desc import parse_pet_info
+
 
 class CBGPetSpider:
     def __init__(self):
         self.session = setup_session()
         self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
+        
+        # 不需要初始化解析器，直接使用parse_pet_info函数
         
         # 使用按月分割的数据库文件路径
         project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -197,6 +202,21 @@ class CBGPetSpider:
             pets = []
             for pet in equip_list:
                 try:
+                    # 引入decode_desc.py中的decode_desc函数，解析desc字段，把解析的字段存入数据库 
+                    
+                    # 获取并解析宠物描述字段
+                    raw_desc = pet.get('desc', '')
+                    parsed_pet_attrs = {}
+                    
+                    # 如果存在desc字段，则解析宠物属性
+                    if raw_desc:
+                        try:
+                            parsed_pet_attrs = parse_pet_info(raw_desc)
+                            self.logger.debug(f"成功解析宠物描述，获得{len(parsed_pet_attrs)}个属性字段")
+                        except Exception as e:
+                            self.logger.warning(f"解析宠物描述失败: {e}")
+                            parsed_pet_attrs = {}
+                    
                     # 直接保存所有原始字段，不做解析
                     pet_data = {
                         # 基本字段直接映射
@@ -244,75 +264,7 @@ class CBGPetSpider:
                         'fair_show_end_time': pet.get('fair_show_end_time'),
                         'fair_show_end_time_left': pet.get('fair_show_end_time_left'),
                         'fair_show_poundage': pet.get('fair_show_poundage'),
-                        
-                        # 宠物属性
-                        'hp': pet.get('hp'),
-                        'qixue': pet.get('qixue'),
-                        'init_hp': pet.get('init_hp'),
-                        'mofa': pet.get('mofa'),
-                        'init_wakan': pet.get('init_wakan'),
-                        'mingzhong': pet.get('mingzhong'),
-                        'fangyu': pet.get('fangyu'),
-                        'init_defense': pet.get('init_defense'),
-                        'defense': pet.get('defense'),
-                        'speed': pet.get('speed'),
-                        'minjie': pet.get('minjie'),
-                        'init_dex': pet.get('init_dex'),
-                        'shanghai': pet.get('shanghai'),
-                        'damage': pet.get('damage'),
-                        'init_damage': pet.get('init_damage'),
-                        'init_damage_raw': pet.get('init_damage_raw'),
-                        'all_damage': pet.get('all_damage'),
-                        'magic_damage': pet.get('magic_damage'),
-                        'magic_defense': pet.get('magic_defense'),
-                        'lingli': pet.get('lingli'),
-                        'fengyin': pet.get('fengyin'),
-                        'anti_fengyin': pet.get('anti_fengyin'),
-                        'zongshang': pet.get('zongshang'),
-                        
-                        # 修炼相关
-                        'expt_gongji': pet.get('expt_gongji'),
-                        'expt_fangyu': pet.get('expt_fangyu'),
-                        'expt_fashu': pet.get('expt_fashu'),
-                        'expt_kangfa': pet.get('expt_kangfa'),
-                        'max_expt_gongji': pet.get('max_expt_gongji'),
-                        'max_expt_fangyu': pet.get('max_expt_fangyu'),
-                        'max_expt_fashu': pet.get('max_expt_fashu'),
-                        'max_expt_kangfa': pet.get('max_expt_kangfa'),
-                        'sum_exp': pet.get('sum_exp'),
-                        
-                        # 宝宝修炼
-                        'bb_expt_gongji': pet.get('bb_expt_gongji'),
-                        'bb_expt_fangyu': pet.get('bb_expt_fangyu'),
-                        'bb_expt_fashu': pet.get('bb_expt_fashu'),
-                        'bb_expt_kangfa': pet.get('bb_expt_kangfa'),
-                        
-                        # 附加属性
-                        'addon_tizhi': pet.get('addon_tizhi'),
-                        'addon_liliang': pet.get('addon_liliang'),
-                        'addon_naili': pet.get('addon_naili'),
-                        'addon_minjie': pet.get('addon_minjie'),
-                        'addon_fali': pet.get('addon_fali'),
-                        'addon_lingli': pet.get('addon_lingli'),
-                        'addon_total': pet.get('addon_total'),
-                        'addon_status': pet.get('addon_status'),
-                        'addon_skill_chance': pet.get('addon_skill_chance'),
-                        'addon_effect_chance': pet.get('addon_effect_chance'),
-                        
-                        # 宝石相关
-                        'gem_level': pet.get('gem_level'),
-                        'xiang_qian_level': pet.get('xiang_qian_level'),
-                        'gem_value': pet.get('gem_value'),
-                        
-                        # 强化相关
-                        'jinglian_level': pet.get('jinglian_level'),
-                        
-                        # 特技和套装
-                        'special_skill': pet.get('special_skill'),
-                        'special_effect': pet.get('special_effect'),
-                        'suit_skill': pet.get('suit_skill'),
-                        'suit_effect': pet.get('suit_effect'),
-                        
+                  
                         # 其他信息
                         'collect_num': pet.get('collect_num'),
                         'has_collect': 1 if pet.get('has_collect') else 0,
@@ -389,7 +341,7 @@ class CBGPetSpider:
                         'random_draw_finish_time': pet.get('random_draw_finish_time'),
                         
                         # 详细描述
-                        'desc': pet.get('desc'),
+                        'desc': raw_desc,  # 使用解析获取的原始desc字段
                         'large_equip_desc': pet.get('large_equip_desc'),
                         'desc_sumup': pet.get('desc_sumup'),
                         'desc_sumup_short': pet.get('desc_sumup_short'),
@@ -415,6 +367,16 @@ class CBGPetSpider:
                         'raw_data_json': json.dumps(pet, ensure_ascii=False)
                     }
                     
+                    # 添加解析后的宠物属性字段 - 直接使用原始字段名
+                    if parsed_pet_attrs:
+                        # 直接将所有解析出的字段添加到pet_data中
+                        for field_name, field_value in parsed_pet_attrs.items():
+                            # 对于复杂数据类型（列表和字典），转换为JSON字符串
+                            if isinstance(field_value, (list, dict)):
+                                pet_data[field_name] = json.dumps(field_value, ensure_ascii=False)
+                            else:
+                                pet_data[field_name] = field_value
+                    
                     pets.append(pet_data)
                     
                 except Exception as e:
@@ -433,7 +395,7 @@ class CBGPetSpider:
         - use_browser=True: 启动浏览器手动设置参数
         - use_browser=False: 从本地文件或默认配置加载参数
         """
-        params_file = 'config/pet_params.json'
+        params_file = 'config/equip_params_pet.json'
         
         # 强制浏览器模式：如果use_browser为True，则删除旧参数文件
         if use_browser and os.path.exists(params_file):
@@ -605,7 +567,7 @@ class CBGPetSpider:
         else:
             search_params = await get_pet_search_params_async(use_browser=use_browser)
             if search_params:
-                self.logger.info(f"📊 使用搜索参数: {len(search_params)} 个")
+                self.logger.info(f"📊 使用搜索参数: {search_params}")
 
         if not search_params:
             self.logger.error(f"无法获取宠物的搜索参数，爬取中止")

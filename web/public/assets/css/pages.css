@@ -1182,9 +1182,9 @@
   background: url(../images/icons.webp) no-repeat -18px 0;
 }
 .soldDetail {
-  background-color: #184a5e!important;
-  padding: 18px;
-  border: 2px solid #2782a5!important;
+  background-color: #184a5e;
+  padding: 0;
+  border: 2px solid #2782a5;
 }
 .soldDetail .bigPic {
   float: left;
@@ -1411,7 +1411,7 @@
 }
 .tabCont {
   background: url(../images/areabg.webp) repeat-y -100px;
-  margin: 1px 15px 0 0;
+  margin:0;
   color: #fff;
   padding: 12px;
   overflow: hidden;
@@ -1568,6 +1568,7 @@ td .btn-pet-detail {
 }
 .petZiZhiTb .added_attr {
   color: #0f0;
+  word-break: normal;
 }
 .petAttrInfo .added_attr {
   position: relative;

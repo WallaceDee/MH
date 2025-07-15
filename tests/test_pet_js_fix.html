@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宠物JS修复测试</title>
+</head>
+<body>
+    <h1>宠物JS修复测试</h1>
+    <div id="test-results"></div>
+
+    <script>
+        // 模拟测试函数
+        function testPetJSFix() {
+            const results = [];
+            
+            // 测试1: correct_pet_desc 函数对空值的处理
+            try {
+                const result1 = correct_pet_desc(undefined);
+                const result2 = correct_pet_desc(null);
+                const result3 = correct_pet_desc("");
+                const result4 = correct_pet_desc("valid;pet;desc");
+                
+                results.push({
+                    test: "correct_pet_desc 空值处理",
+                    passed: result1 === "" && result2 === "" && result3 === "" && result4 !== "",
+                    details: {
+                        undefined: result1,
+                        null: result2,
+                        empty: result3,
+                        valid: result4
+                    }
+                });
+            } catch (error) {
+                results.push({
+                    test: "correct_pet_desc 空值处理",
+                    passed: false,
+                    error: error.message
+                });
+            }
+            
+            // 测试2: get_pet_attrs_info 函数对空值的处理
+            try {
+                const result1 = get_pet_attrs_info(undefined);
+                const result2 = get_pet_attrs_info(null);
+                const result3 = get_pet_attrs_info("");
+                
+                results.push({
+                    test: "get_pet_attrs_info 空值处理",
+                    passed: result1.pet_name === "未知" && result2.pet_name === "未知" && result3.pet_name === "未知",
+                    details: {
+                        undefined: result1,
+                        null: result2,
+                        empty: result3
+                    }
+                });
+            } catch (error) {
+                results.push({
+                    test: "get_pet_attrs_info 空值处理",
+                    passed: false,
+                    error: error.message
+                });
+            }
+            
+            return results;
+        }
+        
+        // 运行测试
+        const testResults = testPetJSFix();
+        
+        // 显示结果
+        const resultsDiv = document.getElementById('test-results');
+        resultsDiv.innerHTML = '<h2>测试结果:</h2>';
+        
+        testResults.forEach((result, index) => {
+            const status = result.passed ? '✅ 通过' : '❌ 失败';
+            const details = result.error ? 
+                `<p><strong>错误:</strong> ${result.error}</p>` : 
+                `<p><strong>详情:</strong> ${JSON.stringify(result.details, null, 2)}</p>`;
+            
+            resultsDiv.innerHTML += `
+                <div style="margin: 10px 0; padding: 10px; border: 1px solid ${result.passed ? 'green' : 'red'};">
+                    <h3>测试 ${index + 1}: ${result.test}</h3>
+                    <p><strong>状态:</strong> ${status}</p>
+                    ${details}
+                </div>
+            `;
+        });
+        
+        // 总结
+        const passedCount = testResults.filter(r => r.passed).length;
+        const totalCount = testResults.length;
+        resultsDiv.innerHTML += `
+            <div style="margin-top: 20px; padding: 10px; background-color: ${passedCount === totalCount ? 'lightgreen' : 'lightcoral'};">
+                <h3>总结</h3>
+                <p>通过: ${passedCount}/${totalCount}</p>
+                <p>状态: ${passedCount === totalCount ? '所有测试通过' : '有测试失败'}</p>
+            </div>
+        `;
+    </script>
+</body>
+</html> 

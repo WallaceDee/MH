@@ -185,74 +185,6 @@ DB_SCHEMA_CONFIG = {
             fair_show_end_time_left TEXT,       -- 公示结束剩余时间
             fair_show_poundage INTEGER DEFAULT 0, -- 公示手续费
             
-            -- 宠物属性
-            hp INTEGER DEFAULT 0,               -- 气血
-            qixue INTEGER DEFAULT 0,            -- 气血（别名）
-            init_hp INTEGER DEFAULT 0,          -- 初始气血
-            mofa INTEGER DEFAULT 0,             -- 魔法
-            init_wakan INTEGER DEFAULT 0,       -- 初始魔力
-            mingzhong INTEGER DEFAULT 0,        -- 命中
-            fangyu INTEGER DEFAULT 0,           -- 防御
-            init_defense INTEGER DEFAULT 0,     -- 初始防御
-            defense INTEGER DEFAULT 0,          -- 防御（别名）
-            speed INTEGER DEFAULT 0,            -- 速度
-            minjie INTEGER DEFAULT 0,           -- 敏捷
-            init_dex INTEGER DEFAULT 0,         -- 初始敏捷
-            shanghai INTEGER DEFAULT 0,         -- 伤害
-            damage INTEGER DEFAULT 0,           -- 伤害（别名）
-            init_damage INTEGER DEFAULT 0,      -- 初始伤害
-            init_damage_raw INTEGER DEFAULT 0,  -- 原始初始伤害
-            all_damage INTEGER DEFAULT 0,       -- 全部伤害
-            magic_damage INTEGER DEFAULT 0,     -- 法术伤害
-            magic_defense INTEGER DEFAULT 0,    -- 法术防御
-            lingli INTEGER DEFAULT 0,           -- 灵力
-            fengyin INTEGER DEFAULT 0,          -- 封印
-            anti_fengyin INTEGER DEFAULT 0,     -- 抗封印
-            zongshang INTEGER DEFAULT 0,        -- 总伤
-            
-            -- 修炼相关
-            expt_gongji INTEGER DEFAULT 0,      -- 攻击修炼
-            expt_fangyu INTEGER DEFAULT 0,      -- 防御修炼
-            expt_fashu INTEGER DEFAULT 0,       -- 法术修炼
-            expt_kangfa INTEGER DEFAULT 0,      -- 抗法修炼
-            max_expt_gongji INTEGER DEFAULT 0,  -- 最大攻击修炼
-            max_expt_fangyu INTEGER DEFAULT 0,  -- 最大防御修炼
-            max_expt_fashu INTEGER DEFAULT 0,   -- 最大法术修炼
-            max_expt_kangfa INTEGER DEFAULT 0,  -- 最大抗法修炼
-            sum_exp INTEGER DEFAULT 0,          -- 总经验
-            
-            -- 宝宝修炼
-            bb_expt_gongji INTEGER DEFAULT 0,   -- 宝宝攻击修炼
-            bb_expt_fangyu INTEGER DEFAULT 0,   -- 宝宝防御修炼
-            bb_expt_fashu INTEGER DEFAULT 0,    -- 宝宝法术修炼
-            bb_expt_kangfa INTEGER DEFAULT 0,   -- 宝宝抗法修炼
-            
-            -- 附加属性
-            addon_tizhi INTEGER DEFAULT 0,      -- 附加体质
-            addon_liliang INTEGER DEFAULT 0,    -- 附加力量
-            addon_naili INTEGER DEFAULT 0,      -- 附加耐力
-            addon_minjie INTEGER DEFAULT 0,     -- 附加敏捷
-            addon_fali INTEGER DEFAULT 0,       -- 附加法力
-            addon_lingli INTEGER DEFAULT 0,     -- 附加灵力
-            addon_total INTEGER DEFAULT 0,      -- 附加总和
-            addon_status INTEGER DEFAULT 0,     -- 附加状态
-            addon_skill_chance INTEGER DEFAULT 0, -- 附加技能几率
-            addon_effect_chance INTEGER DEFAULT 0, -- 附加效果几率
-            
-            -- 宝石相关
-            gem_level INTEGER DEFAULT 0,        -- 宝石等级
-            xiang_qian_level INTEGER DEFAULT 0, -- 镶嵌等级
-            gem_value INTEGER DEFAULT 0,        -- 宝石值
-            
-            -- 强化相关
-            jinglian_level INTEGER DEFAULT 0,   -- 精炼等级
-            
-            -- 特技和套装
-            special_skill INTEGER DEFAULT 0,    -- 特技
-            special_effect TEXT DEFAULT 0,      -- 特效
-            suit_skill INTEGER DEFAULT 0,       -- 套装技能
-            suit_effect INTEGER DEFAULT 0,      -- 套装效果
-            
             -- 其他信息
             collect_num INTEGER DEFAULT 0,      -- 收藏数
             has_collect INTEGER DEFAULT 0,      -- 是否收藏
@@ -348,6 +280,68 @@ DB_SCHEMA_CONFIG = {
             
             -- 搜索相关
             search_type TEXT,                   -- 搜索类型
+            
+            -- decode_desc解析出的字段
+            pet_name TEXT,                      -- 解析出的宠物名称
+            type_id TEXT,                       -- 解析出的类型ID
+            pet_grade TEXT,                     -- 解析出的宠物等级
+            blood TEXT,                         -- 解析出的气血
+            magic TEXT,                         -- 解析出的魔法
+            attack INTEGER DEFAULT 0,           -- 解析出的攻击
+            defence TEXT,                       -- 解析出的防御
+            speed TEXT,                         -- 解析出的速度
+            soma TEXT,                          -- 解析出的体质
+            magic_powner TEXT,                  -- 解析出的魔力
+            strength TEXT,                      -- 解析出的力量
+            endurance TEXT,                     -- 解析出的耐力
+            smartness TEXT,                     -- 解析出的敏捷
+            potential TEXT,                     -- 解析出的潜力
+            wakan TEXT,                         -- 解析出的灵力
+            max_blood TEXT,                     -- 解析出的最大气血
+            max_magic TEXT,                     -- 解析出的最大魔法
+            lifetime TEXT,                      -- 解析出的寿命
+            five_aptitude TEXT,                 -- 解析出的五行
+            attack_aptitude TEXT,               -- 解析出的攻击资质
+            defence_aptitude TEXT,              -- 解析出的防御资质
+            physical_aptitude TEXT,             -- 解析出的体力资质
+            magic_aptitude TEXT,                -- 解析出的法力资质
+            speed_aptitude TEXT,                -- 解析出的速度资质
+            avoid_aptitude TEXT,                -- 解析出的躲避资质
+            growth REAL DEFAULT 0.0,            -- 解析出的成长率
+            all_skill TEXT,                     -- 解析出的所有技能
+            sp_skill TEXT,                      -- 解析出的特殊技能
+            is_baobao TEXT,                     -- 解析出的是否宝宝
+            used_qianjinlu TEXT,                -- 解析出的千金露使用情况
+            sp_skill_id TEXT,                   -- 解析出的特殊技能ID
+            all_skills TEXT,                    -- 解析出的技能列表(JSON)
+            ti_zhi_add INTEGER DEFAULT 0,       -- 解析出的体质加点
+            fa_li_add INTEGER DEFAULT 0,        -- 解析出的法力加点
+            li_liang_add INTEGER DEFAULT 0,     -- 解析出的力量加点
+            nai_li_add INTEGER DEFAULT 0,       -- 解析出的耐力加点
+            min_jie_add INTEGER DEFAULT 0,      -- 解析出的敏捷加点
+            jinjie TEXT,                        -- 解析出的进阶信息(JSON)
+            lx INTEGER DEFAULT 0,               -- 解析出的灵性
+            jinjie_cnt TEXT,                    -- 解析出的进阶次数
+            texing TEXT,                        -- 解析出的特性(JSON)
+            core_close TEXT,                    -- 解析出的核心关闭状态
+            attack_ext INTEGER DEFAULT 0,       -- 解析出的攻击扩展
+            defence_ext INTEGER DEFAULT 0,      -- 解析出的防御扩展
+            speed_ext INTEGER DEFAULT 0,        -- 解析出的速度扩展
+            avoid_ext INTEGER DEFAULT 0,        -- 解析出的躲避扩展
+            physical_ext INTEGER DEFAULT 0,     -- 解析出的体力扩展
+            magic_ext INTEGER DEFAULT 0,        -- 解析出的法力扩展
+            neidan TEXT,                        -- 解析出的内丹(JSON)
+            equip_list TEXT,                    -- 解析出的装备列表(JSON)
+            evol_skill_list TEXT,               -- 解析出的进化技能列表(JSON)
+            evol_skills TEXT,                   -- 解析出的进化技能(JSON)
+            color INTEGER,                      -- 解析出的颜色
+            summon_color INTEGER,               -- 解析出的召唤兽颜色
+            iMagDam INTEGER,                    -- 解析出的法术伤害
+            iMagDef INTEGER,                    -- 解析出的法术防御
+            used_sjg INTEGER DEFAULT 0,         -- 解析出的神机阁使用情况
+            used_yuanxiao INTEGER DEFAULT 0,    -- 解析出的元宵使用情况
+            used_lianshou INTEGER DEFAULT 0,    -- 解析出的炼兽使用情况
+            other TEXT,                         -- 解析出的其他信息(JSON)
             
             -- 元数据
             raw_data_json TEXT,                 -- 原始数据（JSON格式）

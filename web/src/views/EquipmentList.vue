@@ -693,21 +693,6 @@ export default {
 
       return `套装${suitEffect}`
     },
-
-    loadEquipDescParser() {
-      // 只加载装备描述解析器脚本
-      if (!window.parse_style_info) {
-        const script = document.createElement('script')
-        script.src = '/libs/equip_desc_parser.js'
-        script.onload = () => {
-          console.log('装备描述解析器加载成功')
-        }
-        script.onerror = () => {
-          console.error('装备描述解析器加载失败')
-        }
-        document.head.appendChild(script)
-      }
-    },
     handleLevelRangeChange(value) {
       this.filters.level_range = value
       this.fetchEquipments()
@@ -979,7 +964,6 @@ export default {
     },
   },
   mounted() {
-    this.loadEquipDescParser()
     this.initSuitOptions()
     this.fetchEquipments()
   }
@@ -1001,11 +985,6 @@ export default {
   justify-content: center;
 }
 
-:global(.equip-desc-popper) {
-  background-color: #2c3e50;
-  padding: 18px;
-  border: 2px solid #2782a5;
-}
 
 /* 装备描述样式 */
 .equip-desc-content {
@@ -1015,52 +994,6 @@ export default {
   color: #ecf0f1;
   padding: 10px;
   border-radius: 4px;
-}
-
-/* 装备描述颜色样式 */
-:deep(.equip_desc_red) {
-  color: #e74c3c;
-}
-
-:deep(.equip_desc_green) {
-  color: #2ecc71;
-}
-
-:deep(.equip_desc_blue) {
-  color: #3498db;
-}
-
-:deep(.equip_desc_black) {
-  color: #34495e;
-}
-
-:deep(.equip_desc_yellow) {
-  color: #f1c40f;
-}
-
-:deep(.equip_desc_white) {
-  color: #ecf0f1;
-}
-
-:deep(.equip_desc_blink) {
-  animation: blink 1s infinite;
-}
-
-:deep(.equip_desc_underline) {
-  text-decoration: underline;
-}
-
-@keyframes blink {
-
-  0%,
-  50% {
-    opacity: 1;
-  }
-
-  51%,
-  100% {
-    opacity: 0.3;
-  }
 }
 
 /* 相似装备弹窗样式 */
@@ -1077,7 +1010,7 @@ export default {
 }
 
 .gem-badge {
-  equip_type: relative;
+  position: relative;
 }
 
 .gem-images {

@@ -5,6 +5,7 @@ import json
 import os
 import requests
 from functools import partial
+import re # Added for regex validation in _collect_pet_logic
 
 # 导入cookie更新器（异步版本将在需要时动态导入）
 
@@ -913,129 +914,482 @@ async def _collect_pet_equip_logic(page):
     return params_dict
 
 async def _collect_pet_logic(page):
-    """收集召唤兽搜索逻辑"""
+    """收集召唤兽搜索逻辑 - 参考overall_search_pet.js"""
     params_dict = {}
     
-    # 基础等级范围
-    level_min = await page.evaluate('() => document.getElementById("txt_level_min")?.value')
-    if level_min: params_dict['level_min'] = level_min
-
-    level_max = await page.evaluate('() => document.getElementById("txt_level_max")?.value')
-    if level_max: params_dict['level_max'] = level_max
-
-    # 价格范围
-    price_min = await page.evaluate('() => document.getElementById("txt_price_min")?.value')
-    if price_min: params_dict['price_min'] = price_min
-
-    price_max = await page.evaluate('() => document.getElementById("txt_price_max")?.value')
-    if price_max: params_dict['price_max'] = price_max
+    print("🚀 开始收集召唤兽参数...")
     
-    # 宠物类型
-    pet_type = await page.evaluate('() => document.getElementById("pet_select_box")?.value')
-    if pet_type: params_dict['pet_type'] = pet_type
+    # 1. 宠物类型 - 原JS: if ($('pet_select_box').value) { var pet_type = this.get_pet_type_value(); arg['type'] = pet_type; }
+    try:
+        pet_name = await page.evaluate('() => document.getElementById("pet_select_box")?.value')
+        if pet_name:
+            # 获取宠物类型值
+            pet_type = await page.evaluate(f'''
+                () => {{
+                    var result = [];
+                    var pet_name = "{pet_name}";
+                    if (!pet_name) return null;
+                    
+                    for (var pet_type in SaleablePetNameInfo) {{
+                        if (SaleablePetNameInfo[pet_type] == pet_name) {{
+                            result.push(pet_type);
+                        }}
+                    }}
+                    return result.join(',');
+                }}
+            ''')
+            if pet_type:
+                params_dict['type'] = pet_type
+                print(f"✅ 宠物类型: {pet_name} -> {pet_type}")
+            else:
+                print(f"❌ 宠物类型无效: {pet_name}")
+    except Exception as e:
+        print(f"❌ 获取宠物类型参数失败: {e}")
     
-    # 技能数量
-    skill_num = await page.evaluate('() => document.getElementById("txt_skill_num")?.value')
-    if skill_num: params_dict['skill_num'] = skill_num
+    # 2. 收集各种选择器参数 - 原JS: var check_items = [['low_skill', this.low_skill_checker, false], ...]
+    check_panels = [
+        ['low_skill', 'pet_equal_advanced_skill_panel', False],
+        ['front_status', 'fair_show_panel', True],
+        ['server_type', 'server_type_panel', True],
+        ['color', 'color_panel', False],
+        ['mengying', 'mengying_panel', False],
+        ['texing', 'texing_panel', False],
+        ['positive_effect', 'positive_effect_panel', False],
+        ['negative_effect', 'negative_effect_panel', False],
+        ['kindid', 'fight_level_panel', True]
+    ]
     
-    # 成长值
-    growth = await page.evaluate('() => document.getElementById("txt_growth")?.value')
-    if growth: params_dict['growth'] = growth
+    for param_name, panel_id, skip_all in check_panels:
+        try:
+            value = await page.evaluate(f'''
+                () => {{
+                    const panel = document.getElementById('{panel_id}');
+                    if (!panel) return null;
+                    
+                    // 查找带有'on'类的li元素（ButtonChecker的选中标识）
+                    const liElements = panel.querySelectorAll('li');
+                    const selectedValues = [];
+                    
+                    for (let li of liElements) {{
+                        if (li.classList.contains('on')) {{
+                            // 获取文本内容
+                            let text = '';
+                            const span = li.querySelector('span');
+                            if (span) {{
+                                text = span.textContent.trim();
+                            }}
+                            
+                            // 根据参数类型进行转换
+                            let value = text;
+                            if ('{param_name}' === 'kindid' && window.FightLevels) {{
+                                for (let item of window.FightLevels) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'server_type' && window.ServerTypes) {{
+                                for (let item of window.ServerTypes) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'front_status' && window.FrontStatus) {{
+                                for (let item of window.FrontStatus) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'color' && window.Colors) {{
+                                for (let item of window.Colors) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'mengying' && window.MengYingConf) {{
+                                for (let item of window.MengYingConf) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'texing' && window.TexingTypes) {{
+                                for (let item of window.TexingTypes) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'positive_effect' && window.TexingPositiveEffectTypes) {{
+                                for (let item of window.TexingPositiveEffectTypes) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'negative_effect' && window.TexingPositiveEffectTypes) {{
+                                for (let item of window.TexingPositiveEffectTypes) {{
+                                    if (item[1] === text) {{
+                                        value = item[0];
+                                        break;
+                                    }}
+                                }}
+                            }} else if ('{param_name}' === 'low_skill' && window.PetSkills) {{
+                                // 低技能需要特殊处理，获取技能ID
+                                const skillId = li.getAttribute('data-skill_id');
+                                if (skillId) {{
+                                    value = skillId;
+                                }}
+                            }}
+                            
+                            selectedValues.push(value);
+                        }}
+                    }}
+                    
+                    // 检查是否全选（需要跳过的情况）
+                    if ({str(skip_all).lower()}) {{
+                        const totalItems = liElements.length;
+                        if (selectedValues.length === totalItems) {{
+                            return null;  // 全选时跳过
+                        }}
+                    }}
+                    
+                    return selectedValues.length > 0 ? selectedValues.join(',') : null;
+                }}
+            ''')
+            
+            if value:
+                params_dict[param_name] = value
+                print(f"✅ {param_name}: {value}")
+            else:
+                print(f"⚠️ {param_name}: 无选择")
+        except Exception as e:
+            print(f"❌ 获取{param_name}参数失败: {e}")
     
-    # 已使用炼兽珍经数量
-    used_lianshou_max = await page.evaluate('() => document.getElementById("txt_used_lianshou_max")?.value')
-    if used_lianshou_max: params_dict['used_lianshou_max'] = used_lianshou_max
+    # 3. 技能相关参数 - 原JS: arg = this.get_skill_value(arg);
+    try:
+        # 收集包含技能
+        skill_panels = [
+            'pet_skill_super_panel',
+            'pet_skill_special_panel', 
+            'pet_skill_fashu_panel',
+            'pet_skill_wuli_panel',
+            'pet_skill_tongyong_panel',
+            'pet_skill_primary_panel'
+        ]
+        
+        skill_values = []
+        for panel_id in skill_panels:
+            panel_skills = await page.evaluate(f'''
+                () => {{
+                    const panel = document.getElementById('{panel_id}');
+                    if (!panel) return [];
+                    
+                    const selectedSkills = [];
+                    const liElements = panel.querySelectorAll('li.on');
+                    liElements.forEach(li => {{
+                        const skillId = li.getAttribute('data-skill_id');
+                        if (skillId) {{
+                            selectedSkills.push(skillId);
+                        }}
+                    }});
+                    return selectedSkills;
+                }}
+            ''')
+            skill_values.extend(panel_skills)
+        
+        if skill_values:
+            params_dict['skill'] = ','.join(skill_values)
+            print(f"✅ 包含技能: {len(skill_values)}个")
+        
+        # 收集不包含技能
+        not_skill_panels = [
+            'not_pet_skill_super_panel',
+            'not_pet_skill_special_panel',
+            'not_pet_skill_fashu_panel', 
+            'not_pet_skill_wuli_panel',
+            'not_pet_skill_tongyong_panel',
+            'not_pet_skill_primary_panel'
+        ]
+        
+        not_skill_values = []
+        for panel_id in not_skill_panels:
+            panel_skills = await page.evaluate(f'''
+                () => {{
+                    const panel = document.getElementById('{panel_id}');
+                    if (!panel) return [];
+                    
+                    const selectedSkills = [];
+                    const liElements = panel.querySelectorAll('li.on');
+                    liElements.forEach(li => {{
+                        const skillId = li.getAttribute('data-skill_id');
+                        if (skillId) {{
+                            selectedSkills.push(skillId);
+                        }}
+                    }});
+                    return selectedSkills;
+                }}
+            ''')
+            not_skill_values.extend(panel_skills)
+        
+        if not_skill_values:
+            params_dict['not_in_skill'] = ','.join(not_skill_values)
+            print(f"✅ 不包含技能: {len(not_skill_values)}个")
+            
+    except Exception as e:
+        print(f"❌ 获取技能参数失败: {e}")
     
-    # 已使用元宵数量
-    used_yuanxiao_max = await page.evaluate('() => document.getElementById("txt_used_yuanxiao_max")?.value')
-    if used_yuanxiao_max: params_dict['used_yuanxiao_max'] = used_yuanxiao_max
+    # 4. 内丹和赐福技能
+    try:
+        # 高级内丹
+        high_neidan_values = await page.evaluate('''
+            () => {
+                const panel = document.getElementById('high_neidan_panel');
+                if (!panel) return [];
+                
+                const selectedValues = [];
+                const liElements = panel.querySelectorAll('li.on');
+                liElements.forEach(li => {
+                    const span = li.querySelector('span');
+                    if (span) {
+                        const text = span.textContent.trim();
+                        if (window.HighNeidans) {
+                            for (let item of window.HighNeidans) {
+                                if (item[1] === text) {
+                                    selectedValues.push(item[0]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+                return selectedValues;
+            }
+        ''')
+        if high_neidan_values:
+            params_dict['high_neidan'] = high_neidan_values
+            print(f"✅ 高级内丹: {high_neidan_values}")
+        
+        # 低级内丹
+        low_neidan_values = await page.evaluate('''
+            () => {
+                const panel = document.getElementById('low_neidan_panel');
+                if (!panel) return [];
+                
+                const selectedValues = [];
+                const liElements = panel.querySelectorAll('li.on');
+                liElements.forEach(li => {
+                    const span = li.querySelector('span');
+                    if (span) {
+                        const text = span.textContent.trim();
+                        if (window.LowNeidans) {
+                            for (let item of window.LowNeidans) {
+                                if (item[1] === text) {
+                                    selectedValues.push(item[0]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+                return selectedValues;
+            }
+        ''')
+        if low_neidan_values:
+            params_dict['low_neidan'] = low_neidan_values
+            print(f"✅ 低级内丹: {low_neidan_values}")
+        
+        # 赐福技能
+        cifu_skills_values = await page.evaluate('''
+            () => {
+                const panel = document.getElementById('limit_evol_panel');
+                if (!panel) return [];
+                
+                const selectedValues = [];
+                const liElements = panel.querySelectorAll('li.on');
+                liElements.forEach(li => {
+                    const span = li.querySelector('span');
+                    if (span) {
+                        const text = span.textContent.trim();
+                        if (window.cifuSkills) {
+                            for (let item of window.cifuSkills) {
+                                if (item[1] === text) {
+                                    selectedValues.push(item[0]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+                return selectedValues;
+            }
+        ''')
+        if cifu_skills_values:
+            params_dict['evol_skill'] = cifu_skills_values
+            print(f"✅ 赐福技能: {cifu_skills_values}")
+            
+    except Exception as e:
+        print(f"❌ 获取内丹和赐福技能参数失败: {e}")
     
-    # 有效赐福技能数
-    valid_evol_skill_num = await page.evaluate('() => document.getElementById("txt_valid_evol_skill_num")?.value')
-    if valid_evol_skill_num: params_dict['valid_evol_skill_num'] = valid_evol_skill_num
+    # 5. 复选框参数
+    checkbox_items = [
+        ['skill_with_suit', 'chk_skill_with_suit'],
+        ['suit_as_any_skill', 'chk_suit_as_any_skill'],
+        ['skill_including_advanced', 'chk_skill_including_advanced'],
+        ['advanced_evol_skill', 'chk_advanced_evol_skill'],
+        ['is_baobao', 'chk_is_baobao'],
+        ['summon_color', 'chk_summon_color']
+    ]
     
-    # 资质范围
-    attack_aptitude = await page.evaluate('() => document.getElementById("txt_attack_aptitude")?.value')
-    if attack_aptitude: params_dict['attack_aptitude'] = attack_aptitude
+    for param_name, checkbox_id in checkbox_items:
+        try:
+            if await page.evaluate(f'() => document.getElementById("{checkbox_id}")?.checked'):
+                params_dict[param_name] = 1
+                print(f"✅ {param_name}: 已选择")
+        except Exception as e:
+            print(f"❌ 获取{param_name}参数失败: {e}")
     
-    defence_aptitude = await page.evaluate('() => document.getElementById("txt_defence_aptitude")?.value')
-    if defence_aptitude: params_dict['defence_aptitude'] = defence_aptitude
+    # 6. 赐福技能模式
+    try:
+        if await page.evaluate('() => document.getElementById("evol_skill_mode")?.checked'):
+            params_dict['evol_skill_mode'] = 1
+            print("✅ 赐福技能模式: 满足全部")
+        else:
+            params_dict['evol_skill_mode'] = 0
+            print("✅ 赐福技能模式: 满足一种")
+    except Exception as e:
+        print(f"❌ 获取赐福技能模式参数失败: {e}")
+        params_dict['evol_skill_mode'] = 0
     
-    physical_aptitude = await page.evaluate('() => document.getElementById("txt_physical_aptitude")?.value')
-    if physical_aptitude: params_dict['physical_aptitude'] = physical_aptitude
+    # 7. 数值输入参数 - 完全按照原始JavaScript逻辑
+    txt_int_items = [
+        ['level_min', 0, 180, '等级'],
+        ['level_max', 0, 180, '等级'],
+        ['skill_num', 0, 10000, '技能数量'],
+        ['valid_evol_skill_num', 0, 4, '有效赐福技能数'],
+        ['attack_aptitude', 0, 10000, '攻击资质'],
+        ['defence_aptitude', 0, 10000, '防御资质'],
+        ['physical_aptitude', 0, 10000, '体力资质'],
+        ['magic_aptitude', 0, 10000, '法力资质'],
+        ['speed_aptitude_min', 0, 10000, '速度资质'],
+        ['speed_aptitude_max', 0, 10000, '速度资质'],
+        ['price_min', 0, 99999, '价格'],
+        ['price_max', 0, 99999, '价格'],
+        ['max_blood', 0, 20000, '气血'],
+        ['attack', 0, 4000, '攻击'],
+        ['defence', 0, 4000, '防御'],
+        ['speed_min', 0, 2000, '速度'],
+        ['speed_max', 0, 2000, '速度'],
+        ['fashang', 0, 99999, '法伤'],
+        ['fafang', 0, 99999, '法防'],
+        ['lingxing', 0, 10000, '灵性'],
+        ['used_lianshou_max', 0, 99999, '已使用炼兽珍经数量'],
+        ['used_yuanxiao_max', 0, 99999, '已使用元宵数量'],
+        ['high_neidan_level', 0, 99999, '高级内丹层数'],
+        ['low_neidan_level', 0, 99999, '低级内丹层数']
+    ]
     
-    magic_aptitude = await page.evaluate('() => document.getElementById("txt_magic_aptitude")?.value')
-    if magic_aptitude: params_dict['magic_aptitude'] = magic_aptitude
+    for param_name, min_val, max_val, desc in txt_int_items:
+        try:
+            value = await page.evaluate(f'''
+                () => {{
+                    const el = document.getElementById('txt_{param_name}');
+                    if (!el) return null;
+                    const value = el.value;
+                    if (!value) return null;
+                    
+                    // 原JS验证逻辑: var intReg = /^\\d+$/;
+                    const intReg = /^\\d+$/;
+                    if (!intReg.test(value)) return 'invalid_number';
+                    
+                    const intValue = parseInt(value);
+                    if (!({min_val} <= intValue && intValue <= {max_val})) return 'out_of_range';
+                    
+                    return intValue;
+                }}
+            ''')
+            
+            if value == 'invalid_number':
+                print(f"❌ {desc}必须是整数")
+                continue
+            elif value == 'out_of_range':
+                print(f"❌ {desc}超出取值范围 {min_val}-{max_val}")
+                continue
+            elif value is not None:
+                params_dict[param_name] = value
+                print(f"✅ {desc}: {value}")
+        except Exception as e:
+            print(f"❌ 获取{param_name}参数失败: {e}")
     
-    speed_aptitude_min = await page.evaluate('() => document.getElementById("txt_speed_aptitude_min")?.value')
-    if speed_aptitude_min: params_dict['speed_aptitude_min'] = speed_aptitude_min
+    # 8. 价格范围检查
+    if 'price_min' in params_dict and 'price_max' in params_dict:
+        if params_dict['price_max'] < params_dict['price_min']:
+            print("❌ 价格范围错误：最高价格小于最低价格")
+            params_dict.pop('price_min', None)
+            params_dict.pop('price_max', None)
     
-    speed_aptitude_max = await page.evaluate('() => document.getElementById("txt_speed_aptitude_max")?.value')
-    if speed_aptitude_max: params_dict['speed_aptitude_max'] = speed_aptitude_max
+    # 9. 价格处理（原JS: if (arg['price_min']) arg['price_min'] = arg['price_min'] * 100;）
+    if 'price_min' in params_dict: 
+        params_dict['price_min'] *= 100
+        print(f"  价格转换: price_min *= 100 = {params_dict['price_min']}")
+    if 'price_max' in params_dict: 
+        params_dict['price_max'] *= 100
+        print(f"  价格转换: price_max *= 100 = {params_dict['price_max']}")
     
-    # 属性
-    max_blood = await page.evaluate('() => document.getElementById("txt_max_blood")?.value')
-    if max_blood: params_dict['max_blood'] = max_blood
+    # 10. 成长值处理 - 原JS: arg['growth'] = parseInt(parseFloat(growth) * 1000);
+    try:
+        growth = await page.evaluate('() => document.getElementById("txt_growth")?.value')
+        if growth:
+            # 验证成长值格式: /^\d\.\d{1,3}$/
+            if not re.match(r'^\d+\.\d{1,3}$', growth):
+                print(f"❌ 成长值错误, 最多3位小数: {growth}")
+            else:
+                params_dict['growth'] = int(float(growth) * 1000)
+                print(f"✅ 成长值: {growth} -> {params_dict['growth']}")
+    except Exception as e:
+        print(f"❌ 获取成长值参数失败: {e}")
     
-    attack = await page.evaluate('() => document.getElementById("txt_attack")?.value')
-    if attack: params_dict['attack'] = attack
+    # 11. 服务器相关
+    try:
+        # 指定服务器
+        serverid = await page.evaluate('''
+            () => {
+                if (window.OverallPetSearcher && window.OverallPetSearcher.select_server) {
+                    return window.OverallPetSearcher.select_server.get_serverid();
+                }
+                return null;
+            }
+        ''')
+        if serverid: 
+            params_dict['serverid'] = serverid
+            print(f"✅ 服务器ID: {serverid}")
+    except Exception as e:
+        print(f"❌ 获取服务器ID参数失败: {e}")
     
-    defence = await page.evaluate('() => document.getElementById("txt_defence")?.value')
-    if defence: params_dict['defence'] = defence
+    # 跨服购买服务器ID
+    try:
+        cross_buy_serverid = await page.evaluate("() => document.getElementById('user_serverid')?.value || ''")
+        if cross_buy_serverid: 
+            params_dict['cross_buy_serverid'] = cross_buy_serverid
+            print(f"✅ 跨服购买服务器ID: {cross_buy_serverid}")
+    except Exception as e:
+        print(f"❌ 获取跨服购买服务器ID参数失败: {e}")
     
-    speed_min = await page.evaluate('() => document.getElementById("txt_speed_min")?.value')
-    if speed_min: params_dict['speed_min'] = speed_min
+    # 12. 特殊处理：技能数量不包含认证技能
+    try:
+        if 'skill_num' in params_dict and params_dict['skill_num'] > 0:
+            if await page.evaluate('() => document.getElementById("no_include_sp_skill")?.checked'):
+                params_dict['no_include_sp_skill'] = 1
+                print("✅ 技能数量不包含认证技能")
+    except Exception as e:
+        print(f"❌ 获取技能数量特殊处理参数失败: {e}")
     
-    speed_max = await page.evaluate('() => document.getElementById("txt_speed_max")?.value')
-    if speed_max: params_dict['speed_max'] = speed_max
-    
-    lingxing = await page.evaluate('() => document.getElementById("txt_lingxing")?.value')
-    if lingxing: params_dict['lingxing'] = lingxing
-    
-    # 法伤法防
-    fashang = await page.evaluate('() => document.getElementById("txt_fashang")?.value')
-    if fashang: params_dict['fashang'] = fashang
-    
-    fafang = await page.evaluate('() => document.getElementById("txt_fafang")?.value')
-    if fafang: params_dict['fafang'] = fafang
-    
-    # 复选框
-    if await page.evaluate('() => document.getElementById("chk_is_baobao")?.checked'):
-        params_dict['is_baobao'] = 1
-    
-    if await page.evaluate('() => document.getElementById("chk_summon_color")?.checked'):
-        params_dict['summon_color'] = 1
-    
-    if await page.evaluate('() => document.getElementById("no_include_sp_skill")?.checked'):
-        params_dict['no_include_sp_skill'] = 1
-    
-    if await page.evaluate('() => document.getElementById("chk_advanced_evol_skill")?.checked'):
-        params_dict['advanced_evol_skill'] = 1
-    
-    # 前端状态
-    if await page.evaluate('() => document.getElementById("front_status_pass_fair_show")?.checked'):
-        params_dict['front_status'] = 'pass_fair_show'
-    elif await page.evaluate('() => document.getElementById("front_status_fair_show")?.checked'):
-        params_dict['front_status'] = 'fair_show'
-    
-    # 服务器类型
-    server_type_3 = await page.evaluate('() => document.getElementById("server_type_3")?.checked')
-    server_type_2 = await page.evaluate('() => document.getElementById("server_type_2")?.checked')
-    server_type_1 = await page.evaluate('() => document.getElementById("server_type_1")?.checked')
-    
-    if server_type_3:
-        params_dict['server_type'] = 3
-    elif server_type_2:
-        params_dict['server_type'] = 2
-    elif server_type_1:
-        params_dict['server_type'] = 1
-    
-    # 内丹等级
-    high_neidan_level = await page.evaluate('() => document.getElementById("txt_high_neidan_level")?.value')
-    if high_neidan_level: params_dict['high_neidan_level'] = high_neidan_level
-    
-    low_neidan_level = await page.evaluate('() => document.getElementById("txt_low_neidan_level")?.value')
-    if low_neidan_level: params_dict['low_neidan_level'] = low_neidan_level
+    print(f"\n📊 召唤兽参数收集完成，共获取 {len(params_dict)} 个参数:")
+    for key, value in params_dict.items():
+        print(f"  {key}: {value}")
     
     return params_dict
 

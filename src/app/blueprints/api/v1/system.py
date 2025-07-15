@@ -6,8 +6,8 @@
 """
 
 from flask import Blueprint, send_file, request
-from app.controllers.system_controller import SystemController
-from app.utils.response import success_response, error_response
+from src.app.controllers.system_controller import SystemController
+from src.app.utils.response import success_response, error_response
 
 system_bp = Blueprint('system', __name__)
 controller = SystemController()

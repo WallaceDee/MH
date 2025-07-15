@@ -102,10 +102,6 @@ class LingshiMarketDataCollector:
             # 如果找不到，返回默认的当月和上月文件名
             return [f"cbg_equip_{current_month}.db", f"cbg_equip_{last_month}.db"]
 
-    def _find_latest_db(self) -> str:
-        """查找最新的灵饰数据库文件"""
-        dbs = self._find_recent_dbs()
-        return dbs[0] if dbs else "cbg_equip_202412.db"
 
     def connect_database(self, db_path: str) -> sqlite3.Connection:
         """连接到指定的灵饰数据库"""

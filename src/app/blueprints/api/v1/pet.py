@@ -6,8 +6,8 @@
 """
 
 from flask import Blueprint, request, jsonify
-from app.controllers.pet_controller import PetController
-from app.utils.response import success_response, error_response
+from src.app.controllers.pet_controller import PetController
+from src.app.utils.response import success_response, error_response
 
 pet_bp = Blueprint('pet', __name__)
 controller = PetController()
@@ -28,12 +28,10 @@ def get_pets():
             'price_min': request.args.get('price_min'),
             'price_max': request.args.get('price_max'),
             # 多选参数
-            'pet_type': request.args.getlist('pet_type') or request.args.getlist('pet_type[]') or None,
+            'pet_lx': request.args.get('pet_lx'),
+            'pet_texing': request.args.getlist('pet_texing') or request.args.getlist('pet_texing[]') or None,
             'pet_skills': request.args.getlist('pet_skills') or request.args.getlist('pet_skills[]') or None,
-            'pet_special_effect': request.args.getlist('pet_special_effect') or request.args.getlist('pet_special_effect[]') or None,
-            'pet_quality': request.args.getlist('pet_quality') or request.args.getlist('pet_quality[]') or None,
             'pet_growth': request.args.get('pet_growth'),
-            'pet_aptitude': request.args.get('pet_aptitude'),
             'pet_skill_count': request.args.get('pet_skill_count'),
             'sort_by': request.args.get('sort_by', 'price'),
             'sort_order': request.args.get('sort_order', 'asc')

@@ -7,7 +7,7 @@
 
 import logging
 from typing import Dict, List, Optional
-from app.services.pet_service import PetService
+from src.app.services.pet_service import PetService
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,7 @@ class PetController:
             level_max = params.get('level_max')
             price_min = params.get('price_min')
             price_max = params.get('price_max')
+            pet_lx = params.get('pet_lx')
             
             if level_min is not None:
                 level_min = int(level_min)
@@ -58,17 +59,7 @@ class PetController:
                 price_max = float(price_max)
             
             # 多选参数处理
-            pet_type = params.get('pet_type')
-            if pet_type:
-                if isinstance(pet_type, str):
-                    # 如果是字符串，按逗号分割
-                    pet_type = [item.strip() for item in pet_type.split(',') if item.strip()]
-                elif isinstance(pet_type, list):
-                    # 如果已经是列表，直接使用
-                    pet_type = [str(item) for item in pet_type if item]
-                else:
-                    pet_type = None
-            
+
             pet_skills = params.get('pet_skills')
             if pet_skills:
                 if isinstance(pet_skills, str):
@@ -79,6 +70,18 @@ class PetController:
                     pet_skills = [str(item) for item in pet_skills if item]
                 else:
                     pet_skills = None
+            
+            # 特性筛选（多选）
+            pet_texing = params.get('pet_texing')
+            if pet_texing:
+                if isinstance(pet_texing, str):
+                    # 如果是字符串，按逗号分割
+                    pet_texing = [item.strip() for item in pet_texing.split(',') if item.strip()]
+                elif isinstance(pet_texing, list):
+                    # 如果已经是列表，直接使用
+                    pet_texing = [str(item) for item in pet_texing if item]
+                else:
+                    pet_texing = None
             
             pet_special_effect = params.get('pet_special_effect')
             if pet_special_effect:
@@ -120,8 +123,9 @@ class PetController:
                 'level_max': level_max,
                 'price_min': price_min,
                 'price_max': price_max,
-                'pet_type': pet_type,
                 'pet_skills': pet_skills,
+                'pet_texing': pet_texing,
+                'pet_lx': pet_lx,
                 'pet_special_effect': pet_special_effect,
                 'pet_quality': pet_quality,
                 'pet_growth': pet_growth,
@@ -142,12 +146,10 @@ class PetController:
                 level_max=level_max,
                 price_min=price_min,
                 price_max=price_max,
-                pet_type=pet_type,
                 pet_skills=pet_skills,
-                pet_special_effect=pet_special_effect,
-                pet_quality=pet_quality,
+                pet_texing=pet_texing,
+                pet_lx=pet_lx,
                 pet_growth=pet_growth,
-                pet_aptitude=pet_aptitude,
                 pet_skill_count=pet_skill_count,
                 sort_by=sort_by,
                 sort_order=sort_order

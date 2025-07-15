@@ -16,11 +16,11 @@ import warnings
 from dataclasses import dataclass
 
 try:
-    from .market_anchor_evaluator import MarketAnchorEValuator
+    from .market_anchor_evaluator import MarketAnchorEvaluator
     from .rule_evaluator import RuleEvaluator
     from .feature_extractor.feature_extractor import FeatureExtractor
 except ImportError:
-    from market_anchor_evaluator import MarketAnchorEValuator
+    from market_anchor_evaluator import MarketAnchorEvaluator
     from rule_evaluator import RuleEvaluator
     from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
 
@@ -48,7 +48,7 @@ class HybridValuationEngine:
     """混合估价引擎 - 整合市场锚定和规则引擎"""
     
     def __init__(self, 
-                 market_evaluator: Optional[MarketAnchorEValuator] = None,
+                 market_evaluator: Optional[MarketAnchorEvaluator] = None,
                  rule_evaluator: Optional[RuleEvaluator] = None):
         """
         初始化混合估价引擎
@@ -60,7 +60,7 @@ class HybridValuationEngine:
         self.logger = logging.getLogger(__name__)
         
         # 初始化子引擎
-        self.market_evaluator = market_evaluator or MarketAnchorEValuator()
+        self.market_evaluator = market_evaluator or MarketAnchorEvaluator()
         self.rule_evaluator = rule_evaluator or RuleEvaluator()
         self.feature_extractor = FeatureExtractor()
         

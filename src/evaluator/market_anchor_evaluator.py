@@ -25,7 +25,7 @@ except ImportError:
 warnings.filterwarnings('ignore')
 
 
-class MarketAnchorEValuator:
+class MarketAnchorEvaluator:
     """市场锚定估价器 - 基于市场相似角色的价格锚定估价"""
     
     def __init__(self, market_data_collector: Optional[MarketDataCollector] = None):
@@ -1218,7 +1218,7 @@ if __name__ == "__main__":
     # 测试代码
     try:
         # 初始化估价器
-        valuator = MarketAnchorEValuator()
+        valuator = MarketAnchorEvaluator()
         
         # 构造测试角色特征
         test_features = {

@@ -1,41 +1,22 @@
 <template>
-  <el-popover
-    :data-equip-sn="equipment.equip_sn"
-    placement="right"
-    :width="450"
-    trigger="hover"
-    :visible-arrow="false"
-    :content="parseEquipDesc(equipment.large_equip_desc)"
-    raw-content
-    popper-class="equip-desc-popper"
-  >
+  <el-popover :data-equip-sn="equipment.equip_sn" :placement="placement" :width="popoverWidth" trigger="hover"
+    :visible-arrow="false" :content="parseEquipDesc(equipment.large_equip_desc)" raw-content
+    popper-class="equip-desc-popper">
     <template #reference>
-      <el-image
-        :style="imageStyle"
-        :src="getImageUrl(equipment.equip_face_img, size)"
-        fit="cover"
-        referrerpolicy="no-referrer"
-      >
+      <el-image :style="imageStyle" :src="getImageUrl(equipment.equip_face_img, size)" fit="cover"
+        referrerpolicy="no-referrer">
       </el-image>
     </template>
     <div class="equip-desc-content">
       <el-row type="flex" justify="space-between">
-        <el-col style="width: 120px; margin-right: 20px">
-          <el-image
-            style="width: 120px; height: 120px"
-            :src="getImageUrl(equipment.equip_face_img, 'big')"
-            fit="cover"
-            referrerpolicy="no-referrer"
-          >
+        <el-col v-if="image" style="width: 120px; margin-right: 20px">
+          <el-image style="width: 120px; height: 120px" :src="getImageUrl(equipment.equip_face_img, 'big')" fit="cover"
+            referrerpolicy="no-referrer">
           </el-image>
         </el-col>
         <el-col>
-          <p class="equip_desc_yellow">{{ equipment.equip_name }}</p>
-          <p
-            v-for="(name_desc, index) in equipment.equip_type_desc.split('#r')"
-            :key="index"
-            style="color: #fff"
-          >
+          <p class="equip_desc_yellow" v-if="equipment.equip_name">{{ equipment.equip_name }}</p>
+          <p v-for="(name_desc, index) in equipment.equip_type_desc.split('#r')" :key="index" style="color: #fff">
             {{ name_desc }}
           </p>
           <div v-html="parseEquipDesc(equipment.large_equip_desc)"></div>
@@ -49,6 +30,10 @@
 export default {
   name: 'EquipmentImage',
   props: {
+    image: {
+      type: Boolean,
+      default: true
+    },
     equipment: {
       type: Object,
       required: true
@@ -68,11 +53,20 @@ export default {
     cursor: {
       type: String,
       default: 'pointer'
+    },
+    placement: {
+      type: String,
+      default: 'right'
+    },
+    popoverWidth: {
+      type: String,
+      default: '450px'
     }
   },
   computed: {
     imageStyle() {
       return {
+        display: 'block',
         width: this.width,
         height: this.height,
         cursor: this.cursor
@@ -81,6 +75,11 @@ export default {
   },
   methods: {
     getImageUrl(equip_face_img, size = 'small') {
+      // 如果已经是全路径（以http或https开头），直接返回
+      if (equip_face_img && (equip_face_img.startsWith('http://') || equip_face_img.startsWith('https://'))) {
+        return equip_face_img
+      }
+      // 否则拼接路径
       return `https://cbg-xyq.res.netease.com/images/${size}/${equip_face_img}`
     },
     parseEquipDesc(desc) {
@@ -105,29 +104,10 @@ export default {
   border-radius: 4px;
 }
 
-/* 装备描述颜色样式 */
-:deep(.equip_desc_red) {
-  color: #e74c3c;
-}
-
-:deep(.equip_desc_green) {
-  color: #2ecc71;
-}
-
-:deep(.equip_desc_blue) {
-  color: #3498db;
-}
-
-:deep(.equip_desc_black) {
-  color: #34495e;
-}
-
-:deep(.equip_desc_yellow) {
-  color: #f1c40f;
-}
-
-:deep(.equip_desc_white) {
-  color: #ecf0f1;
+:global(.equip-desc-popper) {
+  background-color: #2c3e50;
+  padding: 18px;
+  border: 2px solid #2782a5;
 }
 
 :deep(.equip_desc_blink) {
@@ -139,6 +119,7 @@ export default {
 }
 
 @keyframes blink {
+
   0%,
   50% {
     opacity: 1;
@@ -149,4 +130,4 @@ export default {
     opacity: 0.3;
   }
 }
-</style> 
+</style>

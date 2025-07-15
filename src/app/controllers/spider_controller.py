@@ -9,7 +9,7 @@
 import threading
 import logging
 from typing import Dict, Any, Optional
-from app.services.spider_service import SpiderService
+from src.app.services.spider_service import SpiderService
 
 logger = logging.getLogger(__name__)
 

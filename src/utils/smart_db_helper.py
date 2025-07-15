@@ -271,10 +271,10 @@ if __name__ == "__main__":
         print("✅ 智能数据库助手创建成功")
         print(f"📊 测试数据: {test_data}")
         print("✨ 智能数据库助手会自动处理：")
-        print("   • 字段类型转换（字典→JSON，布尔→整数）")
-        print("   • 字段过滤（只保留表中存在的字段）")
-        print("   • 自动生成SQL占位符（不需要手动写?）")
-        print("   • 防止字段数量不匹配错误")
+        print("   - 字段类型转换（字典→JSON，布尔→整数）")
+        print("   - 字段过滤（只保留表中存在的字段）")
+        print("   - 自动生成SQL占位符（不需要手动写?）")
+        print("   - 防止字段数量不匹配错误")
         
     except Exception as e:
         print(f"❌ 测试失败: {e}")

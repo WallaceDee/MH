@@ -7,7 +7,7 @@
 
 import logging
 from typing import Dict, List, Optional
-from app.services.equipment_service import EquipmentService
+from src.app.services.equipment_service import EquipmentService
 
 logger = logging.getLogger(__name__)
 
