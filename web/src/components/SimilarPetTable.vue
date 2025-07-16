@@ -15,7 +15,11 @@
     </el-table-column>
     <el-table-column fixed label="宠物" width="70">
       <template #default="scope">
-        <pet-image :pet="scope.row.petData" :equipFaceImg="scope.row.equip_face_img" trigger="hover"/>
+        <pet-image
+          :pet="scope.row.petData"
+          :equipFaceImg="scope.row.equip_face_img"
+          trigger="hover"
+        />
       </template>
     </el-table-column>
     <el-table-column prop="similarity" label="相似度" width="80" sortable>
@@ -26,6 +30,17 @@
       </template>
     </el-table-column>
     <el-table-column prop="level" label="等级" width="60"></el-table-column>
+    <el-table-column prop="growth" label="成长" width="60">
+      <template #default="scope">
+        <span v-html="getColorGrowth(scope.row.growth)"></span>
+      </template>
+    </el-table-column>
+    <el-table-column prop="lx" label="灵性" width="60"></el-table-column>
+    <el-table-column prop="equip_list" label="装备套装" width="80">
+      <template #default="{ row: { equip_list } }">
+        {{ getEquipSuitEffect(equip_list) }}
+      </template>
+    </el-table-column>
     <el-table-column label="技能/特性" width="120">
       <template #default="scope">
         <div class="special-info">
@@ -50,9 +65,7 @@
     </el-table-column>
     <el-table-column label="操作" width="80">
       <template #default="scope">
-        <el-button type="text" @click="openCBG(scope.row.eid)" class="cbg-link">
-          查看
-        </el-button>
+        <el-button type="text" @click="openCBG(scope.row.eid)" class="cbg-link"> 查看 </el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -60,7 +73,6 @@
 
 <script>
 import PetImage from './PetImage.vue'
-
 export default {
   name: 'SimilarPetTable',
   components: {
@@ -70,15 +82,55 @@ export default {
     anchors: {
       type: Array,
       default: () => []
+    },
+    targetPet: {
+      type: Object,
+      default: null
     }
   },
   methods: {
+    getEquipSuitEffect(equipList) {
+      if (!equipList) return ''
+
+      try {
+        const equipArray = JSON.parse(equipList).filter((equip) => equip)
+
+        // 用于存储套装效果及其出现次数
+        const suitEffects = {}
+
+        // 遍历装备数组，提取套装效果
+        equipArray.forEach((equip) => {
+          if (equip.desc) {
+            // 匹配套装效果：套装效果：附加状态 + 技能名称
+            const suitMatch = equip.desc.match(/#c4DBAF4套装效果：附加状态#c4DBAF4([^#]+)/)
+            if (suitMatch && suitMatch[1]) {
+              const suitName = suitMatch[1].trim()
+              suitEffects[suitName] = (suitEffects[suitName] || 0) + 1
+            }
+          }
+        })
+
+        // 检查是否有达到3件套的效果
+        for (const [suitName, count] of Object.entries(suitEffects)) {
+          if (count >= 3) {
+            return suitName
+          }
+          // 如果没有达到3件套，返回装备数量
+          return suitName + `(${count}/3)`
+        }
+
+        return ''
+      } catch (error) {
+        console.error('解析装备列表失败:', error)
+        return ''
+      }
+    },
     // 格式化价格
     formatPrice(price) {
       if (!price) return '---'
       return window.get_color_price ? window.get_color_price(price) : `${price}元`
     },
-    
+
     // 格式化完整价格信息（包括跨服费用）
     formatFullPrice(pet, simple = false) {
       const basePrice = this.formatPrice(pet.price)
@@ -91,7 +143,7 @@ export default {
       const crossServerPoundage = pet.cross_server_poundage || 0
       const fairShowPoundage = pet.fair_show_poundage || 0
 
-      if (!crossServerPoundage || simple && simple !== 'cross') {
+      if (!crossServerPoundage || (simple && simple !== 'cross')) {
         if (simple && simple == 'cross') {
           return ''
         }
@@ -124,10 +176,35 @@ export default {
     },
 
     // 格式化技能
+    // 比较目标宠物和相似宠物的技能
+    //'301|302|303' 和 '301|501|302|303|401'
+    //输出[501,401]
     formatSkills(allSkill) {
-      if (!allSkill) return ''
-      const skills = allSkill.split('|')
-      return skills.slice(0, 3).join('|') + (skills.length > 3 ? '...' : '')
+      if (!allSkill || !this.targetPet || !this.targetPet.all_skill) return ''
+
+      const targetPetSkill = this.targetPet.all_skill
+
+      // 将技能字符串转换为数组
+      const targetSkills = targetPetSkill.split('|').filter((skill) => skill.trim())
+      const currentSkills = allSkill.split('|').filter((skill) => skill.trim())
+
+      // 找出当前宠物有但目标宠物没有的技能
+      const diffSkills = currentSkills.filter((skill) => !targetSkills.includes(skill))
+
+      // 如果有差异技能，返回差异技能列表
+      if (diffSkills.length > 0) {
+        return (
+          '+' +
+          diffSkills
+            .map((skillId) => {
+              return window.CBG_GAME_CONFIG.xyq_pet_skills[skillId]
+            })
+            .join('|')
+        )
+      }
+
+      // 如果没有差异，返回空字符串
+      return ''
     },
 
     // 格式化特性
@@ -145,6 +222,30 @@ export default {
     openCBG(eid) {
       const url = `https://xyq-m.cbg.163.com/cgi/mweb/equip/${eid.split('-')[1]}/${eid}`
       window.open(url, '_blank')
+    },
+
+    // 获取带颜色的成长值
+    getColorGrowth(growth) {
+      if (!growth) return '---'
+      growth = +growth
+      if (!growth || growth < 1 || growth > 1.3) {
+        return '---'
+      }
+
+      var cls = 'growth-low'
+      var text = growth.toFixed(3)
+
+      if (growth >= 1.0 && growth < 1.1) {
+        cls = 'growth-low' // 低成长
+      } else if (growth >= 1.1 && growth < 1.2) {
+        cls = 'growth-medium' // 中等成长
+      } else if (growth >= 1.2 && growth < 1.25) {
+        cls = 'growth-high' // 高成长
+      } else if (growth >= 1.25 && growth <= 1.3) {
+        cls = 'growth-perfect' // 完美成长
+      }
+
+      return `<span class="${cls}">${text}</span>`
     }
   }
 }
@@ -180,4 +281,5 @@ export default {
 .cbg-link:hover {
   color: #66b1ff;
 }
-</style> 
+
+</style>

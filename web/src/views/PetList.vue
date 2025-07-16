@@ -20,28 +20,30 @@
           <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
         </el-form-item>
         <el-form-item label="技能">
-            <el-cascader v-model="filters.skills" :options="skillOptions" :props="cascaderProps" :show-all-levels="false"
-              placeholder="请选择技能" multiple clearable filterable>
-              <template slot-scope="{ data }">
-                <el-row type="flex"  align="middle">
-                    <el-image v-if="data.value" :src="getSkillImage(data.value)" fit="cover" referrerpolicy="no-referrer" style="display: block;width: 24px;height: 24px;margin-right: 4px;"></el-image>
-                    <span>{{ data.label }}</span>
-                </el-row>
-              </template>
-            </el-cascader>
+          <el-cascader v-model="filters.skills" :options="skillOptions" :props="cascaderProps" :show-all-levels="false"
+            placeholder="请选择技能" multiple clearable filterable>
+            <template slot-scope="{ data }">
+              <el-row type="flex" align="middle">
+                <el-image v-if="data.value" :src="getSkillImage(data.value)" fit="cover" referrerpolicy="no-referrer"
+                  style="display: block;width: 24px;height: 24px;margin-right: 4px;"></el-image>
+                <span>{{ data.label }}</span>
+              </el-row>
+            </template>
+          </el-cascader>
         </el-form-item>
         <el-form-item label="技能数量≥">
-          <el-input-number v-model="filters.pet_skill_count" placeholder="技能数量" :min="0" controls ></el-input-number>
+          <el-input-number v-model="filters.pet_skill_count" placeholder="技能数量" :min="0" controls></el-input-number>
         </el-form-item>
         <el-form-item label="成长">
-          <el-input-number v-model="filters.pet_growth" placeholder="成长" :min="1" :max="1.4" :step="0.1" controls></el-input-number>
+          <el-input-number v-model="filters.pet_growth" placeholder="成长" :min="1" :max="1.4" :step="0.1"
+            controls></el-input-number>
         </el-form-item>
         <el-form-item label="灵性值≥">
-          <el-input-number v-model="filters.pet_lx" placeholder="灵性值" :min="0" controls ></el-input-number>
+          <el-input-number v-model="filters.pet_lx" placeholder="灵性值" :min="0" controls></el-input-number>
         </el-form-item>
         <el-form-item label="特性">
           <el-select v-model="filters.pet_texing" placeholder="请选择特性" multiple clearable filterable>
-            <el-option v-for="([value,label]) in texing_type_list" :key="value" :label="label" :value="value">
+            <el-option v-for="([value, label]) in texing_type_list" :key="value" :label="label" :value="value">
             </el-option>
           </el-select>
         </el-form-item>
@@ -62,7 +64,8 @@
       </el-table-column>
       <el-table-column fixed label="召唤兽" width="70">
         <template #default="scope">
-          <pet-image :pet="scope.row.petData" :equipFaceImg="scope.row.equip_face_img" :enhanceInfo="getEnhanceInfo(scope.row)"/>
+          <pet-image :pet="scope.row.petData" :equipFaceImg="scope.row.equip_face_img"
+            :enhanceInfo="getEnhanceInfo(scope.row)" />
         </template>
       </el-table-column>
       <el-table-column fixed prop="price" label="价格 (元)" width="140" sortable="custom">
@@ -74,7 +77,8 @@
         <template #default="scope">
           <p :class="scope.row.petData.is_baobao === '是' ? 'cBlue' : 'equip_desc_red'">
             <span>{{ scope.row.petData.is_baobao === '是' ? '' : '野生' }}</span>
-            <span>{{ scope.row.equip_name }}{{ scope.row.petData.is_baobao === '是' ? '宝宝' : '' }}/{{ scope.row.level }}级</span>
+            <span>{{ scope.row.equip_name }}{{ scope.row.petData.is_baobao === '是' ? '宝宝' : '' }}/{{ scope.row.level
+            }}级</span>
           </p>
           <p>参战等级：{{ scope.row.role_grade_limit }}级</p>
         </template>
@@ -82,7 +86,7 @@
 
       <el-table-column prop="growth" label="成长" width="100" sortable="custom">
         <template #default="scope">
-          <span class="cDYellow">{{ scope.row.petData.growth }}</span>
+          <span v-html="getColorGrowth(scope.row.growth, [1, 1.3])"></span>
         </template>
       </el-table-column>
 
@@ -92,7 +96,11 @@
         </template>
       </el-table-column>
       <el-table-column prop="petData.texing.name" label="特性" width="60"></el-table-column>
-      <el-table-column prop="petData.lx" label="灵性值" width="60"></el-table-column>
+      <el-table-column prop="petData.lx" label="灵性值" width="60">
+        <template #default="scope">
+          <span v-html="getColorGrowth(scope.row.petData.lx, [80, 110])"></span>
+        </template>
+      </el-table-column>
       <el-table-column prop="server_name" label="服务器" width="120"></el-table-column>
     </el-table>
     <div class="pagination-container">
@@ -111,12 +119,12 @@ import PetImage from '@/components/PetImage.vue'
 
 const skillOptions = []
 const pet_skill_classification = window.AUTO_SEARCH_CONFIG.pet_skill_classification
-for(const lowOrHightKey in pet_skill_classification){
-  for(const label in pet_skill_classification[lowOrHightKey]){
+for (const lowOrHightKey in pet_skill_classification) {
+  for (const label in pet_skill_classification[lowOrHightKey]) {
     skillOptions.push({
-      value:'',
-      label:lowOrHightKey.replace('技能','')+label,
-      children:pet_skill_classification[lowOrHightKey][label]
+      value: '',
+      label: lowOrHightKey.replace('技能', '') + label,
+      children: pet_skill_classification[lowOrHightKey][label]
     })
   }
 }
@@ -129,21 +137,21 @@ export default {
   },
   data() {
     return {
-        // 级联选择器配置
+      // 级联选择器配置
       cascaderProps: {
         multiple: true,
         checkStrictly: false, // 不允许选择非叶子节点，只能选择叶子节点
         emitPath: false       // 只返回最后一级的值（技能ID），而不是完整路径
       },
-      texing_type_list:window.AUTO_SEARCH_CONFIG.texing_type_list,
+      texing_type_list: window.AUTO_SEARCH_CONFIG.texing_type_list,
       skillOptions,
       pets: [],
       filters: {
-        pet_skill_count:0,
-        pet_growth:1.0,
+        pet_skill_count: 0,
+        pet_growth: 1.0,
         selectedDate: dayjs().format('YYYY-MM'),
         level_range: [0, 180],
-        skills:[],
+        skills: [],
         price_min: undefined,
         price_max: undefined,
         sort_by: 'price',
@@ -169,8 +177,8 @@ export default {
     }
   },
   methods: {
-    getSkillImage(skillId=0) {
-      if(skillId===0){
+    getSkillImage(skillId = 0) {
+      if (skillId === 0) {
         return ''
       }
       // skillId少于4位数要补0
@@ -282,7 +290,29 @@ export default {
       this.filters.sort_order = order === 'ascending' ? 'asc' : 'desc'
       this.fetchPets()
     },
+    // 获取带颜色的成长值
+    getColorGrowth(growth, range = [0, 1]) {
+      if (!growth) return '-'
+      growth = +growth
+      const [min, max] = range
 
+      if (!growth || growth < min || growth > max) {
+        return '-'
+      }
+      var cls = 'growth-low'
+      const stepRange = (max - min)
+      if (growth >= min && growth < min + stepRange * 0.25) {
+        cls = 'growth-low' // 低成长
+      } else if (growth >= min + stepRange * 0.25 && growth < min + stepRange * 0.5) {
+        cls = 'growth-medium' // 中等成长
+      } else if (growth >= min + stepRange * 0.5 && growth < min +   stepRange * 0.75) {
+        cls = 'growth-high' // 高成长
+      } else if (growth >= min + stepRange * 0.75 && growth <= max) {
+        cls = 'growth-perfect' // 完美成长
+      }
+
+      return `<span class="${cls}">${growth}</span>`
+    },
     // 格式化价格
     formatPrice(price) {
       if (!price) return '---'
@@ -447,7 +477,7 @@ export default {
             this.$set(this.similarPets, eid, {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: data.anchors.map((item) =>({...item, petData: this.parsePetInfo(item.desc)})),
+              anchors: data.anchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
               statistics: {
                 price_range: {
                   min: Math.min(...data.anchors.map((a) => a.price || 0)),

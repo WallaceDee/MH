@@ -38,7 +38,7 @@ class MarketDataCollector:
         
         # 自动查找数据库文件
         if db_path is None:
-            self.db_path = self._find_database(db_type)
+            self.db_path = self._find_recent_dbs()
         else:
             self.db_path = db_path
             
@@ -58,34 +58,50 @@ class MarketDataCollector:
         
         print(f"空号市场数据采集器初始化完成，数据库路径: {self.db_path}")
     
-    def _find_database(self, db_type: str = 'normal') -> str:
-        """自动查找数据库文件"""
-        import re
-        
-        # 查找data目录下符合命名格式的数据库文件
-        data_dirs = ['data', '../data', '../../data', './data']
-        
-        for data_dir in data_dirs:
-            if os.path.exists(data_dir):
-                try:
-                    all_files = os.listdir(data_dir)
-                    # 使用正则表达式匹配 empty_characters_yyyyMM.db 格式
-                    pattern = r'^empty_characters_\d{6}\.db$'
-                    matching_files = [f for f in all_files if re.match(pattern, f)]
-                    
-                    if matching_files:
-                        # 按文件名排序，选择最新的（数字最大的月份）
-                        matching_files.sort(reverse=True)
-                        selected_file = matching_files[0]
-                        full_path = os.path.join(data_dir, selected_file)
-                        print(f"找到空号数据库文件: {selected_file}")
-                        return full_path
-                        
-                except Exception as e:
-                    self.logger.warning(f"扫描目录 {data_dir} 时出错: {e}")
-                    continue
-        
-        raise FileNotFoundError("未找到符合 empty_characters_yyyyMM.db 格式的数据库文件")
+    def _find_recent_dbs(self) -> List[str]:
+        """查找所有可用的空号角色数据库文件"""
+        import glob
+        from datetime import datetime, timedelta
+
+        # 获取当前月份和上个月份
+        now = datetime.now()
+        current_month = now.strftime("%Y%m")
+
+        # 计算上个月
+        last_month_date = now.replace(day=1) - timedelta(days=1)
+        last_month = last_month_date.strftime("%Y%m")
+
+        # 优先查找当月和上月的数据库
+        target_months = [current_month, last_month]
+        print(f"优先查找数据库文件，目标月份: {target_months}")
+
+        # 数据库文件固定存放在根目录的data文件夹中
+        data_path = "data"
+        found_dbs = []
+
+        # 首先查找指定月份的数据库文件
+        for month in target_months:
+            db_file = os.path.join(data_path, month, f"empty_characters_{month}.db")
+            if os.path.exists(db_file):
+                found_dbs.append(db_file)
+                print(f"找到指定月份数据库文件: {db_file}")
+
+        # 如果没找到指定月份的，则查找所有可用的空号角色数据库文件
+        if not found_dbs:
+            print("未找到指定月份的数据库文件，查找所有可用的空号角色数据库文件")
+            # 查找所有年月文件夹下的数据库文件
+            pattern = os.path.join(data_path, "*", "empty_characters_*.db")
+            all_dbs = glob.glob(pattern)
+            
+            # 按文件名排序，最新的在前
+            all_dbs.sort(reverse=True)
+            
+            # 取最新的2个数据库文件
+            found_dbs = all_dbs[:2]
+            print(f"找到所有数据库文件: {all_dbs}")
+            print(f"使用最新的数据库文件: {found_dbs}")
+
+        return found_dbs
     
     def refresh_market_data(self, 
                            filters: Optional[Dict[str, Any]] = None,

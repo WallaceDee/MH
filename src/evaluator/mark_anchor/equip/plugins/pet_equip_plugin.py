@@ -117,15 +117,21 @@ class PetEquipPlugin(EquipmentTypePlugin):
                 # 获取该属性的最大值（pet_equip.jsonc中直接存储最大值）
                 max_val = level_config.get(attr_name, 0)
                 if max_val > 0:
-                    # 计算标准化得分 (0-1)，下限为0
-                    normalized_score = attr_value / max_val
+                    # 使用改进的标准化得分计算方法
+                    # 基础分制 - 避免0分问题，适用于宠物装备（下限为0的情况）
+                    base_score = 30  # 基础分数，避免最小值为0分
+                    score_range = 70  # 可变分数范围 (100 - 30)
+                    
+                    # 计算相对位置 (0-1)，宠物装备最小值为0
+                    relative_position = attr_value / max_val
                     # 限制在0-1范围内
-                    normalized_score = max(0.0, min(1.0, normalized_score))
-                    # 转换为0-100分制
-                    score_100 = normalized_score * 100
+                    relative_position = max(0.0, min(1.0, relative_position))
+                    
+                    # 计算最终得分: 基础分 + 相对位置 × 分数范围
+                    score_100 = base_score + relative_position * score_range
                     scores[f'{attr_field}_score'] = round(score_100, 2)
 
-                    # print(f"[主属性得分] {attr_name}: {attr_value} (最大值: {max_val}) -> {score_100:.2f}分")
+                    # print(f"[主属性得分] {attr_name}: {attr_value} (最大值: {max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         return scores
 
@@ -168,15 +174,21 @@ class PetEquipPlugin(EquipmentTypePlugin):
                 # 获取该属性的最大值（pet_equip.jsonc中直接存储最大值）
                 max_val = level_config.get(attr_name, 0)
                 if max_val > 0:
-                    # 计算标准化得分 (0-1)，下限为0
-                    normalized_score = attr_value / max_val
+                    # 使用改进的标准化得分计算方法
+                    # 基础分制 - 避免0分问题，适用于宠物装备（下限为0的情况）
+                    base_score = 30  # 基础分数，避免最小值为0分
+                    score_range = 70  # 可变分数范围 (100 - 30)
+                    
+                    # 计算相对位置 (0-1)，宠物装备最小值为0
+                    relative_position = attr_value / max_val
                     # 限制在0-1范围内
-                    normalized_score = max(0.0, min(1.0, normalized_score))
-                    # 转换为0-100分制
-                    score_100 = normalized_score * 100
+                    relative_position = max(0.0, min(1.0, relative_position))
+                    
+                    # 计算最终得分: 基础分 + 相对位置 × 分数范围
+                    score_100 = base_score + relative_position * score_range
                     scores[f'{attr_field}_score'] = round(score_100, 2)
 
-                    # print(f"[附加得分] {attr_name}: {attr_value} (最大值: {max_val}) -> {score_100:.2f}分")
+                    # print(f"[附加得分] {attr_name}: {attr_value} (最大值: {max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         return scores
 

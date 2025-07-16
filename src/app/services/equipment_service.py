@@ -100,7 +100,7 @@ class EquipmentService:
     def _get_db_file(self, year: Optional[int] = None, month: Optional[int] = None) -> str:
         """获取指定年月的装备数据库文件路径"""
         year, month = self._validate_year_month(year, month)
-        return os.path.join(self.data_dir, f'cbg_equip_{year}{month:02d}.db')
+        return os.path.join(self.data_dir, f'{year}{month:02d}', f'cbg_equip_{year}{month:02d}.db')
     
     def get_equipments(self, page: int = 1, page_size: int = 10, year: Optional[int] = None, month: Optional[int] = None,
                       level_min: Optional[int] = None, level_max: Optional[int] = None,

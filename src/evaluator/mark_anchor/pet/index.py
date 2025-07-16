@@ -86,7 +86,7 @@ class PetMarketAnchorEvaluator:
             pre_filters = self._build_pre_filters(target_features)
             
             # 获取预过滤的市场数据
-            market_data = self.market_collector.get_market_data_for_similarity(pre_filters)
+            market_data = self.market_collector.get_market_data_with_business_rules(pre_filters)
            
             if market_data.empty:
                 print("市场数据为空，无法找到锚点")
@@ -162,8 +162,8 @@ class PetMarketAnchorEvaluator:
         Returns:
             Dict[str, Any]: 过滤条件
         """
-        filters = {}
-        
+        filters = {**target_features}
+        print(f"filtersfiltersfiltersfilters {filters}")
         return filters
 
     def _calculate_similarity(self, 

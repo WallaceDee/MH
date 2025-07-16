@@ -63,11 +63,11 @@ class CBGSpider:
         
         # 正常角色数据库路径
         db_filename = f"cbg_characters_{current_month}.db"
-        self.db_path = os.path.join(project_root, 'data', db_filename)
+        self.db_path = os.path.join(project_root, 'data',current_month, db_filename)
         
         # 空号数据库路径（单独的数据库文件）
         empty_db_filename = f"empty_characters_{current_month}.db"
-        self.empty_db_path = os.path.join(project_root, 'data', empty_db_filename)
+        self.empty_db_path = os.path.join(project_root, 'data',current_month, empty_db_filename)
         
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -711,7 +711,7 @@ class CBGSpider:
                     # 保存到空号数据库的characters表
                     try:
                         self.empty_smart_db.save_character(character_data)
-                        log_info(self.logger, f"识别并保存空号角色: ￥{char.get('price')} - {char.get('sellerNickname')} - {empty_reason}")
+                        log_info(self.logger, f"￥{char.get('price')} - {char.get('sellerNickname')}(空号) - {empty_reason}")
                         saved_count += 1
                     except Exception as e:
                         log_error(self.logger, f"保存空号数据失败: ￥{char.get('price')}, 错误: {e}")
@@ -719,7 +719,7 @@ class CBGSpider:
                     # 如果不是空号，保存到正常角色数据库
                     try:
                         self.smart_db.save_character(character_data)
-                        log_info(self.logger, f"识别并保存角色: ￥{char.get('price')} - {char.get('sellerNickname')}")
+                        log_info(self.logger, f"￥{char.get('price')} - {char.get('sellerNickname')}")
                         saved_count += 1
                     except Exception as e:
                         log_error(self.logger, f"保存角色数据失败: ￥{char.get('price')}, 错误: {e}")

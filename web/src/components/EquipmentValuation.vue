@@ -11,7 +11,9 @@
 
       <!-- 价格比率显示 -->
       <span v-if="priceRatio" class="price-ratio" :class="priceRatioClass">
-        {{ priceRatioText }}
+        <el-tag :type="priceRatioTagType" disable-transitions>
+          {{ priceRatioText }}
+        </el-tag>
       </span>
     </div>
     <div class="valuation-details">
@@ -54,28 +56,34 @@ export default {
 
       return estimatedPrice / sellingPrice
     },
-
-    // 根据比率生成文本提示
+    priceRatioTagType() {
+      if (!this.priceRatio) return ''
+      const ratio = this.priceRatio
+      const deviation = Math.abs(ratio - 1) * 100
+      if (deviation < 5) {
+        return 'success'
+      } else if (deviation < 10) {
+        return 'info'
+      } else if (deviation < 20) {
+        return 'warning'
+      } else {
+        return 'danger'
+      }
+    },
     priceRatioText() {
       if (!this.priceRatio) return ''
-
       const ratio = this.priceRatio
-
-      if (ratio >= 1.5) {
-        return `严重高估 +${((ratio - 1) * 100).toFixed(0)}%`
-      } else if (ratio >= 1.2) {
-        return `显著高估 +${((ratio - 1) * 100).toFixed(0)}%`
-      } else if (ratio >= 1.1) {
-        return `轻微溢价 +${((ratio - 1) * 100).toFixed(0)}%`
-      } else if (ratio >= 0.95) {
-        const deviation = Math.abs(ratio - 1) * 100
-        return `价格合理 ±${deviation < 5 ? '<5' : deviation.toFixed(0)}%`
-      } else if (ratio >= 0.8) {
-        return `轻微折价 -${((1 - ratio) * 100).toFixed(0)}%`
-      } else if (ratio >= 0.5) {
-        return `显著低估 -${((1 - ratio) * 100).toFixed(0)}%`
+      const deviation = Math.abs(ratio - 1) * 100
+      if (deviation < 5) {
+        return `✅ 估价极为贴合市场（±${deviation.toFixed(1)}%）`
+      } else if (deviation < 10) {
+        return `🟢 估价较为贴合（±${deviation.toFixed(1)}%）`
+      } else if (deviation < 20) {
+        return `🟡 估价有一定偏差（±${deviation.toFixed(1)}%）`
+      } else if (ratio > 1) {
+        return `🔴 估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`
       } else {
-        return `严重低估 -${((1 - ratio) * 100).toFixed(0)}%`
+        return `🔵 估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`
       }
     },
 

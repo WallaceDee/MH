@@ -1,0 +1,392 @@
+2025-07-12 00:00:36,924 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:00:36,931 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:05:16,908 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:05:19,216 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:05:19,222 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:10:09,061 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:10:11,274 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:10:11,281 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:10:32,650 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-12 00:10:35,016 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:10:35,023 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:11:01,866 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-12 00:11:04,048 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:11:04,055 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:11:34,853 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:11:37,069 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:11:37,075 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:13:00,691 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:13:03,167 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:13:03,174 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:13:11,632 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:13:13,942 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:13:13,950 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:14:13,400 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:14:13,400 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:14:13,403 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:14:13,403 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:14:13,406 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:14:13,406 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:14:13,407 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:14:13,407 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:14:13,422 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 00:14:13] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-12 00:15:15,875 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:15:15,875 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:15:15,910 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:15:15,910 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:15:15,913 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:15:15,913 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:15:15,926 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:15:15,926 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:15:15,940 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 00:15:15] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-12 00:20:58,686 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-12 00:21:00,727 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:21:00,733 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:22:25,129 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:22:27,167 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:22:27,174 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:22:49,716 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:22:51,910 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:22:51,918 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:23:10,897 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:23:13,034 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:23:13,041 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:27:55,075 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:27:57,166 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:27:57,174 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:28:56,087 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:28:58,154 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:28:58,161 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:35:19,471 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_missing_fields.py', reloading
+2025-07-12 00:35:22,432 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:35:22,439 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:35:54,073 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:35:54,073 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:35:54,075 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:35:54,075 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:35:54,080 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:35:54,080 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:35:54,081 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:35:54,081 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:35:54,102 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 00:35:54] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-12 00:36:01,231 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:36:01,231 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:36:01,233 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:36:01,233 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:36:01,235 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:36:01,235 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:36:01,236 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:36:01,236 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:36:01,250 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 00:36:01] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-12 00:36:02,734 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-12 00:36:02,734 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-12 00:36:02,736 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-12 00:36:02,736 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-12 00:36:02,739 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:36:02,739 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:36:02,740 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:36:02,740 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:36:02,750 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 00:36:02] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=desc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-12 00:36:16,066 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_missing_fields.py', reloading
+2025-07-12 00:36:18,123 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:36:18,130 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:37:36,716 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_missing_fields.py', reloading
+2025-07-12 00:37:38,961 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:37:38,969 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:39:43,125 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:39:45,490 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:39:45,497 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:40:02,021 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:40:04,429 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:40:04,436 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:43:11,289 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_batch_validation.py', reloading
+2025-07-12 00:43:13,328 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:43:13,335 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:44:02,692 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\debug_other_field.py', reloading
+2025-07-12 00:44:04,652 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:44:04,659 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:44:38,676 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\debug_test_data.py', reloading
+2025-07-12 00:44:40,639 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:44:40,647 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:45:07,950 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\debug_test_data.py', reloading
+2025-07-12 00:45:10,091 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:45:10,098 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:45:40,074 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:45:40,074 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:45:40,138 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:45:40,138 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 00:45:40,159 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:45:40,159 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 00:45:40,164 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:45:40,164 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 00:45:40,194 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 00:45:40] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-12 00:46:41,208 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:46:43,447 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:46:43,456 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:49:39,351 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:49:41,558 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:49:41,566 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:57:07,213 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 00:57:09,255 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 00:57:09,262 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 22:49:55,459 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.10.54:5000
+2025-07-12 22:49:55,461 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-12 22:49:55,465 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 22:49:57,799 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 22:49:57,806 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 22:50:01,892 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 22:50:02,140 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 22:50:08,592 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 22:50:08,603 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 22:57:05,723 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_compare.py', reloading
+2025-07-12 22:57:06,158 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 22:57:08,219 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 22:57:08,226 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 22:59:06,312 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 22:59:06,568 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 22:59:08,764 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 22:59:08,771 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 22:59:31,241 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 22:59:31,434 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 22:59:33,510 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 22:59:33,518 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:00:05,555 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_single.py', reloading
+2025-07-12 23:00:05,743 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:00:07,889 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:00:07,896 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:00:47,143 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_compare.py', reloading
+2025-07-12 23:00:47,388 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:00:49,272 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:00:49,278 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:01:24,531 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:01:24,715 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:01:26,525 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:01:26,531 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:01:43,355 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:01:43,566 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:01:45,354 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:01:45,361 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:02:13,560 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:02:13,740 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:02:15,658 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:02:15,665 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:02:54,332 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:02:54,523 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:02:56,565 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:02:56,574 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:04:12,918 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:04:13,111 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:04:14,999 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:04:15,006 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:09:19,710 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:09:19,887 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:09:21,795 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:09:21,802 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:09:56,055 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:09:56,346 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:09:58,142 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:09:58,149 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:10:45,795 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:10:46,002 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:10:47,968 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:10:47,974 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:12:30,793 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:12:31,198 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:12:33,534 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:12:33,541 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:14:30,025 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_compare.py', reloading
+2025-07-12 23:14:30,213 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:14:32,239 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:14:32,251 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:15:55,628 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_single.py', reloading
+2025-07-12 23:15:55,808 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:15:57,569 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:15:57,576 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:16:18,915 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_single.py', reloading
+2025-07-12 23:16:19,093 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:16:20,888 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:16:20,894 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:16:46,929 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_single.py', reloading
+2025-07-12 23:16:47,108 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:16:48,926 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:16:48,933 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:18:46,939 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\test_compare.py', reloading
+2025-07-12 23:18:47,117 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:18:48,951 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:18:48,958 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:21:21,647 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:21:21,830 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:21:23,669 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:21:23,676 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:22:57,044 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:22:57,264 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:22:59,389 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:22:59,395 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:23:36,907 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 23:23:36] "GET /api/v1/spider/config HTTP/1.1" 200 -
+2025-07-12 23:23:36,916 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 23:23:36] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-07-12 23:23:36,932 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 23:23:36] "GET /api/v1/spider/files HTTP/1.1" 200 -
+2025-07-12 23:23:36,953 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 23:23:36] "GET /api/v1/spider/logs/files HTTP/1.1" 200 -
+2025-07-12 23:23:38,725 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 23:23:38,725 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 23:23:38,728 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 23:23:38,728 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-12 23:23:38,733 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 23:23:38,733 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-12 23:23:38,733 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 23:23:38,733 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-12 23:23:38,810 - werkzeug - INFO - 127.0.0.1 - - [12/Jul/2025 23:23:38] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-12 23:23:59,411 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:23:59,597 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:24:01,528 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:24:01,535 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:24:20,645 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:24:20,824 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:24:22,781 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:24:22,788 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:27:35,889 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:27:36,082 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:27:38,132 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:27:38,139 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:28:20,410 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:28:20,593 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:28:22,448 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:28:22,455 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:28:56,688 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:28:56,872 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:28:58,843 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:28:58,849 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:30:07,807 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:30:08,116 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:30:10,118 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:30:10,125 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:38:41,287 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:38:41,468 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:38:43,496 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:38:43,504 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:40:24,496 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:40:24,676 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:40:26,739 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:40:26,746 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:41:48,866 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:41:49,056 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:41:50,924 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:41:50,931 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:42:32,976 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:42:33,163 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:42:35,150 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:42:35,157 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:44:31,868 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:44:32,037 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:44:33,790 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:44:33,797 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:45:44,753 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:45:44,969 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:45:46,775 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:45:46,782 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:46:23,345 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:46:23,526 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:46:25,378 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:46:25,385 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:47:24,545 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:47:24,796 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:47:26,822 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:47:26,828 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:48:44,182 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:48:44,364 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:48:46,197 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:48:46,204 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:51:57,322 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:51:57,512 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:51:59,410 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:51:59,417 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:53:43,230 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:53:43,406 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:53:45,231 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:53:45,238 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:54:58,128 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:54:58,320 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:55:00,164 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:55:00,173 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:55:58,132 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:55:58,400 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:56:00,441 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:56:00,449 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:57:12,558 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:57:12,740 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:57:14,573 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:57:14,580 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:57:21,818 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:57:22,016 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:57:23,964 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:57:23,971 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:58:45,125 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:58:45,300 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:58:47,139 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:58:47,146 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:59:15,042 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:59:15,204 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:59:17,001 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:59:17,010 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 23:59:51,033 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-12 23:59:51,212 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 23:59:53,035 - werkzeug - WARNING -  * Debugger is active!
+2025-07-12 23:59:53,042 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-13 00:00:24,337 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-13 00:00:24,558 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:02:00,009 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:02:51,443 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:03:45,198 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:04:20,238 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:05:18,750 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:05:31,628 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:05:38,627 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:05:49,211 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:06:07,992 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:06:17,587 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:06:55,274 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:18:41,594 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:19:21,386 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:19:42,718 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:19:50,150 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:20:17,201 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:20:48,342 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:21:14,090 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:26:03,021 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:27:53,632 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:28:12,441 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:28:39,547 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:29:20,010 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:35:58,504 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:36:14,294 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:36:38,008 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:38:10,882 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:38:27,532 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:38:53,369 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:41:07,029 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:41:43,467 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:42:17,377 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:43:41,342 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:44:00,399 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:44:12,339 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:44:38,359 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:44:58,266 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:48:25,952 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:49:30,793 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:51:22,557 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:55:21,022 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:55:39,719 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:55:50,257 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:56:02,176 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 00:56:42,776 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:00:51,028 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:00:58,337 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:03:57,506 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:09:44,550 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:20:49,535 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:21:27,298 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:21:42,594 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:22:15,397 - werkzeug - INFO -  * Restarting with stat
+2025-07-13 01:23:04,260 - werkzeug - INFO -  * Restarting with stat

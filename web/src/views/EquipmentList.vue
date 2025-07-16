@@ -122,19 +122,19 @@
 
       <el-table-column prop="fujia_shuxing" label="附加属性" width="150">
         <template #default="scope">
-          <div class="equip_desc_yellow" v-html="formatAddedAttrs(scope.row.agg_added_attrs)"></div>
+          <div class="cBlue" v-html="formatAddedAttrs(scope.row.agg_added_attrs)"></div>
         </template>
       </el-table-column>
       <el-table-column prop="equip_level" label="等级" width="80" sortable="custom"></el-table-column>
       <el-table-column prop="all_damage" label="总伤" width="100" sortable="custom"></el-table-column>
       <el-table-column prop="init_damage" label="初伤" width="100" sortable="custom">
         <template #default="scope">
-          <span class="equip_desc_yellow">{{ scope.row.init_damage || scope.row.damage || scope.row.shanghai || ''}}</span>
+          <span class="cBlue">{{ scope.row.init_damage || scope.row.damage || scope.row.shanghai || ''}}</span>
         </template>
       </el-table-column>
       <el-table-column prop="init_wakan" label="初灵" width="100" sortable="custom">
         <template #default="scope">
-          <span class="equip_desc_yellow">{{
+          <span class="cBlue">{{
             scope.row.init_wakan ||
             (scope.row.magic_damage
               ? `法术伤害
@@ -145,7 +145,7 @@
       </el-table-column>
       <el-table-column prop="init_defense" label="初防" width="100" sortable="custom">
         <template #default="scope">
-          <span class="equip_desc_yellow">{{
+          <span class="cBlue">{{
             scope.row.init_defense ||
             scope.row.defense ||
             scope.row.fangyu ||
@@ -158,12 +158,12 @@
       </el-table-column>
       <el-table-column prop="init_hp" label="初血" width="100" sortable="custom">
         <template #default="scope">
-          <span class="equip_desc_yellow">{{ scope.row.init_hp || scope.row.qixue || ''}}</span>
+          <span class="cBlue">{{ scope.row.init_hp || scope.row.qixue || ''}}</span>
         </template>
       </el-table-column>
       <el-table-column prop="init_dex" label="初敏" width="100" sortable="custom">
         <template #default="scope">
-          <span class="equip_desc_yellow">{{ scope.row.init_dex || scope.row.speed || ''}}</span>
+          <span class="cBlue">{{ scope.row.init_dex || scope.row.speed || ''}}</span>
         </template>
       </el-table-column>
       <el-table-column prop="server_name" label="服务器" width="120"></el-table-column>
@@ -250,10 +250,10 @@ export default {
       equipments: [],
       filters: {
         selectedDate: dayjs().format('YYYY-MM'),
-        level_range: [60, 160],
+        level_range: [60, 60],
         price_min: undefined,
         price_max: undefined,
-        kindid: [29],
+        kindid: [61],
         equip_type: [], // 宠物装备类型（多选）
         equip_special_skills: [],
         equip_special_effect: [],

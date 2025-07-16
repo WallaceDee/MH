@@ -59,8 +59,8 @@ export default {
       default: 'right'
     },
     popoverWidth: {
-      type: String,
-      default: '450px'
+      type: Number,
+      default: 450
     }
   },
   computed: {

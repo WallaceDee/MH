@@ -2,7 +2,7 @@
   <el-popover
     :data-pet-sn="pet.pet_sn"
     placement="left-end"
-    width="640"
+    width="860"
     trigger="click"
     popper-class="similar-pet-popper"
     @show="handleShow"
@@ -40,7 +40,7 @@
       />
 
       <!-- 相似宠物表格 -->
-      <similar-pet-table v-else :anchors="similarData.anchors" />
+      <similar-pet-table v-else :anchors="similarData.anchors"  :target-pet="pet"/>
     </div>
 
     <!-- 错误信息 -->
@@ -87,7 +87,7 @@ export default {
     loading: {
       type: Boolean,
       default: false
-    }
+    },
   },
   methods: {
     handleShow() {

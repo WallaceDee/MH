@@ -11,7 +11,9 @@
 
       <!-- 价格比率显示 -->
       <span v-if="priceRatio" class="price-ratio" :class="priceRatioClass">
-        {{ priceRatioText }}
+        <el-tag :type="priceRatioTagType" disable-transitions>
+          {{ priceRatioText }}
+        </el-tag>
       </span>
     </div>
     <div class="valuation-details">
@@ -48,8 +50,7 @@ export default {
       }
 
       const estimatedPrice = parseFloat(this.valuation.estimated_price_yuan)
-      const sellingPrice = parseFloat(this.targetPet.price) / 100 // 转换为元
-
+      const sellingPrice = parseFloat(this.targetPet.price)
       if (sellingPrice === 0) return null
 
       return estimatedPrice / sellingPrice
@@ -58,14 +59,18 @@ export default {
     // 根据比率生成文本提示
     priceRatioText() {
       if (!this.priceRatio) return ''
-
       const ratio = this.priceRatio
-      if (ratio > 1.2) {
-        return '价格偏低 ⬇️'
-      } else if (ratio < 0.8) {
-        return '价格偏高 ⬆️'
+      const deviation = Math.abs(ratio - 1) * 100
+      if (deviation < 5) {
+        return `✅ 估价极为贴合市场（±${deviation.toFixed(1)}%）`
+      } else if (deviation < 10) {
+        return `🟢 估价较为贴合（±${deviation.toFixed(1)}%）`
+      } else if (deviation < 20) {
+        return `🟡 估价有一定偏差（±${deviation.toFixed(1)}%）`
+      } else if (ratio > 1) {
+        return `🔴 估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`
       } else {
-        return '价格合理 ✓'
+        return `🔵 估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`
       }
     },
 
@@ -80,6 +85,21 @@ export default {
         return 'ratio-high' // 估价低于售价，售价偏高
       } else {
         return 'ratio-normal'
+      }
+    },
+
+    priceRatioTagType() {
+      if (!this.priceRatio) return ''
+      const ratio = this.priceRatio
+      const deviation = Math.abs(ratio - 1) * 100
+      if (deviation < 5) {
+        return 'success'
+      } else if (deviation < 10) {
+        return 'info'
+      } else if (deviation < 20) {
+        return 'warning'
+      } else {
+        return 'danger'
       }
     }
   },

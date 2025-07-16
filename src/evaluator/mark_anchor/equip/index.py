@@ -490,11 +490,7 @@ class EquipAnchorEvaluator:
             # 根据装备类型决定饰市场数据采集器
             if self.base_config.is_lingshi(target_kindid):
                 # 灵饰使用灵饰市场数据采集器
-                market_data = self.lingshi_market_collector.get_market_data(
-                    level_range=pre_filters.get('equip_level_range'),
-                     **pre_filters,
-                    limit=1000
-                )
+                market_data = self.lingshi_market_collector.get_market_data_with_business_rules(pre_filters)
             elif target_kindid == 29:
                 # 宠物装备使用宠物装备市场数据采集器
                 print(f"宠物装备类型target_features: {pre_filters}")
@@ -549,14 +545,16 @@ class EquipAnchorEvaluator:
                         excluded_self_count += 1
                         continue
 
-                    # 从市场数据提取特征
+                    # 从市场数据获取特征
+                    # 注意：数据库中的灵饰/宠物装备数据已经包含提取好的特征，不需要重新提取
                     if self.base_config.is_lingshi(target_kindid):
-                        market_features = self.lingshi_feature_extractor.extract_features(
-                            market_row.to_dict())
+                        # 灵饰数据已经在数据库中完成特征提取，直接使用
+                        market_features = market_row.to_dict()
                     elif target_kindid == 29:
-                        market_features = self.pet_equip_feature_extractor.extract_features(
-                            market_row.to_dict())
+                        # 宠物装备数据已经在数据库中完成特征提取，直接使用
+                        market_features = market_row.to_dict()
                     else:
+                        # 普通装备需要从原始数据中提取特征
                         market_features = self.feature_extractor.extract_features(
                             market_row.to_dict())
 

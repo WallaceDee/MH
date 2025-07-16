@@ -46,6 +46,7 @@ class PetFeatureExtractor:
         """
         features = {}
         features['role_grade_limit'] = equip_data['role_grade_limit']
+        features['all_skill'] = equip_data['all_skill']
         return features
     
     def _extract_skill_features(self, equip_data: Dict[str, Any]) -> Dict[str, Union[int, float]]:

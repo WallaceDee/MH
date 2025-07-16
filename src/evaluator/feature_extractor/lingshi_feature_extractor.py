@@ -118,6 +118,8 @@ class LingshiFeatureExtractor:
             # 六、其他特征（从large_equip_desc提取）
             features.update(self._extract_other_features(equip_data))
 
+            # 标准化得分由插件系统在相似度计算时添加，这里不重复计算
+
             return features
 
         except Exception as e:
@@ -536,6 +538,108 @@ class LingshiFeatureExtractor:
                     print(f"修理失败片段: '{repair_part}'")
 
         return features
+
+    def _calculate_normalized_scores(self, features: Dict[str, Any]) -> Dict[str, float]:
+        """
+        计算标准化得分，用于相似度计算
+        
+        Args:
+            features: 已提取的基础特征
+            
+        Returns:
+            Dict[str, float]: 标准化得分字典
+        """
+        scores = {}
+        
+        try:
+            # 载入配置（如果还没有载入的话）
+            if not hasattr(self, 'auto_config') or not self.auto_config:
+                self._load_configs()
+            
+            equip_level = features.get('equip_level', 0)
+            kindid = features.get('kindid', 0)
+            
+            # 获取灵饰配置
+            lingshi_config_data = self.auto_config.get('lingshi', {})
+            
+            if not lingshi_config_data:
+                self.logger.warning("未找到灵饰配置数据")
+                return scores
+                
+            # 确定装备等级对应的配置
+            level_key = str(equip_level)
+            if level_key not in lingshi_config_data:
+                # 如果找不到精确等级，使用最接近的等级
+                available_levels = list(lingshi_config_data.keys())
+                if available_levels:
+                    closest_level = min(available_levels, key=lambda x: abs(int(x) - equip_level))
+                    level_key = closest_level
+                    print(f"使用等级 {closest_level} 的配置计算等级 {equip_level} 的灵饰")
+
+            if level_key not in lingshi_config_data:
+                return scores
+
+            level_config = lingshi_config_data[level_key]
+            main_config = level_config.get('main', {})
+            attrs_config = level_config.get('attrs', {})
+
+            # 1. 计算主属性得分
+            main_attrs = {
+                'damage': '伤害',
+                'defense': '防御',
+                'magic_damage': '法术伤害',
+                'magic_defense': '法术防御',
+                'fengyin': '封印命中等级',
+                'anti_fengyin': '抵抗封印等级',
+                'speed': '速度'
+            }
+
+            for attr_field, attr_name in main_attrs.items():
+                attr_value = features.get(attr_field, 0)
+                if attr_value > 0:
+                    attr_range = main_config.get(attr_name, [0, 1])
+                    if len(attr_range) == 2:
+                        min_val, max_val = attr_range
+                        if max_val > min_val:
+                            # 使用改进的标准化得分计算方法
+                            base_score = 30  # 基础分数，避免最小值为0分
+                            score_range = 70  # 可变分数范围 (100 - 30)
+                            
+                            # 计算相对位置 (0-1)
+                            relative_position = (attr_value - min_val) / (max_val - min_val)
+                            relative_position = max(0.0, min(1.0, relative_position))
+                            
+                            # 计算最终得分: 基础分 + 相对位置 × 分数范围
+                            score_100 = base_score + relative_position * score_range
+                            scores[f'{attr_field}_score'] = round(score_100, 2)
+
+            # 2. 计算附加属性得分
+            attrs = features.get('attrs', [])
+            for i, attr in enumerate(attrs[:3]):  # 最多3个附加属性
+                attr_type = attr.get('attr_type', '')
+                attr_value = attr.get('attr_value', 0)
+
+                if attr_type and attr_value > 0:
+                    attr_range = attrs_config.get(attr_type, [0, 1])
+                    if len(attr_range) == 2:
+                        min_val, max_val = attr_range
+                        if max_val > min_val:
+                            # 使用改进的标准化得分计算方法
+                            base_score = 30  # 基础分数，避免最小值为0分
+                            score_range = 70  # 可变分数范围 (100 - 30)
+                            
+                            # 计算相对位置 (0-1)
+                            relative_position = (attr_value - min_val) / (max_val - min_val)
+                            relative_position = max(0.0, min(1.0, relative_position))
+                            
+                            # 计算最终得分: 基础分 + 相对位置 × 分数范围
+                            score_100 = base_score + relative_position * score_range
+                            scores[f'attr_{i+1}_score'] = round(score_100, 2)
+
+        except Exception as e:
+            self.logger.error(f"计算标准化得分失败: {e}")
+            
+        return scores
 
     def extract_features_batch(self, equip_list: List[Dict[str, Any]]) -> List[Dict[str, Union[int, float, str]]]:
         """

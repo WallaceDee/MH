@@ -118,17 +118,22 @@ class LingshiPlugin(EquipmentTypePlugin):
                 if len(attr_range) == 2:
                     min_val, max_val = attr_range
                     if max_val > min_val:
-                        # 计算标准化得分 (0-1)
-                        normalized_score = (
-                            attr_value - min_val) / (max_val - min_val)
+                        # 使用改进的标准化得分计算方法
+                        # 方案1: 基础分制 - 最小值给30分，最大值给100分，避免0分问题
+                        base_score = 30  # 基础分数，避免最小值为0分
+                        score_range = 70  # 可变分数范围 (100 - 30)
+                        
+                        # 计算相对位置 (0-1)
+                        relative_position = (attr_value - min_val) / (max_val - min_val)
                         # 限制在0-1范围内
-                        normalized_score = max(0.0, min(1.0, normalized_score))
-                        # 转换为0-100分制
-                        score_100 = normalized_score * 100
+                        relative_position = max(0.0, min(1.0, relative_position))
+                        
+                        # 计算最终得分: 基础分 + 相对位置 × 分数范围
+                        score_100 = base_score + relative_position * score_range
                         scores[f'{attr_field}_score'] = round(score_100, 2)
 
                         print(
-                            f"[主属性得分] {attr_name}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分")
+                            f"[主属性得分] {attr_name}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         return scores
 
@@ -170,17 +175,22 @@ class LingshiPlugin(EquipmentTypePlugin):
                 if len(attr_range) == 2:
                     min_val, max_val = attr_range
                     if max_val > min_val:
-                        # 计算标准化得分 (0-1)
-                        normalized_score = (
-                            attr_value - min_val) / (max_val - min_val)
+                        # 使用改进的标准化得分计算方法
+                        # 基础分制 - 最小值给30分，最大值给100分，避免0分问题
+                        base_score = 30  # 基础分数，避免最小值为0分
+                        score_range = 70  # 可变分数范围 (100 - 30)
+                        
+                        # 计算相对位置 (0-1)
+                        relative_position = (attr_value - min_val) / (max_val - min_val)
                         # 限制在0-1范围内
-                        normalized_score = max(0.0, min(1.0, normalized_score))
-                        # 转换为0-100分制
-                        score_100 = normalized_score * 100
+                        relative_position = max(0.0, min(1.0, relative_position))
+                        
+                        # 计算最终得分: 基础分 + 相对位置 × 分数范围
+                        score_100 = base_score + relative_position * score_range
                         scores[f'attr_{i+1}_score'] = round(score_100, 2)
 
                         print(
-                            f"[附加属性得分] {attr_type}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分")
+                            f"[附加属性得分] {attr_type}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         # 计算匹配属性的平均得分（用于筛选）
         if len(attrs) >= 2:
@@ -221,9 +231,9 @@ class LingshiPlugin(EquipmentTypePlugin):
 
             # 附加属性得分权重
             # 'attrs_avg_score': 1.0,       # 附加属性平均得分
-            'attr_1_score': 0.8,          # 第一个附加属性得分
-            'attr_2_score': 0.8,          # 第二个附加属性得分
-            'attr_3_score': 0.8,            # 第三个附加属性得分
+            'attr_1_score': 1.0,          # 第一个附加属性得分
+            'attr_2_score': 1.0,          # 第二个附加属性得分
+            'attr_3_score': 1.0,            # 第三个附加属性得分
 
             # 忽略的特征
             'gem_level': 0,
@@ -255,24 +265,24 @@ class LingshiPlugin(EquipmentTypePlugin):
         if kindid is not None:
             if kindid == 61:  # 戒指 - 只有伤害和防御
                 base_weights.update({
-                    'damage_score': 2.0,      # 戒指伤害得分
-                    'defense_score': 2.0,     # 戒指防御得分
+                    'damage_score': 1.0,      # 戒指伤害得分
+                    'defense_score': 1.0,     # 戒指防御得分
                 })
             elif kindid == 62:  # 耳饰 - 只有法术伤害和法术防御
                 base_weights.update({
 
-                    'magic_damage_score': 2.0,    # 耳饰法术伤害得分
-                    'magic_defense_score': 2.0,   # 耳饰法术防御得分
+                    'magic_damage_score': 1.0,    # 耳饰法术伤害得分
+                    'magic_defense_score': 1.0,   # 耳饰法术防御得分
 
                 })
             elif kindid == 63:  # 手镯 - 只有封印命中等级和抵抗封印等级
                 base_weights.update({
-                    'fengyin_score': 2.0,         # 手镯封印命中得分
-                    'anti_fengyin_score': 2.0,    # 手镯抵抗封印得分
+                    'fengyin_score': 1.0,         # 手镯封印命中得分
+                    'anti_fengyin_score': 1.0,    # 手镯抵抗封印得分
                 })
             elif kindid == 64:  # 佩饰 - 只有速度
                 base_weights.update({
-                    'speed_score': 2.0,           # 佩饰速度得分
+                    'speed_score': 1.0,           # 佩饰速度得分
                 })
 
         return base_weights

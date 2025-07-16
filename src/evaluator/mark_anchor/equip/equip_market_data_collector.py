@@ -58,49 +58,38 @@ class EquipMarketDataCollector:
         last_month_date = now.replace(day=1) - timedelta(days=1)
         last_month = last_month_date.strftime("%Y%m")
 
+        # 优先查找当月和上月的数据库
         target_months = [current_month, last_month]
-        print(f"查找数据库文件，目标月份: {target_months}")
+        print(f"优先查找数据库文件，目标月份: {target_months}")
 
-        # 数据库文件只在根目录下的data文件夹中
-        # 从当前位置向上查找到项目根目录的data文件夹
-        current_path = os.path.abspath(".")
-
-        # 向上查找直到找到data文件夹或到达系统根目录
-        possible_base_paths = []
-        search_path = current_path
-        for _ in range(5):  # 最多向上5级目录
-            data_path = os.path.join(search_path, "data")
-            if os.path.exists(data_path) and os.path.isdir(data_path):
-                possible_base_paths.append(data_path)
-                break
-            parent = os.path.dirname(search_path)
-            if parent == search_path:  # 已经到达根目录
-                break
-            search_path = parent
-
-        # 如果没找到，使用默认的data路径
-        if not possible_base_paths:
-            possible_base_paths = ["data"]
-
+        # 数据库文件固定存放在根目录的data文件夹中
+        data_path = "data"
         found_dbs = []
 
-        for base_path in possible_base_paths:
-            for month in target_months:
-                db_file = os.path.join(base_path, f"cbg_equip_{month}.db")
-                if os.path.exists(db_file):
-                    found_dbs.append(db_file)
+        # 首先查找指定月份的数据库文件
+        for month in target_months:
+            db_file = os.path.join(data_path, month, f"cbg_equip_{month}.db")
+            if os.path.exists(db_file):
+                found_dbs.append(db_file)
+                print(f"找到指定月份数据库文件: {db_file}")
 
-        # 去重并排序
-        found_dbs = list(set(found_dbs))
-        found_dbs.sort(reverse=True)  # 最新的在前
+        # 如果没找到指定月份的，则查找所有可用的装备数据库文件
+        if not found_dbs:
+            print("未找到指定月份的数据库文件，查找所有可用的装备数据库文件")
+            # 查找所有年月文件夹下的数据库文件
+            pattern = os.path.join(data_path, "*", "cbg_equip_*.db")
+            all_dbs = glob.glob(pattern)
+            
+            # 按文件名排序，最新的在前
+            all_dbs.sort(reverse=True)
+            
+            # 取最新的2个数据库文件
+            found_dbs = all_dbs[:2]
+            print(f"找到所有数据库文件: {all_dbs}")
+            print(f"使用最新的数据库文件: {found_dbs}")
 
-        if found_dbs:
-            print(f"找到数据库文件: {found_dbs}")
-            return found_dbs
-        else:
-            print(f"未找到数据库文件，使用默认文件名")
-            # 如果找不到，返回默认的当月和上月文件名
-            return [f"cbg_equip_{current_month}.db", f"cbg_equip_{last_month}.db"]
+        return found_dbs
+
 
     def connect_database(self, db_path: str) -> sqlite3.Connection:
         """连接到指定的装备数据库"""

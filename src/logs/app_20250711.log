@@ -1,0 +1,778 @@
+2025-07-11 14:08:00,852 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.218.5:5000
+2025-07-11 14:08:00,854 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-11 14:08:00,858 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 14:08:02,381 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 14:08:02,389 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 14:08:54,852 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 14:08:54] "GET /api/v1/spider/config HTTP/1.1" 200 -
+2025-07-11 14:08:54,857 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 14:08:54] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-07-11 14:08:54,913 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 14:08:54] "GET /api/v1/spider/files HTTP/1.1" 200 -
+2025-07-11 14:08:54,917 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 14:08:54] "GET /api/v1/spider/logs/files HTTP/1.1" 200 -
+2025-07-11 14:08:56,009 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 14:08:56,009 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 14:08:56,011 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 14:08:56,011 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 14:08:56,024 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 14:08:56,024 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 14:08:56,025 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 14:08:56,025 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 14:08:56,075 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 14:08:56] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:12:32,129 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,129 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,131 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,131 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,132 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:32,132 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:32,133 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:32,133 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:32,143 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:12:32] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:12:32,314 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,314 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,315 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,315 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:32,317 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:32,317 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:32,318 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:32,318 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:32,330 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:12:32] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:12:43,144 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,144 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,145 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,145 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,146 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:43,146 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:43,147 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:43,147 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:43,155 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:12:43] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:12:43,206 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,206 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,207 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,207 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:43,208 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:43,208 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:43,209 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:43,209 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:43,216 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:12:43] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:12:49,171 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,171 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,172 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,172 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,173 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:49,173 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:49,174 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:49,174 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:49,182 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:12:49] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:12:49,525 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,525 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,526 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,526 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:12:49,527 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:49,527 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:12:49,528 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:49,528 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:12:49,537 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:12:49] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:13:40,568 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,568 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,570 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,570 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,572 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:40,572 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:40,580 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:40,580 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:40,592 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:13:40] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:13:40,934 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,934 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,936 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,936 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:40,938 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:40,938 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:40,939 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:40,939 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:40,947 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:13:40] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:13:52,708 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:52,708 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:52,711 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:52,711 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:52,717 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:52,717 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:52,718 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:52,718 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:52,734 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:13:52] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:13:53,108 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:53,108 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:53,109 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:53,109 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:13:53,111 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:53,111 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:13:53,112 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:53,112 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:13:53,124 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:13:53] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:15:28,979 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:15:28,979 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:15:28,980 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:15:28,980 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:15:28,984 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:15:28,984 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:15:28,989 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:15:28,989 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:15:28,999 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:15:28] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:16:38,609 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:38,609 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:38,610 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:38,610 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:38,612 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:38,612 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:38,613 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:38,613 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:38,623 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:16:38] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:16:39,206 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:39,206 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:39,208 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:39,208 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:39,209 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:39,209 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:39,211 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:39,211 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:39,241 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:16:39] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:16:46,867 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:46,867 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:46,868 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:46,868 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:46,870 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:46,870 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:46,872 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:46,872 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:46,889 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:16:46] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:16:47,627 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:47,627 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:47,628 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:47,628 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:47,629 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:47,629 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:47,630 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:47,630 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:47,643 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:16:47] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:16:48,186 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:48,186 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:48,188 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:48,188 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:16:48,190 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:48,190 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:16:48,191 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:48,191 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:16:48,202 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:16:48] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:17:07,658 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:07,658 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:07,660 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:07,660 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:07,661 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:17:07,661 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:17:07,661 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:17:07,661 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:17:07,669 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:17:07] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:17:53,284 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:53,284 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:53,286 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:53,286 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:17:53,291 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:17:53,291 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:17:53,298 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:17:53,298 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:17:53,331 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:17:53] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:18:48,760 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:18:48,760 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:18:48,761 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:18:48,761 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:18:48,763 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:18:48,763 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:18:48,765 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:18:48,765 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:18:48,775 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:18:48] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:19:10,042 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:10,042 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:10,052 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:10,052 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:10,078 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:19:10,078 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:19:10,080 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:19:10,080 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:19:10,094 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:19:10] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:19:40,031 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:40,031 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:40,033 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:40,033 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:40,034 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:19:40,034 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:19:40,035 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:19:40,035 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:19:40,045 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:19:40] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:19:49,574 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:49,574 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:49,575 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:49,575 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:19:49,576 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:19:49,576 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:19:49,577 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:19:49,577 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:19:49,620 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:19:49] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:20:01,425 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:01,425 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:01,426 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:01,426 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:01,427 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:20:01,427 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:20:01,428 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:20:01,428 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:20:01,435 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:20:01] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:20:47,421 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '2', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:47,421 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '2', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:47,423 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:47,423 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:20:47,426 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:20:47,426 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:20:47,427 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:20:47,427 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:20:47,430 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:20:47] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=2&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:28:54,109 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:28:54,109 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:28:54,110 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:28:54,110 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 15:28:54,113 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:28:54,113 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 15:28:54,113 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:28:54,113 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 15:28:54,121 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 15:28:54] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 15:53:47,385 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 15:53:47,566 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 15:53:49,600 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 15:53:49,610 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 15:54:48,266 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 15:54:48,496 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 15:54:51,136 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 15:54:51,149 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:00:36,413 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:00:36,683 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:00:39,163 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:00:39,172 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:18:10,143 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:18:10,375 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:18:12,923 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:18:12,933 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:18:48,995 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:18:49,187 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:18:51,240 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:18:51,247 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:23:54,171 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:23:54,406 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:23:57,075 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:23:57,087 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:24:24,597 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\test_decode.py', reloading
+2025-07-11 16:24:24,725 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:24:26,704 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:24:26,713 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:26:57,529 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:26:57,668 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:26:59,588 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:26:59,598 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:27:04,995 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:27:05,153 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:27:07,045 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:27:07,053 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:27:12,556 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:27:12,809 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:27:14,938 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:27:14,953 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:27:32,879 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:27:33,037 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:27:34,903 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:27:34,912 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:27:47,757 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:27:47,927 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:27:49,799 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:27:49,808 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:32:17,982 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:32:18,263 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:32:20,259 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:32:20,269 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:32:41,783 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:32:41,928 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:32:43,839 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:32:43,849 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:35:12,297 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\test_decode_simple.py', reloading
+2025-07-11 16:35:12,435 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:35:14,404 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:35:14,413 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:37:43,816 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\test_decode_simple.py', reloading
+2025-07-11 16:37:43,970 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:37:45,885 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:37:45,893 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:43:09,447 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:43:09,639 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:43:12,268 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:43:12,280 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:44:07,736 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:44:07,956 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:44:10,467 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:44:10,479 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:49:18,410 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:49:18,632 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:49:20,609 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:49:20,617 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:49:31,098 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:49:31,281 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:49:33,176 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:49:33,185 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:51:03,365 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:51:03,579 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:51:05,753 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:51:05,764 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:52:45,088 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 16:52:45,274 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 16:52:47,461 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 16:52:47,472 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 16:56:45,268 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:45,268 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:45,270 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:45,270 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:45,271 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:56:45,271 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:56:45,272 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:56:45,272 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:56:45,289 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 16:56:45] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 16:56:46,446 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:46,446 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:46,447 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:46,447 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:46,453 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:56:46,453 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:56:46,455 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:56:46,455 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:56:46,476 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 16:56:46] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 16:56:53,135 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:53,135 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:53,137 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:53,137 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:56:53,142 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:56:53,142 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:56:53,143 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:56:53,143 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:56:53,155 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 16:56:53] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 16:57:05,300 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:05,300 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:05,301 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:05,301 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:05,303 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:57:05,303 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:57:05,303 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:57:05,303 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:57:05,313 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 16:57:05] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 16:57:08,163 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:08,163 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:08,167 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:08,167 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 16:57:08,172 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:57:08,172 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 16:57:08,173 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:57:08,173 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 16:57:08,190 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 16:57:08] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 17:01:58,270 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:01:58,491 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:02:00,543 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:02:00,552 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:02:24,328 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:02:24,491 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:02:26,541 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:02:26,550 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:06:35,683 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:35,683 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:35,684 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:35,684 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:35,685 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:06:35,685 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:06:35,686 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:06:35,686 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:06:35,696 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 17:06:35] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 17:06:48,724 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:48,724 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:48,727 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:48,727 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:48,729 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:06:48,729 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:06:48,730 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:06:48,730 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:06:48,753 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 17:06:48] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 17:06:50,610 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:50,610 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:50,616 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:50,616 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:06:50,618 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:06:50,618 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:06:50,619 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:06:50,619 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:06:50,632 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 17:06:50] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 17:10:08,191 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:10:08,191 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:10:08,192 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:10:08,192 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:10:08,194 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:10:08,194 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:10:08,195 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:10:08,195 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:10:08,203 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 17:10:08] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 17:11:06,216 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:11:06,408 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:11:08,307 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:11:08,317 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:11:18,835 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:11:19,059 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:11:20,935 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:11:20,944 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:15:25,496 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:15:25,649 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:15:27,587 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:15:27,597 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:17:00,581 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:17:00,717 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:17:02,636 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:17:02,646 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:17:20,450 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:17:20,616 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:17:22,512 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:17:22,521 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:19:59,045 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:19:59,268 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:20:01,734 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:20:01,745 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:20:14,854 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:20:15,071 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:20:17,568 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:20:17,581 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:21:23,540 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:21:23,767 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:21:26,266 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:21:26,279 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:25:55,690 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:25:55,877 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:25:58,338 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:25:58,351 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:26:32,076 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:26:32,312 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:26:34,747 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:26:34,756 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:28:36,788 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:36,788 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:36,791 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:36,791 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:36,795 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:28:36,795 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:28:36,799 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:28:36,799 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:28:36,820 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 17:28:36] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 17:28:49,917 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:49,917 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:49,928 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:49,928 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 17:28:49,933 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:28:49,933 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 17:28:49,934 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:28:49,934 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 17:28:50,070 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 17:28:50] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 17:47:21,597 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:47:21,768 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:47:23,806 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:47:23,815 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:47:30,389 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:47:30,529 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:47:32,404 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:47:32,413 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:47:46,441 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:47:46,592 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:47:48,460 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:47:48,470 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:47:58,728 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:47:58,865 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:48:00,699 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:48:00,708 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:48:22,033 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:48:22,211 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:48:24,170 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:48:24,179 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:48:45,553 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:48:45,747 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:48:47,697 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:48:47,707 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:49:10,333 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:49:10,500 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:49:12,408 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:49:12,417 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:50:06,854 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:50:07,001 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:50:08,998 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:50:09,007 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:50:21,587 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:50:21,720 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:50:23,718 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:50:23,728 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:52:01,492 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:52:01,661 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:52:03,549 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:52:03,560 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:52:08,927 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:52:09,064 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:52:10,947 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:52:10,956 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:52:27,613 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:52:27,838 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:52:29,784 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:52:29,794 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:55:44,919 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:55:45,083 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:55:47,120 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:55:47,129 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 17:56:15,894 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 17:56:16,038 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 17:56:17,919 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 17:56:17,928 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:04:49,283 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:04:49,466 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:04:51,851 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:04:51,864 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:09:13,854 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:09:14,015 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:09:15,995 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:09:16,005 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:09:20,262 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:09:20,433 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:09:22,403 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:09:22,414 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:09:45,721 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:09:45,906 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:09:48,303 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:09:48,315 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:10:03,904 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:10:04,066 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:10:06,169 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:10:06,180 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:10:06,636 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:10:06,783 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:10:08,860 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:10:08,867 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:11:48,127 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:11:48,314 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:11:50,193 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:11:50,202 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:12:42,918 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:12:43,084 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:12:45,041 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:12:45,051 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:13:41,276 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:13:41,464 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:13:43,300 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:13:43,309 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:13:54,956 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:13:55,145 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:13:56,974 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:13:56,984 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:14:02,384 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:14:02,513 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:14:04,353 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:14:04,362 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:17:01,645 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:17:01,816 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:17:03,854 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:17:03,863 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:17:21,878 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:17:22,041 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:17:23,982 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:17:23,991 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:17:46,860 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:17:46,996 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:17:48,847 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:17:48,856 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:21:46,652 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:21:46,785 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:21:48,610 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:21:48,619 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:25:14,494 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:25:14,667 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:25:16,698 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:25:16,707 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:25:34,378 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:25:34,515 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:25:36,461 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:25:36,470 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:25:40,713 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:25:40,866 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:25:46,519 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:25:46,529 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 18:25:51,863 - werkzeug - INFO -  * Detected change in 'C:\\Users\\Administrator\\Desktop\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 18:25:52,022 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 18:25:54,340 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 18:25:54,350 - werkzeug - INFO -  * Debugger PIN: 123-456-990
+2025-07-11 23:14:07,966 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.10.54:5000
+2025-07-11 23:14:07,967 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-11 23:14:07,971 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:14:09,856 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:14:09,864 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:14:24,448 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:24] "GET /api/v1/spider/config HTTP/1.1" 200 -
+2025-07-11 23:14:24,453 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:24] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-07-11 23:14:24,475 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:24] "GET /api/v1/spider/files HTTP/1.1" 200 -
+2025-07-11 23:14:24,476 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:24] "GET /api/v1/spider/logs/files HTTP/1.1" 200 -
+2025-07-11 23:14:26,091 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:26,091 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:26,094 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:26,094 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:26,099 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:26,099 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:26,100 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:26,100 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:26,149 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:26] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 23:14:30,500 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:30,500 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:30,504 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:30,504 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:30,505 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:30,505 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:30,506 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:30,506 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:30,516 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:30] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 23:14:31,672 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:14:31,672 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:14:31,674 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:14:31,674 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:14:31,675 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:31,675 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:31,676 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:31,676 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:31,689 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:31] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=desc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 23:14:56,422 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:56,422 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:56,425 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:56,425 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:14:56,427 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:56,427 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:14:56,429 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:56,429 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:14:56,444 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:14:56] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 23:15:01,741 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:15:01,741 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:15:01,743 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:15:01,743 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'asc'}
+2025-07-11 23:15:01,745 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:15:01,745 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:15:01,746 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:15:01,746 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:15:01,756 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:15:01] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=asc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 23:15:03,310 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:15:03,310 - app.controllers.pet_controller - INFO - 收到筛选参数: {'page': '1', 'page_size': '10', 'year': '2025', 'month': '07', 'level_min': '150', 'level_max': '180', 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:15:03,320 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:15:03,320 - app.controllers.pet_controller - INFO - 处理后的筛选参数: {'level_min': 150, 'level_max': 180, 'price_min': None, 'price_max': None, 'pet_type': None, 'pet_skills': None, 'pet_special_effect': None, 'pet_quality': None, 'pet_growth': None, 'pet_aptitude': None, 'pet_skill_count': None, 'sort_by': 'price', 'sort_order': 'desc'}
+2025-07-11 23:15:03,322 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:15:03,322 - app.services.pet_service - INFO - 开始处理筛选条件，参数: level_min=150, level_max=180, price_min=None, price_max=None
+2025-07-11 23:15:03,324 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:15:03,324 - app.services.pet_service - INFO - 多选参数: pet_type=None, pet_skills=None, pet_special_effect=None
+2025-07-11 23:15:03,334 - werkzeug - INFO - 127.0.0.1 - - [11/Jul/2025 23:15:03] "GET /api/v1/pet/?selectedDate=2025-07&sort_by=price&sort_order=desc&year=2025&month=07&page=1&page_size=10&level_min=150&level_max=180 HTTP/1.1" 200 -
+2025-07-11 23:18:35,348 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:18:35,541 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:18:37,508 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:18:37,516 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:19:29,944 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:19:30,127 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:19:32,179 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:19:32,188 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:20:01,464 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:20:01,656 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:20:03,598 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:20:03,606 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:45:23,231 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:45:23,428 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:45:25,646 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:45:25,653 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:47:25,025 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:47:25,306 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:47:27,311 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:47:27,318 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:47:34,759 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:47:35,027 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:47:36,978 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:47:36,985 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:47:46,941 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:47:47,123 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:47:49,087 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:47:49,094 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:48:39,988 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-11 23:48:40,175 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:48:42,191 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:48:42,199 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:49:03,326 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-11 23:49:03,664 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:49:05,684 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:49:05,691 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:49:13,029 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-11 23:49:13,341 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:49:15,448 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:49:15,460 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:49:38,102 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-11 23:49:38,290 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:49:40,324 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:49:40,331 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:50:09,735 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-11 23:50:09,961 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:50:11,900 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:50:11,907 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:50:30,122 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-11 23:50:30,329 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:50:32,360 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:50:32,367 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:56:59,717 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:56:59,895 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:57:02,120 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:57:02,127 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:57:05,999 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:57:06,209 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:57:08,685 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:57:08,693 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:58:48,932 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:58:49,115 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:58:51,098 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:58:51,105 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:59:34,925 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\spider\\helper\\decode_desc.py', reloading
+2025-07-11 23:59:35,112 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:59:37,052 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:59:37,059 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-11 23:59:51,395 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-11 23:59:51,591 - werkzeug - INFO -  * Restarting with stat
+2025-07-11 23:59:53,489 - werkzeug - WARNING -  * Debugger is active!
+2025-07-11 23:59:53,496 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-07-12 00:00:34,816 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\test_decode_desc_migration.py', reloading
+2025-07-12 00:00:35,013 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:05:17,126 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:10:09,244 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:10:32,840 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:11:02,073 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:11:35,099 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:13:00,920 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:13:11,866 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:20:58,862 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:22:25,310 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:22:49,921 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:23:11,126 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:27:55,257 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:28:56,279 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:35:20,374 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:36:16,247 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:37:36,905 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:39:43,324 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:40:02,433 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:43:11,516 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:44:02,873 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:44:38,858 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:45:08,144 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:46:41,410 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:49:39,553 - werkzeug - INFO -  * Restarting with stat
+2025-07-12 00:57:07,402 - werkzeug - INFO -  * Restarting with stat

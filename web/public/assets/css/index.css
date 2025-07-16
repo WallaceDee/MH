@@ -1,0 +1,20 @@
+/* 成长值颜色样式 */
+.growth-low {
+  color: #999999;
+  /* 灰色 - 低成长 */
+}
+
+.growth-medium {
+  color: #67c23a;
+  /* 绿色 - 中等成长 */
+}
+
+.growth-high {
+  color: #e6a23c;
+  /* 橙色 - 高成长 */
+}
+
+.growth-perfect {
+  color: #f56c6c;
+  /* 红色 - 完美成长 */
+}

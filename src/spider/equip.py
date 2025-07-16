@@ -51,7 +51,7 @@ class CBGEquipSpider:
         
         # 装备数据库路径
         db_filename = f"cbg_equip_{current_month}.db"
-        self.db_path = os.path.join(project_root, 'data', db_filename)
+        self.db_path = os.path.join(project_root, 'data', current_month, db_filename)
         
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -706,7 +706,7 @@ class CBGEquipSpider:
                         level = equipment.get('level', '未知')
                         server_name = equipment.get('server_name', '未知服务器')
                         seller_nickname = equipment.get('seller_nickname', '未知卖家')
-                        self.logger.info(f"识别并保存装备: ￥{price} - {equip_name}({level}级) - {server_name} - {seller_nickname}")
+                        self.logger.info(f"￥{price} - {equip_name}({level}级) - {server_name} - {seller_nickname}")
                     
                     self.logger.info(f"✅ 第 {page_num} 页完成，获取 {len(equipments)} 条装备，保存 {saved_count} 条")
                 else:

@@ -49,8 +49,8 @@ class CBGPetSpider:
         
         # 宠物数据库路径
         db_filename = f"cbg_pets_{current_month}.db"
-        self.db_path = os.path.join(project_root, 'data', db_filename)
-        
+        self.db_path = os.path.join(project_root, 'data', current_month, db_filename)
+
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         
@@ -604,7 +604,7 @@ class CBGPetSpider:
                         server_name = pet.get('server_name', '未知服务器')
                         seller_nickname = pet.get('seller_nickname', '未知卖家')
                         desc_sumup_short = pet.get('desc_sumup_short', '无描述')
-                        self.logger.info(f"识别并保存宠物: ￥{price} - {pet_name}({level}级) - {desc_sumup_short} - {server_name} - {seller_nickname}")
+                        self.logger.info(f" ￥{price} - {pet_name}({level}级) - {desc_sumup_short} - {server_name} - {seller_nickname}")
                     
                     self.logger.info(f"✅ 第 {page_num} 页完成，获取 {len(pets)} 条宠物，保存 {saved_count} 条")
                 else:

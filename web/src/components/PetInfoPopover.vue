@@ -241,7 +241,7 @@
                     equip_type_desc: pet.equip_list[index - 1].static_desc,
                     large_equip_desc: pet.equip_list[index - 1].desc,
                     equip_name: pet.equip_list[index - 1].name
-                  }" size="small" popoverWidth="300px" />
+                  }" size="small" :popoverWidth="300" />
                 <span v-else>&nbsp;</span>
               </td>
             </tr>
