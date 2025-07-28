@@ -7,6 +7,9 @@ import requests
 from functools import partial
 import re # Added for regex validation in _collect_pet_logic
 
+# 添加项目根目录到 Python 路径
+from src.utils.project_path import get_project_root, get_config_path
+
 # 导入cookie更新器（异步版本将在需要时动态导入）
 
 logger = logging.getLogger(__name__)
@@ -46,6 +49,14 @@ DEFAULT_PARAMS = {
         'server_type': 3,
         'count': 15,
         'view_loc': 'overall_search'
+    },
+    'role': {
+        'server_type': 3,
+        'level_min': 0,
+        'level_max': 175,
+        'search_type': 'overall_search_role',
+        'view_loc': 'overall_search',
+        'count': 15
     }
 }
 
@@ -59,7 +70,7 @@ async def _get_params_async(equip_type: str, use_browser: bool, collector_logic,
     3. 如果文件不存在，使用默认参数。
     4. 收集/加载后，保存到文件。
     """
-    params_file = os.path.join('config', f'equip_params_{equip_type}.json')
+    params_file = os.path.join(get_config_path(), f'equip_params_{equip_type}.json')
 
     if use_browser:
         logger.info(f"模式: 浏览器. 启动浏览器为 '{equip_type}' 收集参数.")
@@ -90,7 +101,7 @@ def _get_params_sync(equip_type: str, use_browser: bool, collector_logic, collec
     同步获取参数的核心逻辑。
     与异步版本逻辑相同，但使用同步调用。
     """
-    params_file = os.path.join('config', f'equip_params_{equip_type}.json')
+    params_file = os.path.join(get_config_path(), f'equip_params_{equip_type}.json')
 
     if use_browser:
         logger.info(f"模式: 浏览器. 启动浏览器为 '{equip_type}' 收集参数.")
@@ -116,109 +127,17 @@ def _get_params_sync(equip_type: str, use_browser: bool, collector_logic, collec
         return DEFAULT_PARAMS[equip_type]
 
 
-def verify_cookie_validity():
-    """
-    验证Cookie的有效性
-    使用默认参数发送一个测试请求来检查Cookie是否有效
-    返回: True表示Cookie有效，False表示Cookie无效
-    """
-    try:
-        # 读取Cookie文件
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        cookie_path = os.path.join(project_root, 'config', 'cookies.txt')
-        
-        if not os.path.exists(cookie_path):
-            logger.warning("Cookie文件不存在")
-            return False
-        
-        with open(cookie_path, 'r', encoding='utf-8') as f:
-            cookie_str = f.read().strip()
-        
-        if not cookie_str:
-            logger.warning("Cookie文件为空")
-            return False
-        
-        # 使用默认参数发送测试请求，参考cbg_spider.py的参数
-        test_url = "https://xyq.cbg.163.com/cgi-bin/recommend.py"
-        test_params = {
-            'act': 'recommd_by_role',
-            'search_type': 'overall_search_role',
-            'server_type': 3,
-            'page': 1,
-            'count': 15,
-            'callback': 'Request.JSONP.request_map.request_0',
-            '_': str(int(__import__('time').time() * 1000))
-        }
-        
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept': '*/*',
-            'Accept-Language': 'zh-CN,zh;q=0.9',
-            'Cookie': cookie_str,
-            'Referer': 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py'
-        }
-        
-        response = requests.get(test_url, params=test_params, headers=headers, timeout=10)
-        
-        # 检查响应内容判断Cookie是否有效
-        if response.status_code == 200:
-            response_text = response.text
-            
-            # 解析JSONP响应，参考cbg_spider.py的逻辑
-            try:
-                # 查找JSONP响应的JSON部分
-                start = response_text.find('(') + 1
-                end = response_text.rfind(')')
-                
-                if start <= 0 or end <= 0:
-                    logger.warning("响应不是有效的JSONP格式")
-                    return False
-                    
-                json_str = response_text[start:end]
-                data = json.loads(json_str)
-                
-                if not isinstance(data, dict):
-                    logger.warning("解析JSONP响应失败：响应不是一个有效的JSON对象")
-                    return False
-                
-                # 检查API响应状态，参考cbg_spider.py的逻辑
-                status = data.get('status')
-                if status == 1:
-                    # status=1表示成功，Cookie有效
-                    logger.info("Cookie验证成功")
-                    return True
-                elif status == 2:
-                    # status=2表示登录状态失效，Cookie无效
-                    logger.warning("Cookie已失效，需要重新登录 (status=2)")
-                    return False
-                else:
-                    # 其他状态码也认为Cookie无效
-                    msg = data.get('msg', 'N/A')
-                    logger.warning(f"API返回错误状态: {status}, 消息: {msg}")
-                    return False
-                    
-            except json.JSONDecodeError as e:
-                logger.warning(f"解析JSON响应失败: {e}")
-                return False
-            except Exception as e:
-                logger.warning(f"解析响应时出错: {e}")
-                return False
-        else:
-            logger.warning(f"Cookie验证请求失败，状态码: {response.status_code}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"验证Cookie有效性时出错: {e}")
-        return False
+# Cookie验证功能已迁移到 src/utils/cookie_manager.py
 
 async def _collect_params_base_async(url, collector_logic):
     """参数收集的基础函数 (异步)"""
     try:
         # Cookie 验证和准备
         logger.info("正在验证Cookie有效性...")
-        if not verify_cookie_validity():
+        from ..utils.cookie_manager import verify_cookie_validity_async
+        if not await verify_cookie_validity_async():
             logger.warning("Cookie验证失败，正在更新Cookie...")
-            from ..utils.cookie_updater import _update_cookies_internal
+            from ..utils.cookie_manager import _update_cookies_internal
             if not await _update_cookies_internal():
                 logger.error("Cookie更新失败，无法继续")
                 return None
@@ -1886,7 +1805,8 @@ def get_search_params(equip_type='normal', use_browser=False):
     sync_getter_map = {
         'normal': get_equip_search_params_sync,
         'lingshi': get_lingshi_search_params_sync,
-        'pet': get_pet_search_params_sync
+        'pet': get_pet_search_params_sync,
+        'role': get_role_search_params_sync  # 添加角色支持
     }
     
     if equip_type not in sync_getter_map:
@@ -1924,6 +1844,70 @@ async def main():
     params_pet_async = await get_pet_search_params_async(use_browser=False)
     if params_pet_async:
         print(f"✅ 成功获取召唤兽参数 (异步): \n{json.dumps(params_pet_async, ensure_ascii=False, indent=2)}")
+
+
+# 角色搜索参数收集相关函数
+
+async def _collect_role_logic(page):
+    """角色参数收集的具体逻辑"""
+    params_dict = {}
+    
+    print("🚀 开始收集角色搜索参数...")
+    
+    try:
+        # 直接读取隐藏字段 query_args 的值
+        query_args_value = await page.evaluate("() => document.getElementById('query_args')?.value || '{}'")
+        print(f"📄 获取到 query_args 原始值: {query_args_value}")
+        
+        if query_args_value and query_args_value != '{}':
+            try:
+                # 解析 JSON 字符串
+                import json
+                args_dict = json.loads(query_args_value)
+                params_dict.update(args_dict)
+                print(f"✅ 成功解析 query_args: {json.dumps(args_dict, ensure_ascii=False)}")
+            except json.JSONDecodeError as e:
+                print(f"❌ JSON 解析失败: {e}")
+                # 如果解析失败，使用默认参数
+                params_dict = DEFAULT_PARAMS['role'].copy()
+        else:
+            print("⚠️ query_args 为空，使用默认参数")
+            params_dict = DEFAULT_PARAMS['role'].copy()
+        
+        # 确保必要的字段存在
+        if 'server_type' not in params_dict:
+            params_dict['server_type'] = 3
+        if 'search_type' not in params_dict:
+            params_dict['search_type'] = 'overall_search_role'
+        if 'view_loc' not in params_dict:
+            params_dict['view_loc'] = 'overall_search'
+        if 'count' not in params_dict:
+            params_dict['count'] = 15
+        
+        print(f"\n📊 角色参数收集完成，共获取 {len(params_dict)} 个参数:")
+        for key, value in params_dict.items():
+            print(f"  {key}: {value}")
+        
+        return params_dict
+        
+    except Exception as e:
+        print(f"❌ 收集角色参数失败: {e}")
+        import traceback
+        traceback.print_exc()
+        # 返回默认参数
+        return DEFAULT_PARAMS['role'].copy()
+
+# 异步接口
+async def get_role_search_params_async(use_browser=True):
+    """异步获取角色搜索参数"""
+    URL = 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_search_role_form'
+    return await _get_params_async('role', use_browser, _collect_role_logic, URL)
+
+# 同步接口
+def get_role_search_params_sync(use_browser=True):
+    """同步获取角色搜索参数"""
+    URL = 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_search_role_form'
+    return _get_params_sync('role', use_browser, _collect_role_logic, URL)
 
 
 if __name__ == '__main__':

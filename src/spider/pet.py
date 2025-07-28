@@ -18,8 +18,8 @@ import asyncio
 from playwright.async_api import async_playwright
 
 # 添加项目根目录到Python路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(current_dir))
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.insert(0, project_root)
 
 from src.tools.setup_requests_session import setup_session
@@ -27,8 +27,12 @@ from src.utils.smart_db_helper import CBGSmartDB
 from src.cbg_config import DB_TABLE_SCHEMAS, DB_TABLE_ORDER
 from src.tools.search_form_helper import (
     get_pet_search_params_sync,
-    get_pet_search_params_async,
-    verify_cookie_validity,
+    get_pet_search_params_async
+)
+from src.utils.cookie_manager import (
+    setup_session_with_cookies, 
+    get_playwright_cookies_for_context,
+    verify_cookie_validity
 )
 
 # 导入宠物描述解析相关模块
@@ -44,12 +48,12 @@ class CBGPetSpider:
         # 不需要初始化解析器，直接使用parse_pet_info函数
         
         # 使用按月分割的数据库文件路径
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from src.utils.project_path import get_data_path
         current_month = datetime.now().strftime('%Y%m')
         
         # 宠物数据库路径
         db_filename = f"cbg_pets_{current_month}.db"
-        self.db_path = os.path.join(project_root, 'data', current_month, db_filename)
+        self.db_path = os.path.join(get_data_path(), current_month, db_filename)
 
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -62,7 +66,8 @@ class CBGPetSpider:
         
         # 初始化其他组件
         self.setup_session()
-        self.init_database()
+        # 延迟初始化数据库，避免在导入时创建文件
+        # self.init_database()
         self.retry_attempts = 1
 
     def _setup_logger(self):
@@ -113,48 +118,12 @@ class CBGPetSpider:
     
     def setup_session(self):
         """设置请求会话"""
-        # 从cookies.txt文件读取Cookie
-        cookie_content = None
-        try:
-            # 获取项目根目录
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            cookies_path = os.path.join(project_root, 'config/cookies.txt')
-            
-            with open(cookies_path, 'r', encoding='utf-8') as f:
-                cookie_content = f.read().strip()
-            if cookie_content:
-                self.session.headers.update({'Cookie': cookie_content})
-                self.logger.info("成功从config/cookies.txt文件加载Cookie")
-            else:
-                self.logger.warning("config/cookies.txt文件为空")
-                
-        except FileNotFoundError:
-            self.logger.error("未找到config/cookies.txt文件，请创建该文件并添加有效的Cookie")
-        except Exception as e:
-            self.logger.error(f"读取config/cookies.txt文件失败: {e}")
-        
-        # 设置请求头
-        headers = {
-            'accept': '*/*',
-            'accept-language': 'zh-CN,zh;q=0.9',
-            'sec-ch-ua': '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'script',
-            'sec-fetch-mode': 'no-cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-            'referer': 'https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_pet'
-        }
-        
-        # 如果有Cookie，添加到请求头中
-        if cookie_content:
-            headers['Cookie'] = cookie_content
-            self.logger.info("Cookie已添加到请求头")
-        else:
-            self.logger.warning("未找到有效的Cookie，可能影响数据获取")
-        
-        self.session.headers.update(headers)
+        # 使用统一的Cookie管理
+        setup_session_with_cookies(
+            self.session, 
+            referer='https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_pet',
+            logger=self.logger
+        )
     
     def init_database(self):
         """初始化数据库和表结构"""
@@ -174,6 +143,35 @@ class CBGPetSpider:
             raise
         finally:
             conn.close()
+    
+    def _ensure_database_initialized(self):
+        """确保数据库已初始化，如果未初始化则进行初始化"""
+        try:
+            # 检查数据库文件是否存在
+            if not os.path.exists(self.db_path):
+                self.logger.info("检测到数据库文件不存在，开始初始化...")
+                self.init_database()
+            else:
+                # 检查表结构是否完整
+                try:
+                    conn = sqlite3.connect(self.db_path)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    tables = [row[0] for row in cursor.fetchall()]
+                    conn.close()
+                    
+                    # 检查是否包含必要的表
+                    if 'pets' not in tables:
+                        self.logger.info("检测到缺失的表: pets，重新初始化数据库...")
+                        self.init_database()
+                        
+                except Exception as e:
+                    self.logger.warning(f"检查数据库表结构失败: {e}，重新初始化...")
+                    self.init_database()
+                    
+        except Exception as e:
+            self.logger.error(f"确保数据库初始化失败: {e}")
+            raise
 
     def parse_jsonp_response(self, text):
         """解析JSONP响应，提取宠物数据"""
@@ -443,6 +441,9 @@ class CBGPetSpider:
             self.logger.info("没有宠物数据需要保存")
             return 0
         
+        # 确保数据库已初始化
+        self._ensure_database_initialized()
+        
         try:
             # 使用正确的方法名：save_pets_batch
             success = self.smart_db.save_pets_batch(pets)
@@ -495,21 +496,9 @@ class CBGPetSpider:
                 context = await browser.new_context()
                 
                 # 设置cookies
-                cookie_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config', 'cookies.txt')
-                if os.path.exists(cookie_path):
-                    with open(cookie_path, 'r', encoding='utf-8') as f:
-                        cookie_str = f.read().strip()
-                        cookies = []
-                        for cookie in cookie_str.split('; '):
-                            if '=' in cookie:
-                                name, value = cookie.split('=', 1)
-                                cookies.append({
-                                    'name': name,
-                                    'value': value,
-                                    'domain': '.163.com',
-                                    'path': '/'
-                                })
-                        await context.add_cookies(cookies)
+                cookies = get_playwright_cookies_for_context(self.logger)
+                if cookies:
+                    await context.add_cookies(cookies)
                 
                 page_obj = await context.new_page()
                 response = await page_obj.goto(url)
@@ -535,9 +524,10 @@ class CBGPetSpider:
         """
         # 首先验证Cookie有效性
         self.logger.info("正在验证Cookie有效性...")
-        if not verify_cookie_validity():
+        from src.utils.cookie_manager import verify_cookie_validity_async
+        if not await verify_cookie_validity_async(self.logger):
             self.logger.warning("Cookie验证失败，正在更新Cookie...")
-            from src.utils.cookie_updater import _update_cookies_internal
+            from src.utils.cookie_manager import _update_cookies_internal
             if not await _update_cookies_internal():
                 self.logger.error("Cookie更新失败，无法继续爬取")
                 return

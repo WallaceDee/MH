@@ -1,15 +1,6 @@
 <template>
   <el-container>
-    <el-header>
-      <div class="header-content">
-        <el-menu mode="horizontal" :router="true" :default-active="$route.path">
-          <el-menu-item index="/">首页</el-menu-item>
-          <el-menu-item index="/characters">角色列表</el-menu-item>
-          <el-menu-item index="/equipments">装备列表</el-menu-item>
-          <el-menu-item index="/pets">召唤兽列表</el-menu-item>
-        </el-menu>
-      </div>
-    </el-header>
+    <Header />
 
     <el-main>
       <router-view />
@@ -18,34 +9,40 @@
 </template>
 
 <script>
+import Header from '@/components/Header.vue'
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    Header
+  }
 }
 </script>
 
 <style scoped>
-.el-header {
-  background-color: #fff;
-  border-bottom: 1px solid #dcdfe6;
-  padding: 0;
+:global(.el-card) {
+  border-radius: 8px !important;
 }
 
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  height: 100%;
+:global(.el-card .el-card__header) {
+  padding: 8px 16px;
 }
 
-.header-content h1 {
-  margin: 0 20px 0 0;
-  font-size: 20px;
+:global(.emoji-icon) {
+  display: inline-block;
+  border-radius: 6px;
+  width: 38px;
+  height: 38px;
+  background-color: rgba(0, 122, 255, 0.12);
+  line-height: 38px;
+  text-align: center;
+  color: rgb(0, 122, 255);
 }
-
+.el-container {
+  flex-direction: column;
+}
 .el-main {
   min-height: calc(100vh - 60px);
-  background-color: #DCDCE8;
+  background-color: #ECECEC;
   border: 0 solid #C3C5DE;
 }
 </style>

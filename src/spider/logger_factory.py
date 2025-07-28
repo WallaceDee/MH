@@ -72,19 +72,19 @@ def get_spider_logger(spider_type: str, output_dir: str = None) -> Tuple[logging
 
 def log_progress(logger: logging.Logger, current_page: int, total_pages: int = None, message: str = None):
     """
-    记录进度信息
-    
-    Args:
-        logger: 日志器
-        current_page: 当前页数
-        total_pages: 总页数
-        message: 额外消息
+    记录进度信息，带进度百分比
     """
+    percent_str = ''
     if total_pages:
+        try:
+            percent = int((current_page-1) / total_pages * 100)
+        except Exception:
+            percent = 0
+        percent_str = f" 进度[{percent}%]"
         if message:
-            logger.info(f"正在爬取第 {current_page}/{total_pages} 页... {message}")
+            logger.info(f"正在爬取第 {current_page}/{total_pages} 页...{percent_str} {message}")
         else:
-            logger.info(f"正在爬取第 {current_page}/{total_pages} 页...")
+            logger.info(f"正在爬取第 {current_page}/{total_pages} 页...{percent_str}")
     else:
         if message:
             logger.info(f"正在爬取第 {current_page} 页... {message}")
@@ -92,17 +92,18 @@ def log_progress(logger: logging.Logger, current_page: int, total_pages: int = N
             logger.info(f"正在爬取第 {current_page} 页...")
 
 
-def log_page_complete(logger: logging.Logger, page_num: int, data_count: int, saved_count: int):
+def log_page_complete(logger: logging.Logger, page_num: int, data_count: int, saved_count: int, current_page: int = None, total_pages: int = None):
     """
-    记录页面完成信息
-    
-    Args:
-        logger: 日志器
-        page_num: 页码
-        data_count: 获取数据数
-        saved_count: 保存数据数
+    记录页面完成信息，带进度百分比（如有）
     """
-    logger.info(f"第 {page_num} 页完成，获取 {data_count} 条数据，保存 {saved_count} 条")
+    percent_str = ''
+    if current_page is not None and total_pages is not None:
+        try:
+            percent = int(current_page / total_pages * 100)
+        except Exception:
+            percent = 0
+        percent_str = f" 进度[{percent}%]"
+    logger.info(f"第 {page_num} 页完成，获取 {data_count} 条数据，保存 {saved_count} 条{percent_str}")
 
 
 def log_task_complete(logger: logging.Logger, success_pages: int, total_pages: int, total_data: int, data_type: str = "数据"):

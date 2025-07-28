@@ -9,8 +9,8 @@ import os
 import sys
 
 # 添加项目根目录到Python路径，解决模块导入问题
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)  # 向上一级到项目根目录
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.insert(0, project_root)
 
 import requests
@@ -48,6 +48,9 @@ from src.exporter.json_exporter import CBGJSONExporter, export_single_character_
 # 导入统一日志工厂
 from src.spider.logger_factory import get_spider_logger, log_progress, log_page_complete, log_task_complete, log_error, log_warning, log_info, log_total_pages
 
+# 导入统一Cookie管理
+from src.utils.cookie_manager import setup_session_with_cookies, get_playwright_cookies_for_context
+
 # 定义一个特殊的标记，用于表示登录已过期
 LOGIN_EXPIRED_MARKER = "LOGIN_EXPIRED"
 
@@ -58,16 +61,16 @@ class CBGSpider:
         self.output_dir = self.create_output_dir()
         
         # 使用按月分割的数据库文件路径
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        from src.utils.project_path import get_data_path
         current_month = datetime.now().strftime('%Y%m')
         
         # 正常角色数据库路径
         db_filename = f"cbg_characters_{current_month}.db"
-        self.db_path = os.path.join(project_root, 'data',current_month, db_filename)
+        self.db_path = os.path.join(get_data_path(), current_month, db_filename)
         
         # 空号数据库路径（单独的数据库文件）
         empty_db_filename = f"empty_characters_{current_month}.db"
-        self.empty_db_path = os.path.join(project_root, 'data',current_month, empty_db_filename)
+        self.empty_db_path = os.path.join(get_data_path(), current_month, empty_db_filename)
         
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -107,7 +110,8 @@ class CBGSpider:
         
         # 初始化其他组件
         self.setup_session()
-        self.init_database()
+        # 延迟初始化数据库，避免在导入时创建文件
+        # self.init_database()
         self.retry_attempts = 1 # 为登录失败重试设置次数
 
 
@@ -122,48 +126,12 @@ class CBGSpider:
     
     def setup_session(self):
         """设置请求会话"""
-        # 从cookies.txt文件读取Cookie
-        cookie_content = None
-        try:
-            # 获取项目根目录
-            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            cookies_path = os.path.join(project_root, 'config/cookies.txt')
-            
-            with open(cookies_path, 'r', encoding='utf-8') as f:
-                cookie_content = f.read().strip()
-            if cookie_content:
-                self.session.headers.update({'Cookie': cookie_content})
-                log_info(self.logger, "成功从config/cookies.txt文件加载Cookie")
-            else:
-                log_warning(self.logger, "config/cookies.txt文件为空")
-                
-        except FileNotFoundError:
-            log_error(self.logger, "未找到config/cookies.txt文件，请创建该文件并添加有效的Cookie")
-        except Exception as e:
-            log_error(self.logger, f"读取config/cookies.txt文件失败: {e}")
-        
-        # 设置请求头
-        headers = {
-            'accept': '*/*',
-            'accept-language': 'zh-CN,zh;q=0.9',
-            'sec-ch-ua': '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'script',
-            'sec-fetch-mode': 'no-cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-            'referer': 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py'
-        }
-        
-        # 如果有Cookie，添加到请求头中
-        if cookie_content:
-            headers['Cookie'] = cookie_content
-            log_info(self.logger, "Cookie已添加到请求头")
-        else:
-            log_warning(self.logger, "未找到有效的Cookie，可能影响数据获取")
-        
-        self.session.headers.update(headers)
+        # 使用统一的Cookie管理
+        setup_session_with_cookies(
+            self.session, 
+            referer='https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py',
+            logger=self.logger
+        )
     
     def init_database(self):
         """初始化数据库和表结构"""
@@ -180,6 +148,41 @@ class CBGSpider:
             log_error(self.logger, f"初始化数据库失败: {e}")
             raise
     
+    def _ensure_database_initialized(self):
+        """确保数据库已初始化，如果未初始化则进行初始化"""
+        try:
+            # 检查数据库文件是否存在
+            role_exists = os.path.exists(self.db_path)
+            empty_exists = os.path.exists(self.empty_db_path)
+            
+            if not role_exists or not empty_exists:
+                log_info(self.logger, "检测到数据库文件不存在，开始初始化...")
+                self.init_database()
+            else:
+                # 检查表结构是否完整
+                try:
+                    conn = sqlite3.connect(self.db_path)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    tables = [row[0] for row in cursor.fetchall()]
+                    conn.close()
+                    
+                    # 检查是否包含必要的表
+                    required_tables = ['characters', 'pets', 'equipments']
+                    missing_tables = [table for table in required_tables if table not in tables]
+                    
+                    if missing_tables:
+                        log_info(self.logger, f"检测到缺失的表: {missing_tables}，重新初始化数据库...")
+                        self.init_database()
+                        
+                except Exception as e:
+                    log_warning(self.logger, f"检查数据库表结构失败: {e}，重新初始化...")
+                    self.init_database()
+                    
+        except Exception as e:
+            log_error(self.logger, f"确保数据库初始化失败: {e}")
+            raise
+    
     def init_normal_database(self):
         """初始化正常角色数据库"""
         try:
@@ -192,7 +195,6 @@ class CBGSpider:
             for table_name in normal_tables:
                 if table_name in DB_TABLE_SCHEMAS:
                     cursor.execute(DB_TABLE_SCHEMAS[table_name])
-                    # self.logger.debug(f"正常角色数据库创建表: {table_name}")
                 else:
                     log_warning(self.logger, f"未找到表 {table_name} 的结构定义")
             
@@ -213,11 +215,9 @@ class CBGSpider:
             
             # 在空号数据库中创建characters表（使用empty_characters表结构）
             cursor.execute(DB_TABLE_SCHEMAS['empty_characters'])
-            # self.logger.debug(f"空号数据库创建表: characters")
             
             # 也创建large_equip_desc_data表，以防需要存储详细数据
             cursor.execute(DB_TABLE_SCHEMAS['large_equip_desc_data'])
-            # self.logger.debug(f"空号数据库创建表: large_equip_desc_data")
             
             conn.commit()
             log_info(self.logger, f"空号数据库初始化完成: {os.path.basename(self.empty_db_path)}")
@@ -526,41 +526,20 @@ class CBGSpider:
         except Exception as e:
             self.logger.error(f"解析JSONP响应时发生错误: {str(e)}")
             return None
-    
+        
+        
     def save_character_data(self, characters):
         """保存角色数据到数据库"""
         if not characters:
             log_warning(self.logger, "没有要保存的角色数据")
             return 0
+        
+        # 确保数据库已初始化
+        self._ensure_database_initialized()
             
         saved_count = 0
         for char in characters:
             try:
-                # 检查是否需要切换数据库（检查当前月份是否变化）
-                current_month = datetime.now().strftime('%Y%m')
-                current_db_filename = f"cbg_characters_{current_month}.db"
-                current_empty_db_filename = f"empty_characters_{current_month}.db"
-                project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                current_db_path = os.path.join(project_root, 'data', current_db_filename)
-                current_empty_db_path = os.path.join(project_root, 'data', current_empty_db_filename)
-                
-                # 如果当前数据库路径与实例的数据库路径不同，需要重新初始化数据库连接
-                if current_db_path != self.db_path or current_empty_db_path != self.empty_db_path:
-                    log_info(self.logger, f"检测到月份变化，切换到新的数据库:")
-                    log_info(self.logger, f"  正常角色数据库: {current_db_filename}")
-                    log_info(self.logger, f"  空号数据库: {current_empty_db_filename}")
-                    
-                    # 更新数据库路径
-                    self.db_path = current_db_path
-                    self.empty_db_path = current_empty_db_path
-                    
-                    # 重新初始化数据库连接
-                    self.smart_db = CBGSmartDB(self.db_path)
-                    self.empty_smart_db = CBGSmartDB(self.empty_db_path)
-                    
-                    # 确保新数据库的表结构已创建
-                    self.init_database()
-                
                 # 解析技能信息（如果有large_equip_desc数据）
                 life_skills = ''
                 school_skills = ''
@@ -902,12 +881,12 @@ class CBGSpider:
         """
         # 首先验证Cookie有效性
         self.logger.info("正在验证Cookie有效性...")
-        from src.tools.search_form_helper import verify_cookie_validity
-        if not verify_cookie_validity():
+        from src.utils.cookie_manager import verify_cookie_validity
+        if not verify_cookie_validity(self.logger):
             self.logger.warning("Cookie验证失败，正在更新Cookie...")
             # 使用异步方式更新Cookie
             async def update_cookie():
-                from src.utils.cookie_updater import _update_cookies_internal
+                from src.utils.cookie_manager import _update_cookies_internal
                 return await _update_cookies_internal()
             
             if not asyncio.run(update_cookie()):
@@ -931,14 +910,16 @@ class CBGSpider:
         if search_params is None:
             try:
                 if use_browser:
-                    # 使用浏览器监听模式
-                    log_info(self.logger, "启动浏览器监听模式收集参数...")
-                    from src.tools.search_form_helper import get_search_params
-                    search_params = get_search_params()
+                    # 使用浏览器监听模式收集角色参数
+                    log_info(self.logger, "启动浏览器监听模式收集角色参数...")
+                    from src.tools.search_form_helper import get_role_search_params_sync
+                    search_params = get_role_search_params_sync(use_browser=True)
                     if not search_params:
                         search_params = {'server_type': 3}
-                        log_warning(self.logger, "未能收集到搜索参数，将使用默认参数")
+                        log_warning(self.logger, "未能收集到角色搜索参数，将使用默认参数")
                     else:
+                        log_info(self.logger, f"成功收集到角色搜索参数: {json.dumps(search_params, ensure_ascii=False)}")
+                else:
                         log_info(self.logger, f"成功收集到搜索参数: {json.dumps(search_params, ensure_ascii=False)}")
 
             except Exception as e:
@@ -1020,21 +1001,9 @@ class CBGSpider:
                     context = await browser.new_context()
                     
                     # 设置cookies
-                    cookie_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'cookies.txt')
-                    if os.path.exists(cookie_path):
-                        with open(cookie_path, 'r', encoding='utf-8') as f:
-                            cookie_str = f.read().strip()
-                            cookies = []
-                            for cookie in cookie_str.split('; '):
-                                if '=' in cookie:
-                                    name, value = cookie.split('=', 1)
-                                    cookies.append({
-                                        'name': name,
-                                        'value': value,
-                                        'domain': '.163.com',
-                                        'path': '/'
-                                    })
-                            await context.add_cookies(cookies)
+                    cookies = get_playwright_cookies_for_context(self.logger)
+                    if cookies:
+                        await context.add_cookies(cookies)
                     
                     page = await context.new_page()
                     response = await page.goto(url)
@@ -1075,8 +1044,8 @@ class CBGSpider:
         Returns:
             list: 导出的Excel文件路径列表
         """
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        data_dir = os.path.join(project_root, 'data')
+        from src.utils.project_path import get_data_path
+        data_dir = get_data_path()
         
         # 如果没有指定月份，获取所有数据库文件
         if months is None:
@@ -1115,8 +1084,8 @@ class CBGSpider:
         Returns:
             list: 导出的JSON文件路径列表
         """
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        data_dir = os.path.join(project_root, 'data')
+        from src.utils.project_path import get_data_path
+        data_dir = get_data_path()
         
         # 如果没有指定月份，获取所有数据库文件
         if months is None:

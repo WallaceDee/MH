@@ -263,8 +263,8 @@ class ProxySourceManager:
         """保存代理IP到文件"""
         try:
             # 获取项目根目录
-            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            proxy_file_path = os.path.join(project_root, 'config', filename)
+            from src.utils.project_path import get_config_path
+            proxy_file_path = os.path.join(get_config_path(), filename)
             
             with open(proxy_file_path, 'w', encoding='utf-8') as f:
                 f.write("# 从免费代理源自动获取的代理IP列表\n")

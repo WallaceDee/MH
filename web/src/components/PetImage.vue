@@ -12,9 +12,12 @@
 
 <script>
 import PetInfoPopover from './PetInfoPopover.vue'
+import { commonMixin } from '@/utils/mixins/commonMixin'
+
 export default {
   name: 'PetImage',
   components: { PetInfoPopover },
+  mixins: [commonMixin],
   props: {
     size: { type: String, default: 'small' },
     width: { type: String, default: '50px' },
@@ -35,11 +38,6 @@ export default {
         height: this.height,
         cursor: this.cursor
       }
-    }
-  },
-  methods: {
-    getImageUrl(imageName, size = 'small') {
-      return `https://cbg-xyq.res.netease.com/images/${size}/${imageName}`
     }
   }
 }

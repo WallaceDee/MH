@@ -57,6 +57,10 @@ class PetEquipFeatureExtractor:
         try:
             features = {}
             
+            # 检查是否只有large_equip_desc字段，如果是则先解析
+            if self._is_desc_only_data(equip_data):
+                equip_data = self._parse_equip_data_from_desc(equip_data)
+            
             # 一、基础属性特征
             features.update(self._extract_basic_features(equip_data))
 
@@ -80,6 +84,387 @@ class PetEquipFeatureExtractor:
             print(traceback.format_exc())
             raise
 
+    def _is_desc_only_data(self, equip_data: Dict[str, Any]) -> bool:
+        """
+        判断是否为只有large_equip_desc字段的数据
+        
+        Args:
+            equip_data: 装备数据字典
+            
+        Returns:
+            bool: 如果只有large_equip_desc字段则返回True
+        """
+        # 检查是否只有large_equip_desc字段
+        if 'large_equip_desc' not in equip_data:
+            return False
+        
+        # 检查其他关键字段是否缺失
+        key_fields = ['kindid', 'equip_level', 'speed', 'qixue', 'fangyu', 'shanghai']
+        missing_fields = [field for field in key_fields if field not in equip_data or equip_data[field] is None]
+        
+        # 如果大部分关键字段都缺失，认为是desc_only数据
+        return len(missing_fields) >= len(key_fields) * 0.7
+
+    def _parse_equip_data_from_desc(self, equip_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        从large_equip_desc解析出完整的装备数据
+        
+        Args:
+            equip_data: 原始装备数据（只有large_equip_desc）
+            
+        Returns:
+            Dict[str, Any]: 解析后的完整装备数据
+        """
+        desc = equip_data.get('large_equip_desc', '')
+        if not desc:
+            return equip_data
+        
+        # 创建新的装备数据字典
+        parsed_data = equip_data.copy()
+        
+        # 设置默认值
+        from ..constants.equipment_types import PET_EQUIP_KINDID
+        parsed_data['kindid'] = PET_EQUIP_KINDID  # 宠物装备默认kindid
+        parsed_data['equip_level'] = 0
+        
+        # 初始化所有字段为0
+        parsed_data['speed'] = 0
+        parsed_data['qixue'] = 0
+        parsed_data['fangyu'] = 0
+        parsed_data['shanghai'] = 0
+        parsed_data['addon_fali'] = 0
+        parsed_data['addon_lingli'] = 0
+        parsed_data['addon_liliang'] = 0
+        parsed_data['addon_minjie'] = 0
+        parsed_data['addon_naili'] = 0
+        parsed_data['addon_tizhi'] = 0
+        parsed_data['xiang_qian_level'] = 0
+        parsed_data['addon_status'] = ''
+        
+        # 解析基础属性
+        self._parse_basic_attrs_from_desc(desc, parsed_data)
+        
+        # 解析附加属性
+        self._parse_added_attrs_from_desc(desc, parsed_data)
+        
+        # 解析宝石信息
+        self._parse_gem_info_from_desc(desc, parsed_data)
+        
+        # 解析套装信息
+        self._parse_suit_info_from_desc(desc, parsed_data)
+        
+        # 解析装备等级
+        self._parse_equip_level_from_desc(desc, parsed_data)
+        
+        return parsed_data
+
+    def _parse_basic_attrs_from_desc(self, desc: str, parsed_data: Dict[str, Any]):
+        """从描述中解析基础属性"""
+        # 解析速度 - 只匹配基础属性，避免匹配宝石属性
+        speed_patterns = [
+            r'#r速度\s*\+(\d+)',      # #r速度 +48
+            r'速度\s*\+(\d+)(?!\s*镶嵌)',  # 速度 +48 (后面不是镶嵌)
+            r'\+(\d+)\s*速度(?!\s*镶嵌)',  # +48 速度 (后面不是镶嵌)
+        ]
+        for pattern in speed_patterns:
+            speed_match = re.search(pattern, desc)
+            if speed_match:
+                parsed_data['speed'] = int(speed_match.group(1))
+                break
+        
+        # 解析气血 - 只匹配基础属性，避免匹配宝石属性，支持负值
+        qixue_patterns = [
+            r'#r气血\s*\+(\d+)',      # #r气血 +120
+            r'#r气血\s*-(\d+)',       # #r气血 -3
+            r'气血\s*\+(\d+)(?!\s*镶嵌)',  # 气血 +120 (后面不是镶嵌)
+            r'气血\s*-(\d+)(?!\s*镶嵌)',  # 气血 -3 (后面不是镶嵌)
+            r'\+(\d+)\s*气血(?!\s*镶嵌)',  # +120 气血 (后面不是镶嵌)
+            r'-(\d+)\s*气血(?!\s*镶嵌)',  # -3 气血 (后面不是镶嵌)
+        ]
+        for pattern in qixue_patterns:
+            qixue_match = re.search(pattern, desc)
+            if qixue_match:
+                value = int(qixue_match.group(1))
+                # 如果是负值模式，需要取负
+                if '-(\d+)' in pattern or '气血\s*-(\d+)' in pattern:
+                    value = -value
+                parsed_data['qixue'] = value
+                break
+        
+        # 解析防御 - 只匹配基础属性，避免匹配宝石属性
+        fangyu_patterns = [
+            r'#r防御\s*\+(\d+)',      # #r防御 +120
+            r'防御\s*\+(\d+)(?!\s*镶嵌)',  # 防御 +120 (后面不是镶嵌)
+            r'\+(\d+)\s*防御(?!\s*镶嵌)',  # +120 防御 (后面不是镶嵌)
+        ]
+        for pattern in fangyu_patterns:
+            fangyu_match = re.search(pattern, desc)
+            if fangyu_match:
+                parsed_data['fangyu'] = int(fangyu_match.group(1))
+                break
+        
+        # 解析伤害 - 只匹配基础属性，避免匹配宝石属性
+        shanghai_patterns = [
+            r'#r伤害\s*\+(\d+)',      # #r伤害 +65
+            r'伤害\s*\+(\d+)(?!\s*镶嵌)',  # 伤害 +65 (后面不是镶嵌)
+            r'\+(\d+)\s*伤害(?!\s*镶嵌)',  # +65 伤害 (后面不是镶嵌)
+        ]
+        for pattern in shanghai_patterns:
+            shanghai_match = re.search(pattern, desc)
+            if shanghai_match:
+                parsed_data['shanghai'] = int(shanghai_match.group(1))
+                break
+
+    def _parse_added_attrs_from_desc(self, desc: str, parsed_data: Dict[str, Any]):
+        """从描述中解析附加属性"""
+        # 解析法力 - 支持多种格式，包括负值
+        fali_patterns = [
+            r'法力\s*\+(\d+)',
+            r'法力\s*-(\d+)',      # 法力 -16
+            r'\+(\d+)\s*法力',
+            r'-(\d+)\s*法力',      # -16 法力
+            r'法力\s*(\d+)',
+            r'#Y\+(\d+)\s*法力',
+            r'#Y-(\d+)\s*法力',    # #Y-16 法力
+            r'#G#G法力\s*\+(\d+)',  # #G#G法力 +19
+            r'#G#G法力\s*-(\d+)',  # #G#G法力 -16
+            r'#G#G\+(\d+)\s*法力',
+            r'#G#G-(\d+)\s*法力'   # #G#G-16 法力
+        ]
+        for pattern in fali_patterns:
+            fali_match = re.search(pattern, desc)
+            if fali_match:
+                value = int(fali_match.group(1))
+                # 如果是负值模式，需要取负
+                if '-(\d+)' in pattern or '法力\s*-(\d+)' in pattern or '#G#G法力\s*-(\d+)' in pattern:
+                    value = -value
+                parsed_data['addon_fali'] = value
+                break
+        
+        # 解析灵力 - 支持多种格式，避免匹配镶嵌效果，包括负值
+        lingli_patterns = [
+            r'#G#G灵力\s*\+(\d+)',  # #G#G灵力 +10 (附加属性)
+            r'#G#G灵力\s*-(\d+)',   # #G#G灵力 -8 (附加属性)
+            r'#G#G\+(\d+)\s*灵力',  # #G#G+10 灵力 (附加属性)
+            r'#G#G-(\d+)\s*灵力',   # #G#G-8 灵力 (附加属性)
+            r'灵力\s*\+(\d+)(?!\s*镶嵌)',  # 灵力 +10 (非镶嵌)
+            r'灵力\s*-(\d+)(?!\s*镶嵌)',  # 灵力 -8 (非镶嵌)
+            r'\+(\d+)\s*灵力(?!\s*镶嵌)',  # +10 灵力 (非镶嵌)
+            r'-(\d+)\s*灵力(?!\s*镶嵌)',  # -8 灵力 (非镶嵌)
+            r'灵力\s*(\d+)(?!\s*镶嵌)',    # 灵力 10 (非镶嵌)
+            r'#Y\+(\d+)\s*灵力(?!\s*镶嵌)', # #Y+10 灵力 (非镶嵌)
+            r'#Y-(\d+)\s*灵力(?!\s*镶嵌)'  # #Y-8 灵力 (非镶嵌)
+        ]
+        for pattern in lingli_patterns:
+            lingli_match = re.search(pattern, desc)
+            if lingli_match:
+                value = int(lingli_match.group(1))
+                # 如果是负值模式，需要取负
+                if '-(\d+)' in pattern or '灵力\s*-(\d+)' in pattern or '#G#G灵力\s*-(\d+)' in pattern:
+                    value = -value
+                parsed_data['addon_lingli'] = value
+                break
+        
+        # 解析力量 - 支持多种格式，包括负值
+        liliang_patterns = [
+            r'力量\s*\+(\d+)',
+            r'力量\s*-(\d+)',      # 力量 -8
+            r'\+(\d+)\s*力量',
+            r'-(\d+)\s*力量',      # -8 力量
+            r'力量\s*(\d+)',
+            r'#Y\+(\d+)\s*力量',
+            r'#Y-(\d+)\s*力量',    # #Y-8 力量
+            r'#G#G力量\s*\+(\d+)',  # #G#G力量 +23
+            r'#G#G力量\s*-(\d+)',  # #G#G力量 -8
+            r'#G#G\+(\d+)\s*力量',
+            r'#G#G-(\d+)\s*力量'   # #G#G-8 力量
+        ]
+        for pattern in liliang_patterns:
+            liliang_match = re.search(pattern, desc)
+            if liliang_match:
+                value = int(liliang_match.group(1))
+                # 如果是负值模式，需要取负
+                if '-(\d+)' in pattern or '力量\s*-(\d+)' in pattern or '#G#G力量\s*-(\d+)' in pattern:
+                    value = -value
+                parsed_data['addon_liliang'] = value
+                break
+        
+        # 解析敏捷 - 支持多种格式，包括负值
+        minjie_patterns = [
+            r'敏捷\s*\+(\d+)',
+            r'敏捷\s*-(\d+)',      # 敏捷 -13
+            r'\+(\d+)\s*敏捷',
+            r'-(\d+)\s*敏捷',      # -13 敏捷
+            r'敏捷\s*(\d+)',
+            r'#Y\+(\d+)\s*敏捷',
+            r'#Y-(\d+)\s*敏捷',    # #Y-13 敏捷
+            r'#G#G敏捷\s*\+(\d+)',  # #G#G敏捷 +16
+            r'#G#G敏捷\s*-(\d+)',  # #G#G敏捷 -13
+            r'#G#G\+(\d+)\s*敏捷',
+            r'#G#G-(\d+)\s*敏捷'   # #G#G-13 敏捷
+        ]
+        for pattern in minjie_patterns:
+            minjie_match = re.search(pattern, desc)
+            if minjie_match:
+                value = int(minjie_match.group(1))
+                # 如果是负值模式，需要取负
+                if '-(\d+)' in pattern or '敏捷\s*-(\d+)' in pattern or '#G#G敏捷\s*-(\d+)' in pattern:
+                    value = -value
+                parsed_data['addon_minjie'] = value
+                break
+        
+        # 解析耐力 - 支持多种格式，包括负值
+        naili_patterns = [
+            r'耐力\s*\+(\d+)',
+            r'耐力\s*-(\d+)',      # 耐力 -11
+            r'\+(\d+)\s*耐力',
+            r'-(\d+)\s*耐力',      # -11 耐力
+            r'耐力\s*(\d+)',
+            r'#Y\+(\d+)\s*耐力',
+            r'#Y-(\d+)\s*耐力',    # #Y-11 耐力
+            r'#G#G耐力\s*\+(\d+)',  # #G#G耐力 +19
+            r'#G#G耐力\s*-(\d+)',  # #G#G耐力 -11
+            r'#G#G\+(\d+)\s*耐力',
+            r'#G#G-(\d+)\s*耐力'   # #G#G-11 耐力
+        ]
+        for pattern in naili_patterns:
+            naili_match = re.search(pattern, desc)
+            if naili_match:
+                value = int(naili_match.group(1))
+                # 如果是负值模式，需要取负
+                if '-(\d+)' in pattern or '耐力\s*-(\d+)' in pattern or '#G#G耐力\s*-(\d+)' in pattern:
+                    value = -value
+                parsed_data['addon_naili'] = value
+                break
+        
+        # 解析体质 - 支持多种格式，包括负值
+        tizhi_patterns = [
+            r'体质\s*\+(\d+)',
+            r'体质\s*-(\d+)',      # 体质 -3
+            r'\+(\d+)\s*体质',
+            r'-(\d+)\s*体质',      # -3 体质
+            r'体质\s*(\d+)',
+            r'#Y\+(\d+)\s*体质',
+            r'#Y-(\d+)\s*体质',    # #Y-3 体质
+            r'#G#G体质\s*\+(\d+)',  # #G#G体质 +5
+            r'#G#G体质\s*-(\d+)',  # #G#G体质 -3
+            r'#G#G\+(\d+)\s*体质',
+            r'#G#G-(\d+)\s*体质'   # #G#G-3 体质
+        ]
+        for pattern in tizhi_patterns:
+            tizhi_match = re.search(pattern, desc)
+            if tizhi_match:
+                value = int(tizhi_match.group(1))
+                # 如果是负值模式，需要取负
+                if '-(\d+)' in pattern or '体质\s*-(\d+)' in pattern or '#G#G体质\s*-(\d+)' in pattern:
+                    value = -value
+                parsed_data['addon_tizhi'] = value
+                break
+
+    def _parse_gem_info_from_desc(self, desc: str, parsed_data: Dict[str, Any]):
+        """从描述中解析宝石信息"""
+        # 解析宝石等级 - 支持多种格式
+        gem_level_patterns = [
+            r'镶嵌等级[：:]\s*(\d+)',  # 镶嵌等级：8
+        ]
+        for pattern in gem_level_patterns:
+            gem_level_match = re.search(pattern, desc)
+            if gem_level_match:
+                parsed_data['xiang_qian_level'] = int(gem_level_match.group(1))
+                break
+
+    def _parse_suit_info_from_desc(self, desc: str, parsed_data: Dict[str, Any]):
+        """从描述中解析套装信息"""
+        if not desc:
+            # 如果没有描述，设置默认值
+            parsed_data['addon_status'] = ''
+            parsed_data['suit_category'] = '无套装'
+            return
+        
+        # 移除颜色代码
+        desc_clean = re.sub(r'#c4DBAF4', '', desc)
+        desc_clean = re.sub(r'#[A-Z]', '', desc_clean)
+        
+        # 查找套装效果相关信息
+        pattern = r'套装效果：附加状态\s*([^#\n]+)'  # 套装效果：xxx
+        match = re.search(pattern, desc_clean)
+        if match:
+            suit_info = match.group(1).strip()
+            # 清理多余的空格和特殊字符
+            suit_info = re.sub(r'\s+', ' ', suit_info)
+            parsed_data['addon_status'] = suit_info
+            
+            # 计算suit_category
+            suit_category = self._classify_suit_effect(suit_info)
+            parsed_data['suit_category'] = suit_category
+        else:
+            # 没有找到套装效果，设置默认值
+            parsed_data['addon_status'] = ''
+            parsed_data['suit_category'] = '无套装'
+
+    def _classify_suit_effect(self, suit_effect: str) -> str:
+        """
+        根据套装效果分类
+        
+        Args:
+            suit_effect: 套装效果名称
+            
+        Returns:
+            str: 套装分类 ('无套装', '物理系', '法术系', '辅助系', '特殊系', '其他')
+        """
+        if not suit_effect or suit_effect.strip() == '':
+            return '无套装'
+        
+        # 转换为字符串并去除空格
+        effect_name = str(suit_effect).strip()
+        
+        # 物理系套装效果
+        physical_suits = [
+            '高级必杀', '高级偷袭', '高级吸血', '高级连击', '高级进击必杀'
+        ]
+        
+        # 法术系套装效果
+        magic_suits = [
+            '高级魔之心', '高级法术连击', '高级法术暴击', '高级法术波动', '高级进击法爆'
+        ]
+        
+        # 辅助系套装效果
+        support_suits = [
+            '高级神佑', '高级鬼混术'
+        ]
+        
+        # 特殊系套装效果
+        special_suits = [
+            '善恶有报', '力劈华山', '死亡召唤', '上古灵符', '壁垒击破', 
+            '嗜血追击', '剑荡四方', '夜舞倾城', '惊心一剑'
+        ]
+        
+        # 检查分类
+        if effect_name in physical_suits:
+            return '物理系'
+        elif effect_name in magic_suits:
+            return '法术系'
+        elif effect_name in support_suits:
+            return '辅助系'
+        elif effect_name in special_suits:
+            return '特殊系'
+        elif '高级'  in effect_name:
+            return '高级其他'
+        else:
+            return '其他'
+
+    def _parse_equip_level_from_desc(self, desc: str, parsed_data: Dict[str, Any]):
+        """从描述中解析装备等级"""
+        # 解析装备等级 - 只匹配开头的等级信息，避免匹配到宝石等级
+        level_patterns = [
+            r'#r等级\s*(\d+)',          # #r等级 125
+        ]
+        for pattern in level_patterns:
+            level_match = re.search(pattern, desc)
+            if level_match:
+                parsed_data['equip_level'] = int(level_match.group(1))
+                break
+
     def _extract_basic_features(self, equip_data: Dict[str, Any]) -> Dict[str, Union[int, float]]:
         """
         提取宠物装备的基础属性特征
@@ -102,7 +487,8 @@ class PetEquipFeatureExtractor:
         features['equip_level'] = equip_data.get('equip_level', 0)
         
         # 装备类型ID - 这个非常重要，用于插件系统识别
-        features['kindid'] = equip_data.get('kindid', 29)  # 宠物装备默认为29
+        from ..constants.equipment_types import PET_EQUIP_KINDID
+        features['kindid'] = equip_data.get('kindid', PET_EQUIP_KINDID)  # 宠物装备默认为PET_EQUIP_KINDID
         
         # 基础属性
         # features['mingzhong'] = equip_data.get('mingzhong', 0) #不重要
@@ -183,6 +569,9 @@ class PetEquipFeatureExtractor:
         # 计算标准化宝石得分
         gem_score = self._calculate_gem_score(gem_level, gem_type, gemType2Value)
         features['gem_score'] = gem_score
+        
+        # 添加宝石等级字段（兼容字段）
+        features['xiang_qian_level'] = gem_level
         
         return features
     
@@ -290,11 +679,19 @@ class PetEquipFeatureExtractor:
             Dict[str, Union[int, float, str]]: 套装特征字典
                 suit_effect: str - 套装效果名称，如"高级强力"、"高级反震"、"高级强力"等
                              如果装备没有套装效果则返回空字符串
+                addon_status: str - 套装效果名称（兼容字段）
+                suit_category: str - 套装分类 ('无套装', '物理系', '法术系', '辅助系', '特殊系', '其他')
         """
         features = {}
         
         # 套装名称
-        features['suit_effect'] = equip_data.get('addon_status', '')
+        suit_effect = equip_data.get('addon_status', '')
+        features['suit_effect'] = suit_effect
+        features['addon_status'] = suit_effect  # 兼容字段
+        
+        # 套装分类
+        suit_category = self._classify_suit_effect(suit_effect)
+        features['suit_category'] = suit_category
         
         return features
 

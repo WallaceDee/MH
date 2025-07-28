@@ -9,6 +9,7 @@ import os
 import logging
 import platform
 from datetime import datetime
+from src.utils.project_path import get_project_root, get_data_path, get_output_path
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class SystemController:
     """系统控制器"""
     
     def __init__(self):
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        self.project_root = get_project_root()
     
     def get_system_info(self):
         """获取系统信息"""
@@ -30,7 +31,7 @@ class SystemController:
     
     def list_output_files(self):
         """递归列出output目录及所有子目录下的输出文件"""
-        output_dir = os.path.join(self.project_root, "output")
+        output_dir = get_output_path()
         files = []
         for root, dirs, filenames in os.walk(output_dir):
             for file in filenames:
@@ -48,9 +49,12 @@ class SystemController:
     def get_file_path(self, filename):
         """获取文件路径"""
         # 在data和output目录中查找文件
-        for directory in ["data", "output"]:
-            file_path = os.path.join(self.project_root, directory, filename)
-            if os.path.exists(file_path):
-                return file_path
+        data_path = os.path.join(get_data_path(), filename)
+        if os.path.exists(data_path):
+            return data_path
+            
+        output_path = os.path.join(get_output_path(), filename)
+        if os.path.exists(output_path):
+            return output_path
         
         raise FileNotFoundError(f"文件 {filename} 不存在") 

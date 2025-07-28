@@ -1,13 +1,18 @@
 <template>
-  <div v-if="valuation" class="valuation-info">
-    <el-row type="flex" align="middle">
-      <equipment-image :equipment="targetEquipment" width="50px" height="50px" />
-      <span v-html="formatFullPrice(targetEquipment)" style="margin-left: 10px"></span>
+  <div class="valuation-info">
+    <el-row type="flex" align="middle" justify="space-between">
+      <el-row type="flex" align="middle">
+        <equipment-image :equipment="targetEquipment" width="50px" height="50px" />
+        <span v-html="formatFullPrice(targetEquipment)" style="margin-left: 10px"></span>
+      </el-row>
+      <!-- 无锚点时的重试界面 -->
+      <similar-equipment-retry :target-equipment="targetEquipment" />
+
     </el-row>
     <div class="valuation-main">
       <span class="valuation-label">装备估价:</span>
-      <span class="valuation-price">{{ valuation.estimated_price_yuan }}元</span>
-      <span class="valuation-strategy">({{ getStrategyName(valuation.strategy) }})</span>
+      <span class="valuation-price">{{ valuation ? valuation.estimated_price_yuan + '元' : '-' }}</span>
+      <span class="valuation-strategy">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>
 
       <!-- 价格比率显示 -->
       <span v-if="priceRatio" class="price-ratio" :class="priceRatioClass">
@@ -17,8 +22,8 @@
       </span>
     </div>
     <div class="valuation-details">
-      <span>置信度: {{ (valuation.confidence * 100).toFixed(1) }}%</span>
-      <span>基于{{ valuation.anchor_count }}个锚点</span>
+      <span>置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}</span>
+      <span>基于{{ valuation ? valuation.anchor_count + '个锚点' : '-' }}</span>
       <span v-if="priceRatio">估价比率: {{ (priceRatio * 100).toFixed(1) }}%</span>
     </div>
   </div>
@@ -26,12 +31,17 @@
 
 <script>
 import EquipmentImage from './EquipmentImage.vue'
+import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+import { commonMixin } from '@/utils/mixins/commonMixin'
+import SimilarEquipmentRetry from './SimilarEquipmentRetry.vue'
 
 export default {
   name: 'EquipmentValuation',
   components: {
-    EquipmentImage
+    EquipmentImage,
+    SimilarEquipmentRetry
   },
+  mixins: [equipmentMixin, commonMixin],
   props: {
     valuation: {
       type: Object,
@@ -119,44 +129,6 @@ export default {
       }
       return strategyNames[strategy] || strategy
     },
-
-    // 格式化价格显示
-    // 格式化价格
-    formatPrice(price) {
-      const priceFloat = parseFloat(price / 100)
-      if (!priceFloat) return '---'
-      return window.get_color_price ? window.get_color_price(priceFloat) : `${priceFloat}元`
-    },
-    // 格式化完整价格信息（包括跨服费用）
-    formatFullPrice(equipment, simple = false) {
-      const basePrice = this.formatPrice(equipment.price)
-
-      // 检查是否有登录信息和跨服费用
-      if (!window.LoginInfo || !window.LoginInfo.login || simple) {
-        return basePrice
-      }
-
-      const crossServerPoundage = equipment.cross_server_poundage || 0
-      const fairShowPoundage = equipment.fair_show_poundage || 0
-
-      if (!crossServerPoundage) {
-        return basePrice
-      }
-
-      let additionalFeeHtml = ''
-
-      if (equipment.pass_fair_show == 1) {
-        // 跨服费
-        const crossFee = parseFloat(crossServerPoundage / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需跨服费<span class="p1000">￥${crossFee}</span></div>`
-      } else {
-        // 信息费（跨服费 + 预订费）
-        const totalFee = parseFloat((crossServerPoundage + fairShowPoundage) / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需信息费<span class="p1000">￥${totalFee}</span></div>`
-      }
-
-      return basePrice + additionalFeeHtml
-    }
   }
 }
 </script>

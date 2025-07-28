@@ -14,7 +14,8 @@ import sys
 import time
 
 # 添加项目根目录到 Python 路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.append(project_root)
 
 from src.parser.pet_parser import PetParser
@@ -450,7 +451,7 @@ class DataUpdater:
             if equip_db_path is None:
                 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                 current_month = datetime.now().strftime('%Y%m')
-                equip_db_path = os.path.join(project_root, 'data', f'cbg_equip_{current_month}.db')
+                equip_db_path = os.path.join(project_root, 'data', current_month, f'cbg_equip_{current_month}.db')
             
             self.logger.info(f"开始更新装备数据库: {equip_db_path}")
             
@@ -556,7 +557,7 @@ class DataUpdater:
             if equip_db_path is None:
                 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                 current_month = datetime.now().strftime('%Y%m')
-                equip_db_path = os.path.join(project_root, 'data', f'cbg_equip_{current_month}.db')
+                equip_db_path = os.path.join(project_root, 'data', current_month, f'cbg_equip_{current_month}.db')
             
             self.logger.info(f"开始批量更新装备数据库: {equip_db_path}")
             

@@ -147,6 +147,59 @@ def run_proxy_manager():
     manager.save_proxies_to_file(proxies)
     print(f"获取到 {len(proxies)} 个代理IP")
 
+def run_playwright_collector(headless=False, target_url=None):
+    """运行Playwright半自动数据收集器"""
+    print("启动Playwright半自动数据收集器...")
+    try:
+        import asyncio
+        from src.spider.playwright_collector import PlaywrightAutoCollector
+        
+        # 创建收集器实例
+        collector = PlaywrightAutoCollector(headless=headless)
+        
+        # 使用异步运行
+        async def run_collector():
+            try:
+                # 启动收集器
+                if target_url:
+                    print(f"目标URL: {target_url}")
+                    success = await collector.start_collecting(target_url)
+                else:
+                    # 使用默认URL
+                    default_url = "https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1"
+                    print(f"使用默认URL: {default_url}")
+                    success = await collector.start_collecting(default_url)
+                
+                if success:
+                    print("Playwright收集器已启动，浏览器已打开...")
+                    print("请在浏览器中手动操作，所有API请求将被自动捕获")
+                    print("关闭浏览器窗口即可自动停止收集服务")
+                    
+                    # 保持运行直到用户中断或浏览器关闭
+                    try:
+                        while collector.is_collecting:
+                            await asyncio.sleep(1)
+                    except KeyboardInterrupt:
+                        print("\n正在停止收集...")
+                    
+                    # 停止收集器
+                    await collector.stop_collecting()
+                    print("数据收集已完成")
+                else:
+                    print("启动失败")
+                    
+            except Exception as e:
+                print(f"运行Playwright收集器失败: {e}")
+                await collector.stop_collecting()
+        
+        # 运行异步函数
+        asyncio.run(run_collector())
+            
+    except Exception as e:
+        print(f"运行Playwright收集器失败: {e}")
+        import traceback
+        traceback.print_exc()
+
 def run_tests():
     """运行测试"""
     print("运行项目测试...")
@@ -192,6 +245,10 @@ def show_help_examples():
     print("10. 运行测试:")
     print("    python run.py test")
     print()
+    print("11. Playwright半自动数据收集:")
+    print("    python run.py playwright")
+    print("    python run.py playwright --headless --target-url https://xyq.cbg.163.com/")
+    print()
     print("召唤兽爬虫特色功能:")
     print("   - 支持完整的宠物属性: 等级、气血、伤害、防御、速度、法伤、法防等")
     print("   - 支持宠物筛选条件: 宠物类型、技能数量、成长值、资质范围等")
@@ -216,6 +273,16 @@ def main():
   python run.py proxy --pages 10                                # 使用代理爬取
   python run.py proxy-manager                                   # 管理代理IP
   python run.py test                                            # 运行测试
+  python run.py playwright                                      # Playwright半自动数据收集(交互式)
+  python run.py playwright --headless --target-url https://xyq.cbg.163.com/  # Playwright收集(无头模式)
+
+半自动数据收集模式说明:
+  - 启动浏览器并监听所有CBG API请求
+  - 自动捕获对 recommend.py 的请求并解析参数
+  - 根据请求参数自动分类: 角色、装备、灵饰、宠物、宠物装备
+  - 数据自动保存到对应的SQLite数据库
+  - 支持交互式操作和后台监控
+  - 可导出数据为JSON格式
 
 召唤兽爬虫详细说明:
   - 召唤兽数据包含: 基本信息、属性、技能、资质、成长、价格等完整数据
@@ -226,7 +293,7 @@ def main():
     )
     
     # 主要模式参数
-    parser.add_argument('mode', choices=['basic', 'proxy', 'proxy-manager', 'test', 'help'], 
+    parser.add_argument('mode', choices=['basic', 'proxy', 'proxy-manager', 'test', 'playwright', 'help'], 
                        help='运行模式', default='basic')
     
     # 基础爬虫参数
@@ -251,6 +318,12 @@ def main():
                        help='请求延迟最大值(秒) (默认: 8.0)')
     parser.add_argument('--cached-params', type=str,
                        help='缓存参数文件路径')
+    
+    # Playwright收集器参数
+    parser.add_argument('--headless', action='store_true',
+                       help='无头模式运行浏览器')
+    parser.add_argument('--target-url', type=str,
+                       help='目标URL (仅对playwright模式有效)')
     
     args = parser.parse_args()
     
@@ -286,6 +359,16 @@ def main():
             print("浏览器模式: 启用")
             if args.type == 'pet':
                 print("   - 可设置: 等级、价格、宠物类型、技能数、成长值、资质等筛选条件")
+    elif args.mode == 'playwright':
+        print("Playwright半自动数据收集模式")
+        if args.headless:
+            print("浏览器模式: 无头模式")
+        else:
+            print("浏览器模式: 有界面模式")
+        if args.target_url:
+            print(f"目标URL: {args.target_url}")
+        else:
+            print("目标URL: 使用默认推荐搜索页面")
     
     print("=" * 60)
     
@@ -305,6 +388,8 @@ def main():
             run_proxy_manager()
         elif args.mode == 'test':
             run_tests()
+        elif args.mode == 'playwright':
+            run_playwright_collector(headless=args.headless, target_url=args.target_url)
             
         print("\n任务完成！")
         

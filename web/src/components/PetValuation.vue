@@ -26,12 +26,14 @@
 
 <script>
 import PetImage from './PetImage.vue'
-
+import { petMixin } from '@/utils/mixins/petMixin'
+import { commonMixin } from '@/utils/mixins/commonMixin'
 export default {
   name: 'PetValuation',
   components: {
     PetImage
   },
+  mixins: [petMixin, commonMixin],
   props: {
     valuation: {
       type: Object,
@@ -49,7 +51,7 @@ export default {
         return null
       }
 
-      const estimatedPrice = parseFloat(this.valuation.estimated_price_yuan)
+      const estimatedPrice = parseFloat(this.valuation.estimated_price)
       const sellingPrice = parseFloat(this.targetPet.price)
       if (sellingPrice === 0) return null
 
@@ -113,43 +115,6 @@ export default {
       }
       return strategyMap[strategy] || strategy
     },
-
-    // 格式化价格
-    formatPrice(price) {
-      if (!price) return '---'
-      return window.get_color_price ? window.get_color_price(price) : `${price}元`
-    },
-
-    // 格式化完整价格信息（包括跨服费用）
-    formatFullPrice(pet) {
-      const basePrice = this.formatPrice(pet.price)
-
-      // 检查是否有登录信息和跨服费用
-      if (!window.LoginInfo || !window.LoginInfo.login) {
-        return basePrice
-      }
-
-      const crossServerPoundage = pet.cross_server_poundage || 0
-      const fairShowPoundage = pet.fair_show_poundage || 0
-
-      if (!crossServerPoundage) {
-        return basePrice
-      }
-
-      let additionalFeeHtml = ''
-
-      if (pet.pass_fair_show == 1) {
-        // 跨服费
-        const crossFee = parseFloat(crossServerPoundage / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需跨服费<span class="p1000">￥${crossFee}</span></div>`
-      } else {
-        // 信息费（跨服费 + 预订费）
-        const totalFee = parseFloat((crossServerPoundage + fairShowPoundage) / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需信息费<span class="p1000">￥${totalFee}</span></div>`
-      }
-
-      return basePrice + additionalFeeHtml
-    }
   }
 }
 </script>

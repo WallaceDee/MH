@@ -71,23 +71,25 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table :data="equipments" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey">
+    <el-table :data="equipments" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey"
+      v-loading="tableLoading">
       <el-table-column prop="eid" label="操作" width="100" fixed>
         <template #default="scope">
-          <el-link :href="getCBGLink(scope.row.eid)" type="danger" target="_blank">藏宝阁</el-link>
+          <el-link :href="getCBGLinkByType(scope.row.eid, 'equip')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
           <similar-equipment-modal :equipment="scope.row" :similar-data="similarEquipments[scope.row.eid]"
             :valuation="equipmentValuations[scope.row.eid]" :error="similarError[scope.row.eid]"
             :loading="loadingSimilar[scope.row.eid]" @show="loadSimilarEquipments" @retry="retryWithNewThreshold" />
         </template>
       </el-table-column>
-      <el-table-column fixed label="装备" width="70">
+      <el-table-column fixed label="装备" width=" 70">
         <template #default="scope">
           <equipment-image :equipment="scope.row" />
         </template>
       </el-table-column>
       <el-table-column fixed prop="price" label="价格 (元)" width="160" sortable="custom">
         <template #default="scope">
+          {{ scope.row.server_name }}
           <div v-html="formatFullPrice(scope.row)"></div>
         </template>
       </el-table-column>
@@ -129,7 +131,7 @@
       <el-table-column prop="all_damage" label="总伤" width="100" sortable="custom"></el-table-column>
       <el-table-column prop="init_damage" label="初伤" width="100" sortable="custom">
         <template #default="scope">
-          <span class="cBlue">{{ scope.row.init_damage || scope.row.damage || scope.row.shanghai || ''}}</span>
+          <span class="cBlue">{{ scope.row.init_damage || scope.row.damage || scope.row.shanghai || '' }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="init_wakan" label="初灵" width="100" sortable="custom">
@@ -158,15 +160,14 @@
       </el-table-column>
       <el-table-column prop="init_hp" label="初血" width="100" sortable="custom">
         <template #default="scope">
-          <span class="cBlue">{{ scope.row.init_hp || scope.row.qixue || ''}}</span>
+          <span class="cBlue">{{ scope.row.init_hp || scope.row.qixue || '' }}</span>
         </template>
       </el-table-column>
       <el-table-column prop="init_dex" label="初敏" width="100" sortable="custom">
         <template #default="scope">
-          <span class="cBlue">{{ scope.row.init_dex || scope.row.speed || ''}}</span>
+          <span class="cBlue">{{ scope.row.init_dex || scope.row.speed || '' }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="server_name" label="服务器" width="120"></el-table-column>
     </el-table>
     <div class="pagination-container">
       <el-pagination @current-change="handlePageChange" :current-page="pagination.page" @size-change="handleSizeChange"
@@ -181,6 +182,8 @@
 import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
 import EquipmentImage from '@/components/EquipmentImage.vue'
 import dayjs from 'dayjs'
+import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+import { commonMixin } from '@/utils/mixins/commonMixin'
 //CBG_GAME_CONFIG.pet_equip_class0
 window.petEquipTypes = [
   {
@@ -228,32 +231,29 @@ for (var keyIndex in window.CBG_GAME_CONFIG.equip_info) {
     }
   }
 }
-var lingshiKinds = [
-  [61, '戒指'],
-  [62, '耳饰'],
-  [63, '手镯'],
-  [64, '佩饰']
-]
+
 export default {
   name: 'EquipmentList',
   components: {
     SimilarEquipmentModal,
     EquipmentImage
   },
+  mixins: [equipmentMixin, commonMixin],
   data() {
     return {
+      tableLoading: false, // 表格加载状态
       weapon_armors: window.AUTO_SEARCH_CONFIG.weapon_armors
-        .concat(lingshiKinds)
+        .concat(window.lingshiKinds)
         .concat([[29, '宠物装备']]),
       equip_special_skills: window.AUTO_SEARCH_CONFIG.equip_special_skills,
       equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
       equipments: [],
       filters: {
         selectedDate: dayjs().format('YYYY-MM'),
-        level_range: [60, 60],
+        level_range: [60, 160],
         price_min: undefined,
         price_max: undefined,
-        kindid: [61],
+        kindid: [],
         equip_type: [], // 宠物装备类型（多选）
         equip_special_skills: [],
         equip_special_effect: [],
@@ -264,7 +264,7 @@ export default {
         sort_order: 'asc'
       },
       pagination: {
-        page: 1,
+        page: 2,
         page_size: 10,
         total: 0
       },
@@ -289,9 +289,9 @@ export default {
         11: '4009',
         12: '1108_4249',
         4244: '4244',
-        '755_4036':'755_4036',
-        '756_4037':'756_4037',
-        '757_4038':'757_4038'
+        '755_4036': '755_4036',
+        '756_4037': '756_4037',
+        '757_4038': '757_4038'
       },
       // 相似装备相关数据
       similarEquipments: {}, // 存储每个装备的相似装备数据
@@ -312,7 +312,10 @@ export default {
       },
 
       // 表格重新渲染的key
-      tableKey: 0
+      tableKey: 0,
+
+      // URL参数同步相关
+      isInitializing: true // 标记是否正在初始化，避免初始化时触发URL更新
     }
   },
   computed: {
@@ -334,27 +337,177 @@ export default {
       }))
     },
   },
+  created() {
+    // 从URL参数初始化过滤器
+    this.initializeFromURL()
+    // 注意：initializeFromURL方法内部会调用fetchEquipments，所以这里不需要重复调用
+  },
   watch: {
     // 监听showPetEquipType变化，强制重新渲染表格
     showPetEquipType() {
       this.tableKey += 1
+    },
+    
+    // 深度监听filters变化，更新URL
+    filters: {
+      handler() {
+        if (!this.isInitializing) {
+          this.updateURL()
+        }
+      },
+      deep: true
     }
   },
   methods: {
-    isLingshi(kindid) {
-      return lingshiKinds.some(([id]) => id === kindid)
+    // URL参数同步相关方法
+    initializeFromURL() {
+      const urlParams = new URLSearchParams(window.location.search)
+      
+      // 解析URL参数并设置到filters中
+      if (urlParams.get('selectedDate')) {
+        this.filters.selectedDate = urlParams.get('selectedDate')
+      }
+      
+      if (urlParams.get('level_min') && urlParams.get('level_max')) {
+        this.filters.level_range = [
+          parseInt(urlParams.get('level_min')),
+          parseInt(urlParams.get('level_max'))
+        ]
+      }
+      
+      if (urlParams.get('price_min')) {
+        this.filters.price_min = parseInt(urlParams.get('price_min'))
+      }
+      
+      if (urlParams.get('price_max')) {
+        this.filters.price_max = parseInt(urlParams.get('price_max'))
+      }
+      
+      if (urlParams.get('kindid')) {
+        this.filters.kindid = urlParams.get('kindid').split(',').map(id => parseInt(id))
+      }
+      
+      if (urlParams.get('equip_type')) {
+        this.filters.equip_type = urlParams.get('equip_type').split(',').map(id => parseInt(id))
+      }
+      
+      if (urlParams.get('equip_special_skills')) {
+        this.filters.equip_special_skills = urlParams.get('equip_special_skills').split(',').map(id => parseInt(id))
+      }
+      
+      if (urlParams.get('equip_special_effect')) {
+        this.filters.equip_special_effect = urlParams.get('equip_special_effect').split(',').map(id => parseInt(id))
+      }
+      
+      if (urlParams.get('suit_effect')) {
+        this.filters.suit_effect = urlParams.get('suit_effect').split(',').map(id => parseInt(id))
+      }
+      
+      if (urlParams.get('gem_value')) {
+        this.filters.gem_value = parseInt(urlParams.get('gem_value'))
+      }
+      
+      if (urlParams.get('gem_level')) {
+        this.filters.gem_level = parseInt(urlParams.get('gem_level'))
+      }
+      
+      if (urlParams.get('sort_by')) {
+        this.filters.sort_by = urlParams.get('sort_by')
+      }
+      
+      if (urlParams.get('sort_order')) {
+        this.filters.sort_order = urlParams.get('sort_order')
+      }
+      
+      if (urlParams.get('page')) {
+        this.pagination.page = parseInt(urlParams.get('page'))
+      }
+      
+      if (urlParams.get('page_size')) {
+        this.pagination.page_size = parseInt(urlParams.get('page_size'))
+      }
+      
+      // 初始化完成后，获取数据
+      this.isInitializing = false
+      this.fetchEquipments()
     },
-    openCBG(eid) {
-      window.open(this.getCBGLink(eid), '_blank')
-    },
-    getCBGLink(eid) {
-      // return `https://xyq-m.cbg.163.com/cgi/mweb/equip/${eid.split('-')[1]}/${eid}&shareSource=cbg&tfid=f_equip_list&tcid=c_equip_list`
-      return `https://xyq-m.cbg.163.com/cgi/mweb/equip/${eid.split('-')[1]}/${eid}`
+    
+    updateURL() {
+      if (this.isInitializing) return // 初始化时不更新URL
+      
+      const urlParams = new URLSearchParams()
+      
+      // 添加过滤器参数到URL
+      if (this.filters.selectedDate) {
+        urlParams.set('selectedDate', this.filters.selectedDate)
+      }
+      
+      if (this.filters.level_range && Array.isArray(this.filters.level_range)) {
+        urlParams.set('level_min', this.filters.level_range[0].toString())
+        urlParams.set('level_max', this.filters.level_range[1].toString())
+      }
+      
+      if (this.filters.price_min !== undefined && this.filters.price_min !== null) {
+        urlParams.set('price_min', this.filters.price_min.toString())
+      }
+      
+      if (this.filters.price_max !== undefined && this.filters.price_max !== null) {
+        urlParams.set('price_max', this.filters.price_max.toString())
+      }
+      
+      if (this.filters.kindid && this.filters.kindid.length > 0) {
+        urlParams.set('kindid', this.filters.kindid.join(','))
+      }
+      
+      if (this.filters.equip_type && this.filters.equip_type.length > 0) {
+        urlParams.set('equip_type', this.filters.equip_type.join(','))
+      }
+      
+      if (this.filters.equip_special_skills && this.filters.equip_special_skills.length > 0) {
+        urlParams.set('equip_special_skills', this.filters.equip_special_skills.join(','))
+      }
+      
+      if (this.filters.equip_special_effect && this.filters.equip_special_effect.length > 0) {
+        urlParams.set('equip_special_effect', this.filters.equip_special_effect.join(','))
+      }
+      
+      if (this.filters.suit_effect && this.filters.suit_effect.length > 0) {
+        urlParams.set('suit_effect', this.filters.suit_effect.join(','))
+      }
+      
+      if (this.filters.gem_value !== undefined && this.filters.gem_value !== null) {
+        urlParams.set('gem_value', this.filters.gem_value.toString())
+      }
+      
+      if (this.filters.gem_level !== undefined && this.filters.gem_level !== null) {
+        urlParams.set('gem_level', this.filters.gem_level.toString())
+      }
+      
+      if (this.filters.sort_by) {
+        urlParams.set('sort_by', this.filters.sort_by)
+      }
+      
+      if (this.filters.sort_order) {
+        urlParams.set('sort_order', this.filters.sort_order)
+      }
+      
+      if (this.pagination.page > 1) {
+        urlParams.set('page', this.pagination.page.toString())
+      }
+      
+      if (this.pagination.page_size !== 10) {
+        urlParams.set('page_size', this.pagination.page_size.toString())
+      }
+      
+      // 更新浏览器URL，不刷新页面
+      const newURL = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '')
+      window.history.pushState({}, '', newURL)
     },
 
     async fetchEquipments() {
       const [year, month] = this.filters.selectedDate.split('-')
       try {
+        this.tableLoading = true // 开始加载，显示加载状态
         const params = {
           ...this.filters,
           year,
@@ -437,8 +590,14 @@ export default {
       } catch (error) {
         console.error('获取装备列表失败:', error)
         this.$message.error('获取装备列表失败')
+      } finally {
+        this.tableLoading = false // 无论成功失败，都结束加载状态
       }
+      
+      // 更新URL参数
+      this.updateURL()
     },
+    // 重写 commonMixin 中的方法以适配本页面的数据获取方法名
     handleSizeChange(val) {
       this.pagination.page_size = val
       this.pagination.page = 1
@@ -453,44 +612,6 @@ export default {
       this.filters.sort_order = order === 'ascending' ? 'asc' : 'desc'
       this.fetchEquipments()
     },
-
-    // 格式化价格
-    formatPrice(price) {
-      const priceFloat = parseFloat(price / 100)
-      if (!priceFloat) return '---'
-      return window.get_color_price(priceFloat)
-    },
-    // 格式化完整价格信息（包括跨服费用）
-    formatFullPrice(equipment, simple = false) {
-      const basePrice = this.formatPrice(equipment.price)
-
-      // 检查是否有登录信息和跨服费用
-      if (!window.LoginInfo || !window.LoginInfo.login || simple) {
-        return basePrice
-      }
-
-      const crossServerPoundage = equipment.cross_server_poundage || 0
-      const fairShowPoundage = equipment.fair_show_poundage || 0
-
-      if (!crossServerPoundage) {
-        return basePrice
-      }
-
-      let additionalFeeHtml = ''
-
-      if (equipment.pass_fair_show == 1) {
-        // 跨服费
-        const crossFee = parseFloat(crossServerPoundage / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需跨服费<span class="p1000">￥${crossFee}</span></div>`
-      } else {
-        // 信息费（跨服费 + 预订费）
-        const totalFee = parseFloat((crossServerPoundage + fairShowPoundage) / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需信息费<span class="p1000">￥${totalFee}</span></div>`
-      }
-
-      return basePrice + additionalFeeHtml
-    },
-
     formatGems(gemLevel, gemValue) {
       if (!gemLevel || gemLevel <= 0) return ''
 
@@ -527,14 +648,14 @@ export default {
     // 解析宝石图片
     //太阳石  月亮石4003 光芒石4004 神秘石4005 红宝石4006 黄宝石4007 蓝宝石4008  绿宝石4009  舍利子4012 黑宝石4010 红玛瑙4011 翡翠石1108_4249
     //星辉石 4244
-    getGemImageByGemValue({gem_value:gemValue,kindid,fangyu,speed}) {
+    getGemImageByGemValue({ gem_value: gemValue, kindid, fangyu, speed }) {
       const gemIds = (() => {
         try {
-          if(kindid===29){
-            if(fangyu){
+          if (kindid === 29) {
+            if (fangyu) {
               return ['755_4036']
             }
-            if(speed){
+            if (speed) {
               return ['757_4038']
             }
             return ['756_4037']
@@ -545,7 +666,6 @@ export default {
         }
         return []
       })()
-      console.log(gemIds[0],this.getImageUrl(this.gem_image[gemIds[0]] + '.gif'))
       return gemIds.map((id) => {
         if (this.gem_image[id]) {
           return this.getImageUrl(this.gem_image[id] + '.gif')
@@ -574,132 +694,11 @@ export default {
 
       return ''
     },
-
-    // 解析特技特效
-    formatSpecialSkillsAndEffects({
-      special_effect: specialEffect,
-      special_skill: specialSkill,
-      kindid,
-      large_equip_desc
-    }) {
-      console.log({ specialEffect, specialSkill })
-      const specials = []
-
-      // 处理特效（JSON字符串格式）
-      if (specialEffect && specialEffect !== '') {
-        try {
-          const effects = JSON.parse(specialEffect)
-          const isLingshi = this.isLingshi(kindid)
-          console.log(large_equip_desc)
-          if (Array.isArray(effects)) {
-            effects.forEach((effect) => {
-              if (isLingshi) {
-                // 在large_equip_desc中提取特效
-                // 支持两种格式：
-                // 1. #c4DBAF4特效：超级简易#r (无等级)
-                // 2. #c4DBAF4特效：锐不可当（3级）#r (有等级)
-
-                // 先尝试匹配有等级的特效
-                const effectWithLevelMatch = large_equip_desc.match(
-                  /#c4DBAF4特效：([^#]+)（(\d+)级）#r/
-                )
-                if (effectWithLevelMatch) {
-                  const effectName = effectWithLevelMatch[1]
-                  const effectLevel = effectWithLevelMatch[2]
-                  specials.push(`${effectName}（${effectLevel}级）`)
-                } else {
-                  // 再尝试匹配无等级的特效
-                  const effectWithoutLevelMatch = large_equip_desc.match(/#c4DBAF4特效：([^#]+)#r/)
-                  if (effectWithoutLevelMatch) {
-                    const effectName = effectWithoutLevelMatch[1]
-                    specials.push(`${effectName}`)
-                  } else {
-                    // 如果都没有匹配到特效，使用默认处理方式
-                    const effectName = this.getSpecialEffectName(parseInt(effect), isLingshi)
-                    if (effectName) specials.push(`${effectName}`)
-                  }
-                }
-              } else {
-                const effectName = this.getSpecialEffectName(parseInt(effect), isLingshi)
-                if (effectName) specials.push(`${effectName}`)
-              }
-            })
-          }
-        } catch (e) {
-          console.warn('解析特效JSON失败:', e, specialEffect)
-        }
-      }
-
-      // 处理特技
-      if (specialSkill && specialSkill !== 0) {
-        const skillName = this.getSpecialSkillName(specialSkill)
-        if (skillName) specials.push(`${skillName}`)
-      }
-
-      return specials.join('<br />')
-    },
-    // 获取特效名称
-    getSpecialEffectName(id, isLingshi = false) {
-      if (isLingshi) {
-        if (id === 1) {
-          return '超级简易'
-        }
-      } else {
-        // 直接使用全局变量
-        if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_effect) {
-          const effectName = window.AUTO_SEARCH_CONFIG.equip_special_effect[id.toString()]
-          if (effectName) return effectName
-        }
-      }
-      return `特效${id}`
-    },
-    // 获取特技名称
-    getSpecialSkillName(id) {
-      // 直接使用全局变量
-      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_skills) {
-        const skills = window.AUTO_SEARCH_CONFIG.equip_special_skills
-        if (Array.isArray(skills)) {
-          const skill = skills.find((item) => item[0] === parseInt(id))
-          if (skill) return skill[1]
-        }
-      }
-
-      return `特技${id}`
-    },
-    // 解析套装信息
-    formatSuitEffect({ suit_effect: suitEffect, addon_status, kindid }) {
-      if (kindid === 29) {
-        return addon_status
-      }
-      if (!suitEffect) return ''
-
-      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_added_status) {
-        const suitName = window.AUTO_SEARCH_CONFIG.suit_added_status[suitEffect.toString()]
-        if (suitName) return `附加状态${suitName}`
-      }
-
-      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_append_skills) {
-        const suitName = window.AUTO_SEARCH_CONFIG.suit_append_skills[suitEffect.toString()]
-        if (suitName) return `追加法术${suitName}`
-      }
-      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_transform_skills) {
-        const suitName = window.AUTO_SEARCH_CONFIG.suit_transform_skills[suitEffect.toString()]
-        if (suitName) return `变身术之${suitName}`
-      }
-      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_transform_charms) {
-        const suitName = window.AUTO_SEARCH_CONFIG.suit_transform_charms[suitEffect.toString()]
-        if (suitName) return `变化咒之${suitName}`
-      }
-
-      return `套装${suitEffect}`
-    },
     handleLevelRangeChange(value) {
       this.filters.level_range = value
-      this.fetchEquipments()
     },
     handleSuitChange(value) {
       this.filters.suit_effect = value
-      this.fetchEquipments()
     },
     // 处理装备类型变化
     handleKindidChange(value) {
@@ -707,7 +706,6 @@ export default {
       if (!value || !value.includes(29)) {
         this.filters.equip_type = []
       }
-      this.fetchEquipments()
     },
     // 初始化套装选项
     initSuitOptions() {
@@ -835,6 +833,11 @@ export default {
 
         // 处理估价响应
         if (valuationResponse.code === 200) {
+          const { data: { anchors } } = await this.$api.equipment.findEquipmentAnchors({
+            equipment_data: equipment,
+            similarity_threshold: similarityThreshold,
+            max_anchors: 30
+          })
           const data = valuationResponse.data
           this.$set(this.equipmentValuations, eid, data)
 
@@ -843,7 +846,7 @@ export default {
             this.$set(this.similarEquipments, eid, {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: data.anchors,
+              anchors: anchors,
               statistics: {
                 price_range: {
                   min: Math.min(...data.anchors.map((a) => a.price || 0)),
@@ -933,34 +936,6 @@ export default {
       } finally {
         this.$set(this.loadingSimilar, eid, false)
       }
-    },
-
-    // 获取图片URL方法
-    getImageUrl(imageName, size = 'small') {
-      return `https://cbg-xyq.res.netease.com/images/${size}/${imageName}`
-    },
-    parseLogProgress(logs) {
-      // logs: 日志字符串数组
-      let currentPage = 0
-      let totalPages = 0
-      if (!Array.isArray(logs)) return { currentPage, totalPages }
-      for (let i = logs.length - 1; i >= 0; i--) {
-        const line = logs[i]
-        // 1. 匹配"正在爬取第 X/Y 页..."
-        const match1 = line.match(/正在爬取第\s*(\d+)\s*\/\s*(\d+)\s*页/)
-        if (match1) {
-          currentPage = parseInt(match1[1])
-          totalPages = parseInt(match1[2])
-          break
-        }
-        // 2. 匹配"总页数: Y"
-        const match2 = line.match(/总页数[:：]\s*(\d+)/)
-        if (match2) {
-          totalPages = parseInt(match2[1])
-          // 不break，继续往前找有没有X/Y格式
-        }
-      }
-      return { currentPage, totalPages }
     },
   },
   mounted() {

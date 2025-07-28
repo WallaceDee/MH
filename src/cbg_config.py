@@ -352,10 +352,9 @@ DB_SCHEMA_CONFIG = {
     
     'equipments': '''
         CREATE TABLE IF NOT EXISTS equipments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            eid TEXT UNIQUE,                    -- 装备唯一标识符
+            equip_sn TEXT PRIMARY KEY,          -- 装备序列号（主键）
+            eid TEXT,                           -- 装备唯一标识符
             equipid INTEGER,                    -- 装备ID
-            equip_sn TEXT,                      -- 装备序列号
             
             -- 服务器和卖家信息
             server_name TEXT,                   -- 服务器名称

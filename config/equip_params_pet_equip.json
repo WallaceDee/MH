@@ -1,11 +1,13 @@
 {
-  "level_min": 5,
-  "level_max": 145,
-  "equip_pos": "1",
-  "price_min":3000,
   "server_name": "进贤门",
   "server_id": 77,
   "areaid": 43,
-  "search_type":"search_pet_equip",
-  "view_loc":"search_cond"
+  "search_type": "search_pet_equip",
+  "view_loc": "search_cond",
+  "query_order": "price ASC",
+  "level_min": 5,
+  "level_max": 145,
+  "equip_pos": "1",
+  "price_max": 30000,
+  "price_min": 3000
 }

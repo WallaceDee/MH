@@ -2,8 +2,8 @@ import sys
 import os
 
 # 添加项目根目录到Python路径，解决模块导入问题
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到项目根目录
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.insert(0, project_root)
 
 import sqlite3

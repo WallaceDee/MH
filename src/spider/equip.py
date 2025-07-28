@@ -19,8 +19,8 @@ from playwright.async_api import async_playwright
 import re
 
 # 添加项目根目录到Python路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(current_dir))
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.insert(0, project_root)
 
 from src.tools.setup_requests_session import setup_session
@@ -33,11 +33,19 @@ from src.tools.search_form_helper import (
     get_equip_search_params_async,
     get_lingshi_search_params_async,
     get_pet_equip_search_params_async,
-    verify_cookie_validity,
+)
+from src.utils.cookie_manager import (
+    setup_session_with_cookies, 
+    get_playwright_cookies_for_context,
+    verify_cookie_validity
 )
 
 # 导入特征提取器
 from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
+from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
+
+# 导入装备类型常量
+from src.evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_KINDID
 
 class CBGEquipSpider:
     def __init__(self):
@@ -46,12 +54,12 @@ class CBGEquipSpider:
         self.output_dir = self.create_output_dir()
         
         # 使用按月分割的数据库文件路径
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from src.utils.project_path import get_data_path
         current_month = datetime.now().strftime('%Y%m')
         
         # 装备数据库路径
         db_filename = f"cbg_equip_{current_month}.db"
-        self.db_path = os.path.join(project_root, 'data', current_month, db_filename)
+        self.db_path = os.path.join(get_data_path(), current_month, db_filename)
         
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
@@ -61,13 +69,15 @@ class CBGEquipSpider:
         
         # 初始化特征提取器
         self.lingshi_feature_extractor = LingshiFeatureExtractor()
+        self.pet_equip_feature_extractor = PetEquipFeatureExtractor()
         
         # 配置专用的日志器，避免与其他模块冲突
         self.logger = self._setup_logger()
         
         # 初始化其他组件
         self.setup_session()
-        self.init_database()
+        # 延迟初始化数据库，避免在导入时创建文件
+        # self.init_database()
         self.retry_attempts = 1
 
     def _setup_logger(self):
@@ -118,48 +128,12 @@ class CBGEquipSpider:
     
     def setup_session(self):
         """设置请求会话"""
-        # 从cookies.txt文件读取Cookie
-        cookie_content = None
-        try:
-            # 获取项目根目录
-            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-            cookies_path = os.path.join(project_root, 'config/cookies.txt')
-            
-            with open(cookies_path, 'r', encoding='utf-8') as f:
-                cookie_content = f.read().strip()
-            if cookie_content:
-                self.session.headers.update({'Cookie': cookie_content})
-                self.logger.info("成功从config/cookies.txt文件加载Cookie")
-            else:
-                self.logger.warning("config/cookies.txt文件为空")
-                
-        except FileNotFoundError:
-            self.logger.error("未找到config/cookies.txt文件，请创建该文件并添加有效的Cookie")
-        except Exception as e:
-            self.logger.error(f"读取config/cookies.txt文件失败: {e}")
-        
-        # 设置请求头
-        headers = {
-            'accept': '*/*',
-            'accept-language': 'zh-CN,zh;q=0.9',
-            'sec-ch-ua': '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'script',
-            'sec-fetch-mode': 'no-cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-            'referer': 'https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py'
-        }
-        
-        # 如果有Cookie，添加到请求头中
-        if cookie_content:
-            headers['Cookie'] = cookie_content
-            self.logger.info("Cookie已添加到请求头")
-        else:
-            self.logger.warning("未找到有效的Cookie，可能影响数据获取")
-        
-        self.session.headers.update(headers)
+        # 使用统一的Cookie管理
+        setup_session_with_cookies(
+            self.session, 
+            referer='https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py',
+            logger=self.logger
+        )
     
     def init_database(self):
         """初始化数据库和表结构"""
@@ -179,6 +153,35 @@ class CBGEquipSpider:
             raise
         finally:
             conn.close()
+    
+    def _ensure_database_initialized(self):
+        """确保数据库已初始化，如果未初始化则进行初始化"""
+        try:
+            # 检查数据库文件是否存在
+            if not os.path.exists(self.db_path):
+                self.logger.info("检测到数据库文件不存在，开始初始化...")
+                self.init_database()
+            else:
+                # 检查表结构是否完整
+                try:
+                    conn = sqlite3.connect(self.db_path)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    tables = [row[0] for row in cursor.fetchall()]
+                    conn.close()
+                    
+                    # 检查是否包含必要的表
+                    if 'equipments' not in tables:
+                        self.logger.info("检测到缺失的表: equipments，重新初始化数据库...")
+                        self.init_database()
+                        
+                except Exception as e:
+                    self.logger.warning(f"检查数据库表结构失败: {e}，重新初始化...")
+                    self.init_database()
+                    
+        except Exception as e:
+            self.logger.error(f"确保数据库初始化失败: {e}")
+            raise
 
     def parse_jsonp_response(self, text):
         """解析JSONP响应，提取装备数据"""
@@ -211,7 +214,7 @@ class CBGEquipSpider:
                     kindid = equip.get('kindid', 0)
                     extracted_attrs = []
                     
-                    if kindid in [61, 62, 63, 64]:  # 灵饰装备类型
+                    if kindid in LINGSHI_KINDIDS:  # 灵饰装备类型
                         try:
                             # 使用特征提取器提取附加属性
                             added_attrs_features = self.lingshi_feature_extractor._extract_added_attrs_features(equip)
@@ -233,6 +236,26 @@ class CBGEquipSpider:
                         # 非灵饰装备，使用原始数据
                         extracted_attrs = equip.get('agg_added_attrs', [])
                     
+                    # 初始化 addon_status 变量
+                    addon_status = equip.get('addon_status', '')
+                    
+                    if kindid == PET_EQUIP_KINDID:  # 宠物装备类型要解析套装
+                        try:
+                            # 使用宠物装备特征提取器解析套装信息
+                            desc = equip.get('large_equip_desc', '')
+                            self.logger.info(f"宠物装备套装解析desc: {desc}")
+                            if desc:
+                                # 创建临时字典来存储解析结果
+                                parsed_data = {}
+                                self.pet_equip_feature_extractor._parse_suit_info_from_desc(desc, parsed_data)
+                                addon_status = parsed_data.get('addon_status', '')
+                                print(f"宠物装备套装解析结果: {addon_status}")
+                                self.logger.debug(f"宠物装备套装解析结果: {addon_status}")
+                        except Exception as e:
+                            self.logger.warning(f"解析宠物装备套装信息失败: {e}")
+                            # 保持原始值
+
+
                     # 直接保存所有原始字段，不做解析
                     equipment = {
                         # 基本字段直接映射
@@ -331,7 +354,7 @@ class CBGEquipSpider:
                         'addon_fali': equip.get('addon_fali'),
                         'addon_lingli': equip.get('addon_lingli'),
                         'addon_total': equip.get('addon_total'),
-                        'addon_status': equip.get('addon_status'),
+                        'addon_status': addon_status,
                         'addon_skill_chance': equip.get('addon_skill_chance'),
                         'addon_effect_chance': equip.get('addon_effect_chance'),
                         
@@ -528,6 +551,9 @@ class CBGEquipSpider:
             self.logger.info("没有装备数据需要保存")
             return 0
         
+        # 确保数据库已初始化
+        self._ensure_database_initialized()
+        
         try:
             # 使用正确的方法名：save_equipments_batch
             success = self.smart_db.save_equipments_batch(equipments)
@@ -584,21 +610,9 @@ class CBGEquipSpider:
                 context = await browser.new_context()
                 
                 # 设置cookies
-                cookie_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config', 'cookies.txt')
-                if os.path.exists(cookie_path):
-                    with open(cookie_path, 'r', encoding='utf-8') as f:
-                        cookie_str = f.read().strip()
-                        cookies = []
-                        for cookie in cookie_str.split('; '):
-                            if '=' in cookie:
-                                name, value = cookie.split('=', 1)
-                                cookies.append({
-                                    'name': name,
-                                    'value': value,
-                                    'domain': '.163.com',
-                                    'path': '/'
-                                })
-                        await context.add_cookies(cookies)
+                cookies = get_playwright_cookies_for_context(self.logger)
+                if cookies:
+                    await context.add_cookies(cookies)
                 
                 page_obj = await context.new_page()
                 response = await page_obj.goto(url)
@@ -625,9 +639,13 @@ class CBGEquipSpider:
         """
         # 首先验证Cookie有效性
         self.logger.info("正在验证Cookie有效性...")
-        if not verify_cookie_validity():
+        print("即将调用 verify_cookie_validity_async")
+        from src.utils.cookie_manager import verify_cookie_validity_async
+        is_valid = await verify_cookie_validity_async(self.logger)
+        print("verify_cookie_validity_async 返回：", is_valid)
+        if not is_valid:
             self.logger.warning("Cookie验证失败，正在更新Cookie...")
-            from src.utils.cookie_updater import _update_cookies_internal
+            from src.utils.cookie_manager import _update_cookies_internal
             if not await _update_cookies_internal():
                 self.logger.error("Cookie更新失败，无法继续爬取")
                 return

@@ -1,32 +1,31 @@
-from datetime import datetime
-from typing import Dict, Any, List, Optional, Union, Tuple
-import logging
-import numpy as np
-import pandas as pd
-import sqlite3
-import sys
 import os
+import sys
+import sqlite3
+import pandas as pd
+import logging
+from typing import Dict, Any, List, Optional, Tuple
+from datetime import datetime
+import re
 
-# 添加项目根目录到Python路径，解决模块导入问题
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(current_dir))))  # 向上四级到项目根目录
+# 添加项目根目录到Python路径
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.insert(0, project_root)
 
+# 导入装备类型常量
+from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
 
+# 导入特征提取器
 try:
-    from ...feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
+    from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
 except ImportError:
-    try:
-        from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
-    except ImportError:
-        # 如果都导入失败，创建一个简单的占位符
-        class PetEquipFeatureExtractor:
-            def __init__(self):
-                pass
-
-            def extract_features(self, lingshi_data):
-                return {}
+    # 如果导入失败，创建一个简单的占位符类
+    class PetEquipFeatureExtractor:
+        def __init__(self):
+            pass
+        
+        def extract_features(self, lingshi_data):
+            return {}
 
 
 class PetEquipMarketDataCollector:
@@ -43,7 +42,7 @@ class PetEquipMarketDataCollector:
         self.feature_extractor = PetEquipFeatureExtractor()
         self.logger = logging.getLogger(__name__)
 
-        print(f"灵饰数据采集器初始化，加载数据库: {self.db_paths}")
+        print(f"宠物装备数据采集器初始化，加载数据库: {self.db_paths}")
 
     def _find_recent_dbs(self) -> List[str]:
         """查找所有可用的宠物装备数据库文件"""
@@ -110,7 +109,7 @@ class PetEquipMarketDataCollector:
                         limit: int = 1000) -> pd.DataFrame:
         """
         获取市场灵饰数据，从多个数据库中合并数据
-        TODO: 分类，物理、法术、 套装？
+        TODO: 分类，物理、法术、 套装？目前根据shanghai 20 区分
 
         Args:
             main_attr: 主属性(damage、deface、magic_damage、magic_deface、fengyin、anti_fengyin、speed)
@@ -143,7 +142,7 @@ class PetEquipMarketDataCollector:
 
                 with self.connect_database(db_path) as conn:
                     # 构建SQL查询
-                    query = f"SELECT * FROM equipments WHERE 1=1 AND kindid = 29"
+                    query = f"SELECT * FROM equipments WHERE 1=1 AND kindid = {PET_EQUIP_KINDID}"
                     params = []
 
                     if level_range is not None:
@@ -163,7 +162,7 @@ class PetEquipMarketDataCollector:
                     if shanghai == 0:
                         query += " AND shanghai < 20"
 
-                    # 根据装备类型进行过滤
+                    # 根据属性值区分装备类型后进行过滤
                     if fangyu > 0:
                         # 铠甲类型：要求有防御值
                         query += " AND fangyu > 0"
@@ -199,22 +198,10 @@ class PetEquipMarketDataCollector:
         """
         根据目标特征获取用于相似度计算的市场数据（先类型分类）
         """
-        kindid = target_features.get('kindid')
-        # 属性过滤
-        shanghai = target_features.get('shanghai', 0) 
-        # 类型分类参数
-        fangyu = target_features.get('fangyu', 0)
-        speed = target_features.get('speed', 0)
-        # 先类型分类
+    
         print(f"目标特征equip_level_range: {target_features.get('equip_level_range')}")
-        market_data = self.get_market_data(
-            kindid=kindid,
-            level_range = target_features.get('equip_level_range'),
-            fangyu=fangyu,
-            speed=speed,
-            shanghai=shanghai,
-            limit=5000
-        )
+        market_data = self.get_market_data_with_business_rules(target_features)
+   
         if market_data.empty:
             return market_data
         # 特征提取
@@ -241,7 +228,6 @@ class PetEquipMarketDataCollector:
         先类型分类，再做附加属性分类过滤
         """
         try:
-            print(f"target_featurestarget_features{target_features}target_featurestarget_featurestarget_features")
             # 先类型分类
             market_data = self.get_market_data_for_similarity(target_features)
             if market_data.empty:
@@ -321,9 +307,24 @@ class PetEquipMarketDataCollector:
         Returns:
             过滤后的市场数据DataFrame
         """
+        kindid = target_features.get('kindid')
+        # 属性过滤
+        shanghai = target_features.get('shanghai', 0) 
+        # 类型分类参数
+        fangyu = target_features.get('fangyu', 0)
+        speed = target_features.get('speed', 0)
+        level_range = target_features.get('equip_level_range')
+        print(f"target_featurestarget_featurestarget_features: {target_features}")
+        # 先类型分类
         # 获取基础市场数据
-        market_data = self.get_market_data_for_similarity(target_features)
-        
+        market_data = self.get_market_data(
+            kindid=kindid,
+            level_range = level_range,
+            fangyu=fangyu,
+            speed=speed,
+            shanghai=shanghai,
+            limit=2000
+        )
         if market_data.empty:
             return market_data
             
@@ -335,9 +336,9 @@ class PetEquipMarketDataCollector:
             # 例如：价格异常值过滤、属性组合过滤等
             
             # 示例：过滤价格异常值（价格过高或过低的装备）
-            price = row.get('price', 0)
-            if price <= 0 or price > 1000000:  # 价格范围检查
-                continue
+            # price = row.get('price', 0)
+            # if price <= 0 or price > 1000000:  # 价格范围检查
+            #     continue
                 
             filtered_data.append(row)
             

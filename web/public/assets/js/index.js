@@ -354,3 +354,10 @@ if (!Object.clone) {
         return clone;
     };
 }
+
+window.lingshiKinds = [
+    [61, '戒指'],
+    [62, '耳饰'],
+    [63, '手镯'],
+    [64, '佩饰']
+  ]

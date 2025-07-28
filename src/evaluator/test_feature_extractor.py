@@ -27,7 +27,8 @@ def test_equipment_feature_extraction():
     extractor = EquipFeatureExtractor()
     
     # 连接数据库
-    db_path = 'data/cbg_equip_202507.db'
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    db_path = os.path.join(project_root, 'data', '202507', 'cbg_equip_202507.db')
     logger.info(f"正在连接数据库: {db_path}")
     
     try:
@@ -134,7 +135,8 @@ def test_feature_extraction():
     extractor = FeatureExtractor()
     
     # 连接数据库
-    db_path = 'data/cbg_characters_202506.db'
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    db_path = os.path.join(project_root, 'data', '202506', 'cbg_characters_202506.db')
     logger.info(f"正在连接数据库: {db_path}")
     
     try:
@@ -230,7 +232,8 @@ def test_lingshi_feature_extraction():
     extractor = LingshiFeatureExtractor()
     
     # 连接数据库
-    db_path = 'data/cbg_equip_202507.db'
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    db_path = os.path.join(project_root, 'data', '202507', 'cbg_equip_202507.db')
     logger.info(f"正在连接数据库: {db_path}")
     
     try:
@@ -337,7 +340,8 @@ def test_pet_equipment_feature_extraction():
     extractor = PetEquipFeatureExtractor()
     
     # 连接数据库
-    db_path = 'data/cbg_equip_202507.db'
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    db_path = os.path.join(project_root, 'data', '202507', 'cbg_equip_202507.db')
     logger.info(f"正在连接数据库: {db_path}")
     
     try:
@@ -350,7 +354,7 @@ def test_pet_equipment_feature_extraction():
         available_fields = [col[1] for col in columns_info]
         logger.info(f"可用字段数量: {len(available_fields)}")
         
-        # 获取宠物装备数据 - 只查询宠物装备类型（kindid = 29）
+        # 获取宠物装备数据 - 只查询宠物装备类型（kindid = PET_EQUIP_KINDID）
         logger.info("正在查询宠物装备数据...")
         cursor.execute("""
             SELECT 
@@ -359,7 +363,8 @@ def test_pet_equipment_feature_extraction():
                 addon_fali, addon_lingli, addon_liliang, addon_minjie, addon_naili,
                 xiang_qian_level, addon_status, large_equip_desc
             FROM equipments
-            WHERE equip_level > 0 AND kindid = 29
+            from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
+WHERE equip_level > 0 AND kindid = {PET_EQUIP_KINDID}
             LIMIT 20
         """)
         

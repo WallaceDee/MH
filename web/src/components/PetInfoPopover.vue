@@ -1,5 +1,5 @@
 <template>
-  <el-popover placement="right" :trigger="trigger" popper-class="pet-info-popover" :visible="visible" @show="handleShow"
+  <el-popover placement="right" :trigger="trigger" popper-class="pet-info-popover" v-model="visible" @show="handleShow"
     @hide="handleHide">
     <template #reference>
       <div class="pet-trigger" @click="handleClick">
@@ -7,7 +7,7 @@
       </div>
     </template>
 
-    <div class="tabCont" v-if="pet">
+    <div class="tabCont" v-if="pet && visible">
       <div class="soldDetail" id="SkillTipsBox" ref="SkillTipsBox" style="width: 320px; display: none"></div>
       <div class="cols" style="width: 280px; margin-left: -2px; margin-right: 2px">
         <div class="thum" style="text-align: center;">
@@ -234,14 +234,9 @@
           <div class="blank6"></div>
           <table cellspacing="0" cellpadding="0" class="tb03 size50" id="pet_equip_con">
             <tr>
-              <td v-for="index in 3" :key="index">
-                <EquipmentImage v-if="pet.equip_list && pet.equip_list[index - 1]" :placement="'bottom'" :image="false"
-                  :equipment="{
-                    equip_face_img: pet.equip_list[index - 1].icon,
-                    equip_type_desc: pet.equip_list[index - 1].static_desc,
-                    large_equip_desc: pet.equip_list[index - 1].desc,
-                    equip_name: pet.equip_list[index - 1].name
-                  }" size="small" :popoverWidth="300" />
+              <td v-for="(eItem, index) in pet.equip_list" :key="index">
+                <EquipmentImage v-if="eItem && index < 3" :placement="'bottom'" :image="false"
+                  :equipment="getEquipImageProps(eItem)" size="small" :popoverWidth="300" />
                 <span v-else>&nbsp;</span>
               </td>
             </tr>
@@ -254,12 +249,7 @@
             <tr>
               <td>
                 <EquipmentImage v-if="pet.equip_list && pet.equip_list[3]" :placement="'bottom'" :image="false"
-                  :equipment="{
-                    equip_face_img: pet.equip_list[3].icon,
-                    equip_type_desc: pet.equip_list[3].static_desc,
-                    large_equip_desc: pet.equip_list[3].desc,
-                    equip_name: pet.equip_list[3].name
-                  }" :size="'small'" />
+                  :equipment="getEquipImageProps(pet.equip_list[3])" :size="'small'" />
                 <span v-else>&nbsp;</span>
               </td>
             </tr>
@@ -326,8 +316,12 @@
 
 <script>
 import EquipmentImage from './EquipmentImage.vue'
+import { commonMixin } from '@/utils/mixins/commonMixin'
+import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+
 export default {
   name: 'PetInfoPopover',
+  mixins: [commonMixin,equipmentMixin],
   components: {
     EquipmentImage
   },
@@ -347,14 +341,11 @@ export default {
     enhanceInfo: {
       type: Object,
       default: () => ({})
-    },
-    visible: {
-      type: Boolean,
-      default: false
     }
   },
   data() {
     return {
+      visible: false,
       conf: {
         pet_skill_url: 'https://cbg-xyq.res.netease.com/images/skill/',
         notice_node_name: 'pet_tip_notice_msg',
@@ -402,10 +393,8 @@ export default {
     this.cleanupDynamicEvents()
   },
   methods: {
+
     show_pet_skill_in_grade: window.show_pet_skill_in_grade,
-    getImageUrl(imageName, size = 'small') {
-      return `https://cbg-xyq.res.netease.com/images/${size}/${imageName}`
-    },
     // 获取五行名称
     getWuxingName(fiveAptitude) {
       const wuxingInfo = {
@@ -563,39 +552,44 @@ export default {
       }
     }
   },
-  mounted() {
-    this.$nextTick(() => {
-      if (this.pet.all_skill && this.show_pet_skill_in_grade) {
-        const skillNode = this.show_pet_skill_in_grade(
-          this.pet.all_skill,
-          this.pet.sp_skill,
-          6,
-          4,
-          this.conf,
-          this.pet
-        )
-        const { skill_panel_name, notice_node_name } = this.conf
-        const skillPanelNode = skillNode[skill_panel_name]
-        const noticeNode = skillNode[notice_node_name]
+  watch: {
+    visible(val) {
+      if (val) {
+        this.$nextTick(() => {
+          if (this.pet.all_skill && this.show_pet_skill_in_grade) {
+            const skillNode = this.show_pet_skill_in_grade(
+              this.pet.all_skill,
+              this.pet.sp_skill,
+              6,
+              4,
+              this.conf,
+              this.pet
+            )
+            const { skill_panel_name, notice_node_name } = this.conf
+            const skillPanelNode = skillNode[skill_panel_name]
+            const noticeNode = skillNode[notice_node_name]
 
-        if (skillPanelNode && this.$refs.pet_skill_grid_con) {
-          skillPanelNode.forEach((node) => {
-            if (node) {
-              this.$refs.pet_skill_grid_con.appendChild(node)
+            if (skillPanelNode && this.$refs.pet_skill_grid_con) {
+              skillPanelNode.forEach((node) => {
+                if (node) {
+                  this.$refs.pet_skill_grid_con.appendChild(node)
+                }
+              })
+
+              // 为动态生成的技能节点绑定事件
+              this.$nextTick(() => {
+                this.bindEventsForDynamicNodes()
+              })
             }
-          })
 
-          // 为动态生成的技能节点绑定事件
-          this.$nextTick(() => {
-            this.bindEventsForDynamicNodes()
-          })
-        }
-
-        if (noticeNode && this.$refs.pet_tip_notice_msg) {
-          this.$refs.pet_tip_notice_msg.style.display = 'block'
-        }
+            if (noticeNode && this.$refs.pet_tip_notice_msg) {
+              this.$refs.pet_tip_notice_msg.style.display = 'block'
+            }
+          }
+        })
       }
-    })
+    }
+
   }
 }
 </script>

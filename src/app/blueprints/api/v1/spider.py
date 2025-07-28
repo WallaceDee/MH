@@ -182,16 +182,6 @@ def manage_proxies():
         return error_response(f"代理管理失败: {str(e)}")
 
 
-@spider_bp.route('/test/run', methods=['POST'])
-def run_tests():
-    """运行测试"""
-    try:
-        result = controller.run_tests()
-        return success_response(data=result, message="测试已启动")
-    except Exception as e:
-        return error_response(f"启动测试失败: {str(e)}")
-
-
 @spider_bp.route('/task/stop', methods=['POST'])
 def stop_task():
     """停止当前任务"""
@@ -200,6 +190,47 @@ def stop_task():
         return success_response(data=result, message=result.get("message", "停止任务请求已发送"))
     except Exception as e:
         return error_response(f"停止任务失败: {str(e)}")
+
+
+@spider_bp.route('/playwright/start', methods=['POST'])
+def start_playwright():
+    """启动Playwright收集器"""
+    try:
+        data = request.json or {}
+        
+        headless = data.get('headless', False)
+        target_url = data.get('target_url')
+        
+        if not isinstance(headless, bool):
+            return error_response("headless必须是布尔值")
+        
+        result = controller.start_playwright_collector(
+            headless=headless,
+            target_url=target_url
+        )
+        return success_response(data=result, message="Playwright收集器已启动")
+    except Exception as e:
+        return error_response(f"启动Playwright收集器失败: {str(e)}")
+
+
+@spider_bp.route('/cookie/check', methods=['GET'])
+def check_cookie():
+    """检查Cookie状态"""
+    try:
+        result = controller.check_cookie_status()
+        return success_response(data=result, message="Cookie状态检查完成")
+    except Exception as e:
+        return error_response(f"检查Cookie状态失败: {str(e)}")
+
+
+@spider_bp.route('/cookie/update', methods=['POST'])
+def update_cookie():
+    """更新Cookie"""
+    try:
+        result = controller.update_cookies()
+        return success_response(data=result, message="Cookie更新程序已启动")
+    except Exception as e:
+        return error_response(f"启动Cookie更新程序失败: {str(e)}")
 
 
 @spider_bp.route('/task/reset', methods=['POST'])

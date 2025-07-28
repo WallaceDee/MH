@@ -35,7 +35,8 @@ class LingshiPlugin(EquipmentTypePlugin):
 
     @property
     def supported_kindids(self) -> List[int]:
-        return [61, 62, 63, 64]  # 灵饰的kindid
+        from src.evaluator.constants.equipment_types import LINGSHI_KINDIDS
+        return LINGSHI_KINDIDS  # 灵饰的kindid
 
     @property
     def priority(self) -> int:
@@ -254,7 +255,7 @@ class LingshiPlugin(EquipmentTypePlugin):
             'speed': 0,  # 得分代替
 
             'equip_level': 0,             # 等级跨度大，不考虑
-            'suit_effect': 0,             # 没有套装（TODO: 钟灵石套装可以用这个）
+            'suit_effect': 0,             # 没有套装
             'hole_score': 0,              # 没有开运
             'attrs': 0,                   # 附加属性
             'suit_effect_type': 0,

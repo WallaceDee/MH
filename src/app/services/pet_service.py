@@ -13,12 +13,15 @@ from datetime import datetime
 import sqlite3
 import logging
 
+from src.utils.project_path import get_project_root, get_data_path
+
 logger = logging.getLogger(__name__)
 
 # 动态导入评估器，避免循环导入
 try:
     from evaluator.mark_anchor.pet.index import PetMarketAnchorEvaluator
     from evaluator.feature_extractor.pet_feature_extractor import PetFeatureExtractor
+    from evaluator.constants.equipment_types import PET_EQUIP_KINDID
 except ImportError:
     PetMarketAnchorEvaluator = None
     PetFeatureExtractor = None
@@ -28,8 +31,8 @@ except ImportError:
 class PetService:
     def __init__(self):
         # 获取项目根目录
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        self.data_dir = os.path.join(self.project_root, 'data')
+        self.project_root = get_project_root()
+        self.data_dir = get_data_path()
         
         # 初始化特征提取器
         self.pet_feature_extractor = None
@@ -163,7 +166,11 @@ class PetService:
                     where_clause = "WHERE " + " AND ".join(conditions)
                 
                 # 构建ORDER BY子句
-                order_clause = f"ORDER BY {sort_by} {sort_order.upper()}"
+                if sort_by == 'skill_count':
+                    # 按技能数量排序：计算all_skill字段中管道符的数量+1，处理空字符串情况
+                    order_clause = f"ORDER BY CASE WHEN all_skill = '' OR all_skill IS NULL THEN 0 ELSE (LENGTH(all_skill) - LENGTH(REPLACE(all_skill, '|', '')) + 1) END {sort_order.upper()}"
+                else:
+                    order_clause = f"ORDER BY {sort_by} {sort_order.upper()}"
                 
                 # 计算总数
                 count_sql = f"SELECT COUNT(*) FROM pets {where_clause}"
@@ -182,29 +189,83 @@ class PetService:
                     LIMIT ? OFFSET ?
                 """
                 cursor.execute(sql, params + [page_size, offset])
-                rows = cursor.fetchall()
+                pets_rows = cursor.fetchall()
                 
-                # 转换数据格式
-                pets = []
-                for row in rows:
-                    pet_dict = dict(row)
-                    # 转换价格从分到元
-                    if 'price' in pet_dict:
-                        pet_dict['price'] = pet_dict['price'] / 100
-                    pets.append(pet_dict)
+                # 先将sqlite3.Row对象转换为可修改的字典
+                pets = [dict(row) for row in pets_rows]
+                
+                # 宠物装备批量估价逻辑，只估价前3个非null装备
+                all_equips = []
+                equip_index_map = []  # (pet_idx, equip_idx) -> all_equips index
+                for pet_idx, pet in enumerate(pets):
+                    equip_list_raw = pet.get('equip_list', '[]')
+                    try:
+                        equip_list = json.loads(equip_list_raw)
+                    except Exception:
+                        equip_list = []
+                    for equip_idx in range(3):
+                        equip = equip_list[equip_idx] if equip_idx < len(equip_list) else None
+                        if equip:
+                            all_equips.append({
+                                'kindid': PET_EQUIP_KINDID,
+                                'large_equip_desc':equip.get('desc', ''),
+                            })
+                            equip_index_map.append((pet_idx, equip_idx))
+
+                equip_valuations = []
+                if all_equips:
+                    from src.app.services.equipment_service import equipment_service
+                    try:
+                        # 批量估价写死参数 TODO:
+                        result = equipment_service.batch_equipment_valuation(all_equips,'fair_value',0.8,30)
+                        if isinstance(result, dict):
+                            equip_valuations = result.get('results', [])
+                        else:
+                            equip_valuations = result
+                        logger.info(f"批量装备估价完成，成功估价 {len(equip_valuations)} 个装备")
+                    except Exception as e:
+                        import traceback
+                        logger.warning(f"批量装备估价时部分装备失败: {e} (type={type(e)})\n{traceback.format_exc()}")
+                        equip_valuations = [{} for _ in all_equips]
+
+                for pet_idx, pet in enumerate(pets):
+                    equip_list_raw = pet.get('equip_list', '[]')
+                    try:
+                        equip_list = json.loads(equip_list_raw)
+                    except Exception:
+                        equip_list = []
+                    equip_list_price = []
+                    for equip_idx in range(3):
+                        equip = equip_list[equip_idx] if equip_idx < len(equip_list) else None
+                        if equip:
+                            try:
+                                idx = equip_index_map.index((pet_idx, equip_idx))
+                                if 0 <= idx < len(equip_valuations):
+                                    price_info = equip_valuations[idx]
+                                else:
+                                    logger.warning(f"装备估价索引超界: idx={idx}, len(equip_valuations)={len(equip_valuations)}")
+                                    price_info = {}
+                            except Exception as e:
+                                logger.warning(f"装备估价回填异常: {e}")
+                                price_info = {}
+                            equip_list_price.append(price_info)
+                        else:
+                            equip_list_price.append(None)
+                    pet['equip_list_price'] = equip_list_price
                 
                 return {
                     "total": total,
                     "page": page,
                     "page_size": page_size,
                     "total_pages": total_pages,
-                    "data": pets,
+                    "data": pets,  # 已经转换为字典列表，包含equip_list_price
                     "year": year,
                     "month": month
                 }
                 
         except Exception as e:
-            logger.error(f"获取宠物列表时出错: {e}")
+            import traceback
+            logger.error(f"获取宠物列表时出错: {e} (type={type(e)})\n{traceback.format_exc()}")
             return {"error": f"获取宠物列表时出错: {str(e)}"}
     
     def get_pet_details(self, pet_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
@@ -227,9 +288,6 @@ class PetService:
                 
                 if row:
                     pet_dict = dict(row)
-                    # 转换价格从分到元
-                    if 'price' in pet_dict:
-                        pet_dict['price'] = pet_dict['price'] / 100
                     return pet_dict
                 
                 return None
@@ -258,9 +316,6 @@ class PetService:
                 
                 if row:
                     pet_dict = dict(row)
-                    # 转换价格从分到元
-                    if 'price' in pet_dict:
-                        pet_dict['price'] = pet_dict['price'] / 100
                     return pet_dict
                 
                 return None
@@ -357,6 +412,10 @@ class PetService:
             # 特征提取
             pet_features = self.pet_feature_extractor.extract_features(pet_data)
 
+            # 确保特征中包含equip_sn信息，用于排除自身
+            if 'equip_sn' in pet_data:
+                pet_features['equip_sn'] = pet_data['equip_sn']
+
             # 估价
             result = self.evaluator.calculate_value(
                 pet_features,
@@ -372,47 +431,9 @@ class PetService:
                 }
             estimated_price = result.get("estimated_price", 0)
 
-            # 获取锚点详细信息
-            anchors_result = self.find_pet_anchors(
-                pet_data=pet_data,
-                similarity_threshold=similarity_threshold,
-                max_anchors=max_anchors
-            )
-            anchors = anchors_result.get("anchors", [])
-            anchor_count = anchors_result.get("found_count", 0)
-
-            # 处理锚点数据
-            processed_anchors = []
-            for anchor in anchors:
-                anchor_equip_sn = anchor.get("equip_sn")
-                
-                # 通过equip_sn查询完整的宠物信息
-                full_pet_info = None
-                if anchor_equip_sn:
-                    full_pet_info = self._get_pet_by_equip_sn(anchor_equip_sn)
-                
-                # 组合锚点信息和完整宠物信息
-                if full_pet_info:
-                    anchor_info = {
-                        **full_pet_info,
-                        "equip_sn": anchor_equip_sn,
-                        "similarity": round(float(anchor.get("similarity", 0)), 3),
-                    }
-                else:
-                    # 如果无法获取完整信息，使用基础信息
-                    anchor_info = {
-                        "equip_sn": anchor_equip_sn,
-                        "similarity": round(float(anchor.get("similarity", 0)), 3),
-                        "price": float(anchor.get("price", 0)),
-                        "equip_name": "未知宠物",
-                        "server_name": "未知服务器",
-                        "level": 0,
-                        "growth": 0,
-                        "all_skill": "",
-                        "sp_skill": "0",
-                        "is_baobao": "否",
-                    }
-                processed_anchors.append(anchor_info)
+            # 直接使用calculate_value返回的锚点信息，避免重复查找
+            anchors = result.get("anchors", [])
+            anchor_count = result.get("anchor_count", 0)
 
             return {
                 "estimated_price": estimated_price,
@@ -422,11 +443,9 @@ class PetService:
                 "confidence": result.get("confidence", 0),
                 "similarity_threshold": similarity_threshold,
                 "max_anchors": max_anchors,
-                "anchors": processed_anchors,
+                "anchors": anchors,
                 "price_range": result.get("price_range", {}),
-                "fallback_used": result.get("fallback_used", False),
-                "statistics": anchors_result.get("statistics", {}),
-                "message": anchors_result.get("message", "")
+                "fallback_used": result.get("fallback_used", False)
             }
         except Exception as e:
             logger.error(f"获取宠物估价时出错: {e}")

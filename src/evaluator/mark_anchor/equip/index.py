@@ -13,38 +13,22 @@ from .equip_market_data_collector import EquipMarketDataCollector
 from ..lingshi.lingshi_market_data_collector import LingshiMarketDataCollector
 from ..pet_equip.pet_equip_market_data_collector import PetEquipMarketDataCollector
 
+# 导入通用工具
+from ...utils.base_valuator import BaseValuator
+
+# 导入装备类型常量
+from ...constants.equipment_types import (
+    LINGSHI_KINDIDS, PET_EQUIP_KINDID, EQUIP_CATEGORIES,
+    is_lingshi, is_pet_equip, get_equip_category, get_equip_category_name
+)
+
 
 class BaseEquipmentConfig:
     """基础装备配置类 - 提供默认的配置"""
 
     def __init__(self):
-        # 装备类型分类
-        self.equip_categories = {
-            # 武器类
-            'weapons': {
-                'name': '武器',
-                'kindids': [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 52, 53, 54, 72, 73, 74],
-                'description': '包含枪矛、斧钺、剑、双短剑、飘带、爪刺、扇、魔棒、鞭、环圈、刀、锤、宝珠、弓箭、法杖、灯笼、巨剑、伞'
-            },
-            # 防具类
-            'armors': {
-                'name': '防具',
-                'kindids': [18, 59],
-                'description': '包含铠甲、女衣'
-            },
-            # 饰品类
-            'accessories': {
-                'name': '饰品',
-                'kindids': [17, 19, 20, 21, 58],
-                'description': '包含头盔、鞋子、腰带、饰物、发钗'
-            },
-            # 灵饰类
-            'lingshi': {
-                'name': '灵饰',
-                'kindids': [61, 62, 63, 64],
-                'description': '包含灵饰'
-            }
-        }
+        # 装备类型分类 - 使用常量管理
+        self.equip_categories = EQUIP_CATEGORIES
 
         # 基础特征权重配置
         self.base_feature_weights = {
@@ -150,12 +134,7 @@ class BaseEquipmentConfig:
         Returns:
             bool: True表示是灵饰，False表示不是
         """
-        lingshi_kindids = [61, 62, 63, 64]
-
-        if kindid in lingshi_kindids:
-            return True
-        else:
-            return False
+        return is_lingshi(kindid)
 
 
 class EquipmentTypePlugin(ABC):
@@ -394,10 +373,11 @@ class EquipmentPluginManager:
         return None
 
 
-class EquipAnchorEvaluator:
+class EquipAnchorEvaluator(BaseValuator):
     """装备锚定估价器 - 支持插拔式装备类型配置"""
 
     def __init__(self):
+        super().__init__()
         """
         初始化装备锚定估价器
 
@@ -430,7 +410,7 @@ class EquipAnchorEvaluator:
         # 初始化插拔式配置系统
         self.base_config = BaseEquipmentConfig()
         self.plugin_manager = EquipmentPluginManager(self.base_config)
-
+        
         print("装备锚定估价器初始化完成，支持插拔式装备类型配置")
         print(f"已加载插件: {[p.plugin_name for p in self.plugin_manager.plugins]}")
 
@@ -457,7 +437,8 @@ class EquipAnchorEvaluator:
     def find_market_anchors(self,
                             target_features: Dict[str, Any],
                             similarity_threshold: float = 0.7,
-                            max_anchors: int = 30) -> List[Dict[str, Any]]:
+                            max_anchors: int = 30,
+                            verbose: bool = True) -> List[Dict[str, Any]]:
         """
         寻找市场锚点装备
 
@@ -465,6 +446,7 @@ class EquipAnchorEvaluator:
             target_features: 目标装备特征字典
             similarity_threshold: 相似度阈值（0-1）
             max_anchors: 最大锚点数量
+            verbose: 是否显示详细调试日志（单个估价默认开启）
 
         Returns:
             List[Dict[str, Any]]: 锚点装备列表，每个元素包含：
@@ -474,10 +456,11 @@ class EquipAnchorEvaluator:
                 - features: 完整特征数据
         """
         try:
-            print(f"开始寻找装备市场锚点，相似度阈值: {similarity_threshold}")
+            if verbose:
+                print(f"开始寻找装备市场锚点，相似度阈值: {similarity_threshold}")
             # 获取目标装备的equip_sn，用于排除自身
             target_equip_sn = target_features.get('equip_sn')
-            if target_equip_sn:
+            if target_equip_sn and verbose:
                 print(f"目标装备序列号: {target_equip_sn}，将排除自身")
 
             # 构建预过滤条件以提高效率
@@ -491,16 +474,18 @@ class EquipAnchorEvaluator:
             if self.base_config.is_lingshi(target_kindid):
                 # 灵饰使用灵饰市场数据采集器
                 market_data = self.lingshi_market_collector.get_market_data_with_business_rules(pre_filters)
-            elif target_kindid == 29:
+            elif is_pet_equip(target_kindid):
                 # 宠物装备使用宠物装备市场数据采集器
-                print(f"宠物装备类型target_features: {pre_filters}")
+                if verbose:
+                    print(f"宠物装备类型target_features: {pre_filters}")
                 market_data = self.pet_equip_market_collector.get_market_data_with_addon_classification({
                         **pre_filters,
                         **target_features
                     })
             elif needs_addon_filter:
                 # 需要属性分类过滤的装备类型（武器和防具）
-                print(f"装备类型 {target_kindid} 需要属性分类过滤")
+                if verbose:
+                    print(f"装备类型 {target_kindid} 需要属性分类过滤")
                 pre_filters.update({
                     'addon_minjie': target_features.get('addon_minjie', 0),
                     'addon_liliang': target_features.get('addon_liliang', 0),
@@ -513,7 +498,8 @@ class EquipAnchorEvaluator:
                     pre_filters)
             else:
                 # 不需要属性分类过滤的装备类型
-                print(f"装备类型 {target_kindid} 不需要属性分类过滤")
+                if verbose:
+                    print(f"装备类型 {target_kindid} 不需要属性分类过滤")
                 # 获取预过滤的市场数据（不使用属性分类过滤）
                 market_data = self.market_collector.get_market_data(
                     kindid=pre_filters.get('kindid'),
@@ -525,10 +511,12 @@ class EquipAnchorEvaluator:
                 )
 
             if market_data.empty:
-                print("装备市场数据为空，无法找到锚点")
+                if verbose:
+                    print("装备市场数据为空，无法找到锚点")
                 return []
 
-            print(f"预过滤后获得 {len(market_data)} 条候选装备数据")
+            if verbose:
+                print(f"预过滤后获得 {len(market_data)} 条候选装备数据")
 
             # 计算所有市场装备的相似度
             anchor_candidates = []
@@ -550,7 +538,7 @@ class EquipAnchorEvaluator:
                     if self.base_config.is_lingshi(target_kindid):
                         # 灵饰数据已经在数据库中完成特征提取，直接使用
                         market_features = market_row.to_dict()
-                    elif target_kindid == 29:
+                    elif target_kindid == PET_EQUIP_KINDID:
                         # 宠物装备数据已经在数据库中完成特征提取，直接使用
                         market_features = market_row.to_dict()
                     else:
@@ -560,7 +548,7 @@ class EquipAnchorEvaluator:
 
                     # 计算相似度
                     similarity = self._calculate_similarity(
-                        target_features, market_features)
+                        target_features, market_features, verbose=verbose)
 
                     if similarity >= similarity_threshold:
                         anchor_candidates.append({
@@ -590,14 +578,19 @@ class EquipAnchorEvaluator:
             # 返回前N个锚点
             anchors = anchor_candidates[:max_anchors]
 
-            print(f"找到 {len(anchors)} 个装备市场锚点")
-            if excluded_self_count > 0:
-                print(f"排除目标装备自身 {excluded_self_count} 次")
+            # 对锚点进行极端值过滤
             if anchors:
-                print(
-                    f"相似度范围: {anchors[-1]['similarity']:.3f} - {anchors[0]['similarity']:.3f}")
-                print(
-                    f"价格范围: {min(a['price'] for a in anchors):.1f} - {max(a['price'] for a in anchors):.1f}")
+                anchors = self.extreme_value_filter.filter_anchors_for_extreme_values(anchors)
+
+            if verbose:
+                print(f"找到 {len(anchors)} 个装备市场锚点")
+                if excluded_self_count > 0:
+                    print(f"排除目标装备自身 {excluded_self_count} 次")
+                if anchors:
+                    print(
+                        f"相似度范围: {anchors[-1]['similarity']:.3f} - {anchors[0]['similarity']:.3f}")
+                    print(
+                        f"价格范围: {min(a['price'] for a in anchors):.1f} - {max(a['price'] for a in anchors):.1f}")
 
             return anchors
 
@@ -677,20 +670,22 @@ class EquipAnchorEvaluator:
                     print(
                         f"[灵饰主属性] kindid={kindid}, 主属性={attr_name}, 值={attr_value}")
                     break  # 只取第一个找到的主属性
-        elif kindid == 29:
+        elif kindid == PET_EQUIP_KINDID:
             print(f"TODO:")
 
         return filters
 
     def _calculate_similarity(self,
                               target_features: Dict[str, Any],
-                              market_features: Dict[str, Any]) -> float:
+                              market_features: Dict[str, Any],
+                              verbose: bool = False) -> float:
         """
         计算两个装备特征的相似度 - 支持插拔式装备类型配置
 
         Args:
             target_features: 目标装备特征
             market_features: 市场装备特征
+            verbose: 是否显示详细调试日志（批量估价默认关闭）
 
         Returns:
             float: 相似度分数（0-1）
@@ -718,9 +713,8 @@ class EquipAnchorEvaluator:
             # 合并所有特征名称（包括派生特征）
             all_features = set(enhanced_target_features.keys()) | set(
                 enhanced_market_features.keys())
-            # 过滤掉一些元数据字段
-            excluded_features = {'equip_sn',
-                                 'price', 'server_id', 'create_time'}
+            # 过滤掉一些元数据字段 ???FIXME:为什么这么多元数据字段
+            excluded_features = {'equip_sn', 'price', 'server_id', 'create_time', 'index', 'original_data'}
             all_features = all_features - excluded_features
 
             # 收集所有特征的计算结果，用于按得分排序输出
@@ -733,7 +727,9 @@ class EquipAnchorEvaluator:
                 target_val = enhanced_target_features.get(feature_name, 0)
                 market_val = enhanced_market_features.get(feature_name, 0)
                 weight = feature_weights.get(feature_name, 0.5)
-
+                # 权重为0的特征不参与计算
+                if weight == 0:
+                    continue
                 # 尝试使用插件的自定义相似度计算
                 plugin_similarity = self.plugin_manager.calculate_plugin_similarity(
                     kindid, feature_name, target_val, market_val)
@@ -772,26 +768,28 @@ class EquipAnchorEvaluator:
                             feature_similarity = max(
                                 0.0, 1.0 - diff * 0.2)  # 每多1次失败，相似度降低0.2
                         calculation_method = "修理"
-                    elif feature_name in ['special_skill', 'suit_effect']:
+                    elif feature_name in ['special_skill']:
                         # 特技和套装效果必须完全一致（容忍度为0）
                         if target_val == market_val:
                             feature_similarity = 1.0
                         else:
                             feature_similarity = 0.0
-                        calculation_method = "特技"
+                        calculation_method = "特技/套装"
                     elif target_val == 0 or market_val == 0:
                         feature_similarity = 0.10
                         calculation_method = "零值"
+                    
                     else:
                         # 计算相对差异 - 先检查数据类型
                         try:
                             # 处理列表和字典类型的特征值
                             if isinstance(target_val, (list, dict)) or isinstance(market_val, (list, dict)):
-                                print(f"[DEBUG] 特征 '{feature_name}' 包含复杂类型:")
-                                print(
-                                    f"  目标值: {target_val} (类型: {type(target_val)})")
-                                print(
-                                    f"  市场值: {market_val} (类型: {type(market_val)})")
+                                if verbose:
+                                    print(f"[DEBUG] 特征 '{feature_name}' 包含复杂类型:")
+                                    print(
+                                        f"  目标值: {target_val} (类型: {type(target_val)})")
+                                    print(
+                                        f"  市场值: {market_val} (类型: {type(market_val)})")
 
                                 # 对于复杂类型，使用简单匹配
                                 if target_val == market_val:
@@ -825,12 +823,13 @@ class EquipAnchorEvaluator:
 
                         except (TypeError, ValueError) as e:
                             # 捕获类型错误并记录详细信息
-                            print(f"[DEBUG] 特征 '{feature_name}' 转换失败:")
-                            print(
-                                f"  目标值: {target_val} (类型: {type(target_val)})")
-                            print(
-                                f"  市场值: {market_val} (类型: {type(market_val)})")
-                            print(f"  错误信息: {e}")
+                            if verbose:
+                                print(f"[DEBUG] 特征 '{feature_name}' 转换失败:")
+                                print(
+                                    f"  目标值: {target_val} (类型: {type(target_val)})")
+                                print(
+                                    f"  市场值: {market_val} (类型: {type(market_val)})")
+                                print(f"  错误信息: {e}")
 
                             # 对于无法处理的类型，使用简单匹配
                             if target_val == market_val:
@@ -867,20 +866,32 @@ class EquipAnchorEvaluator:
             feature_results.sort(key=lambda x: x['weight'], reverse=True)
 
             # 添加特征权重日志
-            print(f"\n=== 相似度计算详情 (kindid: {kindid}) ===")
-            print("特征名称                 | 目标值    | 市场值    | 权重     | 相似度   | 加权得分 | 计算方法")
-            print("-" * 90)
+            if verbose:
+                print(f"\n=== 相似度计算详情 (kindid: {kindid}) ===")
+                print("特征名称                 | 目标值    | 市场值    | 权重     | 相似度   | 加权得分 | 计算方法")
+                print("-" * 90)
 
-            for result in feature_results:
-                if result['weight'] > 0.1:
-                    print(f"{result['name']:20s} | {str(result['target_val']):>8s} | {str(result['market_val']):>8s} | {result['weight']:7.2f} | {result['similarity']:7.3f} | {result['weighted_score']:7.3f} | {result['method']:>6s}")
+                for result in feature_results:
+                    if result['weight'] > 0.1:
+                        # 特殊处理gem_score，保留两位小数
+                        target_val_str = str(result['target_val'])
+                        market_val_str = str(result['market_val'])
+                        
+                        if result['name'] == 'gem_score':
+                            # 对于gem_score，如果是浮点数，保留两位小数
+                            if isinstance(result['target_val'], (int, float)):
+                                target_val_str = f"{result['target_val']:.2f}"
+                            if isinstance(result['market_val'], (int, float)):
+                                market_val_str = f"{result['market_val']:.2f}"
+                        
+                        print(f"{result['name']:20s} | {target_val_str:>8s} | {market_val_str:>8s} | {result['weight']:7.2f} | {result['similarity']:7.3f} | {result['weighted_score']:7.3f} | {result['method']:>6s}")
 
-            print("-" * 90)
-            print(
-                f"{'总计':20s} | {'':8s} | {'':8s} | {total_weight:7.2f} | {'':7s} | {weighted_similarity:7.3f} | {'':6s}")
-            print(
-                f"最终相似度: {weighted_similarity:.3f} / {total_weight:.3f} = {weighted_similarity/total_weight if total_weight > 0 else 0:.3f}")
-            print("=" * 90)
+                print("-" * 90)
+                print(
+                    f"{'总计':20s} | {'':8s} | {'':8s} | {total_weight:7.2f} | {'':7s} | {weighted_similarity:7.3f} | {'':6s}")
+                print(
+                    f"最终相似度: {weighted_similarity:.3f} / {total_weight:.3f} = {weighted_similarity/total_weight if total_weight > 0 else 0:.3f}")
+                print("=" * 90)
 
             return weighted_similarity / total_weight if total_weight > 0 else 0.0
 
@@ -987,287 +998,3 @@ class EquipAnchorEvaluator:
         # 其他套装效果：使用简化逻辑，给予较低的相似度
         # 这样可以避免套装效果差异过大的装备被误认为相似
         return 0.2
-
-    def calculate_value(self,
-                        target_features: Dict[str, Any],
-                        strategy: str = 'fair_value',
-                        similarity_threshold: float = 0.7,
-                        max_anchors: int = 30) -> Dict[str, Any]:
-        """
-        计算装备价值
-
-        Args:
-            target_features: 目标装备特征字典
-            strategy: 定价策略 ('competitive', 'fair_value', 'premium')
-            similarity_threshold: 相似度阈值（0-1）
-            max_anchors: 最大锚点数量
-
-        Returns:
-            Dict[str, Any]: 估价结果，包含：
-                - estimated_price: 估算价格
-                - anchor_count: 锚点数量
-                - price_range: 价格范围
-                - confidence: 置信度
-                - strategy_used: 使用的策略
-                - fallback_used: 是否使用了保底估价
-        """
-        try:
-            print(
-                f"开始计算装备价值，策略: {strategy}，相似度阈值: {similarity_threshold}，最大锚点数: {max_anchors}")
-
-            # 寻找市场锚点
-            anchors = self.find_market_anchors(
-                target_features, similarity_threshold, max_anchors)
-
-            if len(anchors) == 0:
-                self.logger.error(f"未找到装备市场锚点")
-                return {
-                    'estimated_price': 0,
-                    'anchor_count': 0,
-                    'price_range': {
-                        'min': 0,
-                        'max': 0,
-                        'mean': 0,
-                        'median': 0
-                    },
-                    'confidence': 0,
-                    'strategy_used': strategy,
-                    'fallback_used': True,
-                    'error': '未找到足够的相似装备进行估价',
-                    'anchors': []
-                }
-
-            # 提取锚点价格
-            anchor_prices = [anchor['price'] for anchor in anchors]
-            anchor_similarities = [anchor['similarity'] for anchor in anchors]
-
-            # 根据策略计算估价
-            if strategy == 'competitive':
-                # 竞争性定价：25%分位数 × 0.9
-                estimated_price = float(np.percentile(anchor_prices, 25) * 0.9)
-            elif strategy == 'premium':
-                # 溢价定价：75%分位数 × 0.95
-                estimated_price = float(
-                    np.percentile(anchor_prices, 75) * 0.95)
-            else:  # fair_value
-                # 公允价值：相似度加权中位数 × 0.93
-                base_price = self._weighted_median(
-                    anchor_prices, anchor_similarities)
-                estimated_price = float(base_price * 0.93)
-
-            # 计算置信度
-            confidence = self._calculate_confidence(
-                anchors, len(anchor_prices))
-
-            # 构建结果
-            result = {
-                'estimated_price': round(estimated_price, 1),
-                'anchor_count': len(anchors),
-                'price_range': {
-                    'min': float(min(anchor_prices)),
-                    'max': float(max(anchor_prices)),
-                    'mean': float(np.mean(anchor_prices)),
-                    'median': float(np.median(anchor_prices))
-                },
-                'confidence': float(confidence),
-                'strategy_used': strategy,
-                'fallback_used': False,
-                'anchors': anchors[:5]  # 返回前5个最相似的锚点用于展示
-            }
-
-            print(
-                f"装备估价完成: {estimated_price:.1f}，基于 {len(anchors)} 个锚点，置信度: {confidence:.2f}")
-
-            return result
-
-        except Exception as e:
-            self.logger.error(f"计算装备价值失败: {e}")
-            return {
-                'estimated_price': 0,
-                'anchor_count': 0,
-                'error': str(e)
-            }
-
-    def _weighted_median(self, values: List[float], weights: List[float]) -> float:
-        """
-        计算加权中位数
-
-        Args:
-            values: 数值列表
-            weights: 权重列表
-
-        Returns:
-            float: 加权中位数
-        """
-        if not values or not weights:
-            return 0.0
-
-        # 将数值和权重配对并排序
-        paired = list(zip(values, weights))
-        paired.sort(key=lambda x: x[0])
-
-        # 计算累积权重
-        total_weight = sum(weights)
-        cumulative_weight = 0
-
-        for value, weight in paired:
-            cumulative_weight += weight
-            if cumulative_weight >= total_weight * 0.5:
-                return float(value)
-
-        return float(paired[-1][0])  # fallback
-
-    def _calculate_confidence(self, anchors: List[Dict[str, Any]], anchor_count: int) -> float:
-        """
-        计算估价置信度
-
-        Args:
-            anchors: 锚点列表
-            anchor_count: 锚点数量
-
-        Returns:
-            float: 置信度（0-1）
-        """
-        # 基础置信度基于锚点数量
-        base_confidence = min(anchor_count / 20.0, 1.0)  # 20个锚点达到满分
-
-        # 相似度加成
-        if anchors:
-            avg_similarity = float(np.mean([anchor['similarity']
-                                           for anchor in anchors]))
-            similarity_bonus = avg_similarity * 0.3
-        else:
-            similarity_bonus = 0
-
-        # 价格稳定性加成
-        if len(anchors) >= 3:
-            prices = [anchor['price'] for anchor in anchors]
-            price_cv = float(np.std(prices) /
-                             np.mean(prices)) if np.mean(prices) > 0 else 1.0
-            stability_bonus = max(0, (0.5 - price_cv) * 0.4)  # CV低于0.5时有加成
-        else:
-            stability_bonus = 0
-
-        final_confidence = min(
-            base_confidence + similarity_bonus + stability_bonus, 1.0)
-        return float(final_confidence)
-
-    def value_distribution_report(self, target_features: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        生成装备价值分布报告
-
-        Args:
-            target_features: 目标装备特征字典
-
-        Returns:
-            Dict[str, Any]: 价值分布报告
-        """
-        try:
-            print("生成装备价值分布报告...")
-
-            # 寻找锚点
-            anchors = self.find_market_anchors(
-                target_features, similarity_threshold=0.5, max_anchors=50)
-
-            if len(anchors) == 0:
-                return {
-                    'error': '未找到足够的装备市场锚点',
-                    'min_price': 0,
-                    'max_price': 0,
-                    'median_price': 0,
-                    'anchor_count': 0
-                }
-
-            # 提取价格数据
-            prices = [anchor['price'] for anchor in anchors]
-            similarities = [anchor['similarity'] for anchor in anchors]
-
-            # 计算统计量
-            min_price = float(min(prices))
-            max_price = float(max(prices))
-            median_price = float(np.median(prices))
-            percentile_25 = float(np.percentile(prices, 25))
-            percentile_75 = float(np.percentile(prices, 75))
-
-            # 计算推荐价格
-            competitive_result = self.calculate_value(
-                target_features, 'competitive', max_anchors=len(anchors))
-            fair_result = self.calculate_value(
-                target_features, 'fair_value', max_anchors=len(anchors))
-
-            # 生成价格分布直方图数据
-            hist_bins = 10
-            hist_counts, hist_edges = np.histogram(prices, bins=hist_bins)
-
-            # 构建报告
-            report = {
-                'min_price': min_price,
-                'max_price': max_price,
-                'median_price': median_price,
-                'percentile_25': percentile_25,
-                'percentile_75': percentile_75,
-                'recommended_competitive': competitive_result['estimated_price'],
-                'recommended_fair': fair_result['estimated_price'],
-                'anchor_count': len(anchors),
-                'price_distribution': {
-                    'bins': [float(edge) for edge in hist_edges],
-                    'counts': [int(count) for count in hist_counts]
-                },
-                'anchor_details': [
-                    {
-                        'equip_sn': anchor['equip_sn'],
-                        'price': float(anchor['price']),
-                        'similarity': round(float(anchor['similarity']), 3),
-                        'equip_level': int(anchor['features'].get('equip_level', 0)),
-                        'kindid': int(anchor['features'].get('kindid', 0))
-                    }
-                    for anchor in anchors[:20]  # 返回前20个详细信息
-                ]
-            }
-
-            print(f"装备价值分布报告生成完成，基于 {len(anchors)} 个锚点")
-
-            return report
-
-        except Exception as e:
-            self.logger.error(f"生成装备价值分布报告失败: {e}")
-            return {'error': str(e)}
-
-    def batch_valuation(self,
-                        equip_list: List[Dict[str, Any]],
-                        strategy: str = 'fair_value') -> List[Dict[str, Any]]:
-        """
-        批量装备估价
-
-        Args:
-            equip_list: 装备特征列表
-            strategy: 定价策略
-
-        Returns:
-            List[Dict[str, Any]]: 批量估价结果列表
-        """
-        results = []
-
-        print(f"开始批量装备估价，共 {len(equip_list)} 个装备")
-
-        for i, equip_features in enumerate(equip_list):
-            try:
-                result = self.calculate_value(equip_features, strategy)
-                result['equip_index'] = i
-                results.append(result)
-
-                if (i + 1) % 10 == 0:
-                    print(f"已完成 {i + 1}/{len(equip_list)} 个装备的估价")
-
-            except Exception as e:
-                self.logger.error(f"批量估价第 {i+1} 个装备失败: {e}")
-                results.append({
-                    'equip_index': i,
-                    'estimated_price': 0,
-                    'error': str(e)
-                })
-
-        print(
-            f"批量装备估价完成，成功估价 {len([r for r in results if 'error' not in r])} 个装备")
-
-        return results

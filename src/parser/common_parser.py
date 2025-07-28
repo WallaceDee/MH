@@ -12,16 +12,18 @@ from typing import Dict, Any, Optional
 from functools import lru_cache
 
 try:
-    from ..cbg_config import (
+    from cbg_config import (
         HUMAN_SCHOOLS, DEMON_SCHOOLS, IMMORTAL_SCHOOLS,
         CHINESE_NUM_CONFIG, ROLE_ZHUAN_ZHI_CONFIG
     )
-    from .config_loader import get_config_loader
+    from parser.config_loader import get_config_loader
 except ImportError:
     # 当作为独立模块运行时，使用绝对导入
     import sys
     import os
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from src.utils.project_path import get_project_root
+    project_root = get_project_root()
+    sys.path.insert(0, project_root)
     from cbg_config import (
         HUMAN_SCHOOLS, DEMON_SCHOOLS, IMMORTAL_SCHOOLS,
         CHINESE_NUM_CONFIG, ROLE_ZHUAN_ZHI_CONFIG

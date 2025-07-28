@@ -12,6 +12,9 @@ import logging
 from datetime import datetime
 import sys
 
+# 添加项目根目录到 Python 路径
+from src.utils.project_path import get_project_root, get_data_path
+
 class AddonStatusMigrator:
     """addon_status字段类型迁移器"""
     
@@ -138,7 +141,7 @@ class AddonStatusMigrator:
 def main():
     """主函数"""
     # 获取项目根目录
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    project_root = get_project_root()
     
     # 支持命令行参数指定数据库文件名
     if len(sys.argv) > 1:
@@ -148,7 +151,7 @@ def main():
         current_month = datetime.now().strftime('%Y%m')
         db_filename = f"cbg_equip_{current_month}.db"
     
-    equip_db_path = os.path.join(project_root, 'data', db_filename)
+    equip_db_path = os.path.join(get_data_path(), db_filename)
     
     print("🔧 开始迁移 addon_status 字段类型...")
     print(f"📁 数据库路径: {equip_db_path}")

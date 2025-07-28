@@ -1,6 +1,6 @@
 <template>
   <div class="similar-pet-retry">
-    <el-alert v-if="message" :title="message" type="warning" show-icon style="margin-bottom: 12px;" />
+    <el-alert v-if="message" :title="message" type="warning" show-icon style="margin-bottom: 12px;" :closable="false"/>
     <el-button v-if="canRetry" type="primary" :loading="loading" @click="$emit('retry', currentThreshold)">
       重试（相似度阈值: {{ currentThreshold }}）
     </el-button>

@@ -9,7 +9,8 @@ import os
 import sys
 
 # 添加src目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 src_path = os.path.join(project_root, 'src')
 sys.path.insert(0, src_path)
 

@@ -1,33 +1,97 @@
 <template>
   <div class="home">
     <!-- 爬虫配置区域 -->
-    <el-card class="spider-config-card">
+    <el-card class="spider-config-card" shadow="never">
       <div slot="header" class="card-header">
-        <span>🕷️ 爬虫配置</span>
+        <div><span class="emoji-icon">🤡</span> 配置</div>
       </div>
+      <el-row type="flex">
+        <div style="width: 140px;text-align: center;">
+          <template v-if="externalParams.large_equip_desc">
+           <el-col :span="24"> <p class="cBlue">目标装备</p></el-col>
+          <EquipmentImage  :extractFeatures="!!externalParams.large_equip_desc"
+            searchInCBG :equipment="externalParams" :popoverWidth="450" style="display: block;"
+            @onExtractQuery="onExtractQuery" />
+          </template>
+        </div>
+        <!-- 全局设置 -->
+        <el-form style="width: 100%;flex-shrink: 1;" :model="globalSettings" v-show="activeTab !== 'playwright'">
+          <el-row :gutter="20">
+            <el-col :span="4">
+              <el-form-item label="📄 爬取页数" size="small">
+                <el-input-number v-model="globalSettings.max_pages" :min="1" :max="100" controls-position="right"
+                  style="width: 100%"></el-input-number>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item :label="`⏱️ 延迟范围(秒) 当前：${globalSettings.delay_min} - ${globalSettings.delay_max} 秒`"
+                size="small">
+                <el-slider v-model="delayRange" range show-stops :min="5" :max="30" :step="1"
+                  @change="onDelayRangeChange" style="width: 100%;display: inline-block;">
+                </el-slider>
+              </el-form-item>
+            </el-col>
 
-      <el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
+          </el-row>
+          <el-row>
+            <el-col :span="4">
+              <el-form-item label="🌐 使用浏览器" size="small">
+                <el-switch v-model="globalSettings.use_browser" @change="onGlobalBrowserToggle"></el-switch>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="⚡ 快速配置" size="small" style="width: 100%;">
+                <el-row type="flex"><el-button size="mini" @click="quickConfig('small')">10页</el-button>
+                  <el-button size="mini" @click="quickConfig('medium')">50页</el-button>
+                  <el-button size="mini" @click="quickConfig('large')">100页</el-button></el-row>
+              </el-form-item></el-col>
+          </el-row>
+        </el-form>
+      </el-row>
+
+      <el-tabs v-model="activeTab" @tab-click="handleTabClick" tab-position="left">
+        <!-- Playwright半自动收集器 -->
+        <el-tab-pane label="🎯 Playwright" name="playwright">
+          <el-form :model="playwrightForm" label-width="120px" size="small">
+            <el-form-item label="无头模式">
+              <el-switch v-model="playwrightForm.headless" @change="onHeadlessToggle"></el-switch>
+              <span class="form-tip">关闭后可以看到浏览器操作过程</span>
+            </el-form-item>
+
+            <el-form-item label="目标URL">
+              <el-select v-model="playwrightForm.target_url" style="width: 100%" @change="onTargetUrlChange">
+                <el-option label="角色推荐搜索" value="role_recommend"></el-option>
+                <el-option label="装备推荐搜索" value="equip_recommend"></el-option>
+                <el-option label="宠物推荐搜索" value="pet_recommend"></el-option>
+                <el-option label="自定义URL" value="custom"></el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="自定义URL" v-if="playwrightForm.target_url === 'custom'">
+              <el-input v-model="playwrightForm.custom_url" placeholder="请输入完整的CBG URL" style="width: 100%">
+                <template slot="prepend">https://</template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="startPlaywrightCollector" :loading="isRunning">
+                🚀 启动 🎯
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
         <!-- 角色爬虫 -->
-        <el-tab-pane label="👤 角色爬虫" name="role">
-          <div class="tab-header">
-            <h4>角色数据爬取</h4>
-            <div class="quick-actions">
-              <el-button size="mini" @click="quickConfigRole('small')">快速配置(小)</el-button>
-              <el-button size="mini" @click="quickConfigRole('medium')">快速配置(中)</el-button>
-              <el-button size="mini" @click="quickConfigRole('large')">快速配置(大)</el-button>
-            </div>
-          </div>
-          <el-form :model="roleForm" label-width="100px" size="small">
-            <el-form-item label="爬取页数">
-              <el-input-number v-model="roleForm.max_pages" :min="1" :max="100" style="width: 100%"></el-input-number>
-            </el-form-item>
-            <el-form-item label="使用浏览器">
-              <el-switch v-model="roleForm.use_browser" @change="onRoleBrowserToggle"></el-switch>
-            </el-form-item>
+        <el-tab-pane label="👤 角色" name="role">
 
+          <el-form :model="roleForm" label-width="100px" size="small">
             <!-- JSON参数编辑器 -->
-            <div v-if="!roleForm.use_browser" class="params-editor">
+            <div v-if="!globalSettings.use_browser" class="params-editor">
+              <div class="params-actions">
                 <el-button type="text" size="mini" @click="resetRoleParams">重置</el-button>
+                <el-button type="primary" size="mini" @click="saveRoleParams" :loading="roleSaving"
+                  :disabled="!!roleJsonError">
+                  保存配置
+                </el-button>
+              </div>
               <div class="json-editor-wrapper">
                 <el-input type="textarea" v-model="roleParamsJson" placeholder="请输入角色爬虫参数JSON" :rows="8"
                   @blur="validateRoleJson" class="json-editor">
@@ -38,36 +102,16 @@
               </div>
             </div>
 
-            <el-form-item label="延迟范围(秒)">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-input-number v-model="roleForm.delay_min" :min="1" :max="99"
-                    style="width: 100%"></el-input-number>
-                </el-col>
-                <el-col :span="12">
-                  <el-input-number v-model="roleForm.delay_max" :min="1" :max="99"
-                    style="width: 100%"></el-input-number>
-                </el-col>
-              </el-row>
-            </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="startRoleSpider" :loading="isRunning" style="width: 100%">
-                启动角色爬虫
+              <el-button type="primary" @click="startRoleSpider" :loading="isRunning">
+                🚀 启动 👤
               </el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
 
         <!-- 装备爬虫 -->
-        <el-tab-pane label="⚔️ 装备爬虫" name="equip">
-          <div class="tab-header">
-            <h4>装备数据爬取</h4>
-            <div class="quick-actions">
-              <el-button size="mini" @click="quickConfigEquip('small')">快速配置(小)</el-button>
-              <el-button size="mini" @click="quickConfigEquip('medium')">快速配置(中)</el-button>
-              <el-button size="mini" @click="quickConfigEquip('large')">快速配置(大)</el-button>
-            </div>
-          </div>
+        <el-tab-pane label="⚔️ 装备" name="equip">
           <el-form :model="equipForm" label-width="100px" size="small">
             <el-form-item label="装备类型">
               <el-select v-model="equipForm.equip_type" @change="onEquipTypeChange" style="width: 100%">
@@ -76,16 +120,24 @@
                 <el-option label="宠物装备" value="pet"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="爬取页数">
-              <el-input-number v-model="equipForm.max_pages" :min="1" :max="100" style="width: 100%"></el-input-number>
-            </el-form-item>
-            <el-form-item label="使用浏览器">
-              <el-switch v-model="equipForm.use_browser" @change="onEquipBrowserToggle"></el-switch>
-            </el-form-item>
 
             <!-- JSON参数编辑器 -->
-            <div v-if="!equipForm.use_browser" class="params-editor">
-              <el-button type="text" size="mini" @click="resetEquipParams">重置</el-button>
+            <div v-if="!globalSettings.use_browser" class="params-editor">
+              <div class="params-actions">
+                <el-button type="text" size="mini" @click="resetEquipParams">重置</el-button>
+                <el-button type="primary" size="mini" @click="saveEquipParams" :loading="equipSaving"
+                  :disabled="!!equipJsonError">
+                  保存配置
+                </el-button>
+              </div>
+              <div class="json-editor-wrapper" v-if="externalParams.large_equip_desc">
+                <el-input type="textarea" v-model="externalSearchParams" placeholder="搜索指定参数" :rows="10"
+                  @blur="validateEquipJson" class="json-editor">
+                </el-input>
+                <div v-if="equipJsonError" class="json-error">
+                  <i class="el-icon-warning"></i> {{ equipJsonError }}
+                </div>
+              </div>
               <div class="json-editor-wrapper">
                 <el-input type="textarea" v-model="equipParamsJson" placeholder="请输入装备爬虫参数JSON" :rows="10"
                   @blur="validateEquipJson" class="json-editor">
@@ -96,47 +148,26 @@
               </div>
             </div>
 
-            <el-form-item label="延迟范围(秒)">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-input-number v-model="equipForm.delay_min" :min="1" :max="99"
-                    style="width: 100%"></el-input-number>
-                </el-col>
-                <el-col :span="12">
-                  <el-input-number v-model="equipForm.delay_max" :min="1" :max="99"
-                    style="width: 100%"></el-input-number>
-                </el-col>
-              </el-row>
-            </el-form-item>
             <el-form-item>
-              <el-button type="success" @click="startEquipSpider" :loading="isRunning" style="width: 100%">
-                启动装备爬虫
+              <el-button type="success" @click="startEquipSpider" :loading="isRunning">
+                🚀 启动 ⚔️
               </el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
 
         <!-- 召唤兽爬虫 -->
-        <el-tab-pane label="🐲 召唤兽爬虫" name="pet">
-          <div class="tab-header">
-            <h4>召唤兽数据爬取</h4>
-            <div class="quick-actions">
-              <el-button size="mini" @click="quickConfigPet('small')">快速配置(小)</el-button>
-              <el-button size="mini" @click="quickConfigPet('medium')">快速配置(中)</el-button>
-              <el-button size="mini" @click="quickConfigPet('large')">快速配置(大)</el-button>
-            </div>
-          </div>
+        <el-tab-pane label="🐲 召唤兽" name="pet">
           <el-form :model="petForm" label-width="100px" size="small">
-            <el-form-item label="爬取页数">
-              <el-input-number v-model="petForm.max_pages" :min="1" :max="100" style="width: 100%"></el-input-number>
-            </el-form-item>
-            <el-form-item label="使用浏览器">
-              <el-switch v-model="petForm.use_browser" @change="onPetBrowserToggle"></el-switch>
-            </el-form-item>
-
             <!-- JSON参数编辑器 -->
-            <div v-if="!petForm.use_browser" class="params-editor">
+            <div v-if="!globalSettings.use_browser" class="params-editor">
+              <div class="params-actions">
                 <el-button type="text" size="mini" @click="resetPetParams">重置</el-button>
+                <el-button type="primary" size="mini" @click="savePetParams" :loading="petSaving"
+                  :disabled="!!petJsonError">
+                  保存配置
+                </el-button>
+              </div>
               <div class="json-editor-wrapper">
                 <el-input type="textarea" v-model="petParamsJson" placeholder="请输入召唤兽爬虫参数JSON" :rows="8"
                   @blur="validatePetJson" class="json-editor">
@@ -147,29 +178,18 @@
               </div>
             </div>
 
-            <el-form-item label="延迟范围(秒)">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-input-number v-model="petForm.delay_min" :min="3" :max="99" style="width: 100%"></el-input-number>
-                </el-col>
-                <el-col :span="12">
-                  <el-input-number v-model="petForm.delay_max" :min="3" :max="99" style="width: 100%"></el-input-number>
-                </el-col>
-              </el-row>
-            </el-form-item>
             <el-form-item>
-              <el-button type="warning" @click="startPetSpider" :loading="isRunning" style="width: 100%">
-                启动召唤兽爬虫
+              <el-button type="warning" @click="startPetSpider" :loading="isRunning">
+                🚀 启动 🐲
               </el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
+
       </el-tabs>
     </el-card>
-
-
     <!-- 实时日志监控 -->
-    <el-card class="logs-card" v-if="true">
+    <el-card class="logs-card">
       <div slot="header" class="card-header">
         <span>📝 实时日志</span>
         <div>
@@ -202,10 +222,7 @@
             <div class="status-item">
               <span class="status-label">进度:</span>
               <div class="progress-wrapper">
-                <el-progress 
-                  :percentage="currentTaskStatus.progress || 0" 
-                  :stroke-width="8"
-                  :show-text="true"
+                <el-progress :percentage="currentTaskStatus.progress || 0" :stroke-width="8" :show-text="true"
                   :text-inside="false">
                 </el-progress>
               </div>
@@ -237,196 +254,95 @@
 
     <!-- 第二行 -->
     <el-row :gutter="20">
-      <!-- 代理爬虫 -->
-      <el-col :span="12">
-        <el-card class="spider-card">
-          <div slot="header" class="card-header">
-            <span>🔄 代理爬虫</span>
-          </div>
-          <el-form :model="proxyForm" label-width="100px" size="small">
-            <el-form-item label="爬取页数">
-              <el-input-number v-model="proxyForm.max_pages" :min="1" :max="100" style="width: 100%"></el-input-number>
-            </el-form-item>
-            <el-form-item label="延迟范围(秒)">
-              <el-row :gutter="10">
-                <el-col :span="12">
-                  <el-input-number v-model="proxyForm.delay_min" :min="1" :max="99"
-                    style="width: 100%"></el-input-number>
-                </el-col>
-                <el-col :span="12">
-                  <el-input-number v-model="proxyForm.delay_max" :min="1" :max="99"
-                    style="width: 100%"></el-input-number>
-                </el-col>
-              </el-row>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="info" @click="startProxySpider" :loading="isRunning" style="width: 100%">
-                启动代理爬虫
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </el-col>
-
       <!-- 工具操作 -->
-      <el-col :span="12">
+      <el-col :span="24">
         <el-card class="spider-card">
           <div slot="header" class="card-header">
             <span>🔧 工具操作</span>
           </div>
           <div class="tool-buttons">
-            <el-button type="danger" @click="manageProxies" :loading="isRunning"
-              style="width: 100%; margin-bottom: 10px;">
+            <el-button type="danger" @click="manageProxies" :loading="isRunning">
               🌐 更新代理IP池
             </el-button>
-            <el-button type="primary" @click="runTest" :loading="isRunning" style="width: 100%; margin-bottom: 10px;">
-              🧪 运行系统测试
-            </el-button>
-            <el-button type="warning" @click="stopTask" :disabled="!isRunning"
-              style="width: 100%; margin-bottom: 10px;">
+            <el-button type="warning" @click="stopTask" :disabled="!isRunning">
               ⏹️ 停止当前任务
             </el-button>
-            <el-button type="danger" @click="resetTask" style="width: 100%; margin-bottom: 10px;">
+            <el-button type="danger" @click="resetTask">
               🔄 重置任务状态
             </el-button>
-            <el-button type="info" @click="loadCachedParams" :loading="paramsLoading" style="width: 100%;">
+            <el-button type="info" @click="loadCachedParams" :loading="paramsLoading">
               📋 刷新缓存参数
+            </el-button>
+            <el-button type="info" @click="startProxySpider" :loading="isRunning">
+              启动代理爬虫
             </el-button>
           </div>
         </el-card>
       </el-col>
     </el-row>
-    <!-- 爬虫配置信息 -->
-    <el-card class="config-card">
-      <div slot="header" class="card-header">
-        <span>⚙️ 爬虫配置</span>
-        <el-button type="text" @click="loadConfig" :loading="configLoading">刷新配置</el-button>
-      </div>
-      <el-descriptions :column="2" v-loading="configLoading" size="small">
-        <el-descriptions-item label="默认延迟">
-          {{ config.default_delay || '1-3秒' }}
-        </el-descriptions-item>
-        <el-descriptions-item label="最大重试">
-          {{ config.max_retries || 3 }}
-        </el-descriptions-item>
-        <el-descriptions-item label="超时时间">
-          {{ config.timeout || '30秒' }}
-        </el-descriptions-item>
-        <el-descriptions-item label="用户代理">
-          {{ config.user_agent ? '已配置' : '默认' }}
-        </el-descriptions-item>
-        <el-descriptions-item label="代理状态">
-          <el-tag :type="config.proxy_enabled ? 'success' : 'info'">
-            {{ config.proxy_enabled ? '已启用' : '未启用' }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="输出目录">
-          {{ config.output_dir || './data' }}
-        </el-descriptions-item>
-      </el-descriptions>
-    </el-card>
-
   </div>
 </template>
 
 <script>
+import EquipmentImage from '@/components/EquipmentImage.vue'
+
+
 export default {
   name: 'HomeView',
+  components: {
+    EquipmentImage
+  },
   data() {
     return {
+      // 全局设置
+      globalSettings: {
+        max_pages: 5,
+        delay_min: 8,
+        delay_max: 20,
+        use_browser: false // 新增使用浏览器配置
+      },
+      // 延迟范围滑块
+      delayRange: [8, 20],
       // 角色爬虫表单
       roleForm: {
-        max_pages: 5,
-        use_browser: false,
-        delay_min: 8,
-        delay_max: 20
+        use_browser: false
       },
       // 装备爬虫表单
       equipForm: {
         equip_type: 'normal',
-        max_pages: 5,
-        use_browser: false,
-        delay_min: 8,
-        delay_max: 20
+        use_browser: false
       },
       // 召唤兽爬虫表单
       petForm: {
-        max_pages: 5,
-        use_browser: false,
-        delay_min: 8,
-        delay_max: 20
+        use_browser: false
       },
       // 代理爬虫表单
-      proxyForm: {
-        max_pages: 5,
-        delay_min: 8,
-        delay_max: 20
+      proxyForm: {},
+      // Playwright收集表单
+      playwrightForm: {
+        headless: false,
+        target_url: 'role_recommend',
+        custom_url: ''
       },
       // JSON参数字符串
       roleParamsJson: '',
-      equipParamsJson: '',
+      equipParamsJson: '{}',
       petParamsJson: '',
       // JSON验证错误
       roleJsonError: '',
       equipJsonError: '',
       petJsonError: '',
-      // 默认参数模板
+      // 默认参数模板（将从API动态加载）
       defaultParams: {
-        role: {
-          server_type: 3,
-          search_type: 'overall_search_role',
-          count: 15,
-          view_loc: 'overall_search',
-          level_min: 109,
-          level_max: 109,
-          bb_expt_gongji: 17,
-          bb_expt_fangyu: 17,
-          bb_expt_fashu: 17,
-          bb_expt_kangfa: 17,
-        },
-        equip_normal: {
-          level_min: 0,
-          level_max: 180,
-          search_type: 'overall_search_equip',
-          view_loc: 'overall_search',
-          server_type: 3
-        },
-        equip_lingshi: {
-          level_min: 60,
-          level_max: 160,
-          search_type: 'overall_search_lingshi',
-          view_loc: 'overall_search',
-          server_type: 3
-        },
-        equip_pet: {
-          level_min: 5,
-          level_max: 145,
-          equip_pos: '1',
-          price_min: 3000,
-          server_name: '进贤门',
-          server_id: 77,
-          areaid: 43,
-          search_type: 'search_pet_equip',
-          view_loc: 'search_cond'
-        },
-        pet: {
-          level_min: 0,
-          level_max: 180,
-          search_type: 'overall_search_pet',
-          server_type: 3,
-          evol_skill_mode: 0,
-          count: 15,
-          view_loc: 'overall_search'
-        }
+        role: {},
+        equip_normal: {},
+        equip_lingshi: {},
+        equip_pet: {},
+        equip_pet_equip: {},
+        pet: {}
       },
-      // 爬虫配置
-      config: {},
-      // 文件列表
-      items: [],
       // 加载状态
       isRunning: false,
-      itemsLoading: false,
-      configLoading: false,
       paramsLoading: false,
       logsLoading: false,
       // 日志相关
@@ -435,15 +351,27 @@ export default {
       isLogStreaming: false,
       logEventSource: null,
       // Tab相关
-      activeTab: 'role',
+      activeTab: 'playwright',
       selectedLogFile: 'current',
       logFiles: [],
       // 状态监控
       statusMonitor: null,
-      taskStatus: null
+      taskStatus: null,
+      // 保存状态
+      roleSaving: false,
+      equipSaving: false,
+      petSaving: false,
+      // 缓存清理定时器
+      cacheCleanupTimer: null,
+
+      // 外部参数
+      externalSearchParams: '{}'
     }
   },
   computed: {
+    externalParams() {
+      return JSON.parse(JSON.stringify(this.$route.query))
+    },
     // 当前任务状态信息
     currentTaskStatus() {
       if (!this.taskStatus) {
@@ -467,65 +395,116 @@ export default {
         'stopped': '已停止'
       }
       return statusMap[status] || status
-    }
+    },
+
+
   },
   mounted() {
-    this.loadConfig()
-    this.refreshItems()
-    this.initializeDefaultParams()
-    this.loadLogFiles()
-    // 页面加载时请求一次状态
-    this.checkTaskStatus()
+    // 等待Vuex状态恢复后再执行其他操作
+    this.$nextTick(() => {
+      // 自动清理过期缓存
+      this.$store.dispatch('cookie/cleanExpiredCache')
+      
+      // 启动缓存清理定时器（每分钟检查一次）
+      this.cacheCleanupTimer = setInterval(() => {
+        this.$store.dispatch('cookie/cleanExpiredCache')
+      }, 60 * 1000)
+      
+      this.loadSearchParams()
+      this.loadLogFiles()
+      // 页面加载时请求一次状态
+      this.checkTaskStatus()
+      // 初始化延迟范围滑块
+      this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]
+
+      this.loadExternalParams()
+    })
   },
   beforeDestroy() {
     this.stopLogStream()
     this.stopStatusMonitor()
+    // 清理缓存清理定时器
+    if (this.cacheCleanupTimer) {
+      clearInterval(this.cacheCleanupTimer)
+    }
   },
   methods: {
+    onExtractQuery(query) {
+      this.externalSearchParams = JSON.stringify(query, null, 2)
+    },
+    async loadExternalParams() {
+      if (this.externalParams.activeTab) {
+        this.activeTab = this.externalParams.activeTab
+      }
+      if (this.externalParams.equip_type) {
+        this.equipForm.equip_type = this.externalParams.equip_type
+      }
+    },
     // Tab切换处理
     handleTabClick(tab) {
       console.log('切换到:', tab.name)
       // 可以在这里添加tab切换时的逻辑
     },
 
-    // 快速配置方法
-    quickConfigRole(size) {
+    // 快速配置方法 - 根据当前activeTab配置
+    quickConfig(size) {
       const configs = {
-        small: { max_pages: 3, delay_min: 2, delay_max: 4 },
-        medium: { max_pages: 10, delay_min: 3, delay_max: 6 },
-        large: { max_pages: 30, delay_min: 5, delay_max: 8 }
+        small: { max_pages: 10, delay_min: 10, delay_max: 15 },
+        medium: { max_pages: 50, delay_min: 15, delay_max: 20 },
+        large: { max_pages: 100, delay_min: 20, delay_max: 30 }
       }
       const config = configs[size]
-      Object.assign(this.roleForm, config)
-      this.$message.success(`角色爬虫已配置为${size}规模`)
+      Object.assign(this.globalSettings, config)
+      // 同步更新滑块值
+      this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]
     },
 
-    quickConfigEquip(size) {
-      const configs = {
-        small: { max_pages: 3, delay_min: 2, delay_max: 4 },
-        medium: { max_pages: 10, delay_min: 3, delay_max: 6 },
-        large: { max_pages: 30, delay_min: 5, delay_max: 8 }
-      }
-      const config = configs[size]
-      Object.assign(this.equipForm, config)
-      this.$message.success(`装备爬虫已配置为${size}规模`)
+    // 延迟范围滑块变化处理
+    onDelayRangeChange(value) {
+      this.globalSettings.delay_min = value[0]
+      this.globalSettings.delay_max = value[1]
     },
 
-    quickConfigPet(size) {
-      const configs = {
-        small: { max_pages: 5, delay_min: 3, delay_max: 6 },
-        medium: { max_pages: 50, delay_min: 6, delay_max: 9 },
-        large: { max_pages: 100, delay_min: 8, delay_max: 12 }
+    // 加载搜索参数配置
+    async loadSearchParams() {
+      try {
+        this.paramsLoading = true
+        const response = await this.$api.config.getSearchParams()
+
+        if (response.code === 200) {
+          // 更新默认参数
+          this.defaultParams = {
+            role: response.data.role || {},
+            equip_normal: response.data.equip_normal || {},
+            equip_lingshi: response.data.equip_lingshi || {},
+            equip_pet: response.data.equip_pet || {},
+            equip_pet_equip: response.data.equip_pet_equip || {},
+            pet: response.data.pet || {}
+          }
+
+          // 初始化JSON编辑器
+          this.initializeDefaultParams()
+        } else {
+          this.$notify.error(response.message || '加载搜索参数配置失败')
+          // 使用默认值
+          this.initializeDefaultParams()
+        }
+      } catch (error) {
+        console.error('加载搜索参数配置失败:', error)
+        this.$notify.error('加载搜索参数配置失败: ' + error.message)
+        // 使用默认值
+        this.initializeDefaultParams()
+      } finally {
+        this.paramsLoading = false
       }
-      const config = configs[size]
-      Object.assign(this.petForm, config)
-      this.$message.success(`召唤兽爬虫已配置为${size}规模`)
     },
 
     // 初始化默认参数
     initializeDefaultParams() {
       this.roleParamsJson = JSON.stringify(this.defaultParams.role, null, 2)
-      this.equipParamsJson = JSON.stringify(this.defaultParams.equip_normal, null, 2)
+      // 根据当前装备类型初始化装备参数
+      const equipParamKey = this.getEquipParamKey(this.equipForm.equip_type)
+      this.equipParamsJson = JSON.stringify(this.defaultParams[equipParamKey], null, 2)
       this.petParamsJson = JSON.stringify(this.defaultParams.pet, null, 2)
     },
 
@@ -548,15 +527,46 @@ export default {
       }
     },
 
+    // Playwright收集相关方法
+    onHeadlessToggle(headless) {
+      if (headless) {
+        this.$notify.info({
+          title: '无头模式',
+          message: '浏览器将在后台运行，不会显示界面'
+        })
+      } else {
+        this.$notify.info({
+          title: '有头模式',
+          message: '浏览器将显示界面，可以看到操作过程'
+        })
+      }
+    },
+
+    onTargetUrlChange(value) {
+      if (value === 'custom') {
+        this.playwrightForm.custom_url = ''
+      }
+    },
+
     onEquipTypeChange() {
       // 装备类型改变时切换对应的默认参数
       if (!this.equipForm.use_browser) {
-        const paramKey = `equip_${this.equipForm.equip_type}`
+        const paramKey = this.getEquipParamKey(this.equipForm.equip_type)
         if (this.defaultParams[paramKey]) {
           this.equipParamsJson = JSON.stringify(this.defaultParams[paramKey], null, 2)
           this.equipJsonError = ''
         }
       }
+    },
+
+    // 获取装备参数键
+    getEquipParamKey(equipType) {
+      const paramKeyMap = {
+        normal: 'equip_normal',
+        lingshi: 'equip_lingshi',
+        pet: 'equip_pet_equip'  // 修复：宠物装备应该使用equip_pet_equip
+      }
+      return paramKeyMap[equipType] || 'equip_normal'
     },
 
     // JSON验证方法
@@ -594,7 +604,7 @@ export default {
     },
 
     resetEquipParams() {
-      const paramKey = `equip_${this.equipForm.equip_type}`
+      const paramKey = this.getEquipParamKey(this.equipForm.equip_type)
       this.equipParamsJson = JSON.stringify(this.defaultParams[paramKey], null, 2)
       this.equipJsonError = ''
     },
@@ -604,17 +614,117 @@ export default {
       this.petJsonError = ''
     },
 
+    // 保存参数方法
+    async saveRoleParams() {
+      if (this.roleJsonError) {
+        this.$notify.error('请先修复JSON格式错误')
+        return
+      }
+
+      this.roleSaving = true
+      try {
+        const params = JSON.parse(this.roleParamsJson)
+        const response = await this.$api.config.updateSearchParam('role', params)
+
+        if (response.code === 200) {
+          this.$notify.success('角色参数配置保存成功')
+          // 更新本地默认参数
+          this.defaultParams.role = params
+        } else {
+          this.$notify.error({
+            title: '保存失败',
+            message: response.message || '保存失败'
+          })
+        }
+      } catch (error) {
+        console.error('保存角色参数失败:', error)
+        this.$notify.error({
+          title: '保存失败',
+          message: '保存失败: ' + error.message
+        })
+      } finally {
+        this.roleSaving = false
+      }
+    },
+
+    async saveEquipParams() {
+      if (this.equipJsonError) {
+        this.$notify.error('请先修复JSON格式错误')
+        return
+      }
+
+      this.equipSaving = true
+      try {
+        const params = JSON.parse(this.equipParamsJson)
+        const paramType = this.getEquipParamKey(this.equipForm.equip_type)
+        const response = await this.$api.config.updateSearchParam(paramType, params)
+
+        if (response.code === 200) {
+          this.$notify.success(`${this.getEquipTypeName(this.equipForm.equip_type)}参数配置保存成功`)
+          // 更新本地默认参数
+          this.defaultParams[paramType] = params
+        } else {
+          this.$notify.error({
+            title: '保存失败',
+            message: response.message || '保存失败'
+          })
+        }
+      } catch (error) {
+        console.error('保存装备参数失败:', error)
+        this.$notify.error({
+          title: '保存失败',
+          message: '保存失败: ' + error.message
+        })
+      } finally {
+        this.equipSaving = false
+      }
+    },
+
+    async savePetParams() {
+      if (this.petJsonError) {
+        this.$notify.error('请先修复JSON格式错误')
+        return
+      }
+
+      this.petSaving = true
+      try {
+        const params = JSON.parse(this.petParamsJson)
+        const response = await this.$api.config.updateSearchParam('pet', params)
+
+        if (response.code === 200) {
+          this.$notify.success('宠物参数配置保存成功')
+          // 更新本地默认参数
+          this.defaultParams.pet = params
+        } else {
+          this.$notify.error({
+            title: '保存失败',
+            message: response.message || '保存失败'
+          })
+        }
+      } catch (error) {
+        console.error('保存宠物参数失败:', error)
+        this.$notify.error({
+          title: '保存失败',
+          message: '保存失败: ' + error.message
+        })
+      } finally {
+        this.petSaving = false
+      }
+    },
+
     // 加载缓存参数
     async loadCachedParams() {
-      this.paramsLoading = true
       try {
-        // 这里应该调用后端API获取缓存参数文件内容
-        // 后续可以添加 this.$api.spider.getCachedParams() 接口
-        this.$message.success('缓存参数已刷新')
+        await this.loadSearchParams()
+        this.$notify.success({
+          title: '缓存参数',
+          message: '缓存参数已刷新'
+        })
       } catch (error) {
-        this.$message.error('获取缓存参数失败: ' + error.message)
-      } finally {
-        this.paramsLoading = false
+        this.$notify.error({
+          title: '获取失败',
+          message: '获取缓存参数失败: ' + error.message
+        })
       }
     },
 
@@ -622,13 +732,16 @@ export default {
     async startRoleSpider() {
       if (this.isRunning) return
 
-      if (!this.roleForm.use_browser && this.roleJsonError) {
-        this.$message.error('请先修复JSON格式错误')
+      if (!this.globalSettings.use_browser && this.roleJsonError) {
+        this.$notify.error('请先修复JSON格式错误')
         return
       }
 
       try {
-        const params = { ...this.roleForm }
+        const params = {
+          ...this.globalSettings, // 使用全局设置
+          ...this.roleForm // 角色爬虫特有的参数
+        }
 
         // 如果不使用浏览器，添加缓存参数
         if (!params.use_browser) {
@@ -637,7 +750,10 @@ export default {
 
         const response = await this.$api.spider.startRole(params)
         if (response.code === 200) {
-          this.$message.success('角色爬虫已启动')
+          this.$notify.success({
+            title: '爬虫启动',
+            message: '角色爬虫已启动'
+          })
           this.activeTab = 'role' // 确保切换到角色tab
           this.isRunning = true // 立即设置运行状态
           // 自动启动实时日志监控
@@ -645,10 +761,16 @@ export default {
           // 启动状态监控
           this.startStatusMonitor()
         } else {
-          this.$message.error(response.message || '启动失败')
+          this.$notify.error({
+            title: '启动失败',
+            message: response.message || '启动失败'
+          })
         }
       } catch (error) {
-        this.$message.error('启动失败: ' + error.message)
+        this.$notify.error({
+          title: '启动失败',
+          message: '启动失败: ' + error.message
+        })
       }
     },
 
@@ -657,21 +779,27 @@ export default {
       if (this.isRunning) return
 
       if (!this.equipForm.use_browser && this.equipJsonError) {
-        this.$message.error('请先修复JSON格式错误')
+        this.$notify.error('请先修复JSON格式错误')
         return
       }
 
       try {
-        const params = { ...this.equipForm }
+        const params = {
+          ...this.equipForm,
+          ...this.globalSettings // 使用全局设置
+        }
 
         // 如果不使用浏览器，添加缓存参数
         if (!params.use_browser) {
-          params.cached_params = JSON.parse(this.equipParamsJson)
+          params.cached_params = Object.assign(JSON.parse(this.equipParamsJson), JSON.parse(this.externalSearchParams))
         }
 
         const response = await this.$api.spider.startEquip(params)
         if (response.code === 200) {
-          this.$message.success(`${this.getEquipTypeName(params.equip_type)}爬虫已启动`)
+          this.$notify.success({
+            title: '爬虫启动',
+            message: `${this.getEquipTypeName(this.equipForm.equip_type)}爬虫已启动`
+          })
           this.activeTab = 'equip' // 确保切换到装备tab
           this.isRunning = true // 立即设置运行状态
           // 自动启动实时日志监控
@@ -679,10 +807,16 @@ export default {
           // 启动状态监控
           this.startStatusMonitor()
         } else {
-          this.$message.error(response.message || '启动失败')
+          this.$notify.error({
+            title: '启动失败',
+            message: response.message || '启动失败'
+          })
         }
       } catch (error) {
-        this.$message.error('启动失败: ' + error.message)
+        this.$notify.error({
+          title: '启动失败',
+          message: '启动失败: ' + error.message
+        })
       }
     },
 
@@ -691,12 +825,15 @@ export default {
       if (this.isRunning) return
 
       if (!this.petForm.use_browser && this.petJsonError) {
-        this.$message.error('请先修复JSON格式错误')
+        this.$notify.error('请先修复JSON格式错误')
         return
       }
 
       try {
-        const params = { ...this.petForm }
+        const params = {
+          ...this.petForm,
+          ...this.globalSettings // 使用全局设置
+        }
 
         // 如果不使用浏览器，添加缓存参数
         if (!params.use_browser) {
@@ -705,7 +842,10 @@ export default {
 
         const response = await this.$api.spider.startPet(params)
         if (response.code === 200) {
-          this.$message.success('召唤兽爬虫已启动')
+          this.$notify.success({
+            title: '爬虫启动',
+            message: '召唤兽爬虫已启动'
+          })
           this.activeTab = 'pet' // 确保切换到召唤兽tab
           this.isRunning = true // 立即设置运行状态
           // 自动启动实时日志监控
@@ -713,10 +853,16 @@ export default {
           // 启动状态监控
           this.startStatusMonitor()
         } else {
-          this.$message.error(response.message || '启动失败')
+          this.$notify.error({
+            title: '启动失败',
+            message: response.message || '启动失败'
+          })
         }
       } catch (error) {
-        this.$message.error('启动失败: ' + error.message)
+        this.$notify.error({
+          title: '启动失败',
+          message: '启动失败: ' + error.message
+        })
       }
     },
 
@@ -725,9 +871,17 @@ export default {
       if (this.isRunning) return
 
       try {
-        const response = await this.$api.spider.startProxy(this.proxyForm)
+        const params = {
+          ...this.proxyForm,
+          ...this.globalSettings // 使用全局设置
+        }
+
+        const response = await this.$api.spider.startProxy(params)
         if (response.code === 200) {
-          this.$message.success('代理爬虫已启动')
+          this.$notify.success({
+            title: '爬虫启动',
+            message: '代理爬虫已启动'
+          })
           // 代理爬虫没有对应的tab，使用proxy类型
           this.isRunning = true
           // 自动启动实时日志监控
@@ -735,10 +889,45 @@ export default {
           // 启动状态监控
           this.startStatusMonitor()
         } else {
-          this.$message.error(response.message || '启动失败')
+          this.$notify.error({
+            title: '启动失败',
+            message: response.message || '启动失败'
+          })
         }
       } catch (error) {
-        this.$message.error('启动失败: ' + error.message)
+        this.$notify.error({
+          title: '启动失败',
+          message: '启动失败: ' + error.message
+        })
+      }
+    },
+
+    // 启动Playwright收集
+    async startPlaywrightCollector() {
+      if (this.isRunning) return
+
+      try {
+        const params = {
+          headless: this.playwrightForm.headless
+          // 不传递target_url，使用后端默认值
+        }
+
+        console.log('启动Playwright收集，参数:', params)
+
+        const response = await this.$api.spider.startPlaywright(params)
+        if (response.code === 200) {
+          this.$notify.success('Playwright收集已启动')
+          this.activeTab = 'playwright'
+          this.isRunning = true
+          // 自动启动实时日志监控
+          this.toggleLogStream()
+          // 启动状态监控
+          this.startStatusMonitor()
+        } else {
+          this.$notify.error(response.message || '启动失败')
+        }
+      } catch (error) {
+        this.$notify.error('启动失败: ' + error.message)
       }
     },
 
@@ -749,57 +938,35 @@ export default {
       try {
         const response = await this.$api.spider.manageProxy()
         if (response.code === 200) {
-          this.$message.success('代理管理器已启动')
+          this.$notify.success('代理管理器已启动')
           this.isRunning = true
           // 自动启动实时日志监控
           this.toggleLogStream()
           // 启动状态监控
           this.startStatusMonitor()
         } else {
-          this.$message.error(response.message || '启动失败')
+          this.$notify.error(response.message || '启动失败')
         }
       } catch (error) {
-        this.$message.error('启动失败: ' + error.message)
+        this.$notify.error('启动失败: ' + error.message)
       }
     },
-
-    // 运行测试
-    async runTest() {
-      if (this.isRunning) return
-
-      try {
-        const response = await this.$api.spider.runTest()
-        if (response.code === 200) {
-          this.$message.success('系统测试已启动')
-          this.isRunning = true
-          // 自动启动实时日志监控
-          this.toggleLogStream()
-          // 启动状态监控
-          this.startStatusMonitor()
-        } else {
-          this.$message.error(response.message || '启动失败')
-        }
-      } catch (error) {
-        this.$message.error('启动失败: ' + error.message)
-      }
-    },
-
     // 停止任务
     async stopTask() {
       try {
         const response = await this.$api.spider.stopTask()
         if (response.code === 200) {
-          this.$message.success(response.data?.message || '任务已停止')
+          this.$notify.success(response.data?.message || '任务已停止')
           this.isRunning = false
           // 停止实时日志监控
           this.stopLogStream()
           // 停止状态监控
           this.stopStatusMonitor()
         } else {
-          this.$message.error(response.message || '停止失败')
+          this.$notify.error(response.message || '停止失败')
         }
       } catch (error) {
-        this.$message.error('停止失败: ' + error.message)
+        this.$notify.error('停止失败: ' + error.message)
       }
     },
 
@@ -808,62 +975,19 @@ export default {
       try {
         const response = await this.$api.spider.resetTask()
         if (response.code === 200) {
-          this.$message.success(response.data?.message || '任务状态已重置')
+          this.$notify.success(response.data?.message || '任务状态已重置')
           this.isRunning = false
           // 停止实时日志监控
           this.stopLogStream()
           // 停止状态监控
           this.stopStatusMonitor()
         } else {
-          this.$message.error(response.message || '重置失败')
+          this.$notify.error(response.message || '重置失败')
         }
       } catch (error) {
-        this.$message.error('重置失败: ' + error.message)
+        this.$notify.error('重置失败: ' + error.message)
       }
     },
-
-    // 加载配置
-    async loadConfig() {
-      this.configLoading = true
-      try {
-        const response = await this.$api.spider.getConfig()
-        if (response.code === 200) {
-          this.config = response.data || response
-        }
-      } catch (error) {
-        this.$message.error('获取配置失败: ' + error.message)
-      } finally {
-        this.configLoading = false
-      }
-    },
-
-    // 刷新文件列表
-    async refreshItems() {
-      this.itemsLoading = true
-      try {
-        // 使用统一的API调用方式
-        const response = await this.$api.spider.getFiles()
-        if (response.code === 200) {
-          this.items = response.data.items || []
-        } else {
-          console.error('获取文件列表失败:', response.message)
-        }
-      } catch (error) {
-        console.error('获取文件列表失败:', error)
-      } finally {
-        this.itemsLoading = false
-      }
-    },
-
-    // 下载文件
-    downloadFile(filename) {
-      // 使用正确的下载URL
-      const baseURL = process.env.NODE_ENV === 'development'
-        ? 'http://localhost:5000'
-        : window.location.origin
-      window.open(`${baseURL}/api/v1/spider/download/${filename}`)
-    },
-
     // 获取装备类型名称
     getEquipTypeName(type) {
       const names = {
@@ -900,10 +1024,10 @@ export default {
             this.parseProgressFromLogs()
           }
         } else {
-          this.$message.error(response.message || '获取日志失败')
+          this.$notify.error(response.message || '获取日志失败')
         }
       } catch (error) {
-        this.$message.error('获取日志失败: ' + error.message)
+        this.$notify.error('获取日志失败: ' + error.message)
       } finally {
         this.logsLoading = false
       }
@@ -912,10 +1036,10 @@ export default {
     toggleLogStream() {
       if (this.isLogStreaming) {
         this.stopLogStream()
-        this.$message.info('实时日志监控已停止')
+        this.$notify.info('实时日志监控已停止')
       } else {
         this.startLogStream()
-        this.$message.success('实时日志监控已启动')
+        this.$notify.success('实时日志监控已启动')
       }
     },
 
@@ -975,7 +1099,7 @@ export default {
         }
 
         // 显示成功消息
-        this.$message.success('实时日志监控已启动')
+        this.$notify.success('实时日志监控已启动')
       } catch (error) {
         console.error('启动实时日志监控失败:', error)
         // 静默处理错误，避免显示错误消息
@@ -1032,7 +1156,7 @@ export default {
       // 如果正在实时监控，停止它
       if (this.isLogStreaming) {
         this.stopLogStream()
-        this.$message.info('已切换到历史日志，实时监控已停止')
+        this.$notify.info('已切换到历史日志，实时监控已停止')
       }
 
       // 刷新日志
@@ -1081,14 +1205,10 @@ export default {
 
           // 如果任务完成或出错，显示消息并停止监控
           if (status === 'completed' || status === 'error' || status === 'stopped') {
-            if (status === 'completed') {
-              this.$message.success(response.data.message || '任务已完成')
-              // 刷新文件列表
-              this.refreshItems()
-            } else if (status === 'error') {
-              this.$message.error(response.data.message || '任务执行出错')
+            if (status === 'error') {
+              this.$notify.error(response.data.message || '任务执行出错')
             } else if (status === 'stopped') {
-              this.$message.info(response.data.message || '任务已停止')
+              this.$notify.info(response.data.message || '任务已停止')
             }
 
             // 停止日志流
@@ -1103,42 +1223,31 @@ export default {
       }
     },
 
-    // 从日志解析进度 - 简化版本
+    // 从日志解析进度 - 精简版，直接正则提取进度百分比
     parseProgressFromLogs() {
       if (!this.logs || this.logs.length === 0) return
 
-      let totalPages = 0
-      let completedPages = 0
-      let status = 'running'
+      let progress = 0
       let message = '正在运行...'
+      let status = 'running'
 
-      // 1. 从日志中提取最新的CBGSpider任务ID
-      let latestTaskId = null
+      // 从后往前找最新的进度日志
       for (let i = this.logs.length - 1; i >= 0; i--) {
-        const match = this.logs[i].match(/CBGSpider_(role|equip|pet|proxy)_\d+/)
-        if (match) {
-          latestTaskId = match[0]
+        const log = this.logs[i]
+
+        // 匹配进度百分比
+        const progressMatch = log.match(/进度\[(\d+)%\]/)
+        if (progressMatch) {
+          progress = parseInt(progressMatch[1])
+          message = log
           break
         }
-      }
-
-      // 2. 过滤出当前任务的日志
-      let currentTaskLogs = []
-      if (latestTaskId) {
-        currentTaskLogs = this.logs.filter(log => log.includes(latestTaskId))
-      } else {
-        // 如果没有找到任务ID，使用所有日志
-        currentTaskLogs = this.logs
-      }
-
-      // 3. 从当前任务的最新日志开始解析
-      for (let i = currentTaskLogs.length - 1; i >= 0; i--) {
-        const log = currentTaskLogs[i]
 
         // 检查完成信息
         if (log.includes('爬取完成')) {
           status = 'completed'
           message = log
+          progress = 100
           break
         }
 
@@ -1148,64 +1257,13 @@ export default {
           message = log
           break
         }
-
-        // 解析总页数
-        if (log.includes('总页数:')) {
-          const totalPagesMatch = log.match(/总页数:\s*(\d+)/)
-          if (totalPagesMatch) {
-            totalPages = parseInt(totalPagesMatch[1])
-          }
-        }
-
-        // 解析页面完成信息 - 这是计算进度的关键
-        // 匹配格式：第 X 页完成，获取 Y 条数据，保存 Z 条
-        const pageCompleteMatch = log.match(/第\s*(\d+)\s*页完成/)
-        if (pageCompleteMatch) {
-          const pageNum = parseInt(pageCompleteMatch[1])
-          // 更新已完成页数（取最大值）
-          if (pageNum > completedPages) {
-            completedPages = pageNum
-            message = `第 ${completedPages} 页完成`
-          }
-        } else {
-          // 尝试其他可能的格式
-          const altPageCompleteMatch = log.match(/第\s*(\d+)\s*页.*完成/)
-          if (altPageCompleteMatch) {
-            const pageNum = parseInt(altPageCompleteMatch[1])
-            if (pageNum > completedPages) {
-              completedPages = pageNum
-              message = `第 ${completedPages} 页完成`
-            }
-          }
-        }
-
-        // 检查初始化信息
-        if (log.includes('日志系统初始化完成')) {
-          status = 'initializing'
-          message = '正在初始化...'
-        }
-      }
-
-      // 计算进度百分比
-      let progress = 0
-      if (totalPages > 0 && completedPages > 0) {
-        progress = Math.floor((completedPages / totalPages) * 100)
-        if (status === 'completed') {
-          progress = 100
-        }
       }
 
       // 更新任务状态
       if (this.taskStatus) {
         this.taskStatus.progress = progress
         this.taskStatus.message = message
-        this.taskStatus.details = {
-          ...this.taskStatus.details,
-          current_page: completedPages,
-          total_pages: totalPages
-        }
 
-        // 如果检测到完成，更新状态
         if (status === 'completed') {
           this.taskStatus.status = 'completed'
         } else if (status === 'error') {
@@ -1245,25 +1303,101 @@ export default {
       return statusMap[status] || ''
     },
 
+    // 应用全局设置到所有爬虫
+    async applyGlobalSettings() {
+      this.$notify.info('正在应用全局设置到所有爬虫...')
 
+      try {
+        // 更新角色参数
+        if (this.defaultParams.role) {
+          this.defaultParams.role.max_pages = this.globalSettings.max_pages
+          this.defaultParams.role.delay_min = this.globalSettings.delay_min
+          this.defaultParams.role.delay_max = this.globalSettings.delay_max
+          await this.saveRoleParams()
+        }
+
+        // 更新所有装备类型参数
+        const equipTypes = ['equip_normal', 'equip_lingshi', 'equip_pet_equip']
+        for (const equipType of equipTypes) {
+          if (this.defaultParams[equipType]) {
+            this.defaultParams[equipType].max_pages = this.globalSettings.max_pages
+            this.defaultParams[equipType].delay_min = this.globalSettings.delay_min
+            this.defaultParams[equipType].delay_max = this.globalSettings.delay_max
+
+            // 保存到后端
+            const response = await this.$api.config.updateSearchParam(equipType, this.defaultParams[equipType])
+            if (response.code !== 200) {
+              console.warn(`保存${equipType}参数失败:`, response.message)
+            }
+          }
+        }
+
+        // 更新宠物参数
+        if (this.defaultParams.pet) {
+          this.defaultParams.pet.max_pages = this.globalSettings.max_pages
+          this.defaultParams.pet.delay_min = this.globalSettings.delay_min
+          this.defaultParams.pet.delay_max = this.globalSettings.delay_max
+          await this.savePetParams()
+        }
+
+        // 重新初始化JSON编辑器
+        this.initializeDefaultParams()
+
+        this.$notify.success('全局设置已应用到所有爬虫！')
+      } catch (error) {
+        console.error('应用全局设置失败:', error)
+        this.$notify.error('应用全局设置失败: ' + error.message)
+      }
+    },
+
+    // 重置全局设置为默认值
+    resetGlobalSettings() {
+      this.globalSettings = {
+        max_pages: 5,
+        delay_min: 8,
+        delay_max: 20,
+        use_browser: false
+      }
+      this.$notify.info('全局设置已重置为默认值')
+    },
+
+    // 全局使用浏览器模式切换
+    onGlobalBrowserToggle(useBrowser) {
+      // 如果全局使用浏览器，则所有爬虫都使用浏览器
+      if (useBrowser) {
+        this.roleForm.use_browser = true
+        this.equipForm.use_browser = true
+        this.petForm.use_browser = true
+        this.loadCachedParams() // 加载缓存参数
+      } else {
+        // 如果全局不使用浏览器，则所有爬虫都不使用浏览器
+        this.roleForm.use_browser = false
+        this.equipForm.use_browser = false
+        this.petForm.use_browser = false
+        this.loadCachedParams() // 加载缓存参数
+      }
+    },
   }
 }
 </script>
 
 <style scoped>
-.home {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
+/* 卡片样式 */
 .spider-config-card,
-.config-card,
-.files-card,
-.status-card {
+.logs-card,
+.spider-card {
   margin-bottom: 20px;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* 状态区域样式 */
 .status-content {
   padding: 10px 0;
 }
@@ -1278,12 +1412,7 @@ export default {
   margin-right: 10px;
 }
 
-.status-message {
-  color: #666;
-  font-size: 14px;
-}
-
-/* 进度条样式优化 */
+/* 进度条样式 */
 .progress-wrapper {
   flex: 1;
   margin-left: 10px;
@@ -1311,24 +1440,12 @@ export default {
   background: linear-gradient(90deg, #409eff 0%, #67c23a 100%);
 }
 
-/* 确保进度条容器有足够空间 */
-.status-item {
-  display: flex;
-  align-items: center;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  font-size: 16px;
-}
-
+/* 工具按钮区域 */
 .tool-buttons {
   padding: 10px 0;
 }
 
+/* 参数编辑器样式 */
 .params-editor {
   background-color: #f9f9f9;
   padding: 15px;
@@ -1337,8 +1454,13 @@ export default {
   border-left: 4px solid #409eff;
 }
 
-.params-editor .el-divider {
-  margin: 0 0 15px 0;
+.params-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e4e7ed;
 }
 
 .json-editor-wrapper {
@@ -1379,80 +1501,7 @@ export default {
   margin-right: 4px;
 }
 
-.el-form-item {
-  margin-bottom: 18px;
-}
-
-.el-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s;
-}
-
-.el-card:hover {
-  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
-}
-
-.spider-config-card .el-form {
-  padding: 10px 0;
-}
-
-.spider-config-card .el-button {
-  margin-top: 10px;
-}
-
-/* Tab样式优化 */
-.spider-config-card .el-tabs__header {
-  margin-bottom: 20px;
-}
-
-.spider-config-card .el-tabs__item {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.spider-config-card .el-tabs__item.is-active {
-  color: #409eff;
-  font-weight: 600;
-}
-
-.spider-config-card .el-tab-pane {
-  padding: 0 10px;
-}
-
-/* Tab头部样式 */
-.tab-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.tab-header h4 {
-  margin: 0;
-  color: #303133;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.quick-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.quick-actions .el-button {
-  font-size: 12px;
-  padding: 5px 10px;
-}
-
-
 /* 日志相关样式 */
-.logs-card {
-  margin-bottom: 20px;
-}
-
 .logs-content {
   padding: 10px 0;
 }
@@ -1545,5 +1594,23 @@ export default {
 
 .log-default .log-content {
   color: #e2e8f0;
+}
+
+/* 表单提示样式 */
+.form-tip {
+  margin-left: 10px;
+  color: #909399;
+  font-size: 12px;
+}
+
+/* 图标和颜色样式 */
+.emoji-icon {
+  font-size: 18px;
+  margin-right: 5px;
+}
+
+.cBlue {
+  color: #409eff;
+  font-weight: bold;
 }
 </style>

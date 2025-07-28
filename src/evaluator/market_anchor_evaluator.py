@@ -2,8 +2,8 @@ import sys
 import os
 
 # 添加项目根目录到Python路径，解决模块导入问题
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到项目根目录
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.insert(0, project_root)
 
 import numpy as np
@@ -19,16 +19,19 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 try:
     from .market_data_collector import MarketDataCollector
+    from .utils.base_valuator import BaseValuator
 except ImportError:
     from market_data_collector import MarketDataCollector
+    from utils.base_valuator import BaseValuator
 
 warnings.filterwarnings('ignore')
 
 
-class MarketAnchorEvaluator:
+class MarketAnchorEvaluator(BaseValuator):
     """市场锚定估价器 - 基于市场相似角色的价格锚定估价"""
     
     def __init__(self, market_data_collector: Optional[MarketDataCollector] = None):
+        super().__init__()
         """
         初始化市场锚定估价器
         
@@ -42,6 +45,8 @@ class MarketAnchorEvaluator:
             self.market_collector = MarketDataCollector()
         else:
             self.market_collector = market_data_collector
+            
+
         
         # 定义特征容忍度配置 - 分为绝对容忍度和相对容忍度
         # 绝对容忍度：用于整数值特征（如修炼等级）
@@ -518,278 +523,13 @@ class MarketAnchorEvaluator:
             self.logger.error(f"调整人物修炼特征失败: {e}")
             return features
     
-    def calculate_value(self, 
-                       target_features: Dict[str, Any],
-                       strategy: str = 'fair_value',
-                       similarity_threshold: float = 0.7,
-                       max_anchors: int = 30) -> Dict[str, Any]:
-        """
-        计算角色价值
-        
-        Args:
-            target_features: 目标角色特征字典
-            strategy: 定价策略 ('competitive', 'fair_value', 'premium')
-            similarity_threshold: 相似度阈值（0-1）
-            max_anchors: 最大锚点数量
-            
-        Returns:
-            Dict[str, Any]: 估价结果，包含：
-                - estimated_price: 估算价格
-                - anchor_count: 锚点数量
-                - price_range: 价格范围
-                - confidence: 置信度
-                - strategy_used: 使用的策略
-                - fallback_used: 是否使用了保底估价
-        """
-        try:
-            print(f"开始计算角色价值，策略: {strategy}，相似度阈值: {similarity_threshold}，最大锚点数: {max_anchors}")
-            
-            # 寻找市场锚点
-            anchors = self.find_market_anchors(target_features, similarity_threshold, max_anchors)
-            
-            if len(anchors) == 0:
-                self.logger.error(f"未找到市场锚点")
-                return {
-                    'estimated_price': 0,
-                    'anchor_count': 0,
-                    'price_range': {
-                        'min': 0,
-                        'max': 0,
-                        'mean': 0,
-                        'median': 0
-                    },
-                    'confidence': 0,
-                    'strategy_used': strategy,
-                    'fallback_used': True,
-                    'error': '未找到足够的相似角色进行估价',
-                    'anchors': []
-                }
-            
-            # 提取锚点价格
-            anchor_prices = [anchor['price'] for anchor in anchors]
-            anchor_similarities = [anchor['similarity'] for anchor in anchors]
-            
-                        # 根据策略计算估价
-            if strategy == 'competitive':
-                # 竞争性定价：25%分位数 × 0.9
-                estimated_price = float(np.percentile(anchor_prices, 25) * 0.9)
-            elif strategy == 'premium':
-                # 溢价定价：75%分位数 × 0.95 (下调系数，避免过度溢价)
-                estimated_price = float(np.percentile(anchor_prices, 75) * 0.7)
-            else:  # fair_value
-                # 公允价值：相似度加权中位数 × 0.93 (稍微下调，更贴近成交价)
-                base_price = self._weighted_median(anchor_prices, anchor_similarities)
-                estimated_price = float(base_price * 0.7)
 
-            # 计算置信度
-            confidence = self._calculate_confidence(anchors, len(anchor_prices))
-
-            # 构建结果
-            result = {
-                'estimated_price': round(estimated_price, 1),
-                'anchor_count': len(anchors),
-                'price_range': {
-                    'min': float(min(anchor_prices)),
-                    'max': float(max(anchor_prices)),
-                    'mean': float(np.mean(anchor_prices)),
-                    'median': float(np.median(anchor_prices))
-                },
-                'confidence': float(confidence),
-                'strategy_used': strategy,
-                'fallback_used': False,
-                'anchors': anchors[:5]  # 返回前5个最相似的锚点用于展示
-            }
-            
-            print(f"估价完成: {estimated_price:.1f}，基于 {len(anchors)} 个锚点，置信度: {confidence:.2f}")
-            
-            return result
-            
-        except Exception as e:
-            self.logger.error(f"计算角色价值失败: {e}")
     
-    def _weighted_median(self, values: List[float], weights: List[float]) -> float:
-        """
-        计算加权中位数
-        
-        Args:
-            values: 数值列表
-            weights: 权重列表
-            
-        Returns:
-            float: 加权中位数
-        """
-        if not values or not weights:
-            return 0.0
-        
-        # 将数值和权重配对并排序
-        paired = list(zip(values, weights))
-        paired.sort(key=lambda x: x[0])
-        
-        # 计算累积权重
-        total_weight = sum(weights)
-        cumulative_weight = 0
-        
-        for value, weight in paired:
-            cumulative_weight += weight
-            if cumulative_weight >= total_weight * 0.5:
-                return value
-        
-        return paired[-1][0]  # fallback
-    
-    def _calculate_confidence(self, anchors: List[Dict[str, Any]], anchor_count: int) -> float:
-        """
-        计算估价置信度
-        
-        Args:
-            anchors: 锚点列表
-            anchor_count: 锚点数量
-            
-        Returns:
-            float: 置信度（0-1）
-        """
-        # 基础置信度基于锚点数量
-        base_confidence = min(anchor_count / 20.0, 1.0)  # 20个锚点达到满分
-        
-                # 相似度加成
-        if anchors:
-            avg_similarity = float(np.mean([anchor['similarity'] for anchor in anchors]))
-            similarity_bonus = avg_similarity * 0.3
-        else:
-            similarity_bonus = 0
 
-        # 价格稳定性加成
-        if len(anchors) >= 3:
-            prices = [anchor['price'] for anchor in anchors]
-            price_cv = float(np.std(prices) / np.mean(prices)) if np.mean(prices) > 0 else 1.0
-            stability_bonus = max(0, (0.5 - price_cv) * 0.4)  # CV低于0.5时有加成
-        else:
-            stability_bonus = 0
-
-        final_confidence = min(base_confidence + similarity_bonus + stability_bonus, 1.0)
-        return float(final_confidence)
     
   
     
-    def value_distribution_report(self, target_features: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        生成价值分布报告
-        
-        Args:
-            target_features: 目标角色特征字典
-            
-        Returns:
-            Dict[str, Any]: 价值分布报告，包含：
-                - min_price, max_price, median_price: 价格统计
-                - percentile_25, percentile_75: 分位数
-                - recommended_competitive, recommended_fair: 推荐价格
-                - anchor_count: 锚点数量
-                - price_distribution: 价格分布直方图数据
-        """
-        try:
-            print("生成价值分布报告...")
-            
-            # 寻找锚点
-            anchors = self.find_market_anchors(target_features, similarity_threshold=0.5, max_anchors=50)
-            
-            if len(anchors) == 0:
-                return {
-                    'error': '未找到足够的市场锚点',
-                    'min_price': 0,
-                    'max_price': 0,
-                    'median_price': 0,
-                    'anchor_count': 0
-                }
-            
-            # 提取价格数据
-            prices = [anchor['price'] for anchor in anchors]
-            similarities = [anchor['similarity'] for anchor in anchors]
-            
-            # 计算统计量
-            min_price = float(min(prices))
-            max_price = float(max(prices))
-            median_price = float(np.median(prices))
-            percentile_25 = float(np.percentile(prices, 25))
-            percentile_75 = float(np.percentile(prices, 75))
-            
-            # 计算推荐价格
-            competitive_result = self.calculate_value(target_features, 'competitive', max_anchors=len(anchors))
-            fair_result = self.calculate_value(target_features, 'fair_value', max_anchors=len(anchors))
-            
-            # 生成价格分布直方图数据
-            hist_bins = 10
-            hist_counts, hist_edges = np.histogram(prices, bins=hist_bins)
-            
-            # 构建报告
-            report = {
-                'min_price': min_price,
-                'max_price': max_price,
-                'median_price': median_price,
-                'percentile_25': percentile_25,
-                'percentile_75': percentile_75,
-                'recommended_competitive': competitive_result['estimated_price'],
-                'recommended_fair': fair_result['estimated_price'],
-                'anchor_count': len(anchors),
-                'price_distribution': {
-                    'bins': [float(edge) for edge in hist_edges],
-                    'counts': [int(count) for count in hist_counts]
-                },
-                'anchor_details': [
-                    {
-                        'equip_id': anchor['equip_id'],
-                        'price': float(anchor['price']),
-                        'similarity': round(float(anchor['similarity']), 3),
-                        'level': int(anchor['features'].get('level', 0)),
-                        'cultivation': int(anchor['features'].get('total_cultivation', 0))
-                    }
-                    for anchor in anchors[:10]  # 返回前10个详细信息
-                ]
-            }
-            
-            print(f"价值分布报告生成完成，基于 {len(anchors)} 个锚点")
-            
-            return report
-            
-        except Exception as e:
-            self.logger.error(f"生成价值分布报告失败: {e}")
-            return {'error': str(e)}
-    
-    def batch_valuation(self, 
-                       character_list: List[Dict[str, Any]],
-                       strategy: str = 'fair_value') -> List[Dict[str, Any]]:
-        """
-        批量估价
-        
-        Args:
-            character_list: 角色特征列表
-            strategy: 定价策略
-            
-        Returns:
-            List[Dict[str, Any]]: 批量估价结果列表
-        """
-        results = []
-        
-        print(f"开始批量估价，共 {len(character_list)} 个角色")
-        
-        for i, character_features in enumerate(character_list):
-            try:
-                result = self.calculate_value(character_features, strategy)
-                result['character_index'] = i
-                results.append(result)
-                
-                if (i + 1) % 10 == 0:
-                    print(f"已完成 {i + 1}/{len(character_list)} 个角色的估价")
-                    
-            except Exception as e:
-                self.logger.error(f"批量估价第 {i+1} 个角色失败: {e}")
-                results.append({
-                    'character_index': i,
-                    'estimated_price': 0,
-                    'error': str(e)
-                })
-        
-        print(f"批量估价完成，成功估价 {len([r for r in results if 'error' not in r])} 个角色")
-        
-        return results
+
     
     def export_valuation_report_to_excel(self, 
                                        target_features: Dict[str, Any],

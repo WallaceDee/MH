@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
-数据修复脚本：从large_equip_desc字段中提取套装信息并更新addon_status字段
+修复数据库中的addon_status数据
 """
 
 import sqlite3
-import os
 import re
 import logging
-from datetime import datetime
-import sys
+from typing import Optional
 
-class AddonStatusDataFixer:
-    """addon_status数据修复器"""
+# 导入装备类型常量
+from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
+
+
+class AddonStatusFixer:
+    """修复addon_status数据的工具类"""
     
     def __init__(self, db_path: str):
         self.db_path = db_path
         self.logger = self._setup_logger()
-        
+    
     def _setup_logger(self):
-        """设置日志"""
-        logger = logging.getLogger('AddonStatusDataFixer')
+        """设置日志器"""
+        logger = logging.getLogger(__name__)
         logger.setLevel(logging.INFO)
         
         if not logger.handlers:
@@ -34,49 +35,30 @@ class AddonStatusDataFixer:
     
     def extract_suit_info(self, large_equip_desc: str) -> str:
         """
-        从large_equip_desc中提取套装信息
+        从装备描述中提取套装信息
         
         Args:
-            large_equip_desc: 装备详细描述
+            large_equip_desc: 装备描述
             
         Returns:
-            提取的套装信息，如果没有找到则返回空字符串
+            str: 提取的套装信息，如果没有找到则返回空字符串
         """
         if not large_equip_desc:
             return ""
         
         # 移除颜色代码
-        desc_clean = re.sub(r'#[A-Za-z0-9]{6}', '', large_equip_desc)
+        desc_clean = re.sub(r'#c4DBAF4', '', large_equip_desc)
         desc_clean = re.sub(r'#[A-Z]', '', desc_clean)
         
         # 查找套装效果相关信息
-        suit_patterns = [
-            r'套装效果[：:]\s*([^#\n]+)',  # 套装效果：xxx
-            r'附加状态[：:]\s*([^#\n]+)',  # 附加状态：xxx
-            r'套装[：:]\s*([^#\n]+)',      # 套装：xxx
-        ]
+        pattern = r'套装效果：附加状态\s*([^#\n]+)'  # 套装效果：xxx
+        match = re.search(pattern, desc_clean)
         
-        for pattern in suit_patterns:
-            match = re.search(pattern, desc_clean)
-            if match:
-                suit_info = match.group(1).strip()
-                # 清理多余的空格和特殊字符
-                suit_info = re.sub(r'\s+', ' ', suit_info)
-                
-                # 如果是"附加状态4高级强力"这样的格式，只保留"高级强力"部分
-                if suit_info.startswith('附加状态'):
-                    # 尝试提取"附加状态"后面的实际套装名
-                    # 匹配"附加状态4高级强力"中的"高级强力"部分
-                    suit_match = re.search(r'附加状态\d+(.+)', suit_info)
-                    if suit_match:
-                        suit_info = suit_match.group(1).strip()
-                    else:
-                        # 如果没有数字，直接去掉"附加状态"
-                        suit_info = suit_info.replace('附加状态', '').strip()
-                    # 清理多余的空格和特殊字符
-                    suit_info = re.sub(r'\s+', ' ', suit_info)
-                
-                return suit_info
+        if match:
+            suit_info = match.group(1).strip()
+            # 清理多余的空格和特殊字符
+            suit_info = re.sub(r'\s+', ' ', suit_info)
+            return suit_info
         
         return ""
     
@@ -85,6 +67,15 @@ class AddonStatusDataFixer:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
+                
+                # 检查equipments表是否有addon_status字段
+                cursor.execute("PRAGMA table_info(equipments)")
+                columns_info = cursor.fetchall()
+                column_names = [col[1] for col in columns_info]
+                
+                if 'addon_status' not in column_names:
+                    print("equipments表中没有addon_status字段，跳过")
+                    return 0
                 
                 # 获取所有需要修复的记录
                 cursor.execute("""
@@ -104,12 +95,12 @@ class AddonStatusDataFixer:
                     try:
                         eid, kindid, large_equip_desc, current_addon_status = record
                         
-                        # 只有kindid=29（召唤兽装备）才提取套装信息
-                        if kindid == 29:
+                        # 只有kindid=PET_EQUIP_KINDID（召唤兽装备）才提取套装信息
+                        if kindid == PET_EQUIP_KINDID:
                             # 提取套装信息
                             extracted_suit = self.extract_suit_info(large_equip_desc)
                             
-                            # 对于kindid=29的装备，无论是否找到套装信息都要更新
+                            # 对于kindid=PET_EQUIP_KINDID的装备，无论是否找到套装信息都要更新
                             if extracted_suit:
                                 # 有套装信息
                                 if current_addon_status != extracted_suit:
@@ -233,7 +224,7 @@ def main():
         # 获取当前月份
         current_month = datetime.now().strftime('%Y%m')
         db_filename = f"cbg_equip_{current_month}.db"
-        equip_db_path = os.path.join(project_root, 'data', db_filename)
+        equip_db_path = os.path.join(project_root,'data', current_month, db_filename)
     
     print("🔧 开始修复addon_status数据...")
     print(f"📁 数据库路径: {equip_db_path}")
@@ -247,7 +238,7 @@ def main():
     print(f"✅ 找到装备数据库: {equip_db_path}")
     
     # 创建修复器
-    fixer = AddonStatusDataFixer(equip_db_path)
+    fixer = AddonStatusFixer(equip_db_path)
     
     # 执行修复
     print("🚀 开始执行数据修复...")

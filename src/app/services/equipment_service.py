@@ -13,6 +13,8 @@ from datetime import datetime
 import sqlite3
 import logging
 
+from src.utils.project_path import get_project_root, get_data_path
+
 logger = logging.getLogger(__name__)
 
 # 动态导入评估器，避免循环导入
@@ -21,19 +23,22 @@ try:
     from evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
     from evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
     from evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
+    from evaluator.feature_extractor.unified_feature_extractor import UnifiedFeatureExtractor
+    from evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_KINDID, is_lingshi, is_pet_equip
 except ImportError:
     EquipAnchorEvaluator = None
     EquipFeatureExtractor = None
     LingshiFeatureExtractor = None
     PetEquipFeatureExtractor = None
+    UnifiedFeatureExtractor = None
     logger.warning("无法导入装备锚点估价器或特征提取器")
 
 
 class EquipmentService:
     def __init__(self):
         # 获取项目根目录
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        self.data_dir = os.path.join(self.project_root, 'data')
+        self.project_root = get_project_root()
+        self.data_dir = get_data_path()
         
         # 初始化特征提取器
         self.equip_feature_extractor = None
@@ -69,13 +74,22 @@ class EquipmentService:
                 logger.info("装备锚点估价器初始化成功")
             except Exception as e:
                 logger.error(f"装备锚点估价器初始化失败: {e}")
+        
+        # 初始化统一特征提取器
+        self.unified_extractor = None
+        if UnifiedFeatureExtractor:
+            try:
+                self.unified_extractor = UnifiedFeatureExtractor()
+                logger.info("统一特征提取器初始化成功")
+            except Exception as e:
+                logger.error(f"统一特征提取器初始化失败: {e}")
     
     def _get_feature_extractor(self, kindid: int):
         """根据装备类型获取对应的特征提取器"""
-        # 灵饰装备：kindid=61,62,63,64
-        if kindid in [61, 62, 63, 64]:
+        # 使用常量判断装备类型
+        if is_lingshi(kindid):
             return self.lingshi_feature_extractor
-        elif kindid in [29]:
+        elif is_pet_equip(kindid):
             return self.pet_equip_feature_extractor
         else:
             # 普通装备
@@ -386,7 +400,7 @@ class EquipmentService:
             feature_extractor = self._get_feature_extractor(kindid)
             
             if not feature_extractor:
-                extractor_type = "灵饰" if kindid in [61, 62, 63, 64] else "装备"
+                extractor_type = "灵饰" if is_lingshi(kindid) else "宠物装备" if is_pet_equip(kindid) else "装备"
                 return {
                     "error": f"{extractor_type}特征提取器未初始化",
                     "anchors": [],
@@ -438,7 +452,6 @@ class EquipmentService:
                 similarity_threshold=similarity_threshold,
                 max_anchors=max_anchors
             )
-            
             # 格式化返回结果
             result = {
                 "anchor_count": len(anchors),
@@ -527,7 +540,7 @@ class EquipmentService:
             feature_extractor = self._get_feature_extractor(kindid)
             
             if not feature_extractor:
-                extractor_type = "灵饰" if kindid in [61, 62, 63, 64] else "装备"
+                extractor_type = "灵饰" if is_lingshi(kindid) else "宠物装备" if is_pet_equip(kindid) else "装备"
                 return {
                     "error": f"{extractor_type}特征提取器未初始化",
                     "estimated_price": 0,
@@ -590,16 +603,9 @@ class EquipmentService:
             
             estimated_price = result.get("estimated_price", 0)
             
-            # 获取完整的锚点信息（使用用户指定的参数）
-            anchors_result = self.find_equipment_anchors(
-                equipment_data=equipment_data,
-                similarity_threshold=similarity_threshold,
-                max_anchors=max_anchors
-            )
-            
-            # 处理锚点信息
-            anchors = anchors_result.get("anchors", [])
-            anchor_count = anchors_result.get("anchor_count", 0)
+            # 直接使用calculate_value返回的锚点信息，避免重复查找
+            anchors = result.get("anchors", [])
+            anchor_count = result.get("anchor_count", 0)
             
             return {
                 "estimated_price": estimated_price,
@@ -609,7 +615,7 @@ class EquipmentService:
                 "confidence": result.get("confidence", 0),
                 "similarity_threshold": similarity_threshold,
                 "max_anchors": max_anchors,
-                "anchors": anchors,  # 返回完整的锚点信息
+                "anchors": anchors,  # 使用calculate_value返回的锚点信息
                 "price_range": result.get("price_range", {}),
                 "fallback_used": result.get("fallback_used", False)
             }
@@ -620,4 +626,204 @@ class EquipmentService:
                 "error": f"估价时发生错误: {str(e)}",
                 "estimated_price": 0,
                 "estimated_price_yuan": 0
-            } 
+            }
+
+    def batch_equipment_valuation(self, equipment_list: List[Dict], 
+                                 strategy: str = 'fair_value',
+                                 similarity_threshold: float = 0.7,
+                                 max_anchors: int = 30,
+                                 verbose: bool = False) -> Dict:
+        """批量装备估价"""
+        try:
+            logger.info(f"开始批量装备估价，装备数量: {len(equipment_list)}，策略: {strategy}，详细日志: {verbose}")
+            
+            if not equipment_list:
+                return {
+                    "error": "装备列表为空",
+                    "results": []
+                }
+            
+            # 提取装备特征
+            equip_features_list = []
+            
+            for i, equipment_data in enumerate(equipment_list):
+                try:
+                    # 根据kindid获取对应的特征提取器
+                    kindid = equipment_data.get('kindid', 0)
+                    feature_extractor = self._get_feature_extractor(kindid)
+                    
+                    if not feature_extractor:
+                        extractor_type = "灵饰" if is_lingshi(kindid) else "宠物装备" if is_pet_equip(kindid) else "装备"
+                        logger.warning(f"第{i+1}个装备的{extractor_type}特征提取器未初始化")
+                        continue
+                    
+                    # 使用特征提取器提取特征
+                    equipment_features = feature_extractor.extract_features(equipment_data)
+                    
+                    # 添加原始装备数据用于后续处理
+                    equipment_features['original_data'] = equipment_data
+                    equipment_features['index'] = i
+                    
+                    equip_features_list.append(equipment_features)
+                    
+                except Exception as e:
+                    logger.error(f"第{i+1}个装备特征提取失败: {e}")
+                    continue
+            
+            if not equip_features_list:
+                return {
+                    "error": "所有装备特征提取失败",
+                    "results": []
+                }
+            
+            # 调用装备估价器的批量估价方法，传递 verbose 参数
+            batch_results = self.evaluator.batch_valuation(
+                equip_features_list, 
+                strategy=strategy,
+                similarity_threshold=similarity_threshold,
+                max_anchors=max_anchors,
+                verbose=verbose
+            )
+            
+            # 处理批量估价结果
+            processed_results = []
+            for result in batch_results:
+                if "error" in result:
+                    # 处理错误情况
+                    processed_result = {
+                        "index": result.get("equip_index", 0),
+                        "error": result["error"],
+                        "estimated_price": 0,
+                        "estimated_price_yuan": 0,
+                        "confidence": 0,
+                        "anchor_count": 0
+                    }
+                else:
+                    # 处理成功情况
+                    estimated_price = result.get("estimated_price", 0)
+                    processed_result = {
+                        "index": result.get("equip_index", 0),
+                        "estimated_price": estimated_price,
+                        "estimated_price_yuan": round(estimated_price / 100, 2),
+                        "confidence": result.get("confidence", 0),
+                        "anchor_count": result.get("anchor_count", 0),
+                        "price_range": result.get("price_range", {}),
+                        "fallback_used": result.get("fallback_used", False),
+                        "strategy": strategy
+                    }
+                
+                processed_results.append(processed_result)
+            
+            # 按原始索引排序
+            processed_results.sort(key=lambda x: x["index"])
+            
+            return {
+                "success": True,
+                "total_count": len(equipment_list),
+                "success_count": len([r for r in processed_results if "error" not in r]),
+                "strategy": strategy,
+                "similarity_threshold": similarity_threshold,
+                "max_anchors": max_anchors,
+                "verbose": verbose,
+                "results": processed_results
+            }
+            
+        except Exception as e:
+            logger.error(f"批量装备估价失败: {e}")
+            return {
+                "error": f"批量装备估价失败: {str(e)}",
+                "results": []
+            }
+    
+    def extract_features(self, equipment_data: Dict, data_type: str = 'equipment') -> Dict:
+        """提取装备特征"""
+        try:
+            if not self.unified_extractor:
+                return {
+                    "error": "统一特征提取器未初始化",
+                    "features": {}
+                }
+            
+            # 使用统一特征提取器提取特征
+            features = self.unified_extractor.extract_features(equipment_data, data_type)
+            
+            return {
+                "features": features,
+                "data_type": data_type,
+                "kindid": equipment_data.get('kindid', 0)
+            }
+            
+        except Exception as e:
+            logger.error(f"提取装备特征时发生错误: {e}")
+            return {
+                "error": f"提取装备特征时发生错误: {str(e)}",
+                "features": {}
+            }
+    
+    def extract_features_batch(self, equipment_list: List[Dict], data_type: str = 'equipment') -> Dict:
+        """批量提取装备特征"""
+        try:
+            if not self.unified_extractor:
+                return {
+                    "error": "统一特征提取器未初始化",
+                    "features_list": []
+                }
+            
+            if not equipment_list:
+                return {
+                    "error": "装备列表为空",
+                    "features_list": []
+                }
+            
+            # 使用统一特征提取器批量提取特征
+            features_list = self.unified_extractor.extract_features_batch(equipment_list, data_type)
+            
+            return {
+                "features_list": features_list,
+                "data_type": data_type,
+                "total_count": len(equipment_list),
+                "success_count": len([f for f in features_list if f])
+            }
+            
+        except Exception as e:
+            logger.error(f"批量提取装备特征时发生错误: {e}")
+            return {
+                "error": f"批量提取装备特征时发生错误: {str(e)}",
+                "features_list": []
+            }
+    
+    def get_extractor_info(self, kindid: int) -> Dict:
+        """获取指定kindid的提取器信息"""
+        try:
+            if not self.unified_extractor:
+                return {
+                    "error": "统一特征提取器未初始化"
+                }
+            
+            info = self.unified_extractor.get_extractor_info(kindid)
+            return info
+            
+        except Exception as e:
+            logger.error(f"获取提取器信息时发生错误: {e}")
+            return {
+                "error": f"获取提取器信息时发生错误: {str(e)}"
+            }
+    
+    def get_supported_kindids(self) -> Dict:
+        """获取支持的kindid列表"""
+        try:
+            if not self.unified_extractor:
+                return {
+                    "error": "统一特征提取器未初始化"
+                }
+            
+            supported_kindids = self.unified_extractor.get_supported_kindids()
+            return supported_kindids
+            
+        except Exception as e:
+            logger.error(f"获取支持的kindid列表时发生错误: {e}")
+            return {
+                "error": f"获取支持的kindid列表时发生错误: {str(e)}"
+            }
+
+equipment_service = EquipmentService()

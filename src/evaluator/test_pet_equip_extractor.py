@@ -26,7 +26,8 @@ def test_pet_equip_extractor():
     extractor = PetEquipFeatureExtractor()
     
     # 连接数据库
-    db_path = 'data/cbg_equip_202507.db'
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    db_path = os.path.join(project_root, 'data', '202507', 'cbg_equip_202507.db')
     print(f"连接数据库: {db_path}")
     
     try:
@@ -41,7 +42,8 @@ def test_pet_equip_extractor():
                 addon_fali, addon_lingli, addon_liliang, addon_minjie, addon_naili,
                 xiang_qian_level, addon_status, large_equip_desc
             FROM equipments
-            WHERE equip_level > 0 AND kindid = 29 AND fangyu > 0
+            from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
+WHERE equip_level > 0 AND kindid = {PET_EQUIP_KINDID} AND fangyu > 0
             LIMIT 5
         """)
         

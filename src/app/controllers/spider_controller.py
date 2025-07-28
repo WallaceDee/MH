@@ -160,22 +160,6 @@ class SpiderController:
         
         return {"task_id": id(thread)}
     
-    def run_tests(self):
-        """运行测试"""
-        if self.service.is_task_running():
-            raise Exception("已有任务在运行中")
-        
-        def run_tests():
-            try:
-                self.service.run_tests()
-            except Exception as e:
-                logger.error(f"测试执行失败: {e}")
-        
-        thread = threading.Thread(target=run_tests)
-        thread.start()
-        
-        return {"task_id": id(thread)}
-    
     def stop_current_task(self):
         """停止当前任务"""
         try:
@@ -195,6 +179,38 @@ class SpiderController:
     def get_task_logs(self, lines: int = 100, log_type: str = 'current', spider_type: str = None, filename: str = None):
         """获取任务日志"""
         return self.service.get_task_logs(lines=lines, log_type=log_type, spider_type=spider_type, filename=filename)
+    
+    def start_playwright_collector(self, headless: bool = False, target_url: str = None):
+        """启动Playwright收集器"""
+        if self.service.is_task_running():
+            raise Exception("已有任务在运行中")
+        
+        def run_playwright():
+            try:
+                self.service.run_playwright_collector(headless=headless, target_url=target_url)
+            except Exception as e:
+                logger.error(f"Playwright收集器执行失败: {e}")
+        
+        thread = threading.Thread(target=run_playwright)
+        thread.start()
+        self.current_task = thread
+        
+        return {
+            "task_id": id(thread),
+            "config": {
+                "collector_type": "playwright",
+                "headless": headless,
+                "target_url": target_url
+            }
+        }
+    
+    def check_cookie_status(self):
+        """检查Cookie状态"""
+        return self.service.check_cookie_status()
+    
+    def update_cookies(self):
+        """更新Cookie"""
+        return self.service.update_cookies()
     
 
     

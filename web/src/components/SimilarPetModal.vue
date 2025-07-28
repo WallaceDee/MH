@@ -1,56 +1,48 @@
 <template>
-  <el-popover
-    :data-pet-sn="pet.pet_sn"
-    placement="left-end"
-    width="860"
-    trigger="click"
-    popper-class="similar-pet-popper"
-    @show="handleShow"
-  >
+  <el-popover :data-pet-sn="pet.pet_sn" placement="left-end" width="860" trigger="click"
+    popper-class="similar-pet-popper" @show="handleShow" v-model="visible">
     <template #reference>
-      <el-link type="success">查看相似</el-link>
+      <el-link type="primary">查看相似</el-link>
     </template>
 
     <!-- 相似宠物内容 -->
-    <div v-if="similarData">
-      <div class="similar-header">
-        <h4>相似宠物 (共{{ similarData.anchor_count }}个)<em style="font-size: 12px;">-相似度阈值: {{ similarData.similarity_threshold }}</em></h4>
-        <!-- 宠物估价信息 -->
-        <pet-valuation :valuation="valuation" :target-pet="pet" />
+    <div v-if="visible">
+      <div v-if="similarData">
+        <div class="similar-header">
+          <h4>相似宠物 (共{{ similarData.anchor_count }}个)<em style="font-size: 12px;">-相似度阈值: {{
+            similarData.similarity_threshold }}</em></h4>
+          <!-- 宠物估价信息 -->
+          <pet-valuation :valuation="valuation" :target-pet="pet" />
 
-        <div v-if="similarData.statistics" class="stats">
-          <span>
-            价格范围:
-            <span v-html="formatPrice(similarData.statistics.price_range.min)"></span>
-            -
-            <span v-html="formatPrice(similarData.statistics.price_range.max)"></span>
-          </span>
-          <span> 平均相似度: {{ similarData.statistics.similarity_range.avg.toFixed(3) }} </span>
+          <div v-if="similarData.statistics" class="stats">
+            <span>
+              价格范围:
+              <span v-html="formatPrice(similarData.statistics.price_range.min)"></span>
+              -
+              <span v-html="formatPrice(similarData.statistics.price_range.max)"></span>
+            </span>
+            <span> 平均相似度: {{ similarData.statistics.similarity_range.avg.toFixed(3) }} </span>
+          </div>
         </div>
+
+        <!-- 无锚点时的重试界面 -->
+        <similar-pet-retry v-if="!similarData.anchors || similarData.anchors.length === 0"
+          :message="similarData.message" :can-retry="similarData.canRetry"
+          :current-threshold="similarData.similarity_threshold" :loading="loading" @retry="handleRetry" />
+
+        <!-- 相似宠物表格 -->
+        <similar-pet-table v-else :anchors="similarData.anchors" :target-pet="pet" />
       </div>
 
-      <!-- 无锚点时的重试界面 -->
-      <similar-pet-retry
-        v-if="!similarData.anchors || similarData.anchors.length === 0"
-        :message="similarData.message"
-        :can-retry="similarData.canRetry"
-        :current-threshold="similarData.similarity_threshold"
-        :loading="loading"
-        @retry="handleRetry"
-      />
+      <!-- 错误信息 -->
+      <div v-else-if="error" class="error-info">
+        <el-alert type="error" :title="error" show-icon :closable="false"/>
+      </div>
 
-      <!-- 相似宠物表格 -->
-      <similar-pet-table v-else :anchors="similarData.anchors"  :target-pet="pet"/>
-    </div>
-
-    <!-- 错误信息 -->
-    <div v-else-if="error" class="error-info">
-      <el-alert type="error" :title="error" show-icon />
-    </div>
-
-    <!-- 加载状态 -->
-    <div v-else class="loading-info">
-      <el-skeleton :rows="5" animated />
+      <!-- 加载状态 -->
+      <div v-else class="loading-info">
+        <el-skeleton :rows="5" animated />
+      </div>
     </div>
   </el-popover>
 </template>
@@ -89,6 +81,11 @@ export default {
       default: false
     },
   },
+  data() {
+    return {
+      visible: false
+    }
+  },
   methods: {
     handleShow() {
       this.$emit('show', this.pet)
@@ -101,6 +98,7 @@ export default {
     // 格式化价格
     formatPrice(price) {
       if (!price) return '---'
+      price=price/100
       return window.get_color_price ? window.get_color_price(price) : `${price}元`
     }
   }
@@ -140,4 +138,4 @@ export default {
 .loading-info {
   padding: 20px;
 }
-</style> 
+</style>

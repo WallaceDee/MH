@@ -248,4 +248,81 @@ class EquipmentController:
             
         except Exception as e:
             logger.error(f"获取装备估价时出错: {e}")
-            return {"error": f"获取装备估价时出错: {str(e)}"} 
+            return {"error": f"获取装备估价时出错: {str(e)}"}
+
+    def batch_equipment_valuation(self, equipment_list: List[Dict], strategy: str = 'fair_value',
+                                 similarity_threshold: float = 0.7, max_anchors: int = 30, verbose: bool = False) -> Dict:
+        """批量装备估价"""
+        try:
+            logger.info(f"开始批量装备估价，装备数量: {len(equipment_list)}，策略: {strategy}，详细日志: {verbose}")
+            
+            # 验证策略参数
+            valid_strategies = ['fair_value', 'competitive', 'premium']
+            if strategy not in valid_strategies:
+                return {"error": f"无效的估价策略: {strategy}，有效策略: {', '.join(valid_strategies)}"}
+            
+            # 验证相似度阈值
+            if not 0.0 <= similarity_threshold <= 1.0:
+                return {"error": "相似度阈值必须在0.0-1.0之间"}
+            
+            # 验证最大锚点数量
+            if not 1 <= max_anchors <= 100:
+                return {"error": "最大锚点数量必须在1-100之间"}
+            
+            # 验证装备列表
+            if not equipment_list or not isinstance(equipment_list, list):
+                return {"error": "装备列表不能为空且必须是列表格式"}
+            
+            # 调用服务层
+            result = self.service.batch_equipment_valuation(
+                equipment_list=equipment_list,
+                strategy=strategy,
+                similarity_threshold=similarity_threshold,
+                max_anchors=max_anchors,
+                verbose=verbose
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"批量装备估价失败: {e}")
+            return {
+                "error": f"批量装备估价失败: {str(e)}",
+                "results": []
+            }
+    
+    def extract_features(self, equipment_data: Dict, data_type: str = 'equipment') -> Dict:
+        """提取装备特征"""
+        try:
+            result = self.service.extract_features(equipment_data, data_type)
+            return result
+        except Exception as e:
+            logger.error(f"提取装备特征时出错: {e}")
+            return {"error": f"提取装备特征时出错: {str(e)}"}
+    
+    def extract_features_batch(self, equipment_list: List[Dict], data_type: str = 'equipment') -> Dict:
+        """批量提取装备特征"""
+        try:
+            result = self.service.extract_features_batch(equipment_list, data_type)
+            return result
+        except Exception as e:
+            logger.error(f"批量提取装备特征时出错: {e}")
+            return {"error": f"批量提取装备特征时出错: {str(e)}"}
+    
+    def get_extractor_info(self, kindid: int) -> Dict:
+        """获取指定kindid的提取器信息"""
+        try:
+            result = self.service.get_extractor_info(kindid)
+            return result
+        except Exception as e:
+            logger.error(f"获取提取器信息时出错: {e}")
+            return {"error": f"获取提取器信息时出错: {str(e)}"}
+    
+    def get_supported_kindids(self) -> Dict:
+        """获取支持的kindid列表"""
+        try:
+            result = self.service.get_supported_kindids()
+            return result
+        except Exception as e:
+            logger.error(f"获取支持的kindid列表时出错: {e}")
+            return {"error": f"获取支持的kindid列表时出错: {str(e)}"}

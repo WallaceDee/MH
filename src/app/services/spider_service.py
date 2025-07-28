@@ -29,7 +29,8 @@ task_status = {
 current_process = None
 
 # 添加项目根目录到Python路径
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from src.utils.project_path import get_project_root
+project_root = get_project_root()
 sys.path.insert(0, project_root)
 sys.path.insert(0, os.path.join(project_root, 'src'))
 
@@ -344,47 +345,7 @@ class SpiderService:
             task_status = {"status": "error", "message": f"执行出错: {str(e)}"}
             logger.error(f"代理管理出错: {e}")
             raise
-    
-    def run_tests(self):
-        """运行测试"""
-        global task_status
-        try:
-            task_status = {"status": "running", "message": "运行测试..."}
-            
-            cmd = [sys.executable, self.run_script, 'test']
-            
-            logger.info(f"执行测试命令: {' '.join(cmd)}")
-            
-            global current_process
-            process = subprocess.Popen(
-                cmd, 
-                stdout=subprocess.PIPE, 
-                stderr=subprocess.PIPE, 
-                text=True, 
-                cwd=self.project_root
-            )
-            current_process = process
-            
-            # 等待进程完成
-            stdout, stderr = process.communicate()
-            
-            if process.returncode == 0:
-                task_status = {
-                    "status": "completed",
-                    "message": "测试完成！",
-                    "results": {
-                        "stdout": stdout,
-                        "stderr": stderr
-                    }
-                }
-                logger.info("测试完成")
-            else:
-                raise Exception(f"测试执行失败: {stderr}")
-                
-        except Exception as e:
-            task_status = {"status": "error", "message": f"执行出错: {str(e)}"}
-            logger.error(f"测试出错: {e}")
-            raise
+
     
     def get_spider_config(self):
         """获取爬虫配置信息"""
@@ -553,4 +514,278 @@ class SpiderService:
                 "message": f"获取日志失败: {str(e)}"
             }
     
- 
+    def run_playwright_collector(self, headless: bool = False, target_url: str = None):
+        """
+        运行Playwright收集器
+        
+        Args:
+            headless: 是否无头模式
+            target_url: 目标URL
+        """
+        global task_status, current_process
+        try:
+            import time
+            task_status = {
+                "status": "running", 
+                "message": "启动Playwright收集器...", 
+                "details": {
+                    "task_id": f"playwright_{int(time.time())}",
+                    "start_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "duration": None
+                }
+            }
+            
+            # 构建命令参数
+            cmd = [
+                sys.executable, self.run_script,
+                'playwright'
+            ]
+            
+            # 只在headless=True时添加--headless参数
+            if headless:
+                cmd.append('--headless')
+            
+            if target_url:
+                cmd.extend(['--target-url', target_url])
+            
+            logger.info(f"启动Playwright收集器: {' '.join(cmd)}")
+            
+            # 启动进程
+            current_process = subprocess.Popen(
+                cmd,
+                cwd=self.project_root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                bufsize=1
+            )
+            
+            # 启动日志监控线程
+            def monitor_output():
+                global current_process, task_status
+                try:
+                    for line in iter(current_process.stdout.readline, ''):
+                        if line:
+                            logger.info(f"Playwright: {line.strip()}")
+                            # 更新任务状态
+                            if "启动完成" in line or "浏览器已打开" in line:
+                                task_status["message"] = "Playwright收集器已启动，浏览器已打开"
+                            elif "监听开始" in line:
+                                task_status["message"] = "网络监听已开始，等待数据..."
+                            elif "数据捕获" in line:
+                                task_status["message"] = "正在捕获数据..."
+                            elif "浏览器关闭" in line or "收集器停止" in line or "数据收集已完成" in line:
+                                task_status["status"] = "completed"
+                                task_status["message"] = "Playwright收集器已完成"
+                                break
+                            elif "检测到页面关闭" in line or "检测到浏览器上下文关闭" in line:
+                                task_status["status"] = "completed"
+                                task_status["message"] = "浏览器已关闭，收集器已停止"
+                                break
+                            elif "任务完成" in line:
+                                task_status["status"] = "completed"
+                                task_status["message"] = "Playwright收集器已完成"
+                                break
+                except Exception as e:
+                    logger.error(f"监控Playwright输出失败: {e}")
+                finally:
+                    # 检查进程是否已结束
+                    if current_process:
+                        try:
+                            current_process.stdout.close()
+                            current_process.wait(timeout=5)
+                        except:
+                            pass
+                        finally:
+                            # 如果进程已结束但状态还是running，更新状态
+                            if task_status["status"] == "running":
+                                task_status["status"] = "completed"
+                                task_status["message"] = "Playwright收集器已结束"
+                            current_process = None
+            
+            # 启动监控线程
+            import threading
+            monitor_thread = threading.Thread(target=monitor_output)
+            monitor_thread.daemon = True
+            monitor_thread.start()
+            
+            # 启动进程状态监控线程
+            def monitor_process_status():
+                global current_process, task_status
+                import time
+                while current_process and current_process.poll() is None:
+                    time.sleep(2)  # 每2秒检查一次
+                
+                # 进程已结束，更新状态
+                if current_process and task_status["status"] == "running":
+                    task_status["status"] = "completed"
+                    task_status["message"] = "Playwright收集器进程已结束"
+                    current_process = None
+            
+            process_monitor_thread = threading.Thread(target=monitor_process_status)
+            process_monitor_thread.daemon = True
+            process_monitor_thread.start()
+            
+            return {"message": "Playwright收集器启动成功"}
+            
+        except Exception as e:
+            logger.error(f"启动Playwright收集器失败: {e}")
+            task_status = {
+                "status": "error",
+                "message": f"启动失败: {str(e)}",
+                "details": {
+                    "task_id": None,
+                    "start_time": None,
+                    "duration": None
+                }
+            }
+            raise
+    
+    def check_cookie_status(self):
+        """检查Cookie状态 - 使用真实的服务器验证"""
+        logger.info("=== 进入check_cookie_status方法 ===")
+        try:
+            import os
+            from datetime import datetime
+            from src.utils.cookie_manager import verify_cookie_validity, get_cookie_manager
+            
+            cookie_file = os.path.join(self.project_root, 'config', 'cookies.txt')
+            logger.info(f"Cookie文件路径: {cookie_file}")
+
+            # 基础文件检查
+            if not os.path.exists(cookie_file):
+                logger.warning("Cookie文件不存在")
+                return {
+                    "valid": False,
+                    "last_modified": None,
+                    "cookies_content": None
+                }
+            
+            # 检查文件大小
+            file_size = os.path.getsize(cookie_file)
+            logger.info(f"Cookie文件大小: {file_size} bytes")
+            if file_size == 0:
+                logger.warning("Cookie文件为空")
+                return {
+                    "valid": False,
+                    "last_modified": None,
+                    "cookies_content": ""
+                }
+            
+            # 获取文件修改时间
+            file_mtime = os.path.getmtime(cookie_file)
+            file_time = datetime.fromtimestamp(file_mtime)
+            last_modified = file_time.strftime("%Y-%m-%d %H:%M:%S")
+            logger.info(f"Cookie文件最后修改时间: {last_modified}")
+            
+            # 读取cookies内容
+            try:
+                with open(cookie_file, 'r', encoding='utf-8') as f:
+                    cookies_content = f.read().strip()
+                logger.info(f"成功读取Cookie文件内容，长度: {len(cookies_content)}")
+            except Exception as e:
+                logger.error(f"读取Cookie文件内容失败: {e}")
+                cookies_content = ""
+            
+            # 强制重新加载Cookie管理器中的内容
+            logger.info("强制重新加载Cookie管理器中的内容...")
+            cookie_manager = get_cookie_manager(logger)
+            cookie_manager.reload_cookies()
+            logger.info("Cookie管理器内容已重新加载")
+            
+            # 使用真实的服务器验证
+            logger.info("开始验证Cookie在服务器端的有效性...")
+            is_valid = verify_cookie_validity(logger)
+            logger.info(f"Cookie验证结果: {is_valid}")
+            return {
+                "valid": is_valid,
+                "last_modified": last_modified,
+                "cookies_content": cookies_content
+            }
+                
+        except Exception as e:
+            logger.error(f"检查Cookie状态失败: {e}", exc_info=True)
+            return {
+                "valid": False,
+                "last_modified": None,
+                "cookies_content": None
+            }
+    
+    def update_cookies(self):
+        """更新Cookie"""
+        global task_status, current_process
+        try:
+            import time
+            task_status = {
+                "status": "running", 
+                "message": "启动Cookie更新程序...", 
+                "details": {
+                    "task_id": f"cookie_update_{int(time.time())}",
+                    "start_time": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "duration": None
+                }
+            }
+            
+            # 构建命令参数 - 调用命令行入口点
+            cmd = [
+                sys.executable, 
+                '-c',
+                'from src.utils.cookie_manager import update_cookies_from_command_line; update_cookies_from_command_line()'
+            ]
+            
+            logger.info(f"启动Cookie更新程序: {' '.join(cmd)}")
+            
+            # 启动进程
+            current_process = subprocess.Popen(
+                cmd,
+                cwd=self.project_root,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                bufsize=1
+            )
+            
+            # 启动日志监控线程
+            def monitor_output():
+                global current_process
+                try:
+                    for line in iter(current_process.stdout.readline, ''):
+                        if line:
+                            logger.info(f"Cookie更新: {line.strip()}")
+                            # 更新任务状态
+                            if "Cookie已成功更新" in line:
+                                task_status["status"] = "completed"
+                                task_status["message"] = "Cookie更新成功"
+                                break
+                            elif "错误" in line or "失败" in line:
+                                task_status["status"] = "error"
+                                task_status["message"] = f"Cookie更新失败: {line.strip()}"
+                                break
+                except Exception as e:
+                    logger.error(f"监控Cookie更新输出失败: {e}")
+                finally:
+                    if current_process:
+                        current_process.stdout.close()
+                        current_process.wait()
+                        current_process = None
+            
+            # 启动监控线程
+            import threading
+            monitor_thread = threading.Thread(target=monitor_output)
+            monitor_thread.daemon = True
+            monitor_thread.start()
+            
+            return {"message": "Cookie更新程序启动成功，请在浏览器中登录"}
+            
+        except Exception as e:
+            logger.error(f"启动Cookie更新程序失败: {e}")
+            task_status = {
+                "status": "error",
+                "message": f"启动失败: {str(e)}",
+                "details": {
+                    "task_id": None,
+                    "start_time": None,
+                    "duration": None
+                }
+            }
+            raise

@@ -13,6 +13,8 @@ from datetime import datetime
 import sqlite3
 import logging
 
+from src.utils.project_path import get_project_root, get_data_path
+
 logger = logging.getLogger(__name__)
 
 # 动态导入CBG链接生成器和JSON导出器
@@ -32,8 +34,8 @@ except ImportError:
 class CharacterService:
     def __init__(self):
         # 获取项目根目录
-        self.project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        self.data_dir = os.path.join(self.project_root, 'data')
+        self.project_root = get_project_root()
+        self.data_dir = get_data_path()
     
     def _validate_year_month(self, year: Optional[int], month: Optional[int]) -> Tuple[int, int]:
         """验证并获取有效的年月"""

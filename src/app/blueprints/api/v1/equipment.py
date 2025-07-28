@@ -221,7 +221,113 @@ def get_valuation_by_sn(equip_sn):
         return error_response(f"获取装备估价失败: {str(e)}")
 
 
+@equipment_bp.route('/extract-features', methods=['POST'])
+def extract_equipment_features():
+    """提取装备特征"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供装备数据")
+        
+        equipment_data = data.get('equipment_data')
+        if not equipment_data:
+            return error_response("请提供装备数据")
+        
+        data_type = data.get('data_type', 'equipment')  # 'equipment' 或 'pet'
+        
+        result = controller.extract_features(equipment_data, data_type)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="特征提取成功")
+        
+    except Exception as e:
+        return error_response(f"特征提取失败: {str(e)}")
+
+
+@equipment_bp.route('/extract-features-batch', methods=['POST'])
+def extract_equipment_features_batch():
+    """批量提取装备特征"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供装备数据")
+        
+        equipment_list = data.get('equipment_list')
+        if not equipment_list or not isinstance(equipment_list, list):
+            return error_response("请提供有效的装备列表")
+        
+        data_type = data.get('data_type', 'equipment')  # 'equipment' 或 'pet'
+        
+        result = controller.extract_features_batch(equipment_list, data_type)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="批量特征提取成功")
+        
+    except Exception as e:
+        return error_response(f"批量特征提取失败: {str(e)}")
+
+
+@equipment_bp.route('/extractor-info/<int:kindid>', methods=['GET'])
+def get_extractor_info(kindid):
+    """获取指定kindid的提取器信息"""
+    try:
+        result = controller.get_extractor_info(kindid)
+        return success_response(data=result, message="获取提取器信息成功")
+    except Exception as e:
+        return error_response(f"获取提取器信息失败: {str(e)}")
+
+
+@equipment_bp.route('/supported-kindids', methods=['GET'])
+def get_supported_kindids():
+    """获取支持的kindid列表"""
+    try:
+        result = controller.get_supported_kindids()
+        return success_response(data=result, message="获取支持的kindid列表成功")
+    except Exception as e:
+        return error_response(f"获取支持的kindid列表失败: {str(e)}")
+
+
 @equipment_bp.route('/health', methods=['GET'])
 def health_check():
     """健康检查"""
-    return success_response(data={"status": "ok"}, message="装备服务正常运行") 
+    return success_response(data={"status": "ok"}, message="装备服务正常运行")
+
+
+@equipment_bp.route('/batch-valuation', methods=['POST'])
+def batch_equipment_valuation():
+    """批量装备估价"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供装备数据")
+        
+        equipment_list = data.get('equipment_list')
+        if not equipment_list or not isinstance(equipment_list, list):
+            return error_response("请提供有效的装备列表")
+        
+        # 获取估价参数
+        strategy = data.get('strategy', 'fair_value')
+        similarity_threshold = float(data.get('similarity_threshold', 0.7))
+        max_anchors = int(data.get('max_anchors', 30))
+        
+        # 调用批量估价
+        result = controller.batch_equipment_valuation(
+            equipment_list=equipment_list,
+            strategy=strategy,
+            similarity_threshold=similarity_threshold,
+            max_anchors=max_anchors
+        )
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="批量装备估价完成")
+        
+    except ValueError:
+        return error_response("参数格式错误")
+    except Exception as e:
+        return error_response(f"批量装备估价失败: {str(e)}") 

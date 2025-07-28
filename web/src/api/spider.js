@@ -75,15 +75,6 @@ export const spiderApi = {
   },
 
   /**
-   * 运行测试
-   * @param {Object} data - 测试参数
-   * @returns {Promise}
-   */
-  runTest(data = {}) {
-    return api.post('/spider/test/run', data)
-  },
-
-  /**
    * 停止任务
    * @returns {Promise}
    */
@@ -155,5 +146,32 @@ export const spiderApi = {
    */
   downloadFile(filename) {
     return api.download(`/spider/download/${filename}`, {}, filename)
+  },
+
+  /**
+   * 启动Playwright收集器
+   * @param {Object} data - Playwright收集器参数
+   * @param {boolean} data.headless - 是否无头模式
+   * @param {string} data.target_url - 目标URL
+   * @returns {Promise}
+   */
+  startPlaywright(data) {
+    return api.post('/spider/playwright/start', data)
+  },
+
+  /**
+   * 检查Cookie状态
+   * @returns {Promise}
+   */
+  checkCookie() {
+    return api.get('/spider/cookie/check')
+  },
+
+  /**
+   * 更新Cookie
+   * @returns {Promise}
+   */
+  updateCookies() {
+    return api.post('/spider/cookie/update')
   }
 } 

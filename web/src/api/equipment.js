@@ -67,5 +67,49 @@ export const equipmentApi = {
    */
   healthCheck() {
     return api.get('/equipment/health')
+  },
+
+  /**
+   * 批量装备估价
+   * @param {Object} data - 装备列表和估价参数
+   * @returns {Promise}
+   */
+  batchEquipmentValuation(data) {
+    return api.post('/equipment/batch-valuation', data)
+  },
+
+  /**
+   * 提取装备特征
+   * @param {Object} data - 装备数据和参数
+   * @returns {Promise}
+   */
+  extractFeatures(data) {
+    return api.post('/equipment/extract-features', data)
+  },
+
+  /**
+   * 批量提取装备特征
+   * @param {Object} data - 装备列表和参数
+   * @returns {Promise}
+   */
+  extractFeaturesBatch(data) {
+    return api.post('/equipment/extract-features-batch', data)
+  },
+
+  /**
+   * 获取支持的kindid列表
+   * @returns {Promise}
+   */
+  getSupportedKindids() {
+    return api.get('/equipment/supported-kindids')
+  },
+
+  /**
+   * 获取指定kindid的提取器信息
+   * @param {number} kindid - 装备类型ID
+   * @returns {Promise}
+   */
+  getExtractorInfo(kindid) {
+    return api.get(`/equipment/extractor-info/${kindid}`)
   }
 } 

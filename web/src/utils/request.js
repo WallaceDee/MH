@@ -4,7 +4,6 @@ import { Message } from 'element-ui'
 // 创建axios实例
 const request = axios.create({
   baseURL: '/api/v1', // API基础路径
-  timeout: 10000, // 请求超时时间
   headers: {
     'Content-Type': 'application/json'
   }

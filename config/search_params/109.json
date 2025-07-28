@@ -1,17 +1,9 @@
 {
-    "level_min": "109",
-    "level_max": "109",
-    "expt_fangyu": "17",
-    "expt_kangfa": "17",
-    "expt_total": "51",
-    "bb_expt_gongji": "17",
-    "bb_expt_fangyu": "17",
-    "bb_expt_fashu": "17",
-    "bb_expt_kangfa": "17",
-    "school_skill_num": "7",
-    "school_skill_level": "119",
-    "skill_qiang_shen": "129",
-    "skill_shensu": "40",
-    "skill_qiang_zhuang": "40",
-    "order_by": "price ASC"
-  }
+  "bb_expt_fangyu": "17",
+  "bb_expt_fashu": "17",
+  "bb_expt_gongji": "17",
+  "bb_expt_kangfa": "17",
+  "level_max": "109",
+  "level_min": "129",
+  "order_by": "price ASC"
+}

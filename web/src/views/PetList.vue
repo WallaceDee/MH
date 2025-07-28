@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO:列出有价值的特征在表格列 -->
   <div class="pet-list-view">
     <div class="filters">
       <!-- 筛选和搜索表单 -->
@@ -52,28 +51,30 @@
         </el-form-item>
       </el-form>
     </div>
-    <el-table :data="pets" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey">
-      <el-table-column prop="eid" label="操作" width="100" fixed>
+    <el-table :data="pets" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey"
+      v-loading="tableLoading">
+      <el-table-column prop="eid" label="操作" width="100" fixed align="center">
         <template #default="scope">
-          <el-link :href="getCBGLink(scope.row.eid)" type="danger" target="_blank">藏宝阁</el-link>
+          <el-link :href="getCBGLinkByType(scope.row.eid, 'pet')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <similar-pet-modal :pet="scope.row" :similar-data="similarPets[scope.row.eid]"
+          <SimilarPetModal :pet="scope.row" :similar-data="similarPets[scope.row.eid]"
             :valuation="petValuations[scope.row.eid]" :error="similarError[scope.row.eid]"
             :loading="loadingSimilar[scope.row.eid]" @show="loadSimilarPets" @retry="retryWithNewThreshold" />
         </template>
       </el-table-column>
-      <el-table-column fixed label="召唤兽" width="70">
+      <el-table-column fixed label="召唤兽" width="70" align="center">
         <template #default="scope">
           <pet-image :pet="scope.row.petData" :equipFaceImg="scope.row.equip_face_img"
             :enhanceInfo="getEnhanceInfo(scope.row)" />
         </template>
       </el-table-column>
-      <el-table-column fixed prop="price" label="价格 (元)" width="140" sortable="custom">
+      <el-table-column fixed prop="price" label="价格 (元)" width="140" sortable="custom" align="center">
         <template #default="scope">
+          {{ scope.row.server_name }}
           <div v-html="formatFullPrice(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="level" label="等级" width="140" sortable="custom">
+      <el-table-column prop="level" label="等级" width="140" sortable="custom" align="center">
         <template #default="scope">
           <p :class="scope.row.petData.is_baobao === '是' ? 'cBlue' : 'equip_desc_red'">
             <span>{{ scope.row.petData.is_baobao === '是' ? '' : '野生' }}</span>
@@ -84,24 +85,48 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="growth" label="成长" width="100" sortable="custom">
+      <el-table-column prop="growth" label="成长" width="100" sortable="custom" align="center">
         <template #default="scope">
-          <span v-html="getColorGrowth(scope.row.growth, [1, 1.3])"></span>
+          <span v-html="getColorNumber(scope.row.growth, [1, 1.3])"></span>
         </template>
       </el-table-column>
-
-      <el-table-column prop="skills" label="技能" width="280">
+      <el-table-column prop="lx" label="灵性" width="80" align="center" sortable="custom">
+        <template #default="scope">
+          <span v-html="getColorNumber(scope.row.lx, [80, 110])"></span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="skill_count" label="技能" width="280" sortable="custom" align="center">
         <template #default="scope">
           <div class="pet-skills" v-html="formatSkills(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="petData.texing.name" label="特性" width="60"></el-table-column>
-      <el-table-column prop="petData.lx" label="灵性值" width="60">
-        <template #default="scope">
-          <span v-html="getColorGrowth(scope.row.petData.lx, [80, 110])"></span>
+      <el-table-column prop="equip_list" label="套装" width="100" sortable="custom" align="center">
+        <template #default="{ row: { equip_list } }">
+          <span v-if="getEquipSuitEffect(equip_list)" class="cBlue" style="text-align: center;">{{
+            getEquipSuitEffect(equip_list) }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="server_name" label="服务器" width="120"></el-table-column>
+      <el-table-column prop="equip_list" label="装备" width="320" sortable="custom" align="center">
+        <template #default="{ row: { equip_list } }">
+          <table cellspacing="0" cellpadding="0" class="tb03 size50" id="pet_equip_con" style="transform: scale(0.75);">
+            <tr>
+              <td v-for="(eItem, index) in JSON.parse(equip_list)" :key="index">
+                <EquipmentImage v-if="eItem" :placement="'bottom'" :image="false" :equipment="getEquipImageProps(eItem)"
+                  size="small" :popoverWidth="300" />
+                <span v-else>&nbsp;</span>
+              </td>
+              <td v-if="JSON.parse(equip_list).length === 3">&nbsp;</td>
+            </tr>
+          </table>
+          <el-button v-if="JSON.parse(equip_list).some(item => item)" type="text" size="mini"
+            @click="batchValuateEquipments(JSON.parse(equip_list))" :loading="equipmentValuationLoading"
+            :disabled="!JSON.parse(equip_list).some(item => item)">
+            宠物装备估价
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column prop="petData.texing.name" label="特性" width="60" align="center"></el-table-column>
+
     </el-table>
     <div class="pagination-container">
       <el-pagination @current-change="handlePageChange" :current-page="pagination.page" @size-change="handleSizeChange"
@@ -114,9 +139,14 @@
 
 <script>
 import SimilarPetModal from '@/components/SimilarPetModal.vue'
+import BatchValuationResult from '@/components/BatchValuationResult.vue'
 import dayjs from 'dayjs'
 import PetImage from '@/components/PetImage.vue'
-
+import EquipmentImage from '@/components/EquipmentImage.vue'
+import { petMixin } from '@/utils/mixins/petMixin'
+import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+import { commonMixin } from '@/utils/mixins/commonMixin'
+import { equipmentApi } from '@/api/equipment'
 const skillOptions = []
 const pet_skill_classification = window.AUTO_SEARCH_CONFIG.pet_skill_classification
 for (const lowOrHightKey in pet_skill_classification) {
@@ -133,10 +163,17 @@ export default {
   name: 'PetList',
   components: {
     SimilarPetModal,
-    PetImage
+    PetImage,
+    EquipmentImage
   },
+  mixins: [equipmentMixin, commonMixin, petMixin],
   data() {
     return {
+      batchValuateParams: {
+        similarity_threshold: 0.8,
+        max_anchors: 30
+      },
+      tableLoading: false, // 表格加载状态
       // 级联选择器配置
       cascaderProps: {
         multiple: true,
@@ -174,53 +211,86 @@ export default {
       loadingSimilar: {}, // 存储每个宠物的加载状态
       similarError: {}, // 存储加载错误信息
       petValuations: {}, // 存储宠物估价信息
+      equipmentValuationLoading: false, // 装备批量估价加载状态
+      equipmentValuationResults: {}, // 存储装备批量估价结果
     }
   },
   methods: {
-    getSkillImage(skillId = 0) {
-      if (skillId === 0) {
-        return ''
-      }
-      // skillId少于4位数要补0
-      const paddedId = skillId.toString().padStart(4, '0')
-      return `https://cbg-xyq.res.netease.com/images/skill/${paddedId}.gif`
-    },
-    tableRowClassName({ row }) {
-      if (row.petData.is_baobao === '否') {
-        return 'warning-row'
-      }
-      return ''
-    },
-    parse_fashang_fafang(desc_info) {
+    // 批量装备估价
+    async batchValuateEquipments(equipmentList) {
       try {
-        const data = JSON.decode(window.decode_desc(desc_info)) // 对内容解码
-        return {
-          fashang: data.fashang,
-          fafang: data.fafang
+        // 过滤掉空值和饰品
+        const validEquipments = equipmentList.filter((item, index) => item && item.desc && index < 3).map(item => ({ ...item, kindid: 29, large_equip_desc: item.desc }))
+
+        if (validEquipments.length === 0) {
+          this.$message.warning('没有有效的装备可以估价')
+          return
         }
-      } catch (e) {
-        return {}
+
+        this.equipmentValuationLoading = true
+
+        // 调用批量估价API
+        const response = await equipmentApi.batchEquipmentValuation({
+          equipment_list: validEquipments,
+          strategy: 'fair_value',
+          similarity_threshold: this.batchValuateParams.similarity_threshold,
+          max_anchors: this.batchValuateParams.max_anchors
+        })
+
+        if (response.code === 200) {
+          const results = response.data.results
+          const totalValue = results.reduce((sum, result) => {
+            return sum + (result.estimated_price || 0)
+          }, 0)
+
+          // 显示估价结果对话框
+          this.$msgbox({
+            title: '批量装备估价结果',
+            message: this.$createElement(BatchValuationResult, {
+              props: {
+                results: results,
+                totalValue: totalValue,
+                equipmentList: validEquipments,
+                valuateParams: this.batchValuateParams
+              },
+              on: {
+                close: () => {
+                  this.$msgbox.close()
+                }
+              }
+            }),
+            showCancelButton: false,
+            showConfirmButton: false,
+            customClass: 'batch-valuation-dialog',
+            beforeClose: (action, instance, done) => {
+              done()
+            }
+          }).catch(() => {
+            this.equipmentValuationLoading = false
+          })
+
+          // 存储结果用于后续使用
+          this.equipmentValuationResults = {
+            results,
+            totalValue,
+            timestamp: new Date().toISOString()
+          }
+
+        } else {
+          this.$message.error(response.message || '批量估价失败')
+        }
+
+      } catch (error) {
+        console.error('批量装备估价失败:', error)
+        this.$message.error('批量装备估价失败: ' + error.message)
+      } finally {
+        this.equipmentValuationLoading = false
       }
-    },
-    openCBG(eid) {
-      window.open(this.getCBGLink(eid), '_blank')
-    },
-    getCBGLink(eid) {
-      return `https://xyq-m.cbg.163.com/cgi/mweb/equip/${eid.split('-')[1]}/${eid}`
-    },
-    parsePetInfo(desc) {
-      const pet_desc = window.parse_desc_info(desc)
-      const newLinliData = this.parse_fashang_fafang(desc)
-      const pet_attrs = window.get_pet_attrs_info(pet_desc, {
-        only_basic_attr: false,
-        fashang: newLinliData.fashang,
-        fafang: newLinliData.fafang
-      })
-      return pet_attrs
     },
     async fetchPets() {
       const [year, month] = this.filters.selectedDate.split('-')
       try {
+        this.tableLoading = true // 开始加载，显示加载状态
         const params = {
           ...this.filters,
           year,
@@ -256,26 +326,28 @@ export default {
 
         // 使用新的API
         const response = await this.$api.pet.getPetList(params)
-
         if (response.code === 200) {
           this.pets = response.data.data.map((item) => {
+            const petData = this.parsePetInfo(item.desc)
             return ({
               ...item,
-              petData: this.parsePetInfo(item.desc)
+              petData
             })
           }) || []
+
           this.pagination.total = response.data.total || 0
           this.pagination.page = response.data.page || this.pagination.page
-
-          console.log(this.pets.map(item => ({ desc: item.desc, petData: item.petData })))
         } else {
           this.$message.error(response.message || '获取召唤兽列表失败')
         }
       } catch (error) {
         console.error('获取召唤兽列表失败:', error)
         this.$message.error('获取召唤兽列表失败')
+      } finally {
+        this.tableLoading = false // 无论成功失败，都结束加载状态
       }
     },
+    // 重写 commonMixin 中的方法以适配本页面的数据获取方法名
     handleSizeChange(val) {
       this.pagination.page_size = val
       this.pagination.page = 1
@@ -290,141 +362,9 @@ export default {
       this.filters.sort_order = order === 'ascending' ? 'asc' : 'desc'
       this.fetchPets()
     },
-    // 获取带颜色的成长值
-    getColorGrowth(growth, range = [0, 1]) {
-      if (!growth) return '-'
-      growth = +growth
-      const [min, max] = range
-
-      if (!growth || growth < min || growth > max) {
-        return '-'
-      }
-      var cls = 'growth-low'
-      const stepRange = (max - min)
-      if (growth >= min && growth < min + stepRange * 0.25) {
-        cls = 'growth-low' // 低成长
-      } else if (growth >= min + stepRange * 0.25 && growth < min + stepRange * 0.5) {
-        cls = 'growth-medium' // 中等成长
-      } else if (growth >= min + stepRange * 0.5 && growth < min +   stepRange * 0.75) {
-        cls = 'growth-high' // 高成长
-      } else if (growth >= min + stepRange * 0.75 && growth <= max) {
-        cls = 'growth-perfect' // 完美成长
-      }
-
-      return `<span class="${cls}">${growth}</span>`
-    },
-    // 格式化价格
-    formatPrice(price) {
-      if (!price) return '---'
-      return window.get_color_price(price)
-    },
-    // 格式化完整价格信息（包括跨服费用）
-    formatFullPrice(pet, simple = false) {
-      const basePrice = this.formatPrice(pet.price)
-
-      // 检查是否有登录信息和跨服费用
-      if (!window.LoginInfo || !window.LoginInfo.login || simple) {
-        return basePrice
-      }
-
-      const crossServerPoundage = pet.cross_server_poundage || 0
-      const fairShowPoundage = pet.fair_show_poundage || 0
-
-      if (!crossServerPoundage) {
-        return basePrice
-      }
-
-      let additionalFeeHtml = ''
-
-      if (pet.pass_fair_show == 1) {
-        // 跨服费
-        const crossFee = parseFloat(crossServerPoundage / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需跨服费<span class="p1000">￥${crossFee}</span></div>`
-      } else {
-        // 信息费（跨服费 + 预订费）
-        const totalFee = parseFloat((crossServerPoundage + fairShowPoundage) / 100)
-        additionalFeeHtml = `<div class="f12px" style="color: #666;">另需信息费<span class="p1000">￥${totalFee}</span></div>`
-      }
-
-      return basePrice + additionalFeeHtml
-    },
-
-    // 格式化技能
-    formatSkills({ petData }) {
-      try {
-        // 创建一个临时的容器元素
-        const tempContainer = document.createElement('div')
-
-        // 调用原始函数，传入临时容器
-        const { pet_tip_skill_grid: result } = window.show_pet_skill_in_grade(
-          petData.all_skill,
-          petData.sp_skill,
-          2,
-          8,
-          {
-            pet_skill_url: 'https://cbg-xyq.res.netease.com/images/skill/',
-            notice_node_name: 'pet_tip_notice_msg',
-            skill_panel_name: 'pet_tip_skill_grid',
-            enhance_skills: [],
-            table_class: 'tb03'
-          },
-          petData
-        )
-        // 如果返回的是DOM节点，将其添加到临时容器
-        result.forEach((node) => {
-          if (node) {
-            tempContainer.appendChild(node)
-          }
-        })
-        // 返回HTML字符串，去掉所有空的td标签
-        return tempContainer.innerHTML
-      } catch (error) {
-        console.error('格式化技能失败:', error)
-        return ''
-      }
-    },
-
-    // 获取技能名称
-    getSkillName(skillId) {
-      // 这里可以根据技能ID获取技能名称
-      // 暂时返回技能ID，后续可以扩展技能名称映射
-      return `技能${skillId}`
-    },
-
     handleLevelRangeChange(value) {
       this.filters.level_range = value
-      this.fetchPets()
     },
-
-    // 处理召唤兽类型变化
-    handlePetTypeChange() {
-      this.fetchPets()
-    },
-
-    // 获取增强信息
-    getEnhanceInfo(pet) {
-      var equip_display_conf = {
-        // 高亮技能
-        pet: { skill_id_list: [571, 661], is_baobao: 1 },
-        search: { is_hide_unreasonable_price_equips: 1 }
-      }
-      var enhanceInfo = equip_display_conf.pet || {}
-      var time_lock = pet.is_time_lock
-      time_lock = time_lock > 0 || time_lock == 'true'
-      var time_lock_days
-      if (time_lock) {
-        time_lock_days = pet.time_lock_days
-      }
-      enhanceInfo.time_lock = time_lock
-      enhanceInfo.time_lock_days = time_lock_days
-      return {
-        time_lock: pet.time_lock || false,
-        time_lock_days: pet.time_lock_days || 90,
-        is_baobao: pet.petData.is_baobao === '是' || false,
-        skill_id_list: enhanceInfo.skill_id_list || []
-      }
-    },
-
     // 加载相似宠物
     async loadSimilarPets(pet) {
       const eid = pet.eid
@@ -474,10 +414,15 @@ export default {
 
           // 从估价结果中提取相似宠物信息
           if (data.anchors && data.anchors.length > 0) {
+            const { data: { anchors } } = await this.$api.pet.findPetAnchors({
+              pet_data: pet,
+              similarity_threshold: similarityThreshold,
+              max_anchors: 30
+            })
             this.$set(this.similarPets, eid, {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: data.anchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
+              anchors: anchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
               statistics: {
                 price_range: {
                   min: Math.min(...data.anchors.map((a) => a.price || 0)),
@@ -571,7 +516,6 @@ export default {
   },
   mounted() {
     this.fetchPets()
-    window.parsePetInfo = this.parsePetInfo
   }
 }
 </script>
@@ -608,5 +552,19 @@ export default {
 /* 相似宠物弹窗样式 */
 :global(.similar-pet-popper) {
   padding: 16px;
+}
+
+/* 批量估价对话框样式 */
+:global(.batch-valuation-dialog) {
+  width: 90% !important;
+  max-width: 900px !important;
+}
+
+:global(.batch-valuation-dialog .el-message-box__content) {
+  padding: 0 !important;
+}
+
+:global(.batch-valuation-dialog .el-message-box__body) {
+  padding: 0 !important;
 }
 </style>

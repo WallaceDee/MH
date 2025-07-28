@@ -236,7 +236,7 @@
       <!-- 基本信息 -->
       <el-table-column prop="character_name" label="角色名" width="120">
         <template slot-scope="scope">
-          <a :href="getCBGLink(scope.row.equip_id)" target="_blank" class="character-link">
+          <a :href="getCBGLinkByType(scope.row.equip_id, 'character')" target="_blank" class="character-link">
             {{ scope.row.character_name || scope.row.seller_nickname }}
           </a>
         </template>
@@ -368,10 +368,11 @@
 
 <script>
 import dayjs from 'dayjs'
+import { commonMixin } from '@/utils/mixins/commonMixin'
 
 export default {
   name: 'CharacterList',
-
+  mixins:[commonMixin],
   data() {
     return {
       loading: false,
@@ -620,16 +621,6 @@ export default {
 
     formatMoney(money) {
       return money ? `¥${(money / 100).toFixed(2)}` : '-'
-    },
-
-    getCBGLink(equipId) {
-      if (!equipId) return '#'
-      // 从equip_id中提取服务器ID
-      const serverId = this.extractServerId(equipId)
-      if (!serverId) return '#'
-
-      // 构建CBG链接
-      return `https://xyq.cbg.163.com/equip?s=${serverId}&eid=${equipId}`
     },
 
     extractServerId(equipId) {
