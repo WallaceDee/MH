@@ -1,0 +1,388 @@
+2025-07-28 23:05:36,311 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:05:37,859 - INFO - 成功加载 36 个Cookie
+2025-07-28 23:05:38,096 - INFO - 已注入 36 个Cookie到浏览器上下文
+2025-07-28 23:05:38,388 - INFO - Playwright浏览器设置完成
+2025-07-28 23:05:38,396 - INFO - Playwright网络监听已设置
+2025-07-28 23:05:38,396 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753715135251&act=recommd_by_role&server_id=2&areaid=2&server_name=罗浮山&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=105&fangyu=99&addon_fali=1&addon_naili=1&addon_sum=18&addon_sum_min=18&addon_status=%E9%AB%98%E7%BA%A7%E7%A5%9E%E4%BD%91%E5%A4%8D%E7%94%9F&equip_pos=1
+2025-07-28 23:05:38,668 - INFO - 页面初始加载完成
+2025-07-28 23:05:38,685 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753715135251&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=105&fangyu=99&addon_fali=1&addon_naili=1&addon_sum=18&addon_sum_min=18&addon_status=%E9%AB%98%E7%BA%A7%E7%A5%9E%E4%BD%91%E5%A4%8D%E7%94%9F&equip_pos=1 
+2025-07-28 23:05:38,686 - INFO - 开始创建装备spider实例...
+2025-07-28 23:05:38,833 - INFO - CBGEquipSpider模块导入成功，开始实例化...
+2025-07-28 23:05:38,833 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:05:38,857 - INFO - 装备spider实例已创建
+2025-07-28 23:05:41,672 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753715135251&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=105&fangyu=99&addon_fali=1&addon_naili=1&addon_sum=18&addon_sum_min=18&addon_status=%E9%AB%98%E7%BA%A7%E7%A5%9E%E4%BD%91%E5%A4%8D%E7%94%9F&equip_pos=1
+2025-07-28 23:05:41,672 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753715135251&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=105&fangyu=99&addon_fali=1&addon_naili=1&addon_sum=18&addon_sum_min=18&addon_status=%E9%AB%98%E7%BA%A7%E7%A5%9E%E4%BD%91%E5%A4%8D%E7%94%9F&equip_pos=1', 'message': '已登录'}
+2025-07-28 23:05:41,672 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:05:41,679 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:05:41,679 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:05:41,679 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:05:59,581 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:05:59,641 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:05:59,964 - INFO - 数据收集已停止
+2025-07-28 23:05:59,964 - INFO - 数据收集已停止
+2025-07-28 23:05:59,965 - INFO - 数据收集已停止
+2025-07-28 23:20:22,531 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:20:24,114 - INFO - 成功加载 36 个Cookie
+2025-07-28 23:20:24,277 - INFO - 已注入 36 个Cookie到浏览器上下文
+2025-07-28 23:20:24,550 - INFO - Playwright浏览器设置完成
+2025-07-28 23:20:24,556 - INFO - Playwright网络监听已设置
+2025-07-28 23:20:24,556 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:20:25,426 - INFO - 页面初始加载完成
+2025-07-28 23:20:27,156 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716025419&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-07-28 23:20:27,156 - INFO - 开始创建角色spider实例...
+2025-07-28 23:20:27,662 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-07-28 23:20:27,662 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:20:27,665 - INFO - 角色spider实例已创建
+2025-07-28 23:20:27,684 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:20:27,713 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:20:27,881 - INFO - 开始保存角色数据，数量: 15
+2025-07-28 23:20:27,881 - INFO - 检查角色数据库...
+2025-07-28 23:20:27,881 - INFO - 检查数据库类型: role
+2025-07-28 23:20:27,881 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:20:27,882 - INFO - 数据库文件是否存在: True
+2025-07-28 23:20:27,882 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:20:27,882 - INFO - 获取角色spider实例...
+2025-07-28 23:20:27,882 - INFO - 调用角色spider的save_character_data方法...
+2025-07-28 23:20:31,159 - INFO - 角色数据已保存: 15 条
+2025-07-28 23:20:31,159 - INFO - 响应数据已保存: role - 15 条记录
+2025-07-28 23:20:31,160 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:20:31,161 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-07-28 23:20:31,161 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:20:31,195 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:20:31,195 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:20:31,195 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:20:34,270 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:20:34,314 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:20:34,612 - INFO - 数据收集已停止
+2025-07-28 23:20:34,612 - INFO - 数据收集已停止
+2025-07-28 23:20:35,227 - INFO - 数据收集已停止
+2025-07-28 23:20:37,424 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:20:38,774 - INFO - 成功加载 40 个Cookie
+2025-07-28 23:20:38,903 - INFO - 已注入 40 个Cookie到浏览器上下文
+2025-07-28 23:20:39,178 - INFO - Playwright浏览器设置完成
+2025-07-28 23:20:39,183 - INFO - Playwright网络监听已设置
+2025-07-28 23:20:39,183 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:20:39,967 - INFO - 页面初始加载完成
+2025-07-28 23:20:41,172 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716039961&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-07-28 23:20:41,172 - INFO - 开始创建角色spider实例...
+2025-07-28 23:20:41,684 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-07-28 23:20:41,685 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:20:41,688 - INFO - 角色spider实例已创建
+2025-07-28 23:20:41,713 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:20:41,743 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:20:41,909 - INFO - 开始保存角色数据，数量: 15
+2025-07-28 23:20:41,909 - INFO - 检查角色数据库...
+2025-07-28 23:20:41,909 - INFO - 检查数据库类型: role
+2025-07-28 23:20:41,909 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:20:41,909 - INFO - 数据库文件是否存在: True
+2025-07-28 23:20:41,910 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:20:41,910 - INFO - 获取角色spider实例...
+2025-07-28 23:20:41,910 - INFO - 调用角色spider的save_character_data方法...
+2025-07-28 23:20:45,239 - INFO - 角色数据已保存: 15 条
+2025-07-28 23:20:45,240 - INFO - 响应数据已保存: role - 15 条记录
+2025-07-28 23:20:45,241 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:20:45,241 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-07-28 23:20:45,241 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:20:45,308 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:20:45,316 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:20:45,317 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:20:45,317 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:20:45,327 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:20:45,616 - INFO - 数据收集已停止
+2025-07-28 23:20:45,645 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-07-28 23:20:45,646 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-07-28 23:20:56,760 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:20:58,249 - INFO - 成功加载 40 个Cookie
+2025-07-28 23:20:58,377 - INFO - 已注入 40 个Cookie到浏览器上下文
+2025-07-28 23:20:58,652 - INFO - Playwright浏览器设置完成
+2025-07-28 23:20:58,658 - INFO - Playwright网络监听已设置
+2025-07-28 23:20:58,658 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:20:59,480 - INFO - 页面初始加载完成
+2025-07-28 23:21:00,778 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716059474&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-07-28 23:21:00,778 - INFO - 开始创建角色spider实例...
+2025-07-28 23:21:01,300 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-07-28 23:21:01,301 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:21:01,306 - INFO - 角色spider实例已创建
+2025-07-28 23:21:01,323 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:21:01,349 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:21:01,509 - INFO - 开始保存角色数据，数量: 15
+2025-07-28 23:21:01,509 - INFO - 检查角色数据库...
+2025-07-28 23:21:01,509 - INFO - 检查数据库类型: role
+2025-07-28 23:21:01,509 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:21:01,509 - INFO - 数据库文件是否存在: True
+2025-07-28 23:21:01,510 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:21:01,510 - INFO - 获取角色spider实例...
+2025-07-28 23:21:01,510 - INFO - 调用角色spider的save_character_data方法...
+2025-07-28 23:21:04,654 - INFO - 角色数据已保存: 15 条
+2025-07-28 23:21:04,654 - INFO - 响应数据已保存: role - 15 条记录
+2025-07-28 23:21:04,656 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:21:04,657 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-07-28 23:21:04,657 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:21:04,690 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:21:04,690 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:21:04,690 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:21:08,450 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:21:08,515 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:21:08,821 - INFO - 数据收集已停止
+2025-07-28 23:21:08,822 - INFO - 数据收集已停止
+2025-07-28 23:21:08,822 - INFO - 数据收集已停止
+2025-07-28 23:21:26,692 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:21:28,418 - INFO - 成功加载 40 个Cookie
+2025-07-28 23:21:28,540 - INFO - 已注入 40 个Cookie到浏览器上下文
+2025-07-28 23:21:28,818 - INFO - Playwright浏览器设置完成
+2025-07-28 23:21:28,823 - INFO - Playwright网络监听已设置
+2025-07-28 23:21:28,823 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:21:29,598 - INFO - 页面初始加载完成
+2025-07-28 23:21:30,888 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716089587&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-07-28 23:21:30,888 - INFO - 开始创建角色spider实例...
+2025-07-28 23:21:31,393 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-07-28 23:21:31,393 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:21:31,398 - INFO - 角色spider实例已创建
+2025-07-28 23:21:31,418 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:21:31,447 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:21:31,612 - INFO - 开始保存角色数据，数量: 15
+2025-07-28 23:21:31,612 - INFO - 检查角色数据库...
+2025-07-28 23:21:31,612 - INFO - 检查数据库类型: role
+2025-07-28 23:21:31,612 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:21:31,613 - INFO - 数据库文件是否存在: True
+2025-07-28 23:21:31,613 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:21:31,613 - INFO - 获取角色spider实例...
+2025-07-28 23:21:31,613 - INFO - 调用角色spider的save_character_data方法...
+2025-07-28 23:21:34,949 - INFO - 角色数据已保存: 15 条
+2025-07-28 23:21:34,950 - INFO - 响应数据已保存: role - 15 条记录
+2025-07-28 23:21:34,951 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:21:34,951 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-07-28 23:21:34,951 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:21:34,988 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:21:34,988 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:21:34,988 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:21:35,083 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:21:35,124 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:21:35,487 - INFO - 数据收集已停止
+2025-07-28 23:21:35,487 - INFO - 数据收集已停止
+2025-07-28 23:21:35,997 - INFO - 数据收集已停止
+2025-07-28 23:22:06,926 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:22:08,500 - INFO - 成功加载 40 个Cookie
+2025-07-28 23:22:08,704 - INFO - 已注入 40 个Cookie到浏览器上下文
+2025-07-28 23:22:09,125 - INFO - Playwright浏览器设置完成
+2025-07-28 23:22:09,130 - INFO - Playwright网络监听已设置
+2025-07-28 23:22:09,130 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:22:09,909 - INFO - 页面初始加载完成
+2025-07-28 23:22:11,120 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716129904&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-07-28 23:22:11,121 - INFO - 开始创建角色spider实例...
+2025-07-28 23:22:11,631 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-07-28 23:22:11,632 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:22:11,634 - INFO - 角色spider实例已创建
+2025-07-28 23:22:11,657 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:22:11,688 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:22:11,883 - INFO - 开始保存角色数据，数量: 15
+2025-07-28 23:22:11,884 - INFO - 检查角色数据库...
+2025-07-28 23:22:11,884 - INFO - 检查数据库类型: role
+2025-07-28 23:22:11,884 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:22:11,884 - INFO - 数据库文件是否存在: True
+2025-07-28 23:22:11,884 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:22:11,884 - INFO - 获取角色spider实例...
+2025-07-28 23:22:11,884 - INFO - 调用角色spider的save_character_data方法...
+2025-07-28 23:22:15,228 - INFO - 角色数据已保存: 15 条
+2025-07-28 23:22:15,228 - INFO - 响应数据已保存: role - 15 条记录
+2025-07-28 23:22:15,230 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:22:15,230 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-07-28 23:22:15,230 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:22:15,283 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:22:15,283 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:22:15,283 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:22:50,981 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:22:51,035 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:22:51,375 - INFO - 数据收集已停止
+2025-07-28 23:22:51,375 - INFO - 数据收集已停止
+2025-07-28 23:22:51,539 - INFO - 数据收集已停止
+2025-07-28 23:23:39,452 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:23:41,047 - INFO - 成功加载 40 个Cookie
+2025-07-28 23:23:41,219 - INFO - 已注入 40 个Cookie到浏览器上下文
+2025-07-28 23:23:41,529 - INFO - Playwright浏览器设置完成
+2025-07-28 23:23:41,533 - INFO - Playwright网络监听已设置
+2025-07-28 23:23:41,534 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:23:42,271 - INFO - 页面初始加载完成
+2025-07-28 23:23:43,528 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716222264&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-07-28 23:23:43,528 - INFO - 开始创建角色spider实例...
+2025-07-28 23:23:44,045 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-07-28 23:23:44,046 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:23:44,049 - INFO - 角色spider实例已创建
+2025-07-28 23:23:44,071 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:23:44,095 - INFO - 成功加载game_auto_config.json配置，包含132个配置项
+2025-07-28 23:23:44,264 - INFO - 开始保存角色数据，数量: 15
+2025-07-28 23:23:44,264 - INFO - 检查角色数据库...
+2025-07-28 23:23:44,264 - INFO - 检查数据库类型: role
+2025-07-28 23:23:44,264 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:23:44,264 - INFO - 数据库文件是否存在: True
+2025-07-28 23:23:44,264 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_characters_202507.db
+2025-07-28 23:23:44,264 - INFO - 获取角色spider实例...
+2025-07-28 23:23:44,264 - INFO - 调用角色spider的save_character_data方法...
+2025-07-28 23:23:47,735 - INFO - 角色数据已保存: 15 条
+2025-07-28 23:23:47,735 - INFO - 响应数据已保存: role - 15 条记录
+2025-07-28 23:23:47,737 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-07-28 23:23:47,737 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-07-28 23:23:47,737 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:23:47,777 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:23:47,777 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:23:47,777 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:23:49,989 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:23:50,052 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:23:50,365 - INFO - 数据收集已停止
+2025-07-28 23:23:50,365 - INFO - 数据收集已停止
+2025-07-28 23:23:50,802 - INFO - 数据收集已停止
+2025-07-28 23:33:13,137 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:33:14,585 - INFO - 成功加载 40 个Cookie
+2025-07-28 23:33:14,770 - INFO - 已注入 40 个Cookie到浏览器上下文
+2025-07-28 23:33:15,096 - INFO - Playwright浏览器设置完成
+2025-07-28 23:33:15,100 - INFO - Playwright网络监听已设置
+2025-07-28 23:33:15,100 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716792364&act=recommd_by_role&server_id=2&areaid=2&server_name=罗浮山&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3
+2025-07-28 23:33:15,414 - INFO - 页面初始加载完成
+2025-07-28 23:33:15,434 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716792364&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:33:15,434 - INFO - 开始创建装备spider实例...
+2025-07-28 23:33:15,557 - INFO - CBGEquipSpider模块导入成功，开始实例化...
+2025-07-28 23:33:15,559 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:33:15,582 - INFO - 装备spider实例已创建
+2025-07-28 23:33:18,419 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716792364&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3
+2025-07-28 23:33:18,419 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716792364&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3', 'message': '已登录'}
+2025-07-28 23:33:18,419 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:33:18,426 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:33:18,427 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:33:18,427 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:33:47,877 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716792364&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=20&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:33:47,879 - INFO - 检查数据库类型: equipment
+2025-07-28 23:33:47,879 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:33:47,879 - INFO - 数据库文件是否存在: True
+2025-07-28 23:33:47,880 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:33:48,672 - INFO - 成功批量插入3条数据到表 equipments
+2025-07-28 23:33:48,687 - INFO - 装备数据已保存: 3 条
+2025-07-28 23:33:48,687 - INFO - 响应数据已保存: equipment - 3 条记录
+2025-07-28 23:33:49,735 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:33:49,788 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:33:50,087 - INFO - 数据收集已停止
+2025-07-28 23:33:50,088 - INFO - 数据收集已停止
+2025-07-28 23:33:50,703 - INFO - 数据收集已停止
+2025-07-28 23:34:23,492 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:34:24,849 - INFO - 成功加载 36 个Cookie
+2025-07-28 23:34:25,002 - INFO - 已注入 36 个Cookie到浏览器上下文
+2025-07-28 23:34:25,278 - INFO - Playwright浏览器设置完成
+2025-07-28 23:34:25,284 - INFO - Playwright网络监听已设置
+2025-07-28 23:34:25,284 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=罗浮山&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3
+2025-07-28 23:34:25,719 - INFO - 页面初始加载完成
+2025-07-28 23:34:25,738 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:34:25,738 - INFO - 开始创建装备spider实例...
+2025-07-28 23:34:25,859 - INFO - CBGEquipSpider模块导入成功，开始实例化...
+2025-07-28 23:34:25,860 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:34:25,885 - INFO - 装备spider实例已创建
+2025-07-28 23:34:28,731 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3
+2025-07-28 23:34:28,731 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3', 'message': '已登录'}
+2025-07-28 23:34:28,731 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:34:28,738 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:34:28,738 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:34:28,738 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:34:52,892 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:34:52,898 - INFO - 检查数据库类型: equipment
+2025-07-28 23:34:52,898 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:34:52,899 - INFO - 数据库文件是否存在: True
+2025-07-28 23:34:52,899 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:34:55,724 - INFO - 成功批量插入15条数据到表 equipments
+2025-07-28 23:34:55,741 - INFO - 装备数据已保存: 15 条
+2025-07-28 23:34:55,742 - INFO - 响应数据已保存: equipment - 15 条记录
+2025-07-28 23:35:04,031 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=2&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:04,038 - INFO - 检查数据库类型: equipment
+2025-07-28 23:35:04,038 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:04,038 - INFO - 数据库文件是否存在: True
+2025-07-28 23:35:04,038 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:06,419 - INFO - 成功批量插入13条数据到表 equipments
+2025-07-28 23:35:06,435 - INFO - 装备数据已保存: 13 条
+2025-07-28 23:35:06,435 - INFO - 响应数据已保存: equipment - 13 条记录
+2025-07-28 23:35:12,250 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=3&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:12,257 - INFO - 检查数据库类型: equipment
+2025-07-28 23:35:12,257 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:12,257 - INFO - 数据库文件是否存在: True
+2025-07-28 23:35:12,258 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:14,868 - INFO - 成功批量插入15条数据到表 equipments
+2025-07-28 23:35:14,885 - INFO - 装备数据已保存: 15 条
+2025-07-28 23:35:14,886 - INFO - 响应数据已保存: equipment - 15 条记录
+2025-07-28 23:35:29,325 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=4&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:29,329 - INFO - 检查数据库类型: equipment
+2025-07-28 23:35:29,329 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:29,329 - INFO - 数据库文件是否存在: True
+2025-07-28 23:35:29,330 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:32,205 - INFO - 成功批量插入15条数据到表 equipments
+2025-07-28 23:35:32,221 - INFO - 装备数据已保存: 15 条
+2025-07-28 23:35:32,221 - INFO - 响应数据已保存: equipment - 15 条记录
+2025-07-28 23:35:33,597 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=5&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:33,602 - INFO - 检查数据库类型: equipment
+2025-07-28 23:35:33,602 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:33,602 - INFO - 数据库文件是否存在: True
+2025-07-28 23:35:33,603 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:36,283 - INFO - 成功批量插入15条数据到表 equipments
+2025-07-28 23:35:36,302 - INFO - 装备数据已保存: 15 条
+2025-07-28 23:35:36,302 - INFO - 响应数据已保存: equipment - 15 条记录
+2025-07-28 23:35:36,310 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=6&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:36,316 - INFO - 检查数据库类型: equipment
+2025-07-28 23:35:36,316 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:36,316 - INFO - 数据库文件是否存在: True
+2025-07-28 23:35:36,316 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:38,828 - INFO - 成功批量插入15条数据到表 equipments
+2025-07-28 23:35:38,844 - INFO - 装备数据已保存: 15 条
+2025-07-28 23:35:38,844 - INFO - 响应数据已保存: equipment - 15 条记录
+2025-07-28 23:35:39,653 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=8&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:39,655 - INFO - 检查数据库类型: equipment
+2025-07-28 23:35:39,655 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:39,656 - INFO - 数据库文件是否存在: True
+2025-07-28 23:35:39,656 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:40,588 - INFO - 成功批量插入4条数据到表 equipments
+2025-07-28 23:35:40,603 - INFO - 装备数据已保存: 4 条
+2025-07-28 23:35:40,603 - INFO - 响应数据已保存: equipment - 4 条记录
+2025-07-28 23:35:45,665 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=7&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:45,672 - INFO - 检查数据库类型: equipment
+2025-07-28 23:35:45,672 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:45,672 - INFO - 数据库文件是否存在: True
+2025-07-28 23:35:45,672 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:35:48,199 - INFO - 成功批量插入15条数据到表 equipments
+2025-07-28 23:35:48,215 - INFO - 装备数据已保存: 15 条
+2025-07-28 23:35:48,215 - INFO - 响应数据已保存: equipment - 15 条记录
+2025-07-28 23:35:49,766 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753716862444&act=recommd_by_role&server_id=2&areaid=2&server_name=%E7%BD%97%E6%B5%AE%E5%B1%B1&page=9&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:35:59,079 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:35:59,136 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:35:59,536 - INFO - 数据收集已停止
+2025-07-28 23:35:59,536 - INFO - 数据收集已停止
+2025-07-28 23:35:59,537 - INFO - 数据收集已停止
+2025-07-28 23:37:58,596 - INFO - Spider实例将在需要时延迟创建
+2025-07-28 23:38:00,085 - INFO - 成功加载 36 个Cookie
+2025-07-28 23:38:00,238 - INFO - 已注入 36 个Cookie到浏览器上下文
+2025-07-28 23:38:00,537 - INFO - Playwright浏览器设置完成
+2025-07-28 23:38:00,541 - INFO - Playwright网络监听已设置
+2025-07-28 23:38:00,541 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753717077844&act=recommd_by_role&server_id=77&areaid=43&server_name=进贤门&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3
+2025-07-28 23:38:00,838 - INFO - 页面初始加载完成
+2025-07-28 23:38:00,841 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753717077844&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:38:00,841 - INFO - 开始创建装备spider实例...
+2025-07-28 23:38:00,967 - INFO - CBGEquipSpider模块导入成功，开始实例化...
+2025-07-28 23:38:00,968 - INFO - 成功从config/cookies.txt加载Cookie
+2025-07-28 23:38:00,989 - INFO - 装备spider实例已创建
+2025-07-28 23:38:03,840 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753717077844&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3
+2025-07-28 23:38:03,840 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753717077844&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&shanghai=24&addon_minjie=1&addon_sum=4&addon_sum_min=4&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3', 'message': '已登录'}
+2025-07-28 23:38:03,840 - INFO - 检测到已登录状态，更新Cookie...
+2025-07-28 23:38:03,848 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-07-28 23:38:03,848 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-07-28 23:38:03,848 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-07-28 23:38:21,573 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753717077844&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:38:21,574 - INFO - 检查数据库类型: equipment
+2025-07-28 23:38:21,575 - INFO - 数据库路径: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:38:21,575 - INFO - 数据库文件是否存在: True
+2025-07-28 23:38:21,575 - INFO - 数据库文件已存在: E:\workspace\mh\data\202507\cbg_equip_202507.db
+2025-07-28 23:38:22,412 - INFO - 成功批量插入3条数据到表 equipments
+2025-07-28 23:38:22,427 - INFO - 装备数据已保存: 3 条
+2025-07-28 23:38:22,427 - INFO - 响应数据已保存: equipment - 3 条记录
+2025-07-28 23:38:25,653 - INFO - 捕获到类型（equipment）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753717077844&act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=2&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=search_pet_equip&level=95&addon_status=%E5%96%84%E6%81%B6%E6%9C%89%E6%8A%A5&equip_pos=3 
+2025-07-28 23:39:09,039 - INFO - 检测到页面关闭，停止数据收集服务
+2025-07-28 23:39:09,077 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-07-28 23:39:09,511 - INFO - 数据收集已停止
+2025-07-28 23:39:09,511 - INFO - 数据收集已停止
+2025-07-28 23:39:09,852 - INFO - 数据收集已停止
