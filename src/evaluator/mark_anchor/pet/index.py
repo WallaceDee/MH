@@ -57,9 +57,8 @@ class PetMarketAnchorEvaluator(BaseValuator):
             "lx": 0.1,
             "skill_count": 0,
             "texing": 0,
-            "neidan_count": 0,
+            "neidan_count": 0.2,
             "equip_level":0.8,
-            "suit_effect":0,
             "is_baobao":0,
             "evol_skill_list_value":0.5
         }
@@ -68,12 +67,11 @@ class PetMarketAnchorEvaluator(BaseValuator):
         self.feature_weights = {
             "role_grade_limit": 1,
             "growth": 0.2,
-            "lx": 0.2,
-            "skill_count": 0.5,
+            "lx": 0.3,
+            "skill_count": 0.2,
             "texing": 0.2,
             "neidan_count": 0.2,
             "equip_level":0.8,
-            "suit_effect":0.3,
             "is_baobao":0.2,
             "evol_skill_list_value":0.2
         }
@@ -83,7 +81,8 @@ class PetMarketAnchorEvaluator(BaseValuator):
     def find_market_anchors(self,
                             target_features: Dict[str, Any],
                             similarity_threshold: float = 0.7,
-                            max_anchors: int = 30) -> List[Dict[str, Any]]:
+                            max_anchors: int = 30,
+                            verbose: bool = True) -> List[Dict[str, Any]]:
         """
         寻找市场锚点召唤兽
 
@@ -91,6 +90,7 @@ class PetMarketAnchorEvaluator(BaseValuator):
             target_features: 目标召唤兽特征字典
             similarity_threshold: 相似度阈值（0-1）
             max_anchors: 最大锚点数量
+            verbose: 是否显示详细调试日志
 
         Returns:
             List[Dict[str, Any]]: 锚点召唤兽列表，每个元素包含：
@@ -140,10 +140,27 @@ class PetMarketAnchorEvaluator(BaseValuator):
                     print(
                         f"相似度------------------: {similarity}{target_features}")
                     if similarity >= similarity_threshold:
+                        # 提取价格，如果有equip_list_amount则减去装备估价
+                        total_price = market_row.get('price', 0)
+                        equip_list_amount = market_row.get('equip_list_amount', 0)
+                        
+                        # 计算纯宠物价格（总价格减去装备估价）
+                        pet_price = total_price - equip_list_amount
+                        if equip_list_amount > 0:
+                            print({
+                                'total_price': total_price,
+                                'equip_list_amount': equip_list_amount,
+                                'pet_price': pet_price
+                            })
+                        if pet_price < 0:
+                            pet_price = 0  # 确保价格不为负数
+                        
                         anchor_candidates.append({
                             'equip_sn': current_equip_sn,
                             'similarity': similarity,
-                            'price': market_row.get('price', 0),
+                            'price': pet_price,  # 使用纯宠物价格
+                            'total_price': total_price,  # 保留总价格用于参考
+                            'equip_list_amount': equip_list_amount,  # 保留装备估价用于参考
                             'features': market_row.to_dict()
                         })
 
@@ -167,7 +184,9 @@ class PetMarketAnchorEvaluator(BaseValuator):
             anchor_candidates.sort(key=lambda x: x['similarity'], reverse=True)
             # 返回前N个锚点
             anchors = anchor_candidates[:max_anchors]
-
+            # 对锚点进行极端值过滤
+            if anchors:
+                anchors = self.extreme_value_filter.filter_anchors_for_extreme_values(anchors)
             print(f"找到 {len(anchors)} 个市场锚点召唤兽")
             if anchors:
                 print(
@@ -192,7 +211,7 @@ class PetMarketAnchorEvaluator(BaseValuator):
             Dict[str, Any]: 过滤条件
         """
         filters = {**target_features}
-        print(f"filtersfiltersfiltersfilters {filters}")
+        print(f"_build_pre_filters {filters}")
         return filters
 
     def _calculate_similarity(self,

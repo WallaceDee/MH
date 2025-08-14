@@ -81,9 +81,9 @@ graph TD
 ```python
 class HybridValuationEngine:
     def __init__(self, market_evaluator=None, rule_evaluator=None)
-    def evaluate(self, character_data) -> ValuationResult
-    def batch_evaluate(self, character_list) -> List[ValuationResult]
-    def generate_comprehensive_report(self, character_data) -> Dict
+    def evaluate(self, role_data) -> ValuationResult
+    def batch_evaluate(self, role_list) -> List[ValuationResult]
+    def generate_comprehensive_report(self, role_data) -> Dict
 ```
 
 ### ValuationResult
@@ -113,7 +113,7 @@ from evaluator.hybrid_valuation_engine import HybridValuationEngine
 engine = HybridValuationEngine()
 
 # 准备角色数据
-character_data = {
+role_data = {
     'level': 129,
     'expt_ski1': 0,   # 攻击修炼
     'expt_ski2': 21,  # 防御修炼
@@ -129,7 +129,7 @@ character_data = {
 }
 
 # 执行估价
-result = engine.evaluate(character_data)
+result = engine.evaluate(role_data)
 
 print(f"最终估价: {result.final_value:.1f}")
 print(f"置信度: {result.confidence:.2%}")
@@ -140,8 +140,8 @@ print(f"策略: {result.integration_strategy}")
 
 ```python
 # 批量估价
-character_list = [character_data1, character_data2, ...]
-results = engine.batch_evaluate(character_list)
+role_list = [role_data1, role_data2, ...]
+results = engine.batch_evaluate(role_list)
 
 for i, result in enumerate(results):
     print(f"角色{i+1}: {result.final_value:.1f}")
@@ -151,7 +151,7 @@ for i, result in enumerate(results):
 
 ```python
 # 生成详细报告
-report = engine.generate_comprehensive_report(character_data)
+report = engine.generate_comprehensive_report(role_data)
 
 # 访问报告内容
 summary = report['evaluation_summary']

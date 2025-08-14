@@ -3,12 +3,13 @@
         <div class="header-content">
             <el-menu mode="horizontal" :router="true" :default-active="$route.path">
                 <el-menu-item index="/">🏠️<span class="menu-item-text">首页</span></el-menu-item>
-                <el-menu-item index="/characters">👥<span class="menu-item-text">角色</span></el-menu-item>
+                <el-menu-item index="/roles">👥<span class="menu-item-text">角色</span></el-menu-item>
                 <el-menu-item index="/equipments">⚔️<span class="menu-item-text">装备</span></el-menu-item>
                 <el-menu-item index="/pets">🐲<span class="menu-item-text">召唤兽</span></el-menu-item>
+                <el-menu-item index="/equipment-desc-creator">🔨<span class="menu-item-text">装备模拟</span></el-menu-item>
             </el-menu>
             <el-popover placement="bottom" width="400" trigger="click">
-                <el-button slot="reference" :type="cookieButtonType" :icon="cookieButtonIcon" class="cookie-button">
+                <el-button slot="reference" :type="cookieButtonType" class="cookie-button" size="mini">
                     {{ cookieButtonText }}
                 </el-button>
                 <div>
@@ -52,9 +53,9 @@ export default {
 
         cookieButtonText() {
             if (this.isCookieCacheValid) {
-                return `Cookies有效 (${this.getCacheRemainingMinutes}分钟)`
+                return '🍪 有效'
             }
-            return '无效'
+            return '🍪 已过期'
         }
     },
     mounted() {

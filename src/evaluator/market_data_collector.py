@@ -81,7 +81,7 @@ class MarketDataCollector:
 
         # 首先查找指定月份的数据库文件
         for month in target_months:
-            db_file = os.path.join(data_path, month, f"empty_characters_{month}.db")
+            db_file = os.path.join(data_path, month, f"empty_roles_{month}.db")
             if os.path.exists(db_file):
                 found_dbs.append(db_file)
                 print(f"找到指定月份数据库文件: {db_file}")
@@ -90,7 +90,7 @@ class MarketDataCollector:
         if not found_dbs:
             print("未找到指定月份的数据库文件，查找所有可用的空号角色数据库文件")
             # 查找所有年月文件夹下的数据库文件
-            pattern = os.path.join(data_path, "*", "empty_characters_*.db")
+            pattern = os.path.join(data_path, "*", "empty_roles_*.db")
             all_dbs = glob.glob(pattern)
             
             # 按文件名排序，最新的在前
@@ -134,7 +134,7 @@ class MarketDataCollector:
                     c.all_shenqi_json, c.all_rider_json, c.all_fabao_json,
                     c.ex_avt_json, c.create_time, c.update_time,
                     l.*
-                FROM characters c
+                FROM roles c
                 LEFT JOIN large_equip_desc_data l ON c.equip_id = l.equip_id
                 WHERE c.price > 0
             """
@@ -174,20 +174,20 @@ class MarketDataCollector:
             market_data = []
             for i, row in enumerate(rows):
                 try:
-                    character_data = dict(zip(columns, row))
+                    role_data = dict(zip(columns, row))
                     
                     # 提取特征
-                    features = self.feature_extractor.extract_features(character_data)
+                    features = self.feature_extractor.extract_features(role_data)
                     
                     # 添加基本信息
                     features.update({
-                        'equip_id': character_data.get('equip_id', ''),
-                        'price': character_data.get('price', 0),
-                        'server_name': character_data.get('server_name', ''),
-                        'school_desc': character_data.get('school_desc', ''),
-                        'collect_num': character_data.get('collect_num', 0),
-                        'create_time': character_data.get('create_time', ''),
-                        'seller_nickname': character_data.get('seller_nickname', '')
+                        'equip_id': role_data.get('equip_id', ''),
+                        'price': role_data.get('price', 0),
+                        'server_name': role_data.get('server_name', ''),
+                        'school_desc': role_data.get('school_desc', ''),
+                        'collect_num': role_data.get('collect_num', 0),
+                        'create_time': role_data.get('create_time', ''),
+                        'seller_nickname': role_data.get('seller_nickname', '')
                     })
                     
                     # 计算派生特征

@@ -99,7 +99,9 @@ class LingshiFeatureExtractor:
         """
         try:
             features = {}
-
+            # 检查是否只有cDesc字段，如果是则先解析
+            if self._is_desc_only_data(equip_data):
+                equip_data = self._parse_equip_data_from_desc(equip_data)
             # 一、主基础属性特征
             features.update(self._extract_basic_features(equip_data))
 
@@ -127,6 +129,47 @@ class LingshiFeatureExtractor:
             import traceback
             print(traceback.format_exc())
             raise
+    
+    def _is_desc_only_data(self, equip_data: Dict[str, Any]) -> bool:
+        """
+        判断是否为只有cDesc字段的数据
+
+        Args:
+            equip_data: 装备数据字典
+
+        Returns:
+            bool: 如果只有cDesc字段则返回True
+        """
+        # 检查是否只有cDesc字段
+        if 'cDesc' in equip_data and( 'iType' in equip_data or 'kindid' in equip_data ):
+            return True
+        return False
+    
+    def _parse_equip_data_from_desc(self, equip_data: Dict[str, Any]) -> Dict[str, Any]:
+        """从large_equip_desc解析出完整的装备数据"""
+        desc = equip_data.get('cDesc', '')
+
+        if not desc:
+            return equip_data
+        # 创建新的装备数据字典
+        parsed_data = equip_data.copy()
+        parsed_data['large_equip_desc'] = desc
+        # 设置默认值
+        parsed_data['kindid'] = equip_data.get('kindid', 0)
+        parsed_data['equip_level'] = 0
+
+        # kindid需要根据iType在KINDID_ITYPE_RANGE中找到对应的kindid
+      
+        i_type = equip_data.get('iType', 0)
+        parsed_data['kindid'] = self._get_kindid_from_itype(parsed_data['kindid'], i_type)
+
+        # 解析装备等级
+        level_pattern =  r'等级\s*(\d+)#r' # #r等级 125
+        level_match = re.search(level_pattern, desc)
+        if level_match:
+            parsed_data['equip_level'] = int(level_match.group(1))
+
+        return parsed_data
 
     def _extract_basic_features(self, equip_data: Dict[str, Any]) -> Dict[str, Union[int, float]]:
         """
@@ -613,7 +656,7 @@ class LingshiFeatureExtractor:
                             score_100 = base_score + relative_position * score_range
                             scores[f'{attr_field}_score'] = round(score_100, 2)
 
-            # 2. 计算附加属性得分
+            # 2. 计算附加属性得分 - 按位置索引命名
             attrs = features.get('attrs', [])
             for i, attr in enumerate(attrs[:3]):  # 最多3个附加属性
                 attr_type = attr.get('attr_type', '')
@@ -634,7 +677,10 @@ class LingshiFeatureExtractor:
                             
                             # 计算最终得分: 基础分 + 相对位置 × 分数范围
                             score_100 = base_score + relative_position * score_range
-                            scores[f'attr_{i+1}_score'] = round(score_100, 2)
+                            
+                            # 使用位置索引命名
+                            score_key = f'attr_{i+1}_score'
+                            scores[score_key] = round(score_100, 2)
 
         except Exception as e:
             self.logger.error(f"计算标准化得分失败: {e}")
@@ -661,3 +707,40 @@ class LingshiFeatureExtractor:
                 self.logger.error(f"提取灵饰装备特征失败: {e}")
                 results.append({})
         return results
+    
+    def _get_kindid_from_itype(self, kindid: int, i_type: int) -> int:
+        """
+        根据kindid和iType获取对应的kindid
+        如果kindid已存在且有效，直接返回；否则根据iType转换
+        
+        Args:
+            kindid: 现有的kindid值
+            i_type: iType值
+            
+        Returns:
+            int: 有效的kindid值
+        """
+        # 如果kindid已存在且有效，直接返回
+        if kindid > 0:
+            return kindid
+            
+        # 如果iType无效，返回0
+        if not i_type or i_type <= 0:
+            return 0
+            
+        # 根据iType转换kindid
+        from ..constants.i_type_kindid_map import KINDID_ITYPE_RANGE
+        
+        try:
+            i_type = int(i_type)
+        except (ValueError, TypeError):
+            return 0
+
+        for kindid, ranges in KINDID_ITYPE_RANGE.items():
+            for range_tuple in ranges:
+                if len(range_tuple) == 2:
+                    start, end = range_tuple
+                    if int(start) <= i_type <= int(end):
+                        return kindid
+
+        return 0

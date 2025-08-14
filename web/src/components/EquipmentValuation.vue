@@ -6,8 +6,7 @@
         <span v-html="formatFullPrice(targetEquipment)" style="margin-left: 10px"></span>
       </el-row>
       <!-- 无锚点时的重试界面 -->
-      <similar-equipment-retry :target-equipment="targetEquipment" />
-
+      <SimilarGetMore :target-equipment="targetEquipment" />
     </el-row>
     <div class="valuation-main">
       <span class="valuation-label">装备估价:</span>
@@ -33,13 +32,13 @@
 import EquipmentImage from './EquipmentImage.vue'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
-import SimilarEquipmentRetry from './SimilarEquipmentRetry.vue'
+import SimilarGetMore from './SimilarGetMore.vue'
 
 export default {
   name: 'EquipmentValuation',
   components: {
     EquipmentImage,
-    SimilarEquipmentRetry
+    SimilarGetMore
   },
   mixins: [equipmentMixin, commonMixin],
   props: {

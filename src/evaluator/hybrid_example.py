@@ -19,9 +19,9 @@ except ImportError as e:
     sys.exit(1)
 
 
-def create_sample_characters() -> List[Dict[str, Any]]:
+def create_sample_roles() -> List[Dict[str, Any]]:
     """创建示例角色数据"""
-    characters = [
+    roles = [
         {
             'name': '高修炼普陀山',
             'description': '高修炼、高乾元丹的普陀山角色',
@@ -66,18 +66,18 @@ def create_sample_characters() -> List[Dict[str, Any]]:
         }
     ]
     
-    return characters
+    return roles
 
 
-def demonstrate_single_valuation(engine: HybridValuationEngine, character: Dict[str, Any]):
+def demonstrate_single_valuation(engine: HybridValuationEngine, role: Dict[str, Any]):
     """演示单个角色估价"""
     print(f"\n{'='*60}")
-    print(f"角色: {character['name']}")
-    print(f"描述: {character['description']}")
+    print(f"角色: {role['name']}")
+    print(f"描述: {role['description']}")
     print(f"{'='*60}")
     
     # 执行估价
-    result = engine.evaluate(character['data'])
+    result = engine.evaluate(role['data'])
     
     # 显示基本结果
     print(f"\n📊 基本估价结果:")
@@ -133,11 +133,11 @@ def demonstrate_single_valuation(engine: HybridValuationEngine, character: Dict[
     return result
 
 
-def demonstrate_comprehensive_report(engine: HybridValuationEngine, character: Dict[str, Any]):
+def demonstrate_comprehensive_report(engine: HybridValuationEngine, role: Dict[str, Any]):
     """演示综合报告生成"""
     print(f"\n📋 生成综合报告...")
     
-    report = engine.generate_comprehensive_report(character['data'])
+    report = engine.generate_comprehensive_report(role['data'])
     
     if 'error' in report:
         print(f"❌ 报告生成失败: {report['error']}")
@@ -170,16 +170,16 @@ def demonstrate_comprehensive_report(engine: HybridValuationEngine, character: D
     return report
 
 
-def demonstrate_batch_valuation(engine: HybridValuationEngine, characters: List[Dict[str, Any]]):
+def demonstrate_batch_valuation(engine: HybridValuationEngine, roles: List[Dict[str, Any]]):
     """演示批量估价"""
     print(f"\n🔄 批量估价演示:")
-    print(f"   准备估价 {len(characters)} 个角色...")
+    print(f"   准备估价 {len(roles)} 个角色...")
     
     # 提取角色数据
-    character_data_list = [char['data'] for char in characters]
+    role_data_list = [char['data'] for char in roles]
     
     # 执行批量估价
-    results = engine.batch_evaluate(character_data_list)
+    results = engine.batch_evaluate(role_data_list)
     
     # 汇总结果
     print(f"\n📊 批量估价结果汇总:")
@@ -187,7 +187,7 @@ def demonstrate_batch_valuation(engine: HybridValuationEngine, characters: List[
     print(f"{'-'*60}")
     
     for i, result in enumerate(results):
-        char_name = characters[i]['name'][:14]
+        char_name = roles[i]['name'][:14]
         final_value = result.final_value
         confidence = result.confidence
         strategy = result.integration_strategy[:14]
@@ -222,25 +222,25 @@ def main():
         print("✅ 引擎初始化成功")
         
         # 准备示例数据
-        characters = create_sample_characters()
-        print(f"📝 已准备 {len(characters)} 个示例角色")
+        roles = create_sample_roles()
+        print(f"📝 已准备 {len(roles)} 个示例角色")
         
         # 演示1：单个角色详细估价
         print(f"\n{'🔍 单个角色详细估价演示'}")
-        for character in characters[:2]:  # 演示前两个角色
-            result = demonstrate_single_valuation(engine, character)
+        for role in roles[:2]:  # 演示前两个角色
+            result = demonstrate_single_valuation(engine, role)
         
         # 演示2：综合报告生成
         print(f"\n{'📋 综合报告生成演示'}")
-        demonstrate_comprehensive_report(engine, characters[0])
+        demonstrate_comprehensive_report(engine, roles[0])
         
         # 演示3：批量估价
         print(f"\n{'🔄 批量估价演示'}")
-        batch_results = demonstrate_batch_valuation(engine, characters)
+        batch_results = demonstrate_batch_valuation(engine, roles)
         
         # 演示4：策略对比
         print(f"\n{'⚖️  不同策略对比演示'}")
-        test_character = characters[0]['data']
+        test_role = roles[0]['data']
         
         # 使用不同的市场策略
         print("不同定价策略对比:")
@@ -251,18 +251,18 @@ def main():
         # 高置信度市场主导
         engine.integration_config['market_weight'] = 0.9
         engine.integration_config['rule_weight'] = 0.1
-        result1 = engine.evaluate(test_character)
+        result1 = engine.evaluate(test_role)
         print(f"  市场主导策略: {result1.final_value:.1f} (策略: {result1.integration_strategy})")
         
         # 规则主导
         engine.integration_config['market_weight'] = 0.2
         engine.integration_config['rule_weight'] = 0.8
-        result2 = engine.evaluate(test_character)
+        result2 = engine.evaluate(test_role)
         print(f"  规则主导策略: {result2.final_value:.1f} (策略: {result2.integration_strategy})")
         
         # 恢复原始配置
         engine.integration_config = original_config
-        result3 = engine.evaluate(test_character)
+        result3 = engine.evaluate(test_role)
         print(f"  平衡策略: {result3.final_value:.1f} (策略: {result3.integration_strategy})")
         
         print(f"\n✅ 演示完成！")

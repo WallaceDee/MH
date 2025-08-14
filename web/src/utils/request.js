@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Message } from 'element-ui'
+import { Notification } from 'element-ui'
 
 // 创建axios实例
 const request = axios.create({
@@ -49,7 +49,10 @@ request.interceptors.response.use(
       message = error.message || '请求失败'
     }
     
-    Message.error(message)
+    Notification.error({
+      title: '错误',
+      message: message
+    })
     return {
       code: error.response?.status || 500,
       data: null,

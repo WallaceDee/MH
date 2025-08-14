@@ -48,8 +48,9 @@ class PetMarketDataCollector:
         # 优先查找当月和上月的数据库
         target_months = [current_month, last_month]
 
-        # 数据库文件固定存放在根目录的data文件夹中
-        data_path = "data"
+            # 数据库文件固定存放在根目录的data文件夹中
+        from src.utils.project_path import get_data_path
+        data_path = get_data_path()
         found_dbs = []
 
         # 首先查找指定月份的数据库文件
@@ -120,8 +121,33 @@ class PetMarketDataCollector:
                     continue
 
                 with self.connect_database(db_path) as conn:
+                    # `role_grade_limit` - 角色等级限制
+
+                    # `equip_level` - 装备等级
+
+                    # `growth` - 成长值
+
+                    # `is_baobao` - 是否宝宝
+
+                    # `all_skill` - 所有技能（字符串）
+
+                    # `evol_skill_list` - 进化技能列表（JSON数组）
+
+                    # `texing` - 特性信息（JSON对象）
+
+                    # `lx` - 灵性值
+
+                    # `equip_list` - 装备列表（JSON数组）
+
+                    # `equip_list_amount` - 装备列表金额
+
+                    # `neidan` - 内丹信息（JSON数组）
+
+                    # `equip_sn` - 装备序列号
+                    
+                    # `price` - 价格
                     # 构建SQL查询
-                    query = f"SELECT * FROM pets WHERE 1=1"
+                    query = f"SELECT pets.role_grade_limit, pets.equip_level, pets.growth, pets.is_baobao, pets.all_skill, pets.evol_skill_list, pets.texing, pets.lx, pets.equip_list, pets.equip_list_amount, pets.neidan, pets.equip_sn, pets.price FROM pets WHERE 1=1"
                     params = []
 
                     if level_range is not None:
@@ -216,7 +242,7 @@ class PetMarketDataCollector:
                 features = self.feature_extractor.extract_features(row.to_dict())
                 
                 # 保留原始关键字段，确保接口返回时有完整信息
-                features['equip_sn'] = row.get('equip_sn', row.get('eid', row.get('id', None)))
+                features['equip_sn'] = row.get('equip_sn', row.get('eid',None))
                 features['price'] = row.get('price', 0)
                 
                 features_list.append(features)
@@ -239,7 +265,7 @@ class PetMarketDataCollector:
             target_features: 目标灵饰特征
             **kwargs: 其他过滤参数
 
-        Returns:
+        Returns: 
             过滤后的市场数据DataFrame
         """
         # 获取基础市场数据
@@ -256,9 +282,9 @@ class PetMarketDataCollector:
             # 例如：价格异常值过滤、属性组合过滤等
             
             # 示例：过滤价格异常值（价格过高或过低的装备）
-            price = row.get('price', 0)
-            if price <= 0 or price > 1000000:  # 价格范围检查
-                continue
+            # price = row.get('price', 0)
+            # if price <= 0 or price > 1000000:  # 价格范围检查
+            #     continue
                 
             filtered_data.append(row)
             

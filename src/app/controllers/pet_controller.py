@@ -48,7 +48,8 @@ class PetController:
             price_min = params.get('price_min')
             price_max = params.get('price_max')
             pet_lx = params.get('pet_lx')
-            
+            equip_sn = params.get('equip_sn')
+            warning_rate = params.get('warning_rate')
             if level_min is not None:
                 level_min = int(level_min)
             if level_max is not None:
@@ -57,7 +58,8 @@ class PetController:
                 price_min = float(price_min)
             if price_max is not None:
                 price_max = float(price_max)
-            
+            if warning_rate is not None:
+                warning_rate = float(warning_rate)
             # 多选参数处理
 
             pet_skills = params.get('pet_skills')
@@ -113,6 +115,13 @@ class PetController:
             if pet_skill_count is not None:
                 pet_skill_count = int(pet_skill_count)
             
+            # 估价异常筛选
+            equip_list_amount_warning = params.get('equip_list_amount_warning')
+            logger.info(f"接收到 equip_list_amount_warning 参数: {equip_list_amount_warning}")
+            if equip_list_amount_warning is not None:
+                equip_list_amount_warning = int(equip_list_amount_warning)
+                logger.info(f"转换后的 equip_list_amount_warning: {equip_list_amount_warning}")
+            
             # 排序参数
             sort_by = params.get('sort_by', 'price')
             sort_order = params.get('sort_order', 'asc')
@@ -126,11 +135,13 @@ class PetController:
                 'pet_skills': pet_skills,
                 'pet_texing': pet_texing,
                 'pet_lx': pet_lx,
+                'warning_rate': warning_rate,
                 'pet_special_effect': pet_special_effect,
                 'pet_quality': pet_quality,
                 'pet_growth': pet_growth,
                 'pet_aptitude': pet_aptitude,
                 'pet_skill_count': pet_skill_count,
+                'equip_list_amount_warning': equip_list_amount_warning,
                 'sort_by': sort_by,
                 'sort_order': sort_order
             }
@@ -151,6 +162,9 @@ class PetController:
                 pet_lx=pet_lx,
                 pet_growth=pet_growth,
                 pet_skill_count=pet_skill_count,
+                equip_list_amount_warning=equip_list_amount_warning,
+                warning_rate=warning_rate,
+                equip_sn=equip_sn,
                 sort_by=sort_by,
                 sort_order=sort_order
             )
@@ -211,7 +225,6 @@ class PetController:
                          similarity_threshold: float = 0.7, max_anchors: int = 30) -> Dict:
         """获取宠物估价"""
         try:
-            # 参数验证
             if not pet_data:
                 return {"error": "宠物数据不能为空"}
             
@@ -231,4 +244,125 @@ class PetController:
             
         except Exception as e:
             logger.error(f"获取宠物估价时出错: {e}")
-            return {"error": f"获取宠物估价时出错: {str(e)}"} 
+            return {"error": f"获取宠物估价时出错: {str(e)}"}
+
+    def batch_pet_valuation(self, pet_list: List[Dict], strategy: str = 'fair_value',
+                           similarity_threshold: float = 0.7, max_anchors: int = 30, verbose: bool = False) -> Dict:
+        """批量宠物估价"""
+        try:
+            logger.info(f"开始批量宠物估价，宠物数量: {len(pet_list)}，策略: {strategy}，详细日志: {verbose}")
+            
+            # 验证策略参数
+            valid_strategies = ['fair_value', 'market_price', 'weighted_average']
+            if strategy not in valid_strategies:
+                return {"error": f"无效的估价策略: {strategy}，有效策略: {', '.join(valid_strategies)}"}
+            
+            # 验证相似度阈值
+            if not 0.0 <= similarity_threshold <= 1.0:
+                return {"error": "相似度阈值必须在0.0-1.0之间"}
+            
+            # 验证最大锚点数量
+            if not 1 <= max_anchors <= 100:
+                return {"error": "最大锚点数量必须在1-100之间"}
+            
+            # 验证宠物列表
+            if not pet_list or not isinstance(pet_list, list):
+                return {"error": "宠物列表不能为空且必须是列表格式"}
+            
+            # 调用服务层
+            result = self.service.batch_pet_valuation(
+                pet_list=pet_list,
+                strategy=strategy,
+                similarity_threshold=similarity_threshold,
+                max_anchors=max_anchors,
+                verbose=verbose
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"批量宠物估价失败: {e}")
+            return {
+                "error": f"批量宠物估价失败: {str(e)}",
+                "results": []
+            }
+
+    def update_pet_equipments_price(self, equip_sn: str, price: float, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+        """更新召唤兽装备价格"""
+        try:
+            # 修复参数传递：price作为equip_list_amount，equip_list_amount_warning设为0
+            success = self.service.update_pet_equip_amount(equip_sn, int(price), 0, year, month)
+            if success:
+                return {"message": "更新召唤兽装备价格成功"}
+            else:
+                return {"error": "更新召唤兽装备价格失败"}
+        except Exception as e:
+            logger.error(f"更新召唤兽装备价格失败: {e}")
+            return {"error": f"更新召唤兽装备价格失败: {str(e)}"}
+    
+    def get_unvalued_pets_count(self, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+        """获取当前年月携带装备但未估价的召唤兽数量"""
+        try:
+            result = self.service.get_unvalued_pets_count(year, month)
+            return result
+        except Exception as e:
+            logger.error(f"获取未估价召唤兽数量失败: {e}")
+            return {"error": f"获取未估价召唤兽数量失败: {str(e)}"}
+    
+    def batch_update_unvalued_pets_equipment(self, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+        """批量更新未估价召唤兽的装备价格"""
+        try:
+            result = self.service.batch_update_unvalued_pets_equipment(year, month)
+            return result
+        except Exception as e:
+            logger.error(f"批量更新未估价召唤兽装备失败: {e}")
+            return {"error": f"批量更新未估价召唤兽装备失败: {str(e)}"}
+    
+    def get_task_status(self, task_id: str) -> Dict:
+        """获取任务状态"""
+        try:
+            result = self.service.get_task_status(task_id)
+            if result:
+                return result
+            else:
+                return {"error": "任务不存在"}
+        except Exception as e:
+            logger.error(f"获取任务状态失败: {e}")
+            return {"error": f"获取任务状态失败: {str(e)}"}
+    
+    def get_active_tasks(self) -> Dict:
+        """获取活跃任务列表"""
+        try:
+            result = self.service.get_active_tasks()
+            return result
+        except Exception as e:
+            logger.error(f"获取活跃任务失败: {e}")
+            return {"error": f"获取活跃任务失败: {str(e)}"}
+    
+    def stop_task(self, task_id: str) -> Dict:
+        """停止任务"""
+        try:
+            result = self.service.stop_task(task_id)
+            return result
+        except Exception as e:
+            logger.error(f"停止任务失败: {e}")
+            return {"error": f"停止任务失败: {str(e)}"}
+
+    def delete_pet(self, pet_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+        """删除宠物"""
+        try:
+            result = self.service.delete_pet(pet_sn, year, month)
+            return result
+        except Exception as e:
+            logger.error(f"删除宠物失败: {e}")
+            return {"error": f"删除宠物失败: {str(e)}"}
+        
+    def get_pet_by_equip_sn(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
+        """通过equip_sn获取召唤兽详情"""
+        try:
+            result = self.service.get_pet_by_equip_sn(equip_sn, year, month)
+            return result
+        except Exception as e:
+            logger.error(f"通过equip_sn获取召唤兽详情失败: {e}")
+            return {"error": f"通过equip_sn获取召唤兽详情失败: {str(e)}"}
+

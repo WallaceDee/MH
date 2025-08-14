@@ -6,7 +6,7 @@ async def main():
     # 读取保存的cookies
     cookie_path = os.path.join('config', 'cookies.txt')
     if not os.path.exists(cookie_path):
-        print('错误：未找到cookies文件，请先运行 cookie_updater.py 或使用爬虫系统的自动cookie更新功能')
+        print('错误：未找到cookies文件，请先使用爬虫系统的自动cookie更新功能')
         return
 
     with open(cookie_path, 'r', encoding='utf-8') as f:

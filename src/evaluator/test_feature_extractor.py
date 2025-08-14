@@ -136,7 +136,7 @@ def test_feature_extraction():
     
     # 连接数据库
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    db_path = os.path.join(project_root, 'data', '202506', 'cbg_characters_202506.db')
+    db_path = os.path.join(project_root, 'data', '202506', 'cbg_roles_202506.db')
     logger.info(f"正在连接数据库: {db_path}")
     
     try:
@@ -157,7 +157,7 @@ def test_feature_extraction():
                 c.ex_avt_json AS ex_avt_json_desc, c.create_time, c.update_time,
                 
                 l.*
-            FROM characters c
+            FROM roles c
             LEFT JOIN large_equip_desc_data l ON c.equip_id = l.equip_id
             WHERE c.price > 0 AND l.pet != '[]'
             limit 100
@@ -181,26 +181,26 @@ def test_feature_extraction():
             logger.info(f"\n处理第 {i} 个角色...")
             
             # 转换为字典
-            character_data = dict(zip(columns, row))
+            role_data = dict(zip(columns, row))
             
             # 打印原始数据
             if i <= 1:  # 只打印第一个角色的原始数据
                 logger.info("原始数据示例:")
-                for key, value in list(character_data.items())[:5]:
+                for key, value in list(role_data.items())[:5]:
                     logger.info(f"{key}: {value}")
             
             try:
                 # 提取特征
-                features = extractor.extract_features(character_data)
+                features = extractor.extract_features(role_data)
                 all_features.append(features)
                 
                 # 打印角色基本信息
                 print("\n" + "="*50)
-                print(f"角色ID: {character_data.get('equip_id', 'N/A')}")
-                print(f"服务器: {character_data.get('server_name', 'N/A')}")
-                print(f"门派: {character_data.get('school', 'N/A')}")
-                print(f"等级: {character_data.get('level', 'N/A')}")
-                print(f"价格: {character_data.get('price', 'N/A')}")
+                print(f"角色ID: {role_data.get('equip_id', 'N/A')}")
+                print(f"服务器: {role_data.get('server_name', 'N/A')}")
+                print(f"门派: {role_data.get('school', 'N/A')}")
+                print(f"等级: {role_data.get('level', 'N/A')}")
+                print(f"价格: {role_data.get('price', 'N/A')}")
                 
                 # 打印提取的特征
                 print("\n提取的特征:")
@@ -364,7 +364,7 @@ def test_pet_equipment_feature_extraction():
                 xiang_qian_level, addon_status, large_equip_desc
             FROM equipments
             from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
-WHERE equip_level > 0 AND kindid = {PET_EQUIP_KINDID}
+            WHERE equip_level > 0 AND kindid = {PET_EQUIP_KINDID}
             LIMIT 20
         """)
         

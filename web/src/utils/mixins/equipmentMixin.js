@@ -14,12 +14,17 @@ export const equipmentMixin = {
      * @returns {Object} 装备图片属性
      */
     getEquipImageProps(eItem) {
+      if(!eItem){
+        return {}
+      }
+      //标准
       if(eItem.large_equip_desc&&eItem.equip_name&&eItem.equip_face_img&&eItem.equip_type_desc){
         return eItem
       }
+      //召唤兽
       return {
         ...eItem,
-        equip_face_img: eItem.icon,
+        equip_face_img: eItem.icon||eItem.small_icon||eItem.big_icon,
         equip_type_desc: eItem.static_desc,
         large_equip_desc: eItem.desc,
         equip_name: eItem.name

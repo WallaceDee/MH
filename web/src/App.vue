@@ -19,6 +19,13 @@ export default {
 </script>
 
 <style scoped>
+:global(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell){
+  background-color: #ededf4!important;
+}
+
+:global(.el-table td.el-table__cell ){
+    border-bottom: 1px solid #9ea0bf;
+}
 :global(.el-card) {
   border-radius: 8px !important;
 }

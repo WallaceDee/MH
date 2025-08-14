@@ -291,7 +291,7 @@ class PetEquipPlugin(EquipmentTypePlugin):
             'suit_category': 0,           # 套装分类必须完全匹配
             
             # 主属性标准化得分容忍度
-            'shanghai_score': 0.2,        # 伤害得分容忍度20%
+            'shanghai_score': 0.1,        # 伤害得分容忍度20%
             'fangyu_score': 0.4,          # 防御得分容忍度20%
             'speed_score': 0.2,           # 速度得分容忍度20%
             'qixue_score': 0.2,           # 气血得分容忍度20%

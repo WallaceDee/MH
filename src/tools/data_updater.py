@@ -48,36 +48,36 @@ class DataUpdater:
         # 初始化特征提取器
         self.lingshi_feature_extractor = LingshiFeatureExtractor()
 
-    def update_character_data(self, character_id=None):
+    def update_role_data(self, role_id=None):
         """
         更新角色数据
         
         Args:
-            character_id: 要更新的角色ID，如果为None则更新所有角色
+            role_id: 要更新的角色ID，如果为None则更新所有角色
         """
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
             # 获取要更新的角色
-            if character_id:
+            if role_id:
                 cursor.execute("""
                     SELECT c.equip_id, c.seller_nickname, d.raw_data_json
-                    FROM characters c
+                    FROM roles c
                     JOIN large_equip_desc_data d ON c.equip_id = d.equip_id
                     WHERE c.equip_id = ?
-                """, (character_id,))
+                """, (role_id,))
             else:
                 cursor.execute("""
                     SELECT c.equip_id, c.seller_nickname, d.raw_data_json
-                    FROM characters c
+                    FROM roles c
                     JOIN large_equip_desc_data d ON c.equip_id = d.equip_id
                 """)
             
-            characters = cursor.fetchall()
+            roles = cursor.fetchall()
             updated_count = 0
             
-            for char in characters:
+            for char in roles:
                 try:
                     # 获取原始数据
                     equip_id = char[0]  # equip_id
@@ -106,18 +106,18 @@ class DataUpdater:
                     # updates['yushoushu_skill'] = yushoushu_skill
                     
                     # 更新法宝数据
-                    fabao = self.fabao_parser.process_character_fabao(parsed_desc, seller_nickname)
+                    fabao = self.fabao_parser.process_role_fabao(parsed_desc, seller_nickname)
                     if fabao:
                         updates['all_fabao_json'] = json.dumps(fabao, ensure_ascii=False)
                     
                     # # 更新宠物数据
-                    # pets = self.pet_parser.process_character_pets(parsed_desc, seller_nickname)
+                    # pets = self.pet_parser.process_role_pets(parsed_desc, seller_nickname)
                     # if pets:
                     #     updates['all_pets_json'] = json.dumps(pets, ensure_ascii=False)
                     
                     # # 更新装备数据
                     # if parsed_desc and 'AllEquip' in parsed_desc:
-                    #     equip_info = self.equipment_parser.process_character_equipment(
+                    #     equip_info = self.equipment_parser.process_role_equipment(
                     #         parsed_desc, seller_nickname
                     #     )
                     #     if equip_info:
@@ -125,13 +125,13 @@ class DataUpdater:
                     
                     # # 更新神器数据
                     # if parsed_desc and parsed_desc.get('shenqi'):
-                    #     all_shenqi = self.shenqi_parser.process_character_shenqi(parsed_desc, seller_nickname)
+                    #     all_shenqi = self.shenqi_parser.process_role_shenqi(parsed_desc, seller_nickname)
                     #     if all_shenqi and all_shenqi.get('神器名称'):
                     #         updates['all_shenqi_json'] = json.dumps(all_shenqi, ensure_ascii=False)
                     
                     # # 更新坐骑数据
                     # if parsed_desc and parsed_desc.get('AllRider'):
-                    #     all_rider = self.rider_parser.process_character_rider(
+                    #     all_rider = self.rider_parser.process_role_rider(
                     #         {'rider': parsed_desc.get('AllRider')}, seller_nickname
                     #     )
                     #     if all_rider and all_rider.get('坐骑列表'):
@@ -154,7 +154,7 @@ class DataUpdater:
                             'achieve_show': parsed_desc.get('achieve_show', []),
                             'avt_widget': parsed_desc.get('avt_widget', {})
                         }
-                        all_ex_avt = self.ex_avt_parser.process_character_clothes(ex_avt_data, seller_nickname)
+                        all_ex_avt = self.ex_avt_parser.process_role_clothes(ex_avt_data, seller_nickname)
                         if all_ex_avt:
                             updates['ex_avt_json'] = json.dumps(all_ex_avt, ensure_ascii=False)
                     
@@ -165,7 +165,7 @@ class DataUpdater:
                         values.append(equip_id)
                         
                         cursor.execute(
-                            f"UPDATE characters SET {set_clause} WHERE equip_id = ?",
+                            f"UPDATE roles SET {set_clause} WHERE equip_id = ?",
                             values
                         )
                         
@@ -238,9 +238,9 @@ class DataUpdater:
         """转换房屋真实拥有者状态为中文名称"""
         return self.common_parser.get_house_real_owner_name(owner_status)
     
-    def add_column_to_characters(self, column_name, column_type):
+    def add_column_to_roles(self, column_name, column_type):
         """
-        为characters表添加新字段
+        为roles表添加新字段
         
         Args:
             column_name: 字段名称
@@ -249,7 +249,7 @@ class DataUpdater:
         Returns:
             bool: 是否添加成功
         """
-        return self.add_column_to_table('characters', column_name, column_type)
+        return self.add_column_to_table('roles', column_name, column_type)
     
     def add_column_to_table(self, table_name, column_name, column_type):
         """
@@ -410,9 +410,9 @@ class DataUpdater:
             if 'conn' in locals():
                 conn.close()
     
-    def drop_column_from_characters(self, column_name):
+    def drop_column_from_roles(self, column_name):
         """
-        从characters表删除字段的便捷方法
+        从roles表删除字段的便捷方法
         
         Args:
             column_name: 要删除的字段名
@@ -420,7 +420,7 @@ class DataUpdater:
         Returns:
             bool: 是否删除成功
         """
-        return self.drop_column_from_table('characters', column_name)
+        return self.drop_column_from_table('roles', column_name)
     
     def drop_column_from_large_equip_desc(self, column_name):
         """
@@ -681,7 +681,7 @@ def main():
     current_month = datetime.now().strftime('%Y%m')
     
     # 角色数据库路径
-    char_db_filename = f"empty_characters_{current_month}.db"
+    char_db_filename = f"empty_roles_{current_month}.db"
     char_db_path = os.path.join(project_root, 'data', char_db_filename)
     
     # 装备数据库路径
@@ -713,10 +713,10 @@ def main():
         print("请先运行装备爬虫获取数据")
     
     # 原有的角色数据更新功能（已注释）
-    # updater.add_column_to_characters('sum_amount','INTEGER')
+    # updater.add_column_to_roles('sum_amount','INTEGER')
     # updater.add_column_to_table('large_equip_desc_data','pet','TEXT')
-    # updater.update_character_data()
-    # updater.drop_column_from_table('characters','sum_amount')
+    # updater.update_role_data()
+    # updater.drop_column_from_table('roles','sum_amount')
 
 if __name__ == "__main__":
     main() 

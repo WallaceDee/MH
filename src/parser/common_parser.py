@@ -12,11 +12,11 @@ from typing import Dict, Any, Optional
 from functools import lru_cache
 
 try:
-    from cbg_config import (
+    from src.cbg_config import (
         HUMAN_SCHOOLS, DEMON_SCHOOLS, IMMORTAL_SCHOOLS,
         CHINESE_NUM_CONFIG, ROLE_ZHUAN_ZHI_CONFIG
     )
-    from parser.config_loader import get_config_loader
+    from src.parser.config_loader import get_config_loader
 except ImportError:
     # 当作为独立模块运行时，使用绝对导入
     import sys
@@ -24,12 +24,12 @@ except ImportError:
     from src.utils.project_path import get_project_root
     project_root = get_project_root()
     sys.path.insert(0, project_root)
-    from cbg_config import (
+    from src.cbg_config import (
         HUMAN_SCHOOLS, DEMON_SCHOOLS, IMMORTAL_SCHOOLS,
         CHINESE_NUM_CONFIG, ROLE_ZHUAN_ZHI_CONFIG
     )
     # 导入当前目录下的config_loader
-    from parser.config_loader import get_config_loader
+    from src.parser.config_loader import get_config_loader
 
 
 class CommonParser:
@@ -96,78 +96,6 @@ class CommonParser:
         if not hasattr(self, '_fangwu_level_mapping') or self._fangwu_level_mapping is None:
             self._fangwu_level_mapping = self._config_loader.get_fangwu_level_mapping()
         return self._fangwu_level_mapping
-    
-    def get_school_name(self, school_id):
-        """根据门派ID获取门派名称"""
-        school_id_str = str(school_id)
-        school_mapping = self._get_school_mapping()
-        return school_mapping.get(school_id_str, f"未知门派({school_id})")
-    
-    def get_race_name(self, school_id):
-        """根据门派ID获取种族名称"""
-        try:
-            school_id_int = int(school_id)
-            if school_id_int in HUMAN_SCHOOLS:
-                return "人族"
-            elif school_id_int in DEMON_SCHOOLS:
-                return "魔族"
-            elif school_id_int in IMMORTAL_SCHOOLS:
-                return "仙族"
-            else:
-                return "未知种族"
-        except (ValueError, TypeError):
-            return "未知种族"
-    
-    def get_fly_status(self, equip_data):
-        """解析飞升状态（从large_equip_desc字段中解析）"""
-        try:
-            # 尝试从large_equip_desc字段中解析飞升信息
-            large_desc = equip_data.get('large_equip_desc', '')
-            if isinstance(large_desc, str) and large_desc:
-                # 查找iZhuanZhi值
-                zhuan_zhi_match = re.search(r'"iZhuanZhi":(\d+)', large_desc)
-                i_zhuan_zhi = int(zhuan_zhi_match.group(1)) if zhuan_zhi_match else 0
-                
-                # 查找i3FlyLv值
-                fly_lv_match = re.search(r'"i3FlyLv":(\d+)', large_desc)
-                i3_fly_lv = int(fly_lv_match.group(1)) if fly_lv_match else 0
-                
-                # 查找nine_fight_level值（生死劫等级）
-                nine_fight_match = re.search(r'"nine_fight_level":(\d+)', large_desc)
-                nine_fight_level = int(nine_fight_match.group(1)) if nine_fight_match else 0
-                
-                # 根据解析结果判断飞升状态
-                if i3_fly_lv and i3_fly_lv > 0:
-                    # 三界飞升状态：飞升+中文数字
-                    chinese_num = CHINESE_NUM_CONFIG.get(i3_fly_lv, str(i3_fly_lv))
-                    return f"化圣{chinese_num}"
-                elif nine_fight_level > 0:
-                    # 生死劫状态
-                    if nine_fight_level >= 9:
-                        return "已渡劫"
-                    else:
-                        chinese_num = CHINESE_NUM_CONFIG.get(nine_fight_level, str(nine_fight_level))
-                        return f"生死劫{chinese_num}层"
-                elif i_zhuan_zhi is not None and i_zhuan_zhi >= 0:
-                    # 使用转职状态
-                    return ROLE_ZHUAN_ZHI_CONFIG.get(i_zhuan_zhi, "未知")
-                else:
-                    return "未飞升"
-                    
-        except Exception as e:
-            self.logger.debug(f"解析飞升状态失败: {e}")
-            
-        # 如果解析失败，尝试从顶层字段获取
-        i3_fly_lv = equip_data.get('i3FlyLv')
-        i_zhuan_zhi = equip_data.get('iZhuanZhi')
-        
-        if i3_fly_lv and i3_fly_lv > 0:
-            chinese_num = CHINESE_NUM_CONFIG.get(i3_fly_lv, str(i3_fly_lv))
-            return f"飞升{chinese_num}"
-        elif i_zhuan_zhi is not None and i_zhuan_zhi >= 0:
-            return ROLE_ZHUAN_ZHI_CONFIG.get(i_zhuan_zhi, "未知")
-        else:
-            return "未知"
     
     def get_rent_level_name(self, level):
         """转换房屋等级数字为中文名称"""

@@ -95,6 +95,43 @@ class EquipmentService:
             # 普通装备
             return self.equip_feature_extractor
     
+    def _get_kindid_from_itype(self, kindid: int, i_type: int) -> int:
+        """
+        根据kindid和iType获取对应的kindid
+        如果kindid已存在且有效，直接返回；否则根据iType转换
+        
+        Args:
+            kindid: 现有的kindid值
+            i_type: iType值
+            
+        Returns:
+            int: 有效的kindid值
+        """
+        # 如果kindid已存在且有效，直接返回
+        if kindid > 0:
+            return kindid
+            
+        # 如果iType无效，返回0
+        if not i_type or i_type <= 0:
+            return 0
+            
+        # 根据iType转换kindid
+        from src.evaluator.constants.i_type_kindid_map import KINDID_ITYPE_RANGE
+        
+        try:
+            i_type = int(i_type)
+        except (ValueError, TypeError):
+            return 0
+
+        for kindid, ranges in KINDID_ITYPE_RANGE.items():
+            for range_tuple in ranges:
+                if len(range_tuple) == 2:
+                    start, end = range_tuple
+                    if int(start) <= i_type <= int(end):
+                        return kindid
+
+        return 0
+    
 
     
     def _validate_year_month(self, year: Optional[int], month: Optional[int]) -> Tuple[int, int]:
@@ -117,6 +154,7 @@ class EquipmentService:
         return os.path.join(self.data_dir, f'{year}{month:02d}', f'cbg_equip_{year}{month:02d}.db')
     
     def get_equipments(self, page: int = 1, page_size: int = 10, year: Optional[int] = None, month: Optional[int] = None,
+                      equip_sn: Optional[str] = None,
                       level_min: Optional[int] = None, level_max: Optional[int] = None,
                       price_min: Optional[int] = None, price_max: Optional[int] = None,
                       kindid: Optional[List[str]] = None, 
@@ -130,7 +168,57 @@ class EquipmentService:
                       gem_value: Optional[str] = None,
                       gem_level: Optional[int] = None,
                       sort_by: Optional[str] = 'price', sort_order: Optional[str] = 'asc') -> Dict:
-        """获取分页的装备列表"""
+        """获取分页的装备列表
+        ### 基础信息字段
+        1. `eid` - 装备ID（用于操作链接和相似装备功能）
+        2. `server_name` - 服务器名称
+        3. `price` - 价格
+        4. `equip_level` - 装备等级
+
+        ### 🎨 显示和样式字段
+        5. `highlight` - 亮点信息
+        6. `dynamic_tags` - 动态标签
+
+        ### 💎 宝石和强化字段
+        7. `gem_level` - 宝石等级
+        8. `jinglian_level` - 精炼等级
+        9. `xiang_qian_level` - 镶嵌等级
+
+        ### ⚔️ 特技和特效字段
+        10. `special_effect` - 特效
+        11. `special_skill` - 特技
+
+        ### ��️ 套装和属性字段
+        12. `suit_effect` - 套装效果
+        13. `agg_added_attrs` - 附加属性
+
+        ### �� 伤害和属性字段
+        14. `all_damage` - 总伤害
+        15. `init_damage` - 初始伤害
+        16. `damage` - 伤害（备用字段）
+        17. `shanghai` - 伤害（备用字段）
+
+        ### �� 法术相关字段
+        18. `init_wakan` - 初始灵力
+        19. `magic_damage` - 法术伤害
+        20. `init_defense` - 初始防御
+        21. `defense` - 防御（备用字段）
+        22. `fangyu` - 防御（备用字段）
+        23. `magic_defense` - 法术防御
+
+        ### ❤️ 生命和速度字段
+        24. `init_hp` - 初始气血
+        25. `qixue` - 气血（备用字段）
+        26. `init_dex` - 初始敏捷
+        27. `speed` - 速度（备用字段）
+
+        ### 🎯 功能操作字段
+        28. `equip_sn` - 装备序列号（用于删除操作）
+
+        29. `equip_type_desc` - 装备类型描述
+        30. `equip_name` - 装备名称
+        31. `large_equip_desc` - 装备描述
+        """
         try:
             year, month = self._validate_year_month(year, month)
             db_file = self._get_db_file(year, month)
@@ -152,6 +240,10 @@ class EquipmentService:
                 conditions = []
                 params = []
                 
+                if equip_sn:
+                    conditions.append("equip_sn = ?")
+                    params.append(equip_sn)
+                    
                 # 基础筛选条件 - 修复字段名
                 if level_min is not None:
                     # 数据库字段可能是 level 或 equip_level
@@ -256,10 +348,10 @@ class EquipmentService:
                 order_by_clause = ""
                 if sort_by and sort_order:
                     allowed_sort_by = [
-                        'price', 'level', 'equip_level', 'all_damage', 'init_damage', 'init_wakan', 'init_defense',
-                        'init_hp', 'init_dex', 'create_time_equip', 'selling_time', 'gem_level',
-                        'special_effect', 'special_skill', 'suit_effect', 'server_name', 'equip_name',
-                        'seller_nickname', 'zongshang'
+                        'price', 'highlight', 'dynamic_tags', 'gem_level', 'jinglian_level', 'xiang_qian_level',
+                        'special_effect', 'suit_effect', 'agg_added_attrs', 'equip_level', 'all_damage', 
+                        'init_damage', 'init_wakan', 'init_defense', 'init_hp', 'init_dex', 'create_time_equip', 
+                        'selling_time', 'special_skill', 'server_name', 'equip_name', 'seller_nickname', 'zongshang'
                     ]
                     if sort_by in allowed_sort_by and sort_order.lower() in ['asc', 'desc']:
                         order_by_clause = f"ORDER BY {sort_by} {sort_order.upper()}"
@@ -397,6 +489,11 @@ class EquipmentService:
             
             # 根据kindid获取对应的特征提取器
             kindid = equipment_data.get('kindid', 0)
+            if kindid == 0:
+                i_type = equipment_data.get('iType', 0)
+                if i_type > 0:
+                    kindid = self._get_kindid_from_itype(kindid, i_type)
+
             feature_extractor = self._get_feature_extractor(kindid)
             
             if not feature_extractor:
@@ -537,6 +634,11 @@ class EquipmentService:
             
             # 根据kindid获取对应的特征提取器
             kindid = equipment_data.get('kindid', 0)
+            if kindid == 0:
+                i_type = equipment_data.get('iType', 0)
+                if i_type > 0:
+                    kindid = self._get_kindid_from_itype(kindid, i_type)
+
             feature_extractor = self._get_feature_extractor(kindid)
             
             if not feature_extractor:
@@ -617,7 +719,8 @@ class EquipmentService:
                 "max_anchors": max_anchors,
                 "anchors": anchors,  # 使用calculate_value返回的锚点信息
                 "price_range": result.get("price_range", {}),
-                "fallback_used": result.get("fallback_used", False)
+                "skip_reason": result.get("skip_reason", ""),
+                "invalid_item": result.get("invalid_item", False)
             }
             
         except Exception as e:
@@ -648,8 +751,16 @@ class EquipmentService:
             
             for i, equipment_data in enumerate(equipment_list):
                 try:
-                    # 根据kindid获取对应的特征提取器
+                    # 获取kindid和iType，使用统一方法处理
                     kindid = equipment_data.get('kindid', 0)
+                    i_type = equipment_data.get('iType', 0)
+                    
+                    # 统一处理kindid获取逻辑
+                    kindid = self._get_kindid_from_itype(kindid, i_type)
+                    if kindid > 0:
+                        equipment_data['kindid'] = kindid
+                        logger.debug(f"第{i+1}个装备获取到kindid: {kindid}")
+                    
                     feature_extractor = self._get_feature_extractor(kindid)
                     
                     if not feature_extractor:
@@ -661,7 +772,6 @@ class EquipmentService:
                     equipment_features = feature_extractor.extract_features(equipment_data)
                     
                     # 添加原始装备数据用于后续处理
-                    equipment_features['original_data'] = equipment_data
                     equipment_features['index'] = i
                     
                     equip_features_list.append(equipment_features)
@@ -675,7 +785,6 @@ class EquipmentService:
                     "error": "所有装备特征提取失败",
                     "results": []
                 }
-            
             # 调用装备估价器的批量估价方法，传递 verbose 参数
             batch_results = self.evaluator.batch_valuation(
                 equip_features_list, 
@@ -708,8 +817,9 @@ class EquipmentService:
                         "confidence": result.get("confidence", 0),
                         "anchor_count": result.get("anchor_count", 0),
                         "price_range": result.get("price_range", {}),
-                        "fallback_used": result.get("fallback_used", False),
-                        "strategy": strategy
+                        "strategy": strategy,
+                        "skip_reason": result.get("skip_reason", ""),
+                        "invalid_item": result.get("invalid_item", False)
                     }
                 
                 processed_results.append(processed_result)
@@ -745,12 +855,13 @@ class EquipmentService:
                 }
             
             # 使用统一特征提取器提取特征
-            features = self.unified_extractor.extract_features(equipment_data, data_type)
+            features,kindid,extractor_type = self.unified_extractor.extract_features(equipment_data, data_type)
             
             return {
                 "features": features,
                 "data_type": data_type,
-                "kindid": equipment_data.get('kindid', 0)
+                "kindid": kindid,
+                "extractor_type": extractor_type
             }
             
         except Exception as e:
@@ -825,5 +936,87 @@ class EquipmentService:
             return {
                 "error": f"获取支持的kindid列表时发生错误: {str(e)}"
             }
+
+    def delete_equipment(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+        """删除指定装备"""
+        try:
+            year, month = self._validate_year_month(year, month)
+            db_file = self._get_db_file(year, month)
+            
+            if not os.path.exists(db_file):
+                return {
+                    "error": f"未找到 {year}年{month}月 的装备数据文件",
+                    "deleted": False
+                }
+            
+            with sqlite3.connect(db_file) as conn:
+                cursor = conn.cursor()
+                
+                # 先检查装备是否存在
+                check_sql = "SELECT COUNT(*) FROM equipments WHERE equip_sn = ?"
+                count = cursor.execute(check_sql, (equip_sn,)).fetchone()[0]
+                
+                if count == 0:
+                    return {
+                        "error": f"未找到装备序列号为 {equip_sn} 的装备",
+                        "deleted": False
+                    }
+                
+                # 执行删除操作
+                delete_sql = "DELETE FROM equipments WHERE equip_sn = ?"
+                cursor.execute(delete_sql, (equip_sn,))
+                
+                # 提交事务
+                conn.commit()
+                
+                # 验证删除结果
+                remaining_count = cursor.execute(check_sql, (equip_sn,)).fetchone()[0]
+                
+                if remaining_count == 0:
+                    logger.info(f"成功删除装备: {equip_sn}")
+                    return {
+                        "deleted": True,
+                        "equip_sn": equip_sn,
+                        "year": year,
+                        "month": month,
+                        "message": "装备删除成功"
+                    }
+                else:
+                    return {
+                        "error": "删除操作失败，装备仍然存在",
+                        "deleted": False
+                    }
+                    
+        except Exception as e:
+            logger.error(f"删除装备时发生错误: {e}")
+            return {
+                "error": f"删除装备时发生错误: {str(e)}",
+                "deleted": False
+            }
+
+    def get_lingshi_data(self) -> Dict:
+        """获取灵石数据"""
+        try:
+            import json
+            import os
+            from src.utils.project_path import get_relative_path
+            
+            # 使用项目路径工具获取灵石数据文件路径
+            lingshi_file_path = get_relative_path('src/evaluator/mark_anchor/equip/plugins/lingshi.jsonc')
+            
+            # 检查文件是否存在
+            if not os.path.exists(lingshi_file_path):
+                return {"error": "灵石数据文件不存在"}
+            
+            # 读取并解析JSON文件
+            with open(lingshi_file_path, 'r', encoding='utf-8') as f:
+                lingshi_data = json.load(f)
+            
+            return {"data": lingshi_data}
+            
+        except json.JSONDecodeError as e:
+            return {"error": f"灵石数据文件格式错误: {str(e)}"}
+        except Exception as e:
+            return {"error": f"获取灵石数据失败: {str(e)}"}
 
 equipment_service = EquipmentService()

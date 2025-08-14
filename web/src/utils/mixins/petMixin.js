@@ -55,7 +55,7 @@ export const petMixin = {
      * @param {Object} pet - 宠物对象
      * @returns {string} 格式化后的技能HTML
      */
-    formatSkills({ petData }) {
+    formatSkills({ petData },row=2,col=8) {
       try {
         // 创建一个临时的容器元素
         const tempContainer = document.createElement('div')
@@ -64,8 +64,8 @@ export const petMixin = {
         const { pet_tip_skill_grid: result } = window.show_pet_skill_in_grade(
           petData.all_skill,
           petData.sp_skill,
-          2,
-          8,
+          row,
+          col,
           {
             pet_skill_url: 'https://cbg-xyq.res.netease.com/images/skill/',
             notice_node_name: 'pet_tip_notice_msg',

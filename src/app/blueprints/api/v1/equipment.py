@@ -28,6 +28,7 @@ def get_equipments():
             'price_min': request.args.get('price_min'),
             'price_max': request.args.get('price_max'),
             # 修复多选参数 - 使用getlist获取数组参数
+            'equip_sn': request.args.get('equip_sn'),
             'kindid': request.args.getlist('kindid') or request.args.getlist('kindid[]') or None,
             'equip_type': request.args.getlist('equip_type') or request.args.getlist('equip_type[]') or None,  # 宠物装备类型（多选）
             'equip_special_skills': request.args.getlist('equip_special_skills') or request.args.getlist('equip_special_skills[]') or None,
@@ -56,13 +57,10 @@ def get_equipments():
         return error_response(f"获取装备列表失败: {str(e)}")
 
 
-@equipment_bp.route('/<string:equip_sn>', methods=['GET'])
-def get_equipment_details(equip_sn):
+@equipment_bp.route('/<string:year>/<string:month>/<string:equip_sn>', methods=['GET'])
+def get_equipment_details(year, month, equip_sn):
     """获取装备详情"""
     try:
-        year = request.args.get('year')
-        month = request.args.get('month')
-        
         if year:
             year = int(year)
         if month:
@@ -311,7 +309,7 @@ def batch_equipment_valuation():
         
         # 获取估价参数
         strategy = data.get('strategy', 'fair_value')
-        similarity_threshold = float(data.get('similarity_threshold', 0.7))
+        similarity_threshold = float(data.get('similarity_threshold', 0.8))
         max_anchors = int(data.get('max_anchors', 30))
         
         # 调用批量估价
@@ -330,4 +328,50 @@ def batch_equipment_valuation():
     except ValueError:
         return error_response("参数格式错误")
     except Exception as e:
-        return error_response(f"批量装备估价失败: {str(e)}") 
+        return error_response(f"批量装备估价失败: {str(e)}")
+
+
+@equipment_bp.route('/<string:equip_sn>', methods=['DELETE'])
+def delete_equipment(equip_sn):
+    """删除指定装备"""
+    try:
+        if not equip_sn:
+            return error_response("装备序列号不能为空")
+        
+        # 获取年月参数
+        year = request.args.get('year')
+        month = request.args.get('month')
+        
+        if year:
+            year = int(year)
+        if month:
+            month = int(month)
+        
+        result = controller.delete_equipment(equip_sn, year, month)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        if result.get("deleted", False):
+            return success_response(data=result, message="装备删除成功")
+        else:
+            return error_response(result.get("error", "删除失败"))
+        
+    except ValueError:
+        return error_response("参数格式错误")
+    except Exception as e:
+        return error_response(f"删除装备失败: {str(e)}") 
+
+@equipment_bp.route('/lingshi-data', methods=['GET'])
+def get_lingshi_data():
+    """获取灵石数据"""
+    try:
+        result = controller.get_lingshi_data()
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result["data"], message="获取灵石数据成功")
+        
+    except Exception as e:
+        return error_response(f"获取灵石数据失败: {str(e)}") 

@@ -19,9 +19,9 @@
           @click="handleClearCache" :disabled="cookieChecking || cookieUpdating">
           🗑️ 清除缓存
         </el-button>
-        <el-button v-if="!dynamicCookieStatus.server_validated" type="primary" size="mini" @click="handleUpdateCookies"
+        <el-button  type="primary" size="mini" @click="handleUpdateCookies"
           :loading="cookieUpdating" :disabled="cookieChecking">
-          ♻️ 更新登录
+          ♻️ 更新/登录
         </el-button>
         </el-row>
     </el-alert>
@@ -57,10 +57,10 @@ export default {
         lastModified: null,
         server_validated: false
       },
-      // Cookie更新状态
+      // 🍪 更新状态
       cookieUpdating: false,
       cookieChecking: false,
-      // Cookie更新监控定时器
+      // 🍪 更新监控定时器
       cookieUpdateTimer: null
     }
   },
@@ -83,7 +83,7 @@ export default {
       if (this.isCookieCacheValid) {
         return {
           type: 'success',
-          text: 'Cookies有效',
+          text: '🍪 有效',
           lastModified: '缓存中',
           server_validated: true
         }
@@ -110,7 +110,7 @@ export default {
 
       // 检查缓存是否有效
       if (this.isCookieCacheValid) {
-        console.log('使用Cookie验证缓存，跳过服务器验证')
+        console.log('使用 🍪 验证缓存，跳过服务器验证')
         return
       }
 
@@ -124,7 +124,7 @@ export default {
             this.$store.commit('cookie/updateCookieCache', true)
             this.cookiesStatus = {
               type: 'success',
-              text: 'Cookies有效',
+              text: '🍪 有效',
               lastModified: data.last_modified || '未知',
               server_validated: true
             }
@@ -132,13 +132,13 @@ export default {
             // Cookie无效，清除缓存
             this.$store.commit('cookie/updateCookieCache', false)
             this.cookiesStatus = {
-              type: 'warning',
-              text: 'Cookies已过期',
+              type: 'warning',  
+              text: '🍪 已过期',  
               lastModified: data.last_modified || '未知',
               server_validated: false
             }
             this.$notify.warning({
-              title: 'Cookie已过期',
+              title: '🍪 已过期',
               message: '需要重新登录'
             })
           }
@@ -168,7 +168,7 @@ export default {
         }
         this.$notify.error({
           title: '检查失败',
-          message: '检查Cookies状态失败: ' + error.message
+          message: '检查🍪状态失败: ' + error.message
         })
         this.$emit('status-change', this.cookiesStatus)
       } finally {
@@ -193,42 +193,42 @@ export default {
       this.cookieUpdating = true
       try {
         this.$notify.info({
-          title: 'Cookie更新',
-          message: '正在启动Cookie更新程序，请在弹出的浏览器中登录...'
+          title: '🍪 更新',
+          message: '正在启动🍪 更新程序，请在弹出的浏览器中登录...'
         })
 
         const response = await this.$api.spider.updateCookies()
         if (response.code === 200) {
           // 不立即显示成功，而是提示用户等待
           this.$notify.info({
-            title: 'Cookie更新',
-            message: 'Cookie更新程序已启动，请在浏览器中完成登录操作'
+            title: '🍪 更新',
+            message: '🍪 更新程序已启动，请在浏览器中完成登录操作'
           })
 
           // 更新Cookie状态为"更新中"
           this.cookiesStatus = {
             type: 'warning',
-            text: 'Cookie更新中...',
+            text: '🍪 更新中...',
             lastModified: '未知',
             server_validated: false
           }
 
-          // 启动状态检查，定期检查Cookie更新是否完成
+          // 启动状态检查，定期检查🍪 更新是否完成
           this.startCookieUpdateMonitoring()
           
           this.$emit('update-started')
         } else {
-          throw new Error(response.message || 'Cookies更新失败')
+          throw new Error(response.message || '🍪 更新失败')
         }
       } catch (error) {
-        this.$notify.error('Cookies更新失败: ' + error.message)
+        this.$notify.error('🍪 更新失败: ' + error.message)
         this.$emit('update-failed', error)
       } finally {
         this.cookieUpdating = false
       }
     },
 
-    // 启动Cookie更新监控
+    // 启动🍪 更新监控
     startCookieUpdateMonitoring() {
       // 清除之前的定时器
       if (this.cookieUpdateTimer) {
@@ -247,8 +247,8 @@ export default {
           if (statusResponse.code === 200) {
             const status = statusResponse.data
 
-            if (status.status === 'completed' && status.message.includes('Cookie更新成功')) {
-              // Cookie更新成功
+            if (status.status === 'completed' && status.message.includes('🍪 更新成功')) {
+              // 🍪 更新成功
               clearInterval(this.cookieUpdateTimer)
               this.cookieUpdateTimer = null
 
@@ -256,12 +256,12 @@ export default {
               this.updateCookieCache(false)
               
               this.$notify.success({
-                title: 'Cookie更新',
-                message: 'Cookie更新成功！'
+                title: '🍪 更新',
+                message: '🍪 更新成功！'
               })
               this.cookiesStatus = {
                 type: 'success',
-                text: 'Cookies已更新',
+                text: '🍪 已更新',
                 lastModified: '刚刚',
                 server_validated: true
               }
@@ -269,26 +269,26 @@ export default {
               // 重新检查Cookie状态
               await this.handleCheckStatus()
               this.$emit('update-completed')
-            } else if (status.status === 'error' && status.message.includes('Cookie更新失败')) {
-              // Cookie更新失败
+            } else if (status.status === 'error' && status.message.includes('🍪 更新失败')) {
+              // 🍪 更新失败
               clearInterval(this.cookieUpdateTimer)
               this.cookieUpdateTimer = null
 
               this.$notify.error({
-                title: 'Cookie更新',
-                message: 'Cookie更新失败，请重试'
+                title: '🍪 更新',
+                message: '🍪 更新失败，请重试'
               })
               this.cookiesStatus = {
                 type: 'danger',
-                text: 'Cookie更新失败',
+                text: '🍪 更新失败',
                 lastModified: '未知',
                 server_validated: false
               }
-              this.$emit('update-failed', new Error('Cookie更新失败'))
+              this.$emit('update-failed', new Error('🍪 更新失败'))
             }
           }
         } catch (error) {
-          console.error('检查Cookie更新状态失败:', error)
+          console.error('检查 🍪 更新状态失败:', error)
         }
 
         // 如果检查次数超过限制，停止监控
@@ -297,12 +297,12 @@ export default {
           this.cookieUpdateTimer = null
 
           this.$notify.warning({
-            title: 'Cookie更新',
-            message: 'Cookie更新监控超时，请手动检查状态'
+            title: '🍪 更新',
+            message: '🍪 更新监控超时，请手动检查状态'
           })
           this.cookiesStatus = {
             type: 'warning',
-            text: 'Cookie更新状态未知',
+            text: '🍪 更新状态未知',
             lastModified: '未知',
             server_validated: false
           }
@@ -311,7 +311,7 @@ export default {
       }, 5000) // 每5秒检查一次
     },
 
-    // 停止Cookie更新监控
+    // 停止🍪 更新监控
     stopCookieUpdateMonitoring() {
       if (this.cookieUpdateTimer) {
         clearInterval(this.cookieUpdateTimer)

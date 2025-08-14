@@ -11,9 +11,9 @@ const routes = [
     component: Home
   },
   {
-    path: '/characters',
-    name: 'CharacterList',
-    component: () => import('../views/CharacterList.vue'),
+    path: '/roles',
+    name: 'RoleList',
+    component: () => import('../views/RoleList.vue'),
     meta: {
       title: '角色列表'
     }
@@ -33,6 +33,14 @@ const routes = [
     meta: {
       title: '召唤兽列表'
     }
+  },
+  {
+    path: '/equipment-desc-creator',
+    name: 'EquipmentDescCreator',
+    component: () => import('../views/EquipmentDescCreator.vue'),
+    meta: {
+      title: '装备模拟'
+    }
   }
 ]
 
@@ -43,7 +51,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'CBG数据'
+  document.title = to.meta.title || '🤡'
   next()
 })
 

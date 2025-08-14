@@ -51,6 +51,15 @@ def get_config_path() -> str:
     """
     return os.path.join(get_project_root(), 'config')
 
+def get_logs_path() -> str:
+    """
+    获取logs目录的绝对路径
+    
+    Returns:
+        str: logs目录的绝对路径
+    """
+    return os.path.join(get_project_root(), 'logs')
+
 def get_data_path() -> str:
     """
     获取data目录的绝对路径

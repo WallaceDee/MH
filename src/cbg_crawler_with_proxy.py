@@ -99,10 +99,10 @@ class EnhancedCBGCrawler:
         
         # 创建角色表（简化版，包含主要字段）
         cursor.execute("""
-        CREATE TABLE IF NOT EXISTS characters (
+        CREATE TABLE IF NOT EXISTS roles (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             equip_id TEXT UNIQUE,
-            character_name TEXT,
+            role_name TEXT,
             price REAL,
             server_name TEXT,
             level INTEGER,
@@ -130,18 +130,18 @@ class EnhancedCBGCrawler:
             time.sleep(2)  # 模拟请求延时
             return None  # 这里应该返回实际的数据
     
-    def parse_character_data(self, raw_data, proxy_info=None):
+    def parse_role_data(self, raw_data, proxy_info=None):
         """解析角色数据"""
-        characters = []
+        roles = []
         
         try:
             if not raw_data or 'result' not in raw_data:
-                return characters
+                return roles
             
             for item in raw_data['result']:
-                character = {
+                role = {
                     'equip_id': item.get('equip_id'),
-                    'character_name': item.get('equip_name'),
+                    'role_name': item.get('equip_name'),
                     'price': float(item.get('price', 0)) / 100,  # 分转元
                     'server_name': item.get('server_name'),
                     'level': int(item.get('level', 0)),
@@ -149,29 +149,29 @@ class EnhancedCBGCrawler:
                     'proxy_used': f"{proxy_info['ip']}:{proxy_info['port']}" if proxy_info else 'direct',
                     'response_time': proxy_info.get('response_time', 0) if proxy_info else 0
                 }
-                characters.append(character)
+                roles.append(role)
         
         except Exception as e:
             print(f"❌ 解析角色数据失败: {e}")
         
-        return characters
+        return roles
     
-    def save_to_database(self, characters, db_path):
+    def save_to_database(self, roles, db_path):
         """保存数据到数据库"""
-        if not characters:
+        if not roles:
             return
         
         try:
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
             
-            for char in characters:
+            for char in roles:
                 cursor.execute("""
-                INSERT OR REPLACE INTO characters 
-                (equip_id, character_name, price, server_name, level, profession, proxy_used, response_time)
+                INSERT OR REPLACE INTO roles 
+                (equip_id, role_name, price, server_name, level, profession, proxy_used, response_time)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
-                    char['equip_id'], char['character_name'], char['price'],
+                    char['equip_id'], char['role_name'], char['price'],
                     char['server_name'], char['level'], char['profession'],
                     char['proxy_used'], char['response_time']
                 ))
@@ -179,7 +179,7 @@ class EnhancedCBGCrawler:
             conn.commit()
             conn.close()
             
-            print(f"💾 已保存 {len(characters)} 条角色数据")
+            print(f"💾 已保存 {len(roles)} 条角色数据")
             
         except Exception as e:
             print(f"❌ 保存数据失败: {e}")
@@ -191,7 +191,7 @@ class EnhancedCBGCrawler:
         # 创建数据库
         db_path = self.create_database()
         
-        total_characters = 0
+        total_roles = 0
         successful_pages = 0
         
         for page in range(start_page, end_page + 1):
@@ -213,15 +213,15 @@ class EnhancedCBGCrawler:
                             proxy_info = active_proxies[0]  # 简化处理
                     
                     # 解析数据
-                    characters = self.parse_character_data(raw_data, proxy_info)
+                    roles = self.parse_role_data(raw_data, proxy_info)
                     
                     # 保存到数据库
-                    self.save_to_database(characters, db_path)
+                    self.save_to_database(roles, db_path)
                     
-                    total_characters += len(characters)
+                    total_roles += len(roles)
                     successful_pages += 1
                     
-                    print(f"✅ 第{page}页完成，获取{len(characters)}条数据，耗时{fetch_time:.2f}秒")
+                    print(f"✅ 第{page}页完成，获取{len(roles)}条数据，耗时{fetch_time:.2f}秒")
                 
                 else:
                     print(f"❌ 第{page}页获取失败")
@@ -237,7 +237,7 @@ class EnhancedCBGCrawler:
                 continue
         
         # 显示统计信息
-        self._show_crawl_summary(successful_pages, end_page - start_page + 1, total_characters, db_path)
+        self._show_crawl_summary(successful_pages, end_page - start_page + 1, total_roles, db_path)
         
         # 如果使用了代理，显示代理统计
         if self.use_proxy and self.proxy_manager:
@@ -246,22 +246,22 @@ class EnhancedCBGCrawler:
         
         return db_path
     
-    def _show_crawl_summary(self, successful_pages, total_pages, total_characters, db_path):
+    def _show_crawl_summary(self, successful_pages, total_pages, total_roles, db_path):
         """显示爬取汇总"""
         print("\n" + "="*60)
         print("🎉 爬取任务完成！")
         print(f"📊 成功页面: {successful_pages}/{total_pages}")
-        print(f"👥 总角色数: {total_characters}")
+        print(f"👥 总角色数: {total_roles}")
         print(f"💾 数据库文件: {db_path}")
         
-        if total_characters > 0:
+        if total_roles > 0:
             success_rate = (successful_pages / total_pages) * 100
             print(f"✅ 成功率: {success_rate:.1f}%")
             
             # 快速统计
             try:
                 conn = sqlite3.connect(db_path)
-                df = pd.read_sql_query("SELECT * FROM characters", conn)
+                df = pd.read_sql_query("SELECT * FROM roles", conn)
                 conn.close()
                 
                 if len(df) > 0:
@@ -274,31 +274,6 @@ class EnhancedCBGCrawler:
             
             except Exception as e:
                 print(f"❌ 统计信息生成失败: {e}")
-    
-    def export_to_excel(self, db_path):
-        """导出Excel文件"""
-        try:
-            conn = sqlite3.connect(db_path)
-            df = pd.read_sql_query("SELECT * FROM characters", conn)
-            conn.close()
-            
-            if len(df) == 0:
-                print("❌ 没有数据可导出")
-                return
-            
-            # Excel文件路径
-            excel_path = os.path.join(self.output_dir, "cbg_characters.xlsx")
-            
-            # 导出Excel
-            with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-                df.to_excel(writer, sheet_name='角色数据', index=False)
-            
-            print(f"📊 Excel文件已导出: {excel_path}")
-            return excel_path
-            
-        except Exception as e:
-            print(f"❌ Excel导出失败: {e}")
-            return None
 
 def demo_proxy_crawling():
     """演示代理IP轮换爬虫"""
@@ -336,12 +311,7 @@ def demo_proxy_crawling():
     # 执行爬取
     db_path = crawler.crawl_multiple_pages(1, pages)
     
-    # 导出Excel
-    excel_path = crawler.export_to_excel(db_path)
-    
     print("\n🎉 任务完成！")
-    if excel_path:
-        print(f"📊 可以查看Excel文件: {excel_path}")
 
 if __name__ == "__main__":
     demo_proxy_crawling() 

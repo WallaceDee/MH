@@ -85,7 +85,7 @@ def setup_session():
     try:
         cookie_path = os.path.join('config', 'cookies.txt')
         if not os.path.exists(cookie_path):
-            logger.warning("未找到cookies文件，请先运行 cookie_updater.py 或使用爬虫系统的自动cookie更新功能")
+            logger.warning("未找到cookies文件，请先使用爬虫系统的自动cookie更新功能")
             return session
 
         with open(cookie_path, 'r', encoding='utf-8') as f:

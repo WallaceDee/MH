@@ -3,6 +3,18 @@
  */
 export const commonMixin = {
   methods: {
+    gen_dynamic_tags(str) {
+      if (str) {
+        return window.gen_dynamic_tags(JSON.parse(str))
+      }
+      return ''
+    },
+    gen_highlight(str) {
+      if (str) {
+        return window.gen_highlight(JSON.parse(str))
+      }
+      return ''
+    },
     /**
      * 处理分页大小变化
      * @param {number} val - 新的分页大小
@@ -69,62 +81,6 @@ export const commonMixin = {
       if (!timestamp) return '-'
       const date = new Date(timestamp * 1000)
       return date.toLocaleString('zh-CN')
-    },
-
-    /**
-     * 格式化金额
-     * @param {number} money - 金额（分为单位）
-     * @returns {string} 格式化后的金额
-     */
-    formatMoney(money) {
-      if (!money) return '-'
-      return `¥${(money / 100).toFixed(2)}`
-    },
-
-    /**
-     * 复制文本到剪贴板
-     * @param {string} text - 要复制的文本
-     */
-    copyText(text) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard
-          .writeText(text)
-          .then(() => {
-            this.$message({
-              message: '复制成功',
-              type: 'success',
-              duration: 1500
-            })
-          })
-          .catch(() => {
-            this.$message({
-              message: '复制失败',
-              type: 'error',
-              duration: 1500
-            })
-          })
-      } else {
-        // 兼容旧浏览器
-        const textArea = document.createElement('textarea')
-        textArea.value = text
-        document.body.appendChild(textArea)
-        textArea.select()
-        try {
-          document.execCommand('copy')
-          this.$message({
-            message: '复制成功',
-            type: 'success',
-            duration: 1500
-          })
-        } catch (err) {
-          this.$message({
-            message: '复制失败',
-            type: 'error',
-            duration: 1500
-          })
-        }
-        document.body.removeChild(textArea)
-      }
     },
     /**
      * 获取带颜色的数字
@@ -210,7 +166,7 @@ export const commonMixin = {
     /**
      * 获取CBG链接（通用版本，支持不同类型）
      * @param {string} eid - 装备/宠物ID
-     * @param {string} type - 类型：'equip', 'pet', 'character'
+     * @param {string} type - 类型：'equip', 'pet', 'role'
      * @returns {string} CBG链接
      */
     getCBGLinkByType(eid, type = 'equip') {
@@ -221,34 +177,13 @@ export const commonMixin = {
       switch (type) {
         // case 'pet':
         //   return `https://xyq-m.cbg.163.com/cgi/mweb/equip/${serverId}/${eid}`
-        // case 'character':
+        // case 'role':
         //   return `https://xyq.cbg.163.com/equip?s=${serverId}&eid=${eid}`
         // case 'equip':
         default:
           return `https://xyq-m.cbg.163.com/cgi/mweb/equip/${serverId}/${eid}`
       }
     },
-    /**
-     * 处理API错误响应
-     * @param {Object} response - API响应对象
-     * @param {string} defaultMessage - 默认错误消息
-     */
-    handleApiError(response, defaultMessage = '操作失败') {
-      const message = response?.message || defaultMessage
-      this.$message.error(message)
-      console.error('API错误:', response)
-    },
-
-    /**
-     * 处理API成功响应
-     * @param {Object} response - API响应对象
-     * @param {string} defaultMessage - 默认成功消息
-     */
-    handleApiSuccess(response, defaultMessage = '操作成功') {
-      const message = response?.message || defaultMessage
-      this.$message.success(message)
-    },
-
     /**
      * 防抖函数
      * @param {Function} func - 要防抖的函数

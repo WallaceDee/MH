@@ -3,24 +3,27 @@
     <div class="filters">
       <!-- 筛选和搜索表单 -->
       <el-form :inline="true" :model="filters" @submit.native.prevent="fetchPets" size="mini">
-        <el-form-item label="选择月份">
-          <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="选择月份"
+        <el-form-item label="📅数据月份">
+          <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="📅选择月份"
             format="yyyy-MM" value-format="yyyy-MM" />
         </el-form-item>
-        <el-form-item label="等级范围">
+        <el-form-item label="🔑序列号">
+          <el-input v-model="filters.equip_sn" placeholder="🔑序列号"></el-input>
+        </el-form-item>
+        <el-form-item label="🔢等级">
           <div style="width: 500px">
             <el-slider v-model="filters.level_range" range :min="0" :max="180" :step="5" show-input show-input-controls
               :marks="levelMarks" @change="handleLevelRangeChange" />
           </div>
         </el-form-item>
-        <el-form-item label="价格范围">
+        <el-form-item label="💲价格">
           <el-input-number v-model="filters.price_min" placeholder="最低价格" :min="0" :controls="false"></el-input-number>
           -
           <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
         </el-form-item>
-        <el-form-item label="技能">
+        <el-form-item label="🔧技能">
           <el-cascader v-model="filters.skills" :options="skillOptions" :props="cascaderProps" :show-all-levels="false"
-            placeholder="请选择技能" multiple clearable filterable>
+            placeholder="🔧请选择技能" multiple clearable filterable>
             <template slot-scope="{ data }">
               <el-row type="flex" align="middle">
                 <el-image v-if="data.value" :src="getSkillImage(data.value)" fit="cover" referrerpolicy="no-referrer"
@@ -30,26 +33,37 @@
             </template>
           </el-cascader>
         </el-form-item>
-        <el-form-item label="技能数量≥">
-          <el-input-number v-model="filters.pet_skill_count" placeholder="技能数量" :min="0" controls></el-input-number>
+        <el-form-item label="🔧技能数量≥">
+          <el-input-number v-model="filters.pet_skill_count" placeholder="🔧技能数量" :min="0" controls></el-input-number>
         </el-form-item>
-        <el-form-item label="成长">
-          <el-input-number v-model="filters.pet_growth" placeholder="成长" :min="1" :max="1.4" :step="0.1"
+        <el-form-item label="📚成长">
+          <el-input-number v-model="filters.pet_growth" placeholder="📚成长" :min="1" :max="1.4" :step="0.1"
             controls></el-input-number>
         </el-form-item>
-        <el-form-item label="灵性值≥">
-          <el-input-number v-model="filters.pet_lx" placeholder="灵性值" :min="0" controls></el-input-number>
+        <el-form-item label="🧝灵性值≥">
+          <el-input-number v-model="filters.pet_lx" placeholder="🧝灵性值" :min="0" controls></el-input-number>
         </el-form-item>
-        <el-form-item label="特性">
-          <el-select v-model="filters.pet_texing" placeholder="请选择特性" multiple clearable filterable>
+        <el-form-item label="🔥特性">
+          <el-select v-model="filters.pet_texing" placeholder="🔥请选择特性" multiple clearable filterable>
             <el-option v-for="([value, label]) in texing_type_list" :key="value" :label="label" :value="value">
             </el-option>
           </el-select>
+        </el-form-item>
+        <el-form-item label="❌估价异常">
+          <el-switch v-model="filters.equip_list_amount_warning" :active-value="1" :inactive-value="0"
+            inactive-color="#409EFF" active-color="#F56C6C"></el-switch>
+        </el-form-item>
+        <el-form-item label="🔍装备估价异常占比率≤" v-if="filters.equip_list_amount_warning === 1"> 
+          <el-input-number v-model="filters.warning_rate" placeholder="装备估价异常占比率" :min="0" :max="99" :step="0.1"
+            controls></el-input-number>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchPets">查询</el-button>
         </el-form-item>
       </el-form>
+      <el-alert type="warning"  @close="batchUpdateUnvaluedPets" :loading="unvaluedPetsLoading"
+            v-if="unvaluedPetsCount > 0" :title="` 有（${unvaluedPetsCount}）只召唤兽装备未估价/估价异常`" close-text="更新">
+          </el-alert>
     </div>
     <el-table :data="pets" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey"
       v-loading="tableLoading">
@@ -57,14 +71,12 @@
         <template #default="scope">
           <el-link :href="getCBGLinkByType(scope.row.eid, 'pet')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <SimilarPetModal :pet="scope.row" :similar-data="similarPets[scope.row.eid]"
-            :valuation="petValuations[scope.row.eid]" :error="similarError[scope.row.eid]"
-            :loading="loadingSimilar[scope.row.eid]" @show="loadSimilarPets" @retry="retryWithNewThreshold" />
+          <SimilarPetModal :pet="scope.row" :similar-data="similarPets" :valuation="petValuation" @show="loadSimilarPets" />
         </template>
       </el-table-column>
       <el-table-column fixed label="召唤兽" width="70" align="center">
         <template #default="scope">
-          <pet-image :pet="scope.row.petData" :equipFaceImg="scope.row.equip_face_img"
+          <PetImage :pet="scope.row.petData" :equip_sn="scope.row.equip_sn" :equipFaceImg="scope.row.equip_face_img"
             :enhanceInfo="getEnhanceInfo(scope.row)" />
         </template>
       </el-table-column>
@@ -74,17 +86,39 @@
           <div v-html="formatFullPrice(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="level" label="等级" width="140" sortable="custom" align="center">
-        <template #default="scope">
-          <p :class="scope.row.petData.is_baobao === '是' ? 'cBlue' : 'equip_desc_red'">
-            <span>{{ scope.row.petData.is_baobao === '是' ? '' : '野生' }}</span>
-            <span>{{ scope.row.equip_name }}{{ scope.row.petData.is_baobao === '是' ? '宝宝' : '' }}/{{ scope.row.level
-            }}级</span>
-          </p>
-          <p>参战等级：{{ scope.row.role_grade_limit }}级</p>
+      <el-table-column prop="highlight" label="亮点"  width="100"  align="center" sortable="custom">>
+        <template slot-scope="scope">
+          <span v-html="gen_highlight(scope.row.highlight)"></span>
         </template>
       </el-table-column>
-
+      <el-table-column prop="dynamic_tags" label="动态"  width="100"  align="center" sortable="custom">
+        <template slot-scope="scope">
+          <span v-html="gen_dynamic_tags(scope.row.dynamic_tags)"></span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="equip_list" label="装备" width="171" sortable="custom" align="center">
+        <template #default="{ row: { equip_list, equip_list_amount }, row }">
+          <table cellspacing="0" cellpadding="0" class="tb03 size50" id="pet_equip_con">
+            <tr>
+              <td v-for="(eItem, index) in JSON.parse(equip_list).splice(0, 3)" :key="index">
+                <EquipmentImage v-if="eItem" :placement="'bottom'" :image="false" :equipment="getEquipImageProps(eItem)"
+                  size="small" :popoverWidth="300" />
+                <span v-else>&nbsp;</span>
+              </td>
+            </tr>
+          </table>
+          <el-row type="flex" justify="space-between" align="middle">
+            <p v-if="getEquipSuitEffect(equip_list)" class="cBlue">{{
+              getEquipSuitEffect(equip_list) }}套装</p> <span
+              v-html="formatFullPrice({ price: equip_list_amount }, true)"></span>
+          </el-row>
+          <el-button v-if="JSON.parse(equip_list).slice(0, 3).some(item => item)" type="text" size="mini"
+            @click="updatePetEquipmentsPrice(row)" :loading="equipmentValuationLoading"
+            :disabled="!JSON.parse(equip_list).some(item => item)" style="float:right ;">
+            装备估价
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column prop="growth" label="成长" width="100" sortable="custom" align="center">
         <template #default="scope">
           <span v-html="getColorNumber(scope.row.growth, [1, 1.3])"></span>
@@ -100,33 +134,22 @@
           <div class="pet-skills" v-html="formatSkills(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="equip_list" label="套装" width="100" sortable="custom" align="center">
-        <template #default="{ row: { equip_list } }">
-          <span v-if="getEquipSuitEffect(equip_list)" class="cBlue" style="text-align: center;">{{
-            getEquipSuitEffect(equip_list) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="equip_list" label="装备" width="320" sortable="custom" align="center">
-        <template #default="{ row: { equip_list } }">
-          <table cellspacing="0" cellpadding="0" class="tb03 size50" id="pet_equip_con" style="transform: scale(0.75);">
-            <tr>
-              <td v-for="(eItem, index) in JSON.parse(equip_list)" :key="index">
-                <EquipmentImage v-if="eItem" :placement="'bottom'" :image="false" :equipment="getEquipImageProps(eItem)"
-                  size="small" :popoverWidth="300" />
-                <span v-else>&nbsp;</span>
-              </td>
-              <td v-if="JSON.parse(equip_list).length === 3">&nbsp;</td>
-            </tr>
-          </table>
-          <el-button v-if="JSON.parse(equip_list).some(item => item)" type="text" size="mini"
-            @click="batchValuateEquipments(JSON.parse(equip_list))" :loading="equipmentValuationLoading"
-            :disabled="!JSON.parse(equip_list).some(item => item)">
-            宠物装备估价
-          </el-button>
+      <el-table-column prop="level" label="等级" width="140" sortable="custom" align="center">
+        <template #default="scope">
+          <p :class="scope.row.petData.is_baobao === '是' ? 'cBlue' : 'equip_desc_red'">
+            <span>{{ scope.row.petData.is_baobao === '是' ? '' : '野生' }}</span>
+            <span>{{ scope.row.equip_name }}{{ scope.row.petData.is_baobao === '是' ? '宝宝' : '' }}/{{ scope.row.level
+              }}级</span>
+          </p>
+          <p>参战等级：{{ scope.row.role_grade_limit }}级</p>
         </template>
       </el-table-column>
       <el-table-column prop="petData.texing.name" label="特性" width="60" align="center"></el-table-column>
-
+      <el-table-column label="操作" width="100">
+        <template #default="scope">
+          <el-link href="javascript:void(0)" type="danger" @click.native="handleDelete(scope.row)">删除</el-link>
+        </template>
+      </el-table-column>
     </el-table>
     <div class="pagination-container">
       <el-pagination @current-change="handlePageChange" :current-page="pagination.page" @size-change="handleSizeChange"
@@ -134,6 +157,41 @@
         layout="total, sizes, prev, pager, next, jumper" :total="pagination.total">
       </el-pagination>
     </div>
+
+    <!-- 装备估价结果对话框 -->
+    <el-dialog :title="valuationDialogTitle" :visible.sync="valuationDialogVisible" width="90%"
+      :close-on-click-modal="false" :close-on-press-escape="false" custom-class="batch-valuation-dialog">
+      <BatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
+        :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
+        @close="closeValuationDialog" />
+    </el-dialog>
+
+    <!-- 任务进度对话框 -->
+    <el-dialog title="批量更新进度" :visible.sync="taskProgressVisible" width="500px" :close-on-click-modal="false"
+      :close-on-press-escape="false" :show-close="false">
+      <div style="text-align: center; padding: 20px;">
+        <div style="font-size: 16px; margin-bottom: 20px;">
+          正在批量更新召唤兽装备估算价格...
+        </div>
+        <el-progress :percentage="taskStatus ? taskStatus.progress_percentage || 0 : 0" :stroke-width="16"
+          :text-inside="true">
+        </el-progress>
+        <div style="margin-top: 20px; font-size: 14px; color: #666;">
+          已处理: {{ taskStatus ? taskStatus.processed_count || 0 : 0 }} / {{ taskStatus ? taskStatus.total_count || 0 : 0
+          }}
+        </div>
+        <div style="margin-top: 10px; font-size: 14px; color: #666;">
+          当前批次: {{ taskStatus ? taskStatus.current_batch || 0 : 0 }} / {{ taskStatus ? taskStatus.total_batches || 0 : 0
+          }}
+        </div>
+        <div style="margin-top: 10px; font-size: 14px; color: #666;">
+          已更新: {{ taskStatus ? taskStatus.updated_count || 0 : 0 }}
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="stopCurrentTask" type="danger">停止任务</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -146,7 +204,7 @@ import EquipmentImage from '@/components/EquipmentImage.vue'
 import { petMixin } from '@/utils/mixins/petMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
-import { equipmentApi } from '@/api/equipment'
+import { petApi } from '@/api/pet'
 const skillOptions = []
 const pet_skill_classification = window.AUTO_SEARCH_CONFIG.pet_skill_classification
 for (const lowOrHightKey in pet_skill_classification) {
@@ -164,7 +222,8 @@ export default {
   components: {
     SimilarPetModal,
     PetImage,
-    EquipmentImage
+    EquipmentImage,
+    BatchValuationResult
   },
   mixins: [equipmentMixin, commonMixin, petMixin],
   data() {
@@ -184,6 +243,7 @@ export default {
       skillOptions,
       pets: [],
       filters: {
+        equip_sn: '',
         pet_skill_count: 0,
         pet_growth: 1.0,
         selectedDate: dayjs().format('YYYY-MM'),
@@ -192,7 +252,9 @@ export default {
         price_min: undefined,
         price_max: undefined,
         sort_by: 'price',
-        sort_order: 'asc'
+        sort_order: 'asc',
+        equip_list_amount_warning: 0,
+        warning_rate: 0.4
       },
       pagination: {
         page: 1,
@@ -206,83 +268,86 @@ export default {
         150: '150'
       },
       tableKey: 0,
-      // 相似宠物相关数据
-      similarPets: {}, // 存储每个宠物的相似宠物数据
-      loadingSimilar: {}, // 存储每个宠物的加载状态
-      similarError: {}, // 存储加载错误信息
-      petValuations: {}, // 存储宠物估价信息
+      // 相似宠物相关数据（实时计算，不缓存）
+      similarPets: null, // 当前显示的相似宠物数据
+      petValuation: null, // 当前宠物估价信息
       equipmentValuationLoading: false, // 装备批量估价加载状态
-      equipmentValuationResults: {}, // 存储装备批量估价结果
+      // 装备估价结果对话框相关数据
+      valuationDialogVisible: false,
+      valuationResults: [],
+      valuationTotalValue: 0,
+      valuationEquipmentList: [],
+      valuationLoading: false,
+      valuationDialogTitle: '',
+      // 未估价召唤兽数量
+      unvaluedPetsCount: 0,
+      unvaluedPetsLoading: false,
+      // 任务相关数据
+      currentTaskId: null,
+      taskStatus: {},
+      taskProgressTimer: null,
+      taskProgressVisible: false,
+      taskProgressPercentage: 0,
+      taskProgressProcessed: 0,
+      taskProgressTotal: 0,
+      taskProgressCurrentBatch: 0,
+      taskProgressTotalBatches: 0,
+      taskProgressUpdated: 0,
     }
   },
   methods: {
-    // 批量装备估价
-    async batchValuateEquipments(equipmentList) {
+    async updatePetEquipmentsPrice({ equip_sn, equip_list, equip_name }) {
       try {
-        // 过滤掉空值和饰品
-        const validEquipments = equipmentList.filter((item, index) => item && item.desc && index < 3).map(item => ({ ...item, kindid: 29, large_equip_desc: item.desc }))
-
-        if (validEquipments.length === 0) {
-          this.$message.warning('没有有效的装备可以估价')
-          return
-        }
-
         this.equipmentValuationLoading = true
 
+        // 先过滤装备数据，只取前三个
+        const validEquipments = JSON.parse(equip_list)
+          .filter((item, index) => item && item.desc && index < 3)
+          .map(item => ({ ...item, kindid: 29 }))
+
+        // 先显示弹窗和骨架屏
+        this.valuationDialogVisible = true
+        this.valuationLoading = true
+        this.valuationResults = []
+        this.valuationTotalValue = 0
+        this.valuationEquipmentList = validEquipments
+        this.valuationDialogTitle = `召唤兽装备估价结果 - ${equip_name}`
+
         // 调用批量估价API
-        const response = await equipmentApi.batchEquipmentValuation({
-          equipment_list: validEquipments,
+        const response = await petApi.updatePetEquipmentsPrice({
+          equip_sn,
           strategy: 'fair_value',
           similarity_threshold: this.batchValuateParams.similarity_threshold,
-          max_anchors: this.batchValuateParams.max_anchors
+          max_anchors: this.batchValuateParams.max_anchors,
+          year: this.filters.selectedDate.split('-')[0] * 1,
+          month: this.filters.selectedDate.split('-')[1] * 1
         })
 
         if (response.code === 200) {
-          const results = response.data.results
+          const data = response.data
+          const results = data.results || []
           const totalValue = results.reduce((sum, result) => {
             return sum + (result.estimated_price || 0)
           }, 0)
 
-          // 显示估价结果对话框
-          this.$msgbox({
-            title: '批量装备估价结果',
-            message: this.$createElement(BatchValuationResult, {
-              props: {
-                results: results,
-                totalValue: totalValue,
-                equipmentList: validEquipments,
-                valuateParams: this.batchValuateParams
-              },
-              on: {
-                close: () => {
-                  this.$msgbox.close()
-                }
-              }
-            }),
-            showCancelButton: false,
-            showConfirmButton: false,
-            customClass: 'batch-valuation-dialog',
-            beforeClose: (action, instance, done) => {
-              done()
-            }
-          }).catch(() => {
-            this.equipmentValuationLoading = false
-          })
-
-          // 存储结果用于后续使用
-          this.equipmentValuationResults = {
-            results,
-            totalValue,
-            timestamp: new Date().toISOString()
+          if (results.length === 0) {
+            this.$notify.warning('该召唤兽没有携带装备或装备估价失败')
+            this.closeValuationDialog()
+            return
           }
 
+          // 更新弹窗内容，显示实际数据
+          this.valuationResults = results
+          this.valuationTotalValue = totalValue
+          this.valuationLoading = false
         } else {
-          this.$message.error(response.message || '批量估价失败')
+          this.$notify.error(response.message || '召唤兽装备估价失败')
+          this.closeValuationDialog()
         }
-
       } catch (error) {
-        console.error('批量装备估价失败:', error)
-        this.$message.error('批量装备估价失败: ' + error.message)
+        console.error('召唤兽装备估价失败:', error)
+        this.$notify.error('召唤兽装备估价失败')
+        this.closeValuationDialog()
       } finally {
         this.equipmentValuationLoading = false
       }
@@ -338,11 +403,11 @@ export default {
           this.pagination.total = response.data.total || 0
           this.pagination.page = response.data.page || this.pagination.page
         } else {
-          this.$message.error(response.message || '获取召唤兽列表失败')
+          this.$notify.error(response.message || '获取召唤兽列表失败')
         }
       } catch (error) {
         console.error('获取召唤兽列表失败:', error)
-        this.$message.error('获取召唤兽列表失败')
+        this.$notify.error('获取召唤兽列表失败')
       } finally {
         this.tableLoading = false // 无论成功失败，都结束加载状态
       }
@@ -367,39 +432,13 @@ export default {
     },
     // 加载相似宠物
     async loadSimilarPets(pet) {
-      const eid = pet.eid
-
-      // 如果已经加载过，直接返回
-      if (this.similarPets[eid] && this.petValuations[eid]) {
-        return
-      }
-
-      // 使用默认相似度阈值0.8加载
+      this.similarPets = null
+      this.petValuation = null
       await this.loadPetValuation(pet, 0.8)
     },
-
-    // 重试查找相似宠物
-    async retryWithNewThreshold(eid, newThreshold) {
-      // 获取保存的宠物数据
-      const similarData = this.similarPets[eid]
-      if (!similarData || !similarData.pet) {
-        this.$message.error('宠物数据丢失，请重新点击查看相似')
-        return
-      }
-
-      const pet = similarData.pet
-      // 使用新的相似度阈值重新加载
-      await this.loadPetValuation(pet, newThreshold, true)
-    },
-
-    // 统一的宠物估价加载方法
-    async loadPetValuation(pet, similarityThreshold = 0.8, isRetry = false) {
-      const eid = pet.eid
-
+    async loadPetValuation({ petData, ...pet }, similarityThreshold = 0.8) {
       try {
-        this.$set(this.loadingSimilar, eid, true)
-        this.$set(this.similarError, eid, null)
-
+        console.log(petData)
         // 获取估价信息（包含相似宠物）
         const valuationResponse = await this.$api.pet.getPetValuation({
           pet_data: pet,
@@ -410,16 +449,16 @@ export default {
         // 处理估价响应
         if (valuationResponse.code === 200) {
           const data = valuationResponse.data
-          this.$set(this.petValuations, eid, data)
+          this.petValuation = data
 
-          // 从估价结果中提取相似宠物信息
-          if (data.anchors && data.anchors.length > 0) {
-            const { data: { anchors } } = await this.$api.pet.findPetAnchors({
+          const { data: { anchors } } = await this.$api.pet.findPetAnchors({
               pet_data: pet,
               similarity_threshold: similarityThreshold,
               max_anchors: 30
             })
-            this.$set(this.similarPets, eid, {
+          // 从估价结果中提取相似宠物信息
+          if (data.anchors && data.anchors.length > 0) {
+            this.similarPets = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
               anchors: anchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
@@ -436,86 +475,342 @@ export default {
                     data.anchors.length
                 }
               }
-            })
-
-            if (isRetry) {
-              this.$message.success(`成功找到 ${data.anchor_count} 个相似宠物`)
             }
-          } else {
-            this.$set(this.similarPets, eid, {
-              anchor_count: 0,
-              similarity_threshold: data.similarity_threshold || similarityThreshold,
-              anchors: [],
-              statistics: {
-                price_range: { min: 0, max: 0 },
-                similarity_range: { min: 0, max: 0, avg: 0 }
-              },
-              message: isRetry
-                ? '仍未找到符合条件的市场锚点，请尝试更低的相似度阈值'
-                : '未找到符合条件的市场锚点，建议降低相似度阈值',
-              canRetry: true,
-              pet: pet
-            })
-
-            if (isRetry) {
-              this.$message.warning('仍未找到相似宠物，请尝试更低的相似度阈值')
-            }
-          }
-        } else if (valuationResponse.code === 400) {
-          // 400错误也要显示界面，只是没有锚点数据
-          this.$set(this.similarPets, eid, {
-            anchor_count: 0,
-            similarity_threshold: similarityThreshold,
-            anchors: [],
-            statistics: {
-              price_range: { min: 0, max: 0 },
-              similarity_range: { min: 0, max: 0, avg: 0 }
-            },
-            message: valuationResponse.message || '未找到符合条件的市场锚点，建议降低相似度阈值',
-            canRetry: true,
-            pet: pet
-          })
-          // 清空估价信息，因为无法估价
-          this.$set(this.petValuations, eid, null)
-
-          if (isRetry) {
-            this.$message.error(valuationResponse.message || '查找相似宠物失败')
-          }
-        } else {
-          this.$set(this.similarError, eid, valuationResponse.message || '加载估价和相似宠物失败')
-
-          if (isRetry) {
-            this.$set(this.similarPets, eid, {
-              anchor_count: 0,
-              similarity_threshold: similarityThreshold,
-              anchors: [],
-              statistics: {
-                price_range: { min: 0, max: 0 },
-                similarity_range: { min: 0, max: 0, avg: 0 }
-              },
-              message: valuationResponse.message || '查找失败，请重试',
-              canRetry: true,
-              pet: pet
-            })
-            this.$message.error(valuationResponse.message || '查找相似宠物失败')
+            return
           }
         }
-
-        console.log('估价和相似宠物数据:', valuationResponse.data)
+        this.similarPets = {
+          anchor_count: 0,
+          similarity_threshold: similarityThreshold,
+          anchors: [],
+          statistics: {
+            price_range: { min: 0, max: 0 },
+            similarity_range: { min: 0, max: 0, avg: 0 }
+          }
+        }
       } catch (error) {
         console.error('加载相似宠物或估价失败:', error)
-        this.$set(this.similarError, eid, `加载失败: ${error.message}`)
-
-        if (isRetry) {
-          this.$message.error(`重试失败: ${error.message}`)
-        }
-      } finally {
-        this.$set(this.loadingSimilar, eid, false)
       }
     },
+    // 关闭装备估价结果对话框
+    closeValuationDialog() {
+      this.valuationDialogVisible = false
+      this.valuationResults = []
+      this.valuationTotalValue = 0
+      this.valuationEquipmentList = []
+      this.valuationLoading = false
+      this.valuationDialogTitle = ''
+    },
+
+    // 获取未估价召唤兽数量
+    async getUnvaluedPetsCount() {
+      try {
+        this.unvaluedPetsLoading = true
+        const [year, month] = this.filters.selectedDate.split('-')
+
+        const response = await petApi.getUnvaluedPetsCount({
+          year: parseInt(year),
+          month: parseInt(month)
+        })
+
+        if (response.code === 200) {
+          this.unvaluedPetsCount = response.data.count || 0
+        } else {
+          console.error('获取未估价召唤兽数量失败:', response.message)
+        }
+      } catch (error) {
+        console.error('获取未估价召唤兽数量失败:', error)
+      } finally {
+        this.unvaluedPetsLoading = false
+      }
+    },
+
+    // 批量更新未估价召唤兽装备
+    async batchUpdateUnvaluedPets() {
+      try {
+        this.unvaluedPetsLoading = true
+        const [year, month] = this.filters.selectedDate.split('-')
+
+        // 确认对话框
+        await this.$confirm(
+          `确定要批量更新 ${this.unvaluedPetsCount} 只未估价召唤兽的装备价格吗？此操作可能需要较长时间。`,
+          '批量估价确认',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        const response = await petApi.batchUpdateUnvaluedPets({
+          year: parseInt(year),
+          month: parseInt(month)
+        })
+
+        if (response.code === 200) {
+          const data = response.data
+          this.currentTaskId = data.task_id
+          this.taskStatus = data
+
+          // 显示任务进度对话框
+          this.showTaskProgressDialog()
+
+          // 开始监控任务进度
+          this.startTaskProgressMonitoring()
+        } else {
+          this.$notify.error(response.message || '批量更新失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') { // 用户取消不显示错误
+          console.error('批量更新未估价召唤兽装备失败:', error)
+          this.$notify.error('批量更新失败')
+        }
+      } finally {
+        this.unvaluedPetsLoading = false
+      }
+    },
+
+    // 显示任务进度对话框
+    showTaskProgressDialog() {
+      this.taskProgressVisible = true
+    },
+
+    // 开始监控任务进度
+    startTaskProgressMonitoring() {
+      this.taskProgressTimer = setInterval(async () => {
+        if (!this.currentTaskId) {
+          this.stopTaskProgressMonitoring()
+          return
+        }
+
+        try {
+          const response = await petApi.getTaskStatus(this.currentTaskId)
+          if (response.code === 200) {
+            this.taskStatus = response.data
+
+            // 检查任务是否完成
+            if (this.taskStatus && this.taskStatus.status === 'completed') {
+              this.handleTaskCompleted()
+            } else if (this.taskStatus && this.taskStatus.status === 'failed') {
+              this.handleTaskFailed()
+            } else if (this.taskStatus && this.taskStatus.status === 'cancelled') {
+              this.handleTaskCancelled()
+            }
+          }
+        } catch (error) {
+          console.error('获取任务状态失败:', error)
+        }
+      }, 10*1000) // 每10秒更新一次
+    },
+
+    // 停止监控任务进度
+    stopTaskProgressMonitoring() {
+      if (this.taskProgressTimer) {
+        clearInterval(this.taskProgressTimer)
+        this.taskProgressTimer = null
+      }
+    },
+
+    // 停止当前任务
+    async stopCurrentTask() {
+      if (this.currentTaskId) {
+        try {
+          await petApi.stopTask(this.currentTaskId)
+          this.$notify.info('已发送停止任务请求')
+
+          // 等待任务状态变为cancelled，然后关闭弹窗
+          this.waitForTaskCancelled()
+        } catch (error) {
+          console.error('停止任务失败:', error)
+        }
+      }
+    },
+
+    // 等待任务取消
+    async waitForTaskCancelled() {
+      const maxWaitTime = 10000 // 最多等待10秒
+      const checkInterval = 1000 // 每1秒检查一次
+      const startTime = Date.now()
+
+      console.log('开始等待任务取消...')
+
+      while (Date.now() - startTime < maxWaitTime) {
+        try {
+          const response = await petApi.getTaskStatus(this.currentTaskId)
+          if (response.code === 200 && response.data) {
+            const status = response.data.status
+            console.log(`任务状态: ${status}`)
+
+            if (status === 'cancelled') {
+              // 任务已取消，关闭弹窗
+              console.log('任务已取消，关闭弹窗')
+              this.handleTaskCancelled()
+              return
+            } else if (status === 'completed' || status === 'failed') {
+              // 任务已完成或失败，也会关闭弹窗
+              console.log(`任务状态为 ${status}，关闭弹窗`)
+              if (status === 'completed') {
+                this.handleTaskCompleted()
+              } else {
+                this.handleTaskFailed()
+              }
+              return
+            }
+          }
+        } catch (error) {
+          console.error('检查任务状态失败:', error)
+        }
+
+        // 等待一段时间再检查
+        await new Promise(resolve => setTimeout(resolve, checkInterval))
+      }
+
+      // 超时后强制关闭弹窗
+      console.warn('等待任务取消超时，强制关闭弹窗')
+      this.handleTaskCancelled()
+    },
+
+    // 处理任务完成
+    handleTaskCompleted() {
+      this.stopTaskProgressMonitoring()
+      this.taskProgressVisible = false
+
+      if (this.taskStatus) {
+        this.$notify.success(
+          `批量更新完成！成功更新 ${this.taskStatus.updated_count || 0}/${this.taskStatus.total_count || 0} 只召唤兽的装备价格。`
+        )
+      } else {
+        this.$notify.success('批量更新完成！')
+      }
+
+      this.currentTaskId = null
+      this.taskStatus = null
+
+      // 重新获取未估价数量
+      this.getUnvaluedPetsCount()
+      // 刷新宠物列表
+      this.fetchPets()
+    },
+
+    // 处理任务失败
+    handleTaskFailed() {
+      this.stopTaskProgressMonitoring()
+      this.taskProgressVisible = false
+
+      if (this.taskStatus) {
+        this.$notify.error(`任务失败: ${this.taskStatus.error_message || '未知错误'}`)
+      } else {
+        this.$notify.error('任务失败: 未知错误')
+      }
+
+      this.currentTaskId = null
+      this.taskStatus = null
+    },
+
+    // 处理任务取消
+    handleTaskCancelled() {
+      this.stopTaskProgressMonitoring()
+      this.taskProgressVisible = false
+      this.$notify.info('任务已取消')
+      this.currentTaskId = null
+      this.taskStatus = null
+    },
+
+    // 删除宠物
+    async handleDelete(row) {
+      try {
+        // 确认删除
+        await this.$confirm(
+          `确定要删除召唤兽 ${row.equip_name || row.equip_sn} 吗？`,
+          '确认删除',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        // 获取当前年月
+        const [year, month] = this.filters.selectedDate.split('-')
+
+        // 调用删除API
+        const response = await petApi.deletePet(row.equip_sn, {
+          year,
+          month
+        })
+
+        if (response.code === 200) {
+          this.$notify.success('召唤兽删除成功')
+          // 重新获取数据
+          await this.fetchPets()
+        } else {
+          this.$notify.error(response.message || '删除失败')
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('删除召唤兽失败:', error)
+          this.$notify.error('删除召唤兽失败')
+        }
+      }
+    },
+
+    // 检查活跃任务
+    async checkActiveTasks() {
+      try {
+        console.log('开始检查活跃任务...')
+        const response = await petApi.getActiveTasks()
+        console.log('活跃任务API响应:', response)
+
+        if (response.code === 200 && response.data && response.data.length > 0) {
+          console.log('找到活跃任务:', response.data)
+
+          // 找到当前年月对应的活跃任务
+          const [year, month] = this.filters.selectedDate.split('-')
+          console.log('当前年月:', year, month)
+
+          const currentTask = response.data.find(task => {
+            console.log('比较任务:', task.year, task.month, 'vs', year, month)
+            return task.year === parseInt(year) && task.month === parseInt(month)
+          })
+
+          console.log('匹配的当前任务:', currentTask)
+
+          if (currentTask) {
+            this.currentTaskId = currentTask.task_id
+            this.taskStatus = currentTask
+
+            // 如果任务还在运行，显示进度对话框并开始监控
+            if (currentTask.status === 'running') {
+              console.log('恢复运行中的任务:', currentTask.task_id)
+              this.showTaskProgressDialog()
+              this.startTaskProgressMonitoring()
+              this.$notify.info('检测到未完成的任务，已恢复监控')
+            } else if (currentTask.status === 'pending') {
+              console.log('发现待处理任务:', currentTask.task_id)
+              this.$notify.info('检测到待处理的任务，正在等待执行')
+            }
+          } else {
+            console.log('未找到当前年月的活跃任务')
+          }
+        } else {
+          console.log('没有活跃任务或API响应异常')
+        }
+      } catch (error) {
+        console.error('检查活跃任务失败:', error)
+      }
+    }
   },
+
   mounted() {
     this.fetchPets()
+    this.getUnvaluedPetsCount()
+    // 检查是否有活跃任务需要恢复
+    this.checkActiveTasks()
+  },
+
+  beforeDestroy() {
+    // 清理任务进度监控
+    this.stopTaskProgressMonitoring()
   }
 }
 </script>

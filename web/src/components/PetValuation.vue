@@ -1,13 +1,17 @@
 <template>
-  <div v-if="valuation" class="valuation-info">
-    <el-row type="flex" align="middle">
-      <pet-image :pet="targetPet.petData" trigger="hover" :equipFaceImg="targetPet.equip_face_img"/>
-      <span v-html="formatFullPrice(targetPet)" style="margin-left: 10px"></span>
+  <div class="valuation-info">
+    <el-row type="flex" align="middle" justify="space-between">
+      <el-row type="flex" align="middle">
+        <PetImage :pet="targetPet.petData" trigger="hover" :equipFaceImg="targetPet.equip_face_img" />
+        <span v-html="formatFullPrice(targetPet)" style="margin-left: 10px"></span>
+      </el-row>
+      <!-- 无锚点时的重试界面 -->
+      <SimilarGetMore :target-equipment="targetPet" type="pet"/>
     </el-row>
     <div class="valuation-main">
       <span class="valuation-label">宠物估价:</span>
-      <span class="valuation-price">{{ valuation.estimated_price_yuan }}元</span>
-      <span class="valuation-strategy">({{ getStrategyName(valuation.strategy) }})</span>
+      <span class="valuation-price">{{ valuation ? valuation.estimated_price_yuan + '元' : '-' }}</span>
+      <span class="valuation-strategy">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>
 
       <!-- 价格比率显示 -->
       <span v-if="priceRatio" class="price-ratio" :class="priceRatioClass">
@@ -17,8 +21,8 @@
       </span>
     </div>
     <div class="valuation-details">
-      <span>置信度: {{ (valuation.confidence * 100).toFixed(1) }}%</span>
-      <span>基于{{ valuation.anchor_count }}个锚点</span>
+      <span>置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}</span>
+      <span>基于{{ valuation ? valuation.anchor_count + '个锚点' : '-' }}</span>
       <span v-if="priceRatio">估价比率: {{ (priceRatio * 100).toFixed(1) }}%</span>
     </div>
   </div>
@@ -28,10 +32,12 @@
 import PetImage from './PetImage.vue'
 import { petMixin } from '@/utils/mixins/petMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
+import SimilarGetMore from './SimilarGetMore.vue'
 export default {
   name: 'PetValuation',
   components: {
-    PetImage
+    PetImage,
+    SimilarGetMore
   },
   mixins: [petMixin, commonMixin],
   props: {
@@ -185,4 +191,4 @@ export default {
 .valuation-details span {
   white-space: nowrap;
 }
-</style> 
+</style>

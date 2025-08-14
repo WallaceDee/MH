@@ -25,7 +25,7 @@ sys.path.insert(0, project_root)
 
 from src.tools.setup_requests_session import setup_session
 from src.utils.smart_db_helper import CBGSmartDB
-from src.cbg_config import DB_TABLE_SCHEMAS, DB_TABLE_ORDER
+from src.cbg_config import DB_SCHEMA_CONFIG
 from src.tools.search_form_helper import (
     get_equip_search_params_sync,
     get_lingshi_search_params_sync,
@@ -142,7 +142,7 @@ class CBGEquipSpider:
             cursor = conn.cursor()
             
             # 只创建装备相关的表
-            cursor.execute(DB_TABLE_SCHEMAS['equipments'])
+            cursor.execute(DB_SCHEMA_CONFIG['equipments'])
             self.logger.debug("装备数据库创建表: equipments")
             
             conn.commit()

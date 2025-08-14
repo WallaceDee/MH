@@ -1,16 +1,45 @@
 <template>
-  <el-popover placement="right" :trigger="trigger" popper-class="pet-info-popover" v-model="visible" @show="handleShow"
-    @hide="handleHide">
+  <el-popover :data-equip-sn="$attrs.equip_sn" placement="right" :trigger="trigger" popper-class="pet-info-popover"
+    v-model="visible" @show="handleShow" @hide="handleHide">
     <template #reference>
       <div class="pet-trigger" @click="handleClick">
         <slot name="trigger"></slot>
       </div>
     </template>
 
-    <div class="tabCont" v-if="pet && visible">
+    <div class="tabCont" v-if="pet && visible&&pet.icon">
+      <PetDetail :current_pet="pet" />
+    </div>
+    <div class="tabCont" v-else-if="pet && visible&&!pet.icon">
       <div class="soldDetail" id="SkillTipsBox" ref="SkillTipsBox" style="width: 320px; display: none"></div>
       <div class="cols" style="width: 280px; margin-left: -2px; margin-right: 2px">
-        <div class="thum" style="text-align: center;">
+        <template v-if="pet.action">
+          <div class="thum" style="text-align: center;">
+          <div class="time-key-wap"><el-image :src="getImageUrl(equipFaceImg, 'big')"
+              style="width: 100px; height: 100px" referrerpolicy="no-referrer"></el-image></div>
+          <p class="f14px cWhite">等级：<span class="cYellow">{{ pet.equip_level }}</span> 携带等级：{{ pet.role_grade_limit }}</p>
+        </div>
+        <div class="blank12"></div>
+        <h4>资质</h4>
+        <table class="tb02 petZiZhiTb petAttrInfo" width="100%" cellspacing="0" cellpadding="0">
+          <tr>
+            <th>历史灵性值：</th>
+            <td>{{ pet.lx }}</td>
+            <th>成长：</th>
+            <td>{{ pet.growth }}</td>
+          </tr>
+          <tr>
+            <th :class="{ enhance: enhanceInfo.is_baobao }">是否宝宝：</th>
+              <td :class="{ enhance: enhanceInfo.is_baobao }">
+                <span :style="`color:${pet.is_baobao === '否' ? '#FF0000' : '#00FF00'}`">
+                  {{ pet.is_baobao }}
+                </span>
+              </td>
+          </tr>
+        </table>
+        </template>
+        <template v-else>
+          <div class="thum" style="text-align: center;">
           <div class="time-key-wap"><el-image :src="getImageUrl(equipFaceImg, 'big')"
               style="width: 100px; height: 100px" referrerpolicy="no-referrer"></el-image></div>
           <p class="f14px cWhite">名字：<span class="cYellow">{{ pet.pet_name }}</span> 等级：{{ pet.pet_grade }}</p>
@@ -18,7 +47,6 @@
         <h4>
           属性<span v-if="pet.other.color_str && pet.other.current_on_avt">(已包含梦影穿戴属性)</span>
         </h4>
-
         <table class="tb02" width="100%" cellspacing="0" cellpadding="0">
           <tr>
             <th>气血：</th>
@@ -174,6 +202,7 @@
             <td>{{ pet.lx }}</td>
           </tr>
         </table>
+        </template>
       </div>
 
       <!-- 技能和特性部分 -->
@@ -301,7 +330,8 @@
           <div class="blank12"></div>
         </div>
 
-        <h4>其它</h4>
+        <template v-if="!pet.action">
+          <h4>其它</h4>
         <div class="blank6"></div>
         <table class="tb02" width="100%" cellspacing="0" cellpadding="0">
           <tr>
@@ -309,6 +339,7 @@
             <td>{{ getSummonColorDesc(pet.summon_color, pet.type_id) }}</td>
           </tr>
         </table>
+        </template>
       </div>
     </div>
   </el-popover>
@@ -318,25 +349,27 @@
 import EquipmentImage from './EquipmentImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+import PetDetail from './RoleInfo/PetDetail.vue'
 
 export default {
   name: 'PetInfoPopover',
-  mixins: [commonMixin,equipmentMixin],
+  mixins: [commonMixin, equipmentMixin],
   components: {
-    EquipmentImage
+    EquipmentImage,
+    PetDetail
   },
   props: {
     trigger: {
       type: String,
       default: 'click'
     },
-    pet: {
-      type: Object,
-      required: true
-    },
     equipFaceImg: {
       type: String,
       default: ''
+    },
+    pet: {
+      type: Object,
+      required: true
     },
     enhanceInfo: {
       type: Object,
@@ -393,7 +426,6 @@ export default {
     this.cleanupDynamicEvents()
   },
   methods: {
-
     show_pet_skill_in_grade: window.show_pet_skill_in_grade,
     // 获取五行名称
     getWuxingName(fiveAptitude) {
@@ -556,7 +588,7 @@ export default {
     visible(val) {
       if (val) {
         this.$nextTick(() => {
-          if (this.pet.all_skill && this.show_pet_skill_in_grade) {
+          if (this.pet.all_skill && this.show_pet_skill_in_grade ) {
             const skillNode = this.show_pet_skill_in_grade(
               this.pet.all_skill,
               this.pet.sp_skill,

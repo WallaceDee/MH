@@ -204,20 +204,21 @@ class MarketAnchorEvaluator(BaseValuator):
             
             for equip_id, market_row in market_data.iterrows():
                 try:
-                    # 计算相似度
-                    similarity = self._calculate_similarity(target_features, market_row.to_dict())
+                    # 计算相似度 - 确保数据类型转换
+                    market_dict = self._convert_pandas_row_to_dict(market_row)
+                    similarity = self._calculate_similarity(target_features, market_dict)
                     
                     if similarity >= similarity_threshold:
                         anchor_candidates.append({
                             'equip_id': equip_id,
-                            'similarity': similarity,
-                            'price': market_row.get('price', 0),
-                            'features': market_row.to_dict()
+                            'similarity': float(similarity),
+                            'price': float(market_row.get('price', 0)),
+                            'features': market_dict
                         })
                         
                 except Exception as e:
                     # 详细记录有问题的数据
-                    market_dict = market_row.to_dict()
+                    market_dict = self._convert_pandas_row_to_dict(market_row)
                     self.logger.error(f"处理角色 {equip_id} 时出错: {e}")
                     self.logger.error(f"问题数据内容: {market_dict}")
                     
@@ -523,500 +524,77 @@ class MarketAnchorEvaluator(BaseValuator):
             self.logger.error(f"调整人物修炼特征失败: {e}")
             return features
     
-
-    
-
-    
-  
-    
-
-    
-    def export_valuation_report_to_excel(self, 
-                                       target_features: Dict[str, Any],
-                                       output_file: str = None,
-                                       include_anchors: bool = True) -> str:
+    def _convert_pandas_row_to_dict(self, row) -> Dict[str, Any]:
         """
-        导出估价报告到Excel文件
+        将pandas行数据转换为Python原生类型的字典
         
         Args:
-            target_features: 目标角色特征字典
-            output_file: 输出文件路径，如果为None则自动生成
-            include_anchors: 是否包含锚点角色详细信息
+            row: pandas Series对象
             
         Returns:
-            str: 导出的文件路径
+            Dict[str, Any]: 转换后的字典，所有数值都是Python原生类型
         """
         try:
-            print("开始生成Excel估价报告...")
+            raw_dict = row.to_dict()
+            converted_dict = {}
             
-            # 生成文件名
-            if output_file is None:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                output_file = f"角色估价报告_{timestamp}.xlsx"
+            for key, value in raw_dict.items():
+                if value is None:
+                    converted_dict[key] = None
+                elif isinstance(value, (np.integer, np.int64, np.int32)):
+                    converted_dict[key] = int(value)
+                elif isinstance(value, (np.floating, np.float64, np.float32)):
+                    converted_dict[key] = float(value)
+                elif isinstance(value, np.ndarray):
+                    converted_dict[key] = value.tolist()
+                elif isinstance(value, (list, tuple)):
+                    # 递归处理列表中的numpy类型
+                    converted_dict[key] = self._convert_list_types(value)
+                elif isinstance(value, dict):
+                    # 递归处理字典中的numpy类型
+                    converted_dict[key] = self._convert_dict_types(value)
+                else:
+                    converted_dict[key] = value
             
-            # 获取估价结果和分布报告
-            fair_result = self.calculate_value(target_features, 'fair_value')
-            competitive_result = self.calculate_value(target_features, 'competitive')
-            premium_result = self.calculate_value(target_features, 'premium')
-            distribution_report = self.value_distribution_report(target_features)
-            
-            # 创建Excel工作簿
-            wb = Workbook()
-            
-            # 删除默认工作表
-            wb.remove(wb.active)
-            
-            # 1. 创建估价摘要工作表
-            self._create_summary_sheet(wb, target_features, fair_result, competitive_result, premium_result)
-            
-            # 2. 创建价格分布工作表
-            self._create_distribution_sheet(wb, distribution_report)
-            
-            # 3. 创建相似角色列表工作表
-            if include_anchors and fair_result.get('anchor_count', 0) > 0:
-                self._create_anchors_sheet(wb, target_features)
-            
-            # 保存文件
-            wb.save('./output/'+output_file)
-            print(f"Excel报告已保存至: /output/{output_file}")
-            
-            return output_file
+            return converted_dict
             
         except Exception as e:
-            self.logger.error(f"导出Excel报告失败: {e}")
-            raise e
+            self.logger.error(f"转换pandas行数据失败: {e}")
+            # 降级到原始to_dict()方法
+            return row.to_dict()
     
-    def _create_summary_sheet(self, wb: Workbook, 
-                            target_features: Dict[str, Any],
-                            fair_result: Dict[str, Any],
-                            competitive_result: Dict[str, Any],
-                            premium_result: Dict[str, Any]):
-        """创建估价摘要工作表"""
-        ws = wb.create_sheet("估价摘要", 0)
-        
-        # 设置标题样式
-        title_font = Font(name='微软雅黑', size=14, bold=True, color='FFFFFF')
-        title_fill = PatternFill(start_color='4472C4', end_color='4472C4', fill_type='solid')
-        
-        header_font = Font(name='微软雅黑', size=12, bold=True)
-        header_fill = PatternFill(start_color='D9E1F2', end_color='D9E1F2', fill_type='solid')
-        
-        normal_font = Font(name='微软雅黑', size=11)
-        
-        # 标题
-        ws['A1'] = '梦幻西游角色估价报告'
-        ws['A1'].font = title_font
-        ws['A1'].fill = title_fill
-        ws.merge_cells('A1:D1')
-        ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
-        
-        # 角色特征信息
-        row = 3
-        ws[f'A{row}'] = '角色特征信息'
-        ws[f'A{row}'].font = header_font
-        ws[f'A{row}'].fill = header_fill
-        ws.merge_cells(f'A{row}:D{row}')
-        
-        row += 1
-        
-        # 按类别组织特征显示
-        feature_categories = {
-            '基础属性': ['level', 'all_new_point', 'sum_exp', 'three_fly_lv', 'nine_fight_level'],
-            '修炼等级': ['expt_ski1', 'expt_ski2', 'expt_ski3', 'expt_ski4', 'expt_ski5', 'total_cultivation'],
-            '修炼上限': ['max_expt1', 'max_expt2', 'max_expt3', 'max_expt4'],
-            '召唤兽修炼': ['beast_ski1', 'beast_ski2', 'beast_ski3', 'beast_ski4', 'total_beast_cultivation'],
-            '门派与技能': ['school_history_count', 'life_skills_count'],
-            '装备与道具': ['premium_fabao_count', 'premium_pet_count', 'hight_grow_rider_count', 'packet_page', 'allow_pet_count'],
-            '外观与神器': ['shenqi_score', 'limited_skin_score', 'limited_huge_horse_score']
-        }
-        
-        # 显示所有特征，按类别分组
-        for category, features in feature_categories.items():
-            # 检查该类别是否有任何特征值
-            has_features = any(feature in target_features for feature in features)
-            if not has_features:
-                continue
-                
-            # 类别标题
-            ws[f'A{row}'] = category
-            ws[f'A{row}'].font = Font(name='微软雅黑', size=11, bold=True, color='4472C4')
-            ws.merge_cells(f'A{row}:B{row}')
-            row += 1
-            
-            # 该类别下的特征
-            for feature in features:
-                if feature in target_features:
-                    ws[f'A{row}'] = f"  {self._get_feature_display_name(feature)}"
-                    ws[f'B{row}'] = target_features[feature]
-                    ws[f'A{row}'].font = normal_font
-                    ws[f'B{row}'].font = normal_font
-                    row += 1
-            
-            # 类别间空行
-            row += 1
-        
-        # 显示其他未分类的特征
-        displayed_features = set()
-        for features in feature_categories.values():
-            displayed_features.update(features)
-        
-        other_features = {k: v for k, v in target_features.items() if k not in displayed_features}
-        if other_features:
-            ws[f'A{row}'] = '其他特征'
-            ws[f'A{row}'].font = Font(name='微软雅黑', size=11, bold=True, color='4472C4')
-            ws.merge_cells(f'A{row}:B{row}')
-            row += 1
-            
-            for feature, value in other_features.items():
-                ws[f'A{row}'] = f"  {self._get_feature_display_name(feature)}"
-                ws[f'B{row}'] = value
-                ws[f'A{row}'].font = normal_font
-                ws[f'B{row}'].font = normal_font
-                row += 1
-        
-        # 估价结果
-        row += 1
-        ws[f'A{row}'] = '估价结果'
-        ws[f'A{row}'].font = header_font
-        ws[f'A{row}'].fill = header_fill
-        ws.merge_cells(f'A{row}:D{row}')
-        
-        row += 1
-        pricing_data = [
-            ('竞争性定价', competitive_result['estimated_price'], competitive_result['confidence']),
-            ('公允价值定价', fair_result['estimated_price'], fair_result['confidence']),
-            ('溢价定价', premium_result['estimated_price'], premium_result['confidence']),
-        ]
-        
-        ws[f'A{row}'] = '定价策略'
-        ws[f'B{row}'] = '估算价格'
-        ws[f'C{row}'] = '置信度'
-        ws[f'D{row}'] = '锚点数量'
-        
-        for i in range(4):
-            ws[f'{chr(65+i)}{row}'].font = header_font
-            ws[f'{chr(65+i)}{row}'].fill = header_fill
-        
-        row += 1
-        for strategy, price, confidence in pricing_data:
-            ws[f'A{row}'] = strategy
-            ws[f'B{row}'] = f"{price:.1f}"
-            ws[f'C{row}'] = f"{confidence:.2%}"
-            ws[f'D{row}'] = fair_result['anchor_count']
-            
-            for i in range(4):
-                ws[f'{chr(65+i)}{row}'].font = normal_font
-            row += 1
-        
-        # 调整列宽
-        ws.column_dimensions['A'].width = 20
-        ws.column_dimensions['B'].width = 15
-        ws.column_dimensions['C'].width = 15
-        ws.column_dimensions['D'].width = 15
-    
-    def _create_distribution_sheet(self, wb: Workbook, distribution_report: Dict[str, Any]):
-        """创建价格分布工作表"""
-        ws = wb.create_sheet("价格分布分析")
-        
-        if 'error' in distribution_report:
-            ws['A1'] = f"价格分布分析失败: {distribution_report['error']}"
-            return
-        
-        # 标题样式
-        header_font = Font(name='微软雅黑', size=12, bold=True)
-        header_fill = PatternFill(start_color='D9E1F2', end_color='D9E1F2', fill_type='solid')
-        normal_font = Font(name='微软雅黑', size=11)
-        
-        # 价格统计
-        ws['A1'] = '价格统计信息'
-        ws['A1'].font = header_font
-        ws['A1'].fill = header_fill
-        ws.merge_cells('A1:B1')
-        
-        stats_data = [
-            ('最低价格', f"{distribution_report['min_price']:.1f}"),
-            ('最高价格', f"{distribution_report['max_price']:.1f}"),
-            ('中位价格', f"{distribution_report['median_price']:.1f}"),
-            ('25%分位数', f"{distribution_report['percentile_25']:.1f}"),
-            ('75%分位数', f"{distribution_report['percentile_75']:.1f}"),
-            ('锚点数量', f"{distribution_report['anchor_count']}个"),
-        ]
-        
-        row = 2
-        for label, value in stats_data:
-            ws[f'A{row}'] = label
-            ws[f'B{row}'] = value
-            ws[f'A{row}'].font = normal_font
-            ws[f'B{row}'].font = normal_font
-            row += 1
-        
-        # 调整列宽
-        ws.column_dimensions['A'].width = 15
-        ws.column_dimensions['B'].width = 15
-    
-    def _create_anchors_sheet(self, wb: Workbook, target_features: Dict[str, Any]):
-        """创建相似角色列表工作表"""
-        ws = wb.create_sheet("相似角色列表")
-        
-        # 获取锚点数据
-        anchors = self.find_market_anchors(target_features, similarity_threshold=0.4, max_anchors=100)
-        
-        if not anchors:
-            ws['A1'] = "未找到相似角色"
-            return
-        
-        # 标题样式
-        header_font = Font(name='微软雅黑', size=10, bold=True)
-        header_fill = PatternFill(start_color='4472C4', end_color='4472C4', fill_type='solid')
-        header_font.color = 'FFFFFF'
-        
-        normal_font = Font(name='微软雅黑', size=9)
-        
-        # 收集所有特征列
-        all_features = set()
-        for anchor in anchors:
-            all_features.update(anchor['features'].keys())
-        
-        # 按优先级排序特征
-        priority_features = [
-            'level', 'all_new_point', 'sum_exp', 'three_fly_lv', 'nine_fight_level',
-            'expt_ski1', 'expt_ski2', 'expt_ski3', 'expt_ski4', 'expt_ski5', 'total_cultivation',
-            'max_expt1', 'max_expt2', 'max_expt3', 'max_expt4',
-            'beast_ski1', 'beast_ski2', 'beast_ski3', 'beast_ski4', 'total_beast_cultivation',
-            'school_history_count', 'life_skills_count',
-            'premium_fabao_count', 'premium_pet_count', 'hight_grow_rider_count', 'packet_page', 'allow_pet_count',
-            'shenqi_score', 'limited_skin_score', 'limited_huge_horse_score',
-        ]
-        
-        # 构建最终的特征列表（优先级特征 + 其他特征）
-        ordered_features = []
-        for feature in priority_features:
-            if feature in all_features:
-                ordered_features.append(feature)
-        
-        # 添加其他未分类的特征
-        remaining_features = sorted(all_features - set(ordered_features))
-        ordered_features.extend(remaining_features)
-        
-        # 构建表头
-        headers = ['序号', '角色ID', '价格', '相似度']
-        headers.extend([self._get_feature_display_name(feature) for feature in ordered_features])
-        headers.append('藏宝阁链接')
-        
-        # 设置表头
-        for col, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col, value=header)
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal='center', vertical='center')
-        
-        # 填充数据
-        for idx, anchor in enumerate(anchors, 1):
-            row = idx + 1
-            features = anchor['features']
-            
-            # 基本信息
-            ws.cell(row=row, column=1, value=idx)
-            # 藏宝阁链接
-            try:
-                from ..utils.cbg_link_generator import CBGLinkGenerator
-            except ImportError:
-                try:
-                    from utils.cbg_link_generator import CBGLinkGenerator
-                except ImportError:
-                    import sys
-                    import os
-                    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
-                    from cbg_link_generator import CBGLinkGenerator
-            cbg_url = CBGLinkGenerator.generate_cbg_link(anchor['equip_id'])
-            ws.cell(row=row, column=2, value=str(anchor['equip_id']))
-              # 设置超链接
-            from openpyxl.worksheet.hyperlink import Hyperlink
-            ws.cell(row=row, column=2).hyperlink = cbg_url
-            ws.cell(row=row, column=2).style = "Hyperlink"
-            ws.cell(row=row, column=3, value=f"{anchor['price']:.1f}")
-            ws.cell(row=row, column=4, value=f"{anchor['similarity']:.3f}")
-            
-            # 所有特征值
-            col = 5
-            for feature in ordered_features:
-                value = features.get(feature, 0)
-                # 处理不同类型的值
-                if isinstance(value, (list, tuple)):
-                    # 列表或元组转换为字符串
-                    display_value = str(value) if len(str(value)) < 50 else f"[{len(value)}项]"
-                elif isinstance(value, dict):
-                    # 字典转换为字符串
-                    display_value = f"{{dict:{len(value)}项}}"
-                elif isinstance(value, float):
-                    # 浮点数格式化
-                    if value > 1000:
-                        display_value = f"{value:.0f}"
-                    else:
-                        display_value = f"{value:.2f}"
-                elif isinstance(value, (int, str)):
-                    # 整数和字符串直接使用
-                    display_value = value
-                else:
-                    # 其他类型转换为字符串
-                    display_value = str(value)
-                
-                ws.cell(row=row, column=col, value=display_value)
-                col += 1
-            
-            # 设置字体
-            for c in range(1, col + 1):
-                ws.cell(row=row, column=c).font = normal_font
-        
-        # 动态调整列宽
-        column_widths = [6, 15, 10, 8]  # 序号、角色ID、价格、相似度
-        
-        # 为每个特征设置合适的列宽
-        for feature in ordered_features:
-            feature_name = self._get_feature_display_name(feature)
-            if len(feature_name) > 8:
-                column_widths.append(12)
-            elif len(feature_name) > 6:
-                column_widths.append(10)
+    def _convert_list_types(self, data_list) -> List[Any]:
+        """递归转换列表中的numpy类型"""
+        converted_list = []
+        for item in data_list:
+            if isinstance(item, (np.integer, np.int64, np.int32)):
+                converted_list.append(int(item))
+            elif isinstance(item, (np.floating, np.float64, np.float32)):
+                converted_list.append(float(item))
+            elif isinstance(item, np.ndarray):
+                converted_list.append(item.tolist())
+            elif isinstance(item, list):
+                converted_list.append(self._convert_list_types(item))
+            elif isinstance(item, dict):
+                converted_list.append(self._convert_dict_types(item))
             else:
-                column_widths.append(8)
-        
-        column_widths.append(25)  # 藏宝阁链接
-        
-        # 应用列宽
-        for col, width in enumerate(column_widths, 1):
-            if col <= 26:  # A-Z
-                ws.column_dimensions[chr(64+col)].width = width
-            else:  # AA, AB, AC...
-                first_char = chr(64 + (col - 1) // 26)
-                second_char = chr(65 + (col - 1) % 26)
-                ws.column_dimensions[f'{first_char}{second_char}'].width = width
-        
-        # 设置筛选
-        last_col = chr(64 + len(headers)) if len(headers) <= 26 else f"{chr(64 + len(headers) // 26)}{chr(65 + (len(headers) - 1) % 26)}"
-        ws.auto_filter.ref = f"A1:{last_col}{len(anchors)+1}"
-        
-        # 冻结前4列（序号、角色ID、价格、相似度）
-        ws.freeze_panes = 'E2'
-        
-        print(f"已导出 {len(anchors)} 个相似角色到Excel，包含 {len(ordered_features)} 个特征列")
+                converted_list.append(item)
+        return converted_list
     
-    def _get_feature_display_name(self, feature_name: str) -> str:
-        """获取特征的显示名称"""
-        display_names = {
-            # 基础属性
-            'level': '角色等级',
-            'all_new_point': '乾元丹',
-            'sum_exp': '总经验(亿)',
-            'three_fly_lv': '化圣等级',
-            'nine_fight_level': '生死劫等级',
-            
-            # 修炼等级
-            'expt_ski1': '攻击修炼',
-            'expt_ski2': '防御修炼',
-            'expt_ski3': '法术修炼',
-            'expt_ski4': '抗法修炼',
-            'expt_ski5': '猎术修炼',
-            'total_cultivation': '总修炼等级',
-            
-            # 修炼上限
-            'max_expt1': '攻击修炼上限',
-            'max_expt2': '防御修炼上限',
-            'max_expt3': '法术修炼上限',
-            'max_expt4': '抗法修炼上限',
-            
-            # 召唤兽修炼
-            'beast_ski1': '召唤兽攻击修炼',
-            'beast_ski2': '召唤兽防御修炼',
-            'beast_ski3': '召唤兽法术修炼',
-            'beast_ski4': '召唤兽抗法修炼',
-            'total_beast_cultivation': '召唤兽总修炼',
-            
-            # 门派与技能
-            'school_history_count': '历史门派数',
-            'life_skills_count': '生活技能数量',
-            
-            # 装备与道具
-            'premium_fabao_count': '高价值法宝数量',
-            'premium_pet_count': '特殊宠物数量',
-            'hight_grow_rider_count': '高成长坐骑数量',
-            'packet_page': '行囊页数',
-            'allow_pet_count': '召唤兽上限',
-            'learn_cash': '储备金',
-            'xianyu_amount': '仙玉数量',
-            'jiyuan_amount': '机缘数量',
-            
-            # 外观和神器系统
-            'shenqi_score': '神器得分',
-            'limited_skin_score': '限量锦衣得分',
-            'limited_huge_horse_score': '限量祥瑞得分',
-        }
-        return display_names.get(feature_name, feature_name)
-
-
-if __name__ == "__main__":
-    # 测试代码
-    try:
-        # 初始化估价器
-        valuator = MarketAnchorEvaluator()
-        
-        # 构造测试角色特征
-        test_features = {
-            'level': 129,
-            'expt_ski2': 21,       # 防御修炼
-            'expt_ski3': 21,       # 法术修炼
-            'expt_ski4': 21,       # 抗法修炼
-            'beast_ski1': 20,      # 召唤兽攻击修炼
-            'beast_ski2': 20,      # 召唤兽防御修炼
-            'beast_ski3': 20,      # 召唤兽法术修炼
-            'beast_ski4': 20,      # 召唤兽抗法修炼
-            'avg_school_skills': 150  # 师门技能平均值
-        }
-        
-        # 计算派生特征
-        test_features['total_cultivation'] = test_features.get('expt_ski1', 0) + test_features.get('expt_ski2', 0) + test_features.get('expt_ski3', 0) + test_features.get('expt_ski4', 0)
-        test_features['total_beast_cultivation'] = test_features.get('beast_ski1', 0) + test_features.get('beast_ski2', 0) + test_features.get('beast_ski3', 0) + test_features.get('beast_ski4', 0)
-        
-        print("=== 测试角色特征 ===")
-        for key, value in test_features.items():
-            print(f"{key}: {value}")
-        
-        # 测试估价
-        print("\n=== 开始估价测试 ===")
-        
-        # 公允价值估价
-        fair_result = valuator.calculate_value(test_features, 'fair_value')
-        print(f"\n公允价值估价: {fair_result['estimated_price']:.1f}")
-        print(f"锚点数量: {fair_result['anchor_count']}")
-        print(f"置信度: {fair_result['confidence']:.2f}")
-        
-        # 竞争性估价
-        competitive_result = valuator.calculate_value(test_features, 'competitive')
-        print(f"\n竞争性估价: {competitive_result['estimated_price']:.1f}")
-        
-        # 溢价估价
-        premium_result = valuator.calculate_value(test_features, 'premium')
-        print(f"\n溢价估价: {premium_result['estimated_price']:.1f}")
-        
-        # 生成价值分布报告
-        print("\n=== 生成价值分布报告 ===")
-        report = valuator.value_distribution_report(test_features)
-        
-        if 'error' not in report:
-            print(f"价格范围: {report['min_price']:.1f} - {report['max_price']:.1f}")
-            print(f"中位价格: {report['median_price']:.1f}")
-            print(f"推荐竞争价格: {report['recommended_competitive']:.1f}")
-            print(f"推荐公允价格: {report['recommended_fair']:.1f}")
-            print(f"锚点数量: {report['anchor_count']}")
-        else:
-            print(f"报告生成失败: {report['error']}")
-        
-        # 测试Excel导出
-        print("\n=== 测试Excel导出 ===")
-        excel_file = valuator.export_valuation_report_to_excel(test_features)
-        print(f"Excel报告已生成: {excel_file}")
-        
-    except Exception as e:
-        print(f"测试失败: {e}")
-        import traceback
-        traceback.print_exc() 
+    def _convert_dict_types(self, data_dict) -> Dict[str, Any]:
+        """递归转换字典中的numpy类型"""
+        converted_dict = {}
+        for key, value in data_dict.items():
+            if isinstance(value, (np.integer, np.int64, np.int32)):
+                converted_dict[key] = int(value)
+            elif isinstance(value, (np.floating, np.float64, np.float32)):
+                converted_dict[key] = float(value)
+            elif isinstance(value, np.ndarray):
+                converted_dict[key] = value.tolist()
+            elif isinstance(value, list):
+                converted_dict[key] = self._convert_list_types(value)
+            elif isinstance(value, dict):
+                converted_dict[key] = self._convert_dict_types(value)
+            else:
+                converted_dict[key] = value
+        return converted_dict

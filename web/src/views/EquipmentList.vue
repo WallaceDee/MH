@@ -7,6 +7,9 @@
           <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="选择月份"
             format="yyyy-MM" value-format="yyyy-MM" />
         </el-form-item>
+        <el-form-item label="装备序列号">
+          <el-input v-model="filters.equip_sn" placeholder="装备序列号"></el-input>
+        </el-form-item>
         <el-form-item label="等级范围">
           <div style="width: 500px">
             <el-slider v-model="filters.level_range" range :min="60" :max="160" :step="5" show-input show-input-controls
@@ -19,11 +22,12 @@
           <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
         </el-form-item>
         <el-form-item label="类型">
-          <el-select v-model="filters.kindid" placeholder="请选择类型" multiple clearable filterable
-            @change="handleKindidChange">
-            <el-option v-for="[value, label] in weapon_armors" :key="value" :label="label" :value="value">
-            </el-option>
-          </el-select>
+          <el-cascader v-model="filters.kindid" :options="kindidOptions" placeholder="请选择宠物装备类型" multiple clearable
+            filterable collapse-tags collapse-tags-tooltip :props="{
+              multiple: true,
+              emitPath: false
+            }" @change="handleKindidChange">
+          </el-cascader>
         </el-form-item>
         <!-- 宠物装备类型选择器 -->
         <el-form-item v-if="showPetEquipType" label="宠物装备类型">
@@ -77,29 +81,36 @@
         <template #default="scope">
           <el-link :href="getCBGLinkByType(scope.row.eid, 'equip')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <similar-equipment-modal :equipment="scope.row" :similar-data="similarEquipments[scope.row.eid]"
-            :valuation="equipmentValuations[scope.row.eid]" :error="similarError[scope.row.eid]"
-            :loading="loadingSimilar[scope.row.eid]" @show="loadSimilarEquipments" @retry="retryWithNewThreshold" />
+          <SimilarEquipmentModal :equipment="scope.row" :similar-data="similarEquipments" :valuation="equipmentValuation" @show="loadSimilarEquipments" />
         </template>
       </el-table-column>
       <el-table-column fixed label="装备" width=" 70">
         <template #default="scope">
-          <equipment-image :equipment="scope.row" />
+          <EquipmentImage :equipment="scope.row" />
         </template>
       </el-table-column>
-      <el-table-column fixed prop="price" label="价格 (元)" width="160" sortable="custom">
+      <el-table-column fixed prop="price" label="价格 (元)" width="100" sortable="custom">
         <template #default="scope">
           {{ scope.row.server_name }}
           <div v-html="formatFullPrice(scope.row)"></div>
         </template>
       </el-table-column>
-
-      <el-table-column prop="baoshi" label="宝石" width="100">
+      <el-table-column prop="highlight" label="亮点"  width="100"  align="center" sortable="custom">
+        <template slot-scope="scope">
+          <span v-html="gen_highlight(scope.row.highlight)"></span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="dynamic_tags" label="动态"  width="100"  align="center" sortable="custom">
+        <template slot-scope="scope">
+          <span v-html="gen_dynamic_tags(scope.row.dynamic_tags)"></span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="gem_level" label="宝石" width="100"  sortable="custom">
         <template #default="scope">
           <div class="gem-container">
             <el-badge v-if="scope.row.gem_level || scope.row.jinglian_level || scope.row.xiang_qian_level"
               :value="scope.row.gem_level * 1 || scope.row.jinglian_level * 1 || scope.row.xiang_qian_level * 1"
-              class="gem-badge" type="warning">
+              class="gem-badge">
               <div class="gem-images">
                 <el-image v-for="gemImgSrc in getGemImageByGemValue(scope.row)" :key="gemImgSrc"
                   style="width: 30px; height: 30px; cursor: pointer; margin-right: 2px" :src="gemImgSrc" fit="cover"
@@ -110,31 +121,30 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column v-if="!showPetEquipType" prop="tejigui" label="特技/特效" width="120">
+      <el-table-column prop="special_effect" label="特技/特效" width="120" sortable="custom">
         <template #default="scope">
           <div class="equip_desc_blue" :data-specia-effet="scope.row.special_effect"
             :data-special-skill="scope.row.special_skill" v-html="formatSpecialSkillsAndEffects(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="taozhuang" label="套装" width="160">
+      <el-table-column prop="suit_effect" label="套装" width="160"  sortable="custom">
         <template #default="scope">
           <div class="equip_desc_blue" v-html="formatSuitEffect(scope.row)"></div>
         </template>
       </el-table-column>
-
-      <el-table-column prop="fujia_shuxing" label="附加属性" width="150">
+      <el-table-column prop="agg_added_attrs" label="附加属性" width="150" sortable="custom">
         <template #default="scope">
           <div class="cBlue" v-html="formatAddedAttrs(scope.row.agg_added_attrs)"></div>
         </template>
       </el-table-column>
       <el-table-column prop="equip_level" label="等级" width="80" sortable="custom"></el-table-column>
-      <el-table-column prop="all_damage" label="总伤" width="100" sortable="custom"></el-table-column>
-      <el-table-column prop="init_damage" label="初伤" width="100" sortable="custom">
+      <el-table-column prop="all_damage" label="总伤" width="80" sortable="custom"></el-table-column>
+      <el-table-column prop="init_damage" label="初伤" width="80" sortable="custom">
         <template #default="scope">
           <span class="cBlue">{{ scope.row.init_damage || scope.row.damage || scope.row.shanghai || '' }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="init_wakan" label="初灵" width="100" sortable="custom">
+      <el-table-column prop="init_wakan" label="初灵" width="80" sortable="custom">
         <template #default="scope">
           <span class="cBlue">{{
             scope.row.init_wakan ||
@@ -145,7 +155,7 @@
           }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="init_defense" label="初防" width="100" sortable="custom">
+      <el-table-column prop="init_defense" label="初防" width="80" sortable="custom">
         <template #default="scope">
           <span class="cBlue">{{
             scope.row.init_defense ||
@@ -158,14 +168,19 @@
           }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="init_hp" label="初血" width="100" sortable="custom">
+      <el-table-column prop="init_hp" label="初血" width="80" sortable="custom">
         <template #default="scope">
           <span class="cBlue">{{ scope.row.init_hp || scope.row.qixue || '' }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="init_dex" label="初敏" width="100" sortable="custom">
+      <el-table-column prop="init_dex" label="初敏" width="80" sortable="custom">
         <template #default="scope">
           <span class="cBlue">{{ scope.row.init_dex || scope.row.speed || '' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="100">
+        <template #default="scope">
+          <el-link href="javascript:void(0)" type="danger" @click.native="handleDelete(scope.row)">删除</el-link>
         </template>
       </el-table-column>
     </el-table>
@@ -231,7 +246,21 @@ for (var keyIndex in window.CBG_GAME_CONFIG.equip_info) {
     }
   }
 }
-
+// value: 'keyIndex',
+// label: 'name',
+// children: 'items',
+const kindidOptions = [{
+  value: -1,
+  label: '人物装备',
+  children: window.AUTO_SEARCH_CONFIG.weapon_armors.map(([value, label]) => ({ value, label }))
+}, {
+  value: -2,
+  label: '灵饰',
+  children: window.lingshiKinds.map(([value, label]) => ({ value, label }))
+}, {
+  value: 29,
+  label: '宠物装备'
+}]
 export default {
   name: 'EquipmentList',
   components: {
@@ -242,13 +271,12 @@ export default {
   data() {
     return {
       tableLoading: false, // 表格加载状态
-      weapon_armors: window.AUTO_SEARCH_CONFIG.weapon_armors
-        .concat(window.lingshiKinds)
-        .concat([[29, '宠物装备']]),
+      kindidOptions,
       equip_special_skills: window.AUTO_SEARCH_CONFIG.equip_special_skills,
       equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
       equipments: [],
       filters: {
+        equip_sn: '',
         selectedDate: dayjs().format('YYYY-MM'),
         level_range: [60, 160],
         price_min: undefined,
@@ -264,7 +292,7 @@ export default {
         sort_order: 'asc'
       },
       pagination: {
-        page: 2,
+        page: 1,
         page_size: 10,
         total: 0
       },
@@ -293,11 +321,9 @@ export default {
         '756_4037': '756_4037',
         '757_4038': '757_4038'
       },
-      // 相似装备相关数据
-      similarEquipments: {}, // 存储每个装备的相似装备数据
-      loadingSimilar: {}, // 存储每个装备的加载状态
-      similarError: {}, // 存储加载错误信息
-      equipmentValuations: {}, // 存储装备估价信息
+      // 相似装备相关数据（实时计算，不缓存）
+      similarEquipments: null, // 当前显示的相似装备数据
+      equipmentValuation: null, // 当前装备估价信息
 
       // 宠物装备类型配置
       petEquipTypes: window.petEquipTypes,
@@ -337,173 +363,58 @@ export default {
       }))
     },
   },
-  created() {
-    // 从URL参数初始化过滤器
-    this.initializeFromURL()
-    // 注意：initializeFromURL方法内部会调用fetchEquipments，所以这里不需要重复调用
-  },
   watch: {
     // 监听showPetEquipType变化，强制重新渲染表格
     showPetEquipType() {
       this.tableKey += 1
     },
-    
-    // 深度监听filters变化，更新URL
-    filters: {
-      handler() {
-        if (!this.isInitializing) {
-          this.updateURL()
-        }
-      },
-      deep: true
-    }
   },
   methods: {
-    // URL参数同步相关方法
-    initializeFromURL() {
-      const urlParams = new URLSearchParams(window.location.search)
-      
-      // 解析URL参数并设置到filters中
-      if (urlParams.get('selectedDate')) {
-        this.filters.selectedDate = urlParams.get('selectedDate')
-      }
-      
-      if (urlParams.get('level_min') && urlParams.get('level_max')) {
-        this.filters.level_range = [
-          parseInt(urlParams.get('level_min')),
-          parseInt(urlParams.get('level_max'))
-        ]
-      }
-      
-      if (urlParams.get('price_min')) {
-        this.filters.price_min = parseInt(urlParams.get('price_min'))
-      }
-      
-      if (urlParams.get('price_max')) {
-        this.filters.price_max = parseInt(urlParams.get('price_max'))
-      }
-      
-      if (urlParams.get('kindid')) {
-        this.filters.kindid = urlParams.get('kindid').split(',').map(id => parseInt(id))
-      }
-      
-      if (urlParams.get('equip_type')) {
-        this.filters.equip_type = urlParams.get('equip_type').split(',').map(id => parseInt(id))
-      }
-      
-      if (urlParams.get('equip_special_skills')) {
-        this.filters.equip_special_skills = urlParams.get('equip_special_skills').split(',').map(id => parseInt(id))
-      }
-      
-      if (urlParams.get('equip_special_effect')) {
-        this.filters.equip_special_effect = urlParams.get('equip_special_effect').split(',').map(id => parseInt(id))
-      }
-      
-      if (urlParams.get('suit_effect')) {
-        this.filters.suit_effect = urlParams.get('suit_effect').split(',').map(id => parseInt(id))
-      }
-      
-      if (urlParams.get('gem_value')) {
-        this.filters.gem_value = parseInt(urlParams.get('gem_value'))
-      }
-      
-      if (urlParams.get('gem_level')) {
-        this.filters.gem_level = parseInt(urlParams.get('gem_level'))
-      }
-      
-      if (urlParams.get('sort_by')) {
-        this.filters.sort_by = urlParams.get('sort_by')
-      }
-      
-      if (urlParams.get('sort_order')) {
-        this.filters.sort_order = urlParams.get('sort_order')
-      }
-      
-      if (urlParams.get('page')) {
-        this.pagination.page = parseInt(urlParams.get('page'))
-      }
-      
-      if (urlParams.get('page_size')) {
-        this.pagination.page_size = parseInt(urlParams.get('page_size'))
-      }
-      
-      // 初始化完成后，获取数据
-      this.isInitializing = false
-      this.fetchEquipments()
-    },
-    
-    updateURL() {
-      if (this.isInitializing) return // 初始化时不更新URL
-      
-      const urlParams = new URLSearchParams()
-      
-      // 添加过滤器参数到URL
-      if (this.filters.selectedDate) {
-        urlParams.set('selectedDate', this.filters.selectedDate)
-      }
-      
-      if (this.filters.level_range && Array.isArray(this.filters.level_range)) {
-        urlParams.set('level_min', this.filters.level_range[0].toString())
-        urlParams.set('level_max', this.filters.level_range[1].toString())
-      }
-      
-      if (this.filters.price_min !== undefined && this.filters.price_min !== null) {
-        urlParams.set('price_min', this.filters.price_min.toString())
-      }
-      
-      if (this.filters.price_max !== undefined && this.filters.price_max !== null) {
-        urlParams.set('price_max', this.filters.price_max.toString())
-      }
-      
-      if (this.filters.kindid && this.filters.kindid.length > 0) {
-        urlParams.set('kindid', this.filters.kindid.join(','))
-      }
-      
-      if (this.filters.equip_type && this.filters.equip_type.length > 0) {
-        urlParams.set('equip_type', this.filters.equip_type.join(','))
-      }
-      
-      if (this.filters.equip_special_skills && this.filters.equip_special_skills.length > 0) {
-        urlParams.set('equip_special_skills', this.filters.equip_special_skills.join(','))
-      }
-      
-      if (this.filters.equip_special_effect && this.filters.equip_special_effect.length > 0) {
-        urlParams.set('equip_special_effect', this.filters.equip_special_effect.join(','))
-      }
-      
-      if (this.filters.suit_effect && this.filters.suit_effect.length > 0) {
-        urlParams.set('suit_effect', this.filters.suit_effect.join(','))
-      }
-      
-      if (this.filters.gem_value !== undefined && this.filters.gem_value !== null) {
-        urlParams.set('gem_value', this.filters.gem_value.toString())
-      }
-      
-      if (this.filters.gem_level !== undefined && this.filters.gem_level !== null) {
-        urlParams.set('gem_level', this.filters.gem_level.toString())
-      }
-      
-      if (this.filters.sort_by) {
-        urlParams.set('sort_by', this.filters.sort_by)
-      }
-      
-      if (this.filters.sort_order) {
-        urlParams.set('sort_order', this.filters.sort_order)
-      }
-      
-      if (this.pagination.page > 1) {
-        urlParams.set('page', this.pagination.page.toString())
-      }
-      
-      if (this.pagination.page_size !== 10) {
-        urlParams.set('page_size', this.pagination.page_size.toString())
-      }
-      
-      // 更新浏览器URL，不刷新页面
-      const newURL = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '')
-      window.history.pushState({}, '', newURL)
-    },
+    async handleDelete(row) {
+      try {
+        // 确认删除
+        await this.$confirm(
+          `确定要删除装备 ${row.equip_name || row.equip_sn} 吗？`,
+          '确认删除',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
 
+        // 获取当前年月
+        const [year, month] = this.filters.selectedDate.split('-')
+
+        // 调用删除API
+        const response = await this.$api.equipment.deleteEquipment(row.equip_sn, {
+          year,
+          month
+        })
+
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '成功',
+            message: '装备删除成功'
+          })
+          // 重新获取数据
+          await this.fetchEquipments()
+        } else {
+          this.$notify.error({
+            title: '错误',
+            message: response.message || '删除失败'
+          })
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('删除装备失败:', error)
+          this.$notify.error({
+            title: '错误',
+            message: '删除装备失败'
+          })
+        }
+      }
+    },
     async fetchEquipments() {
       const [year, month] = this.filters.selectedDate.split('-')
       try {
@@ -585,17 +496,20 @@ export default {
           this.pagination.total = response.data.total || 0
           this.pagination.page = response.data.page || this.pagination.page
         } else {
-          this.$message.error(response.message || '获取装备列表失败')
+          this.$notify.error({
+            title: '错误',
+            message: response.message || '获取装备列表失败'
+          })
         }
       } catch (error) {
         console.error('获取装备列表失败:', error)
-        this.$message.error('获取装备列表失败')
+        this.$notify.error({
+          title: '错误',
+          message: '获取装备列表失败'
+        })
       } finally {
         this.tableLoading = false // 无论成功失败，都结束加载状态
       }
-      
-      // 更新URL参数
-      this.updateURL()
     },
     // 重写 commonMixin 中的方法以适配本页面的数据获取方法名
     handleSizeChange(val) {
@@ -790,38 +704,15 @@ export default {
 
     // 加载相似装备
     async loadSimilarEquipments(equipment) {
-      const eid = equipment.eid
-
-      // 如果已经加载过，直接返回
-      if (this.similarEquipments[eid] && this.equipmentValuations[eid]) {
-        return
-      }
-
-      // 使用默认相似度阈值0.85加载
+      // 每次都重新计算，不使用缓存
+      this.equipmentValuation = null
+      this.similarEquipments= null
       await this.loadEquipmentValuation(equipment, 0.8)
     },
 
-    // 重试查找相似装备
-    async retryWithNewThreshold(eid, newThreshold) {
-      // 获取保存的装备数据
-      const similarData = this.similarEquipments[eid]
-      if (!similarData || !similarData.equipment) {
-        this.$message.error('装备数据丢失，请重新点击查看相似')
-        return
-      }
-
-      const equipment = similarData.equipment
-      // 使用新的相似度阈值重新加载
-      await this.loadEquipmentValuation(equipment, newThreshold, true)
-    },
-
     // 统一的装备估价加载方法
-    async loadEquipmentValuation(equipment, similarityThreshold = 0.85, isRetry = false) {
-      const eid = equipment.eid
-
+    async loadEquipmentValuation(equipment, similarityThreshold) {
       try {
-        this.$set(this.loadingSimilar, eid, true)
-        this.$set(this.similarError, eid, null)
 
         // 获取估价信息（包含相似装备）
         const valuationResponse = await this.$api.equipment.getEquipmentValuation({
@@ -833,17 +724,17 @@ export default {
 
         // 处理估价响应
         if (valuationResponse.code === 200) {
+          const data = valuationResponse.data
+          this.equipmentValuation = data
+
           const { data: { anchors } } = await this.$api.equipment.findEquipmentAnchors({
             equipment_data: equipment,
             similarity_threshold: similarityThreshold,
             max_anchors: 30
           })
-          const data = valuationResponse.data
-          this.$set(this.equipmentValuations, eid, data)
-
           // 从估价结果中提取相似装备信息
           if (data.anchors && data.anchors.length > 0) {
-            this.$set(this.similarEquipments, eid, {
+            this.similarEquipments = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
               anchors: anchors,
@@ -860,81 +751,22 @@ export default {
                     data.anchors.length
                 }
               }
-            })
-
-            if (isRetry) {
-              this.$message.success(`成功找到 ${data.anchor_count} 个相似装备`)
             }
-          } else {
-            this.$set(this.similarEquipments, eid, {
-              anchor_count: 0,
-              similarity_threshold: data.similarity_threshold || similarityThreshold,
-              anchors: [],
-              statistics: {
-                price_range: { min: 0, max: 0 },
-                similarity_range: { min: 0, max: 0, avg: 0 }
-              },
-              message: isRetry
-                ? '仍未找到符合条件的市场锚点，请尝试更低的相似度阈值'
-                : '未找到符合条件的市场锚点，建议降低相似度阈值',
-              canRetry: true,
-              equipment: equipment
-            })
-
-            if (isRetry) {
-              this.$message.warning('仍未找到相似装备，请尝试更低的相似度阈值')
-            }
+            return
           }
-        } else if (valuationResponse.code === 400) {
-          // 400错误也要显示界面，只是没有锚点数据
-          this.$set(this.similarEquipments, eid, {
+        }
+        this.similarEquipments = {
             anchor_count: 0,
             similarity_threshold: similarityThreshold,
             anchors: [],
             statistics: {
               price_range: { min: 0, max: 0 },
               similarity_range: { min: 0, max: 0, avg: 0 }
-            },
-            message: valuationResponse.message || '未找到符合条件的市场锚点，建议降低相似度阈值',
-            canRetry: true,
-            equipment: equipment
-          })
-          // 清空估价信息，因为无法估价
-          this.$set(this.equipmentValuations, eid, null)
-
-          if (isRetry) {
-            this.$message.error(valuationResponse.message || '查找相似装备失败')
+            }
           }
-        } else {
-          this.$set(this.similarError, eid, valuationResponse.message || '加载估价和相似装备失败')
-
-          if (isRetry) {
-            this.$set(this.similarEquipments, eid, {
-              anchor_count: 0,
-              similarity_threshold: similarityThreshold,
-              anchors: [],
-              statistics: {
-                price_range: { min: 0, max: 0 },
-                similarity_range: { min: 0, max: 0, avg: 0 }
-              },
-              message: valuationResponse.message || '查找失败，请重试',
-              canRetry: true,
-              equipment: equipment
-            })
-            this.$message.error(valuationResponse.message || '查找相似装备失败')
-          }
-        }
-
         console.log('估价和相似装备数据:', valuationResponse.data)
       } catch (error) {
         console.error('加载相似装备或估价失败:', error)
-        this.$set(this.similarError, eid, `加载失败: ${error.message}`)
-
-        if (isRetry) {
-          this.$message.error(`重试失败: ${error.message}`)
-        }
-      } finally {
-        this.$set(this.loadingSimilar, eid, false)
       }
     },
   },

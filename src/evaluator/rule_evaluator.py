@@ -5,34 +5,14 @@ from src.utils.project_path import get_project_root
 project_root = get_project_root()
 sys.path.insert(0, project_root)
 
-
 try:
     from .feature_extractor.feature_extractor import FeatureExtractor
 except ImportError:
     from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
-
-# 导入CBG链接生成器
-try:
-    from ..utils.cbg_link_generator import CBGLinkGenerator
-    from ..utils import load_jsonc_from_config_dir
-except ImportError:
-    try:
-        from utils.cbg_link_generator import CBGLinkGenerator
-        from utils import load_jsonc_from_config_dir
-    except ImportError:
-        import sys
-        import os
-        sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
-        from cbg_link_generator import CBGLinkGenerator
-        from jsonc_loader import load_jsonc_from_config_dir
-
-
 import sqlite3
-import json
 import logging
 import numpy as np
 from typing import Dict,  Optional, Union
-import glob
 import pandas as pd
 
 
@@ -44,14 +24,14 @@ class RuleEvaluator:
         self.feature_extractor = FeatureExtractor()
         self.df = None
 
-    def _extract_features(self, character_data, conn=None):
+    def _extract_features(self, role_data, conn=None):
         """提取角色特征
 
         使用 FeatureExtractor 提取特征
         """
         try:
             # 使用 FeatureExtractor 提取特征
-            features = self.feature_extractor.extract_features(character_data)
+            features = self.feature_extractor.extract_features(role_data)
             return features
 
         except Exception as e:
@@ -70,15 +50,15 @@ class RuleEvaluator:
 
         return value
 
-    def evaluate(self, character_data):
+    def evaluate(self, role_data):
         """评估角色价值
         
         Args:
-            character_data: 角色数据
+            role_data: 角色数据
         """
         try:
             # 1.提取特征
-            features = self._extract_features(character_data)
+            features = self._extract_features(role_data)
             
             # 使用改进的算法
             improved_result = self.calc_base_attributes_value_improved(features)
@@ -117,7 +97,7 @@ class RuleEvaluator:
                     c.all_shenqi_json, c.all_rider_json AS all_rider_json_desc, c.all_fabao_json,
                     c.ex_avt_json AS ex_avt_json_desc, c.create_time, c.update_time,
                     l.*
-                FROM characters c
+                FROM roles c
                 LEFT JOIN large_equip_desc_data l ON c.equip_id = l.equip_id
                 WHERE c.price > 0 AND l.all_equip_json =='{}' AND l.all_summon_json == '[]'
             """)
@@ -131,10 +111,10 @@ class RuleEvaluator:
             print("开始提取特征...")
             data = []
             for i, row in enumerate(rows):
-                character_data = dict(zip(columns, row))
-                features = self._extract_features(character_data, conn)
-                features['price'] = character_data.get('price', 0)
-                features['equip_id'] = character_data.get('equip_id', '')
+                role_data = dict(zip(columns, row))
+                features = self._extract_features(role_data, conn)
+                features['price'] = role_data.get('price', 0)
+                features['equip_id'] = role_data.get('equip_id', '')
                 data.append(features)
                 if (i + 1) % 10 == 0:
                     print(f"已处理 {i + 1}/{len(rows)} 条数据")
@@ -156,9 +136,6 @@ class RuleEvaluator:
             if 'conn' in locals():
                 conn.close()
 
-    def generate_cbg_link(self, eid: str) -> Optional[str]:
-
-        return CBGLinkGenerator.generate_cbg_link(eid)
 
     def calc_base_attributes_value_improved(self, features: Dict[str, Union[int, float, str]]) -> Dict[str, float]:
         """
@@ -440,301 +417,3 @@ class RuleEvaluator:
                 'total_raw_value': 0.0,
                 'final_value': 0.0
             }
-
-    def export_comparison_to_excel(self, output_path: str = 'results_comparison.xlsx') -> Optional[str]:
-        """
-        导出改进算法结果到Excel文件
-
-        Args:
-            output_path (str): 输出文件路径，默认为 'results_comparison.xlsx'
-
-        Returns:
-            Optional[str]: 成功时返回输出文件路径，失败时返回None
-        """
-        try:
-            import openpyxl
-            from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-            from openpyxl.utils.dataframe import dataframe_to_rows
-
-            if self.df is None or self.df.empty:
-                print("没有数据可导出")
-                return None
-
-            print(f"开始导出 {len(self.df)} 条数据到Excel（改进算法结果）...")
-
-            # 创建工作簿
-            wb = openpyxl.Workbook()
-            ws = wb.active
-            ws.title = "改进算法结果"
-
-            # 准备数据
-            export_data = []
-            for equip_id, row in self.df.iterrows():
-                # 获取角色基本信息
-                price = row.get('price', 0)
-
-                # 计算改进算法价值
-                try:
-                    improved_result = self.calc_base_attributes_value_improved(row.to_dict())
-                    improved_value = improved_result['final_value']
-                    value_breakdown = improved_result['value_breakdown']
-                except:
-                    improved_value = 0
-                    value_breakdown = {}
-
-                # 生成CBG链接
-                cbg_link = self.generate_cbg_link(equip_id)
-
-                # 计算差异
-                improved_diff_ratio = (improved_value - price) / price * 100 if price > 0 else 0
-
-                # 准备一行数据
-                row_data = {
-                    'equip_id': equip_id,
-                    'cbg_link': cbg_link,
-                    'price': price,
-                    'improved_value': improved_value,
-                    'improved_diff_ratio': improved_diff_ratio,
-                    **value_breakdown,  # 展开价值分解
-                    **row.to_dict()  # 包含所有features
-                }
-                export_data.append(row_data)
-
-            if not export_data:
-                print("没有有效数据可导出")
-                return None
-
-            # 定义列顺序：优先列 + 价值分解列 + features列
-            priority_columns = ['equip_id', 'price', 'improved_value', 'improved_diff_ratio']
-            
-            # 获取所有价值分解列
-            value_breakdown_columns = []
-            for data in export_data:
-                for key in data.keys():
-                    # 检查是否是价值分解列
-                    if (key in ['school_history', 'jiyuan', 'exp', 'learn_cash', 'xianyu', 
-                               'lingyou', 'rider', 'fabao', 'qianyuandan', 'packet', 'pet_count',
-                               'qianyuandan_breakthrough', 'school_skills', 'cultivation_limit',
-                               'cultivation_level', 'beast_cultivation', 'life_skills', 'qiangzhuang_shensu', 
-                               'shenqi', 'limited_skin', 'limited_huge_horse']):
-                        if key not in value_breakdown_columns:
-                            value_breakdown_columns.append(key)
-
-            # 获取所有features列（排除优先列和价值分解列）
-            all_columns = list(export_data[0].keys())
-            feature_columns = [
-                col for col in all_columns 
-                if col not in priority_columns and col != 'cbg_link' and col not in value_breakdown_columns
-            ]
-
-            # 最终列顺序
-            final_columns = priority_columns + value_breakdown_columns + feature_columns
-
-            # 设置表头
-            headers = []
-            for col in final_columns:
-                if col == 'equip_id':
-                    headers.append('装备ID')
-                elif col == 'price':
-                    headers.append('实际价格')
-                elif col == 'improved_value':
-                    headers.append('改进估值')
-                elif col == 'improved_diff_ratio':
-                    headers.append('差价比率(%)')
-                elif col in value_breakdown_columns:
-                    headers.append(f'{col}_价值')
-                else:
-                    headers.append(col)
-
-            # 写入表头
-            for col_idx, header in enumerate(headers, 1):
-                cell = ws.cell(row=1, column=col_idx, value=header)
-                cell.font = Font(bold=True, color="FFFFFF")
-                cell.fill = PatternFill(
-                    start_color="366092", end_color="366092", fill_type="solid")
-                cell.alignment = Alignment(
-                    horizontal="center", vertical="center")
-                cell.border = Border(
-                    left=Side(style='thin'),
-                    right=Side(style='thin'),
-                    top=Side(style='thin'),
-                    bottom=Side(style='thin')
-                )
-
-            # 写入数据
-            for row_idx, data in enumerate(export_data, 2):
-                for col_idx, col_name in enumerate(final_columns, 1):
-                    value = data.get(col_name, '')
-
-                    # 特殊处理角色名列（添加超链接）
-                    if col_name == 'equip_id':
-                        cbg_link = data.get('cbg_link')
-                        cell = ws.cell(
-                            row=row_idx, column=col_idx, value=value)
-                        if cbg_link:
-                            cell.hyperlink = cbg_link
-                            cell.font = Font(
-                                color="0000FF", underline="single")
-                        else:
-                            cell.font = Font()
-                    else:
-                        # 数值格式化
-                        if isinstance(value, (int, float)):
-                            if col_name in ['price', 'improved_value'] or col_name in value_breakdown_columns:
-                                # 价格显示
-                                display_value = f"{value:.1f}" if value > 0 else "0"
-                            elif '_ratio' in col_name:
-                                # 比率显示
-                                display_value = f"{value:.1f}%" if value != 0 else "0%"
-                            else:
-                                display_value = f"{value:.2f}" if isinstance(
-                                    value, float) else str(value)
-                        else:
-                            display_value = str(
-                                value) if value is not None else ""
-
-                        cell = ws.cell(
-                            row=row_idx, column=col_idx, value=display_value)
-
-                    # 设置单元格样式
-                    cell.alignment = Alignment(
-                        horizontal="center", vertical="center")
-                    cell.border = Border(
-                        left=Side(style='thin'),
-                        right=Side(style='thin'),
-                        top=Side(style='thin'),
-                        bottom=Side(style='thin')
-                    )
-
-                    # 特殊颜色
-                    if col_name == 'price':
-                        cell.fill = PatternFill(
-                            start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
-                    elif col_name == 'improved_value':
-                        cell.fill = PatternFill(
-                            start_color="E2EFDA", end_color="E2EFDA", fill_type="solid")
-                    elif col_name == 'improved_diff_ratio':
-                        # 根据差价比率设置颜色
-                        value = float(data.get(col_name, 0))
-                        if value > 20:  # 高溢价
-                            cell.fill = PatternFill(
-                                start_color="FFCDD2", end_color="FFCDD2", fill_type="solid")
-                        elif value < -20:  # 高折价
-                            cell.fill = PatternFill(
-                                start_color="C8E6C9", end_color="C8E6C9", fill_type="solid")
-                    elif col_name in value_breakdown_columns:
-                        # 价值分解列使用浅蓝色
-                        cell.fill = PatternFill(
-                            start_color="DEEBF7", end_color="DEEBF7", fill_type="solid")
-
-            # 调整列宽
-            for col_idx, col_name in enumerate(final_columns, 1):
-                if col_name in ['equip_id']:
-                    ws.column_dimensions[openpyxl.utils.get_column_letter(
-                        col_idx)].width = 25
-                elif col_name in ['price', 'improved_value'] or col_name in value_breakdown_columns:
-                    ws.column_dimensions[openpyxl.utils.get_column_letter(
-                        col_idx)].width = 15
-                elif '_ratio' in col_name:
-                    ws.column_dimensions[openpyxl.utils.get_column_letter(
-                        col_idx)].width = 18
-                else:
-                    ws.column_dimensions[openpyxl.utils.get_column_letter(
-                        col_idx)].width = 12
-
-            # 冻结首行
-            ws.freeze_panes = "A2"
-
-            # 添加统计工作表
-            stats_ws = wb.create_sheet("统计汇总")
-            
-            # 计算统计数据
-            improved_values = [d['improved_value'] for d in export_data]
-            prices = [d['price'] for d in export_data]
-            
-            improved_avg = sum(improved_values) / len(improved_values)
-            price_avg = sum(prices) / len(prices)
-            
-            # 计算准确率（差价比率在±20%内的比例）
-            improved_accurate = sum(1 for d in export_data if abs(d['improved_diff_ratio']) <= 20) / len(export_data) * 100
-            
-            stats_data = [
-                ["统计项目", "数值", "说明"],
-                ["总角色数", len(export_data), ""],
-                ["平均估值", f"{improved_avg:.1f}", "改进算法平均估值"],
-                ["平均实际价格", f"{price_avg:.1f}", "市场平均价格"],
-                ["估值准确率(±20%)", f"{improved_accurate:.1f}%", "差价比率在±20%内的比例"],
-                ["价值分解项数", len(value_breakdown_columns), "改进算法包含的价值分解维度"],
-                ["折价系数应用", "是", "是否应用市场折价系数"],
-            ]
-
-            for row_idx, row_data in enumerate(stats_data, 1):
-                for col_idx, value in enumerate(row_data, 1):
-                    cell = stats_ws.cell(
-                        row=row_idx, column=col_idx, value=value)
-                    if row_idx == 1:  # 表头
-                        cell.font = Font(bold=True)
-                        cell.fill = PatternFill(
-                            start_color="366092", end_color="366092", fill_type="solid")
-                        cell.font = Font(bold=True, color="FFFFFF")
-                    cell.alignment = Alignment(horizontal="center", vertical="center")
-                    cell.border = Border(
-                        left=Side(style='thin'),
-                        right=Side(style='thin'),
-                        top=Side(style='thin'),
-                        bottom=Side(style='thin')
-                    )
-
-            # 调整统计表列宽
-            for col_idx in range(1, 4):
-                stats_ws.column_dimensions[openpyxl.utils.get_column_letter(col_idx)].width = 20
-
-            # 保存文件
-            wb.save(output_path)
-            print(f"Excel文件已保存到: {output_path}")
-            print(f"包含 {len(export_data)} 条角色数据")
-            print(f"价值分解列: {value_breakdown_columns}")
-            print(f"改进算法准确率: {improved_accurate:.1f}%")
-
-            return output_path
-
-        except ImportError:
-            print("需要安装openpyxl库: pip install openpyxl")
-            return None
-        except Exception as e:
-            print(f"导出Excel文件失败: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
-
-
-if __name__ == "__main__":
-    try:
-        # 自动查找/data/文件夹下的所有.db文件
-        db_files = glob.glob("data/*.db")
-        if not db_files:
-            print("未找到数据库文件，请确保/data/文件夹下有.db文件")
-            exit(1)
-        # 选择第一个.db文件
-        db_path = db_files[0]
-        print(f"使用数据库文件: {db_path}")
-
-        evaluator = RuleEvaluator()
-        print("开始加载数据...")
-        # 加载数据
-        evaluator.batch_evaluate(db_path)
-        print("数据加载完成")
-
-        print("\n=== 导出改进算法结果 ===")
-        # 导出改进算法结果到Excel
-        comparison_output_path = evaluator.export_comparison_to_excel(
-            './output/results_comparison.xlsx')
-        if comparison_output_path:
-            print(f"改进算法结果已成功导出到: {comparison_output_path}")
-        else:
-            print("导出改进算法结果Excel失败")
-
-    except Exception as e:
-        print(f"程序运行出错: {str(e)}")
-        import traceback
-        print(traceback.format_exc())

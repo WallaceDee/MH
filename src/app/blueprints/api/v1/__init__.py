@@ -9,7 +9,7 @@ from flask import Blueprint
 from .spider import spider_bp
 from .system import system_bp
 from .equipment import equipment_bp
-from .character import character_bp
+from .role import role_bp
 from .pet import pet_bp
 
 # 创建v1蓝图
@@ -19,5 +19,5 @@ api_v1_bp = Blueprint('api_v1', __name__)
 api_v1_bp.register_blueprint(spider_bp, url_prefix='/spider')
 api_v1_bp.register_blueprint(system_bp, url_prefix='/system')
 api_v1_bp.register_blueprint(equipment_bp, url_prefix='/equipment')
-api_v1_bp.register_blueprint(character_bp, url_prefix='/character')
+api_v1_bp.register_blueprint(role_bp, url_prefix='/role')
 api_v1_bp.register_blueprint(pet_bp, url_prefix='/pet') 

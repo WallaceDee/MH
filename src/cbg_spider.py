@@ -29,21 +29,11 @@ from playwright.async_api import async_playwright
 from src.utils.smart_db_helper import CBGSmartDB
 
 # 导入数据库配置
-from src.cbg_config import DB_TABLE_SCHEMAS, DB_TABLE_ORDER
+from src.cbg_config import DB_SCHEMA_CONFIG
 
 # 导入解析器类
-from src.parser.pet_parser import PetParser
-from src.parser.equipment_parser import EquipmentParser
-from src.parser.shenqi_parser import ShenqiParser
-from src.parser.rider_parser import RiderParser
-from src.parser.ex_avt_parser import ExAvtParser
 from src.parser.common_parser import CommonParser
-from src.parser.fabao_parser import FabaoParser
 from src.utils.lpc_helper import LPCHelper
-
-# 导入导出器类
-from src.exporter.excel_exporter import CBGExcelExporter
-from src.exporter.json_exporter import CBGJSONExporter, export_single_character_to_json
 
 # 导入统一日志工厂
 from src.spider.logger_factory import get_spider_logger, log_progress, log_page_complete, log_task_complete, log_error, log_warning, log_info, log_total_pages
@@ -65,53 +55,37 @@ class CBGSpider:
         current_month = datetime.now().strftime('%Y%m')
         
         # 正常角色数据库路径
-        db_filename = f"cbg_characters_{current_month}.db"
+        db_filename = f"cbg_roles_{current_month}.db"
         self.db_path = os.path.join(get_data_path(), current_month, db_filename)
         
         # 空号数据库路径（单独的数据库文件）
-        empty_db_filename = f"empty_characters_{current_month}.db"
+        empty_db_filename = f"cbg_empty_roles_{current_month}.db"
         self.empty_db_path = os.path.join(get_data_path(), current_month, empty_db_filename)
         
         # 确保data目录存在
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         
+        # 配置专用的日志器，使用统一日志工厂
+        self.logger, self.log_file = get_spider_logger('role')
+        
+        # 延迟初始化数据库，避免在导入时创建文件
+        self.init_database()
+
         # 初始化智能数据库助手（正常角色）
         self.smart_db = CBGSmartDB(self.db_path)
         
         # 初始化空号数据库助手（空号专用）
         self.empty_smart_db = CBGSmartDB(self.empty_db_path)
         
-        # 配置专用的日志器，使用统一日志工厂
-        self.logger, self.log_file = get_spider_logger('role')
-        
-        # 初始化宠物解析器
-        self.pet_parser = PetParser(self.logger)
-        
-        # 初始化装备解析器
-        self.equipment_parser = EquipmentParser(self.logger)
-        
-        # 初始化神器解析器
-        self.shenqi_parser = ShenqiParser(self.logger)
-        
-        # 初始化坐骑解析器
-        self.rider_parser = RiderParser(self.logger)
-        
-        # 初始化锦衣解析器
-        self.ex_avt_parser = ExAvtParser(self.logger)
-        
         # 初始化通用解析器
         self.common_parser = CommonParser(self.logger)
 
-        # 初始化法宝解析器
-        self.fabao_parser = FabaoParser(self.logger)
-        
         # 初始化LPC解析助手
         self.lpc_helper = LPCHelper(self.logger)
         
         # 初始化其他组件
         self.setup_session()
-        # 延迟初始化数据库，避免在导入时创建文件
-        # self.init_database()
+        
         self.retry_attempts = 1 # 为登录失败重试设置次数
 
 
@@ -148,55 +122,17 @@ class CBGSpider:
             log_error(self.logger, f"初始化数据库失败: {e}")
             raise
     
-    def _ensure_database_initialized(self):
-        """确保数据库已初始化，如果未初始化则进行初始化"""
-        try:
-            # 检查数据库文件是否存在
-            role_exists = os.path.exists(self.db_path)
-            empty_exists = os.path.exists(self.empty_db_path)
-            
-            if not role_exists or not empty_exists:
-                log_info(self.logger, "检测到数据库文件不存在，开始初始化...")
-                self.init_database()
-            else:
-                # 检查表结构是否完整
-                try:
-                    conn = sqlite3.connect(self.db_path)
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-                    tables = [row[0] for row in cursor.fetchall()]
-                    conn.close()
-                    
-                    # 检查是否包含必要的表
-                    required_tables = ['characters', 'pets', 'equipments']
-                    missing_tables = [table for table in required_tables if table not in tables]
-                    
-                    if missing_tables:
-                        log_info(self.logger, f"检测到缺失的表: {missing_tables}，重新初始化数据库...")
-                        self.init_database()
-                        
-                except Exception as e:
-                    log_warning(self.logger, f"检查数据库表结构失败: {e}，重新初始化...")
-                    self.init_database()
-                    
-        except Exception as e:
-            log_error(self.logger, f"确保数据库初始化失败: {e}")
-            raise
-    
     def init_normal_database(self):
         """初始化正常角色数据库"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # 创建正常角色相关的表（排除empty_characters表）
-            normal_tables = [table for table in DB_TABLE_ORDER if table != 'empty_characters']
+            # 创建roles表
+            cursor.execute(DB_SCHEMA_CONFIG['roles'])
             
-            for table_name in normal_tables:
-                if table_name in DB_TABLE_SCHEMAS:
-                    cursor.execute(DB_TABLE_SCHEMAS[table_name])
-                else:
-                    log_warning(self.logger, f"未找到表 {table_name} 的结构定义")
+            # 也创建large_equip_desc_data表，以防需要存储详细数据
+            cursor.execute(DB_SCHEMA_CONFIG['large_equip_desc_data'])
             
             conn.commit()
             log_info(self.logger, f"正常角色数据库初始化完成: {os.path.basename(self.db_path)}")
@@ -213,11 +149,11 @@ class CBGSpider:
             conn = sqlite3.connect(self.empty_db_path)
             cursor = conn.cursor()
             
-            # 在空号数据库中创建characters表（使用empty_characters表结构）
-            cursor.execute(DB_TABLE_SCHEMAS['empty_characters'])
+            # 创建roles表
+            cursor.execute(DB_SCHEMA_CONFIG['roles'])
             
             # 也创建large_equip_desc_data表，以防需要存储详细数据
-            cursor.execute(DB_TABLE_SCHEMAS['large_equip_desc_data'])
+            cursor.execute(DB_SCHEMA_CONFIG['large_equip_desc_data'])
             
             conn.commit()
             log_info(self.logger, f"空号数据库初始化完成: {os.path.basename(self.empty_db_path)}")
@@ -228,18 +164,6 @@ class CBGSpider:
         finally:
             conn.close()
 
-    def get_school_name(self, school_id):
-        """根据门派ID获取门派名称"""
-        return self.common_parser.get_school_name(school_id)
-    
-    def get_race_name(self, school_id):
-        """根据门派ID获取种族名称"""
-        return self.common_parser.get_race_name(school_id)
-    
-    def get_fly_status(self, equip_data):
-        """解析飞升状态（从large_equip_desc字段中解析）"""
-        return self.common_parser.get_fly_status(equip_data)
-    
     def parse_large_equip_desc(self, large_desc):
         """解析large_equip_desc字段，提取详细的角色信息
         
@@ -260,7 +184,7 @@ class CBGSpider:
                 # 然后用js_eval解析JavaScript格式字符串
                 parsed_data = self.lpc_helper.js_eval(js_format)
                 if parsed_data and isinstance(parsed_data, dict) and len(parsed_data) > 0:
-                    return self.extract_character_fields(parsed_data)
+                    return self.extract_role_fields(parsed_data)
             
             log_warning(self.logger, f"LPC->JS解析失败，原始数据前200字符: {clean_desc[:200]}")
             return {}
@@ -269,7 +193,7 @@ class CBGSpider:
             log_warning(self.logger, f"解析large_equip_desc失败: {e}")
             return {}
     
-    def extract_character_fields(self, parsed_data):
+    def extract_role_fields(self, parsed_data):
         """从解析后的数据中提取角色字段"""
         if not isinstance(parsed_data, dict):
             return {}
@@ -375,170 +299,24 @@ class CBGSpider:
                 return None
 
             equip_list = data.get('equip_list', [])
-            
-            if not equip_list:
-                self.logger.warning("没有找到任何角色数据")
-                return []
-                
-            characters = []
-            for equip in equip_list:
-                try:
-                    # 解析基本信息
-                    char = {
-                        'eid': equip.get('eid'),
-                        'serverName': equip.get('server_name'),
-                        'sellerNickname': equip.get('seller_nickname'),  # 使用seller_nickname作为角色名
-                        'level': equip.get('level'),
-                        'price': float(equip.get('price_desc', '0')),
-                        'priceDesc': equip.get('price_desc'),
-                        'school': self.get_school_name(equip.get('school')),  # 转换门派为中文
-                        'areaName': equip.get('area_name'),
-                        'iconIndex': equip.get('icon_index'),
-                        'kindId': equip.get('kindid'),
-                        'gameOrdersn': equip.get('game_ordersn'),
-                        'passFairShow': equip.get('pass_fair_show'),
-                        'fairShowEndTime': equip.get('fair_show_end_time'),
-                        'acceptBargain': equip.get('accept_bargain'),
-                        'statusDesc': equip.get('status_desc'),
-                        'onsaleExpireTimeDesc': equip.get('onsale_expire_time_desc'),
-                        'expire_time': equip.get('expire_time'),
-                        'flyStatus': self.get_fly_status(equip),
-                        # 基础字段
-                        'collectNum': equip.get('collect_num'),
-                        
-                        # 角色属性字段
-                        'race': self.get_race_name(equip.get('school'))
-                    }
-                    
-                    # 添加large_equip_desc字段（如果存在）
-                    if 'large_equip_desc' in equip:
-                        char['large_equip_desc'] = equip['large_equip_desc']
-                    
-                    # 解析角色属性
-                    if 'attrs' in equip:
-                        attrs = equip['attrs']
-                        char['attributes'] = {
-                            'hp': attrs.get('hp'),
-                            'mp': attrs.get('mp'),
-                            'attack': attrs.get('attack'),
-                            'defense': attrs.get('defense'),
-                            'speed': attrs.get('speed'),
-                            'wiz': attrs.get('wiz'),
-                            'skills': attrs.get('skills', []),
-                            'specialSkill': attrs.get('special_skill'),
-                            'sumExp': attrs.get('sum_exp'),
-                            'exp': attrs.get('exp'),
-
-                            
-                            # 基础属性字段
-                            'baseHp': attrs.get('base_hp'),
-                            'baseMp': attrs.get('base_mp'),
-                            'baseAttack': attrs.get('base_attack'),
-                            'baseDefense': attrs.get('base_defense'),
-                            'baseSpeed': attrs.get('base_speed'),
-                            'baseWiz': attrs.get('base_wiz'),
-                            'extraHp': attrs.get('extra_hp'),
-                            'extraMp': attrs.get('extra_mp'),
-                            'extraAttack': attrs.get('extra_attack'),
-                            'extraDefense': attrs.get('extra_defense'),
-                            'extraSpeed': attrs.get('extra_speed'),
-                            'extraWiz': attrs.get('extra_wiz'),
-                            
-                            # 其他属性字段
-                            
-                            # 战斗属性字段
-                            'damageAll': attrs.get('damage_all'),
-                            'magicDamageAll': attrs.get('magic_damage_all'),
-                            'magicDefenseAll': attrs.get('magic_defense_all'),
-                            'dodgeAll': attrs.get('dodge_all'),
-                            'hitAll': attrs.get('hit_all'),
-                            'critAll': attrs.get('crit_all')
-                        }
-                    
-                    # 解析装备信息
-                    if 'equip_list' in equip:
-                        char['equipments'] = []
-                        for item in equip['equip_list']:
-                            equipment = {
-                                'position': item.get('position'),
-                                'name': item.get('name'),
-                                'level': item.get('level'),
-                                'quality': item.get('quality'),
-                                'attributes': item.get('attributes', []),
-                                'specialEffects': item.get('special_effects', []),
-                                'durability': item.get('durability'),
-                                
-                                # 新增装备字段
-                                'itemId': item.get('item_id'),
-                                'type': item.get('type'),
-                                'subType': item.get('sub_type'),
-                                'color': item.get('color'),
-                                'bindType': item.get('bind_type'),
-                                'maxDurability': item.get('max_durability'),
-                                'repairCount': item.get('repair_count'),
-                                'stoneCount': item.get('stone_count'),
-                                'stoneAttributes': item.get('stone_attributes', []),
-                                'enhanceLevel': item.get('enhance_level'),
-                                'enhanceAttributes': item.get('enhance_attributes', []),
-                                'specialSkill': item.get('special_skill'),
-                                'specialEffect': item.get('special_effect'),
-                                'creatorName': item.get('creator_name'),
-                                'createTime': item.get('create_time'),
-                                'expireTime': item.get('expire_time'),
-                                
-                                # 锁定状态字段
-                                'isLocked': item.get('iLock', 0),
-                                'lockType': item.get('iLockType', 0),
-                                'lockExpireTime': item.get('iLockExpireTime', 0)
-                            }
-                            char['equipments'].append(equipment)
-                    
-                    # 解析宝宝信息
-                    
-                    # 从large_equip_desc中解析宝宝信息
-                    large_desc = equip.get('large_equip_desc', '')
-                    if large_desc:
-                        try:
-                            parsed_data = self.parse_large_equip_desc(large_desc)
-                            
-                            # 使用装备解析器的统一处理方法
-                            char['all_equips'] = self.equipment_parser.process_character_equipment(parsed_data, char.get('sellerNickname', '未知'))
-                            # 使用宠物解析器的统一处理方法
-                            char['pets'] = self.pet_parser.process_character_pets(parsed_data, char.get('sellerNickname', '未知'))
-                                
-                        except Exception as e:
-                            self.logger.error(f"解析装备/宝宝信息失败: {e}")
-                            char['pets'] = []
-                            char['all_equips'] = {"装备总数": 0, "使用中装备": [], "未使用装备": [], "拆分销售装备": []}
-                    else:
-                        self.logger.debug("large_equip_desc为空，跳过宝宝解析")
-                        char['pets'] = []
-                        char['all_equips'] = {"装备总数": 0, "使用中装备": [], "未使用装备": [], "拆分销售装备": []}
-                    
-                    characters.append(char)
-                    
-                except Exception as e:
-                    self.logger.error(f"解析单个角色数据时出错: {str(e)}")
-                    continue
-            
-            return characters
+            return equip_list
             
         except Exception as e:
             self.logger.error(f"解析JSONP响应时发生错误: {str(e)}")
             return None
         
         
-    def save_character_data(self, characters):
+    def save_role_data(self, roles):
         """保存角色数据到数据库"""
-        if not characters:
+        if not roles:
             log_warning(self.logger, "没有要保存的角色数据")
             return 0
         
         # 确保数据库已初始化
-        self._ensure_database_initialized()
+        # self._ensure_database_initialized()
             
         saved_count = 0
-        for char in characters:
+        for char in roles:
             try:
                 # 解析技能信息（如果有large_equip_desc数据）
                 life_skills = ''
@@ -546,159 +324,192 @@ class CBGSpider:
                 ju_qing_skills = ''
                 yushoushu_skill = 0
 
-                large_equip_desc = char.get('large_equip_desc')
+                large_equip_desc = char.get('large_equip_desc', '')
                 server_name = char.get('serverName')
                 if(server_name == '花样年华'):
-                    log_info(self.logger, f"{char.get('sellerNickname')} 服务器为花样年华,不予记录。")
+                    log_info(self.logger, f"{char.get('seller_nickname')} 服务器为花样年华,不予记录。")
                     continue
-                if large_equip_desc:
-                    try:
-                        parsed_desc = self.parse_large_equip_desc(large_equip_desc)
-                        if parsed_desc and 'all_skills' in parsed_desc:
-                            all_skills = parsed_desc['all_skills']
-                            if isinstance(all_skills, dict):
-                                # 解析各种技能
-                                life_skills = self.parse_life_skills(all_skills)
-                                school_skills = self.parse_school_skills(all_skills)
-                                ju_qing_skills = self.parse_ju_qing_skills(all_skills)
-                                yushoushu_skill = self.parse_yushoushu_skill(all_skills)
-
-                    except Exception as e:
-                        log_warning(self.logger, f"解析角色 {char.get('eid')} 的技能信息失败: {e}")
-                
+              
                 # 解析large_equip_desc字段
-                parsed_desc = self.parse_large_equip_desc(char.get('large_equip_desc', ''))
-                
+                parsed_desc = self.parse_large_equip_desc(large_equip_desc)
+                all_skills = parsed_desc.get('all_skills', {})
+                # 解析各种技能
+                life_skills = self.parse_life_skills(all_skills)
+                school_skills = self.parse_school_skills(all_skills)
+                ju_qing_skills = self.parse_ju_qing_skills(all_skills)
+                yushoushu_skill = self.parse_yushoushu_skill(all_skills)
+
                 # 1. 保存角色基础信息
-                character_data = {
-                    'equip_id': char.get('eid'),
-                    'server_name': server_name,
-                    'seller_nickname': char.get('sellerNickname'),
+                role_data = {
+                    # 基本字段直接映射
+                    'eid': char.get('eid'),
+                    'equipid': char.get('equipid'),
+                    'equip_sn': char.get('equip_sn'),
+                    'server_name': char.get('server_name'),
+                    'serverid': char.get('serverid'),
+                    'equip_server_sn': char.get('equip_server_sn'),
+                    'seller_nickname': char.get('seller_nickname'),
+                    'seller_roleid': char.get('seller_roleid'),
+                    'area_name': char.get('area_name'),
+                    'equip_name': char.get('equip_name'),
+                    'equip_type': char.get('equip_type'),
+                    'equip_type_name': char.get('equip_type_name'),
+                    'equip_type_desc': char.get('equip_type_desc'),
                     'level': char.get('level'),
-                    'price': char.get('price'),
-                    'price_desc': char.get('priceDesc'),
+                    'equip_level': char.get('equip_level'),
+                    'equip_level_desc': char.get('equip_level_desc'),
+                    'level_desc': char.get('level_desc'),
+                    'subtitle': char.get('subtitle'),
+                    'equip_pos': char.get('equip_pos'),
+                    'position': char.get('position'),
                     'school': char.get('school'),
-                    'area_name': char.get('areaName'),
-                    'icon_index': char.get('iconIndex'),
-                    'kindid': char.get('kindId'),
-                    'game_ordersn': char.get('gameOrdersn'),
-                    'pass_fair_show': char.get('passFairShow'),
-                    'fair_show_end_time': char.get('fairShowEndTime'),
-                    'accept_bargain': char.get('acceptBargain'),
-                    'status_desc': char.get('statusDesc'),
-                    'onsale_expire_time_desc': char.get('onsaleExpireTimeDesc'),
+                    'role_grade_limit': char.get('role_grade_limit'),
+                    'min_buyer_level': char.get('min_buyer_level'),
+                    'equip_count': char.get('equip_count'),
+                    'price': char.get('price'),
+                    'price_desc': char.get('price_desc'),
+                    'unit_price_desc': char.get('unit_price_desc'),
+                    'min_unit_price': char.get('min_unit_price'),
+                    'accept_bargain': 1 if char.get('accept_bargain') else 0,
+                    'equip_status': char.get('equip_status'),
+                    'equip_status_desc': char.get('equip_status_desc'),
+                    'status_desc': char.get('status_desc'),
+                    'onsale_expire_time_desc': char.get('onsale_expire_time_desc'),
+                    'time_left': char.get('time_left'),
                     'expire_time': char.get('expire_time'),
-                    'race': char.get('race'),
-                    'fly_status': char.get('flyStatus'),
-                    'collect_num': char.get('collectNum'),
-                    'create_time': datetime.now().isoformat(),
+                    'create_time_equip': char.get('create_time'),
+                    'selling_time': char.get('selling_time'),
+                    'selling_time_ago_desc': char.get('selling_time_ago_desc'),
+                    'first_onsale_time': char.get('first_onsale_time'),
+                    'pass_fair_show': char.get('pass_fair_show'),
+                    'fair_show_time': char.get('fair_show_time'),
+                    'fair_show_end_time': char.get('fair_show_end_time'),
+                    'fair_show_end_time_left': char.get('fair_show_end_time_left'),
+                    'fair_show_poundage': char.get('fair_show_poundage'),
+                
+                    # 其他信息
+                    'collect_num': char.get('collect_num'),
+                    'has_collect': 1 if char.get('has_collect') else 0,
+                    'score': char.get('score'),
+                    'icon_index': char.get('icon_index'),
+                    'icon': char.get('icon'),
+                    'equip_face_img': char.get('equip_face_img'),
+                    'kindid': char.get('kindid'),
+                    'game_channel': char.get('game_channel'),
+                    
+                    # 订单相关
+                    'game_ordersn': char.get('game_ordersn'),
+                    'whole_game_ordersn': char.get('whole_game_ordersn'),
+                    
+                    # 跨服相关
+                    'allow_cross_buy': char.get('allow_cross_buy'),
+                    'cross_server_poundage': char.get('cross_server_poundage'),
+                    'cross_server_poundage_origin': char.get('cross_server_poundage_origin'),
+                    'cross_server_poundage_discount': char.get('cross_server_poundage_discount'),
+                    'cross_server_poundage_discount_label': char.get('cross_server_poundage_discount_label'),
+                    'cross_server_poundage_display_mode': char.get('cross_server_poundage_display_mode'),
+                    'cross_server_activity_conf_discount': char.get('cross_server_activity_conf_discount'),
+                    
+                    # 活动相关
+                    'activity_type': char.get('activity_type'),
+                    'joined_seller_activity': 1 if char.get('joined_seller_activity') else 0,
+                    
+                    # 拆分相关
+                    'is_split_sale': 1 if char.get('is_split_sale') else 0,
+                    'is_split_main_role': 1 if char.get('is_split_main_role') else 0,
+                    'is_split_independent_role': 1 if char.get('is_split_independent_role') else 0,
+                    'is_split_independent_equip': 1 if char.get('is_split_independent_equip') else 0,
+                    'split_equip_sold_happen': 1 if char.get('split_equip_sold_happen') else 0,
+                    'show_split_equip_sold_remind': 1 if char.get('show_split_equip_sold_remind') else 0,
+                    
+                    # 保护相关
+                    'is_onsale_protection_period': 1 if char.get('is_onsale_protection_period') else 0,
+                    'onsale_protection_end_time': char.get('onsale_protection_end_time'),
+                    'is_vip_protection': 1 if char.get('is_vip_protection') else 0,
+                    'is_time_lock': 1 if char.get('is_time_lock') else 0,
+                    
+                    # 测试服相关
+                    'equip_in_test_server': 1 if char.get('equip_in_test_server') else 0,
+                    'buyer_in_test_server': 1 if char.get('buyer_in_test_server') else 0,
+                    'equip_in_allow_take_away_server': 1 if char.get('equip_in_allow_take_away_server') else 0,
+                    
+                    # 其他标识
+                    'is_weijianding': 1 if char.get('is_weijianding') else 0,
+                    'is_show_alipay_privilege': 1 if char.get('is_show_alipay_privilege') else 0,
+                    'is_seller_redpacket_flag': 1 if char.get('is_seller_redpacket_flag') else 0,
+                    'is_show_expert_desc': char.get('is_show_expert_desc'),
+                    'is_show_special_highlight': 1 if char.get('is_show_special_highlight') else 0,
+                    'is_xyq_game_role_kunpeng_reach_limit': 1 if char.get('is_xyq_game_role_kunpeng_reach_limit') else 0,
+                    
+                    # 版本和存储相关
+                    'equip_onsale_version': char.get('equip_onsale_version'),
+                    'storage_type': char.get('storage_type'),
+                    'agent_trans_time': char.get('agent_trans_time'),
+                    
+                    # KOL相关
+                    'kol_article_id': char.get('kol_article_id'),
+                    'kol_share_id': char.get('kol_share_id'),
+                    'kol_share_time': char.get('kol_share_time'),
+                    'kol_share_status': char.get('kol_share_status'),
+                    
+                    # 推荐相关
+                    'reco_request_id': char.get('reco_request_id'),
+                    'appointed_roleid': char.get('appointed_roleid'),
+                    
+                    # 团队相关
+                    'play_team_cnt': char.get('play_team_cnt'),
+                    
+                    # 随机抽奖相关
+                    'random_draw_finish_time': char.get('random_draw_finish_time'),
+                    
+                    # 详细描述
+                    'desc': char.get('desc'), # 使用解析获取的原始desc字段
+                    'large_equip_desc': char.get('large_equip_desc'),
+                    'desc_sumup': char.get('desc_sumup'),
+                    'desc_sumup_short': char.get('desc_sumup_short'),
+                    'diy_desc': char.get('diy_desc'),
+                    'rec_desc': char.get('rec_desc'),
+                    
+                    # 搜索相关
+                    'search_type': char.get('search_type'),
+                    'tag': char.get('tag'),
+                    
+                    # JSON格式字段
+                    'price_explanation': json.dumps(char.get('price_explanation'), ensure_ascii=False) if char.get('price_explanation') else '',
+                    'bargain_info': json.dumps(char.get('bargain_info'), ensure_ascii=False) if char.get('bargain_info') else '',
+                    'diy_desc_pay_info': json.dumps(char.get('diy_desc_pay_info'), ensure_ascii=False) if char.get('diy_desc_pay_info') else '',
+                    'other_info': char.get('other_info', ''),
+                    'video_info': json.dumps(char.get('video_info'), ensure_ascii=False) if char.get('video_info') else '',
+                    'agg_added_attrs': json.dumps(char.get('agg_added_attrs'), ensure_ascii=False) if char.get('agg_added_attrs') else '',
+                    'dynamic_tags': json.dumps(char.get('dynamic_tags'), ensure_ascii=False) if char.get('dynamic_tags') else '',
+                    'highlight': json.dumps(char.get('highlight'), ensure_ascii=False) if char.get('highlight') else '',
+                    'tag_key': char.get('tag_key', ''),
                     'life_skills': life_skills,
                     'school_skills': school_skills,
                     'ju_qing_skills': ju_qing_skills,
-                    'yushoushu_skill': yushoushu_skill
+                    'yushoushu_skill': yushoushu_skill,
+                    # 原始数据
+                    'raw_data_json': json.dumps(char, ensure_ascii=False)
                 }
-                
-                # 处理宠物数据（保存all_pets_json）
-                pets = char.get('pets', [])
-                if pets:
-                    character_data['all_pets_json'] = json.dumps(pets, ensure_ascii=False)
-                    # self.logger.debug(f"保存宝宝信息: 共{len(pets)}只宝宝，中文JSON格式")
-                else:
-                    character_data['all_pets_json'] = ''
-                
-                # 处理装备信息（保存到characters表）
-                all_equips = char.get('all_equips')
-                if all_equips:
-                    character_data['all_equip_json'] = json.dumps(all_equips, ensure_ascii=False)
-                    # self.logger.debug(f"保存装备信息到characters表: {len(json.dumps(all_equips, ensure_ascii=False))} 字符")
-                else:
-                    character_data['all_equip_json'] = ''
-                
-                # 处理神器信息（保存到characters表）
-                if parsed_desc and parsed_desc.get('shenqi'):
-                    # 使用神器解析器处理神器数据
-                    all_shenqi = self.shenqi_parser.process_character_shenqi(parsed_desc, char.get('sellerNickname', ''))
-                    if all_shenqi and all_shenqi.get('神器名称'):
-                        character_data['all_shenqi_json'] = json.dumps(all_shenqi, ensure_ascii=False)
-                        # self.logger.debug(f"保存神器信息到characters表: {len(character_data['all_shenqi_json'])} 字符")
-                    else:
-                        character_data['all_shenqi_json'] = ''
-                else:
-                    character_data['all_shenqi_json'] = ''
-                
-                # 处理坐骑信息（保存到characters表）
-                if parsed_desc and parsed_desc.get('AllRider'):
-                    # 使用坐骑解析器处理坐骑数据
-                    all_rider = self.rider_parser.process_character_rider({'rider': parsed_desc.get('AllRider')}, char.get('sellerNickname', ''))
-                    if all_rider and all_rider.get('坐骑列表'):
-                        character_data['all_rider_json'] = json.dumps(all_rider, ensure_ascii=False)
-                        # self.logger.debug(f"保存坐骑信息到characters表: {len(character_data['all_rider_json'])} 字符")
-                    else:
-                        character_data['all_rider_json'] = ''
-                else:
-                    character_data['all_rider_json'] = ''
-
-                # 处理法宝信息（保存到characters表）
-                if parsed_desc and parsed_desc.get('fabao_json'):
-                    # 使用法宝解析器处理法宝数据
-                    all_fabao = self.fabao_parser.process_character_fabao(parsed_desc, char.get('sellerNickname', ''))
-                    if all_fabao:
-                        character_data['all_fabao_json'] = json.dumps(all_fabao, ensure_ascii=False)
-                        # self.logger.debug(f"保存法宝信息到characters表: {len(character_data['all_fabao_json'])} 字符")
-                    else:
-                        character_data['all_fabao_json'] = ''
-                else:
-                    character_data['all_fabao_json'] = ''    
-
-                # 处理锦衣信息（保存到characters表）
-                if parsed_desc and parsed_desc.get('ExAvt'):
-                    # 构建锦衣数据，包含基础信息和特效信息
-                    ex_avt_data = {
-                        'ExAvt': parsed_desc.get('ExAvt'),
-                        'basic_info': {
-                            'total_avatar': parsed_desc.get('total_avatar', 0),
-                            'xianyu': parsed_desc.get('xianyu', 0),
-                            'xianyu_score': parsed_desc.get('xianyu_score', 0),
-                            'qicai_score': parsed_desc.get('qicai_score', 0)
-                        },
-                        'chat_effect': parsed_desc.get('chat_effect'),
-                        'icon_effect': parsed_desc.get('icon_effect'),
-                        'title_effect': parsed_desc.get('title_effect'),
-                        'perform_effect': parsed_desc.get('perform_effect'),
-                        'achieve_show': parsed_desc.get('achieve_show', []),
-                        'avt_widget': parsed_desc.get('avt_widget', {})
-                    }
-                    
-                    # 使用锦衣解析器处理锦衣数据
-                    all_ex_avt = self.ex_avt_parser.process_character_clothes(ex_avt_data, char.get('sellerNickname', ''))
-                    # 检查解析结果：ExAvtParser可能返回'锦衣'或'锦衣列表'字段
-                    character_data['ex_avt_json'] = json.dumps(all_ex_avt, ensure_ascii=False)
-                    # self.logger.debug(f"保存锦衣信息到characters表: {len(character_data['ex_avt_json'])} 字符")
-                else:
-                    character_data['ex_avt_json'] = ''
-                
+               
                 # 空号识别逻辑
-                is_empty_character = self.is_empty_character(char, all_equips, pets)
+                is_empty_role = self.is_empty_role(parsed_desc.get('AllEquip', {}), parsed_desc.get('AllSummon', {}))
                 
-                if is_empty_character:
+                if is_empty_role:
                     # 如果是空号，添加空号识别信息并保存到空号数据库
-                    empty_reason = self.get_empty_reason(char, all_equips, pets)
-                    character_data['empty_reason'] = empty_reason
-                    character_data['equip_count'] = all_equips.get('物品总数', 0) if all_equips else 0
-                    character_data['high_level_pet_count'] = self.count_high_level_pets(pets)
-                    
-                    # 保存到空号数据库的characters表
+                    empty_reason = self.get_empty_reason(parsed_desc.get('AllEquip', {}), parsed_desc.get('AllSummon', {}))
+                    # 保存到空号数据库的roles表
                     try:
-                        self.empty_smart_db.save_character(character_data)
-                        log_info(self.logger, f"￥{char.get('price')} - {char.get('sellerNickname')}(空号) - {empty_reason}")
+                        self.empty_smart_db.save_role(role_data)
+                        log_info(self.logger, f"￥{char.get('price')} - {char.get('seller_nickname')}(空号) - {empty_reason}")
                         saved_count += 1
                     except Exception as e:
                         log_error(self.logger, f"保存空号数据失败: ￥{char.get('price')}, 错误: {e}")
                 else:
                     # 如果不是空号，保存到正常角色数据库
                     try:
-                        self.smart_db.save_character(character_data)
-                        log_info(self.logger, f"￥{char.get('price')} - {char.get('sellerNickname')}")
+                        self.smart_db.save_role(role_data)
+                        log_info(self.logger, f"￥{char.get('price')} - {char.get('seller_nickname')}")
                         saved_count += 1
                     except Exception as e:
                         log_error(self.logger, f"保存角色数据失败: ￥{char.get('price')}, 错误: {e}")
@@ -725,11 +536,12 @@ class CBGSpider:
                         
                         # 构建详细角色数据
                         equip_data = {
-                            'equip_id': char.get('eid'),
-                            'character_name': safe_str(parsed_desc.get('cName')),
-                            'character_level': safe_int(parsed_desc.get('iGrade')),
-                            'character_school': safe_int(parsed_desc.get('iSchool')),
-                            'character_icon': safe_int(parsed_desc.get('iIcon')),
+                            'eid': char.get('eid'),
+                            'time_lock_days': safe_int(char.get('time_lock_days')),
+                            'role_name': safe_str(parsed_desc.get('cName')),
+                            'role_level': safe_int(parsed_desc.get('iGrade')),
+                            'role_school': safe_int(parsed_desc.get('iSchool')),
+                            'role_icon': safe_int(parsed_desc.get('iIcon')),
                             'user_num': safe_str(parsed_desc.get('usernum')),
                             'hp_max': safe_int(parsed_desc.get('iHp_Max')),
                             'mp_max': safe_int(parsed_desc.get('iMp_Max')),
@@ -774,7 +586,7 @@ class CBGSpider:
                             'goodness': safe_int(parsed_desc.get('iGoodness')),
                             'badness': safe_int(parsed_desc.get('iBadness')),
                             'goodness_sav': safe_int(parsed_desc.get('igoodness_sav')),
-                            'character_title': safe_str(parsed_desc.get('title')),
+                            'role_title': safe_str(parsed_desc.get('title')),
                             'org_name': safe_str(parsed_desc.get('cOrg')),
                             'org_offer': safe_int(parsed_desc.get('iOrgOffer')),
                             'org_position': safe_str(parsed_desc.get('org_position')),
@@ -830,7 +642,7 @@ class CBGSpider:
                         }
                         
                         # 根据是否为空号选择对应的数据库保存详细装备数据
-                        if is_empty_character:
+                        if is_empty_role:
                             # 空号数据保存到空号数据库
                             self.logger.debug(f"保存空号详细数据到空号数据库: {char.get('eid')}")
                             success = self.empty_smart_db.save_large_equip_data(equip_data)
@@ -849,14 +661,6 @@ class CBGSpider:
                         
                     except Exception as e:
                         self.logger.error(f"解析装备详细信息时出错: {str(e)}")
-                
-                # 为每个角色单独导出JSON数据到role_json文件夹
-                # try:
-                #     # 使用json_exporter中的方法导出
-                #     self._export_single_character_json(character_data, large_equip_desc, parsed_desc)
-                    
-                # except Exception as e:
-                #     self.logger.warning(f"保存角色 {character_data.get('equip_id')} 的单独JSON失败: {e}")
                 
             except Exception as e:
                 self.logger.error(f"保存角色 {char.get('eid')} 时出错: {str(e)}")
@@ -900,7 +704,7 @@ class CBGSpider:
             self.logger.info("Cookie验证通过")
 
         current_page = 1
-        total_characters = 0
+        total_roles = 0
         successful_pages = 0
         
         # 输出总页数信息
@@ -938,8 +742,8 @@ class CBGSpider:
                 break
                 
             # 保存数据
-            saved_count = self.save_character_data(page_data)
-            total_characters += saved_count
+            saved_count = self.save_role_data(page_data)
+            total_roles += saved_count
             successful_pages += 1
             
             # 使用统一的页面完成日志格式
@@ -960,8 +764,8 @@ class CBGSpider:
                 time.sleep(delay)
         
         # 使用统一的任务完成日志格式
-        log_task_complete(self.logger, successful_pages, max_pages, total_characters, "角色")
-        return total_characters
+        log_task_complete(self.logger, successful_pages, max_pages, total_roles, "角色")
+        return total_roles
 
     def fetch_page(self, page=1, search_params=None):
         """
@@ -1030,89 +834,7 @@ class CBGSpider:
         except Exception as e:
             log_error(self.logger, f"获取第{page}页数据时出错: {e}")
             return None
-    
 
-    
-    def export_to_excel(self, filename=None, months=None):
-        """
-        导出数据到Excel（使用独立的Excel导出器）
-        
-        Args:
-            filename: 输出文件名
-            months: 要导出的月份列表，格式为['202401', '202402']，如果为None则导出所有月份
-            
-        Returns:
-            list: 导出的Excel文件路径列表
-        """
-        from src.utils.project_path import get_data_path
-        data_dir = get_data_path()
-        
-        # 如果没有指定月份，获取所有数据库文件
-        if months is None:
-            db_files = [f for f in os.listdir(data_dir) if f.endswith('.db')]
-        else:
-            db_files = [f"cbg_characters_{month}.db" for month in months]
-        
-        exported_files = []
-        for db_file in db_files:
-            db_path = os.path.join(data_dir, db_file)
-            if not os.path.exists(db_path):
-                log_warning(self.logger, f"数据库文件不存在: {db_file}")
-                continue
-                
-            # 为每个数据库创建Excel导出器
-            excel_exporter = CBGExcelExporter(db_path, self.output_dir, self.logger)
-            
-            # 使用导出器导出数据
-            excel_file = excel_exporter.export_to_excel(
-                filename=f"{filename}_{db_file.replace('.db', '')}" if filename else None
-            )
-            if excel_file:
-                exported_files.append(excel_file)
-            
-        return exported_files
-    
-    def export_to_json(self, filename=None, pretty=True, months=None):
-        """
-        导出数据到JSON（使用独立的JSON导出器）
-        
-        Args:
-            filename: 输出文件名
-            pretty: 是否格式化输出JSON
-            months: 要导出的月份列表，格式为['202401', '202402']，如果为None则导出所有月份
-            
-        Returns:
-            list: 导出的JSON文件路径列表
-        """
-        from src.utils.project_path import get_data_path
-        data_dir = get_data_path()
-        
-        # 如果没有指定月份，获取所有数据库文件
-        if months is None:
-            db_files = [f for f in os.listdir(data_dir) if f.endswith('.db')]
-        else:
-            db_files = [f"cbg_characters_{month}.db" for month in months]
-        
-        exported_files = []
-        for db_file in db_files:
-            db_path = os.path.join(data_dir, db_file)
-            if not os.path.exists(db_path):
-                log_warning(self.logger, f"数据库文件不存在: {db_file}")
-                continue
-                
-            # 为每个数据库创建JSON导出器
-            json_exporter = CBGJSONExporter(db_path, self.output_dir, self.logger)
-            
-            # 使用导出器导出数据
-            json_file = json_exporter.export_to_json(
-                filename=f"{filename}_{db_file.replace('.db', '')}" if filename else None,
-                pretty=pretty
-            )
-            if json_file:
-                exported_files.append(json_file)
-            
-        return exported_files
-    
     def parse_yushoushu_skill(self, skills_data):
         """解析育兽术技能数据"""
         return self.common_parser.parse_yushoushu_skill(skills_data)
@@ -1128,11 +850,7 @@ class CBGSpider:
     def parse_ju_qing_skills(self, skills_data):
         """解析剧情技能数据"""
         return self.common_parser.parse_ju_qing_skills(skills_data)
-    
-    def get_rent_level_name(self, level):
-        """转换房屋等级数字为中文名称"""
-        return self.common_parser.get_rent_level_name(level)
-    
+
     def get_outdoor_level_name(self, level):
         """转换庭院等级数字为中文名称"""
         return self.common_parser.get_outdoor_level_name(level)
@@ -1146,13 +864,12 @@ class CBGSpider:
         owner_names = {0: "无", 1: "自己", 2: "配偶"}
         return owner_names.get(owner_status, "未知")
     
-    def is_empty_character(self, char_data, all_equips, pets):
+    def is_empty_role(self, all_equips, pets):
         """
         判断是否为空号
         空号条件：物品个数等于0，且宠物等级大于100的数量为0
         
         Args:
-            char_data: 角色基础数据
             all_equips: 装备数据
             pets: 宠物数据
             
@@ -1163,7 +880,10 @@ class CBGSpider:
             # 检查物品个数
             equip_count = 0
             if all_equips and isinstance(all_equips, dict):
-                equip_count = all_equips.get('物品总数', 0)
+                # 计算装备数量（排除特殊字段）
+                for key, value in all_equips.items():
+                    if key.isdigit() and isinstance(value, dict):
+                        equip_count += 1
             
             # 检查高等级宠物数量（等级大于100）
             high_level_pet_count = self.count_high_level_pets(pets)
@@ -1172,7 +892,7 @@ class CBGSpider:
             is_empty = (equip_count == 0) and (high_level_pet_count == 0)
             
             if is_empty:
-                # self.logger.debug(f"识别空号: {char_data.get('sellerNickname')} - 物品数:{equip_count}, 高级宠物数:{high_level_pet_count}")
+                # self.logger.debug(f"识别空号: {char_data.get('seller_nickname')} - 物品数:{equip_count}, 高级宠物数:{high_level_pet_count}")
                 pass
             
             return is_empty
@@ -1199,7 +919,7 @@ class CBGSpider:
             for pet in pets:
                 if isinstance(pet, dict):
                     # 从宠物数据中获取等级
-                    pet_level = pet.get('等级', 0)
+                    pet_level = pet.get('iGrade', 0)
                     if isinstance(pet_level, (int, float)) and pet_level > 100:
                         high_level_count += 1
                     elif isinstance(pet_level, str):
@@ -1216,12 +936,11 @@ class CBGSpider:
             log_error(self.logger, f"统计高等级宠物时出错: {e}")
             return 0
     
-    def get_empty_reason(self, char_data, all_equips, pets):
+    def get_empty_reason(self, all_equips, pets):
         """
         获取空号识别原因
         
         Args:
-            char_data: 角色基础数据
             all_equips: 装备数据
             pets: 宠物数据
             
@@ -1234,7 +953,10 @@ class CBGSpider:
             # 检查物品数量
             equip_count = 0
             if all_equips and isinstance(all_equips, dict):
-                equip_count = all_equips.get('物品总数', 0)
+                # 计算装备数量（排除特殊字段）
+                for key, value in all_equips.items():
+                    if key.isdigit() and isinstance(value, dict):
+                        equip_count += 1
             
             if equip_count == 0:
                 reasons.append("无物品")
@@ -1253,37 +975,3 @@ class CBGSpider:
         except Exception as e:
             log_error(self.logger, f"获取空号原因时出错: {e}")
             return "识别异常"
-
-    def _export_single_character_json(self, character_data, large_equip_desc, parsed_desc):
-        """
-        内部方法：为单个角色导出JSON数据到role_json文件夹
-        
-        Args:
-            character_data: 角色基础数据
-            large_equip_desc: 原始装备描述数据
-            parsed_desc: 解析后的装备描述数据
-        """
-        try:
-            # 合并数据
-            full_character_data = character_data.copy()
-            if large_equip_desc and parsed_desc:
-                full_character_data.update(parsed_desc)
-            
-            # 使用json_exporter中的方法导出
-            return export_single_character_to_json(
-                character_data=full_character_data,
-                output_dir=self.output_dir,
-                logger=self.logger
-            )
-            
-        except Exception as e:
-            log_error(self.logger, f"导出单个角色JSON失败: {e}")
-            return None
-
-def main():
-    """简单的测试函数 - 主要使用run.py启动"""
-    print("CBG角色爬虫模块")
-    print("请使用 'python run.py basic' 启动爬虫")
-
-if __name__ == "__main__":
-    main() 

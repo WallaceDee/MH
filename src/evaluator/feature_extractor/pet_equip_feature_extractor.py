@@ -94,8 +94,8 @@ class PetEquipFeatureExtractor:
         Returns:
             bool: 如果只有large_equip_desc字段则返回True
         """
-        # 检查是否只有large_equip_desc字段
-        if 'large_equip_desc' not in equip_data:
+        # 检查是否只有desc字段
+        if 'desc' not in equip_data:
             return False
         
         # 检查其他关键字段是否缺失
@@ -110,12 +110,12 @@ class PetEquipFeatureExtractor:
         从large_equip_desc解析出完整的装备数据
         
         Args:
-            equip_data: 原始装备数据（只有large_equip_desc）
+            equip_data: 原始装备数据（只有desc）
             
         Returns:
             Dict[str, Any]: 解析后的完整装备数据
         """
-        desc = equip_data.get('large_equip_desc', '')
+        desc = equip_data.get('desc', '')
         if not desc:
             return equip_data
         
@@ -140,6 +140,9 @@ class PetEquipFeatureExtractor:
         parsed_data['addon_tizhi'] = 0
         parsed_data['xiang_qian_level'] = 0
         parsed_data['addon_status'] = ''
+
+        # 解析装备等级
+        self._parse_equip_level_from_desc(desc, parsed_data)
         
         # 解析基础属性
         self._parse_basic_attrs_from_desc(desc, parsed_data)
@@ -152,9 +155,6 @@ class PetEquipFeatureExtractor:
         
         # 解析套装信息
         self._parse_suit_info_from_desc(desc, parsed_data)
-        
-        # 解析装备等级
-        self._parse_equip_level_from_desc(desc, parsed_data)
         
         return parsed_data
 
@@ -380,14 +380,10 @@ class PetEquipFeatureExtractor:
             parsed_data['addon_status'] = ''
             parsed_data['suit_category'] = '无套装'
             return
-        
-        # 移除颜色代码
-        desc_clean = re.sub(r'#c4DBAF4', '', desc)
-        desc_clean = re.sub(r'#[A-Z]', '', desc_clean)
-        
+        #c4DBAF4套装效果：附加状态#c4DBAF4惊心一剑#
         # 查找套装效果相关信息
-        pattern = r'套装效果：附加状态\s*([^#\n]+)'  # 套装效果：xxx
-        match = re.search(pattern, desc_clean)
+        pattern = r'#c4DBAF4套装效果：附加状态#c4DBAF4\s*([^#\n]+)'  # 套装效果：xxx
+        match = re.search(pattern, desc)
         if match:
             suit_info = match.group(1).strip()
             # 清理多余的空格和特殊字符
@@ -457,7 +453,7 @@ class PetEquipFeatureExtractor:
         """从描述中解析装备等级"""
         # 解析装备等级 - 只匹配开头的等级信息，避免匹配到宝石等级
         level_patterns = [
-            r'#r等级\s*(\d+)',          # #r等级 125
+            r'#r等级\s*(\d+)', #r等级 65         # #r等级 125
         ]
         for pattern in level_patterns:
             level_match = re.search(pattern, desc)

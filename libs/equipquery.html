@@ -24,29 +24,39 @@
 
 <script>
 !function(E,N,c,s,e){window.STAT_START_DATETIME=new Date/1,window.PAGE_LOAD_ADDON=window.PAGE_LOAD_ADDON||{};var b=E.document,o=E.encodeURIComponent,O=E.setTimeout,_=E.performance,h=E.navigator,u;function S(e,r){return 0<=e.indexOf(r)}function w(e,r){for(var n in r)r.hasOwnProperty(n)&&(e[n]=r[n]);return e}function A(e){var r=b.cookie.match("(^|;)\\s*"+e+"\\s*=\\s*([^;]+)");return r?r.pop():""}function t(e,r,n){e.attachEvent?e.attachEvent("on"+r,n):e.addEventListener(r,n,!1)}function f(e,r){var n=[];if(r){for(var t in r)r.hasOwnProperty(t)&&n.push(t+"="+o(r[t]));e+=(S(e,"?")?"&":"?")+n.join("&")}return e}function y(){return _&&_.now?Math.round(_.now()):(new Date).getTime()}function x(e){if(!u){var r={},n=b.domain,t=n.split(".")[0];t=t.replace(/(-oppo)|(-huawei)|(-xiaomi)/,""),/^([^.]+)?\.cbg\.163\.com$/.test(n)&&!location.port||(t="dev"),u={product:r[t]||t,log:"js_error",client_type:s,useragent:h.userAgent,from:b.referrer,fingerprint:A("fingerprint"),urs:A("is_user_login")&&A("login_user_urs")};var o=A("last_login_roleid"),a=A("last_login_serverid");o&&(u.roleid=o,u.serverid=a)}for(var i in u.referer=location.href,u)i in e||(e[i]=u[i]);(new Image).src=f(c,e)}var D=y(),r,m="load",g="unload",T="beforeload",j=-1,L=null;!function(){var e=1,a=-1,i=-2,c=-3,s=D,r,p=!0;function n(e,r){var n=s,t=r,o=_&&_.timing;o&&o.navigationStart&&o.loadEventEnd&&(n=o.navigationStart,t=o.loadEventEnd),L(e,n,t)}function v(e,r,n){var t=n?1:a,o=r-e;return o<0?(t=i,o=0):18e5<o&&(t=c,o=0),{status:t,duration:o}}t(E,"beforeunload",function(){T=g,p&&(clearTimeout(r),n(!1,y()))}),t(E,"load",function(){var e=y();T!=g&&(T=m,j=e-D),p&&(r=O(function(){n(!0,e)},100))}),L=function(e,r,n,t){p=!1;var o=v(r,n,e),a=E.screen,i=[a.width+"x"+a.height];h.standalone&&i.push("standalone");var c=w({log:"page_load",status:o.status,time:o.duration,flow_group:A("_flow_group")||"",info:i.join("|")},t||{}),s=window.PAGE_LOAD_ADDON;s&&"object"==typeof s&&(c=w(c,s));var u=window.staticResIsCombine;u&&(c.is_combine_req=u),1!=o.status&&(c.time_start=r,c.time_end=n),(E.matchMedia&&E.matchMedia("(prefers-color-scheme: dark)").matches||S(h.userAgent,"dark_mode"))&&(c.is_dark_mode=1);var f=_&&_.memory;f&&(c.js_heap=f.totalJSHeapSize);try{var m=sessionStorage.getItem("_external_mark")}catch(d){}function g(e,r){var r=r||location.search,n=new RegExp("[?&]"+e+"=([^&]*)").exec(r);return n?decodeURIComponent(n[1]):""}(m=m||A("_external_mark"))&&(c.external_origin=m);var l=g("from_external_id");l&&(c.from_external_id=l),x(c),O(function(){},100)}}(),function(){var f=!1,n=!0,s=function(e,r){return Object.prototype.toString.call(e)==="[object "+(r||"Object")+"]"},r={},m=function(e){return!!r[e]||!(r[e]=!0)},t=function(e){try{if(e.stack){var r=e.stack.match("https?://[^)^\n]+"),n=(r=r?r[0]:"").match(":(\\d+):(\\d+)");n||(n=[0,0,0]);var t=u(e),o=r.replace(n[0],"");return e.fnName&&(o+=":"+e.fnName),{msg:e.message,info:t,rowNum:n[1],colNum:n[2],target:o}}return e.name&&e.message&&e.description?{target:e.fnName,msg:e.message,info:"name:"+e.name+",desc:"+e.description+",number:"+e.number}:e}catch(a){return{msg:"__parse_error__",info:(a.message||a.toString())+"-"+e.toString()}}},u=function(e){var r=e.stack.replace(/\n/gi,"").split(/\bat\b/).slice(0,9).join("@").replace(/\?[^:]+/gi,""),n=e.toString();return S(r,n)||(r=n+"@"+r),r},a=function(e){p(t(e))},o=function(e){if(!e)return!0;if(!n){var r=e.msg;if(S(r,"ReferenceError")||S(r,"\u672a\u5b9a\u4e49"))return!0}return f||m(e.target+e.msg)},i=function(e){return"object"==typeof e&&(e.pagestatus=T,e.loadtime=j,e.duration=y()-D),x(e)},e=5,c=[],g,l=function(e,r){5<r?(c.push(e),g&&clearTimeout(g),g=O(function(){1==c.length?i(c[0]):i({msg:"ERR_MERGED",linenumber:c.length,info:window.JSON?(JSON.stringify||JSON.encode)(c).substr(0,1e3):c[0].msg,idx:r}),c=[]},1e3)):i(e)},d=0,p=function(e){if(!o(e)){var r={idx:++d};for(var n in e)if(Object.hasOwnProperty.call(e,n)){var t=e[n];"target"===n?r.filename=t:"rowNum"===n?r.linenumber=e.rowNum+":"+e.colNum:"colNum"===n||(r[n]=t)}l(r,d)}},v=E.onerror,_;if(E.onerror=function(e,r,n,t,o){var a=e;if(o&&o.stack&&(a=u(o)),s(a,"Event")){var i=a.type,c=a.target;a+=i?"--"+i+"--"+(c?c.tagName+"::"+c.src:""):""}p({msg:e,info:a,target:r,rowNum:n,colNum:t}),v&&v.apply(E,arguments)},E.addEventListener&&E.addEventListener("unhandledrejection",function(e){var r=e.reason;r instanceof window.Error?a(r):p({msg:(JSON.stringify||JSON.encode)(r),type:"promise"})}),E.addEventListener){var h=0;E.addEventListener("error",function(e,r){if(e.target){var n=["IMG","SCRIPT","LINK"],t=e.target,o=(t.tagName||"").toUpperCase(),r="LINK"==o?t.href:t.src;if(!m(r)&&S(n,o)&&!S(r,"/1.gif?")&&null===t.getAttribute("no-tracer")&&"prefetch"!==t.getAttribute("rel")){var a={msg:"LOAD_FAILED",filename:r,idx:++h};if("SCRIPT"==o&&(S(r,N)&&(f=!0),S(r,"http://"))){for(var i=b.getElementsByTagName("script"),c=[],s=0,u=i.length;s<u;s++)i[s]&&i[s].src&&c.push(i[s].getAttribute("src"));a.info=[t.outerHTML,i.length,c.join("|")].join()}l(a,h)}}},!0)}else n=!1;var w={watch:function(t,o){return function(){try{return t.apply(this,o||arguments)}catch(n){var e=/^function[^\(]*/.exec(t.toString());if(n.fnName=e&&e[0],a(n),!_){var r=E.onerror;E.onerror=function(){},_=O(function(){E.onerror=r,_=null},50)}throw n}}},reportError:a,send:p,logPageLoad:function(e,r,n){return L(!0,e,r,n)}};E.CBG_JS_REPORT=w}()}(window,"https://cbg-xyq.res.netease.com","//sigma-other-cbg.proxima.nie.netease.com/1.gif","web","");
-</script><link href=./global.css" rel="stylesheet" type="text/css" media="all" />
-<link href=./pages.css" rel="stylesheet" type="text/css" media="all" />
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/mootools-core-1.3.2.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/mootools-jsonp.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/cbg_com.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/autocomplete.js?v=20140520"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/util.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/server_list_data.js"></script>
+</script><link href="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/css/global.css" rel="stylesheet" type="text/css" media="all" />
+<link href="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/css/pages.css" rel="stylesheet" type="text/css" media="all" />
+<link href="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/css/order-lock.css" rel="stylesheet" type="text/css" />
+<link href="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/css/cbg_com.css" rel="stylesheet" type="text/css" media="all" />
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/order/order-lock.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/mootools-core-1.3.2.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/cbg_com.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/mootools-jsonp.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/autocomplete.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/util.js"></script>
 <script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/test_server_list.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/drop_select_server.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/parse_role.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/recommd.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/parse_role.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/recommd.js"></script>
 <script type="text/javascript">
-var CBG_PAGE_ID = 'overall_search';
 var CgiRootUrl = 'https://xyq.cbg.163.com/cgi-bin';
 var HttpsCgiRootUrl = 'https://xyq.cbg.163.com/cgi-bin';
-var CgiRoot = '/cgi-bin';
+var HomePage = 'https://xyq.cbg.163.com';
 var ResUrl = 'https://cbg-xyq.res.netease.com';
-var ResUrlVer = 'https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084';
-var LoginInfo = {"area_id": 43, "uid": 1635401, "server_name": "\u8fdb\u8d24\u95e8", "server_type": 3, "roleid": "23387570", "area_name": "\u5e7f\u4e1c2\u533a", "block_urs": "ch****01@163.com", "user_icon": "2", "user_msg_num": 5, "safe_code": "K62bhRpA", "user_level": "0", "user_roles": {"23387570": {"color": "0", "roleid": "23387570", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u2606\u67cf\u03bc\u7eac\u704f3", "icon": 2}, "23157594": {"color": "0", "roleid": "23157594", "racename": "\u4eba", "grade": 35, "race": "1", "nickname": "\u70ed\u8840\u9752\u5e74_\u8f89", "icon": 1}, "23388090": {"color": "0", "roleid": "23388090", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u2103\u6556\u56db\u7ea2\u22483", "icon": 2}, "23387585": {"color": "0", "roleid": "23387585", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u2161\u5546\u3013\u59543", "icon": 2}, "23388209": {"color": "0", "roleid": "23388209", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u01da\u961a\u51b0\u5f64\u222b3", "icon": 2}, "23157818": {"color": "0", "roleid": "23157818", "racename": "\u4eba", "grade": 50, "race": "1", "nickname": "\u5e9f\u9752\u534e", "icon": 2}}, "is_server_open_wallet": true, "urs": "chenguohuacgh001@163.com", "login": true, "nickname": "\u2606\u67cf\u03bc\u7eac\u704f3", "serverid": 77, "serversn": 420, "pass_mb_check": 1};
-
+var ResUrlVer = 'https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997';
+var IsLogin = 1;
+var LoginInfo = window.safe_json_decode && safe_json_decode('{"area_id": 43, "uid": 1635401, "server_name": "\u8fdb\u8d24\u95e8", "server_type": 3, "roleid": "23387570", "area_name": "\u5e7f\u4e1c2\u533a", "block_urs": "ch****01@163.com", "user_icon": "2", "user_msg_num": 6, "safe_code": "uhReavuA", "user_level": "0", "user_roles": {"23387570": {"color": "0", "roleid": "23387570", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u2606\u67cf\u03bc\u7eac\u704f3", "icon": 2}, "23157594": {"color": "0", "roleid": "23157594", "racename": "\u4eba", "grade": 35, "race": "1", "nickname": "\u70ed\u8840\u9752\u5e74_\u8f89", "icon": 1}, "23388090": {"color": "0", "roleid": "23388090", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u2103\u6556\u56db\u7ea2\u22483", "icon": 2}, "23387585": {"color": "0", "roleid": "23387585", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u2161\u5546\u3013\u59543", "icon": 2}, "23388209": {"color": "0", "roleid": "23388209", "racename": "\u4eba", "grade": 0, "race": "1", "nickname": "\u01da\u961a\u51b0\u5f64\u222b3", "icon": 2}, "23157818": {"color": "0", "roleid": "23157818", "racename": "\u4eba", "grade": 50, "race": "1", "nickname": "\u5e9f\u9752\u534e", "icon": 2}}, "is_server_open_wallet": true, "urs": "chenguohuacgh001@163.com", "login": true, "nickname": "\u2606\u67cf\u03bc\u7eac\u704f3", "serverid": 77, "serversn": 420, "pass_mb_check": 1}');
+var WalletData = window.safe_json_decode && safe_json_decode('{"is_locked": false, "checking_balance": 0, "balance": 0, "is_pay_freeze": "0", "free_balance": 0}');
+var ServerTime = '2025-08-05 14:35:48';
+var Recommd = {
+	url: "/cgi-bin/recommend.py"
+};
+var Tracker = {
+	url: "https://sigma-other-cbg.proxima.nie.netease.com"
+};
+var SafeCode = "uhReavuA";
 // 是否是无角色登录
 var isFakeRole = false;
+
 if(LoginInfo && LoginInfo.hasOwnProperty('user_roles')) {
 	var roleid = LoginInfo.roleid;
 	if(LoginInfo.user_roles.hasOwnProperty(roleid) && LoginInfo.user_roles[roleid].is_fake_role) {
@@ -54,36 +64,29 @@ if(LoginInfo && LoginInfo.hasOwnProperty('user_roles')) {
 	}
 };
 
-var HomePage = 'https://xyq.cbg.163.com';
-var WalletData = window.safe_json_decode && safe_json_decode('{"is_locked": false, "checking_balance": 0, "balance": 0, "is_pay_freeze": "0", "free_balance": 0}');
-var ServerTime = '2025-06-21 01:01:32';
-var Recommd = {
-	url: "/cgi-bin/recommend.py"
+var StaticFileConfig = {
+	"is_using" : false,
+	"res_root" : "http://xyq.cbg.163.com/static_file",
+	"max_page" : 1
 };
-var Tracker = {
-	url: "https://sigma-other-cbg.proxima.nie.netease.com"
-};
-var SafeCode = "K62bhRpA";
-var IsLogin = 1;
-var ServerInfo = {
-    "area_id" : LoginInfo.area_id,
-    "area_name" : LoginInfo.area_name,
-    "server_id" : LoginInfo.serverid,
-    "server_sn" : LoginInfo.serversn,
-    "server_name" : LoginInfo.server_name
-};
-var equip_refer_loc_origin = decodeURIComponent("overall_search");
-var equip_refer_loc = equip_refer_loc_origin;  // equip_refer_loc 可能会被热门搜索改写
-var page_type = "overall_search";  
 
-if (window.self != window.top){
-	location.href = "about:blank";
+var ServerInfo = {
+	"area_id" : "43",
+	"area_name" : "广东2区",
+	"server_id" : "77",
+	"server_sn" : "420",
+	"server_name" : "进贤门"
 };
 window.addEvent("domready", function(){
+	fix_anonymous_menu_link();
 	var $roleAvatar = $('js_role_avatar');
-	if(isFakeRole && $roleAvatar) {
-		var fakeRoleAvatar = "https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/smallface/fake-role.gif";
-		$roleAvatar.set('src', fakeRoleAvatar);
+	if($roleAvatar) {
+		var src = "https://cbg-xyq.res.netease.com/images/role_icon/small/2.gif";
+		if(isFakeRole) {
+			var src = "https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/smallface/fake-role.gif";
+		}
+		$roleAvatar.set('src', src);
+		$roleAvatar.setStyle('display', '');
 	}
 	if (IsLogin && window.CBG) {
 		CBG.checkUserIsAdult();
@@ -94,16 +97,16 @@ window.addEvent("domready", function(){
 
 </head>
 
-<body class="overallSearch" >
+<body>
 <script>
 if (window.Browser && Browser.ie) {
-  Asset.css('https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/css/ie-update-tips.css');
-  Asset.javascript('https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/ie-update-tips.js');
+  Asset.css('https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/css/ie-update-tips.css');
+  Asset.javascript('https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/ie-update-tips.js');
 }
 </script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/right_float_menu.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/sprite.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/sprite-hotq.js?rcc10a11c2d3fb39c7e084"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/right_float_menu.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/sprite.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/sprite-hotq.js?rc09d0d8f65b7516ba0997"></script>
 
 
 <div id="recent_list_templ">
@@ -198,19 +201,19 @@ if (window.Browser && Browser.ie) {
 			<a class="download_app" id="right_float_download_app" href="javascript:void(0);" >扫码下载</a>
 			<div class="qrcode-list" id="qrcode_list">
 				<p class="qrcode-item">
-					<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_weChat_public.png" alt="">
+					<img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_weChat_public.png" alt="">
 					藏宝阁微信公众号
 				</p>
 				<p class="qrcode-item">
 					<a href="https://cbg.163.com/app/xyq/?from=cbgsidebar&cps=other3" target="_blank">
-						<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_download_other3.png" alt="">
+						<img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_download_other3.png" alt="">
 					</a>
 					手机藏宝阁
 				</p>
 				<p class="qrcode-item " id="qr_close_item">
-					<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_weixin_work.png" alt="梦幻西游电脑版公众号">
+					<img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_weixin_work.png" alt="梦幻西游电脑版公众号">
 					添加企微领取成就点
-					<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_close.png" class="qr_close " id="qr_close">
+					<img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_close.png" class="qr_close " id="qr_close">
 				</p>
 			</div>
 		</li>
@@ -359,58 +362,34 @@ if (window.Browser && Browser.ie) {
 		$('newsTip').setStyle('display', 'none');
 	}
 </script>
-
-<div class="blank"><!-- ie 7 --></div>
 <div class="areaTop"></div>
-<div id="login_info_template" style="display:none;">
-<!--
-	<% if (this.LoginInfo.login) { 
-		var info = this.LoginInfo;
-	%>
-	<div class="userInfo cWhite aWhite">
-		<p>
-			<%= info.area_name %> -&gt; <%= info.server_name %><span class="separator"></span>
-			<span style="display: none;" class="walletTips" id="js_fake_role_login_tips"></span>	
-			<span class="cYellow"><%= info.nickname %></span>
-			<a style="display: none;" class="js_global_normal_role" href="https://xyq.cbg.163.com/cgi-bin/login.py?act=show_role_select_page&select_roleid=<%= info.roleid %>">[切换角色]</a>
-		</p>
-		<p>
-			<a href="https://xyq.cbg.163.com/cgi-bin/userinfo.py?act=cbg_wallet"><span class="title">钱包余额：</span><span class="balance" id="wallet_balance">&nbsp;元</span></a><span class="walletTips js-popoverHook" data-popover-class="tipsBlack popArrowUp"></span><span class="separator"></span><a id="btn_get_money" href="javascript:;" tid="web_other_1_9">提现</a><span class="separator"></span>
-			<a id="buy_card_a" tid="web_other_1_3" href="javascript:;" style="display: none;">充值中心</a>
-		</p>
-		<img class="avatar" id="js_role_avatar" src="https://cbg-xyq.res.netease.com/images/role_icon/small/<%= info.user_icon %>.gif" alt="头像" />
-	</div>
-	<p class="navLinks aWhite">
-		<a href="https://xyq.cbg.163.com/cgi-bin/message.py?act=msg_route" id="user_msg_num_panel"><%= gen_msg_num_html(info.user_msg_num) %></a><span class="separator"></span><a href="https://cbg-xyq.res.netease.com/help/index.html" target="_blank">帮助</a><span class="separator"></span><a href="//xyq.gm.163.com/" target="_blank">客服</a><span class="separator"></span><a id="logout_link" href="javascript:logout('https://xyq.cbg.163.com/cgi-bin/logout.py?act=logout')" class="white_a">退出</a><span class="separator"></span>
-		<a href="https://cbg.163.com/app/xyq/?from=cbgtoplink&cps=other1" class="mobileLink" target="_blank" tid="web_other_1_1">
-			藏宝阁APP 
-			<span class="qrcode-item">
-				<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_download_other1.png" alt="" />
-				手机藏宝阁
-			</span>
-		</a>
-	</p>
-	<% } %>
--->
-</div>
 <div class="header area hasLayout clearfix">
 	<h1 class="logo"><a href="https://xyq.cbg.163.com" title="梦幻西游藏宝阁首页">梦幻西游藏宝阁</a></h1>
-	<div id="login_info_panel" class="headerInfo">
-		<div class="userInfo cWhite">
-			<p>您好，<span class="cYellow">梦幻玩家</span></p>
-			<img class="avatar" src="https://cbg-xyq.res.netease.com/images/no_login_user.gif" width="44" height="44" alt="头像" />
+	<div class="headerInfo">
+		<div class="userInfo cWhite aWhite">
+			<p>
+				广东2区 -&gt; 进贤门<span class="separator"></span>
+				<span style="display: none;" class="walletTips" id="js_fake_role_login_tips"></span>	
+				<span class="cYellow">☆柏μ纬灏3</span>
+				<a style="display: none;" class="js_global_normal_role" href="https://xyq.cbg.163.com/cgi-bin/login.py?act=show_role_select_page&select_role id=23387570" tid="web_other_1_2">[切换角色]</a>
+			</p>
+			<p>
+				<a href="https://xyq.cbg.163.com/cgi-bin/userinfo.py?act=cbg_wallet"><span class="title">钱包余额：</span><span class="balance" id="wallet_balance">&nbsp;元</span></a><span class="walletTips js-popoverHook" data-popover-class="tipsBlack popArrowUp"></span><span class="walletFreeze"></span><span class="separator"></span><a id="btn_get_money" href="javascript:;" tid="web_other_1_9">提现</a><span class="separator"></span>
+				<a id="buy_card_a" tid="web_other_1_3" href="javascript:;" style="display: none;">充值中心</a>
+			</p>
+			<img class="avatar" id="js_role_avatar" style="display:none;" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/blank.png" width="44" height="44" alt="头像" />
 		</div>
 		<p class="navLinks aWhite">
-			<a href="https://xyq.cbg.163.com">首页</a><span class="separator"></span><a target="_blank" href="https://cbg-xyq.res.netease.com/help/index.html">帮助</a><span class="separator"></span><a target="_blank" href="//xyq.gm.163.com/">客服</a><span class="separator"></span>
-			<a href="https://cbg.163.com/app/xyq/?from=cbgtoplink&cps=other1" class="mobileLink" target="_blank" tid="web_other_1_1">
-				藏宝阁APP
+			<a href="https://xyq.cbg.163.com/cgi-bin/message.py?act=msg_route" id="user_msg_num_panel" tid="web_other_1_4"></a><span class="separator"></span><script>$('user_msg_num_panel').set('html', gen_msg_num_html(6));</script> <a href="https://cbg-xyq.res.netease.com/help/index.html" target="_blank" tid="web_other_1_5">帮助</a><span class="separator"></span><a href="//xyq.gm.163.com/" target="_blank" tid="web_other_1_6">客服</a><span class="separator"></span><a id="logout_link" href="javascript:logout('https://xyq.cbg.163.com/cgi-bin/logout.py?act=logout')" class="white_a" tid="web_other_1_7">退出</a><span class="separator"></span> 
+			<a href="https://cbg.163.com/app/xyq/?from=cbgtoplink&cps=other1" class="mobileLink" target="_blank" tid="web_other_1_1">藏宝阁APP 
 				<span class="qrcode-item">
-					<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_download_other1.png" alt="" />
+					<img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_download_other1.png" alt="" />
 					手机藏宝阁
 				</span>
 			</a>
 		</p>
 	</div>
+
 </div>
 <div class="areaBtm"></div>
 <!-- 浮动层开始，请作为body的顶级子集 -->
@@ -1028,11 +1007,11 @@ data_sell_by_apart_type="2"
 <% } %>
 -->
 </script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/equip_desc_parser.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/pet.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/equip_desc_parser.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/pet.js"></script>
 <script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/game_auto_config.js"></script>    
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/xyq_setting_config.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/role_info_config.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/xyq_setting_config.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/role_info_config.js"></script>
 
 <script>
 function get_window_height()
@@ -1223,10 +1202,10 @@ function show_role_tips_box_common(el, other_info) {
         school_skill_info["school_skill" + i + "_name"]  = "";
       }
     }
-
+    var equip_name = node.getAttribute('data_equip_name');
     var role = {
       "nickname": other_info['cName'],
-      'roleid': other_info['usernum'],
+      'roleid': equip_name || other_info['usernum'],
       'school_offer': other_info['iSchOffer'],
       'org_offer': other_info['iOrgOffer'],
       'school': other_info['iSchool'],
@@ -1387,83 +1366,1202 @@ function set_img_icon(){
 }
 
 </script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/drag_slider.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/auto_search_config.js"></script>    
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/common/draw_tips.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/overall_search_com.js"></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/overall_search_equip.js"></script>
+
+
+<link href="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/css/query.css" rel="stylesheet" />
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/kind_data.js?v=20190514"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/equip_name.js?v=20190514"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/searchable_equip_names.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/saleable_pet_name.js?v=20190514"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/String.Crypt.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/fingerprint2.min.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/common/draw_tips.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/equip_query_com.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/query.js"></script>
 <script type="text/javascript">
-	var OverallSearchType = 'equip';
-	var SearchUrl = '/cgi-bin/xyq_overall_search.py';
-	var PageInfo = {"need_captcha": false};
-	window.addEvent('domready', function(){
-		$('sub_equip').addClass('on');
-		new OverallEquipSearcher();
+var SearchTypes = {"equip_search": 4, "shenbing_search": 13, "offsale_search": 5, "search_by_type": 1, "guardian_stone_search": 22, "pet_equip_search": 16, "xuanyin_search": 24, "recommend_pet_search": 9, "charms_search": 20, "pet_search": 3, "appointed_search": 6, "seller_search": 7, "daoju_search": 14, "disha_star_search": 15, "cuiyu_jiejing_search": 21, "xianqi_search": 12, "peishi_search": 19, "normal_search": 0, "role_search": 2, "recommend_equip_search": 10, "recommend_lingshi_search": 11, "jinxiu_lihe_search": 23, "child_equip_search": 17, "recommend_role_search": 8, "normal_equip_search": 18};
+var SearchArg = {};
+var SearchType = 0;
+var FairShowType = 'pass_fair_show';
+var MaxStaticDepth = 2;
+var NoStaticKindIds = [23];
+var equip_refer_loc = 'reco_left';
 
-		if (PageInfo.need_captcha) {
-			AjaxGuard.show_simple_captcha();
+var CommonVar = {
+	'act': 'recommend_search',
+	'server_id': '77',
+	'areaid': '43',
+	'server_name': '进贤门',
+	'page': 1,
+	'query_order': 'score DESC'
+};
+
+(function() {
+  
+  if (CommonVar.act == 'recommend_search' || CommonVar.act == 'overall_wjd_equip_search' || CommonVar.act == 'overall_wjd_lingshi_search') {
+    var _gen_highlight_html = gen_highlight_html;
+    gen_highlight_html = function(highlight_list, separator) {
+      return _gen_highlight_html(highlight_list, separator, false);
+    }
+  }
+  
+  if (window.gQuery && gQuery.isDefaultSort && window.CommonVar) {
+    if ('query_order' in CommonVar) {
+      CommonVar.query_order = '';
+    }
+  }
+})();
+
+var DefaultQueryOrder = 'score DESC';
+var CheckVar = {};
+var QueryVar = {"price_max": "", "activity_tag": "", "price_min": "", "kindid": "", "highlight_filter": "", "has_kol_evaluate_desc": "", "recommend_type": "1"};
+
+var trace_log_name = ['show_equip_detail', 'recommd_in_equip_detail_page'];
+
+function display_appointed_equip(){
+	$$('.soldImg img').each(function(el, index){
+		var equipid = el.getAttribute('data_equipid');
+		var appointed_id = el.getAttribute('data_appointed_roleid').trim();
+		if(appointed_id){
+			$('appointed_tip_msg_' + equipid).style.display = 'inline';
 		}
-    window.server_selector = new UserServerSelector();
-		server_selector.show_user_server_info();
-    new HotSearch('btn_equip_search');
 	});
-	var trace_log_name = ['show_equip_detail'];
-</script>
+}
 
-<div id="search_empty_templ" style="display:none;">
+function highlight_senior_shoujue(){
+	$$('#soldList .equip_name').each(function(el, index){
+		var equip_type = el.getAttribute('data_equip_type');
+		if(equip_type != '611' && equip_type != '18521')
+			return;
+		var html = el.get('html').trim();
+		if(is_advanced_yaojue(html))
+			el.set('html', '<span class="cRed">' + html + '</span>');
+	});
+}
+
+function initDownloadQrcodeShow() {
+  var moneyKindid = 23;
+  if(QueryVar && QueryVar.kindid == moneyKindid) {
+    $('downloadAppDesc').set('html', '下载app可一键购买<br />指定数量梦幻币')
+  } else {
+    $('downloadAppDesc').set('html', '扫码下载App订阅心仪物品<br />相关物品上架第一时间购买')
+  }
+  $('queryDownloadApp').setStyle('display', '');
+}
+
+window.addEvent('domready', function(){
+	$("top_buy_menu").addClass("on");
+
+	if (CommonVar.page !== 1) {
+		$$('#soldList tbody').setStyle('display', '');
+	}
+
+	if (if_need_display_highlight()){
+		if (QueryVar["highlight_filter"]){
+			QueryVar["highlight_filter"] = QueryVar["highlight_filter"].replace(/\&quot;/g, '"');
+		}
+	}
+  
+  show_kind_tree();
+  if (QueryVar.kindid != undefined && QueryVar.kindid !=""){
+		$("kind_a_" + (QueryVar.kindid || 0)).addClass("on");
+	}
+
+	
+	init_advance_search_box();
+	init_search_text();
+  init_sub_nav();
+  init_recommend_menu();
+  
+	check_search_panel();
+	check_offsale_equips();
+	check_user_msg();
+  
+  
+  
+  init_query_page(function() {
+    
+    $$('#soldList tbody').setStyle('display', '');
+    display_appointed_equip();
+    highlight_senior_shoujue();
+    reg_tips_event();
+    init_equip_list_collect('list');
+    init_money_list();
+    init_list_filter();
+    
+    initDownloadQrcodeShow();
+  });
+});
+</script>
+<div id="kind_tree_node_templ" style="display:none">
 <!--
-	<p class="textCenter cRed pageTips">没有符合条件的商品</p>
+	<%
+		var kind_item = this.kind_info[0];
+		if(this.hide_kinds.contains(kind_item[0])){
+			return;
+		}
+		var child_list = this.kind_info[1];
+		var kind_family = this.family;
+		if (this.is_top){
+			var lable_begin = "<h3 style='padding-left:25px;'>";
+			var label_end = "</h3>";
+			this.h_size = 2;
+		} else {
+			var lable_begin = "<h" + this.h_size + ">";
+			var label_end = "</h" + this.h_size + ">";		
+		}
+		
+		var has_child = false;
+		var has_child_cls = "";
+		var has_child_display = "none";
+		if (child_list.length != 0){
+			has_child = true;
+			has_child_cls = "on";
+			has_child_display = "block";
+		}
+		
+		var li_cls = "";
+		if (!has_child){
+			li_cls = "noChild";
+		}
+		
+		
+	%>
+<li class="<%= li_cls %>">
+<% if (kind_item[0] == 0 && !if_display_all_menu()){ %>
+
+<% } else { %>
+	<%= lable_begin %>
+		<% if (has_child && !this.is_top) { %>
+      <button class="off <%= has_child_cls %>" onclick="tree_folding(this, 'tree_node_<%= kind_item[0] %>')"></button>
+		<% } %>
+<a href="#" id="kind_a_<%= kind_item[0] %>" onclick="search_by_kind(<%= kind_item[0] %>, <%= this.kind_depth %>);return false;" tid="web_buy_12"><%= kind_item[1] %></a>
+	<%= label_end %>
+
+<% } %>
+
+	<% if (has_child) { %>
+		<ul id="tree_node_<%= kind_item[0] %>" style="display:<%= has_child_display %>">
+			<% for (var i=0; i < child_list.length; i++) { %>
+				<%
+					var new_size = this.h_size + 1;
+					var data = {"kind_info":child_list[i],"h_size":new_size, "is_top":false,"family":kind_family, "kind_depth": (this.kind_depth+1), "hide_kinds": this.hide_kinds};
+					var sub_list_html = render("kind_tree_node_templ", data);
+				%>
+				<%= sub_list_html %>
+			<% } %> 
+		</ul>
+	<% } %>
+</li>
+	
 -->
 </div>
 
-<script type="text/html" id="search_result_templ">
-<% var equips=this.equips %>
-<table width="100%" id="soldList" class="tb01" cellspacing="0" cellpadding="0" border="0" id="soldList" log-exposure-container="1">
-	<tr id="order_menu">
-		<th width="60">
-			<a href="javascript:search_order_by('');" data_attr_name="" data_sort_way="single">综合排序</a>
-		</th>
-		<th><a href="javascript:search_order_by('level')" data_attr_name="level">等级</a></th>
-		<th><a href="javascript:search_order_by('all_damage')" data_attr_name="all_damage">总伤</a></th>
-		<th><a href="javascript:search_order_by('init_damage')" data_attr_name="init_damage">初伤</a></th>
-		<th><a href="javascript:search_order_by('init_wakan')" data_attr_name="init_wakan">初灵</a></th>
-		<th><a href="javascript:search_order_by('init_defense')" data_attr_name="init_defense">初防</a></th>
-		<th><a href="javascript:search_order_by('init_hp')" data_attr_name="init_hp">初血</a></th>
-		<th><a href="javascript:search_order_by('init_dex')" data_attr_name="init_dex">初敏</a></th>
-		<th>宝石</th>
-		<th>附加属性</th>
-		<th>特技/特效</th>
-		<th>套装</th>
-		<th><a href="javascript:search_order_by('price')" data_attr_name="price">价格</a></th>
-		<th>服务器</th>
-		<th></th>
+
+<div id="kind_tree_templ" style="display:none">
+<!--
+<h3 style="padding-left:25px; display:none;color:#ff0000" id="menu_recommend">推荐</h3>
+<h3 style="padding-left:25px; display:none" id="menu_recommend_all">
+	<a onclick="search_by_kind(0, 1);return false;" id="kind_a_0" href="#">全部</a>	
+</h3>
+
+<ul>
+	<li class="noChild" style="display:none;color:#c5612e"><h4><a id="menu_recommend_type_1"  href="https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1&client_type=web" tid="web_buy_11">角色</a></h4></li>
+	<li class="noChild" style="display:none;color:#c5612e"><h4><a id="menu_recommend_type_3" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=3&client_type=web" tid="web_buy_11">召唤兽</a></h4></li>
+	<li class="noChild" style="display:none;color:#c5612e"><h4><a id="menu_recommend_type_2" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=2&client_type=web" tid="web_buy_11">装备</a></h4></li>
+	<li class="noChild" style="display:none;color:#c5612e"><h4><a id="menu_recommend_type_4" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=4&client_type=web" tid="web_buy_11">灵饰</a></h4></li>
+</ul>
+
+<ul>
+	<%
+		if($("kind_id")){
+			var kindid = $("kind_id").value.toInt();
+		} else {
+			var kindid = QueryVar.kindid || 0;
+		}
+		var kind_family = get_kind_family(kind, kindid);
+		kind[0][0] = kind[0][0].toInt();
+		var hide_kinds = this.hide_kinds;
+		if(this.hide_kinds==undefined){
+			hide_kinds = [];	
+		}
+		var data = {"kind_info":kind,"h_size":3, "is_top":true, "family":kind_family, "kind_depth":1, "hide_kinds": hide_kinds};
+		var tree_html = render("kind_tree_node_templ", data);
+	%>
+	
+	<%= tree_html %>
+</ul>
+-->
+</div>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/auto_search_config.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/overall_search_equip.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/js/wjd_combine_buyer_h5.js"></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/drag_slider.js"></script>
+
+<form style="display:none" name="advance_search" id="advance_search" method="post" action="https://xyq.cbg.163.com/cgi-bin/query.py" accept-charset="gbk" onsubmit="document.charset='gbk';"></form>
+
+<script type="text/html" id="role_search_templ">
+<% 
+	var arg = this.arg; 
+	var level_min = arg["level_min"] ? arg["level_min"]: "";
+	var level_max = arg["level_max"] ? arg["level_max"]: "";
+%>
+<table width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<th>门派：</th>
+		<td>
+			<select id="role_school" onchange="update_role_type()">
+			<option value="">--不限--</option>
+			<% for (var school in SchoolNameInfo) { %>
+				<% var el_selected = school==arg["school"] ? "selected":"" %>
+				<option <%= el_selected %> value="<%= school %>"><%= SchoolNameInfo[school]%></option>
+			<% } %>	
+			</select>
+		</td>
+		<th>角色外形：</th>
+		<td>
+			<select id="role_type">
+				<option value="">--不限--</option>
+				<% 
+					var school = arg["school"]; 
+					if(school){
+						var kind_list = SchoolKindMapping[school];
+					}else{
+						var kind_list = Object.keys(RoleKindNameInfo);
+					}
+				%>
+				<% for (var i=0; i < kind_list.length; i++){
+						var kind = kind_list[i];
+						var el_selected = kind==arg["race"] ? "selected" : "";
+				%>
+				<option <%= el_selected %> value="<%= kind %>"><%= RoleKindNameInfo[kind]%></option>
+				<%}%>
+			</select>
+		</td>
+		<th>等级区间：</th>
+		<td colspan="5">
+			<input id="txt_level_min" type="text" size="4" class="txt1" value="<%= level_min %>" /> - <input id="txt_level_max" type="text" size="4" class="txt1" value="<%= level_max %>" />
+		</td>
 	</tr>
-	<% var addon_arg = get_cross_buy_addon_args(); %>
-	<% for(var i=0; i<equips.length; i++) { %>
-		<%
+	<tr>
+		<th>攻击修炼：</th>
+		<td>
+			<select id="expt_gongji">
+				<option value="0">--不限--</option>
+				<% for (var i=1; i <= 25; i++) { %>
+					<% var el_selected = i == arg["expt_gongji"] ? "selected":""; %>
+					<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+			</select>
+		</td>
+		<th>防御修炼：</th>
+		<td>
+			<select id="expt_fangyu">
+				<option value="0">--不限--</option>
+				<% for (var i=1; i <= 25; i++) { %>
+					<% var el_selected = i == arg["expt_fangyu"] ? "selected":""; %>
+					<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+			</select>
+		</td>
+		<th>猎术修炼：</th>
+        <td>
+            <select id="expt_lieshu">
+				<option value="0">--不限--</option>
+				<% for (var i=1; i <= 20; i++) { %>
+					<% var el_selected = i == arg["expt_lieshu"] ? "selected":""; %>
+					<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+            </select>
+        </td>
+		<th>&nbsp;</th>
+		<td>&nbsp;</td>
+		<th>&nbsp;</th>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<th>法术修炼：</th>
+		<td>
+			<select id="expt_fashu">
+				<option value="0">--不限--</option>
+				<% for (var i=1; i <= 25; i++) { %>
+					<% var el_selected = i == arg["expt_fashu"] ? "selected":""; %>
+					<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+			</select>
+		</td>
+        <th>抗法修炼：</th>
+        <td>
+            <select id="expt_kangfa">
+				<option value="0">--不限--</option>
+				<% for (var i=1; i <= 25; i++) { %>
+					<% var el_selected = i == arg["expt_kangfa"] ? "selected":""; %>
+					<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+            </select>
+        </td>
+		<th>宠物修炼：</th>
+        <td>
+            <select id="sel_expt_bb">
+				<option value="">--不限--</option>
+				<option value="bb_expt_total">宠修总和</option>
+				<option value="bb_expt_gongji">攻击控制</option>
+				<option value="bb_expt_fangyu">防御控制</option>
+				<option value="bb_expt_fashu">法术控制</option>
+				<option value="bb_expt_kangfa">抗法控制</option>
+            </select>&ge;<input type="text" id="txt_bb_expt" class="txt1" size="4" />
+        </td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+		<td></td>
+    </tr>
+	<tr>
+		<th>价格区间：</th>
+		<td>
+			<input id="txt_price_min" type="text" size="7" class="txt1" value="<%= fen2yuan_para(arg.price_min) %>" /> - <input id="txt_price_max" type="text" size="7" class="txt1" value="<%= fen2yuan_para(arg.price_max) %>" />元
+		</td>
+		<th>总经验：</th>
+		<td><input id="txt_sum_exp_min" type="text" size="4" class="txt1" value="<%= arg.sum_exp_min %>" /> - <input id="txt_sum_exp_max" type="text" size="4" class="txt1" value="<%= arg.sum_exp_max %>" />亿</td>
+		<th>潜能果数&ge;&nbsp;</th>
+        <td>
+			<input type="text" class="txt1" size="4" id="txt_qian_neng_guo" value="<%= arg.qian_neng_guo %>" />
+        </td>
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+	<tr>
+		<th>
+			奇经八脉：
+		</th>
+		<td>
+			乾元丹&ge;<input type="text" class="txt1" size="6" id="txt_qian_yuan_dan" value="<%= arg.qian_yuan_dan %>" />
+		</td>
+		<th>师门技能：</th>
+		<td colspan="5.5">
+			任意&nbsp;<select id="sel_school_skill_num">
+				<option value="">不限</option>
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5</option>
+				<option value="6">6</option>
+				<option value="7">7</option>
+			</select>&nbsp;个技能等级&ge;<input id="txt_school_skill_level" size="6" class="txt1" type="text" value="<%= arg.school_skill_level %>">
+			&nbsp;包含符石、法宝影响:
+			<label><input type="radio" name="original_school_skill" value="1" id="original_school_skill_1" checked> 是</label>&nbsp;&nbsp;<label><input type="radio" name="original_school_skill" value="0" id="original_school_skill_0"> 否</label>
+		</td>
+	</tr>
+	<tr>
+		<th>
+		</th>
+		<td>
+		</td>
+		<th>
+		</th>
+		<td>
+		</td>
+		<th>
+		</th>
+		<td style="display: flex;justify-content: flex-end;flex-wrap: wrap;" colspan="9">
+			<input type="button" value="查询" class="btn1" onclick="search_role()" />
+		</td>
+	</tr>
+</table>
+
+<input type="hidden" name="highlight_filter" id="highlight_filter" value="" />
+
+<div class="filter" id="highlight_filter_panel"></div>
+</script>
+
+<script type="text/html" id="pet_search_templ">
+<%
+	var arg = this.arg; 
+	var pet_type = arg["type"];
+	if (pet_type){
+		pet_type = pet_type.split(",")[0];
+	}
+	var name="";
+	if (pet_type && SaleablePetNameInfo[pet_type]){
+		name=SaleablePetNameInfo[pet_type];
+	}
+	
+	var level_min = arg["level_min"] ? arg["level_min"]:"";
+	var level_max = arg["level_max"] ? arg["level_max"]:"";
+	
+	var growth = "0";
+	if (arg["growth"]){
+		growth = arg["growth"]/1000;
+		growth = growth.toFixed(3);
+	}
+%>
+<table width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<th>召唤兽类型：</th>
+		<td><div style="position:relative;"><input id="pet_select_box" type="text" class="txt1" size="12" value="<%= name %>" /></div></td>
+		<th>召唤兽资质：</th>
+		<td>
+			<select id="sel_pet_aptitude">
+				<option value="">--不限--</option>
+				<option value="attack_aptitude">攻击资质</option>
+				<option value="defence_aptitude">防御资质</option>
+				<option value="physical_aptitude">体力资质</option>
+				<option value="magic_aptitude">法力资质</option>
+				<option value="speed_aptitude">速度资质</option>
+				<option value="avoid_aptitude">躲避资质</option>
+			</select>&ge;<input type="text" size="4" class="txt1" id="txt_pet_aptitude" />
+		</td>
+		<th>携带技能数量：</th>
+		<td>
+			<select id="pet_skill_num">
+				<option value="">--不限--</option>
+				<% for (var i=1; i <= 12; i++) { %>
+					<% var el_selected = arg["skill_num"]==i ? "selected":"";  %>	
+					<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+			</select>
+		</td>
+		<td><label><input type="checkbox" id="no_include_sp_skill" />不含认证技能</label></td>
+	</tr>
+	<tr>
+		<th>召唤兽等级：</th>
+		<td><input id="pet_level_min" type="text" size="4" class="txt1" value="<%= level_min %>" /> - <input id="pet_level_max" type="text" size="4" class="txt1" value="<%= level_max %>" /></td>
+		<th>成长大于等于：</th>
+		<td><input id="pet_growth" type="text" size="4" class="txt1" value="<%= growth %>" /></td>
+		<th>召唤兽状态：</th>
+		<td>
+			<select id="sel_pet_status">
+				<option value="">--不限--</option>
+				<option value="yesheng">野生</option>
+				<option value="baobao">宝宝</option>
+				<option value="color1">变异1</option>
+				<option value="color2">变异2</option>
+			</select>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<th>价格区间：</th>
+		<td><input id="txt_pet_price_min" type="text" size="7" class="txt1" value="<%= fen2yuan_para(arg.price_min) %>" /> - <input id="txt_pet_price_max" type="text" size="7" class="txt1" value="<%= fen2yuan_para(arg.price_max) %>" /></td>
+		<th>特殊技能：</th>
+		<td>
+			<select id="sel_pet_skill">
+				<option value="">--不限--</option>
+				<% for(var key in AUTO_SEARCH_CONFIG.native_pet_skills) { %>
+					<option value="<%= key %>" ><%= AUTO_SEARCH_CONFIG.native_pet_skills[key] %></option>
+				<% } %>
+			</select>
+		</td>
+		<th colspan="2"><span id="include_fair_show_panel" style="display:none;"><input type="checkbox" id="chk_include_fair_show" />显示公示期物品</span></td>
+		<th>&nbsp;&nbsp;<input type="button" value="查询" class="btn1" onclick="search_pet()" /></th>
+	</tr>
+</table>
+
+<input type="hidden" name="highlight_filter" id="highlight_filter" value="" />
+<div class="filter" id="highlight_filter_panel"></div>
+
+</script>
+
+<script type="text/html" id="highlight_filter_templ">
+	<% if (this.filter_list.length > 0){ %>
+	<strong>亮点关键字检索：</strong>
+	<ul >
+		<% for (var i=0; i < this.filter_list.length; i++){ %>
+			<% var filter = this.filter_list[i]; %>
+			<li><span><%= htmlEncode(filter[0]) %><a href="#" onclick="del_highlight_filter(this);return false;" data_paras="<%= JSON.encode(filter).toBase64() %>">×</a></span></li>
+			<% } %>
+		</ul>
+		<% } %>
+</script>
+
+
+<script type="text/html" id="equip_search_templ">
+<%
+  var AUTO_SEARCH_CONFIG = window.AUTO_SEARCH_CONFIG || {};
+	var role_level_list = ["60", "70", "80", "90", "100", "110", "120", "130", "140", "150", "160"];
+	var role_equip_suits = changeObjectToArray(AUTO_SEARCH_CONFIG.suit_effects);
+	var guideBook_zhizao_suits = changeObjectToArray(AUTO_SEARCH_CONFIG.zz_skill_books);
+	var guideBook_lingshi_suits = changeObjectToArray(AUTO_SEARCH_CONFIG.ls_skill_books);
+	var xuanlingzhu_suits = [["56974", "破军"],["56973", "回春"]];
+	var xuanlingzhu_level_list = ["5", "6", "7", "8"];
+
+	var zhongling_stone_texing = AUTO_SEARCH_CONFIG.lingshi_suit_effects;
+  var zhongling_stone_levels = [5, 6, 7, 8];
+  
+	var arg = this.arg;
+	var equip_search_acts = ["search_role_equip", "search_material", "search_msyj_neidan", "search_stone", "search_jl_stone"];
+	var selected_act = "search_role_equip";
+	if(this.common_arg && equip_search_acts.contains(this.common_arg.act)){
+		selected_act = this.common_arg.act;
+	}
+	
+	var dianhuashi_skills = AUTO_SEARCH_CONFIG.dianhua_stone_type;
+	var lingxiyu_effects = AUTO_SEARCH_CONFIG.ling_xi_yu_affects;
+%>
+<table width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="75">
+			<label><input type="radio" <%= selected_act == "search_role_equip" ? "checked=\"checked\"" : "" %> value="search_role_equip" name="equip_kind" />角色装备</label>
+		</td>
+		<td width="135" >
+			<select id="s_role_type" class="label_role_equip">
+				<option value="">所有类型</option>
+				<%
+					var select_kindid = null;
+					if(selected_act == "search_role_equip") {
+						select_kindid = arg.kindid;
+					}
+				%>
+				<% for (var i = 0; i < AUTO_SEARCH_CONFIG.weapon_armors.length;i++) { %>
+					<% 
+					  var item = AUTO_SEARCH_CONFIG.weapon_armors[i]; 
+					  var kindid = item[0]; 
+					  var text = item[1]; 
+						var el_selected = select_kindid == kindid ? "selected" : ""; 
+					%>
+					<option <%= el_selected %> value="<%= kindid %>"><%= text %></option>
+				<% } %>
+			</select>
+		</td>
+		<td width="135" >
+			<%
+				var s_role_level = null;
+				var s_role_price_min = null;
+				var s_role_price_max = null;
+				var s_role_equip_suit = null;
+				if(selected_act == "search_role_equip") {
+					s_role_level = arg["level_min"];
+					s_role_price_min = arg.price_min;
+					s_role_price_max = arg.price_max;
+					s_role_equip_suit = arg.suit_effect;
+				}
+			%>
+			<select id="s_role_level" class="label_role_equip">
+				<option value="">所有等级</option>
+				<% for(var i=0; i<role_level_list.length; i++) { %>
+					<% var el_selected = s_role_level==role_level_list[i] ? "selected" : "" %>
+					<option <%= el_selected %> value="<%= role_level_list[i] %>"><%= role_level_list[i] %></option>
+				<% } %>
+			</select>
+		</td>
+		<td>
+			价格区间
+			<input id="txt_equip_price_min" type="text" size="7" class="txt1 label_role_equip" value="<%= fen2yuan_para(s_role_price_min) %>" /> - <input id="txt_equip_price_max" type="text" size="7" class="txt1 label_role_equip" value="<%= fen2yuan_para(s_role_price_max) %>" />
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td colspan="5">
+			<div id="suit_effect_panel" style="position:relative;">
+			套装：
+			<label style="display:none"><input type="radio" name="rdo_suit_effect" value="shortcut" id="radio_short_cut" checked="checked" /></label>
+			<select style="display:none" id="sel_short_cut" onfocus="$('radio_short_cut').checked='checked';">
+				<option value="">--不限--</option>
+				<% for(var i=0; i<role_equip_suits.length; i++){ %>
+					<% var el_selected = s_role_equip_suit==role_equip_suits[i][0] ? "selected" : "" %>
+					<option <%= el_selected %> value="<%= role_equip_suits[i][0] %>"><%= role_equip_suits[i][1] %></option>
+				<% } %>
+			</select>
+			<label>
+				<input type="radio" name="rdo_suit_effect" value="added_status" id="radio_added_status">附加状态
+			</label><input type="input" id="txt_added_status" size="6" onfocus="$('radio_added_status').checked='checked'" />
+			<label>
+				<input type="radio" name="rdo_suit_effect" value="append_skill" id="radio_append_skill">追加法术
+			</label><input type="input" id="txt_append_skill" size="6" onfocus="$('radio_append_skill').checked='checked'" />
+			<label>
+				<input type="radio" name="rdo_suit_effect" value="transform_skill" id="radio_transform_skill">变身术之
+			</label><input type="input" id="txt_transform_skill" size="6" onfocus="$('radio_transform_skill').checked='checked'" />
+			<label>
+				<input type="radio" name="rdo_suit_effect" value="transform_charm" id="radio_transform_charm">变化咒之
+			</label><input type="input" id="txt_transform_charm" size="6" onfocus="$('radio_transform_charm').checked='checked'" />
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>特技：
+			<select id="sel_equip_special_skill" class="label_role_equip">
+				<option value="">所有类型</option>
+				<% for(var i=0; i < SpecialSkills.length; i++){ %>
+					<% var sp_skill = SpecialSkills[i]; %>
+					<option value="<%=sp_skill[0] %>" <% if(sp_skill[0] == arg["special_skill"]){ %>selected<% } %>><%=sp_skill[1] %></option>
+				<% } %>
+			</select>
+		</td>
+		<td>特效：
+			<select id="sel_equip_special_effect" class="label_role_equip">
+				<option value="">所有类型</option>
+				<% for(var i=0; i < SpecialEffects.length; i++){ %>
+					<% var sp_effect = SpecialEffects[i]; %>
+					<option value="<%=sp_effect[0] %>" <% if(sp_effect[0] == arg["special_effect"]){ %>selected<% } %> ><%=sp_effect[1] %></option>
+				<% } %>
+			</select>
+		</td>
+		<td colspan="2">基础属性：
+			<select id="sel_equip_attr" class="label_role_equip">
+				<option value="">所有类型</option>
+				<% 
+					var equip_attr_list = [
+						["init_damage", "初伤（包含命中）"],
+						["init_damage_raw", "初伤（不含命中）"],
+						["init_defense", "初防"],
+						["init_hp", "初血"],
+						["init_dex", "初敏"],
+						["init_wakan", "初灵"],
+						["all_wakan", "总灵"],
+						["all_damage", "总伤"],
+						["damage", "伤害"]
+					];
+					var selected_equip_attr_value = "";
+					for(var i=0; i<equip_attr_list.length; i++){ 
+						var equip_attr = equip_attr_list[i];
+				%>
+				<option value="<%=equip_attr[0] %>" <% if(arg[equip_attr[0]]){ selected_equip_attr_value=arg[equip_attr[0]];%>selected<% }%> ><%=equip_attr[1] %></option>
+				<% } %>
+			</select>
+			&ge; <input type="text" size="6" class="txt1" id="txt_equip_attr" value="<%=selected_equip_attr_value %>"/>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td colspan="4"><span style="float:left;line-height:24px;">附加属性：</span>
+			<ul class="btnList" style="float:left" id="sum_attr_panel">
+				<% for(var key in AUTO_SEARCH_CONFIG.sum_attrs) { %>
+					<li data_value="<%= key %>"><span><%= AUTO_SEARCH_CONFIG.sum_attrs[key] %></span></li>
+				<% } %>
+			</ul>&nbsp;
+			属性总和&ge; <input type="text" size="6" class="txt1" id="txt_sum_attr_value" value="<%=arg.sum_attr_value %>"/>
+		</td>
+	</tr>
+	<tr>
+		<td><label><input type="radio" <%= selected_act == "search_material" ? "checked=\"checked\"" : "" %> value="search_material" name="equip_kind"/>材料</label></td>
+		<td colspan="2">
+    
+			<select id="sel_material_s_type" class="label_material verAlignM">
+				<option value="">所有类型</option>
+				<% for(var key in AUTO_SEARCH_CONFIG.material_types) { %>
+					<option value="<%= key %>"><%= AUTO_SEARCH_CONFIG.material_types[key] %></option>
+				<% } %>
+			</select>
+      
+      <%
+				var zhizao = null;
+				if(selected_act == "search_material") {
+					zhizao = arg["skill_text"];
+				}
+			%>
+      <select id="sel_guidebook_zhizao" class="label_material verAlignM" style="display:none;">
+				<option value="">所有类型</option>
+				<% for (var i=0; i < guideBook_zhizao_suits.length; i++) { %>
+          <% var el_selected = zhizao == guideBook_zhizao_suits[i][0] ? "selected":"";  %>
+					<option <%= el_selected %> value="<%= guideBook_zhizao_suits[i][0] %>"><%= guideBook_zhizao_suits[i][1] %></option>
+				<% } %>			
+			</select>
+      
+      <%
+				var lingshi = null;
+				if(selected_act == "search_material") {
+					lingshi = arg["skill_text"];
+				}
+			%>
+      <select id="sel_guidebook_lingshi" class="label_material verAlignM" style="display:none;">
+				<option value="">所有类型</option>
+				<% for (var i=0; i < guideBook_lingshi_suits.length; i++) { %>
+          <% var el_selected = lingshi == guideBook_lingshi_suits[i][0] ? "selected":"";  %>
+					<option <%= el_selected %> value="<%= guideBook_lingshi_suits[i][0] %>"><%= guideBook_lingshi_suits[i][1] %></option>
+				<% } %>			
+			</select>
+
+			<%
+				var xuanlingzhu = null;
+				if(selected_act == "search_material") {
+					xuanlingzhu = arg["skill_text"];
+				}
+			%>
+      <select id="sel_xunlingzhu" class="label_material verAlignM" style="display:none;">
+				<option value="">所有类型</option>
+				<% for (var i=0; i < xuanlingzhu_suits.length; i++) { %>
+          <% var el_selected = xuanlingzhu == xuanlingzhu_suits[i][0] ? "selected":"";  %>
+					<option <%= el_selected %> value="<%= xuanlingzhu_suits[i][0] %>"><%= xuanlingzhu_suits[i][1] %></option>
+				<% } %>			
+			</select>
+
+			<%
+			xuanlingzhu_level= null;
+				if(selected_act == "search_material") {
+					xuanlingzhu_level = arg["equip_level"];
+				}
+			%>
+			<select id="sel_xunlingzhu_level" class="label_material verAlignM">
+				<option value="">所有等级</option>
+				<% for (var i=0; i < xuanlingzhu_level_list.length; i++) { %>
+					<% var el_selected = xuanlingzhu_level==xuanlingzhu_level_list[i] ? "selected":"";  %>
+					<option <%= el_selected %>  value="<%= xuanlingzhu_level_list[i] %>"><%= xuanlingzhu_level_list[i] %></option>
+				<% } %>			
+			</select>
+
+			<%
+				material_level = null;
+				if(selected_act == "search_material") {
+					material_level = arg["equip_level"];
+				}
+			%>
+			<select id="sel_material_level" class="label_material verAlignM">
+				<option value="">所有等级</option>
+				<% for (var i=0; i < role_level_list.length; i++) { %>
+					<% var el_selected = material_level==role_level_list[i] ? "selected":"";  %>
+					<option <%= el_selected %>  value="<%= role_level_list[i] %>"><%= role_level_list[i] %></option>
+				<% } %>			
+			</select>
+			
+			<%
+				var dianhuashi_skill = null;
+				if(selected_act == "search_material") {
+					dianhuashi_skill = arg["skill_text"];
+				}				
+			%>			
+			<select id="sel_dianhuashi_skill" class="label_material verAlignM" style="display:none">
+				<option value="">所有技能</option>
+				<% for (var i=0; i < dianhuashi_skills.length; i++) { %>
+					<% var el_selected = dianhuashi_skill==dianhuashi_skills[i] ? "selected":"";  %>
+					<option <%= el_selected %>  value="<%= dianhuashi_skills[i] %>"><%= dianhuashi_skills[i] %></option>
+				<% } %>			
+			</select>
+
+			<%
+				var lingxiyu_effect = null;
+				if(selected_act == "search_material") {
+					lingxiyu_effect = arg["skill_text"];
+				}				
+			%>			
+			<select id="sel_lingxiyu_effect" class="label_material verAlignM" style="display:none">
+				<option value="">所有类型</option>
+				<% for (var i=0; i < lingxiyu_effects.length; i++) { %>
+					<% var el_selected = lingxiyu_effect==lingxiyu_effects[i] ? "selected":"";  %>
+					<option <%= el_selected %>  value="<%= lingxiyu_effects[i] %>"><%= lingxiyu_effects[i] %></option>
+				<% } %>			
+			</select>
+
+			<%
+				var zhongling_stone_tx = null;
+				var zhongling_stone_level = null;
+				if(selected_act == "search_material" && arg.s_type == "50344") {
+					zhongling_stone_tx = arg["skill_text"];
+					zhongling_stone_level = arg["equip_level"];
+				}				
+			%>			
+			<select id="zhongling_stone_tx" class="label_material verAlignM" style="display:none;max-width: 6em;">
+				<option value="">所有类型</option>
+				<% for (var i=0; i < zhongling_stone_texing.length; i++) { %>
+					<% var el_selected = zhongling_stone_tx==zhongling_stone_texing[i] ? "selected":"";  %>
+					<option <%= el_selected %>  value="<%= zhongling_stone_texing[i] %>"><%= zhongling_stone_texing[i] %></option>
+				<% } %>			
+			</select>
+			<select id="sel_zhongling_stone_level" class="label_material verAlignM" style="display:none">
+				<option value="">所有等级</option>
+				<% for (var i=0; i < zhongling_stone_levels.length; i++) { %>
+					<% var el_selected = zhongling_stone_level==zhongling_stone_levels[i] ? "selected":"";  %>
+					<option <%= el_selected %>  value="<%= zhongling_stone_levels[i] %>"><%= zhongling_stone_levels[i] %></option>
+				<% } %>			
+			</select>
+			
+		</td>
+		<td>
+			<label><input <%= selected_act == "search_jl_stone" ? "checked=\"checked\"" : "" %> value="search_jl_stone" type="radio" name="equip_kind" />精魄灵石</label>
+			&nbsp;
+			<%
+				var s_jl_stone_level = null;
+				if(selected_act == "search_jl_stone") {
+					s_jl_stone_level = arg["equip_level"];
+				}
+			%>
+			<select id="sel_jl_stone_s_type" class="label_jl_stone verAlignM">
+				<option value="">所有类型</option>
+				<% for(var key in AUTO_SEARCH_CONFIG.jingpo_stone_types) { %>
+					<option value="<%= key %>"><%= AUTO_SEARCH_CONFIG.jingpo_stone_types[key] %></option>
+				<% } %>
+			</select>
+			&nbsp;
+			<select id="sel_jl_stone_level" class="label_jl_stone verAlignM">
+				<option value="">所有等级</option>
+				<% for (var i=5; i <=15; i++){ %>
+						<% var el_selected = s_jl_stone_level==i ? "selected":"";  %>
+						<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+			</select>
+		</td>
+		<td></td>
+	</tr>
+	<tr>
+		<td><label><input <%= selected_act == "search_stone" ? "checked=\"checked\"" : "" %> value="search_stone" type="radio" name="equip_kind" />宝石</label></td>
+		<td>
+			<%
+				var s_stone_level = null;
+				var s_stone_type = null;
+				if(selected_act == "search_stone") {
+					s_stone_level = arg["equip_level"];
+					s_stone_type = arg["s_type"];
+				}
+			%>
+			<select id="s_stone_type" class="label_stone">
+				<option value="">所有类型</option>
+				<% for (var type in AUTO_SEARCH_CONFIG.stone_list){ %>
+					<% var el_selected = s_stone_type==type ? "selected":"";  %>
+					<option <%= el_selected %> value="<%= type %>"><%= AUTO_SEARCH_CONFIG.stone_list[type] %></option>
+				<% } %>
+			</select>
+		</td>
+		<td>
+			<select id="s_stone_level" class="label_stone">
+				<option value="">所有等级</option>
+				<% for (var i=5; i <=20; i++){ %>
+						<% var el_selected = s_stone_level==i ? "selected":"";  %>
+						<option <%= el_selected %> value="<%= i %>"><%= i %></option>
+				<% } %>
+			</select>
+		</td>
+		<td style="position:relative;">
+			<%
+				var msyj_neidan_value = "";
+				if(selected_act == "search_msyj_neidan"){
+					var msyj_neidan_value = arg.skill_name.fromBase64();
+				}
+			%>
+			<label><input type="radio" <%= selected_act == "search_msyj_neidan" ? "checked=\"checked\"" : "" %> value="search_msyj_neidan" name="equip_kind"/>魔兽要诀/高级内丹</label>
+			<input type="text" class="txt1 label_msyj_neidan" size="12" id="msyj_select_box" value="<%= msyj_neidan_value %>" />
+		</td>
+		<td></td>
+	</tr>
+  <tr>
+    <td></td>
+    <td colspan="4" class="toolSearchBottom">
+      <input type="button" value="查询" class="btn1" onclick="search_equip(1)" />
+      <div style="display:none;" id="include_fair_show_panel" class="fairShowWrap"><input type="checkbox" id="chk_include_fair_show" />显示公示期物品&nbsp;&nbsp;</div>
+    </td>
+  </tr>
+
+</table>
+
+<input type="hidden" name="highlight_filter" id="highlight_filter" value="" />
+
+<div class="filter" id="highlight_filter_panel"></div>
+
+</script>
+
+<script type="text/html" id="pet_equip_search_templ">
+<table width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<th>装备类型：</th>
+		<td>
+			<%
+				var pet_level_list = ["5", "15", "25", "35", "45", "55", "65", "75", "85","95","105","115","125","135","145"];
+				var arg = this.arg;
+				s_pet_level = arg["level"];
+				s_pet_type = arg["equip_pos"];
+				s_pet_price_min = arg.price_min;
+				s_pet_price_max = arg.price_max;
+			%>
+			<select id="s_pet_type" class="label_pet_equip">
+				<option value="">所有类型</option>
+				<% for(var kind in PetEquipKindInfo){ %>
+					<% var el_selected = s_pet_type==kind ? "selected":"";  %>
+					<option <%= el_selected %> value="<%= kind %>"><%=PetEquipKindInfo[kind]%></option>
+				<% } %>
+			</select>
+		</td>
+		<th>装备等级：</th>
+		<td>
+			<select id="s_pet_level" class="label_pet_equip">
+				<option value="">所有等级</option>
+				<% for (var i=0; i < pet_level_list.length; i++) { %>
+					<% var el_selected = s_pet_level==pet_level_list[i] ? "selected":"";  %>
+					<option <%= el_selected %>  value="<%= pet_level_list[i] %>"><%= pet_level_list[i] %></option>
+				<% } %>			
+			</select>
+		</td>
+		<th>价格区间：</th>
+		<td style="position:relative;">
+			<input id="txt_pet_price_min" type="text" size="7" class="txt1 label_pet_equip" value="<%= fen2yuan_para(s_pet_price_min) %>" /> - <input id="txt_pet_price_max" type="text" size="7" class="txt1 label_pet_equip" value="<%= fen2yuan_para(s_pet_price_max) %>" />
+		</td>
+		<th>附加状态：</th>
+		<td style="position:relative;">
+			<input type="text" class="txt1 label_pet_equip" size="16" id="txt_addon_status" value="<%= arg.addon_status %>" />
+		</td>
+	</tr>
+	<tr>
+		<th>装备属性：</th>
+		<td colspan="7">
+			速度 &ge; <input id="speed" type="text" size="6" class="txt1" value="<%=arg.speed %>"/>
+			防御 &ge; <input id="fangyu" type="text" size="6" class="txt1" value="<%=arg.fangyu %>"/>
+			魔法 &ge; <input id="mofa" type="text" size="6" class="txt1" value="<%=arg.mofa %>"/>
+			伤害 &ge; <input id="shanghai" type="text" size="6" class="txt1" value="<%=arg.shanghai %>"/>
+			气血 &ge; <input id="hp" type="text" size="6" class="txt1" value="<%=arg.hp %>"/>
+			宝石 &ge; <input id="xiang_qian_level" type="text" size="6" class="txt1" value="<%=arg.xiang_qian_level%>"/>
+		</td>
+	</tr>
+	<tr>
+		<th>附加属性：</th>
+		<td colspan="5">
+			<ul class="btnList" style="float:left;" id="addon_skill_box">
+				<% for(var key in AUTO_SEARCH_CONFIG.addon_attrs) { %>
+					<li data_value="<%= key %>"><span><%= AUTO_SEARCH_CONFIG.addon_attrs[key] %></span></li>
+				<% } %>
+			</ul>
+		</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td colspan="3">
+			属性总和 &ge; <input id="addon_sum_min" type="text" size="6" class="txt1" value="<%=arg.addon_sum %>" />&nbsp;&nbsp;&nbsp;
+			敏捷减少 &ge; <input id="addon_minjie_reduce" type="text" size="6" class="txt1" value="<%=arg.addon_minjie_reduce %>" />
+		</td>
+		<td colspan="4" style="padding-right:10px;">
+			<input style="float:right;" type="button" value="查询" class="btn1" onclick="search_equip(1, 'search_pet_equip')" />
+			<div style="float:right; display:none;line-height:24px;margin-right:10px;" id="include_fair_show_panel"><input type="checkbox" id="chk_include_fair_show" />显示公示期物品</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="8" style="padding-right:10px;">
+			<input style="float:right;" type="button" value="查看召唤兽" class="btn1" onclick="search_equip(1, 'search_pet_by_pet_equip')" />
+			<span style="float:right;line-height:24px;margin-right:10px;">可查看携带满足搜索条件装备的召唤兽</span>
+		</td>
+	</tr>
+</table>
+
+</script>
+<script type="text/html" id="gift_box_search_templ">
+	<%
+		var arg = this.arg;
+    var lihe_equip_types = AUTO_SEARCH_CONFIG.lihe_equip_type || [];
+    var libi_equip_types = AUTO_SEARCH_CONFIG.libi_equip_type || [];
+		var selected_type = arg.selected_type;
+	%>
+	<table width="100%" cellspacing="0" cellpadding="0">
+		<tr>
+			<td width="75">
+				<label><input type="radio" <%= selected_type == "lihe_equip_type" ? "checked=\"checked\"" : "" %> value="lihe_equip_type" name="selected_type" />礼盒：</label>
+			</td>
+			<td style="width:120px;">
+							<select style="width:120px;" id="lihe_equip_type">
+                <option value="">所有类型</option>
+									<% for(var i=0;i<lihe_equip_types.length;i++){ 
+													var item = lihe_equip_types[i];
+									%>
+													<option value="<%=item.value %>" <%=item.value == parseInt(arg.lihe_equip_type)?"selected":"" %>><%=item.label %></option>
+									<% } %>
+							</select>
+					</td>
+			<td width="75">
+				<label style="margin-left: 20px;"><input type="radio" <%= selected_type == "libi_equip_type" ? "checked=\"checked\"" : "" %> value="libi_equip_type" name="selected_type" />礼币：</label>
+			</td>
+			<td> 
+							<select style="width:120px;" id="libi_equip_type">
+                <option value="">所有类型</option>
+									<% for(var i=0;i<libi_equip_types.length;i++){ 
+													var item = libi_equip_types[i];
+									%>
+													<option value="<%=item.value %>" <%=item.value == parseInt(arg.libi_equip_type)?"selected":"" %>><%=item.label %></option>
+									<% } %>
+							</select>
+					</td>
+		</tr>
+		<tr>
+			<td width="85" >
+				<label><input type="radio" <%= selected_type == "lihe_libi_equip_type" ? "checked=\"checked\"" : "" %> value="lihe_libi_equip_type" name="selected_type" />礼盒/礼币：</label>
+			</td>
+			<td><div style="position:relative;"><input style="width: 110px;" id="gift_select_box" type="text" class="txt1" size="12" /></div></td>
+			<th style="position: absolute;right: 20px;"><input type="button" value="查询" class="btn1" onclick="search_gift_box()" /></th>
+		</tr>
+</table>
+</script>
+<script type="text/html" id="lingshi_search_templ">
+<%
+	var arg = this.arg; 
+	var pet_type = arg["type"];
+	if (pet_type){
+		pet_type = pet_type.split(",")[0];
+	}
+	var name="";
+	if (pet_type && SaleablePetNameInfo[pet_type]){
+		name=SaleablePetNameInfo[pet_type];
+	}
+	
+	var level_min = arg["level_min"] ? arg["level_min"]:"";
+	var level_max = arg["level_max"] ? arg["level_max"]:"";
+	
+	var growth = "0";
+	if (arg["growth"]){
+		growth = arg["growth"]/1000;
+		growth = growth.toFixed(3);
+	}
+    var lingshi_kinds = get_sub_kinds(window.kind, 60);
+%>
+<table width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+		<th>灵饰类型：</th>
+		<td>
+            <select id="sel_lingshi_type">
+				<option value="">--不限--</option>
+                <% for(var i=0;i<lingshi_kinds.length;i++){ 
+                        var kind = lingshi_kinds[i];
+                %>
+                        <option value="<%=kind.kindid %>" <%=kind.kindid == parseInt(arg.kindid)?"selected":"" %>><%=kind.name %></option>
+                <% } %>
+            </select>
+        </td>
+		<th>灵饰等级：</th>
+		<td><input id="lingshi_level_min" type="text" size="4" class="txt1" value="<%= level_min %>" /> - <input id="lingshi_level_max" type="text" size="4" class="txt1" value="<%= level_max %>" /></td>
+		<th>基础属性：</th>
+		<td>
+			<select id="sel_basic_attr_type">
+				<option value="">--请选择属性--</option>
+				<% for(var key in AUTO_SEARCH_CONFIG.lingshi_basic_attrs) { %>
+					<option value="<%= key %>"><%= AUTO_SEARCH_CONFIG.lingshi_basic_attrs[key] %></option>
+				<% } %>
+			</select>&ge;<input type="text" size="6" class="txt1" id="txt_lingshi_basic_attr_value" />
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<th>附加属性1：</th>
+		<td>
+			<select id="sel_add_attr1">
+            </select>
+        </td>
+		<th>附加属性2：</th>
+		<td>
+			<select id="sel_add_attr2">
+            </select>
+        </td>
+		<th>附加属性3：</th>
+		<td>
+			<select id="sel_add_attr3">
+            </select>
+        </td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<th>精炼等级&ge;</th>
+        <td>
+            <input type="input" id="txt_lingshi_jinglian_level" size="6" class="txt1"/>
+        </td>
+		<th>价格区间：</th>
+		<td><input id="txt_lingshi_price_min" type="text" size="7" class="txt1" value="<%= fen2yuan_para(arg.price_min) %>" /> - <input id="txt_lingshi_price_max" type="text" size="7" class="txt1" value="<%= fen2yuan_para(arg.price_max) %>" /></td>
+		<th colspan="2"><span id="include_fair_show_panel" style="display:none;"><input type="checkbox" id="chk_include_fair_show" />显示公示期物品</span></td>
+		<th>&nbsp;&nbsp;<input type="button" value="查询" class="btn1" onclick="search_lingshi()" /></th>
+	</tr>
+</table>
+
+<input type="hidden" name="highlight_filter" id="highlight_filter" value="" />
+
+<div class="filter" id="highlight_filter_panel"></div>
+</script>
+
+<script type="text/html" id="wjd_search_templ">
+	<table width="100%" cellspacing="0" cellpadding="0">
+		<tr>
+			<th style="margin-right:20px;">等级：</th>
+			<td >
+				<ul class="btnList" style="float:left" id="level_attr_panel">
+				</ul>
+			</td>
+		</tr>
+	  
+	  <tr>
+			<th style="margin-right:20px;">类型：</th>
+			<td>
+				<ul class="btnList" style="float:left" id="kindid_attr_panel">
+				</ul>
+			</td>
+		</tr>
+		<tr id="equip_type_attr_panel_block" style="display: none;">
+			<th style="margin-right:20px;">造型：</th>
+			<td>
+				<ul class="btnList" style="float:left" id="equip_type_attr_panel">
+				</ul>
+			</td>
+		</tr>
+	  <tr>
+			<th style="margin-right:20px;width:50px;"></th>
+			<td>
+			</td>
+			<th><input type="button" value="查询" class="btn" id="btn_wjd_search" />&nbsp;&nbsp;
+		</th>
+		</tr>
+		<tr>      
+		</tr>
+	</table>
+	<div style="display:none">
+		<form method="GET" name="query_form" >
+		</form>
+	</div>
+	<input type="hidden" name="highlight_filter" id="highlight_filter" value="" />
+	
+	<div class="filter" id="highlight_filter_panel"></div>
+</script><div id="recommd_result_templ" style="display:none;">
+<!--
+	<%	
+    var equips = this.equips;
+    var refer = this.equip_refer || "";
+    var view_loc = this.view_loc || "";
+		var className = "";
+		if(equips.length % 2 == 1){
+			className = "even";
+		}
+
+		for(var i=0;i<equips.length;i++){
 			var equip = equips[i];
-      var equip_other = {};
-			if(equip.other_info != ""){
-				equip_other = JSON.decode(equip["other_info"]);
+			if (equip.storage_type != StorageStype["role"]){
+				var url = ResUrl + "/images/small/" + equip.equip_face_img;
+			}else{
+				var icon = get_role_icon(equip.other_info.trim());
+				var url =  ResUrl + "/images/role_icon/small/" + icon + ".gif";
 			}
 
-			var idata = equip;
-			var cInfo = calcEquipLinkInfo(idata, {
-				response: this.result || null,
-				overall_search: true,
-				offset: i,
-				view_loc: window.equip_refer_loc,
-				query: {
-					equip_refer: 1
-				}
-			});
-      var href = cInfo.link + (addon_arg ? "&" + addon_arg : "");;
-		%>
-		<tr log-exposure='<%= cInfo.exposure_str %>'>
-			<td>
-				<a href="<%= href %>" class="soldImg" target="_blank">
-					<span class="time-key-wap">
-						<img src="<%= ResUrl %>/images/small/<%= equip["equip_face_img"] %>" id="equip_img_<%= equip["game_ordersn"] %>" alt="物品" width="50" height="50"
+			if(className === "even"){
+				className = "";
+			}else{
+				className = "even";
+			}
+      
+      var isWjd = window.CommonVar && window.CommonVar.act.contains("overall_wjd");
+      var isRole = window.StorageStype && StorageStype.role == equip.storage_type;
+      var isMoney = (window.StorageStype && window.QueryVar) && (StorageStype.money == equip.storage_type && window.QueryVar.kindid == 23);
+      var isMoneySearch = (window.StorageStype && window.CommonVar) && (StorageStype.money == equip.storage_type && window.CommonVar.act == "type_query");
+			var isGiftSearch = window.QueryVar && window.QueryVar.kindid == -4;
+      var equipName = equip.equip_name;
+      if (isRole) {
+        try {
+          equipName = get_school_name(equip.school);
+        } catch (e) { }
+      }
+      
+      var idata = equip;
+      var cInfo = calcEquipLinkInfo(idata, {
+        response: this.result || null,
+        offset: i,
+        view_loc: view_loc,
+        query: {
+          equip_refer: refer
+        }
+      });
+      var link = cInfo.link;
+      var tag_key = JSON.encode(equip.tag_key);
+      var logData = JSON.encode({ kindid: equip.kindid, game_ordersn: equip.game_ordersn, eid: equip.eid, storage_type: equip.storage_type });
+	%>
+	<tr <% if(className != ""){ %>class="<%=className %>" <%}%>
+    recommd="true"
+    log-exposure='<%= cInfo.exposure_str %>'
+  >
+		<td>
+			<a href="<%= link %>" target="_blank" class="soldImg" onclick="save_equip_price_info('<%=equip.game_ordersn %>', <%=fen2yuan(equip.price) %>)" onmousedown="save_equip_price_info('<%=equip.game_ordersn %>', <%=fen2yuan(equip.price) %>)">
+				<span class="time-key-wap">
+        <img id="equip_img_<%=equip.game_ordersn %>" alt="物品" width="50" height="50"
+          src="<%=url %>"
+          data_view_loc="<%= this.view_loc || ""%>"
 data_equip_name='<%= htmlEncode(idata["equip_name"]) %>' data_equip_type_desc='<%= htmlEncode(idata["equip_type_desc"]) %>' data_equip_img="<%= idata["equip_face_img"] %>" data_storage_type='<%= idata["storage_type"] %>' data_equip_type="<%= idata["equip_type"] %>" data_price="<%=idata["price"] / 100 %>" data_selling_time="<%=idata["selling_time"] %>" data_create_time="<%=idata["create_time"] %>" data_kindid="<%=idata["kindid"] %>" data_serverid="<%=idata["serverid"] %>" data_ordersn="<%=idata["game_ordersn"]%>" data_status="<%=idata["equip_status"] %>" data_serversn="<%=idata["server_sn"] || idata["game_serverid"] %>" data_equip_level="<%= idata["equip_level"] || idata["level"] %>" data_seller_roleid="<%= idata["seller_roleid"] %>" data_recommd_tag="<%=idata["tag"]%>" data_appointed_roleid='<%= idata.appointed_roleid %>' data_time_lock="<%= idata.is_time_lock %>" data_time_lock_days="<%= idata.time_lock_days %>"
 data_equipid='<%=idata.game_ordersn %>' 
 data_owner_roleid='<%=idata.seller_roleid %>'
@@ -1485,79 +2583,58 @@ data_sell_by_apart_type="0"
 data_sell_by_apart_type="1"
 <% } else if(idata.is_split_independent_equip == 1) { %>
 data_sell_by_apart_type="2"
-<% } %>						/>
-						<% if (equip["is_time_lock"]) { %>
-							<span class="icon-time-key big-time-key"></span>
-						<% } %>
-					</span>
-					<textarea id="other_info_<%= equip["game_ordersn"] %>" style="display:none"><%= equip["other_info"] %></textarea>
-				</a>
-				<textarea id="equip_desc_<%= equip["game_ordersn"] %>" style="display:none">
-          <%= equip["desc"] || equip["large_equip_desc"] %>
-        </textarea>
-			</td>
-			<td>
-				<%= equip["equip_level"] %>
-			</td>
-			<td>
-				<%= equip["all_damage"] %>
-			</td>
-			<td>
-				<%= equip["init_damage"] %>
-			</td>
-			<td>
-				<%= equip["init_wakan"] %>
-			</td>
-			<td>
-				<%= equip["init_defense"] %>
-			</td>
-			<td>
-				<%= equip["init_hp"] %>
-			</td>
-			<td>
-				<%= equip["init_dex"] %>
-			</td>
-			<td>
-				<% if(equip["gem_level"] > 0){ %>
-					<%= get_names_by_value(equip["gem_value"], Gems).join("<br />") %>
-					<br />
-					锻炼等级：<%= equip["gem_level"] %>
-				<% } %>
-			</td>
-			<td>
-				<% if(equip_other.add_melt_attrs) { %>
-					<%= equip_other.add_melt_attrs.join("<br />") %>
-				<% } %>
-			</td>
-			<td>
-				<% 
-					var specials = []; 
-					if(equip["special_effect"]){
-						if(instanceOf(equip["special_effect"], Array)){
-							var effects = equip["special_effect"];
-						} else {
-							var effects = equip["special_effect"].split("|");
-							effects = effects.filter(function(v){return v.length>0});
-						}
-						effects = effects.map(function(v){return get_name_from_conf(parseInt(v), SpecialEffects)});
-						specials = specials.concat(effects);
-					}
-					if(equip["special_skill"]){
-						specials.push(get_name_from_conf(equip["special_skill"], SpecialSkills));
-					}
-				%>
-				<%= specials.join("<br />") %>
-			</td>
-			<td>
-				<% if(equip["suit_effect"]){ %>
-				<%= get_suit_name_by_value(equip["suit_effect"]) %>
-				<% } %>
-			</td>
-			<td>
-				<% if (equip.is_show_alipay_privilege) { %>
-          <span class="icon-tag-alipay"></span>
-        <% } %> 
-				<span><%= get_color_price(parseFloat(equip["price"] / 100)) %></span>
+<% } %>        />
+        <% if(equip.is_time_lock) { %>
+        <span class="icon-time-key"></span>
+        <% } %>
+      </span>
+      </a>
+			<textarea id="equip_desc_<%=equip.game_ordersn %>" style="display:none">
+				<%=equip.other_info %>
+			</textarea>
+		</td>
+		<td class="equip_name" data_equip_type="<%=equip.equip_type %>">
+      <% if(!isMoney) { %>
+        <div>
+          <% if(isRole) { %>
+            <% if (equip.is_split_independent_role) { %>
+              <i class="icon-chai"></i>
+            <% } else if(equip.is_split_main_role) { %>
+              <i class="icon-zheng"></i>
+            <% } %>
+          <% } %>
+          <span class="vertical-middle">
+            <%= equipName %>
+          </span>
+        </div>
+        
+        <% if(isMoneySearch) { %>
+          <span><%= desc_4_mhb(equip.equip_count) %></span>
+        <% } else if (!isGiftSearch) { %>
+          <div class="js-level cGray"><%= ("equip_level_desc" in equip) ? equip.equip_level_desc : equip.equip_level + "级" %></div>
+        <% } %>
+
+      <% } else { %>
+        <span><%= desc_4_mhb(equip.equip_count) %></span>
+      <% } %>
+		</td>
+    
+    <% if(isMoney) { %> 
+      <td>
+        <%= equip.unit_price_desc %>元/万两</strong>
+      </td>
+    <% } %>
+		<%= gen_highlight(equip.highlight) %>
+    <% if(!isWjd) { %> 
+      <%= gen_dynamic_tags(equip.dynamic_tags) %>
+    <% } %>
+
+    <td>
+      <% if (equip.is_show_alipay_privilege) { %>
+        <span class="icon-tag-alipay"></span>
+      <% } %>
+			<%=get_color_price(parseFloat(fen2yuan(equip.price))) %>
+			<br/>
 
 <%
   var cross_server_poundage = equip.cross_server_poundage || 0;
@@ -1598,22 +2675,672 @@ data_sell_by_apart_type="2"
   <span class="tag-discount-price"><%= cross_server_poundage_discount_label %>￥<%= fen2yuan(cross_server_poundage_origin - cross_server_poundage_discount) %></span>
 </div>
 <% } %>
-			</td>
-			<td>
-				<%= equip["area_name"] %><br /><%= equip["server_name"] %>
-				<% if(equip["server_name"] == "花样年华"){ %>
-					<br/>
-					<span style="font-size: 12px; font-weight: normal;" class="cGray">限时服务器-不支持转服</span>
-				<% } %>
-			</td>
-			<td>
-				<a class="btn1 jsStat" href="<%= href %>" target="_blank" style="padding:0 8px; margin-top:0px;">查看详情</a>
-			</td>
-		</tr>
+			<span id="appointed_tip_msg_<%=equip.game_ordersn %>" class="f12px cDarkRed" style="display:none;">已指定买家</span>
+    </td>
+
+		<td><%=equip.onsale_expire_time_desc %>后下架</td>
+		<td class="textLeft vama" style="white-space: nowrap;">
+			<a href="<%= link %>" target="_blank" onclick="return save_equip_price_info('<%=equip.game_ordersn %>', '<%=fen2yuan(equip.price) %>',  '<%=equip.is_onsale_protection_period %>',  '<%=equip.is_random_draw_period %>',  '<%=equip.onsale_protection_end_time %>')" class="btn1 jsStat btnBuy" reonsale_identify="<%= equip.reonsale_identify %>" equipid="<%= equip.equipid %>" eid="<%= equip.eid %>" data_type="<%= equip.storage_type %>" status="<%= equip.equip_status %>"
+        data_trace_json='<%= logData %>'  
+      >购买</a>
+    </td>
+    <% if(!isMoney) { %>
+      <td>
+        <% if (this.showCollect == true) { %>
+            <span class="equipListCollect <% if (equip.has_collect) { %>on<% } %>" data-tag_key='<%= tag_key %>'  data-game_ordersn="<%= equip.game_ordersn %>" data_storage_type="<%= equip.storage_type %>" data-view_loc="<%= this.view_loc || ""%>"></span>
+            <div class="equipListCollectNum">
+              <%= equip.collect_num || "" %>
+            </div>
+          <% } else { %>
+            <span class="equipListCollect" style="visibility: hidden;"></span>
+          <% } %>
+      </td>
+    <% } %>
+	</tr>
 	<% } %>
-</table>
+  
+  <% if ((!this.equips || this.equips.length <= 0) && this.showNoResult) { %>
+    <tr>
+      <td colspan="10" class="noResult noResultNew">
+        <h2 class="no_result_icon"><%= this.noResultText || "没有符合条件的商品" %></h2>
+      </td>
+    </tr>
+  <% } %>
+-->
+</div>
+
+
+
+
+<div class="areaTop"></div>
+<div class="area subArea">
+	<div class="areaHead">
+		<div class="nav">
+<script language="javascript">
+  var auth_info = {}
+  var verifyFun = null
+  // 原始状态码，key与服务端的status_code保持一致
+  var ORI_STATUS = {
+    ERR: 0,
+    OK: 1,
+    SESSION_TIMEOUT: 2,   // 登录态失效
+    CAPTCHA_AUTH: 3,      // 需要安全验证（易盾）
+    REFRESH_COOKIE: 4,        // cookie 过期，刷新以自动登录
+    MIBAO_AUTH: 5,             // 验证密保（手游暂未实现）
+    MOBILE_AUTH: 6,            // 验证短信
+    NEED_ACCEPT_LICENSE: 7,        // 同意协议
+    AUTO_LOGIN: 8,            // 可以登录上去，调用一下登录接口
+    NEED_FACIAL_RECOGNITION: 9     // 人脸识别验证
+  };
+  // #132736 改用status_code判断请求结果状态， status兜底（且center接口是没有status_code的） 
+  var judgeStatus = function (res, statusCode){
+    return res && (res.status_code ? res.status_code === statusCode : res.status == ORI_STATUS[statusCode]);
+  }
+  var STATUS = {
+    ERR: function(res) { return judgeStatus(res, 'ERR') },
+    OK: function(res) { return judgeStatus(res, 'OK') },
+    ERR_SESSION_TIMEOUT: function(res) { return judgeStatus(res, 'SESSION_TIMEOUT') }, // 登录态失效
+    ERR_NEED_CAPTCHA: function(res) { return judgeStatus(res, 'CAPTCHA_AUTH') }, // 需要安全验证（易盾）
+    REFRESH_COOKIE: function(res) { return judgeStatus(res, 'REFRESH_COOKIE') }, // cookie 过期，刷新以自动登录
+    VERIFY_MB: function(res) { return judgeStatus(res, 'MIBAO_AUTH') }, // 验证密保
+    VERIFY_SMS: function(res) { return judgeStatus(res, 'MOBILE_AUTH')}, // 验证短信
+    ACCEPT_LICENSE: function(res) { return judgeStatus(res, 'NEED_ACCEPT_LICENSE')}, // 同意协议
+    AUTO_LOGIN:  function(res) { return judgeStatus(res, 'AUTO_LOGIN')}, // 可以登录上去，调用一下登录接口
+    VERIFY_FACIAL_RECOGNITION: function(res) { return judgeStatus(res, 'NEED_FACIAL_RECOGNITION')} // 人脸识别验证
+  };
+  
+  function h5AjaxRequest(params) {
+    // verifyFun 验证密保或者验证手机号后需要执行的函数
+    var successCallback = params.successCallback
+    var errCallback = params.errCallback
+    var verifyCallback = params.verifyCallback
+    verifyCallback && (verifyFun = verifyCallback)
+    var Ajax = new Request.JSON({
+      "url": params.url,
+      "onSuccess": function(data){
+        var msg = data.msg || data.status_code
+        data = data || {};
+        var msg_addition = data.msg_addition;
+        if (msg_addition) {
+          CBG.confirm(msg_addition.msg_rich_context || msg_addition.msg, {
+            confirmText: msg_addition.msg_ok_text,
+            cancelText: msg_addition.msg_cancel_text
+          })
+          .addEvent('confirm', function() {
+            var action = msg_addition.msg_ok_action
+            if (action) {
+              if (action.startsWith("http")) {
+                window.location.href = action;
+              } else {
+                alert('处理失败，您可以尝试到藏宝阁 App 继续完成操作');
+              }
+            } else if (msg_addition.confirm_type === 'retry') {
+              params.data = (Object.merge || Object.assign)(params.data || {}, {
+                confirm_flag: data.confirm_flag
+              });
+              _send();
+            }
+          }).addEvent('cancel', function() {
+            var action = msg_addition.msg_cancel_action
+            if (action) {
+              if (action.startsWith("http")) {
+                window.location.href = action;
+              } else {
+                alert('处理失败，您可以尝试到藏宝阁 App 继续完成操作');
+              }
+            }
+          });
+        } else if (STATUS.OK(data)) {
+          successCallback && successCallback(data)
+        } else if (STATUS.VERIFY_SMS(data)) {
+          // 需要手机验证
+          showVerifyMobile()
+          errCallback && errCallback(data)
+        } else if (STATUS.VERIFY_MB(data)) {
+          // 验证密保
+          var mb_title = $('mb-title')
+          mb_title.innerHTML = data.msg
+          if (data.mbtype === 2) {
+            // 验证将军令
+            $('mb-lable').innerHTML = '将军令：'
+          } else if (data.mbtype === 1) {
+            // 验证密保
+            $('mb-lable').innerHTML = '密保：'
+            $('mb-coord').innerHTML = '密保卡坐标：' + data.ppc_coordinate
+          }
+          auth_info = data.auth_info
+          showMbAuth(data.mbtype)
+          errCallback && errCallback(data)
+        } else {
+          CBG.toast(msg)
+          errCallback && errCallback(data)
+        }
+      },
+      "onFailure": function(res) {
+        CBG.toast(res.status + ' ' +res.statusText)
+      }
+    });
+    // 基础参数,H5所有请求都要携带,safe_code用于csrf
+    params.data.client_type = 'web';
+    params.data.safe_code = window.SafeCode
+    _send();
+
+    function _send() {
+      if (params.method === 'get' || params.method === 'GET') {
+        Ajax.get(params.data)
+      } else if (params.method === 'post' || params.method === 'POST') {
+        Ajax.post(params.data)
+      }
+    }
+  }
+  // 展示验证弹窗
+  function showVerifyMobile (callback) {
+    function errClose() {
+      closeVerifyMobile()
+      if (window.PopupDialog) {
+        var dialog = PopupDialog.confirm('请绑定安全手机后重试', {
+        buttons: [
+            { text: '确定', event: 'confirm' }
+          ]
+        });
+        dialog.addEvent('confirm', function () {
+          location.reload()
+        });
+      } else if (CBG.confirm) {
+        CBG.confirm('请绑定安全手机后重试', {
+          confirmText: '确定'
+        })
+        .addEvent('confirm', function() {
+          location.reload()
+        });
+      }
+    }
+    // 获取手机号
+    h5AjaxRequest({
+      url: /xyq/g.test(location.host) ? '/cgi/api/mobile/get_xyq_bind_info' : '/cgi/api/get_mobile_bind_info',
+      method: 'get',
+      data: {
+        op_type: 'mobile_auth_equip_onsale'
+      },
+      successCallback: function(res) {
+        if (res.bind_status === 0 || !res.mobile) {
+          errClose()
+          return
+        }
+        var verify_mobile_mask = $('verify-mask')
+        var verify_mobile = $('verify-mobile')
+        res.mobile && ($('mobile-phone').innerHTML = res.mobile)
+        verify_mobile_mask && (verify_mobile_mask.style.display = 'block')
+        verify_mobile && (verify_mobile.style.display = 'block')
+      },
+      errCallback: function(res) {
+        // 未绑定手机号直接关闭弹窗
+        errClose()
+      }
+    })
+  }
+
+  // 关闭手机验证弹窗
+  function closeVerifyMobile () {
+    var verify_mobile_mask = $('verify-mask')
+    var verify_mobile = $('verify-mobile')
+    verify_mobile_mask && (verify_mobile_mask.style.display = 'none')
+    verify_mobile && (verify_mobile.style.display = 'none')
+    verifyFun = null
+  }
+
+  // 获取验证码
+  function get_sms_code() {
+    h5AjaxRequest({
+      url: '/cgi/api/get_sms_code',
+      method: 'get',
+      data: {
+        op_type: 'mobile_auth_equip_onsale'
+      },
+      successCallback: function() {},
+      errCallback: function(res) {}
+    })
+  }
+  
+  // 验证
+  function verify_sms_code() {
+    var code = $('input_sms_code').value
+    var mobile_code_tips = $('mobile_code_tips')
+    if (!code) {
+      mobile_code_tips.style.display = 'block'
+      return
+    }
+    h5AjaxRequest({
+      url: '/cgi/api/verify_sms_code',
+      method: 'get',
+      data: {
+        op_type: 'mobile_auth_equip_onsale',
+        sms_code: code
+      },
+      successCallback: function() {
+        verifyFun && verifyFun()
+        closeVerifyMobile();
+      }
+    })
+  }
+  
+  // 获取验证码倒计时
+  function countDown() {
+    var sms_send_btn = $('sms_send_btn')
+    if (sms_send_btn.innerHTML !== '获取验证码') {
+      return
+    }
+    get_sms_code()
+    var time = 60
+    sms_send_btn.innerHTML = time + '秒后重新获取'
+    var intev = setInterval(function() {
+      if (time === 0) {
+        clearInterval(intev)
+        sms_send_btn.innerHTML = '获取验证码'
+        return
+      }
+      time--
+      sms_send_btn.innerHTML = time + '秒后重新获取'
+    }, 1000);
+  }
+  function showMbAuth (type) {
+    var verify_mobile_mask = $('verify-mask')
+    var mb_auth = $('mb-auth')
+    var mb_coord = $('mb-coord')
+    verify_mobile_mask && (verify_mobile_mask.style.display = 'block')
+    mb_auth && (mb_auth.style.display = 'block')
+    $('input_mb_code').set('maxlength', 6);
+    if (type === 1) {
+      $('input_mb_code').set('maxlength', 9);
+      mb_coord && (mb_coord.style.display = 'inline-block')
+    }
+  }
+  function closeMbAuth () {
+    var verify_mobile_mask = $('verify-mask')
+    var mb_auth = $('mb-auth')
+    var mb_coord = $('mb-coord')
+    verify_mobile_mask && (verify_mobile_mask.style.display = 'none')
+    mb_auth && (mb_auth.style.display = 'none')
+    mb_coord && (mb_coord.style.display = 'none')
+    verifyFun = null
+  }
+
+  // 验证密保
+  function verifyMb () {
+    var mibao_code = $('input_mb_code').value
+    var mb_code_tips = $('mb_code_tips')
+    if (!mibao_code) {
+      mb_code_tips.style.display = 'block'
+      mb_code_tips.innerHTML = '请输入密保'
+      return
+    }
+    h5AjaxRequest({
+      url: '/cgi/api/login/check_mibao',
+      method: 'get',
+      data: {
+        mibao_code: mibao_code,
+        mibao_auth_type: auth_info.mibao_auth_type,
+        equipid: auth_info.equipid
+      },
+      successCallback: function() {
+        verifyFun && verifyFun()
+        closeMbAuth();
+      },
+      errCallback: function(data) {
+        mb_code_tips.style.display = 'block'
+        mb_code_tips.innerHTML = data.msg
+      }
+    })
+  }
+
+  function inputMobile() {
+    var value = $('input_sms_code').value
+    if (value || value == 0) {
+      $('mobile_code_tips').style.display = 'none'
+    }
+  }
+
+  function inputMb() {
+    var value = $('input_mb_code').value
+    if (value || value == 0) {
+      $('mb_code_tips').style.display = 'none'
+    }
+  }
 </script>
-<div id="pager_templ" style="display:none;">
+
+<style>
+#verify-mask {
+  position: fixed;
+  z-index: 100010;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+}
+#verify-mobile, #mb-auth {
+  width: 498px;
+  background-color: #000;
+  right: 50%;
+  margin-top: -196px;
+  margin-right: -255px;
+  top: 40%;
+  position: absolute;
+  z-index: 10001;
+  opacity: 1;
+}
+.verify-mobile-title {
+  width: 100%;
+  height: 20px;
+}
+
+.verify-form {
+  padding: 35px 41px;
+  border: 3px solid #C3C5DE;
+  border-radius: 5px;
+  margin: 0 1px;
+  background-color: #DCDCE8;
+  zoom: 1;
+}
+
+.verify-form-p {
+  margin-bottom: 16px;
+  line-height: 16px;
+}
+.verify-form-p-btn {
+  margin-top: 40px;
+  text-align: center;
+}
+.submit-btn {
+  display: inline-block;
+  width: 96px;
+  height: 32px;
+  line-height: 32px;
+  border: 1px solid #590821;
+  background: #920A33;
+  font-size: 16px;
+  color: #fff;
+  font-weight: 400;
+  text-align: center;
+  cursor: pointer;
+}
+</style>
+<div id="verify-mask" style="display: none;">
+  <div id="verify-mobile" style="display: none;">
+    <div class="blockTitle">操作提示<span class="dialogClose" onclick="closeVerifyMobile()"></span></div>
+    <div class="verify-form">
+      <p class="verify-form-p" style="font-size: 16px;font-weight: 400;color: #000;">为保障您的账户交易安全，需验证您在藏宝阁绑定的手机号</p>
+      <p class="verify-form-p" style="font-size: 14px;font-weight: 400;">
+        <span style="color: #6D6A8C;">您绑定的手机号为：</span>
+        <span id="mobile-phone" style="color: #292929;"></span>
+      </p>
+      <p style="font-size: 14px;">
+        <input id="input_sms_code" type="input" style="width: 132px;height: 24px;border: 1px solid #000000;" placeholder="请输入短信验证码" oninput="inputMobile()" />
+        <span id="sms_send_btn" style="color: #1e82f8;margin-left: 8px;" onclick="countDown()">获取验证码</span>
+      </p>
+      <p class="verify-form-p" id="mobile_code_tips" style="display: none;margin-top: 5px; color: #e94040;">请输入验证码</p>
+      <p class="verify-form-p-btn">
+        <span id="submit-btn" class="submit-btn" onclick="verify_sms_code()">确定</span>
+      </p>
+    </div>
+  </div>
+  
+  <!-- 验证将军令 -->
+  <div id="mb-auth" style="display: none;">
+    <div class="blockTitle" id="mb-title">请输入将军令的动态密码</div>
+    <div class="verify-form">
+      <p class="verify-form-p-btn" style="font-size: 14px;font-weight: 400;">
+        <span id="mb-coord" style="display: none;">密保卡坐标：E6;D2;D3</span>
+      </p>
+      <p class="verify-form-p-btn" style="font-size: 14px;font-weight: 400;">
+        <span id="mb-lable">将军令：</span>
+        <input class="txt1" size="24" type="text" maxlength="6" id="input_mb_code" tabindex="1" oninput="inputMb()" />
+      </p>
+      <p class="verify-form-p" id="mb_code_tips" style="display: none;margin-top: 5px; color: #e94040; text-align: center;">请输入密保</p>
+      <p class="verify-form-p-btn">
+        <input type="button" class="btn1" value="确 认"  onclick="verifyMb()" />&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="button" value="返回" class="btn1" onclick="closeMbAuth()" />
+      </p>
+    </div>
+  </div>
+</div>
+
+<script language="javascript">
+
+  // 跳转网易支付
+  function goToEpay () {
+    h5AjaxRequest({
+      url: '/cgi/api/epay_account_check',
+      method: 'get',
+      data: {
+        action: "web_home",
+        bind_card_refer: "walletEpay"
+      },
+      successCallback: function(res) {
+        if (res && res.url) {
+            window.open(res.url, "_blank");
+        }
+      },
+      errCallback: function(data) {
+        window.open("https://epay.163.com/servlet/controller?operation=main", "_blank");
+      }
+    })
+  }
+
+</script>
+
+<ul>
+<li id="top_buy_menu"><h3><a id="top_buy_menu_a" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=query" tid="web_buy_1">我是买家</a></h3></li>
+<li id="top_sell_menu"><h3><a id="top_sell_menu_a" href="https://xyq.cbg.163.com/cgi-bin/userinfo.py?act=my_equips" tid="web_sell_1">我是卖家</a></h3></li>
+<li id="top_mycbg_menu"><h3 style="width:98px;"><a id="top_mycbg_menu_a" href="https://xyq.cbg.163.com/cgi-bin/userinfo.py?act=order" tid="web_cbg_1">我的藏宝阁</a></h3></li>
+<li><h3><a target="_blank" onclick="goToEpay()" tid="web_pay_1">网易支付</a></h3></li>
+<li id="top_fairshow_menu"><h3><a id="top_fairshow_menu_a" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=fair_show_query" tid="web_fair_1">公示期物品</a></h3></li>
+<script>window.fix_buy_menu_url && fix_buy_menu_url()</script>
+<!-- <li id="top_gift_menu"><h3><a href="https://gift.163.com/index_xyq.html" target="_blank" tid="web_mall_1">周边商城</a></h3></li> -->
+<li id="top_overall_menu"><h3  style="width:90px;"><a href="https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_search_role_form" target="_blank" tid="web_overall_1">全服搜索</a></h3></li>
+</ul>
+<div class="navRight">
+  <a class="shopcart" id="buy_cart_panel" style="display:none" href="https://xyq.cbg.163.com/cgi-bin/userinfo.py?act=order" tid="web_other_2_1">购物车<span class="cYellow" id="cart_order_num"></span></a>
+  
+</div>
+
+		</div>
+	</div>
+
+	<div class="subNav" id="querySubNav">
+	<!-- 搜索框内容，如不需要可以删去 -->
+		<div class="search">
+			
+			<form id="search_browse_f" name="search_browse_f" action="https://xyq.cbg.163.com/cgi-bin/query.py">
+				<input id="advance_search_box" autocomplete="off" name="search_text" type="text" class="txt1 txt2" onfocus="if(this.value=='输入物品名称进行搜索') {this.value=''}" onblur="if(this.value=='') this.value='输入物品名称进行搜索'" size="23" value="输入物品名称进行搜索" />&nbsp;
+				<input type="button" class="btn1" value="搜索" onclick="search_auto_complete(this.form, ename_data);"/>
+				<input type="text" name="equip_type" style="display:none;"/>
+				<input type="hidden" name="act" value="type_query" id="search_act"/>
+				<input type="hidden" name="server_id" id="server_id" value="77" />
+				<input type="hidden" name="areaid" id="areaid" value="43" />
+				<input type="hidden" name="page" id="search_page" />
+				<input type="hidden" name="server_name" value="进贤门" />
+			</form>
+		</div>
+		<!-- 搜索框内容，如不需要可以删去 -->
+		<a id="common_query_a" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=query" tid="web_buy_2">浏览商品</a>
+		<a id="role_search" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=search_role" class="advance_search_link" tid="web_buy_3">角色搜索</a>
+		<a id="equip_search" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=search_role_equip" class="advance_search_link" tid="web_buy_4">道具搜索</a>
+		<a id="pet_search" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=search_pet" class="advance_search_link" tid="web_buy_5">召唤兽搜索</a>
+		<a id="pet_equip_search" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=search_pet_equip" class="advance_search_link" tid="web_buy_6">召唤兽装备搜索</a>
+		<a id="lingshi_search" href="https://xyq.cbg.163.com/cgi-bin/query.py?act=search_lingshi" class="advance_search_link" tid="web_buy_7">灵饰搜索</a>
+		<a id="sub_menu_appointed_to_me" href="https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=appointed_to_me&server_id=77" class="advance_search_link" tid="web_buy_8">指定我</a>
+		<a id="cross_server_buy" href="https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_equip" class="advance_search_link" target="_blank" style="color:#FFFF00" tid="web_buy_9">跨服购买</a>
+		
+		<script type="text/javascript">
+			window.fix_buy_menu_url && fix_buy_menu_url();
+		</script>
+	</div>
+  <div class="tipsDialog hidden" id="tipsDialog">
+    <div class="blank12"></div>
+    <div class="win">
+      <div class="blockTitle">
+        <h3 class="f14px fB">操作提示<a href="javascript:toggleDialog();" class="dialogClose"></a></h3>
+      </div>
+      <div class="blockCont">
+
+        <div class="drawTips hidden" id="drawTips">
+          <p class="draw-title">该物品处于抽签期<br/>下载App参与抽签</p>
+          <img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_download_app_draw.png" alt="">
+          <p style="line-height: 25px;">
+            <i class="qr_icon_small" style="vertical-align:middle;"></i>
+            <span style="display: inline-block;vertical-align:middle;">扫码下载App</span>
+          </p>
+        </div>
+
+        <div id="protectTips" class="hidden">
+          <p class="cDYellow tips">
+            该商品处于交易保护期<br/>请在<span id="onsale_protection_end_time"></span>后再尝试购买
+          </p>
+          <div class="blank12"></div>
+          <input type="button hidden" value="返回" class="btn1" onclick="toggleDialog()" />
+        </div>
+
+      </div>
+    </div>
+  </div>	<div class="content hasLayout">
+
+		<div class="menu" id="kind_tree_panel"></div>
+		<div class="rightCont">
+		<p class="cDYellow" style="padding:6px 9px; display:none;">角色交易是把卖家通行证下的那个角色移动到买家的通行证下，而不是把卖家的通行证给买家</p>
+
+		<div class="searchForm" id="advance_search_panel" style="display:none;"></div><!--search panel-->
+
+
+<div class="divGride qListFilter">
+  <div class="title">
+    
+    <ul class="qFilters hidden" id="qFiltersNotMoney">
+      <li class="qFilter" data-name="recommend">
+        
+        <a href="javascript:;" class="text" data-sort="">综合排序</a>
+      </li>
+      <li class="qFilter" data-name="selling_time">
+        <a href="javascript:;" class="text" data-sort="DESC">最新</a>
+      </li>
+      <li class="qFilter" data-name="collect_num">
+        <a href="javascript:;" class="text" title="收藏数量从高到低" data-sort="DESC">收藏</a>
+      </li>
+      <li class="qFilter" data-name="price">
+        <a href="javascript:;" class="text dropSwitch">
+          价格
+          <span class="s-icon s-icon-down"></span>
+        </a>
+        <ul class="dropList" style="*width: 8em;">
+          <li class="dropItem">
+            <a href="javascript:;" class="dropText" data-sort="ASC">价格从低到高</a>
+          </li>
+          <li class="dropItem">
+            <a href="javascript:;" class="dropText" data-sort="DESC">价格从高到低</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <ul class="qFilters hidden" id="qFiltersMoney">
+      <li class="qFilter" data-name="unit_price">
+        <a href="javascript:;" class="text" title="单价从低到高" data-sort="ASC">单价</a>
+      </li>
+      <li class="qFilter" data-name="price"  >
+        <a href="javascript:;" class="text dropSwitch">
+          总价
+          <span class="s-icon s-icon-down"></span>
+        </a>
+        <ul class="dropList" style="*width: 8em;">
+          <li class="dropItem">
+            <a href="javascript:;" class="dropText" data-sort="ASC">总价从低到高</a>
+          </li>
+          <li class="dropItem">
+            <a href="javascript:;" class="dropText" data-sort="DESC">总价从高到低</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    
+    
+    <div class="priceRange">
+      <div class="bg toggle"></div>
+      <div class="wrap">
+        <span class="text">￥</span>
+        <input type="text" name="price_min" />
+      </div>
+      <span class="split">-</span>
+      <div class="wrap">
+        <span class="text">￥</span>
+        <input type="text" name="price_max" />
+      </div>
+      <a href="javascript:;" class="btn1 searchBtn toggle">确定</a>
+    </div>
+    
+    
+    <div class="qPager" data-cur="1" data-total="100">
+      <a href="javascript:;" class="pPrev disabled">&lt;</a>
+      <span class="info">1/100</span>
+      <a href="javascript:;" class="pNext disabled">&gt;</a>
+    </div>
+    
+    <div class="clear"></div>
+  </div>
+</div>
+
+
+
+<table
+  id="soldList"
+  class="tb01"
+  cellspacing="0"
+  cellpadding="0"
+  border="0"
+  width="100%"
+  log-exposure-container="1"
+>
+  <tbody style="display: none;">
+  
+  </tbody>
+</table>
+
+<div class="blank12"></div>
+
+<div class="clearfix">
+  <dl class="downloadWrap clearfix fl" style="display: none;" id="queryDownloadApp">
+    <dt class="fl imgWrap">
+      <img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_download_app_query.png"  alt="">
+    </dt>
+    <dd class="desc fr" id="downloadAppDesc"></dd>
+  </dl>
+  <div id="pager" class="fr"></div>
+</div>
+
+
+  </div>
+	</div>
+</div>
+<div class="areaBtm"></div>
+
+
+<div class="pageCover" id="pageRemindPrice" style="display:none"></div>
+<div class="popupDialog" id="popupRemindPrice" style="position: absolute; width: 490px; display: none;">
+  <div class="dialogWrap">
+    <div class="blockTitle">降价提醒设置<a href="javascript:;" class="dialogClose" data-close="1" hidefocus="true"></a></div>
+		<div class="dialogCont f14px" style="padding: 20px 15px;">
+			<div style="padding: 0 0 40px 0;">
+				<div>
+          当价格≤ <input id="remindful_price" type="text" class="txt1 f12px" size="6" value=""/> 元时，您会在站内信和游戏系统消息中收到降价通知
+        </div>
+        <div style="padding-top: 12px;display: none;" id="changeDownPriceDesc"></div>
+			</div>
+      <div class="js_error cRed f12px textCenter" style="padding-bottom: 8px;">&nbsp;</div>
+			<p class="textCenter"><input type="button" class="btn1 f14px" value="确定" onclick="add_collect_remind_price()" style="width: 60px;" /></p>
+			<!--	以上是收藏弹窗的内容 -->
+		</div>
+  </div>
+</div><div id="pager_templ" style="display:none;">
 <!--
 <% var pager = this.pager; %>
 <div class="pages">
@@ -1648,803 +3375,15 @@ data_sell_by_apart_type="2"
 </div>
 -->
 </div>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/select_server_v1.js"></script>
-
-<div id="no_server_select_templ" style="display:none">
-<!--
-	<p class="f14px">为保证精准为您找到可购买的商品，建议您先选择将要购买商品的账号所在的服务器。</p>
-	<p class="inline-block">
-		<span class="serverBtn" id="btn_show_server_select_box" tid="web_overall_9_1"><strong>选择服务器</strong></span>
-	</p>
-	<ul id="recent_selected_server" class="inline-block"></ul>
--->
-</div>
-
-<div id="user_server_info_templ" style="display:none">
-<!--
-	<div class="grideCont searchServer">
-		<p class="f14px inline-block">购入商品的账号所在服务器：<%= this.area_name %> - <%= this.server_name %>
-			<a href="javascript:void(0);" class="underline" id="btn_change_user_server" tid="web_overall_9_2">修改服务器</a>
-		</p>
-		<ul id="recent_selected_server" class="inline-block"></ul>
-		<input type="hidden" name="user_serverid" id="user_serverid" value="<%= this.serverid %>" />
-	</div>	
--->
-</div>
-
-<div id="area_list_templ" style="display:none">
-<!--
-<table class="serverArea" cellspacing="4" cellpadding="4">
-	<% for (var i=0; i < AreaRowNum; i++){ %>
-	<tr>
-			<% for (var j=0; j < TableColNum; j++) { %>
-					<% var el_id = i * TableColNum + j + 1; %>
-					<td id="area_pos_<%= el_id%>">
-						<a href="#" id="area_pos_<%= el_id%>_a"></a>
-					</td>
-			<% } %>	
-	</tr>
-	<% } %>
-</table>
--->
-</div>
-
-<div id="server_list_templ" style="display:none">
-<!--
-<%
-	var RowNum = 2;
-	var ColumnNum = 7; 
-%>
-<table class="serverArea serverName" cellspacing="4" cellpadding="4">
-	<% for (var i=0; i < ServerRowNum; i++){ %>
-	<tr>
-		<% for (var j=0; j < TableColNum; j++){ %>
-			<% var el_id = i * TableColNum + j + 1; %>
-			<td id="server_pos_<%= el_id%>">
-				<a href="#" id="server_pos_<%= el_id%>_a"></a>
-			</td>
-		<% } %>
-	</tr>
-	<% } %>
-</table>
--->
-</div>
-
-
-<div id="search_server_list_templ" style="display:none">
-<!--
-<% if (this.filter_server_list.length) { %>
-<ul>
-<% for (var i=0; i < this.filter_server_list.length; i++){ %>
-	<% var item = this.filter_server_list[i]; %>
-	<li data_serverid="<%= item.serverid %>" data_area_name="<%= item.area_name %>" data_server_name="<%= item.server_name %>"><%= item.server_name %></li>
-<% } %>
-</ul>
-<% } %>
--->
-</div>
-<div style="display:none">
-    <form method="post" name="query_form" action="/cgi-bin/xyq_overall_search.py" target="_blank">
-        <input type="hidden" name="act" value="show_role_search_result" />
-        <input type="hidden" name="args" id="query_args" />
-        <input type="hidden" name="search_act" value="" />
-    </form>
-</div>
-<div class="areaTop"></div>
-<div class="subArea area">
-<div class="areaHead">
-	<div class="nav">
-		<ul>
-			<li class="on"><h3><a href="#">全服搜索</a></h3></li>
-		</ul>
-	</div>
-</div>
-
-<div class="subNav">
-	<a href="https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_search_role_form" id="sub_role" tid="web_overall_2">角色搜索</a>
-	<a href="https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_equip" id="sub_equip" tid="web_overall_4">装备搜索</a>
-	<a href="https://xyq.cbg.163.com/cgi-bin/equipquery.py?act=show_overall_search_pet" id="sub_pet" tid="web_overall_5">召唤兽搜索</a>
-	<a href="https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_overall_search_yuanshen" id="sub_yuanshen" tid="web_overall_6">元身搜索</a>
-	<a href="https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_pet_equip_search_form" id="sub_pet_equip" tid="web_overall_7">召唤兽装备搜索</a>
-	<a href="https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_overall_search_lingshi" id="sub_lingshi" tid="web_overall_8">灵饰搜索</a>
-	
-</div>
-	<div class="content">
-<div id="overall_hot_search_panel"></div>
-<div id="overall_hot_search_temp" style="display: none;">
-<!--
-<%
-	if (this.labels) { 
-%>
-  <div class="filter hot-search-panel">
-		<strong><%= this.title %>：</strong>
-		<ul class="overall-top-list hot-search-list">
-			<% for (var i = 0; i < this.labels.length; i++) { 
-				var item = this.labels[i];
-			%>
-				<li class="tipsBtn jsHotSearchTips" data-index="<%= i %>" tid="web_overall_19" data_trace_text="<%= item.name %>" title="<%= item.name %>" ><%= item.name %></li>
-			<% 
-			}
-			%>
-		</ul>
-	</div>
-<% } %>
--->
-</div>
-<div id="overall_search_saved_query_panel"></div>
-<div style="display:none" id="overall_search_saved_query_templ">
-<!--
-<%
-	if (this.saved_query.length > 0 && this.desc_nav.length > 0 ) { 
-%>
-	<div class="filter">
-		<strong>最近搜索：</strong>
-		<ul class="overall-top-list">
-			<% for (var i=0; i < this.saved_query.length; i++){ 
-				var query = this.saved_query[i];
-				var desc_nav = this.desc_nav[i];
-				var desc_modal = JSON.encode(this.desc_modal[i]);
-				if (desc_nav && desc_nav != "" ) {
-			%>
-				<li class="tipsBtn" data-query='<%= desc_modal %>' tid="web_overall_17" data_trace_text="<%= get_trace_text() %>" >
-					<a href="javascript:do_saved_query(<%=i %>)" class="recentDesc"><%= desc_nav %></a>
-					<a href="javascript:del_overall_search_saved_query(<%=i %>);">×</a>
-				</li>
-			<% 
-				} 
-			}
-			%>
-		</ul>
-	</div>
-<% } %>
--->
-</div>
-<div class="overall_search_modal" id="overall_search_save_modal"></div>
-<div style="display:none;" id="overall_search_save_modal_templ">
-<!-- 
-  <div id="modal-content" >
-		<table class="modal-item">
-			<tbody>	
-		    <% 
-			    var data=this.modal_data;
-		      for (var i = 0; i < data.length; i++) { 
-			  %>
-			    <tr>
-            <th><%= data[i][0] %>:</th>
-            <td><%= cut_text(data[i][1],30,40) %></td>
-			    </tr>	
-			<% } %>	
-			</tbody>
-		</table>			
-  </div> 
--->
-</div>
-
-<script type="text/javascript">
-	var SAVED_OVERALL_SEARCH_QUERY_STORAGE_KEY = 'saved_overall_search_' + OverallSearchType + '_query';
-	var timer =null;
-	function load_overall_search_saved_query_list(){
-		var saved_query = localStorage.getItem(SAVED_OVERALL_SEARCH_QUERY_STORAGE_KEY);
-		if(!saved_query){
-			return null;
-		}
-		try{
-			saved_query = JSON.decode(saved_query);
-		}catch(e){
-			localStorage.setItem(SAVED_OVERALL_SEARCH_QUERY_STORAGE_KEY, '');
-			return null;
-		}
-
-		return saved_query;
-	}
-
-	function get_trace_text() {
-		var config = {
-			role: '角色',
-			equip: '装备',
-			pet: '召唤兽',
-			yuanshen: '元身',
-			pet_equip: '召唤兽装备',
-			lingshi:'灵饰'
-		}
-		return config[OverallSearchType] || '-';
-	}
-
-	function init_overall_search_saved_query(){
-		var saved_query_list = load_overall_search_saved_query_list();
-		if(!saved_query_list){
-			return;
-		}
-		var get_query_desc = new GetSavedQueryDesc(saved_query_list);
-    var all_desc = get_query_desc.get_all_desc();
-    
-		render_to_replace('overall_search_saved_query_panel', 'overall_search_saved_query_templ', {'saved_query': saved_query_list, desc_nav: all_desc.navBarDesc, desc_modal: all_desc.modalDesc });
-	}
-	
-	function do_saved_query(idx){
-		var saved_query_list = load_overall_search_saved_query_list();
-		if(!saved_query_list || saved_query_list.length <= idx){
-			return;
-		}
-		
-		var saved_query = saved_query_list[idx];
-		restore_query_form(saved_query); 
-	}
-
-	function update_overall_search_saved_query(){
-		var saved_query_list = load_overall_search_saved_query_list();
-		if(!saved_query_list){
-			saved_query_list = [];
-		}
-
-		var cur_query = {};
-		if(window.CurSearchValue && CurSearchValue.arg){
-			cur_query = CurSearchValue.arg;
-		}else if($('query_args') && $('query_args').value){
-			cur_query = JSON.decode($('query_args').value);
-		}else if(window.QueryArgs){
-			cur_query = QueryArgs;
-			if(cur_query.page){
-				delete cur_query.page;
-			}
-		}
-
-		var json_str = JSON.encode(cur_query);
-		for(var i=0;i<saved_query_list.length;i++){
-			var saved_json_str = JSON.encode(saved_query_list[i]);
-			if(json_str === saved_json_str){
-				break;
-			}
-		}
-
-		if(i < saved_query_list.length){
-			saved_query_list.splice(i, 1);
-		}
-
-		saved_query_list.unshift(cur_query);
-		if(saved_query_list.length > 5){
-			saved_query_list = saved_query_list.slice(0, 5);
-		}
-
-		localStorage.setItem(SAVED_OVERALL_SEARCH_QUERY_STORAGE_KEY, JSON.encode(saved_query_list), {'duration': 30});
-		
-		init_overall_search_saved_query();
-	}
-
-	$('overall_search_saved_query_panel').addEvent('mouseover:relay(.tipsBtn)', function(e){
-	    show_recent_search_modal(this,e);
-	});
-	$('overall_search_saved_query_panel').addEvent('mouseout:relay(.tipsBtn)', function(e){
-	    hide_recent_search_modal();
-	});	
-  function show_recent_search_modal($child, e) {
-    var childOffset = $child.getCoordinates();
-    var parentOffset = $($child.getOffsetParent()).getCoordinates();
-      var childLeft = childOffset.left,
-      childWidth = childOffset.width,
-      childHeight = childOffset.height,
-      childRight = childOffset.right,
-      childTop = childOffset.top;
-      var parentLeft = parentOffset.left,
-      parentTop = parentOffset.top;
-    var originData = JSON.decode($child.getAttribute('data-query'));
-    render_to_replace('overall_search_save_modal', 'overall_search_save_modal_templ', { 'modal_data': originData });
-    var modalWidth=$('overall_search_save_modal').getStyle('width').toInt() + 30; 
-    var left = childLeft - parentLeft > 500 ? childLeft - parentLeft -(modalWidth-childWidth) : childLeft - parentLeft;	
-    timer = setTimeout(function(){  
-      //需求需要鼠标悬上0.4秒才显示
-      $('overall_search_save_modal').setStyles({
-        left: left,
-        top: childTop - parentTop + childHeight + 3,
-        visibility: 'visible' 
-      });				
-    },400);	    		
-  }	
-
-	function hide_recent_search_modal(){
-		clearTimeout(timer);
-		$('overall_search_save_modal').setStyles({
-			'visibility':'hidden',
-			'left':'50%'
-		});
-		$('overall_search_save_modal').innerHTML='';
-		timer=null;
-	}
-
-	function cut_text(text,minLen,maxLen) {
-    var text = text,
-        len = text.length,
-        minLen = minLen;
-	  if (len > maxLen) {
-      if(text.substring(minLen, minLen+1) != ",") {
-        var subText = text.substr(minLen, 15); //向后截取15个字符，获取到有逗号或者空的位置。
-        for(var i = 0;i < subText.length;i++) {
-          if(subText.substring(i,i+1) == ",") {
-            minLen += i;
-            break;
-          }
-        }
-      } 
-      text = text.substr(0, (minLen+1)) + '<br>' + text.substr((minLen+1), maxLen) + '...';
-		}
-		return text;
-	}
-
-	function del_overall_search_saved_query(idx){
-		var saved_query_list = load_overall_search_saved_query_list();
-		if(!saved_query_list || saved_query_list.length <= idx){
-			return;
-		}
-		
-		saved_query_list.splice(idx, 1);
-
-		localStorage.setItem(SAVED_OVERALL_SEARCH_QUERY_STORAGE_KEY, JSON.encode(saved_query_list), {'duration': 30});
-
-		init_overall_search_saved_query();
-		hide_recent_search_modal();
-	}
-
-	window.addEvent('domready', function() {
-		init_overall_search_saved_query();	
-	})
-</script>
-		<div class="cols hasLayout">
-
-			<div class="divGride searchForm">
-				<div class="title">
-					<span><a href="javascript:;" class="fB f14px" id="btn_reset_user_server">重置</a></span>
-					<h3 class="f14px textLeft fB" data-title="选择服务器">选择服务器</h3>
-				</div>
-			</div>
-				
-			<div id="user_server_info_box" class="grideCont searchServer"></div>
-			
-			<div class="divGride searchForm js_search_form">
-
-				<div class="title">
-					<span><a href="javascript:;" class="fB f14px" id="reset_equip_attr">重置</a></span>
-					<h3 class="f14px textLeft fB js_form_title" data-title="武器装备">武器装备</h3>
-				</div>
-
-				<!-- grideCont开始 -->
-				<div class="grideCont">
-
-<table width="100%" cellspacing="0" cellpadding="0" class="searcTb">
-	<col width="120" /><col/>
-	<tr>
-		<th class="js_sub_title" data-title="等级">
-			<div class="blank24"></div>
-			等级：
-		</th>
-		<td>
-			<div class="blank24"></div>
-			<div class="levelSlider" id="level_slider">
-				<div class="track" style="width:198px;"></div>
-				<div class="bar" style="width:200px;"></div>
-				<div class="startPoint">
-					<div class="num">70级</div>
-				</div>
-				<div class="endPoint">
-					<div class="num">150级</div>
-				</div>
-				<div class="nodes">
-					<ul>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-						<li></li>
-					</ul>
-				</div>
-			</div>
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="类型">类型：</th>
-		<td>
-			<ul class="btnList" id="kind_check_panel">
-			</ul>
-			<div class="blank9 hasLayout"></div>
-			武器：
-			<select id="for_role_race">
-				<option value="">不限</option>
-				<option value="999">所有</option>
-			</select>
-			防具：
-			<select id="for_role_sex">
-				<option value="">不限</option>
-				<option value="999">所有</option>
-				<option value="1">男性角色</option>
-				<option value="2">女性角色</option>
-			</select>
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="特效">特效：</th>
-		<td>
-			<div id="check_mode_panel">
-				<label><input type="radio" name="check_mode" value="and" checked="checked"> 都满足</label>
-				<label><input type="radio" name="check_mode" value="or"> 满足一种</label>
-			</div>
-			<div class="blank9 hasLayout"></div>
-			<ul class="btnList" id="special_effect_panel">
-			</ul>
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="特技">特技：</th>
-		<td>
-			<div class="blank9 hasLayout"></div>
-			<ul class="btnList" id="special_skill_panel" style="width:960px;">
-			</ul>
-			<a href="javascript:void(0)" title="全部特技" class="listAll" id="btn_all_special_skill">全部特技&raquo;</a>
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="套装">套装：</th>
-		<td>
-			<div id="suit_effect_panel" style="position:relative;">
-			<label><input type="radio" name="rdo_suit_effect" value="shortcut" id="radio_short_cut" checked="checked" /></label>
-			<select id="sel_short_cut" onfocus="$('radio_short_cut').checked='checked';"><option value="">--不限--</option></select>
-			<label>
-				<input type="radio" name="rdo_suit_effect" value="added_status" id="radio_added_status">附加状态
-			</label><input type="input" id="txt_added_status" size="6" onfocus="$('radio_added_status').checked='checked'" />
-			<label>
-				<input type="radio" name="rdo_suit_effect" value="append_skill" id="radio_append_skill">追加法术
-			</label><input type="input" id="txt_append_skill" size="6" onfocus="$('radio_append_skill').checked='checked'" />
-			<label>
-				<input type="radio" name="rdo_suit_effect" value="transform_skill" id="radio_transform_skill">变身术之
-			</label><input type="input" id="txt_transform_skill" size="6" onfocus="$('radio_transform_skill').checked='checked'" />
-			<label>
-				<input type="radio" name="rdo_suit_effect" value="transform_charm" id="radio_transform_charm">变化咒之
-			</label><input type="input" id="txt_transform_charm" size="6" onfocus="$('radio_transform_charm').checked='checked'" />
-			</div>
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="属性">属性：</th>
-		<td>
-			初伤（包含命中）&ge; <input type="text" size="6" class="txt1" id="txt_init_damage" />&nbsp;&nbsp;&nbsp;初伤（不含命中）&ge; <input type="text" size="6" class="txt1" id="txt_init_damage_raw" />&nbsp;&nbsp;&nbsp;初防&ge; <input type="text" size="6" class="txt1" id="txt_init_defense" />&nbsp;&nbsp;&nbsp;初血&ge; <input type="text" size="6" class="txt1" id="txt_init_hp" />&nbsp;&nbsp;&nbsp;初敏&ge; <input type="text" size="6" class="txt1" id="txt_init_dex" />&nbsp;&nbsp;&nbsp;初灵&ge; <input type="text" size="6" class="txt1" id="txt_init_wakan" />
-			<div class="blank9 hasLayout"></div>
-			总灵&ge; <input type="text" size="6" class="txt1" id="txt_all_wakan" />总伤&ge; <input type="text" size="6" class="txt1" id="txt_all_damage" />&nbsp;&nbsp;&nbsp;伤害&ge; <input type="text" size="6" class="txt1" id="txt_damage" />
-			<label><input type="checkbox" id="chk_attr_with_melt" checked> 计算熔炼效果</label>
-	</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="属性计算">属性计算：</th>
-		<td>
-			<ul class="btnList" id="sum_attr_panel">
-			</ul>
-			<div class="blank6 hasLayout"></div>
-			属性总和&ge; <input type="text" size="6" class="txt1" id="txt_sum_attr_value" />
-			<label><input type="checkbox" id="chk_sum_attr_with_melt" checked> 计算熔炼效果</label>
-		</td>
-	</tr>
-  
-  <tr>
-		<th class="js_sub_title" data-title="160级装备特性">160级装备特性：</th>
-		<td>
-			<select id="160_attr">
-        <option value="">所有</option>
-      </select>
-		</td>
-	</tr>
-  
-	<tr>
-		<th class="js_sub_title" data-title="镶嵌宝石">镶嵌宝石：</th>
-		<td>
-			<ul class="btnList" style="width:560px;float:left;" id="gem_panel">
-			</ul>
-			<br style="clear:both;" />
-			<br />
-			宝石锻炼等级&ge;<input type="text" size="6" class="txt1" id="txt_gem_level" />
-			<label><input type="checkbox" id="chk_filter_hun_da_gem"> 过滤混打宝石</label>
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="装备开运">装备开运：</th>
-		<td>
-			装备开孔数目&ge; <input type="text" size="6" class="txt1" id="txt_hole_num" />
-			<br /><br />
-			限开启星位：<input type="checkbox" value="1" id="chk_star" />
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="装备出处">装备出处：</th>
-		<td>
-			<ul class="btnList" style="width:560px;float:left;" id="produce_from_panel">
-			</ul>
-		</td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="修理失败">修理失败：</th>
-		<td>
-			修理失败次数&le; <input type="text" size="6" class="txt1" id="txt_repair_fail" />
-		</td>
-	</tr>
-
-	<tr>
-		<th class="js_sub_title" data-title="价格">价格：</th>
-		<td><input type="text" size="7" class="txt1" id="txt_price_min" /> 到 <input type="text" size="7" class="txt1" id="txt_price_max" /></td>
-	</tr>
-	<tr>
-		<th class="js_sub_title" data-title="出售状态">出售状态：</th>
-		<td>
-			<ul class="btnList" id="fair_show_panel"></ul>
-		</td>
-	</tr>
-</table>
-				</div>
-				<!-- grideCont结束 -->
-			</div>
-
-			<div class="divGride searchForm js_search_form">
-				<div class="title">
-					<span><a href="javascript:;" class="fB f14px" id="reset_server_info">重置</a></span>
-					<h3 class="f14px textLeft fB js_form_title" data-title="服务器范围">服务器范围</h3>
-				</div>
-				<!-- grideCont开始 -->
-				<div class="grideCont">
-					<table width="99%" cellspacing="0" cellpadding="0" class="searcTb">
-            <col width="100" />
-            <tr>
-              <th class="fB js_sub_title"  data-title="开服时间">开服时间：</th>
-              <td>
-                <ul class="btnList" id="server_type_panel"></ul>
-              </td>
-            </tr>
-<tr>
-  <th class="fB js_sub_title"  data-title="指定区服">指定区服：</th>
-  <td>
-    <select id="overall_sel_area"></select>
-    区
-    <select id="ovarall_sel_server"></select>
-    服务器
-    <ul class="btnList choice-login-server">
-      <li id="js_choice_login_server" style="display:none;"><span>选择已登录服务器</span></li>
-    </ul>
-  </td>
-</tr>
-
-<script>
-  var OverallAppointServer = new Class({
-
-    Extends: DropSelectServer,	
-
-    initialize: function(server_type_checker) {
-      this.parent($('overall_sel_area'), $('ovarall_sel_server'));
-      this.server_type_checker = server_type_checker;
-      this.init_login_server_btn();
-      this.reg_event();
-    },
-
-    init_login_server_btn: function() {
-      if(ServerInfo.area_id && ServerInfo.server_id) {
-        var $jsChoiceServerBtn = $('js_choice_login_server');
-        $jsChoiceServerBtn.setStyle('display','block');
-        $jsChoiceServerBtn.set({
-          'data-area_id': ServerInfo.area_id,
-          'data-server_id': ServerInfo.server_id
-        });
-        this.bind_event();
-      }
-    },
-
-    handle_login_server_btn: function() {
-      if (ServerInfo.area_id && ServerInfo.server_id) {
-        if ($('overall_sel_area').value == ServerInfo.area_id && $('ovarall_sel_server').value == ServerInfo.server_id) {
-          $('js_choice_login_server').addClass('on');
-        } else {
-          $('js_choice_login_server').removeClass('on');
-        }
-      }
-    },
-
-    // 重写父集方法
-    reg_event: function () {
-      var ctx = this;
-      ctx.area_el.addEvent('change', function () {
-        ctx.gen_server_box();
-        if($('overall_sel_area').value) {
-          ctx.server_type_checker.add_disable();
-        } else {
-          ctx.server_type_checker.reset_value();
-        }
-        ctx.handle_login_server_btn();
-      });
-      ctx.server_el.addEvent('change',function() {
-        ctx.handle_login_server_btn();
-      });
-    },
-
-    bind_event: function() {
-      var ctx = this;
-      $('js_choice_login_server').addEvent('click',function() {
-        var $this = $(this);
-        ctx.server_type_checker.reset_value(); // 重置开服时间button
-        if ($this.hasClass('on')) {
-          $this.removeClass('on');
-          ctx.area_el.set('value', '');
-          ctx.gen_server_box();
-        } else {
-          var area_id = $this.get('data-area_id');
-          var server_id = $this.get('data-server_id');
-          var $selectAreaOption = $('overall_sel_area').getElement('option[value=' + area_id + ']');
-          if ($selectAreaOption) {
-            $selectAreaOption.set('selected', 'selected');
-            ctx.gen_server_box();
-          }
-          var $selectServerOption = $('ovarall_sel_server').getElement('option[value=' + server_id + ']');
-          if ($selectServerOption) {
-            $selectServerOption.set('selected', 'selected');
-          }
-          $this.addClass('on');
-          ctx.server_type_checker.add_disable();
-        }
-      });
-    },
-    
-    reset_value: function () { //外部的重置调用
-      this.area_el.set('value', '');
-      this.gen_server_box();
-      $('js_choice_login_server').removeClass('on');
-    },
-
-    get_serverid: function() {
-      return $('ovarall_sel_server').value || '';
-    }
-  });
-</script>					</table>
-				</div>
-				<!-- grideCont结束 -->
-			</div>
-
-			<div class="searchSbmt hasLayout" style="padding-left: 460px;">
-				<div class="searchbtCon" style="width:150px;">
-					<a href="javascript:;" class="os-btn os-btn-red fB" id="btn_equip_search">全服搜索</a>
-					<span id="loading_img" style="display:none;"><img src="https://cbg-xyq.res.netease.com/images/loading.gif" /></span>
-				</div>
-				<div style="height:38px;line-height:38px;float:left;">
-					<a href="javascript:;" class="os-btn fB" id="reset_all">重置</a>
-				</div>
-			</div>
-			<div style="text-align:center;padding-bottom: 20px;" class="f14px">
-        转服购买物品，请留意可转服范围，<a href="http://xyq.163.com/2011/zhuanyi/shuoming.html" target="_blank" class="os-link underLine">点击查询转服规则</a>&nbsp;<a href="javascript:;" class="os-link underLine" id="link_search_related_role" tid="web_overall_16" data_trace_text="装备">查看携带满足搜索条件装备的角色</a>
-      </div>
-			<div id="search_result"></div>
-			<div class="blank12"></div>
-			<div id="pager"></div>
-		</div>
-	</div>
-</div>
-<div class="areaBtm"></div>
-
-<ul class="overall-sidebar-nav" id="overallSidebarNav" style="display: none;">
-  <script type="text/html" id="overall_sidebar_templ">
-    <% var data = this.data; %>
-    <% for(var i = 0; i < data.length; i++) { %>
-    <li>
-      <% var title = data[i][0]; %>
-      <% var subList = data[i][1]; %>
-      <% var isDefaultColse = data[i][2]; %>
-      <% if(title) { %>
-      <h2 class="title">
-        <i class="icon-switch js_toggle <% if(isDefaultColse) { %>fold<% } %>" data-toggle-title="<%= title %>">
-          <%= isDefaultColse ? "+" : "-"%>
-        </i>
-        <span class="text js_nav" data-title="title"><%= title %></span>
-      </h2>
-      <% } %>
-      <% if(subList && subList.length) { %>
-      <% var hideStyle =isDefaultColse ? "display:none;" : "" %>
-      <ul class="tree-node js_tree_node" data-toggle-title="<%= title %>" style="<%= hideStyle %>">
-        <% for(var j = 0; j < subList.length; j++) { %>
-        <li class="tree-item js_nav"><%= subList[j] %></li>
-        <% } %>
-      </ul>
-      <% } %>
-    </li>
-    <% } %>
-  </script>
-</ul>
-
-<script>
-;(function() {
-  
-  var OverallSibarNav = new Class({
-    
-    initialize : function(options) {
-      this.$root = $('overallSidebarNav');
-      this.render();
-      this.bindEvent();
-    },
-    
-    getNavData: function() {
-      var $searchForm = $$('.js_search_form');
-      var result = [];
-      for(var i = 0, len1 = $searchForm.length; i < len1; i++) {
-        var data = [];
-        var $item = $searchForm[i];
-        var $mainTitleElem = $item.getElement('.js_form_title');
-        var $subTitleElems = $item.getElements('.js_sub_title');
-        var title = '';
-        var isDefaultColse = false;
-        if($mainTitleElem) {
-          title = $mainTitleElem.get('data-title');
-          isDefaultColse = $mainTitleElem.get('data-close');
-        }
-        var subTitles = [];
-        if($subTitleElems && $subTitleElems.length) {
-          for(var j = 0, len2 = $subTitleElems.length; j < len2; j++) {
-            var subTitle = $subTitleElems[j].get('data-title');
-            subTitles.push(subTitle);
-          }
-        }
-        data[0] =  title;
-        data[1] =  subTitles;
-        if(isDefaultColse) {
-          data[2] = true;
-        }
-        result.push(data);
-      }
-      return result;
-    },
-
-    render: function() {
-      var data = this.getNavData();
-      if(data.length) {
-        render_to_replace('overallSidebarNav', 'overall_sidebar_templ', { data: data });
-        this.$root.setStyle('display', '');
-      }
-    },
-
-    bindEvent: function() {
-      this.$root.addEvent('click:relay(.js_nav)', function() {
-        $$('#advance_search_box').setStyle('display', 'block');
-        var title = $(this).get('text');
-        var $elem = $$('.js_search_form [data-title='+ title +']');
-        if($elem) {
-          var offset = $elem.getCoordinates()[0];
-          window.scrollTo(0, offset.top - 3); // -3是预留一些边距，更完美些
-        }
-      });
-      this.$root.addEvent('click:relay(.js_toggle)', function() {
-        var $this = $(this);
-        var $expandList = $$('.js_tree_node[data-toggle-title='+ $this.get('data-toggle-title') +']');
-        if($this.hasClass('fold')) {
-          $this.removeClass('fold');
-          $this.set('html', '-');
-          $expandList.setStyle('display', '');
-        } else {
-          $this.addClass('fold');
-          $this.set('html', '+');
-          $expandList.setStyle('display', 'none');
-        }
-      });
-    }
-
-  });
-
-  window.addEvent('domready', function() {
-    new OverallSibarNav();
-  });
-
-})();
-</script><!--页脚-->
+<!--页脚-->
 <div class="areaTop"></div>
 <div class="footer area clearfix">
 	<div class="qrcode-item">
-		<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_download_other2.png" id="footerDownloadApp" alt="">
+		<img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_download_other2.png" id="footerDownloadApp" alt="">
 		手机藏宝阁
 	</div>
 	<div class="qrcode-item">
-		<img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/qrcode_weChat_public.png" alt="">
+		<img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/qrcode_weChat_public.png" alt="">
 		藏宝阁微信公众号
 	</div>
 <style type="text/css">
@@ -2463,7 +3402,7 @@ data_sell_by_apart_type="2"
 <div class="cbg-copyright">
   <div class="nie-cn-part1">
     <span class="nie-cn-logo">
-    <a class="a0" href="http://www.163.com" target="_blank"><img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/netease.2.png?v=20220427"></a><a class="a1" href="https://game.163.com" target="_blank"><img src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/images/nie.2.png"></a>
+    <a class="a0" href="http://www.163.com" target="_blank"><img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/netease.2.png?v=20220427"></a><a class="a1" href="https://game.163.com" target="_blank"><img src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/images/nie.2.png"></a>
     </span>
     <span class="nie-cn-nav">
       <i class="nie-cn-nav-i1">
@@ -2490,7 +3429,7 @@ data_sell_by_apart_type="2"
     var $footerLinkLaw = document.getElementById('footerLinkLaw');
     if (isXyq) {
       $footerLinkLaw.innerHTML = '隐私政策';
-      $footerLinkLaw.setAttribute('href','https://xyq.cbg.163.com/privacy_policy.html');
+      $footerLinkLaw.setAttribute('href','https://cbg.163.com/app-static/privacy_policy.html');
     }
   })();
 </script>
@@ -2499,9 +3438,9 @@ data_sell_by_apart_type="2"
 <div class="areaBtm"></div>
 <div class="blank12"></div>
 <script>var SHARE_FROM_XYQ = true;</script>
-<script>var SHARE_RES_URL = "https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084";</script>
-<script crossorigin src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/share_init.js" no-tracer></script>
-<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rcc10a11c2d3fb39c7e084/js/trace.js"></script>
+<script>var SHARE_RES_URL = "https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997";</script>
+<script crossorigin src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/share_init.js" no-tracer></script>
+<script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/rc09d0d8f65b7516ba0997/js/trace.js"></script>
 <script crossorigin type="text/javascript" src="https://cbg-xyq.res.netease.com/cbg_tgxc/xyq_tgxc.js"></script>
 </body>
 </html>

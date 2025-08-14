@@ -5935,7 +5935,7 @@ Cookie.dispose = function (key, options) {
         ) {
           if (255 < (r = o.charCodeAt((n += 0.75))))
             throw new f(
-              "'btoa' failed: The string to be encoded contains characters outside of the Latin1 range."
+              "'btoa' failed: The string to be encoded contains roles outside of the Latin1 range."
             );
           t = (t << 8) | r;
         }

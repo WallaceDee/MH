@@ -70,6 +70,43 @@ class UnifiedFeatureExtractor:
         else:
             # 默认使用普通装备提取器
             return self.equip_extractor
+        
+    def _get_kindid_from_itype(self, kindid: int, i_type: int) -> int:
+        """
+        根据kindid和iType获取对应的kindid
+        如果kindid已存在且有效，直接返回；否则根据iType转换
+        
+        Args:
+            kindid: 现有的kindid值
+            i_type: iType值
+            
+        Returns:
+            int: 有效的kindid值
+        """
+        # 如果kindid已存在且有效，直接返回
+        if kindid > 0:
+            return kindid
+            
+        # 如果iType无效，返回0
+        if not i_type or i_type <= 0:
+            return 0
+            
+        # 根据iType转换kindid
+        from ..constants.i_type_kindid_map import KINDID_ITYPE_RANGE
+        
+        try:
+            i_type = int(i_type)
+        except (ValueError, TypeError):
+            return 0
+
+        for kindid, ranges in KINDID_ITYPE_RANGE.items():
+            for range_tuple in ranges:
+                if len(range_tuple) == 2:
+                    start, end = range_tuple
+                    if int(start) <= i_type <= int(end):
+                        return kindid
+
+        return 0
     
     def extract_features(self, data: Dict[str, Any], data_type: str = 'equipment') -> Dict[str, Union[int, float, str]]:
         """
@@ -89,11 +126,21 @@ class UnifiedFeatureExtractor:
             
             # 装备数据根据kindid选择提取器
             kindid = data.get('kindid', 0)
+            # 如果kindid为0，则根据type获取kindid
+            kindid = self._get_kindid_from_itype(kindid, data.get('type', 0))
             extractor = self.get_extractor_by_kindid(kindid)
-            
+            extractor_type = self.kindid_mapping.get(kindid, self.kindid_mapping['default'])
+            _data ={
+                'kindid': kindid
+            }
+            if extractor_type == 'pet_equip':
+                _data['desc'] = data.get('large_equip_desc', '')
+            else:
+                _data['cDesc'] = data.get('large_equip_desc', '')
+                
             self.logger.info(f"使用 {extractor.__class__.__name__} 提取 kindid={kindid} 的特征")
             
-            return extractor.extract_features(data)
+            return extractor.extract_features(_data),kindid,extractor_type
             
         except Exception as e:
             self.logger.error(f"特征提取失败: {e}")

@@ -121,14 +121,14 @@ export default new Vuex.Store({
       state.server_name = server_name
       state.server_data_value = [areaid, server_id]
     },
-    
+
     // 更新server_data_value
     updateServerDataValue(state, server_data_value) {
       if (Array.isArray(server_data_value) && server_data_value.length >= 2) {
         state.server_data_value = server_data_value
         state.areaid = server_data_value[0]
         state.server_id = server_data_value[1]
-        
+
         // 根据server_data_value查找对应的server_name
         if (window.server_data) {
           for (let key in window.server_data) {
@@ -145,6 +145,11 @@ export default new Vuex.Store({
             }
           }
         }
+      } else {
+        state.server_data_value = [43, 77]
+        state.areaid = 43
+        state.server_id = 77
+        state.server_name = '进贤门'
       }
     }
   },
@@ -153,7 +158,7 @@ export default new Vuex.Store({
     setServerData({ commit }, { areaid, server_id, server_name }) {
       commit('updateServerData', { areaid, server_id, server_name })
     },
-    
+
     // 设置server_data_value
     setServerDataValue({ commit }, server_data_value) {
       commit('updateServerDataValue', server_data_value)

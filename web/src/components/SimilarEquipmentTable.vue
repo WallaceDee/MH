@@ -34,7 +34,7 @@
             :data-specia-effet="scope.row.special_effect"
             :data-special-skill="scope.row.special_skill"
           ></div>
-         <p> {{ formatSpecialSkillsAndEffects(scope.row) }}</p>
+         <p v-html="formatSpecialSkillsAndEffects(scope.row)"></p>
           <p>  {{ formatSuitEffect(scope.row) }}</p>
         </div>
       </template>

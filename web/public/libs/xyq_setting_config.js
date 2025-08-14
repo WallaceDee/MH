@@ -91,13 +91,6 @@
             var grade = +(pet.pet_grade || 0);
             var growth = (pet.growth || pet.cheng_zhang || 0) * 1000;
             
-            // 调试：打印衰减计算的基础参数
-            if (type === 0) {  // 攻击
-                console.log('\n[DEBUG][JS] _fix_pet_decay_attr开始: attr_type=' + type + '(攻击), down_zz=' + downzz);
-                console.log('[DEBUG][JS] 基础参数: grade=' + grade + ', growth=' + growth);
-                console.log('[DEBUG][JS] 衰减前attack值: ' + pet.attack);
-            }
-            
             if (isNaN(grade) || isNaN(growth)) {
                 return;
             }
@@ -111,11 +104,6 @@
                         var currentVal = pet[key];
                         var newVal = Math.max(pet[key] - val, 0) || 0;
                         pet[key] = newVal;
-                        
-                        // 调试：打印attack相关的衰减过程
-                        if (key === 'attack') {
-                            console.log('[DEBUG][JS] attack衰减: ' + currentVal + ' - ' + val + ' = ' + newVal);
-                        }
                     }
                 }
             }
@@ -135,9 +123,7 @@
                 // 调试：打印attack衰减的详细计算过程
                 var decayCalc = downzz * grade * 2 / 1000 * (700 + growth / 2) / 1000 * 4 / 3;
                 var decay = Math.ceil(decayCalc);
-                console.log('[DEBUG][JS] attack衰减计算: down_zz(' + downzz + ') * grade(' + grade + ') * 2 / 1000 * (700 + growth(' + growth + ')/2) / 1000 * 4/3 = ' + decayCalc);
-                console.log('[DEBUG][JS] attack衰减结果: ceil(' + decayCalc + ') = ' + decay);
-                
+
                 tryDecay('attack', decay);
                 break;
             case 1:
@@ -217,64 +203,30 @@
             var z = zz[i];
             var extKey = attrs[i];
             var totalKey = totalAttrs[i];
-            
-            // 调试：打印attack相关的计算过程
-            if (extKey.indexOf('gong_ji') !== -1 || totalKey.indexOf('gong_ji') !== -1) {
-                console.log('\n[DEBUG][JS] 处理attack相关资质: i=' + i + ', extKey=' + extKey + ', totalKey=' + totalKey);
-                console.log('[DEBUG][JS] 资质上限z=' + z + ', carrygradezz=' + carrygradezz);
-            }
-            
+
             if (totalKey in data) {
                 var value = data[totalKey] - Math.max(z, csavezz[i] || 0);
                 var ext = data[extKey] = Math.max(value, 0);
                 
-                // 调试：打印attack相关的计算过程
-                if (extKey.indexOf('gong_ji') !== -1 || totalKey.indexOf('gong_ji') !== -1) {
-                    console.log('[DEBUG][JS] attack计算: total_value=' + data[totalKey] + ', csave_value=' + (csavezz[i] || 0));
-                    console.log('[DEBUG][JS] attack计算: value=' + data[totalKey] + '-max(' + z + ',' + (csavezz[i] || 0) + ')=' + value + ', ext=' + ext);
-                }
-                
                 var orgZZ = data[totalKey] - data[extKey];
                 data[totalKey] = orgZZ;
-                
-                // 调试：打印attack相关的计算过程
-                if (extKey.indexOf('gong_ji') !== -1 || totalKey.indexOf('gong_ji') !== -1) {
-                    console.log('[DEBUG][JS] attack计算: org_zz=' + data[totalKey] + '-' + ext + '=' + orgZZ);
-                }
                 
                 if (ext > 0) {
                     var year = lastchecksubzz || 2017;
                     var currentYear = currentDate.getFullYear();
                     var currentTotalZZ = orgZZ + ext;
-                    
-                    // 调试：打印attack相关的衰减过程
-                    if (extKey.indexOf('gong_ji') !== -1 || totalKey.indexOf('gong_ji') !== -1) {
-                        console.log('[DEBUG][JS] attack衰减开始: year=' + year + ', current_year=' + currentYear);
-                        console.log('[DEBUG][JS] attack衰减: current_total_zz=' + orgZZ + '+' + ext + '=' + currentTotalZZ);
-                    }
-                    
+
                     for (var y = currentYear - year; y > 0; y--) {
                         var decay = Math.floor(ext / 2);
                         currentTotalZZ = Math.max(currentTotalZZ - decay, orgZZ);
                         ext = currentTotalZZ - orgZZ;
-                        
-                        // 调试：打印attack相关的衰减过程
-                        if (extKey.indexOf('gong_ji') !== -1 || totalKey.indexOf('gong_ji') !== -1) {
-                            console.log('[DEBUG][JS] attack衰减第' + y + '年: decay=floor(' + ext + '/2)=' + decay + ', current_total_zz=' + currentTotalZZ + ', ext=' + ext);
-                        }
-                        
+
                         if (ext <= 0) {
                             break;
                         }
                     }
                     var downExtZZ = data[extKey] - ext;
                     data[extKey] = ext;
-                    
-                    // 调试：打印attack相关的衰减结果
-                    if (extKey.indexOf('gong_ji') !== -1 || totalKey.indexOf('gong_ji') !== -1) {
-                        console.log('[DEBUG][JS] attack衰减结果: down_ext_zz=' + data[extKey] + '-' + ext + '=' + downExtZZ);
-                        console.log('[DEBUG][JS] attack最终值: attack_ext=' + ext + ', attack_aptitude=' + orgZZ);
-                    }
                     
                     if (downExtZZ > 0) {
                         fix_pet_decay_attr(data, i, downExtZZ);

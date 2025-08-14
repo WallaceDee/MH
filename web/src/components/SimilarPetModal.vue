@@ -1,10 +1,10 @@
 <template>
-  <el-popover :data-pet-sn="pet.pet_sn" placement="left-end" width="860" trigger="click"
+  <el-popover  placement="left-end" width="860" trigger="click"
     popper-class="similar-pet-popper" @show="handleShow" v-model="visible">
     <template #reference>
-      <el-link type="primary">查看相似</el-link>
+      <el-link type="primary" style="font-size: 12px;">查看相似</el-link>
     </template>
-
+    
     <!-- 相似宠物内容 -->
     <div v-if="visible">
       <div v-if="similarData">
@@ -12,8 +12,7 @@
           <h4>相似宠物 (共{{ similarData.anchor_count }}个)<em style="font-size: 12px;">-相似度阈值: {{
             similarData.similarity_threshold }}</em></h4>
           <!-- 宠物估价信息 -->
-          <pet-valuation :valuation="valuation" :target-pet="pet" />
-
+          <PetValuation :valuation="valuation" :target-pet="pet" :equip_sn="pet.equip_sn"/>
           <div v-if="similarData.statistics" class="stats">
             <span>
               价格范围:
@@ -24,24 +23,13 @@
             <span> 平均相似度: {{ similarData.statistics.similarity_range.avg.toFixed(3) }} </span>
           </div>
         </div>
-
-        <!-- 无锚点时的重试界面 -->
-        <similar-pet-retry v-if="!similarData.anchors || similarData.anchors.length === 0"
-          :message="similarData.message" :can-retry="similarData.canRetry"
-          :current-threshold="similarData.similarity_threshold" :loading="loading" @retry="handleRetry" />
-
         <!-- 相似宠物表格 -->
-        <similar-pet-table v-else :anchors="similarData.anchors" :target-pet="pet" />
+        <similar-pet-table v-if="similarData.anchors?.length>0" :anchors="similarData.anchors" :target-pet="pet" />
+        <el-empty v-else  description="暂无数据"></el-empty>
       </div>
-
-      <!-- 错误信息 -->
-      <div v-else-if="error" class="error-info">
-        <el-alert type="error" :title="error" show-icon :closable="false"/>
-      </div>
-
       <!-- 加载状态 -->
       <div v-else class="loading-info">
-        <el-skeleton :rows="5" animated />
+        <el-skeleton :rows="12" animated />
       </div>
     </div>
   </el-popover>
@@ -49,16 +37,15 @@
 
 <script>
 import PetValuation from './PetValuation.vue'
-import SimilarPetRetry from './SimilarPetRetry.vue'
 import SimilarPetTable from './SimilarPetTable.vue'
-
+import { commonMixin } from '@/utils/mixins/commonMixin'
 export default {
   name: 'SimilarPetModal',
   components: {
     PetValuation,
-    SimilarPetRetry,
     SimilarPetTable
   },
+  mixins: [commonMixin],
   props: {
     pet: {
       type: Object,
@@ -71,15 +58,7 @@ export default {
     valuation: {
       type: Object,
       default: null
-    },
-    error: {
-      type: String,
-      default: ''
-    },
-    loading: {
-      type: Boolean,
-      default: false
-    },
+    }
   },
   data() {
     return {
@@ -90,17 +69,6 @@ export default {
     handleShow() {
       this.$emit('show', this.pet)
     },
-
-    handleRetry(threshold) {
-      this.$emit('retry', this.pet.eid, threshold)
-    },
-
-    // 格式化价格
-    formatPrice(price) {
-      if (!price) return '---'
-      price=price/100
-      return window.get_color_price ? window.get_color_price(price) : `${price}元`
-    }
   }
 }
 </script>

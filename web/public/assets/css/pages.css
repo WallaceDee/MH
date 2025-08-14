@@ -4756,7 +4756,7 @@ a.btnRed,
   font-size: 14px;
   color: #333;
   font-family: Microsoft Yahei;
-  display: none;
+  /* display: none; */
 }
 .shenqi-modal-content {
   border-radius: 4px;
@@ -5418,7 +5418,7 @@ a.btnRed,
   background-image: url(../images/icon_xianyu.webp);
 }
 .xianyu-wrap .icon-xianyu-jifen {
-  background-image: url(../images/icon_xianyu_jifen.webp);
+  background-image: url(../images/icon_xianyu_jifen.png);
 }
 .xianyu-wrap .icon-qicai-jifen {
   background-image: url(../images/icon_qicai_jifen.webp);

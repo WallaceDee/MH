@@ -1,9 +1,5 @@
-from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl import Workbook
-from datetime import datetime
 import logging
-from typing import Dict, Any, List, Optional, Union, Tuple
+from typing import Dict, Any, List, Optional, Tuple
 import pandas as pd
 import numpy as np
 from abc import ABC, abstractmethod
@@ -17,9 +13,8 @@ from ..pet_equip.pet_equip_market_data_collector import PetEquipMarketDataCollec
 from ...utils.base_valuator import BaseValuator
 
 # 导入装备类型常量
-from ...constants.equipment_types import (
-    LINGSHI_KINDIDS, PET_EQUIP_KINDID, EQUIP_CATEGORIES,
-    is_lingshi, is_pet_equip, get_equip_category, get_equip_category_name
+from ...constants.equipment_types import ( PET_EQUIP_KINDID, EQUIP_CATEGORIES,
+    is_lingshi, is_pet_equip
 )
 
 
@@ -98,12 +93,6 @@ class BaseEquipmentConfig:
             'special_effect': 1          # 特技已在get_market_data_for_similarity中过滤
         }
 
-    def get_equip_category(self, kindid: int) -> str:
-        """根据kindid获取装备类别"""
-        for category, config in self.equip_categories.items():
-            if kindid in config['kindids']:
-                return category
-        return 'weapons'  # 默认返回武器类
 
     def needs_addon_classification_filter(self, kindid: int) -> bool:
         """
@@ -158,12 +147,13 @@ class EquipmentTypePlugin(ABC):
         """插件优先级，数字越大优先级越高"""
         pass
 
-    def get_derived_features(self, features: Dict[str, Any]) -> Dict[str, Any]:
+    def get_derived_features(self, features: Dict[str, Any], context: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         计算派生特征
 
         Args:
             features: 原始特征字典
+            context: 上下文信息，包含额外的计算参数
 
         Returns:
             Dict[str, Any]: 派生特征字典
@@ -301,13 +291,18 @@ class EquipmentPluginManager:
         """获取支持指定kindid的插件列表"""
         return self._kindid_plugin_map.get(kindid, [])
 
-    def get_enhanced_features(self, kindid: int, base_features: Dict[str, Any]) -> Dict[str, Any]:
+    def get_enhanced_features(self, kindid: int, base_features: Dict[str, Any], context: Dict[str, Any] = None) -> Dict[str, Any]:
         """获取增强后的特征（包含派生特征）"""
         enhanced_features = base_features.copy()
 
         # 应用所有支持该kindid的插件的派生特征
         for plugin in self.get_plugins_for_kindid(kindid):
-            derived_features = plugin.get_derived_features(base_features)
+            # 尝试传递context参数，如果插件支持的话
+            try:
+                derived_features = plugin.get_derived_features(base_features, context)
+            except TypeError:
+                # 如果插件不支持context参数，则使用原有方式
+                derived_features = plugin.get_derived_features(base_features)
             enhanced_features.update(derived_features)
 
         return enhanced_features
@@ -537,14 +532,14 @@ class EquipAnchorEvaluator(BaseValuator):
                     # 注意：数据库中的灵饰/宠物装备数据已经包含提取好的特征，不需要重新提取
                     if self.base_config.is_lingshi(target_kindid):
                         # 灵饰数据已经在数据库中完成特征提取，直接使用
-                        market_features = market_row.to_dict()
+                        market_features = self._convert_pandas_row_to_dict(market_row)
                     elif target_kindid == PET_EQUIP_KINDID:
                         # 宠物装备数据已经在数据库中完成特征提取，直接使用
-                        market_features = market_row.to_dict()
+                        market_features = self._convert_pandas_row_to_dict(market_row)
                     else:
                         # 普通装备需要从原始数据中提取特征
                         market_features = self.feature_extractor.extract_features(
-                            market_row.to_dict())
+                            self._convert_pandas_row_to_dict(market_row))
 
                     # 计算相似度
                     similarity = self._calculate_similarity(
@@ -556,7 +551,7 @@ class EquipAnchorEvaluator(BaseValuator):
                             'equip_sn': current_equip_sn,
                             'similarity': float(similarity),
                             'price': float(market_row.get('price', 0)),
-                            'features': market_row.to_dict()
+                            'features': self._convert_pandas_row_to_dict(market_row)
                         })
 
                 except Exception as e:
@@ -702,10 +697,19 @@ class EquipAnchorEvaluator(BaseValuator):
                 kindid, target_features)
 
             # 特征增强：添加派生特征
+            # 对于灵饰，传递target_match_attrs信息
+            context = None
+            if self.base_config.is_lingshi(kindid) and hasattr(self.lingshi_market_collector, 'target_features'):
+                target_match_attrs = self.lingshi_market_collector.target_features.get('target_match_attrs')
+                if target_match_attrs:
+                    context = {
+                        'target_match_attrs': target_match_attrs
+                    }
+            
             enhanced_target_features = self.plugin_manager.get_enhanced_features(
-                kindid, target_features)
+                kindid, target_features, context)
             enhanced_market_features = self.plugin_manager.get_enhanced_features(
-                kindid, market_features)
+                kindid, market_features, context)
 
             total_weight = 0
             weighted_similarity = 0
@@ -714,7 +718,7 @@ class EquipAnchorEvaluator(BaseValuator):
             all_features = set(enhanced_target_features.keys()) | set(
                 enhanced_market_features.keys())
             # 过滤掉一些元数据字段 ???FIXME:为什么这么多元数据字段
-            excluded_features = {'equip_sn', 'price', 'server_id', 'create_time', 'index', 'original_data'}
+            excluded_features = {'equip_sn', 'price', 'create_time', 'index'}
             all_features = all_features - excluded_features
 
             # 收集所有特征的计算结果，用于按得分排序输出
@@ -998,3 +1002,95 @@ class EquipAnchorEvaluator(BaseValuator):
         # 其他套装效果：使用简化逻辑，给予较低的相似度
         # 这样可以避免套装效果差异过大的装备被误认为相似
         return 0.2
+
+    def _convert_pandas_row_to_dict(self, row: pd.Series) -> Dict[str, Any]:
+        """
+        将pandas的Series对象转换为字典，确保数据类型正确
+        
+        Args:
+            row: pandas Series对象
+            
+        Returns:
+            Dict[str, Any]: 转换后的字典，所有数值都是Python原生类型
+        """
+        try:
+            result = {}
+            for col in row.index:
+                value = row[col]
+                # 处理numpy数组的情况
+                if isinstance(value, np.ndarray):
+                    if value.size == 0:
+                        result[col] = []
+                    elif value.size == 1:
+                        # 单个元素的数组，提取值
+                        single_value = value.item()
+                        if pd.isna(single_value):
+                            result[col] = None
+                        else:
+                            result[col] = self._convert_single_value(single_value)
+                    else:
+                        # 多元素数组，转换为列表
+                        result[col] = value.tolist()
+                elif isinstance(value, list):
+                    # 处理列表中的numpy数组
+                    converted_list = []
+                    for item in value:
+                        if isinstance(item, np.ndarray):
+                            if item.size == 0:
+                                converted_list.append([])
+                            elif item.size == 1:
+                                converted_list.append(item.item())
+                            else:
+                                converted_list.append(item.tolist())
+                        else:
+                            converted_list.append(item)
+                    result[col] = converted_list
+                elif pd.isna(value):
+                    result[col] = None
+                else:
+                    result[col] = self._convert_single_value(value)
+            return result
+        except Exception as e:
+            self.logger.error(f"转换pandas行数据失败: {e}")
+            # 降级到原始to_dict()方法
+            return row.to_dict()
+    
+    def _convert_list_types(self, data_list) -> List[Any]:
+        """递归转换列表中的numpy类型"""
+        converted_list = []
+        for item in data_list:
+            if isinstance(item, (np.integer, np.int64, np.int32)):
+                converted_list.append(int(item))
+            elif isinstance(item, (np.floating, np.float64, np.float32)):
+                converted_list.append(float(item))
+            elif isinstance(item, np.ndarray):
+                converted_list.append(item.tolist())
+            elif isinstance(item, list):
+                converted_list.append(self._convert_list_types(item))
+            elif isinstance(item, dict):
+                converted_list.append(self._convert_dict_types(item))
+            else:
+                converted_list.append(item)
+        return converted_list
+    
+    def _convert_single_value(self, value) -> Any:
+        """转换单个值，处理numpy类型"""
+        if isinstance(value, (np.integer, np.int64, np.int32)):
+            return int(value)
+        elif isinstance(value, (np.floating, np.float64, np.float32)):
+            return float(value)
+        elif isinstance(value, (list, tuple)):
+            # 递归处理列表中的numpy类型
+            return self._convert_list_types(value)
+        elif isinstance(value, dict):
+            # 递归处理字典中的numpy类型
+            return self._convert_dict_types(value)
+        else:
+            return value
+    
+    def _convert_dict_types(self, data_dict) -> Dict[str, Any]:
+        """递归转换字典中的numpy类型"""
+        converted_dict = {}
+        for key, value in data_dict.items():
+            converted_dict[key] = self._convert_single_value(value)
+        return converted_dict

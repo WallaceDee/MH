@@ -13,6 +13,19 @@ project_root = os.path.dirname(os.path.dirname(
     os.path.dirname(os.path.dirname(current_dir))))  # 向上四级到项目根目录
 sys.path.insert(0, project_root)
 
+# 导入灵饰优先级配置
+try:
+    from src.evaluator.constants.lingshi_priorities import (
+        RING_EARRING_PRIORITY, BRACELET_ACCESSORY_PRIORITY,
+        get_priority_by_attr_name
+    )
+except ImportError:
+    # 如果导入失败，定义默认配置
+    RING_EARRING_PRIORITY = {}
+    BRACELET_ACCESSORY_PRIORITY = {}
+    def get_priority_by_attr_name(attr_name: str, equipment_type: str = None) -> int:
+        return 999
+
 
 try:
     from ...feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
@@ -42,6 +55,7 @@ class LingshiMarketDataCollector:
         self.db_paths = db_paths or self._find_recent_dbs()
         self.feature_extractor = LingshiFeatureExtractor()
         self.logger = logging.getLogger(__name__)
+        self.target_features = None  # 保存目标特征，用于传递target_match_attrs
 
         print(f"灵饰数据采集器初始化，加载数据库: {self.db_paths}")
 
@@ -63,7 +77,8 @@ class LingshiMarketDataCollector:
         print(f"优先查找数据库文件，目标月份: {target_months}")
 
         # 数据库文件固定存放在根目录的data文件夹中
-        data_path = "data"
+        from src.utils.project_path import get_data_path
+        data_path = get_data_path()
         found_dbs = []
 
         # 首先查找指定月份的数据库文件
@@ -216,6 +231,9 @@ class LingshiMarketDataCollector:
         if data_df.empty or not target_attrs:
             return data_df
         
+        # 保存目标特征，供后续特征计算使用
+        self.target_features = {'attrs': target_attrs}
+        
         # 提取目标附加属性的类型
         target_attr_types = []
         for attr in target_attrs:
@@ -233,50 +251,9 @@ class LingshiMarketDataCollector:
         # 物理系：伤害(S)、物理暴击等级(A)、穿刺等级(B)、狂暴等级(C)
         # 法术系：法术伤害(S)、法术暴击等级(A)、法术伤害结果(B)
         # 辅助系：固定伤害(S)、治疗能力(A)、封印命中等级(B)、速度(C)
-        # 手镯/佩饰属性优先级：
-        # 气血(S)、防御(S)、抵抗封印等级(A)、抗物理暴击(A)、格挡值(B)、法术防御(B)、抗法术暴击(C)、气血回复效果(C)
-        
-        ring_earring_priority = {
-            # 物理系 - S级
-            '伤害': 1,
-            # 物理系 - A级
-            '物理暴击等级': 2,
-            # 物理系 - B级
-            '穿刺等级': 3,
-            # 物理系 - C级
-            '狂暴等级': 4,
-            
-            # 法术系 - S级
-            '法术伤害': 1,
-            # 法术系 - A级
-            '法术暴击等级': 2,
-            # 法术系 - B级
-            '法术伤害结果': 3,
-            
-            # 辅助系 - S级
-            '固定伤害': 1,
-            # 辅助系 - A级
-            '治疗能力': 2,
-            # 辅助系 - B级
-            '封印命中等级': 3,
-            # 辅助系 - C级
-            '速度': 4,
-        }
-        
-        bracelet_accessory_priority = {
-            # S级
-            '气血': 1,
-            '防御': 1,
-            # A级
-            '抵抗封印等级': 2,
-            '抗物理暴击': 2,
-            # B级
-            '格挡值': 3,
-            '法术防御': 3,
-            # C级
-            '抗法术暴击': 4,
-            '气血回复效果': 4,
-        }
+        # 使用统一的灵饰属性优先级配置
+        # 戒指/耳饰属性优先级：伤害(1)、物理暴击等级(2)、穿刺等级(3)、狂暴等级(4)、法术伤害(1)、法术暴击等级(2)、法术伤害结果(3)、固定伤害(1)、治疗能力(2)、封印命中等级(3)、速度(4)
+        # 手镯/佩饰属性优先级：气血(1)、防御(1)、抵抗封印等级(2)、抗物理暴击(2)、格挡值(3)、法术防御(3)、抗法术暴击(4)、气血回复效果(4)
         
         # 根据目标属性数量确定匹配策略
         target_attr_count = len(target_attr_types)
@@ -284,38 +261,65 @@ class LingshiMarketDataCollector:
         # 获取目标属性的优先级排序
         def get_priority_sorted_attrs(attr_types, equipment_type):
             """根据装备类型获取优先级排序的属性列表"""
-            if equipment_type in [61, 62]:  # 戒指/耳饰
-                priority_map = ring_earring_priority
-            elif equipment_type in [63, 64]:  # 手镯/佩饰
-                priority_map = bracelet_accessory_priority
-            else:
-                # 未知类型，按原顺序返回
-                return attr_types
-            
+            # 使用统一的优先级配置
             # 按优先级排序，优先级相同的保持原顺序
-            sorted_attrs = sorted(attr_types, key=lambda x: priority_map.get(x, 999))
+            sorted_attrs = sorted(attr_types, key=lambda x: get_priority_by_attr_name(x, equipment_type))
             return sorted_attrs
         
         # 根据目标属性数量确定匹配所需的属性
         def get_match_attrs(target_attrs, equipment_type):
-            """根据目标属性数量和装备类型确定匹配所需的属性"""
+            """根据目标属性数量和装备类型确定匹配所需的属性，返回(匹配属性列表, 未选中属性)"""
             if target_attr_count == 2:
                 # 2条属性时，需要2条属性类型相同
-                return set(target_attrs)
+                return list(target_attrs), None
             elif target_attr_count == 3:
                 # 3条属性时，检查是否都相同
                 unique_attrs = set(target_attrs)
                 if len(unique_attrs) == 1:
                     # 3条属性都一样，必须3条匹配
-                    return set(target_attrs)
+                    return list(target_attrs), None
                 else:
-                    # 3条属性不全相同，按优先级取2条
-                    sorted_attrs = get_priority_sorted_attrs(target_attrs, equipment_type)
-                    return set(sorted_attrs[:2])
+                    # 3条属性不全相同，优先选择重复的属性
+                    from collections import Counter
+                    attr_counter = Counter(target_attrs)
+                    
+                    # 如果有重复属性，优先选择重复最多的属性
+                    if len(attr_counter) < len(target_attrs):
+                        # 有重复属性，选择重复最多的属性
+                        most_common_attr = attr_counter.most_common(1)[0][0]
+                        # 如果重复属性有2个或以上，选择2个重复属性
+                        if attr_counter[most_common_attr] >= 2:
+                            # 选择2个重复属性，未选中的是其他属性
+                            unmatched_attrs = [attr for attr in target_attrs if attr != most_common_attr]
+                            return [most_common_attr, most_common_attr], unmatched_attrs[0] if unmatched_attrs else None
+                        else:
+                            # 重复属性只有1个，选择1个重复属性 + 1个其他属性
+                            other_attrs = [attr for attr in target_attrs if attr != most_common_attr]
+                            # 未选中的是其他属性中除了已选择的那一个
+                            unmatched_attr = other_attrs[1] if len(other_attrs) > 1 else None
+                            return [most_common_attr, other_attrs[0]], unmatched_attr
+                    else:
+                        # 没有重复属性，按优先级取2条
+                        sorted_attrs = get_priority_sorted_attrs(target_attrs, equipment_type)
+                        # 未选中的是排序后第3个属性
+                        unmatched_attr = sorted_attrs[2] if len(sorted_attrs) > 2 else None
+                        return sorted_attrs[:2], unmatched_attr
             else:
-                # 其他情况，使用所有属性
-                return set(target_attrs)
+                # 灵饰最多只有3条属性，这里不应该到达
+                raise ValueError(f"灵饰属性数量异常: {target_attr_count}，最多只能有3条属性")
         
+        # 预先计算目标匹配属性，避免在循环中重复计算
+        # 由于equipment_type在同类装备中是固定的，可以预先计算
+        # 从第一行数据获取equipment_type，因为同类装备的equipment_type是固定的
+        first_equipment_type = data_df.iloc[0].get('kindid', 0) if not data_df.empty else 0
+        target_match_attrs, unmatched_attr = get_match_attrs(target_attr_types, first_equipment_type)
+        print(f"预先计算目标匹配属性target_match_attrs {target_match_attrs}")
+        print(f"预先计算未选中属性unmatched_attr {unmatched_attr}")
+        
+        # 将target_match_attrs信息添加到目标特征中，供后续特征计算使用
+        if hasattr(self, 'target_features') and self.target_features:
+            self.target_features['target_match_attrs'] = target_match_attrs
+            self.target_features['attr_3_type'] = unmatched_attr
         filtered_rows = []
         
         for _, row in data_df.iterrows():
@@ -343,11 +347,6 @@ class LingshiMarketDataCollector:
                     attr_type = attr.get('attr_type', '')
                     if attr_type:
                         market_attr_types.append(attr_type)
-                print(f"market_attr_types {market_attr_types}")
-                
-                # 确定目标匹配属性
-                target_match_attrs = get_match_attrs(target_attr_types, equipment_type)
-                
                 # 检查匹配条件
                 if target_attr_count == 2:
                     # 2条属性时，需要2条属性类型相同
@@ -365,7 +364,8 @@ class LingshiMarketDataCollector:
                     else:
                         # 2条属性不同，需要市场装备包含这2种属性
                         market_attr_set = set(market_attr_types)
-                        if len(target_match_attrs.intersection(market_attr_set)) >= 2:
+                        target_match_set = set(target_match_attrs)
+                        if len(target_match_set.intersection(market_attr_set)) >= 2:
                             filtered_rows.append(row)
                 elif target_attr_count == 3:
                     # 3条属性时的特殊处理
@@ -380,15 +380,17 @@ class LingshiMarketDataCollector:
                         if market_attr_counter.get(target_attr_type, 0) >= 3:
                             filtered_rows.append(row)
                     else:
-                        # 3条属性不全相同，按优先级取2条匹配
+                        # 3条属性不全相同，优先选择重复的属性
                         market_attr_set = set(market_attr_types)
-                        if len(target_match_attrs.intersection(market_attr_set)) >= 2:
+                        target_match_set = set(target_match_attrs)
+                        if len(target_match_set.intersection(market_attr_set)) >= 2:
                             filtered_rows.append(row)
                 else:
                     # 其他情况，使用交集匹配
                     market_attr_set = set(market_attr_types)
-                    common_attr_types = target_match_attrs.intersection(market_attr_set)
-                    if len(common_attr_types) >= min(2, len(target_match_attrs)):
+                    target_match_set = set(target_match_attrs)
+                    common_attr_types = target_match_set.intersection(market_attr_set)
+                    if len(common_attr_types) >= min(2, len(target_match_set)):
                         filtered_rows.append(row)
                     
             except Exception as e:

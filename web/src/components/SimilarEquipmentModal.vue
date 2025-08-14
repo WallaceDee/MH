@@ -2,7 +2,9 @@
   <el-popover :data-equip-sn="equipment.equip_sn" placement="left-end" width="640" trigger="click"
     popper-class="similar-equip-popper" v-model="visible" @show="handleShow">
     <template #reference>
-      <el-link type="primary">查看相似</el-link>
+      <slot>
+        <el-link type="primary" style="font-size: 12px;" >查看相似</el-link>
+      </slot>
     </template>
 
     <!-- 相似装备内容 -->
@@ -27,21 +29,17 @@
 
         <!-- 相似装备表格 -->
         <similar-equipment-table v-if="similarData.anchors?.length" :anchors="similarData.anchors" />
-      </div>
-
-      <!-- 错误信息 -->
-      <div v-else-if="error" class="error-info">
-        <el-alert type="error" :title="error" show-icon :closable="false"/>
+        <el-empty v-else  description="暂无数据"></el-empty>
       </div>
 
       <!-- 加载状态 -->
       <div v-else class="loading-info">
-        <el-skeleton :rows="5" animated />
+        <el-skeleton :rows="12" animated />
       </div>
     </div>
   </el-popover>
 </template>
-
+ 
 <script>
 import EquipmentValuation from './EquipmentValuation.vue'
 import SimilarEquipmentTable from './SimilarEquipmentTable.vue'
@@ -67,14 +65,6 @@ export default {
     valuation: {
       type: Object,
       default: null
-    },
-    error: {
-      type: String,
-      default: ''
-    },
-    loading: {
-      type: Boolean,
-      default: false
     }
   },
   data() {

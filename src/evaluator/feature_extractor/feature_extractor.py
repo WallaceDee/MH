@@ -26,7 +26,7 @@ class FeatureExtractor:
         # 从配置文件加载高价值法宝
         self.premium_fabao = self.config.get('PremiumFabao', [])
 
-    def extract_features(self, character_data: Dict[str, Any]) -> Dict[str, Union[int, float, str]]:
+    def extract_features(self, role_data: Dict[str, Any]) -> Dict[str, Union[int, float, str]]:
         """
         提取所有特征
         Returns:
@@ -75,19 +75,19 @@ class FeatureExtractor:
             features = {}
 
             # 一、基础属性特征
-            features.update(self._extract_basic_features(character_data))
+            features.update(self._extract_basic_features(role_data))
 
             # 二、修炼与控制力特征
-            features.update(self._extract_cultivation_features(character_data))
+            features.update(self._extract_cultivation_features(role_data))
 
             # 三、技能体系特征
-            features.update(self._extract_skill_features(character_data))
+            features.update(self._extract_skill_features(role_data))
 
             # 四、外观与增值特征
-            features.update(self._extract_appearance_features(character_data))
+            features.update(self._extract_appearance_features(role_data))
 
             # 五、市场行为特征
-            features.update(self._extract_market_features(character_data))
+            features.update(self._extract_market_features(role_data))
 
             # 六、神器得分（归一化0-100）
             value_map = self.config.get('ShenqiAttr2Value', {})
@@ -112,13 +112,13 @@ class FeatureExtractor:
         """提取基础属性特征"""
         qianyuandanBreakthrough = (data.get('level', 0) == 129 and data.get('all_new_point', 0) == 5) or (
             data.get('level', 0) == 159 and data.get('all_new_point', 0) == 7)
-        # 历史门派个数 [1,2,1,2,3]计数为3，如果data.get('character_school')不在列表中再+1
+        # 历史门派个数 [1,2,1,2,3]计数为3，如果data.get('role_school')不在列表中再+1
         try:
             changesch_json = data.get('changesch_json', '[]')
             if changesch_json and changesch_json != '':
                 changesch_data = json.loads(changesch_json)
                 schoolHistoryCount = len(set(changesch_data)) + (
-                    0 if data.get('character_school') in changesch_data else 0)
+                    0 if data.get('role_school') in changesch_data else 0)
             else:
                 schoolHistoryCount = 0  # 如果没有转职记录，默认为0个门派
         except (json.JSONDecodeError, TypeError):
@@ -136,17 +136,20 @@ class FeatureExtractor:
                 hightGrowRiderCount = 0
         except (json.JSONDecodeError, TypeError, ValueError):
             hightGrowRiderCount = 0
-        # 有价值的法宝数量 在 all_fabao_json（格式[{"name": "附灵玉", "cDesc": "0#Y灵气：#G50 #Y 五行：#G水#Y#r修炼境界：第#G4#Y层 #c13E1EC预知福祸#Y"}, {"name": "重明战鼓", "cDesc": "0#Y灵气：#G500#Y 五行：#G水#Y#r修炼境界：第#G14#Y层 #cFF6F28返璞归真#Y#r#n#Y最佳五行属性奖励：额外增加召唤兽等级*3％的物攻和法攻#G（已生效）#Y"}, {"name": "拭剑石", "cDesc": "0#Y灵气：#G192#Y 五行：#G水#Y#r修炼境界：第#G9#Y层 #cFF6F28不堕轮回#Y"}, {"name": "仓颉神木", "cDesc": "0【专用】修炼境界：第#G4#Y层"}]）在找出名字在 self.premium_fabao 列表中的格式 ，
-        fabao_json = data.get('all_fabao_json')
-        if fabao_json is None or fabao_json == '':
-            premiumFabaoCount = 0
-        else:
-            try:
-                fabao_data = json.loads(fabao_json)
-                premiumFabaoCount = sum(1 for fabao in fabao_data
-                                        if fabao.get('name') in self.premium_fabao)
-            except (json.JSONDecodeError, TypeError):
-                premiumFabaoCount = 0
+            
+        # 格式已改变，是字典    
+        # # 有价值的法宝数量 在 all_fabao_json（格式[{"name": "附灵玉", "cDesc": "0#Y灵气：#G50 #Y 五行：#G水#Y#r修炼境界：第#G4#Y层 #c13E1EC预知福祸#Y"}, {"name": "重明战鼓", "cDesc": "0#Y灵气：#G500#Y 五行：#G水#Y#r修炼境界：第#G14#Y层 #cFF6F28返璞归真#Y#r#n#Y最佳五行属性奖励：额外增加召唤兽等级*3％的物攻和法攻#G（已生效）#Y"}, {"name": "拭剑石", "cDesc": "0#Y灵气：#G192#Y 五行：#G水#Y#r修炼境界：第#G9#Y层 #cFF6F28不堕轮回#Y"}, {"name": "仓颉神木", "cDesc": "0【专用】修炼境界：第#G4#Y层"}]）在找出名字在 self.premium_fabao 列表中的格式 ，
+        # fabao_json = data.get('fabao_json')
+        # if fabao_json is None or fabao_json == '':
+        #     premiumFabaoCount = 0
+        # else:
+        #     try:
+        #         fabao_data = json.loads(fabao_json)
+        #         premiumFabaoCount = sum(1 for fabao in fabao_data
+        #                                 if fabao.get('name') in self.premium_fabao)
+        #     except (json.JSONDecodeError, TypeError):
+        #         premiumFabaoCount = 0
+
         # 神器解析 数据在 shenqi_json 字段（格式：{"full": 0, "power": 1200, "suit": [{"max_use_count": 125, "curr_illusion": 0, "my_use_count": 0, "components": [{"unlock": 1, "wuxing": [{"status": 0, "new_id": 0, "attr": "固定伤害 +3", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 16, "wuxingshi_level": 1}, {"status": 0, "new_id": 0, "attr": "气血 +21", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 1}, {"status": 0, "new_id": 0, "attr": "抵抗封印 +6", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 4, "wuxingshi_level": 1}, {"status": 0, "new_id": 0, "attr": "气血 +21", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 1}], "level": 1}, {"unlock": 0, "wuxing": [{"status": 0, "new_id": 0, "attr": "封印命中 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 8, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "气血 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "封印命中 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 8, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "气血 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 0}], "level": 0}, {"unlock": 0, "wuxing": [{"status": 0, "new_id": 0, "attr": "固定伤害 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 16, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "抵抗封印 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 4, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "抵抗封印 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 4, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "速度 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 1, "wuxingshi_level": 0}], "level": 0}], "actived": 1, "attributes": [{"new_id": 1, "disable": 1, "new_attr": "速度 +0", "attr": "速度 +0", "id": 1}, {"new_id": 2, "disable": 0, "new_attr": "气血 +0", "attr": "气血 +42", "id": 2}, {"new_id": 8, "disable": 1, "new_attr": "封印命中 +0", "attr": "封印命中 +0", "id": 8}, {"new_id": 16, "disable": 0, "new_attr": "固定伤害 +0", "attr": "固定伤害 +3", "id": 16}, {"new_id": 4, "disable": 0, "new_attr": "抵抗封印 +0", "attr": "抵抗封印 +6", "id": 4}], "illusion": 0}], "active": 0, "my_fu_count": 0, "skill": 0, "skill_level": 1, "illusion": 0, "skill_desc": "", "id": 6205}）
         # 遍历 json 的 suit 字段
         # 在 suit 中的 components 数组中，统计子字段item.wuxing 的id，如果相同的id数目等于 12 个，则 allTheSameCount+=1，否则相同的id数大于等于9，则same9Count+=1。注意遍历components时，如果item.unlock==0则跳过。每个suit互为独立
@@ -214,7 +217,8 @@ class FeatureExtractor:
         except Exception as e:
             self.logger.error(f"神器统计失败: {e}")
             print(f"错误详情: {str(e)}")
-
+            
+        # 特殊宠物 灵佑
         try:
             special_pets_raw = data.get('pet', '[]')
             if not special_pets_raw or special_pets_raw == '':
@@ -250,7 +254,7 @@ class FeatureExtractor:
         all_new_point = safe_float_to_int(data.get('all_new_point'))
 
         # 性别 "1":男, "0":女
-        icon_id = data.get('character_icon')
+        icon_id = data.get('role_icon')
         gender = self.get_gender(icon_id)
 
         features = {
@@ -270,7 +274,8 @@ class FeatureExtractor:
             'hight_grow_rider_count': hightGrowRiderCount,
             # 最大召唤兽携带数量
             'allow_pet_count': safe_float_to_int(data.get('allow_pet_count')),
-            'premium_fabao_count': premiumFabaoCount,  # 高价值法宝数量
+            # TODO:
+            # 'premium_fabao_count': premiumFabaoCount,  # 高价值法宝数量
             'shenqi': shenqi,
             'gender': gender,
             'lingyou_count': lingyou_count  # 灵佑数量
@@ -391,7 +396,7 @@ class FeatureExtractor:
 
         return features
 
-    def _extract_appearance_features(self, character_data):
+    def _extract_appearance_features(self, role_data):
         """提取外观特征，基于价值配置转化为0-100标准化得分"""
         features = {
             'limited_skin_value': 0,      # 限量锦衣价值得分
@@ -404,11 +409,11 @@ class FeatureExtractor:
 
         try:
             # 获取角色性别用于价值计算
-            icon_id = character_data.get('character_icon')
+            icon_id = role_data.get('role_icon')
             gender = self.get_gender(icon_id)  # "0":女, "1":男
 
             # 处理锦衣数据
-            skins_str = character_data.get('ex_avt_json', '{}')
+            skins_str = role_data.get('ex_avt_json', '{}')
             if skins_str and skins_str.strip():
                 try:
                     skins = json.loads(skins_str)
@@ -439,7 +444,7 @@ class FeatureExtractor:
                     self.logger.warning(f"解析锦衣数据失败: {e}")
 
             # 处理祥瑞数据
-            huge_horse_str = character_data.get('huge_horse_json', '{}')
+            huge_horse_str = role_data.get('huge_horse_json', '{}')
             if huge_horse_str and huge_horse_str.strip():
                 try:
                     huge_horses = json.loads(huge_horse_str)

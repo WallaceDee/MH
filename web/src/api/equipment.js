@@ -111,5 +111,23 @@ export const equipmentApi = {
    */
   getExtractorInfo(kindid) {
     return api.get(`/equipment/extractor-info/${kindid}`)
+  },
+
+  /**
+   * 删除装备
+   * @param {string} equipSn - 装备序列号
+   * @param {Object} params - 额外参数（如年月）
+   * @returns {Promise}
+   */
+  deleteEquipment(equipSn, params = {}) {
+    return api.delete(`/equipment/${equipSn}`, params)
+  },
+
+  /**
+   * 获取灵石数据
+   * @returns {Promise}
+   */
+  getLingshiData() {
+    return api.get('/equipment/lingshi-data')
   }
 } 

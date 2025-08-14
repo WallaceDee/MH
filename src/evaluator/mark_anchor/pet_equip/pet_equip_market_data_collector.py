@@ -62,7 +62,8 @@ class PetEquipMarketDataCollector:
         print(f"优先查找数据库文件，目标月份: {target_months}")
 
         # 数据库文件固定存放在根目录的data文件夹中
-        data_path = "data"
+        from src.utils.project_path import get_data_path
+        data_path = get_data_path()
         found_dbs = []
 
         # 首先查找指定月份的数据库文件
@@ -314,7 +315,6 @@ class PetEquipMarketDataCollector:
         fangyu = target_features.get('fangyu', 0)
         speed = target_features.get('speed', 0)
         level_range = target_features.get('equip_level_range')
-        print(f"target_featurestarget_featurestarget_features: {target_features}")
         # 先类型分类
         # 获取基础市场数据
         market_data = self.get_market_data(

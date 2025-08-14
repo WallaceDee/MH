@@ -29,7 +29,7 @@ class EquipmentController:
             page_size = int(params.get('page_size', 10))
             year = params.get('year')
             month = params.get('month')
-            
+            equip_sn = params.get('equip_sn')
             # 验证分页参数
             if page < 1:
                 page = 1
@@ -120,6 +120,7 @@ class EquipmentController:
             
             # 添加处理后的参数日志
             filter_params = {
+                'equip_sn': equip_sn,
                 'level_min': level_min,
                 'level_max': level_max,
                 'price_min': price_min,
@@ -145,6 +146,7 @@ class EquipmentController:
                 page_size=page_size,
                 year=year,
                 month=month,
+                equip_sn=equip_sn,
                 level_min=level_min,
                 level_max=level_max,
                 price_min=price_min,
@@ -326,3 +328,40 @@ class EquipmentController:
         except Exception as e:
             logger.error(f"获取支持的kindid列表时出错: {e}")
             return {"error": f"获取支持的kindid列表时出错: {str(e)}"}
+    
+    def delete_equipment(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+        """删除指定装备"""
+        try:
+            if not equip_sn:
+                return {"error": "装备序列号不能为空", "deleted": False}
+            
+            # 类型转换
+            if year:
+                year = int(year)
+            if month:
+                month = int(month)
+            
+            # 调用服务层
+            result = self.service.delete_equipment(equip_sn, year, month)
+            return result
+            
+        except ValueError as e:
+            logger.error(f"参数格式错误: {e}")
+            return {"error": f"参数格式错误: {str(e)}", "deleted": False}
+        except Exception as e:
+            logger.error(f"删除装备时出错: {e}")
+            return {"error": f"删除装备时出错: {str(e)}", "deleted": False}
+
+    def get_lingshi_data(self) -> Dict:
+        """获取灵石数据"""
+        try:
+            result = self.service.get_lingshi_data()
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"获取灵石数据失败: {str(e)}")
+            return {"error": f"获取灵石数据失败: {str(e)}"}

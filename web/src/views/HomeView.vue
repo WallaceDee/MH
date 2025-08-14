@@ -7,11 +7,27 @@
       </div>
       <el-row type="flex">
         <div style="width: 140px;text-align: center;">
-          <template v-if="externalParams.large_equip_desc">
-           <el-col :span="24"> <p class="cBlue">目标装备</p></el-col>
-          <EquipmentImage  :extractFeatures="!!externalParams.large_equip_desc"
-            searchInCBG :equipment="externalParams" :popoverWidth="450" style="display: block;"
-            @onExtractQuery="onExtractQuery" />
+          <template v-if="externalParams.action">
+            <el-col :span="24">
+              <p class="cBlue">🎯目标：</p>
+            </el-col>
+            <EquipmentImage v-if="externalParams.action === 'similar_equip'" :equipment="externalParams"
+              :popoverWidth="450" style="display: flex;flex-direction: column;height: 50px;width: 100%;align-items: center;" />
+            <PetImage v-if="externalParams.action === 'similar_pet'" :pet="externalParams"
+              :equipFaceImg="externalParams.equip_face_img" />
+            <template v-if="externalParams.action">
+              <el-cascader :options="server_data" size="mini" filterable v-model="server_data_value" clearable />
+              <div style="display: inline-block; margin-left: 8px">
+                <el-link @click="openCBGSearch" :type="isCookieValid ? 'danger' : 'info'" :style="cbgLinkStyle"
+                  :disabled="!isCookieValid">
+                  藏宝阁
+                </el-link>
+                <el-tooltip v-if="!isCookieValid" content="请先登录藏宝阁，确保Cookies有效后再使用此功能" placement="top">
+                  <i class="el-icon-warning" style="color: #e6a23c; margin-left: 4px"></i>
+                </el-tooltip>
+              </div>
+            </template>
+
           </template>
         </div>
         <!-- 全局设置 -->
@@ -130,7 +146,7 @@
                   保存配置
                 </el-button>
               </div>
-              <div class="json-editor-wrapper" v-if="externalParams.large_equip_desc">
+              <div class="json-editor-wrapper" v-if="externalParams.action === 'similar_equip'">
                 <el-input type="textarea" v-model="externalSearchParams" placeholder="搜索指定参数" :rows="10"
                   @blur="validateEquipJson" class="json-editor">
                 </el-input>
@@ -167,6 +183,14 @@
                   :disabled="!!petJsonError">
                   保存配置
                 </el-button>
+              </div>
+              <div class="json-editor-wrapper" v-if="externalParams.action === 'similar_pet'">
+                <el-input type="textarea" v-model="externalSearchParams" placeholder="搜索指定参数" :rows="10"
+                  @blur="validateEquipJson" class="json-editor">
+                </el-input>
+                <div v-if="equipJsonError" class="json-error">
+                  <i class="el-icon-warning"></i> {{ equipJsonError }}
+                </div>
               </div>
               <div class="json-editor-wrapper">
                 <el-input type="textarea" v-model="petParamsJson" placeholder="请输入召唤兽爬虫参数JSON" :rows="8"
@@ -284,16 +308,30 @@
 </template>
 
 <script>
+import str2gbk from 'str2gbk'
+import qs from 'qs'
 import EquipmentImage from '@/components/EquipmentImage.vue'
-
-
+import PetImage from '@/components/PetImage.vue'
+const server_data_list = []
+for (let key in window.server_data) {
+  let [parent, children] = window.server_data[key]
+  const [label, , , , value] = parent
+  children = children.map(([value, label]) => ({ value, label }))
+  server_data_list.push({
+    label,
+    value,
+    children
+  })
+}
 export default {
   name: 'HomeView',
   components: {
-    EquipmentImage
+    EquipmentImage,
+    PetImage
   },
   data() {
     return {
+      server_data: server_data_list,
       // 全局设置
       globalSettings: {
         max_pages: 5,
@@ -365,12 +403,20 @@ export default {
       cacheCleanupTimer: null,
 
       // 外部参数
-      externalSearchParams: '{}'
+      externalSearchParams: '{}',
+      targetFeatures: {}
     }
   },
   computed: {
     externalParams() {
-      return JSON.parse(JSON.stringify(this.$route.query))
+      const query = JSON.parse(JSON.stringify(this.$route.query))
+      if (query.action === 'similar_pet') {
+        query.evol_skill_list = JSON.parse(query.evol_skill_list)
+        query.neidan = JSON.parse(query.neidan)
+        query.equip_list = JSON.parse(query.equip_list)
+        query.texing = JSON.parse(query.texing)
+      }
+      return query
     },
     // 当前任务状态信息
     currentTaskStatus() {
@@ -396,20 +442,59 @@ export default {
       }
       return statusMap[status] || status
     },
+    // 从Vuex store获取server_data_valueTODO:::::
+    server_data_value: {
+      get() {
+        return this.$store?.state.server_data_value || {}
+      },
+      set(value) {
+        this.$store.dispatch('setServerDataValue', value)
+      }
+    },
+    // 检查cookies是否有效
+    isCookieValid() {
+      return this.$store.getters['cookie/isCookieCacheValid']
+    },
+    // 藏宝阁链接样式
+    cbgLinkStyle() {
+      return {
+        color: this.isCookieValid ? '#f56c6c' : '#c0c4cc',
+        cursor: this.isCookieValid ? 'pointer' : 'not-allowed',
+        textDecoration: this.isCookieValid ? 'underline' : 'none'
+      }
+    }
 
-
+  },
+  watch: {
+    // 监听server_data_value变化，同步到Vuex store
+    server_data_value: {
+      handler(newValue) {
+        console.log(newValue, 'newValue')
+        if (Array.isArray(newValue) && newValue.length >= 2) {
+          this.$store.dispatch('setServerDataValue', newValue)
+          const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
+          this.onExtractQuery({
+            ...this.genarateEquipmentSearchParams(this.targetFeatures),
+            server_id,
+            areaid,
+            server_name
+          })
+        }
+      },
+      deep: true
+    }
   },
   mounted() {
     // 等待Vuex状态恢复后再执行其他操作
     this.$nextTick(() => {
       // 自动清理过期缓存
       this.$store.dispatch('cookie/cleanExpiredCache')
-      
+
       // 启动缓存清理定时器（每分钟检查一次）
       this.cacheCleanupTimer = setInterval(() => {
         this.$store.dispatch('cookie/cleanExpiredCache')
       }, 60 * 1000)
-      
+
       this.loadSearchParams()
       this.loadLogFiles()
       // 页面加载时请求一次状态
@@ -419,6 +504,16 @@ export default {
 
       this.loadExternalParams()
     })
+    // 初始化时设置默认的server_data_value（如果store中没有的话）
+    if (
+      this.externalParams.action &&
+      (!this.$store?.state.server_data_value || this.$store?.state.server_data_value.length === 0)
+    ) {
+      this.$store.dispatch('setServerDataValue', [43, 77])
+    }
+    if (this.externalParams.action) {
+      this.getFeatures()
+    }
   },
   beforeDestroy() {
     this.stopLogStream()
@@ -429,6 +524,271 @@ export default {
     }
   },
   methods: {
+    genaratePetSearchParams() {
+      const searchParams = {}
+      searchParams.skill = this.externalParams.all_skill.replace(/\|/g, ',')
+      searchParams.texing = this.externalParams.texing?.id
+      searchParams.lingxing = this.externalParams.lx
+      searchParams.growth = this.externalParams.growth * 1000
+      return searchParams
+    },
+    genarateEquipmentSearchParams({ kindid, ...features }) {
+      const searchParams = {}
+      if (window.is_pet_equip(kindid)) {
+        searchParams.level = features.equip_level
+        searchParams.speed = features.speed > 0 ? features.speed : undefined
+        searchParams.shanghai = features.shanghai > 0 ? features.shanghai : undefined
+        searchParams.hp = features.qixue > 0 ? features.qixue : undefined
+        searchParams.fangyu = features.fangyu > 0 ? features.fangyu : undefined
+        let addon_sum = 0
+          ;['fali', 'liliang', 'lingli', 'minjie', 'naili'].forEach((item) => {
+            searchParams[`addon_${item}`] = this.targetFeatures[`addon_${item}`] > 0 ? 1 : undefined
+            if (item === 'minjie' && this.targetFeatures[`addon_${item}`] < 0) {
+              searchParams.addon_minjie_reduce = this.targetFeatures[`addon_${item}`] * -1
+            } else {
+              addon_sum += this.targetFeatures[`addon_${item}`]
+            }
+          })
+        searchParams.addon_sum = addon_sum > 0 ? addon_sum : undefined
+        searchParams.addon_sum_min = searchParams.addon_sum
+        searchParams.addon_status = features.addon_status
+        if (features.fangyu > 0) {
+          searchParams.equip_pos = 1
+        } else if (features.speed > 0) {
+          searchParams.equip_pos = 2
+        } else {
+          searchParams.equip_pos = 3
+        }
+      } else if (window.is_lingshi_equip(kindid)) {
+        searchParams.kindid = kindid
+
+        // 灵饰附加属性配置
+        const { lingshi_added_attr1, lingshi_added_attr2 } = window.AUTO_SEARCH_CONFIG
+
+        // 属性名称映射表 - 前端显示名称到后端字段名的映射
+        const attr_name_map = {
+          '法伤结果': '法术伤害结果',
+          '法伤': '法术伤害',
+          '固伤': '固定伤害',
+          '法术暴击': '法术暴击等级',
+          '物理暴击': '物理暴击等级',
+          '封印': '封印命中等级',
+          '狂暴': '狂暴等级',
+          '穿刺': '穿刺等级',
+          '治疗': '治疗能力',
+          '伤害': '伤害',
+          '速度': '速度',
+          '抗法术暴击': '抗法术暴击等级',
+          '抗物理暴击': '抗物理暴击等级',
+          '抗封': '抵抗封印等级',
+          '回复': '气血回复效果',
+          '法防': '法术防御',
+          '防御': '防御',
+          '格挡': '格挡值',
+          '气血': '气血'
+        }
+
+        // 构建属性值到搜索参数的映射
+        const buildAttrValueMapping = () => {
+          const mapping = {}
+
+          // 合并两个属性配置
+          const allAttrs = { ...lingshi_added_attr1, ...lingshi_added_attr2 }
+
+          // 遍历所有属性，建立映射关系
+          Object.entries(allAttrs).forEach(([value, displayName]) => {
+            const backendFieldName = attr_name_map[displayName]
+            if (backendFieldName) {
+              mapping[backendFieldName] = value
+            }
+          })
+
+          return mapping
+        }
+
+        // 处理主属性
+        const processMainAttributes = () => {
+          const mainAttrs = ['damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'fengyin', 'speed']
+          mainAttrs.forEach(attr => {
+            if (features[attr] && features[attr] > 0) {
+              searchParams[attr] = features[attr]
+            }
+          })
+        }
+
+        // 处理精炼等级
+        const processGemLevel = () => {
+          if (features.gem_level && features.gem_level > 0) {
+            searchParams.jinglian_level = features.gem_level
+          }
+        }
+
+        // 处理附加属性
+        const processAddedAttributes = () => {
+          if (!features.attrs || !Array.isArray(features.attrs)) {
+            return
+          }
+
+          const attrValueMapping = buildAttrValueMapping()
+          const addedAttrsCount = {}
+
+          // 统计每种附加属性的出现次数
+          features.attrs.forEach(({ attr_type }) => {
+            const searchValue = attrValueMapping[attr_type]
+            if (searchValue) {
+              addedAttrsCount[searchValue] = (addedAttrsCount[searchValue] || 0) + 1
+            }
+          })
+
+          // 将统计结果添加到搜索参数
+          Object.entries(addedAttrsCount).forEach(([value, count]) => {
+            searchParams[`added_attr.${value}`] = count
+          })
+        }
+
+        // 执行处理
+        processMainAttributes()
+        processGemLevel()
+        processAddedAttributes()
+      } else {
+        // 装备
+        searchParams.kindid = kindid
+        let addon_sum = 0
+          ;['moli', 'liliang', 'tizhi', 'minjie', 'naili'].forEach((item) => {
+            searchParams[`addon_${item}`] = this.targetFeatures[`addon_${item}`] > 0 ? 1 : undefined
+            if (item === 'minjie' && this.targetFeatures[`addon_${item}`] < 0) {
+              searchParams.addon_minjie_reduce = this.targetFeatures[`addon_${item}`] * -1
+            } else {
+              addon_sum += this.targetFeatures[`addon_${item}`]
+            }
+          })
+        searchParams.addon_sum = addon_sum > 0 ? addon_sum : undefined
+        searchParams.addon_sum_min = searchParams.addon_sum
+        if (features.equip_level) {
+          searchParams.level_min = features.equip_level
+          searchParams.level_max = features.equip_level * 1 + 9
+        }
+
+        if (features.suit_effect) {
+          searchParams.suit_effect = features.suit_effect
+        }
+        if (features.special_skill) {
+          searchParams.special_skill = features.special_skill
+        }
+        [
+          'init_damage',
+          'init_damage_raw',
+          'init_defense',
+          'init_hp',
+          'init_dex',
+          'init_wakan',
+          'all_wakan',
+          'all_damage',
+          'damage'
+        ].forEach((value) => {
+          if (features[value]) {
+            searchParams[value] = features[value]
+          }
+        })
+      }
+      return searchParams
+    },
+    async getFeatures() {
+      const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
+      let query = {}
+      if (this.externalParams.action === 'similar_equip') {
+        console.log(this.externalParams.kindid * 1 || 0, 'kindid')
+        await this.$api.equipment
+          .extractFeatures({
+            equipment_data: {
+              kindid: this.externalParams.kindid * 1 || undefined,
+              type: this.externalParams.type * 1 || undefined,
+              large_equip_desc: this.externalParams.large_equip_desc
+            },
+            data_type: 'equipment'
+          })
+          .then((res) => {
+            if (res.code === 200 && res.data.features) {
+              this.targetFeatures = res.data.features
+              query = this.genarateEquipmentSearchParams(res.data.features)
+            }
+          })
+      } else if (this.externalParams.action === 'similar_pet') {
+        query = this.genaratePetSearchParams()
+      }
+      this.onExtractQuery({
+        ...query,
+        server_id,
+        areaid,
+        server_name
+      })
+    },
+    async openCBGSearch() {
+      // 检查cookies是否有效
+      const isCookieValid = this.$store.getters['cookie/isCookieCacheValid']
+
+      if (!isCookieValid) {
+        // Cookies无效，提示用户先登录
+        this.$notify.warning({
+          message: '请先登录藏宝阁，确保Cookies有效后再使用此功能',
+          duration: 3000,
+          showClose: true
+        })
+
+        // 可以在这里添加跳转到登录页面的逻辑
+        // this.$router.push('/login')
+        return
+      }
+
+      let prefix = ''
+      let search_type = 'search_role_equip'
+      let query = {}
+      if (this.externalParams.action === 'similar_equip') {
+        if (window.is_pet_equip(this.externalParams.kindid)) {
+          // 使用Vuex store中的服务器数据
+          search_type = 'search_pet_equip'
+        } else if (window.is_lingshi_equip(this.externalParams.kindid)) {
+          search_type = 'search_lingshi'
+        } else {
+          search_type += 'hide_lingshi=1&'
+        }
+        query = this.genarateEquipmentSearchParams(this.targetFeatures)
+      } else {
+        search_type = 'search_pet'
+        query = this.genaratePetSearchParams()
+      }
+      const serverData = this.$store.getters.getCurrentServerData
+      prefix = `https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=${new Date().getTime()}&act=recommd_by_role&server_id=${serverData.server_id
+        }&areaid=${serverData.areaid}&server_name=${serverData.server_name
+        }&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=${search_type}&`
+
+      let target_url = prefix + qs.stringify(query)
+      console.log(target_url, 'target_url')
+      this.$api.spider.startPlaywright({
+        headless: false,
+        target_url
+      })
+    },
+    /**
+    * GBK编码的URL编码
+    * @param {string} str - 要编码的字符串
+    * @returns {Promise<string>} - GBK编码的URL编码字符串
+    */
+    encodeGBK(str) {
+      if (!str) return ''
+
+      try {
+        const gbkBytes = str2gbk(str)
+        // 将字节数组转换为URL编码格式
+        return Array.from(gbkBytes)
+          .map((b) => `%${b.toString(16).toUpperCase().padStart(2, '0')}`)
+          .join('')
+      } catch (error) {
+        console.warn('GBK编码失败，使用UTF-8编码作为降级方案:', error)
+        // 降级到UTF-8编码
+        return window.encodeURI(str)
+      }
+    },
     onExtractQuery(query) {
       this.externalSearchParams = JSON.stringify(query, null, 2)
     },

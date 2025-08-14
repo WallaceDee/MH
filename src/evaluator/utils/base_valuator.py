@@ -20,6 +20,7 @@ class BaseValuator(ABC):
         from .extreme_value_filter import ExtremeValueFilter
         self.extreme_value_filter = ExtremeValueFilter()
     
+    print
     @abstractmethod
     def find_market_anchors(self,
                            target_features: Dict[str, Any],
@@ -60,6 +61,23 @@ class BaseValuator(ABC):
             Dict[str, Any]: 估价结果
         """
         try:
+            # 首先检测物品是否无效
+            from .invalid_item_detector import InvalidItemDetector
+            invalid_detector = InvalidItemDetector()
+            
+            should_skip, skip_reason = invalid_detector.should_skip_valuation(target_features)
+            if should_skip:
+                if verbose:
+                    print(f"物品无效，跳过估价: {skip_reason}")
+                return {
+                    'estimated_price': 1,
+                    'anchor_count': 0,
+                    'invalid_item': True,
+                    'skip_reason': skip_reason,
+                    'confidence': 1
+                }
+            
+            print(target_features, 'target_featurestarget_featurestarget_featurestarget_featurestarget_featurestarget_features')
             # 寻找市场锚点
             anchors = self.find_market_anchors(
                 target_features, similarity_threshold, max_anchors, verbose=verbose)
@@ -68,8 +86,7 @@ class BaseValuator(ABC):
                 return {
                     'estimated_price': 0,
                     'anchor_count': 0,
-                    'error': '未找到相似的市场锚点',
-                    'fallback_used': True
+                    'error': '未找到相似的市场锚点'
                 }
             
             # 提取价格和相似度
@@ -79,10 +96,16 @@ class BaseValuator(ABC):
             # 根据策略计算估价
             if strategy == 'competitive':
                 # 竞争性定价：25%分位数 × 0.9
-                estimated_price = float(np.percentile(anchor_prices, 25) * 0.9)
+                sorted_prices = sorted(anchor_prices)
+                percentile_25_index = int(len(sorted_prices) * 0.25)
+                percentile_25_value = sorted_prices[percentile_25_index] if percentile_25_index < len(sorted_prices) else sorted_prices[-1]
+                estimated_price = float(percentile_25_value * 0.9)
             elif strategy == 'premium':
                 # 溢价定价：75%分位数 × 0.95
-                estimated_price = float(np.percentile(anchor_prices, 75) * 0.95)
+                sorted_prices = sorted(anchor_prices)
+                percentile_75_index = int(len(sorted_prices) * 0.75)
+                percentile_75_value = sorted_prices[percentile_75_index] if percentile_75_index < len(sorted_prices) else sorted_prices[-1]
+                estimated_price = float(percentile_75_value * 0.95)
             else:  # fair_value
                 # 公允价值：相似度加权中位数 × 0.93
                 base_price = self._weighted_median(anchor_prices, anchor_similarities)
@@ -91,19 +114,19 @@ class BaseValuator(ABC):
             # 计算置信度
             confidence = self._calculate_confidence(anchors, len(anchor_prices))
             
-            # 构建结果
+            # 构建结果 - 确保所有数值都是Python原生类型
             result = {
                 'estimated_price': round(estimated_price, 1),
                 'anchor_count': len(anchors),
                 'price_range': {
                     'min': float(min(anchor_prices)),
                     'max': float(max(anchor_prices)),
-                    'mean': float(np.mean(anchor_prices)),
-                    'median': float(np.median(anchor_prices))
+                    'mean': float(sum(anchor_prices) / len(anchor_prices)),
+                    'median': float(sorted(anchor_prices)[len(anchor_prices) // 2])
                 },
                 'confidence': float(confidence),
                 'strategy_used': strategy,
-                'fallback_used': False,
+                'invalid_item': False,
                 'anchors': anchors[:5]  # 返回前5个最相似的锚点用于展示
             }
             
@@ -117,7 +140,8 @@ class BaseValuator(ABC):
             return {
                 'estimated_price': 0,
                 'anchor_count': 0,
-                'error': str(e)
+                'error': str(e),
+                'invalid_item': False
             }
     
     def _weighted_median(self, values: List[float], weights: List[float]) -> float:
@@ -165,7 +189,8 @@ class BaseValuator(ABC):
         
         # 相似度加成
         if anchors:
-            avg_similarity = float(np.mean([anchor['similarity'] for anchor in anchors]))
+            similarities = [anchor['similarity'] for anchor in anchors]
+            avg_similarity = float(sum(similarities) / len(similarities))  # 使用原生Python计算平均值
             similarity_bonus = avg_similarity * 0.3
         else:
             similarity_bonus = 0
@@ -173,7 +198,14 @@ class BaseValuator(ABC):
         # 价格稳定性加成
         if len(anchors) >= 3:
             prices = [anchor['price'] for anchor in anchors]
-            price_cv = float(np.std(prices) / np.mean(prices)) if np.mean(prices) > 0 else 1.0
+            mean_price = float(sum(prices) / len(prices))  # 使用原生Python计算平均值
+            if mean_price > 0:
+                # 计算标准差
+                variance = sum((p - mean_price) ** 2 for p in prices) / len(prices)
+                std_price = float(variance ** 0.5)
+                price_cv = float(std_price / mean_price)
+            else:
+                price_cv = 1.0
             stability_bonus = max(0, (0.5 - price_cv) * 0.4)  # CV低于0.5时有加成
         else:
             stability_bonus = 0
@@ -246,6 +278,7 @@ class BaseValuator(ABC):
         try:
             print("生成价值分布报告...")
             
+            print
             # 寻找锚点
             anchors = self.find_market_anchors(
                 target_features, similarity_threshold=0.5, max_anchors=50)

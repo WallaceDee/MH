@@ -5,6 +5,7 @@
 """
 
 from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
+from src.evaluator.constants.lingshi_priorities import is_same_priority
 import sys
 import os
 from typing import Dict, Any, List, Optional, Tuple
@@ -42,7 +43,7 @@ class LingshiPlugin(EquipmentTypePlugin):
     def priority(self) -> int:
         return 100  # 高优先级
 
-    def get_derived_features(self, features: Dict[str, Any]) -> Dict[str, Any]:
+    def get_derived_features(self, features: Dict[str, Any], context: Dict[str, Any] = None) -> Dict[str, Any]:
         """灵饰派生特征"""
         derived = {}
 
@@ -57,10 +58,28 @@ class LingshiPlugin(EquipmentTypePlugin):
             features, equip_level, config_data)
         derived.update(main_attr_scores)
 
-        # 计算附加属性标准化得分
+        # 计算附加属性标准化得分 - 传入目标匹配属性
+        target_match_attrs = context.get('target_match_attrs') if context else None
         attr_scores = self._calculate_attr_scores(
-            features, equip_level, config_data)
+            features, equip_level, config_data, target_match_attrs)
         derived.update(attr_scores)
+
+        # 添加attr_3_type字段 - 根据目标装备属性计算
+        if context and 'target_match_attrs' in context:
+            target_match_attrs = context['target_match_attrs']
+            # 获取目标装备的所有属性类型
+            target_attrs = features.get('attrs', [])
+            target_attr_types = []
+            for attr in target_attrs:
+                attr_type = attr.get('attr_type', '')
+                if attr_type:
+                    target_attr_types.append(attr_type)
+            
+            # 排除target_match_attrs后，获得剩余的属性类型
+            remaining_attrs = [attr_type for attr_type in target_attr_types if attr_type not in target_match_attrs]
+            # 取第一个剩余的属性类型作为attr_3_type
+            attr_3_type = remaining_attrs[0] if remaining_attrs else None
+            derived['attr_3_type'] = attr_3_type
 
         return derived
 
@@ -138,8 +157,8 @@ class LingshiPlugin(EquipmentTypePlugin):
 
         return scores
 
-    def _calculate_attr_scores(self, features: Dict[str, Any], equip_level: int, config_data: Dict[str, Any]) -> Dict[str, float]:
-        """计算附加属性标准化得分"""
+    def _calculate_attr_scores(self, features: Dict[str, Any], equip_level: int, config_data: Dict[str, Any], target_match_attrs: List[str] = None) -> Dict[str, float]:
+        """计算附加属性标准化得分 - 只计算匹配的属性类型"""
         scores = {}
 
         # 获取附加属性列表
@@ -165,53 +184,59 @@ class LingshiPlugin(EquipmentTypePlugin):
         level_config = config_data[level_key]
         attrs_config = level_config.get('attrs', {})
 
-        # 计算每个附加属性的标准化得分
-        for i, attr in enumerate(attrs):
+        # 只计算匹配的属性类型得分，但使用位置索引命名
+        matched_attrs = []
+        for attr in attrs:
             attr_type = attr.get('attr_type', '')
             attr_value = attr.get('attr_value', 0)
 
+            # 如果指定了目标匹配属性，只计算这些属性的得分
+            if target_match_attrs and attr_type not in target_match_attrs:
+                continue
+
             if attr_type and attr_value > 0:
-                # 获取该属性的配置范围
-                attr_range = attrs_config.get(attr_type, [0, 1])
-                if len(attr_range) == 2:
-                    min_val, max_val = attr_range
-                    if max_val > min_val:
-                        # 使用改进的标准化得分计算方法
-                        # 基础分制 - 最小值给30分，最大值给100分，避免0分问题
-                        base_score = 30  # 基础分数，避免最小值为0分
-                        score_range = 70  # 可变分数范围 (100 - 30)
-                        
-                        # 计算相对位置 (0-1)
-                        relative_position = (attr_value - min_val) / (max_val - min_val)
-                        # 限制在0-1范围内
-                        relative_position = max(0.0, min(1.0, relative_position))
-                        
-                        # 计算最终得分: 基础分 + 相对位置 × 分数范围
-                        score_100 = base_score + relative_position * score_range
-                        scores[f'attr_{i+1}_score'] = round(score_100, 2)
+                matched_attrs.append(attr)
 
-                        print(
-                            f"[附加属性得分] {attr_type}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
+        # 按target_match_attrs的顺序重新排序，确保位置索引一致
+        if target_match_attrs:
+            # 创建一个映射，记录每个属性类型在target_match_attrs中的位置
+            attr_order_map = {attr_type: i for i, attr_type in enumerate(target_match_attrs)}
+            
+            # 按照target_match_attrs的顺序排序，相同类型的属性按值降序排序
+            matched_attrs.sort(key=lambda attr: (
+                attr_order_map.get(attr.get('attr_type', ''), 999),  # 先按属性类型顺序
+                -attr.get('attr_value', 0)  # 再按属性值降序（负号表示降序）
+            ))
 
-        # 计算匹配属性的平均得分（用于筛选）
-        if len(attrs) >= 2:
-            # 获取前两个属性的得分
-            attr1_score = scores.get('attr_1_score', 0)
-            attr2_score = scores.get('attr_2_score', 0)
+        # 按位置索引计算得分
+        for i, attr in enumerate(matched_attrs):
+            attr_type = attr.get('attr_type', '')
+            attr_value = attr.get('attr_value', 0)
 
-            # 计算平均得分
-            # avg_score = (attr1_score + attr2_score) / 2
-            # scores['attrs_avg_score'] = round(avg_score, 2)
+            # 获取该属性的配置范围
+            attr_range = attrs_config.get(attr_type, [0, 1])
+            if len(attr_range) == 2:
+                min_val, max_val = attr_range
+                if max_val > min_val:
+                    # 使用改进的标准化得分计算方法
+                    # 基础分制 - 最小值给30分，最大值给100分，避免0分问题
+                    base_score = 30  # 基础分数，避免最小值为0分
+                    score_range = 70  # 可变分数范围 (100 - 30)
+                    
+                    # 计算相对位置 (0-1)
+                    relative_position = (attr_value - min_val) / (max_val - min_val)
+                    # 限制在0-1范围内
+                    relative_position = max(0.0, min(1.0, relative_position))
+                    
+                    # 计算最终得分: 基础分 + 相对位置 × 分数范围
+                    score_100 = base_score + relative_position * score_range
+                    
+                    # 使用位置索引命名
+                    score_key = f'attr_{i+1}_score'
+                    scores[score_key] = round(score_100, 2)
 
-            # # 如果有第三个属性，计算最高两个属性的平均得分
-            # if len(attrs) >= 3:
-            #     attr3_score = scores.get('attr_3_score', 0)
-
-            #     # 获取最高的两个得分
-            #     attr_scores = [attr1_score, attr2_score, attr3_score]
-            #     attr_scores.sort(reverse=True)
-            #     top2_avg = (attr_scores[0] + attr_scores[1]) / 2
-            #     scores['attrs_top2_avg_score'] = round(top2_avg, 2)
+                    print(
+                        f"[附加属性得分] {attr_type}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         return scores
 
@@ -235,7 +260,7 @@ class LingshiPlugin(EquipmentTypePlugin):
             'attr_1_score': 1.0,          # 第一个附加属性得分
             'attr_2_score': 1.0,          # 第二个附加属性得分
             'attr_3_score': 1.0,            # 第三个附加属性得分
-
+            'attr_3_type': 0.5,            # 第三个属性类型权重
             # 忽略的特征
             'gem_level': 0,
             'is_super_simple': 0,
@@ -305,10 +330,10 @@ class LingshiPlugin(EquipmentTypePlugin):
 
             # 附加属性得分容忍度
             # 'attrs_avg_score': 0.4,       # 附加属性平均得分容忍度40%
-            'attr_1_score': 0.4,          # 第一个附加属性得分容忍度40%
-            'attr_2_score': 0.4,          # 第二个附加属性得分容忍度40%
-            'attr_3_score': 0.4,          # 第三个附加属性得分容忍度50%
-
+            'attr_1_score': 0.25,          # 第一个附加属性得分容忍度25%
+            'attr_2_score': 0.25,          # 第二个附加属性得分容忍度25%
+            'attr_3_score': 0.25,          # 第三个附加属性得分容忍度25%
+            'attr_3_type':0,
             # 忽略的特征
             'suit_effect_type': 1,
             'suit_effect_level': 1,
@@ -364,7 +389,28 @@ class LingshiPlugin(EquipmentTypePlugin):
     def calculate_custom_similarity(self,
                                     feature_name: str,
                                     target_val: Any,
-                                    market_val: Any) -> Optional[float]:
+                                    market_val: Any,
+                                    context: Dict[str, Any] = None) -> Optional[float]:
         """灵饰自定义相似度计算"""
-
+        # 灵饰特有的相似度计算逻辑
+        if feature_name == 'attr_3_type':
+            # attr_3_type相似度计算
+            if target_val is None and market_val is None:
+                return 1.0  # 都没有第三个属性，完全匹配
+            elif target_val is None or market_val is None:
+                return 0.5  # 一个有第三个属性一个没有，给予中等相似度
+            else:
+                # 都有第三个属性，根据优先级判断是否相似
+                # 获取装备类型用于优先级判断
+                equipment_type = context.get('kindid') if context else None
+                
+                 # 完全相同的属性
+                if target_val == market_val:
+                    return 1.0 
+                # 使用优先级判断属性是否相似
+                elif is_same_priority(target_val, market_val, equipment_type):
+                    return 0.75  # 优先级相同，认为相似
+                else:
+                    return 0.0  # 优先级不同，不相似
+        
         return None  # 其他特征使用默认计算

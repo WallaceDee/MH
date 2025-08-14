@@ -1,7 +1,7 @@
 <template>
-  <PetInfoPopover v-bind="$attrs">
+  <PetInfoPopover v-bind="$attrs" :pet="pet" :equipFaceImg="equipFaceImg" :enhanceInfo="enhanceInfo" style="position: relative;display: block;">
     <template #trigger>
-      <el-image :src="imageUrl"  fit="cover" :style="imageStyle" referrerpolicy="no-referrer">
+      <el-image :src="imageUrl" fit="cover" :style="imageStyle" referrerpolicy="no-referrer">
         <div slot="error" class="image-slot">
           <i class="el-icon-picture-outline"></i>
         </div>
@@ -24,21 +24,33 @@ export default {
     height: { type: String, default: '50px' },
     cursor: { type: String, default: 'pointer' },
     placement: { type: String, default: 'right' },
-    popoverWidth: { type: String, default: '400px' }
+    popoverWidth: { type: String, default: '400px' },
+    pet: Object,
+    enhanceInfo: {
+      type: Object,
+      default: () => ({})
+    },
+    equipFaceImg: {
+      type: String,
+      default: ''
+    }
   },
   computed: {
     imageUrl() {
-      const petId = this.$attrs.equipFaceImg || 'default'
+      const petId = this.equipFaceImg
       return this.getImageUrl(`${petId}`)
     },
     imageStyle() {
       return {
-        display: 'block',
+        display: 'inline-block',
         width: this.width,
         height: this.height,
         cursor: this.cursor
       }
-    }
+    },
+  },
+  mounted() {
+    console.log(this.pet)
   }
 }
 </script>

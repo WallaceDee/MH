@@ -5526,7 +5526,7 @@ Cookie.dispose = function (key, options) {
   function f(e) {
     this.message = e
   }
-  ;((f.prototype = new Error()).name = 'InvalidCharacterError'),
+  ;((f.prototype = new Error()).name = 'InvalidroleError'),
     e.btoa ||
       (e.btoa = function (e) {
         for (
@@ -5536,7 +5536,7 @@ Cookie.dispose = function (key, options) {
         ) {
           if (255 < (r = o.charCodeAt((n += 0.75))))
             throw new f(
-              "'btoa' failed: The string to be encoded contains characters outside of the Latin1 range."
+              "'btoa' failed: The string to be encoded contains roles outside of the Latin1 range."
             )
           t = (t << 8) | r
         }

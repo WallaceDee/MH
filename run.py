@@ -101,28 +101,8 @@ def run_basic_spider(max_pages=5, spider_type='role', equip_type='normal', use_b
                 cached_params=cached_params
             )    
         else:
-                    print(f"未知的爬虫类型: {spider_type}")
+            print(f"未知的爬虫类型: {spider_type}")
         return
-            
-        print("数据爬取完成")
-        
-        # # 导出Excel
-        # print("\n正在导出Excel...")
-        # excel_file = spider.export_to_excel()
-        # if excel_file:
-        #     print(f"Excel文件已生成: {excel_file}")
-        # else:
-        #     print("Excel导出失败")
-        
-        # # 导出JSON
-        # print("\n正在导出JSON...")
-        # json_file = spider.export_to_json(filename=None, pretty=False)
-        # if json_file:
-        #     print(f"JSON文件已生成: {json_file}")
-        # else:
-        #     print("JSON导出失败")
-        
-        print("基础爬虫完成！")
         
     except Exception as e:
         print(f"执行出错: {e}")

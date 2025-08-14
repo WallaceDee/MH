@@ -1,48 +1,58 @@
 <template>
   <div class="batch-valuation-result">
+    <!-- Loading骨架屏 -->
+    <div v-if="loading" class="skeleton-container">
+      <el-skeleton :rows="12" animated />
+    </div>
     <!-- 结果概览 -->
-    <el-row :gutter="20" style="margin-bottom: 20px;">
-      <el-col :span="6">
-        <el-statistic group-separator="," :precision="2" :value="totalValue / 100" title="估价总值" prefix="¥"
-          :value-style="{  fontSize: '28px', fontWeight: 'bold' }">
-        </el-statistic>
-      </el-col>
-      <el-col :span="6">
-        <el-statistic group-separator="," :precision="0" :value="successCount" title="成功估价"
-          :value-style="{  fontSize: '28px', fontWeight: 'bold' }">
-          <template slot="suffix">
-            <span style="color: #909399; font-size: 16px">/ {{ totalCount }}</span>
-          </template>
-        </el-statistic>
-      </el-col>
-    </el-row>
-    <el-row  type="flex" justify="space-between">
-      <el-col :span="8" v-for="(result, index) in results" :key="index" class="result-item"
-        :class="{ error: result.error, success: !result.error }">
-        <div class="result-header">
-          <span class="item-index">装备 {{ index + 1 }}</span>
-          <span v-if="!result.error" class="confidence-badge">
-            置信度: {{ (result.confidence * 100).toFixed(1) }}%
-          </span>
-          <span v-else class="error-badge" :title="result.error">估价失败</span>
-        </div>
+    <!-- 实际结果 -->
+    <template v-else>
+      <el-row :gutter="20" style="margin-bottom: 20px;">
+        <el-col :span="6">
+          <el-statistic group-separator="," :precision="2" :value="totalValue / 100" title="估价总值" prefix="¥"
+            :value-style="{ fontSize: '28px', fontWeight: 'bold', color: '#67c23a' }">
+          </el-statistic>
+        </el-col>
+        <el-col :span="6">
+          <el-statistic group-separator="," :precision="0" :value="successCount" title="成功估价"
+            :value-style="{ fontSize: '28px', fontWeight: 'bold', color: '#67c23a' }">
+            <template slot="suffix">
+              <span style="color: #909399; font-size: 16px">/ {{ totalCount }}</span>
+            </template>
+          </el-statistic>
+        </el-col>
+      </el-row>
+      <el-row type="flex" style="flex-wrap: wrap;">
+        <el-col :span="8" v-for="(result, index) in results" :key="index" class="result-item"
+          :class="{ error: result.error, success: !result.error }">
+          <div class="result-header">
+            <span class="item-index">{{equipmentList[index].name||`装备 ${index + 1}`}}</span>
+            <span v-if="!result.error" class="confidence-badge">
+              置信度: {{ (result.confidence * 100).toFixed(1) }}%
+            </span>
+            <span v-else class="error-badge" :title="result.error">估价失败</span>
+          </div>
 
-        <el-row class="result-content">
-          <el-col :span="12">
-            <EquipmentImage placement="top" :image="false" :equipment="getEquipImageProps(equipmentList[index])"
-              size="small" :popoverWidth="300" />
-            <SimilarEquipmentModal :equipment="equipmentList[index]" :loading="loading" @show="loadSimilarEquipments"
-              :similar-data="similarData"  :valuation="result"/>
-          </el-col>
-          <el-col class="price-info" :span="12">
-
-            <el-statistic group-separator="," :precision="2" :value="result.estimated_price_yuan" title="估价" prefix="¥"
-              :value-style="{ color: '#f56c6c', fontSize: '18px', fontWeight: 'bold' }">
-            </el-statistic>
-          </el-col>
-        </el-row>
-      </el-col>
-    </el-row>
+          <el-row type="flex" align="middle" justify="space-between">
+            <el-col style="width: 50px;">
+              <EquipmentImage placement="top" :image="false" :equipment="getEquipImageProps(equipmentList[index])"
+                :lock_type="equipmentList[index].lock_type" size="small" :popoverWidth="300" />
+              <SimilarEquipmentModal :equipment="equipmentList[index]" :similar-data="similarData" :valuation="result"
+                @show="loadSimilarEquipments" />
+            </el-col>
+            <el-col class="price-info" :span="12">
+              <el-statistic group-separator="," :precision="2" :value="result.estimated_price_yuan" title="估价"
+                prefix="¥" :value-style="{ color: '#f56c6c', fontSize: '18px', fontWeight: 'bold' }">
+              </el-statistic>
+            </el-col>
+          </el-row>
+        </el-col>
+      </el-row>
+    </template>
+    <!-- 关闭按钮 -->
+    <div class="dialog-footer" style="text-align: center; margin-top: 20px;">
+      <el-button @click="$emit('close')" type="primary">关闭</el-button>
+    </div>
   </div>
 </template>
 
@@ -68,12 +78,15 @@ export default {
     valuateParams: {
       type: Object,
       required: true
+    },
+    loading: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
     return {
-      loading: false,
-      similarData:null
+      similarData: null
     }
   },
   mixins: [equipmentMixin],
@@ -90,16 +103,14 @@ export default {
     }
   },
   methods: {
-    closeDialog() {
-      this.$emit('close')
-    },
     // 加载相似装备
     async loadSimilarEquipments(equipment) {
-      // 使用默认相似度阈值0.85加载
+      // 使用默认相似度阈值0.8加载
+      this.similarData = null
       await this.loadEquipmentValuation(equipment)
     },
     // 统一的装备估价加载方法
-    async loadEquipmentValuation(equipment, isRetry = false) {
+    async loadEquipmentValuation(equipment) {
       try {
         // similarity_threshold:0.8,
         // max_anchors:30
@@ -118,7 +129,6 @@ export default {
         // 处理估价响应
         if (valuationResponse.code === 200) {
           const data = valuationResponse.data
-
           // 从估价结果中提取相似装备信息
           if (data.anchors && data.anchors.length > 0) {
             this.similarData = {
@@ -139,9 +149,6 @@ export default {
                 }
               }
             }
-            if (isRetry) {
-              this.$message.success(`成功找到 ${data.anchor_count} 个相似装备`)
-            }
           } else {
             this.similarData = {
               anchor_count: 0,
@@ -151,15 +158,9 @@ export default {
                 price_range: { min: 0, max: 0 },
                 similarity_range: { min: 0, max: 0, avg: 0 }
               },
-              message: isRetry
-                ? '仍未找到符合条件的市场锚点，请尝试更低的相似度阈值'
-                : '未找到符合条件的市场锚点，建议降低相似度阈值',
+              message: '未找到符合条件的市场锚点，建议降低相似度阈值',
               canRetry: true,
               equipment: equipment
-            }
-
-            if (isRetry) {
-              this.$message.warning('仍未找到相似装备，请尝试更低的相似度阈值')
             }
           }
         } else if (valuationResponse.code === 400) {
@@ -176,38 +177,11 @@ export default {
             canRetry: true,
             equipment: equipment
           }
-
-          if (isRetry) {
-            this.$message.error(valuationResponse.message || '查找相似装备失败')
-          }
-        } else {
-
-          if (isRetry) {
-            this.similarData = {
-              anchor_count: 0,
-              similarity_threshold: this.valuateParams.similarity_threshold,
-              anchors: [],
-              statistics: {
-                price_range: { min: 0, max: 0 },
-                similarity_range: { min: 0, max: 0, avg: 0 }
-              },
-              message: valuationResponse.message || '查找失败，请重试',
-              canRetry: true,
-              equipment: equipment
-            }
-            this.$message.error(valuationResponse.message || '查找相似装备失败')
-          }
         }
 
         console.log('估价和相似装备数据:', valuationResponse.data)
       } catch (error) {
         console.error('加载相似装备或估价失败:', error)
-
-        if (isRetry) {
-          this.$message.error(`重试失败: ${error.message}`)
-        }
-      } finally {
-        this.loading = false
       }
     },
   }
@@ -308,11 +282,6 @@ export default {
   font-size: 12px;
 }
 
-.result-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
 .price-info {
   display: flex;
@@ -363,5 +332,37 @@ export default {
 
 .results-list::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* 骨架屏样式 */
+.skeleton-container {
+  padding: 20px 0;
+}
+
+.skeleton-item {
+  padding: 15px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.skeleton-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
 }
 </style>

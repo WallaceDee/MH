@@ -16,6 +16,7 @@ module.exports = {
     "quotes": ["error", "single"],
     "semi": ["error", "never"],
     "no-irregular-whitespace": "off",
-    "vue/multi-word-component-names": "off"
+    "vue/multi-word-component-names": "off",
+    "vue/no-use-v-if-with-v-for": "off",
   },
 };

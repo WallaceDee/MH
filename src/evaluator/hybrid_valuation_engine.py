@@ -86,12 +86,12 @@ class HybridValuationEngine:
         
         print("混合估价引擎初始化完成")
     
-    def evaluate(self, character_data: Dict[str, Any]) -> ValuationResult:
+    def evaluate(self, role_data: Dict[str, Any]) -> ValuationResult:
         """
         执行混合估价
         
         Args:
-            character_data: 角色数据
+            role_data: 角色数据
             
         Returns:
             ValuationResult: 估价结果
@@ -100,7 +100,7 @@ class HybridValuationEngine:
             print("\n=== 开始混合估价 ===")
             
             # 1. 特征提取和校准
-            features = self._extract_and_calibrate_features(character_data)
+            features = self._extract_and_calibrate_features(role_data)
             
             # 2. 执行双引擎估价
             market_result, rule_result = self._dual_engine_valuation(features)
@@ -142,11 +142,11 @@ class HybridValuationEngine:
             self.logger.error(f"混合估价失败: {e}")
             return self._create_fallback_result()
     
-    def _extract_and_calibrate_features(self, character_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _extract_and_calibrate_features(self, role_data: Dict[str, Any]) -> Dict[str, Any]:
         """提取并校准特征"""
         try:
             # 使用 FeatureExtractor 提取特征
-            features = self.feature_extractor.extract_features(character_data)
+            features = self.feature_extractor.extract_features(role_data)
             
             # 特征校准
             if self.integration_config['calibration_enabled']:
@@ -402,18 +402,18 @@ class HybridValuationEngine:
             warnings=['估价引擎执行失败']
         )
     
-    def batch_evaluate(self, character_list: List[Dict[str, Any]]) -> List[ValuationResult]:
+    def batch_evaluate(self, role_list: List[Dict[str, Any]]) -> List[ValuationResult]:
         """批量混合估价"""
         results = []
-        print(f"开始批量混合估价，共 {len(character_list)} 个角色")
+        print(f"开始批量混合估价，共 {len(role_list)} 个角色")
         
-        for i, character_data in enumerate(character_list):
+        for i, role_data in enumerate(role_list):
             try:
-                result = self.evaluate(character_data)
+                result = self.evaluate(role_data)
                 results.append(result)
                 
                 if (i + 1) % 5 == 0:
-                    print(f"已完成 {i + 1}/{len(character_list)} 个角色的混合估价")
+                    print(f"已完成 {i + 1}/{len(role_list)} 个角色的混合估价")
                     
             except Exception as e:
                 self.logger.error(f"批量估价第 {i+1} 个角色失败: {e}")
@@ -422,14 +422,14 @@ class HybridValuationEngine:
         print(f"批量混合估价完成")
         return results
     
-    def generate_comprehensive_report(self, character_data: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_comprehensive_report(self, role_data: Dict[str, Any]) -> Dict[str, Any]:
         """生成综合估价报告"""
         try:
             # 执行混合估价
-            result = self.evaluate(character_data)
+            result = self.evaluate(role_data)
             
             # 获取详细的市场分析
-            features = self._extract_and_calibrate_features(character_data)
+            features = self._extract_and_calibrate_features(role_data)
             market_distribution = self.market_evaluator.value_distribution_report(features)
             
             # 构建综合报告
@@ -493,7 +493,7 @@ if __name__ == "__main__":
         engine = HybridValuationEngine()
         
         # 构造测试角色数据
-        test_character = {
+        test_role = {
             'level': 129,
             'expt_ski1': 0,        # 攻击修炼
             'expt_ski2': 21,       # 防御修炼
@@ -513,7 +513,7 @@ if __name__ == "__main__":
         print("=== 混合估价引擎测试 ===")
         
         # 执行混合估价
-        result = engine.evaluate(test_character)
+        result = engine.evaluate(test_role)
         
         print(f"\n=== 估价结果 ===")
         print(f"最终估价: {result.final_value:.1f}")
@@ -529,7 +529,7 @@ if __name__ == "__main__":
         
         # 生成综合报告
         print(f"\n=== 生成综合报告 ===")
-        report = engine.generate_comprehensive_report(test_character)
+        report = engine.generate_comprehensive_report(test_role)
         
         if 'error' not in report:
             print(f"报告生成成功")

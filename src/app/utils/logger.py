@@ -14,7 +14,8 @@ def setup_logging(app):
     """配置应用日志"""
     
     # 创建日志目录
-    log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'logs')
+    from src.utils.project_path import get_logs_path
+    log_dir = get_logs_path()
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     

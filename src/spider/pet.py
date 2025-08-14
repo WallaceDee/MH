@@ -24,7 +24,7 @@ sys.path.insert(0, project_root)
 
 from src.tools.setup_requests_session import setup_session
 from src.utils.smart_db_helper import CBGSmartDB
-from src.cbg_config import DB_TABLE_SCHEMAS, DB_TABLE_ORDER
+from src.cbg_config import DB_SCHEMA_CONFIG
 from src.tools.search_form_helper import (
     get_pet_search_params_sync,
     get_pet_search_params_async
@@ -132,7 +132,7 @@ class CBGPetSpider:
             cursor = conn.cursor()
             
             # 只创建宠物相关的表
-            cursor.execute(DB_TABLE_SCHEMAS['pets'])
+            cursor.execute(DB_SCHEMA_CONFIG['pets'])
             self.logger.debug("宠物数据库创建表: pets")
             
             conn.commit()
@@ -445,6 +445,7 @@ class CBGPetSpider:
         self._ensure_database_initialized()
         
         try:
+            self.logger.info(f"开始保存 {len(pets)} 条宠物数据到数据库")
             # 使用正确的方法名：save_pets_batch
             success = self.smart_db.save_pets_batch(pets)
             if success:

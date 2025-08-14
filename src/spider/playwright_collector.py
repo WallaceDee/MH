@@ -78,7 +78,7 @@ class PlaywrightAutoCollector:
                     current_month), exist_ok=True)
 
         self.db_paths = {
-            'role': os.path.join(self.project_root, 'data', current_month, f'cbg_characters_{current_month}.db'),
+            'role': os.path.join(self.project_root, 'data', current_month, f'cbg_roles_{current_month}.db'),
             'pet': os.path.join(self.project_root, 'data', current_month, f'cbg_pets_{current_month}.db'),
             'equipment': os.path.join(self.project_root, 'data', current_month, f'cbg_equip_{current_month}.db')
         }
@@ -165,8 +165,6 @@ class PlaywrightAutoCollector:
                 logger.info(f"数据库文件不存在，开始创建...")
                 self._create_database(db_type, db_path)
                 logger.info(f"按需创建数据库: {db_path}")
-            else:
-                logger.info(f"数据库文件已存在: {db_path}")
         else:
             logger.error(f"未知的数据库类型: {db_type}")
 
@@ -200,21 +198,21 @@ class PlaywrightAutoCollector:
                     logger.info(f"数据库 {db_path} 存在但无表，将创建表结构")
 
             logger.info(f"导入数据库配置...")
-            from src.cbg_config import DB_TABLE_SCHEMAS
+            from src.cbg_config import DB_SCHEMA_CONFIG
 
             if db_type == 'role':
                 logger.info(f"创建角色数据库表结构...")
-                cursor.execute(DB_TABLE_SCHEMAS['characters'])
+                cursor.execute(DB_SCHEMA_CONFIG['roles'])
                 logger.info(f"角色数据库 {db_path} 表结构创建完成")
 
             elif db_type == 'equipment':
                 logger.info(f"创建装备数据库表结构...")
-                cursor.execute(DB_TABLE_SCHEMAS['equipments'])
+                cursor.execute(DB_SCHEMA_CONFIG['equipments'])
                 logger.info(f"装备数据库 {db_path} 表结构创建完成")
 
             elif db_type == 'pet':
                 logger.info(f"创建宠物数据库表结构...")
-                cursor.execute(DB_TABLE_SCHEMAS['pets'])
+                cursor.execute(DB_SCHEMA_CONFIG['pets'])
                 logger.info(f"宠物数据库 {db_path} 表结构创建完成")
 
             conn.commit()
@@ -513,9 +511,9 @@ class PlaywrightAutoCollector:
             logger.info("获取角色spider实例...")
             role_spider = self._get_role_spider()
             if role_spider:
-                logger.info("调用角色spider的save_character_data方法...")
+                logger.info("调用角色spider的save_role_data方法...")
                 # roles已经是解析后的数据，直接保存
-                role_spider.save_character_data(roles)
+                role_spider.save_role_data(roles)
                 logger.info(f"角色数据已保存: {len(roles)} 条")
             else:
                 logger.warning("角色spider实例创建失败，跳过数据保存")
@@ -557,7 +555,11 @@ class PlaywrightAutoCollector:
 
 
     def _classify_request(self, url: str, params: Dict) -> str:
-        """根据请求参数分类数据类型"""
+        """根据请求参数分类数据类型
+        https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1753947060166&
+        act=recommd_by_role&server_id=77&areaid=43&server_name=%E8%BF%9B%E8%B4%A4%E9%97%A8&page=4
+        &query_order=price%20ASC&view_loc=search_cond&count=15&search_type=&kindid=20&level_min=80&level_max=89&suit_effect=3011&init_defense=34&init_hp=160
+        """
         try:
             # 全区搜索
             if 'search_type=overall_search_role' in url:
@@ -590,7 +592,7 @@ class PlaywrightAutoCollector:
             elif 'view_loc=search_cond' in url:
                 if any(search_type in url for search_type in ['search_role_equip', 'search_pet_equip', 'search_lingshi']):
                     return 'equipment'
-                elif 'search_type=search_pet' in url:
+                if 'search_type=search_pet' in url:
                     return 'pet'
                 if 'search_type=search_role' in url:
                     return 'role'
