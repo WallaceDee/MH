@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排序参数同步测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .url-display {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        .sort-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .sort-btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+        .sort-btn:hover {
+            background: #f0f0f0;
+        }
+        .sort-btn.active {
+            background: #409eff;
+            color: white;
+            border-color: #409eff;
+        }
+        .test-steps {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .test-steps h3 {
+            margin-top: 0;
+            color: #1890ff;
+        }
+        .test-steps ol {
+            margin: 10px 0;
+        }
+        .test-steps li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 排序参数同步到地址栏测试</h1>
+    
+    <div class="demo-section">
+        <h2>当前URL状态</h2>
+        <div class="url-display" id="currentUrl"></div>
+        
+        <h3>排序状态</h3>
+        <div id="sortState">无排序</div>
+    </div>
+
+    <div class="demo-section">
+        <h2>排序操作</h2>
+        <div class="sort-buttons">
+            <button class="sort-btn" onclick="toggleSort('price')">价格排序</button>
+            <button class="sort-btn" onclick="toggleSort('level')">等级排序</button>
+            <button class="sort-btn" onclick="toggleSort('create_time')">创建时间排序</button>
+        </div>
+        
+        <button onclick="clearSort()" style="margin-top: 10px; padding: 8px 16px; background: #f56c6c; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            清除排序
+        </button>
+    </div>
+
+    <div class="demo-section">
+        <h2>测试功能</h2>
+        <div class="test-steps">
+            <h3>测试步骤：</h3>
+            <ol>
+                <li>点击不同的排序按钮，观察地址栏变化</li>
+                <li>复制当前URL到新标签页，验证排序状态恢复</li>
+                <li>使用浏览器前进后退按钮测试</li>
+                <li>点击清除排序，验证参数被清除</li>
+            </ol>
+        </div>
+        
+        <button onclick="testUrlSync()" style="padding: 8px 16px; background: #67c23a; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            测试URL同步
+        </button>
+    </div>
+
+    <script>
+        // 模拟Vue Router的query参数管理
+        let currentQuery = {};
+        let sortState = {};
+
+        // 更新URL显示
+        function updateUrlDisplay() {
+            const url = window.location.pathname + buildQueryString();
+            document.getElementById('currentUrl').textContent = url;
+            
+            // 更新排序状态显示
+            const sortText = Object.keys(sortState).length > 0 
+                ? Object.entries(sortState).map(([field, order]) => `${field}: ${order}`).join(', ')
+                : '无排序';
+            document.getElementById('sortState').textContent = sortText;
+        }
+
+        // 构建查询字符串
+        function buildQueryString() {
+            const sortFields = [];
+            const sortOrders = [];
+            
+            for (const [field, order] of Object.entries(sortState)) {
+                if (order) {
+                    sortFields.push(field);
+                    sortOrders.push(order === 'ascending' ? 'ASC' : 'DESC');
+                }
+            }
+            
+            const params = new URLSearchParams();
+            if (sortFields.length > 0) {
+                params.set('sort_by', sortFields.join(','));
+                params.set('sort_order', sortOrders.join(','));
+            }
+            
+            const queryString = params.toString();
+            return queryString ? '?' + queryString : '';
+        }
+
+        // 切换排序
+        function toggleSort(field) {
+            if (!sortState[field]) {
+                sortState[field] = 'ascending';
+            } else if (sortState[field] === 'ascending') {
+                sortState[field] = 'descending';
+            } else {
+                delete sortState[field];
+            }
+            
+            updateUrlDisplay();
+            updateSortButtons();
+        }
+
+        // 清除所有排序
+        function clearSort() {
+            sortState = {};
+            updateUrlDisplay();
+            updateSortButtons();
+        }
+
+        // 更新排序按钮状态
+        function updateSortButtons() {
+            const buttons = document.querySelectorAll('.sort-btn');
+            buttons.forEach(btn => {
+                const field = btn.getAttribute('onclick').match(/toggleSort\('(\w+)'\)/)[1];
+                btn.classList.remove('active');
+                
+                if (sortState[field]) {
+                    btn.classList.add('active');
+                    btn.textContent = `${field}排序 (${sortState[field] === 'ascending' ? '↑' : '↓'})`;
+                } else {
+                    btn.textContent = `${field}排序`;
+                }
+            });
+        }
+
+        // 测试URL同步
+        function testUrlSync() {
+            const currentUrl = window.location.pathname + buildQueryString();
+            const newWindow = window.open(currentUrl, '_blank');
+            
+            if (newWindow) {
+                setTimeout(() => {
+                    newWindow.close();
+                    alert('新窗口已打开并关闭，请检查地址栏是否包含排序参数');
+                }, 1000);
+            }
+        }
+
+        // 从URL恢复排序状态
+        function restoreFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortBy = urlParams.get('sort_by');
+            const sortOrder = urlParams.get('sort_order');
+            
+            if (sortBy && sortOrder) {
+                const fields = sortBy.split(',');
+                const orders = sortOrder.split(',');
+                
+                sortState = {};
+                fields.forEach((field, index) => {
+                    const order = orders[index];
+                    if (order === 'ASC') {
+                        sortState[field] = 'ascending';
+                    } else if (order === 'DESC') {
+                        sortState[field] = 'descending';
+                    }
+                });
+                
+                updateUrlDisplay();
+                updateSortButtons();
+            }
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            restoreFromUrl();
+            updateUrlDisplay();
+            updateSortButtons();
+        });
+
+        // 监听浏览器前进后退
+        window.addEventListener('popstate', () => {
+            restoreFromUrl();
+            updateUrlDisplay();
+            updateSortButtons();
+        });
+    </script>
+</body>
+</html> 

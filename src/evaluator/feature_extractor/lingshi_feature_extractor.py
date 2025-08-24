@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from typing import Dict, Any, Union, List
 import os
-from src.utils.jsonc_loader import load_jsonc_relative_to_file
+from utils.jsonc_loader import load_js_config_relative_to_file
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -44,8 +44,8 @@ class LingshiFeatureExtractor:
     def _load_configs(self):
         """加载配置文件"""
         try:
-            self.auto_config = load_jsonc_relative_to_file(
-                __file__, '../../constant/auto_search_config.json')
+            self.auto_config = load_js_config_relative_to_file(
+                __file__, '../../constant/auto_search_config.js')
 
             # 特效配置
             self.suit_effects = self.auto_config.get(
@@ -441,9 +441,9 @@ class LingshiFeatureExtractor:
                 for i in range(1, gem_level + 1):
                     gem_score += (3 ** (i - 1))
                 
-                # 标准化到0-100分，以10级为满分参考
+                # 标准化到0-100分，以8级为满分3280参考
                 # 10级得分：1+3+9+27+81+243+729+2187+6561+19683 = 29524
-                max_reference_score = 29524  # 10级精炼的总得分
+                max_reference_score = 3280  # 10级精炼的总得分
                 normalized_score = (gem_score / max_reference_score) * 100
                 features['gem_score'] = round(normalized_score, 2)
                 

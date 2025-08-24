@@ -129,7 +129,12 @@ export const commonMixin = {
      * @returns {string} 格式化后的完整价格信息
      */
     formatFullPrice(item, simple = false) {
-      const basePrice = this.formatPrice(item.price)
+      let basePrice 
+      if(typeof item === 'object'){
+        basePrice = this.formatPrice(item.price)
+      }else{
+        basePrice = this.formatPrice(item)
+      }
 
       // 检查是否有登录信息和跨服费用
       if (!window.LoginInfo || !window.LoginInfo.login) {

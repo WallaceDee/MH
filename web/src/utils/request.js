@@ -90,7 +90,7 @@ export const api = {
       params,
       responseType: 'blob'
     }).then(response => {
-      if (response.success !== false) {
+      if (response.code === 200) {
         // 创建下载链接
         const blob = new Blob([response.data])
         const downloadUrl = window.URL.createObjectURL(blob)

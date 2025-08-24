@@ -240,7 +240,7 @@ const startRoleSpider = async () => {
         delay_max: 8.0
     }
     const response = await this.$api.spider.startRoleSpider(params)
-    if (response.success) {
+    if (response.code === 200) {
         console.log('角色爬虫已启动:', response.data.task_id)
     }
 }
@@ -253,7 +253,7 @@ const startEquipSpider = async () => {
         use_browser: true
     }
     const response = await this.$api.spider.startEquipSpider(params)
-    if (response.success) {
+    if (response.code === 200) {
         console.log('装备爬虫已启动:', response.data.task_id)
     }
 }
@@ -262,7 +262,7 @@ const startEquipSpider = async () => {
 const monitorTaskStatus = () => {
     const interval = setInterval(async () => {
         const response = await this.$api.spider.getStatus()
-        if (response.success) {
+        if (response.code === 200) {
             const status = response.data
             console.log(`任务状态: ${status.status}, 进度: ${status.progress}%`)
             

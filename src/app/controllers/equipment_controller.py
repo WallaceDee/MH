@@ -7,7 +7,7 @@
 
 import logging
 from typing import Dict, List, Optional
-from src.app.services.equipment_service import EquipmentService
+from ..services.equipment_service import EquipmentService
 
 logger = logging.getLogger(__name__)
 
@@ -351,6 +351,65 @@ class EquipmentController:
         except Exception as e:
             logger.error(f"删除装备时出错: {e}")
             return {"error": f"删除装备时出错: {str(e)}", "deleted": False}
+    
+    def mark_equipment_as_abnormal(self, equipment_data: Dict, reason: str = "标记异常", notes: str = None) -> Dict:
+        """标记装备为异常"""
+        try:
+            if not equipment_data:
+                return {"error": "装备数据不能为空"}
+            
+            result = self.service.mark_equipment_as_abnormal(equipment_data, reason, notes)
+            return result
+            
+        except Exception as e:
+            logger.error(f"标记装备异常失败: {e}")
+            return {"error": f"标记装备异常失败: {str(e)}"}
+    
+    def get_abnormal_equipment_list(self, params: Dict) -> Dict:
+        """获取异常装备列表"""
+        try:
+            page = int(params.get('page', 1))
+            page_size = int(params.get('page_size', 20))
+            status = params.get('status')
+            
+            # 验证分页参数
+            if page < 1:
+                page = 1
+            if page_size < 1 or page_size > 100:
+                page_size = 20
+            
+            result = self.service.get_abnormal_equipment_list(page, page_size, status)
+            return result
+            
+        except Exception as e:
+            logger.error(f"获取异常装备列表失败: {e}")
+            return {"error": f"获取异常装备列表失败: {str(e)}"}
+    
+    def update_abnormal_equipment_status(self, equip_sn: str, status: str, notes: str = None) -> Dict:
+        """更新异常装备状态"""
+        try:
+            if not equip_sn:
+                return {"error": "装备序列号不能为空"}
+            
+            result = self.service.update_abnormal_equipment_status(equip_sn, status, notes)
+            return result
+            
+        except Exception as e:
+            logger.error(f"更新异常装备状态失败: {e}")
+            return {"error": f"更新异常装备状态失败: {str(e)}"}
+    
+    def delete_abnormal_equipment(self, equip_sn: str) -> Dict:
+        """删除异常装备记录"""
+        try:
+            if not equip_sn:
+                return {"error": "装备序列号不能为空"}
+            
+            result = self.service.delete_abnormal_equipment(equip_sn)
+            return result
+            
+        except Exception as e:
+            logger.error(f"删除异常装备记录失败: {e}")
+            return {"error": f"删除异常装备记录失败: {str(e)}"}
 
     def get_lingshi_data(self) -> Dict:
         """获取灵石数据"""

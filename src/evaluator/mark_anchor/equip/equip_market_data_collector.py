@@ -7,6 +7,28 @@ import sqlite3
 import sys
 import os
 
+# 套装效果ID常量定义
+# 高价值套装
+AGILITY_SUITS = [1040, 1047, 1049, 1053, 1056, 1065, 1067, 1070, 1077]  # 敏捷套装
+MAGIC_SUITS = [1041, 1042, 1043, 1046, 1050, 1052, 1057, 1059, 1069, 1073, 1074, 1081]  # 魔力套装
+HIGH_VALUE_SUITS = AGILITY_SUITS + MAGIC_SUITS  # 合并高价值套装
+
+# 精确筛选套装（允许精确筛选的套装效果）
+PRECISE_FILTER_SUITS = [4002, 4011, 4017, 4019, 3011, 3050]  # 定心术、变身、碎星诀、天神护体、满天花雨、浪涌
+
+# 高价值特效
+HIGH_VALUE_EFFECTS = [1, 3, 5]  # 无级别，愤怒，永不磨损 高价值特效
+IMPORTANT_EFFECTS = [1, 2, 3, 4, 5, 7, 11, 12, 16]  # 相似度计算中重要的特效
+
+# 高价值简易装备等级
+HIGH_VALUE_EQUIP_LEVELS = [70, 90, 110, 130]  # 高价值简易装备等级
+SIMPLE_EFFECT_ID = 2  # 简易装备特效编号
+
+# 低价值特技
+LOW_VALUE_SPECIAL_SKILLS = [1001,1002,1003,1004,1005,1006,1007,1050,2001,2004,1041,2041]
+# 低价值特效
+LOW_VALUE_EFFECTS = [9, 10, 13, 14, 15, 17, 18]
+
 # 添加项目根目录到Python路径，解决模块导入问题
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -108,6 +130,7 @@ class EquipMarketDataCollector:
                         exclude_suit_effect: Optional[List[int]] = None,
                         exclude_high_value_simple_equips: bool = False,
                         require_high_value_suits: bool = False,
+                        exclude_high_value_special_skills: bool = False,
                         limit: int = 1000) -> pd.DataFrame:
         """
         获取市场装备数据，从多个数据库中合并数据
@@ -117,12 +140,13 @@ class EquipMarketDataCollector:
             level_range: 等级范围 (min_level, max_level)
             price_range: 价格范围 (min_price, max_price)
             server: 服务器筛选
-            special_skill: 特技筛选（必须完全一致）
             special_effect: 特效筛选（高价值必须包含）
+            require_high_value_suits: 强制包含高价值套装装备（魔力套和敏捷套）
+            special_skill: 特技筛选（必须完全一致）
             exclude_special_effect: 排除特效筛选（排除具有这些特效的装备）
             exclude_suit_effect: 排除套装效果筛选（排除具有这些套装效果的装备）
             exclude_high_value_simple_equips: 排除高价值简易装备（70/90/110/130级的简易装备）
-            require_high_value_suits: 强制包含高价值套装装备（魔力套和敏捷套）
+            exclude_high_value_special_skills: 排除高价值特技装备（只搜索无特技或低价值特技装备）
             suit_effect: 套装效果有三种，如果是"附加状态"/"追加法术"，则传入过滤，"变身术"/"变化咒"，则不传入过滤，在锚定的时候做聚类
             limit: 返回数据条数限制
 
@@ -149,8 +173,23 @@ class EquipMarketDataCollector:
                         params.append(kindid)
 
                     if special_skill is not None:
-                        query += " AND special_skill = ?"
-                        params.append(special_skill)
+                        # 只有当不需要排除高价值特技时，才添加具体的特技筛选条件
+                        if not exclude_high_value_special_skills:
+                            query += " AND special_skill = ?"
+                            params.append(special_skill)
+                        else:
+                            print(f"跳过具体特技筛选，因为需要排除高价值特技")
+
+                    # 特技筛选逻辑：如果目标装备是低价值特技，则排除高价值特技装备
+                    if exclude_high_value_special_skills:
+                        # 只能搜索无特技或低价值特技的装备
+                        # 无特技：special_skill = 0 或 special_skill IS NULL
+                        # 低价值特技：special_skill IN (低价值特技列表)
+                        query += " AND (special_skill = 0 OR special_skill IS NULL OR special_skill IN ("
+                        placeholders = ','.join(['?' for _ in LOW_VALUE_SPECIAL_SKILLS])
+                        query += f"{placeholders}))"
+                        params.extend(LOW_VALUE_SPECIAL_SKILLS)
+                        print(f"特技筛选：只搜索无特技或低价值特技装备")
 
                     if suit_effect is not None:
                         # 将字符串转换为数字后再比较（pet_equip除外，其他都是数字字符串）
@@ -168,11 +207,7 @@ class EquipMarketDataCollector:
 
                     if require_high_value_suits:
                         # 强制包含高价值套装：只搜索魔力套和敏捷套装备
-                        agility_suits = [1040, 1047, 1049, 1053,
-                                         1056, 1065, 1067, 1070, 1077]  # 敏捷套装
-                        magic_suits = [1041, 1042, 1043, 1046, 1050, 1052,
-                                       1057, 1059, 1069, 1073, 1074, 1081]  # 魔力套装
-                        high_value_suits = agility_suits + magic_suits
+                        high_value_suits = HIGH_VALUE_SUITS
 
                         if high_value_suits:
                             # 创建IN条件：suit_effect IN (1040, 1041, ...)
@@ -187,17 +222,18 @@ class EquipMarketDataCollector:
                         if special_effect and len(special_effect) > 0:
                             effect_conditions = []
                             for effect in special_effect:
-                                # 使用精确的JSON数组匹配，避免数字包含关系的误匹配
-                                # 匹配模式：[6], [6,x], [x,6], [x,6,y] 等，但不匹配16, 26等包含6的数字
-                                effect_conditions.append(
-                                    "(special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)")
-                                # 四种匹配模式：单独存在、开头、中间、结尾
-                                params.extend([
-                                    f'[{effect}]',        # 只有这一个特效：[6]
-                                    f'[{effect},%',       # 在开头：[6,x,...]
-                                    f'%,{effect},%',      # 在中间：[x,6,y,...]
-                                    f'%,{effect}]'        # 在结尾：[x,y,6]
-                                ])
+                                if effect not in LOW_VALUE_EFFECTS:  # 排除低价值特效
+                                    # 使用精确的JSON数组匹配，避免数字包含关系的误匹配
+                                    # 匹配模式：[6], [6,x], [x,6], [x,6,y] 等，但不匹配16, 26等包含6的数字
+                                    effect_conditions.append(
+                                        "(special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)")
+                                    # 四种匹配模式：单独存在、开头、中间、结尾
+                                    params.extend([
+                                        f'[{effect}]',        # 只有这一个特效：[6]
+                                        f'[{effect},%',       # 在开头：[6,x,...]
+                                        f'%,{effect},%',      # 在中间：[x,6,y,...]
+                                        f'%,{effect}]'        # 在结尾：[x,y,6]
+                                    ])
 
                             # 将特效条件添加到查询中
                             if effect_conditions:
@@ -239,9 +275,9 @@ class EquipMarketDataCollector:
 
                     if exclude_high_value_simple_equips:
                         # 排除高价值简易装备：排除70级/90级/110级/130级且有简易特效(2)的装备
-                        high_value_levels = [70, 90, 110, 130]
+                        high_value_levels = HIGH_VALUE_EQUIP_LEVELS
                         simple_effect_patterns = [
-                            '[2]', '[2,%', '%,2,%', '%,2]']  # 简易特效的匹配模式
+                            f'[{SIMPLE_EFFECT_ID}]', f'[{SIMPLE_EFFECT_ID},%', f'%,{SIMPLE_EFFECT_ID},%', f'%,{SIMPLE_EFFECT_ID}]']  # 简易特效的匹配模式
 
                         exclude_high_value_simple_conditions = []
                         for level in high_value_levels:
@@ -281,14 +317,25 @@ class EquipMarketDataCollector:
                     db_limit = min(limit // len(self.db_paths) + 100, limit)
                     query += f" ORDER BY update_time DESC LIMIT {db_limit}"
 
+                    # 添加详细的SQL调试日志
+                    print(f"=== 数据库 {db_path} 的SQL调试信息 ===")
+                    print(f"完整SQL: {query}")
+                    print(f"SQL参数: {params}")
+                    print(f"参数数量: {len(params)}")
+                    print(f"数据库限制: {db_limit}")
+                    print("=" * 50)
+
                     try:
                         df = pd.read_sql_query(query, conn, params=params)
                         if not df.empty:
                             df['source_db'] = db_path  # 标记数据来源
                             all_data.append(df)
                             print(f"从 {db_path} 加载了 {len(df)} 条装备数据")
+                        else:
+                            print(f"从 {db_path} 查询到0条数据")
                     except Exception as e:
                         self.logger.error(f"查询装备数据失败 ({db_path}): {e}")
+                        print(f"SQL执行异常: {e}")
                         continue
 
             except Exception as e:
@@ -309,7 +356,8 @@ class EquipMarketDataCollector:
             print(f"总共加载了 {len(combined_df)} 条装备数据")
             return combined_df
         else:
-            print("未从任何数据库加载到装备数据")
+            print(f"未从任何数据库加载到装备数据")
+            print(f"请检查数据库文件是否存在，以及筛选条件是否过于严格")
             return pd.DataFrame()
 
     def get_market_data_for_similarity(self,
@@ -342,26 +390,27 @@ class EquipMarketDataCollector:
             exclude_special_effect = None
             exclude_high_value_simple_equips = False
 
-            # 定义重要特效
-            high_value_effects = [1, 3, 5]  # 无级别，愤怒，永不磨损 高价值特效
-            # 重要特效还有一个特殊场景, 70级/90级/110级/130级装备简易装备也属于高价值特效。其他等级装备简易装备不属于高价值特效。
-            important_effects = [1, 2, 3, 4, 5, 7, 11, 12, 16]  # 相似度计算中重要的特效
+            # 使用预定义的特效和等级常量
+            high_value_effects = HIGH_VALUE_EFFECTS
+            important_effects = IMPORTANT_EFFECTS
 
             # 简易装备特殊逻辑处理
             target_equip_level = target_features.get('equip_level', 0)
-            simple_effect_id = 2  # 简易装备特效编号
-            high_value_equip_levels = [70, 90, 110, 130]  # 高价值简易装备等级
+            simple_effect_id = SIMPLE_EFFECT_ID
+            high_value_equip_levels = HIGH_VALUE_EQUIP_LEVELS
 
             # 检查目标装备是否包含高价值特效
             target_has_high_value_effects = False
             target_has_simple_effect = False
-
+            print(f"special_effectspecial_effectspecial_effectspecial_effect: {special_effect}-----------------target_equip_level{target_features}")
             if special_effect and len(special_effect) > 0:
                 # 筛选出重要特效用于相似度计算
                 filtered_effects = []
                 for effect in special_effect:
                     if effect in important_effects:
-                        filtered_effects.append(effect)
+                        # 如果特效是 SIMPLE_EFFECT_ID，则等级要符合 HIGH_VALUE_EQUIP_LEVELS
+                        if effect != simple_effect_id or (effect == simple_effect_id and target_equip_level in high_value_equip_levels):
+                            filtered_effects.append(effect)
                     # 检查是否包含基础高价值特效（无级别、愤怒、永不磨损）
                     if effect in high_value_effects:
                         target_has_high_value_effects = True
@@ -390,16 +439,9 @@ class EquipMarketDataCollector:
             exclude_suit_effect = []
             require_high_value_suits = False
 
-            # 定义高价值套装（magic_suits和agility_suits）
-            agility_suits = [1040, 1047, 1049, 1053,
-                             1056, 1065, 1067, 1070, 1077]  # 敏捷套装
-            magic_suits = [1041, 1042, 1043, 1046, 1050, 1052,
-                           1057, 1059, 1069, 1073, 1074, 1081]  # 魔力套装
-            high_value_suits = agility_suits + magic_suits  # 合并高价值套装
-
-            # 定义精确筛选套装（允许精确筛选的套装效果）
-            precise_filter_suits = [4002, 4011, 4017,
-                                    4019, 3011, 3050]  # 定心术、变身、碎星诀、天神护体、满天花雨、浪涌
+            # 使用预定义的高价值套装和精确筛选套装
+            high_value_suits = HIGH_VALUE_SUITS
+            precise_filter_suits = PRECISE_FILTER_SUITS
 
             # 检查目标装备的套装类型
             target_has_high_value_suits = False
@@ -437,6 +479,15 @@ class EquipMarketDataCollector:
                 exclude_suit_effect = high_value_suits + precise_filter_suits
                 print(f"目标装备不包含高价值套装和精确筛选套装，将排除这些套装的装备")
 
+            # 特技筛选逻辑
+            exclude_high_value_special_skills = False
+            if require_high_value_suits or (special_effect and len(special_effect) > 0 and not target_has_high_value_effects):
+                # 如果强制高价值套装，或者有特效但不是高价值特效，则检查特技
+                if special_skill and special_skill in LOW_VALUE_SPECIAL_SKILLS:
+                    # 如果目标装备是低价值特技，则只能搜索无特技或低价值特技的装备
+                    exclude_high_value_special_skills = True
+                    print(f"目标装备是低价值特技 {special_skill}，将排除高价值特技装备")
+
             print(
                 f"相似度筛选 - 重要特效: {filtered_special_effect}, 排除特效: {exclude_special_effect}")
             print(
@@ -461,6 +512,7 @@ class EquipMarketDataCollector:
                 exclude_suit_effect=exclude_suit_effect if exclude_suit_effect else None,
                 exclude_high_value_simple_equips=exclude_high_value_simple_equips,
                 require_high_value_suits=require_high_value_suits,
+                exclude_high_value_special_skills=exclude_high_value_special_skills,
                 limit=2000  # 相似度计算需要更多数据
             )
 
@@ -484,7 +536,7 @@ class EquipMarketDataCollector:
             bool: 是否应该筛选此套装效果
         """
         # 允许精确筛选的套装效果：定心术、变身术、碎星诀、天神护体、满天花雨、浪涌
-        allowed_suit_effects = [4002, 4011, 4017, 4019, 3011, 3050]
+        allowed_suit_effects = PRECISE_FILTER_SUITS
 
         # 尝试转换为数字进行比较
         try:
@@ -503,16 +555,6 @@ class EquipMarketDataCollector:
         这个方法在基础查询的基础上应用特定的业务规则，
         比如套装效果的筛选策略等
 
-        #属性点加成分类，属性点加成类型一般成对出现；
-        # 如果两个都是正数则是组合双加，如体质+10和耐力+10都是正数则是体耐；
-        # 如果单种属性正数，如体质+10，则是体质；
-        # 如果一个正数一个负数，如体质+15，敏捷-2，则是体质；
-        # 分四个聚类
-        # 1."体质", "体耐",
-        # 2."魔力", "魔体","魔耐","魔敏",
-        # 3."耐力",
-        # 4."敏捷","敏体","敏耐",
-        # 5."力量", "力体","力魔","力耐","力敏"
         Args:
             target_features: 目标装备特征
             **kwargs: 其他查询参数
@@ -551,13 +593,16 @@ class EquipMarketDataCollector:
                                    addon_moli: int = 0) -> str:
         """
         根据装备的附加属性分类
-
-        属性点加成分类规则：
-        1. "体质", "体耐"
-        2. "魔力", "魔体","魔耐","魔敏"
-        3. "耐力"
-        4. "敏捷","敏体","敏耐"
-        5. "力量", "力体","力魔","力耐","力敏"
+        #属性点加成分类，属性点加成类型一般成对出现；
+        # 如果两个都是正数则是组合双加，如体质+10和耐力+10都是正数则是体耐；
+        # 如果单种属性正数，如体质+10，则是体质；
+        # 如果一个正数一个负数，如体质+15，敏捷-2，则是体质；
+        # 分四个聚类
+        # 1."体质", "体耐",
+        # 2."魔力", "魔体","魔耐","魔敏",
+        # 3."耐力",
+        # 4."敏捷","敏体","敏耐",
+        # 5."力量", "力体","力魔","力耐","力敏"
 
         Args:
             addon_minjie: 敏捷加成

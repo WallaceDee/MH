@@ -2,16 +2,20 @@
   <div class="valuation-info">
     <el-row type="flex" align="middle" justify="space-between">
       <el-row type="flex" align="middle">
-        <equipment-image :equipment="targetEquipment" width="50px" height="50px" />
+        <equipment-image :equipment="targetEquipment" width="50px" height="50px" placement="left"/>
         <span v-html="formatFullPrice(targetEquipment)" style="margin-left: 10px"></span>
       </el-row>
       <!-- 无锚点时的重试界面 -->
-      <SimilarGetMore :target-equipment="targetEquipment" />
+      <div>
+        <el-button type="primary" @click="$emit('refresh')" size="mini">刷新</el-button>
+        <SimilarGetMore :target-equipment="targetEquipment" />
+      </div>
     </el-row>
     <div class="valuation-main">
       <span class="valuation-label">装备估价:</span>
       <span class="valuation-price">{{ valuation ? valuation.estimated_price_yuan + '元' : '-' }}</span>
       <span class="valuation-strategy">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>
+      <el-link type="danger" @click.native="markAsAbnormal"  size="mini">标记为异常</el-link>
 
       <!-- 价格比率显示 -->
       <span v-if="priceRatio" class="price-ratio" :class="priceRatioClass">
@@ -84,15 +88,15 @@ export default {
       const ratio = this.priceRatio
       const deviation = Math.abs(ratio - 1) * 100
       if (deviation < 5) {
-        return `✅ 估价极为贴合市场（±${deviation.toFixed(1)}%）`
+        return `估价极为贴合市场（±${deviation.toFixed(1)}%）`
       } else if (deviation < 10) {
-        return `🟢 估价较为贴合（±${deviation.toFixed(1)}%）`
+        return `估价较为贴合（±${deviation.toFixed(1)}%）`
       } else if (deviation < 20) {
-        return `🟡 估价有一定偏差（±${deviation.toFixed(1)}%）`
+        return `估价有一定偏差（±${deviation.toFixed(1)}%）`
       } else if (ratio > 1) {
-        return `🔴 估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`
+        return `估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`
       } else {
-        return `🔵 估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`
+        return `估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`
       }
     },
 
@@ -120,6 +124,36 @@ export default {
     }
   },
   methods: {
+    async markAsAbnormal() {
+      try {
+        // 调用API标记装备为异常
+        const response = await this.$api.equipment.markEquipmentAsAbnormal({
+          equipment_data: this.targetEquipment,
+          reason: '标记异常',
+          notes: '用户手动标记的异常装备'
+        })
+        
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '提示',
+            message: '装备已标记为异常'
+          })
+          // 可以触发父组件刷新或其他操作
+          this.$emit('abnormal-marked', this.targetEquipment)
+        } else {
+          this.$notify.error({
+            title: '提示',
+            message: response.message || '标记异常失败'
+          })
+        }
+      } catch (error) {
+        console.error('标记异常失败:', error)
+        this.$notify.error({
+          title: '提示',
+          message: '标记异常失败，请稍后重试'
+        })
+      }
+    },
     getStrategyName(strategy) {
       const strategyNames = {
         fair_value: '公允价值',

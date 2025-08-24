@@ -1,12 +1,3 @@
 {
-  "server_id": 77,
-  "areaid": 43,
-  "view_loc": "search_cond",
-  "server_name": "进贤门",
-  "added_attr_logic": "and",
-  "search_type": "search_lingshi",
-  "kindid": "61",
-  "equip_level_min": 60,
-  "equip_level_max": 160,
-  "price_min":5000
+  "query_order": "price ASC"
 }

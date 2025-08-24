@@ -532,6 +532,7 @@ DB_SCHEMA_CONFIG = {
             addon_minjie INTEGER DEFAULT 0,     -- 附加敏捷
             addon_fali INTEGER DEFAULT 0,       -- 附加法力
             addon_lingli INTEGER DEFAULT 0,     -- 附加灵力
+            addon_moli INTEGER DEFAULT 0,      -- 附加魔力
             addon_total INTEGER DEFAULT 0,      -- 附加总和
             addon_status TEXT,                 -- 附加状态（套装信息）
             addon_skill_chance INTEGER DEFAULT 0, -- 附加技能几率
@@ -791,7 +792,6 @@ DB_SCHEMA_CONFIG = {
             changesch_json TEXT,            -- 转门派历史JSON(changesch)
             prop_kept_json TEXT,            -- 保持属性JSON(propKept)
             more_attr_json TEXT,            -- 更多属性JSON(more_attr)
-            raw_data_json TEXT,             -- 原始数据JSON
 
             -- 时间字段
             create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 创建时间

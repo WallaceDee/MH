@@ -8,7 +8,7 @@ import logging
 from typing import Dict, Any, List, Optional, Tuple
 from enum import Enum
 
-from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
+from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID,WEAPON_KINDIDS,ARMOR_KINDIDS,LINGSHI_KINDIDS
 
 class ItemType(Enum):
     """物品类型枚举"""
@@ -31,7 +31,7 @@ class InvalidItemDetector:
         
     
     def detect_invalid_item(self, 
-                           item_data: Dict[str, Any]) -> Tuple[bool, Optional[InvalidReason], str]:
+                           item_data: Dict[str, Any]) -> Tuple[bool, Optional[InvalidReason], str, float]:
         """
         检测物品是否无效
         
@@ -40,10 +40,11 @@ class InvalidItemDetector:
             item_type: 物品类型，如果为None则自动判断
             
         Returns:
-            Tuple[bool, Optional[InvalidReason], str]: 
+            Tuple[bool, Optional[InvalidReason], str, float]: 
                 - 是否无效
                 - 无效原因（如果有效则为None）
                 - 详细说明
+                - 跳过估价时的建议价值
         """
         try:
             # 自动判断物品类型
@@ -56,7 +57,7 @@ class InvalidItemDetector:
                 
         except Exception as e:
             self.logger.error(f"检测无效物品时出错: {e}")
-            return False, None, f"检测过程出错: {str(e)}"
+            return False, None, f"检测过程出错: {str(e)}",0
     
     def _detect_item_type(self, item_data: Dict[str, Any]) -> ItemType:
         """自动检测物品类型"""
@@ -75,54 +76,58 @@ class InvalidItemDetector:
             self.logger.warning(f"自动检测物品类型失败: {e}")
             return ItemType.EQUIPMENT
     
-    def _detect_invalid_equipment(self, item_data: Dict[str, Any]) -> Tuple[bool, Optional[InvalidReason], str]:
+    def _detect_invalid_equipment(self, item_data: Dict[str, Any]) -> Tuple[bool, Optional[InvalidReason], str, float]:
         """检测装备是否无效"""
         try:
-            # 检查修理失败次数
+            # 检查修理失败次数 130级以上装备修理失败次数过多
             repair_fail = item_data.get('repair_fail_num', 0)
             equip_level = item_data.get('equip_level', 0)
             kindid = item_data.get('kindid', 0)
             if equip_level == 0:
-                return True, InvalidReason.NO_VALUE, f"不是有效的装备"
+                return True, InvalidReason.NO_VALUE, f"不是有效的装备",1
             elif equip_level < 60:
-                return True, InvalidReason.NO_VALUE, f"装备等级过低: {equip_level}"
+                return True, InvalidReason.NO_VALUE, f"装备等级过低: {equip_level}",1
             if repair_fail >= 3 and equip_level > 120:
-                return True, InvalidReason.BROKEN_EQUIPMENT, f"修理失败次数过多: {repair_fail}"
+                return True, InvalidReason.BROKEN_EQUIPMENT, f"修理失败次数过多: {repair_fail}",1
             
             if kindid == PET_EQUIP_KINDID:
                 if item_data.get('qixue', 0) == 0  and item_data.get('shanghai', 0) == 0 and item_data.get('addon_fali', 0) == 0 and item_data.get('addon_lingli', 0) == 0 and item_data.get('addon_liliang', 0) == 0 and item_data.get('addon_minjie', 0) == 0 and item_data.get('addon_naili', 0) == 0 and item_data.get('addon_tizhi', 0) == 0  and item_data.get('addon_status', '') == '':
-                     return True, InvalidReason.NO_VALUE, f"白板召唤兽装备"
-            return False, None, "装备有效"
+                     return True, InvalidReason.NO_VALUE, f"[白板]召唤兽装备",100
+            if kindid not in WEAPON_KINDIDS + ARMOR_KINDIDS + LINGSHI_KINDIDS and item_data.get('equip_level', 0) < 90:
+                if len(item_data.get('special_effect',[])) == 0 and item_data.get('special_skill',0) == 0 and item_data.get('suit_effect',0) == 0:
+                    return True, InvalidReason.NO_VALUE, f"[白板]装备", 100
+            
+            return False, None, "装备有效",0
             
         except Exception as e:
             self.logger.error(f"检测装备无效性时出错: {e}")
-            return False, None, f"检测过程出错: {str(e)}"
+            return False, None, f"检测过程出错: {str(e)}", 0
   
     
     
-    def _detect_invalid_pet(self, item_data: Dict[str, Any]) -> Tuple[bool, Optional[InvalidReason], str]:
+    def _detect_invalid_pet(self, item_data: Dict[str, Any]) -> Tuple[bool, Optional[InvalidReason], str, float]:
         """检测召唤兽是否无效"""
         try:
             
             # 检查等级
             equip_level = item_data.get('equip_level', 0)
             if equip_level < 30:
-                return True, InvalidReason.WORTHLESS_PET, f"等级过低: {equip_level}"
+                return True, InvalidReason.WORTHLESS_PET, f"等级过低: {equip_level}",1
             
             # 检查技能数量
             is_baobao = item_data.get('is_baobao', False)
             skill_count = item_data.get('skill_count', 0)
             if not is_baobao:
                 if equip_level < 100:
-                    return True, InvalidReason.WORTHLESS_PET, f"野生且等级过低: {equip_level}"
+                    return True, InvalidReason.WORTHLESS_PET, f"野生且等级过低: {equip_level}",1
                 if skill_count < 5:
-                    return True, InvalidReason.WORTHLESS_PET, f"野生且技能数量过少: {skill_count}"
+                    return True, InvalidReason.WORTHLESS_PET, f"野生且技能数量过少: {skill_count}",1
             
-            return False, None, "召唤兽有效"
+            return False, None, "召唤兽有效",0
             
         except Exception as e:
             self.logger.error(f"检测召唤兽无效性时出错: {e}")
-            return False, None, f"检测过程出错: {str(e)}"
+            return False, None, f"检测过程出错: {str(e)}",0
     
     def get_invalid_reason_description(self, reason: InvalidReason) -> str:
         """获取无效原因的详细描述"""
@@ -134,7 +139,7 @@ class InvalidItemDetector:
         return descriptions.get(reason, "未知原因")
     
     def should_skip_valuation(self, 
-                            item_data: Dict[str, Any]) -> Tuple[bool, str]:
+                            item_data: Dict[str, Any]) -> Tuple[bool, str, float]:
         """
         判断是否应该跳过估价
         
@@ -143,12 +148,12 @@ class InvalidItemDetector:
             item_type: 物品类型
             
         Returns:
-            Tuple[bool, str]: 是否跳过估价，跳过原因
+            Tuple[bool, str, float]: 是否跳过估价，跳过原因，跳过时的建议价值
         """
-        is_invalid, reason, description = self.detect_invalid_item(item_data )
+        is_invalid, reason, description, skip_value = self.detect_invalid_item(item_data)
         
         if is_invalid:
             reason_desc = self.get_invalid_reason_description(reason) if reason else "未知原因"
-            return True, f"{reason_desc}: {description}"
+            return True, f"{reason_desc}: {description}", skip_value
         
-        return False, ""
+        return False, "", 0.0

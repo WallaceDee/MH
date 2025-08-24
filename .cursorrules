@@ -100,7 +100,7 @@ def get_equipment_valuation():
 ```javascript
 // ✅ 正确方式：使用统一API
 const response = await this.$api.equipment.getEquipmentList(params)
-if (response.success) {
+if (response.code === 200) {
     this.equipments = response.items || response.data || []
     this.total = response.total || 0
 }
@@ -112,7 +112,7 @@ const response = await axios.get('/api/v1/equipment/')
 
 ### 响应处理模式
 - 响应拦截器自动处理数据格式化和错误提示
-- 使用`response.success`判断业务是否成功
+- 使用`response.code === 200`判断业务是否成功
 - 分页数据使用`response.items`、`response.total`等字段
 
 ### 组件开发
@@ -125,10 +125,13 @@ const response = await axios.get('/api/v1/equipment/')
 ```javascript
 try {
     const response = await this.$api.equipment.getEquipmentList(params)
-    if (response.success) {
+    if (response.code === 200) {
         // 成功处理
     } else {
-        this.$message.error(response.message || '操作失败')
+        this.$notify.error({
+          title: '提示',
+          message: response.message || '操作失败'
+        })
     }
 } catch (error) {
     console.error('请求异常:', error)

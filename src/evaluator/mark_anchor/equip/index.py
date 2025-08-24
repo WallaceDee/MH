@@ -51,8 +51,10 @@ class BaseEquipmentConfig:
             'addon_minjie': 0,         # 附加敏捷
             'addon_fali': 0,           # 附加法力
             'addon_lingli': 0,         # 附加灵力
+            'addon_moli': 0,           # 附加魔力
 
             # 以下忽略，因为此特征已派生出新特征，不需要再计算
+            'gem_level': 0,              # 宝石等级
             'special_skill': 0,          # 特技，获取市场数据时候已经分类了
             'kindid': 0,                 # 类别在get_market_data已经过滤
             'gem_value': 0,              # 宝石得分已包含
@@ -85,10 +87,12 @@ class BaseEquipmentConfig:
             'addon_minjie': 1,         # 附加敏捷
             'addon_fali': 1,           # 附加法力
             'addon_lingli': 1,         # 附加灵力
+            'addon_moli': 1,           # 附加魔力
 
             # 以下忽略，因为此特征已派生出新特征，不需要再计算
             'special_skill': 1,          # 特技，获取市场数据时候已经分类了
             'kindid': 1,                 # 类别在get_market_data已经过滤
+            'gem_level': 1,              # 宝石等级
             'gem_value': 1,              # 宝石得分已包含
             'special_effect': 1          # 特技已在get_market_data_for_similarity中过滤
         }
@@ -496,14 +500,7 @@ class EquipAnchorEvaluator(BaseValuator):
                 if verbose:
                     print(f"装备类型 {target_kindid} 不需要属性分类过滤")
                 # 获取预过滤的市场数据（不使用属性分类过滤）
-                market_data = self.market_collector.get_market_data(
-                    kindid=pre_filters.get('kindid'),
-                    level_range=pre_filters.get('equip_level_range'),
-                    special_skill=pre_filters.get('special_skill'),
-                    suit_effect=pre_filters.get('suit_effect'),
-                    special_effect=pre_filters.get('special_effect'),
-                    limit=1000
-                )
+                market_data = self.market_collector.get_market_data_for_similarity({**pre_filters,**target_features})
 
             if market_data.empty:
                 if verbose:
@@ -608,6 +605,7 @@ class EquipAnchorEvaluator(BaseValuator):
         # 装备等级过滤（±10级）
         if 'equip_level' in target_features:
             level = target_features['equip_level']
+            filters['equip_level'] = level
             filters['equip_level_range'] = (max(1, level - 10), level + 10)
 
         # 装备类型必须完全一致
@@ -988,16 +986,16 @@ class EquipAnchorEvaluator(BaseValuator):
             # 正常的敏捷套/魔力套相似度计算
             if target_type == market_type and target_grade == market_grade:
                 # 同类型同等级（如巴蛇A级敏捷套 -> 机关鸟A级敏捷套）
-                return 0.95
+                return 0.8
             elif target_type != market_type and target_grade == market_grade:
                 # 不同类型同等级（如巴蛇A级敏捷套 -> 灵鹤A级魔力套）
-                return 0.9
+                return 0.5
             elif target_type == market_type and target_grade != market_grade:
                 # 同类型跨等级（如巴蛇A级敏捷套 -> 凤凰B级敏捷套）
-                return 0.75
+                return 0.5
             elif target_type != market_type and target_grade != market_grade:
                 # 不同类型跨等级（如巴蛇A级敏捷套 -> 蛟龙B级魔力套）
-                return 0.3
+                return 0.2
 
         # 其他套装效果：使用简化逻辑，给予较低的相似度
         # 这样可以避免套装效果差异过大的装备被误认为相似

@@ -16,6 +16,7 @@ import pandas as pd
 current_dir = os.path.dirname(__file__)
 project_root = os.path.join(current_dir, '..', '..')
 sys.path.insert(0, project_root)
+sys.path.insert(0, os.path.join(project_root, 'src'))
 
 from src.evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
 
@@ -28,7 +29,7 @@ class DetailedComparisonTest:
             # 使用绝对路径
             current_dir = os.path.dirname(__file__)
             project_root = os.path.join(current_dir, '..', '..')
-            db_path = os.path.join(project_root, 'data', '202506', 'cbg_equip_202506.db')
+            db_path = os.path.join(project_root, 'data', '202508', 'cbg_equip_202508.db')
         
         self.db_path = db_path
         self.extractor = EquipFeatureExtractor()

@@ -1,5 +1,0 @@
-2025-07-18 10:34:39,158 - INFO - 数据库 C:\Users\Administrator\Desktop\mh\data\202507\cbg_roles_202507.db 已存在，包含表: ['roles', 'sqlite_sequence', 'pets', 'equipments', 'large_equip_desc_data']
-2025-07-18 10:34:39,159 - INFO - 数据库 C:\Users\Administrator\Desktop\mh\data\202507\cbg_equip_202507.db 已存在，包含表: ['sqlite_sequence', 'equipments']
-2025-07-18 10:34:39,163 - INFO - 数据库 C:\Users\Administrator\Desktop\mh\data\202507\cbg_pets_202507.db 已存在，包含表: ['pets', 'sqlite_sequence']
-2025-07-18 10:34:39,165 - INFO - 数据库 C:\Users\Administrator\Desktop\mh\data\202507\cbg_equip_202507.db 已存在，包含表: ['sqlite_sequence', 'equipments']
-2025-07-18 10:34:39,170 - INFO - 数据库 C:\Users\Administrator\Desktop\mh\data\202507\cbg_equip_202507.db 已存在，包含表: ['sqlite_sequence', 'equipments']

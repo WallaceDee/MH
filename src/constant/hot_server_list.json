@@ -1,0 +1,594 @@
+[
+  {
+    "server_id": 0,
+    "server_name": "七大烟花",
+    "children": [
+      {
+        "server_id": 459,
+        "areaid": 3,
+        "server_name": "2008"
+      },
+      {
+        "server_id": 527,
+        "areaid": 3,
+        "server_name": "生日快乐"
+      },
+      {
+        "server_id": 625,
+        "areaid": 39,
+        "server_name": "钓鱼岛"
+      },
+      {
+        "server_id": 554,
+        "areaid": 58,
+        "server_name": "兰亭序"
+      },
+      {
+        "server_id": 443,
+        "areaid": 28,
+        "server_name": "沂水雪山"
+      },
+      {
+        "server_id": 9,
+        "areaid": 3,
+        "server_name": "紫禁城"
+      },
+      {
+        "server_id": 976,
+        "areaid": 58,
+        "server_name": "梦幻西游"
+      }
+    ]
+  },
+  {
+    "server_id": 1,
+    "server_name": "T1烟花",
+    "children": [
+      {
+        "server_id": 584,
+        "areaid": 58,
+        "server_name": "将军"
+      },
+      {
+        "server_id": 352,
+        "areaid": 22,
+        "server_name": "姑苏城"
+      },
+      {
+        "server_id": 558,
+        "areaid": 58,
+        "server_name": "青花瓷"
+      },
+      {
+        "server_id": 159,
+        "areaid": 1,
+        "server_name": "珍宝阁"
+      },
+      {
+        "server_id": 326,
+        "areaid": 10,
+        "server_name": "齐云楼"
+      },
+      {
+        "server_id": 407,
+        "areaid": 29,
+        "server_name": "曲阜孔庙"
+      },
+      {
+        "server_id": 215,
+        "areaid": 48,
+        "server_name": "燕赵风云"
+      },
+      {
+        "server_id": 926,
+        "areaid": 63,
+        "server_name": "大唐官府"
+      }
+    ]
+  },
+  {
+    "server_id": 2,
+    "server_name": "T2烟花",
+    "children": [
+      {
+        "server_id": 40,
+        "areaid": 34,
+        "server_name": "成都府"
+      },
+      {
+        "server_id": 669,
+        "areaid": 26,
+        "server_name": "青岛栈桥"
+      },
+      {
+        "server_id": 199,
+        "areaid": 49,
+        "server_name": "汴梁城"
+      },
+      {
+        "server_id": 149,
+        "areaid": 45,
+        "server_name": "再续前缘"
+      },
+      {
+        "server_id": 132,
+        "areaid": 54,
+        "server_name": "西栅老街"
+      },
+      {
+        "server_id": 85,
+        "areaid": 4,
+        "server_name": "白云山"
+      },
+      {
+        "server_id": 579,
+        "areaid": 58,
+        "server_name": "千里之外"
+      }
+    ]
+  },
+  {
+    "server_id": 3,
+    "server_name": "T3烟花",
+    "children": [
+      {
+        "server_id": 901,
+        "areaid": 45,
+        "server_name": "2020"
+      },
+      {
+        "server_id": 416,
+        "areaid": 35,
+        "server_name": "绍兴鉴湖"
+      },
+      {
+        "server_id": 138,
+        "areaid": 5,
+        "server_name": "钱塘江"
+      },
+      {
+        "server_id": 12,
+        "areaid": 11,
+        "server_name": "明秀园"
+      },
+      {
+        "server_id": 116,
+        "areaid": 37,
+        "server_name": "大观园"
+      },
+      {
+        "server_id": 133,
+        "areaid": 54,
+        "server_name": "台州湾"
+      },
+      {
+        "server_id": 689,
+        "areaid": 9,
+        "server_name": "万里长城"
+      },
+      {
+        "server_id": 11,
+        "areaid": 10,
+        "server_name": "百花村"
+      },
+      {
+        "server_id": 266,
+        "areaid": 42,
+        "server_name": "慈光阁"
+      },
+      {
+        "server_id": 234,
+        "areaid": 10,
+        "server_name": "鼓浪屿"
+      },
+      {
+        "server_id": 377,
+        "areaid": 35,
+        "server_name": "绍兴兰亭"
+      },
+      {
+        "server_id": 33,
+        "areaid": 27,
+        "server_name": "蓬莱岛"
+      },
+      {
+        "server_id": 583,
+        "areaid": 58,
+        "server_name": "龙拳"
+      },
+      {
+        "server_id": 681,
+        "areaid": 26,
+        "server_name": "东海崂山"
+      },
+      {
+        "server_id": 146,
+        "areaid": 56,
+        "server_name": "解放碑"
+      },
+      {
+        "server_id": 82,
+        "areaid": 4,
+        "server_name": "状元坊"
+      },
+      {
+        "server_id": 705,
+        "areaid": 58,
+        "server_name": "龙马精神"
+      },
+      {
+        "server_id": 344,
+        "areaid": 33,
+        "server_name": "小梅沙"
+      },
+      {
+        "server_id": 378,
+        "areaid": 55,
+        "server_name": "灵隐寺"
+      },
+      {
+        "server_id": 137,
+        "areaid": 55,
+        "server_name": "苏堤春晓"
+      },
+      {
+        "server_id": 730,
+        "areaid": 60,
+        "server_name": "金戈铁马"
+      },
+      {
+        "server_id": 192,
+        "areaid": 7,
+        "server_name": "牡丹亭"
+      },
+      {
+        "server_id": 39,
+        "areaid": 33,
+        "server_name": "世界之窗"
+      },
+      {
+        "server_id": 127,
+        "areaid": 44,
+        "server_name": "彩云之南"
+      },
+      {
+        "server_id": 851,
+        "areaid": 3,
+        "server_name": "江山如画"
+      },
+      {
+        "server_id": 275,
+        "areaid": 17,
+        "server_name": "橘子洲"
+      },
+      {
+        "server_id": 3,
+        "areaid": 3,
+        "server_name": "国子监"
+      },
+      {
+        "server_id": 173,
+        "areaid": 39,
+        "server_name": "逍遥城"
+      },
+      {
+        "server_id": 699,
+        "areaid": 3,
+        "server_name": "喜大普奔"
+      },
+      {
+        "server_id": 838,
+        "areaid": 3,
+        "server_name": "黄金台"
+      },
+      {
+        "server_id": 421,
+        "areaid": 30,
+        "server_name": "雁门关"
+      },
+      {
+        "server_id": 414,
+        "areaid": 50,
+        "server_name": "南阳府"
+      },
+      {
+        "server_id": 892,
+        "areaid": 63,
+        "server_name": "长安城"
+      },
+      {
+        "server_id": 105,
+        "areaid": 22,
+        "server_name": "夫子庙"
+      },
+      {
+        "server_id": 299,
+        "areaid": 9,
+        "server_name": "阳光城"
+      },
+      {
+        "server_id": 413,
+        "areaid": 49,
+        "server_name": "少林寺"
+      },
+      {
+        "server_id": 229,
+        "areaid": 40,
+        "server_name": "雄鹰岭"
+      },
+      {
+        "server_id": 795,
+        "areaid": 60,
+        "server_name": "超凡入圣"
+      }
+    ]
+  },
+  {
+    "server_id": 4,
+    "server_name": "T4烟花",
+    "children": [
+      {
+        "server_id": 249,
+        "areaid": 11,
+        "server_name": "青秀山"
+      },
+      {
+        "server_id": 2,
+        "areaid": 2,
+        "server_name": "罗浮山"
+      },
+      {
+        "server_id": 78,
+        "areaid": 43,
+        "server_name": "万绿湖"
+      },
+      {
+        "server_id": 305,
+        "areaid": 41,
+        "server_name": "朱紫坊"
+      },
+      {
+        "server_id": 622,
+        "areaid": 32,
+        "server_name": "徐家汇"
+      },
+      {
+        "server_id": 79,
+        "areaid": 43,
+        "server_name": "如意岛"
+      },
+      {
+        "server_id": 207,
+        "areaid": 28,
+        "server_name": "大明湖"
+      },
+      {
+        "server_id": 212,
+        "areaid": 8,
+        "server_name": "水泊梁山"
+      },
+      {
+        "server_id": 155,
+        "areaid": 3,
+        "server_name": "太和殿"
+      },
+      {
+        "server_id": 807,
+        "areaid": 61,
+        "server_name": "花好月圆"
+      },
+      {
+        "server_id": 139,
+        "areaid": 5,
+        "server_name": "普陀山"
+      },
+      {
+        "server_id": 417,
+        "areaid": 42,
+        "server_name": "紫蓬山"
+      },
+      {
+        "server_id": 211,
+        "areaid": 26,
+        "server_name": "东岳泰山"
+      },
+      {
+        "server_id": 367,
+        "areaid": 25,
+        "server_name": "星海湾"
+      },
+      {
+        "server_id": 60,
+        "areaid": 12,
+        "server_name": "缘聚唐城"
+      },
+      {
+        "server_id": 15,
+        "areaid": 13,
+        "server_name": "避暑山庄"
+      },
+      {
+        "server_id": 559,
+        "areaid": 58,
+        "server_name": "本草纲目"
+      },
+      {
+        "server_id": 334,
+        "areaid": 48,
+        "server_name": "燕塞湖"
+      },
+      {
+        "server_id": 723,
+        "areaid": 60,
+        "server_name": "群星璀璨"
+      },
+      {
+        "server_id": 791,
+        "areaid": 60,
+        "server_name": "诗情画意"
+      },
+      {
+        "server_id": 935,
+        "areaid": 9,
+        "server_name": "一生一世"
+      }
+    ]
+  },
+  {
+    "server_id": 5,
+    "server_name": "T5烟花",
+    "children": [
+      {
+        "server_id": 769,
+        "areaid": 3,
+        "server_name": "恭王府"
+      },
+      {
+        "server_id": 750,
+        "areaid": 35,
+        "server_name": "烟雨江南"
+      },
+      {
+        "server_id": 72,
+        "areaid": 47,
+        "server_name": "湖光岩"
+      },
+      {
+        "server_id": 358,
+        "areaid": 4,
+        "server_name": "流花湖"
+      },
+      {
+        "server_id": 86,
+        "areaid": 11,
+        "server_name": "云天宫"
+      },
+      {
+        "server_id": 758,
+        "areaid": 55,
+        "server_name": "西湖龙井"
+      },
+      {
+        "server_id": 101,
+        "areaid": 21,
+        "server_name": "文昌阁"
+      },
+      {
+        "server_id": 657,
+        "areaid": 29,
+        "server_name": "威海卫"
+      },
+      {
+        "server_id": 200,
+        "areaid": 31,
+        "server_name": "大雁塔"
+      },
+      {
+        "server_id": 38,
+        "areaid": 32,
+        "server_name": "东方明珠"
+      },
+      {
+        "server_id": 26,
+        "areaid": 23,
+        "server_name": "花果山"
+      },
+      {
+        "server_id": 285,
+        "areaid": 36,
+        "server_name": "红枫湖"
+      },
+      {
+        "server_id": 123,
+        "areaid": 52,
+        "server_name": "德阳文庙"
+      },
+      {
+        "server_id": 197,
+        "areaid": 49,
+        "server_name": "中岳嵩山"
+      },
+      {
+        "server_id": 712,
+        "areaid": 54,
+        "server_name": "文澜阁"
+      },
+      {
+        "server_id": 84,
+        "areaid": 4,
+        "server_name": "流溪河"
+      },
+      {
+        "server_id": 223,
+        "areaid": 16,
+        "server_name": "黄鹤楼"
+      },
+      {
+        "server_id": 462,
+        "areaid": 23,
+        "server_name": "镇淮楼"
+      },
+      {
+        "server_id": 911,
+        "areaid": 62,
+        "server_name": "恭喜发财"
+      },
+      {
+        "server_id": 104,
+        "areaid": 21,
+        "server_name": "雨花台"
+      },
+      {
+        "server_id": 263,
+        "areaid": 34,
+        "server_name": "嘉陵江"
+      },
+      {
+        "server_id": 804,
+        "areaid": 5,
+        "server_name": "功成名就"
+      }
+    ]
+  },
+  {
+    "server_id": 6,
+    "server_name": "推荐",
+    "children": [
+      {
+        "server_id": 871,
+        "areaid": 3,
+        "server_name": "繁荣富强"
+      },
+      {
+        "server_id": 86,
+        "areaid": 11,
+        "server_name": "云天宫"
+      },
+      {
+        "server_id": 270,
+        "areaid": 24,
+        "server_name": "庐山胜境"
+      },
+      {
+        "server_id": 902,
+        "areaid": 63,
+        "server_name": "东海湾"
+      },
+      {
+        "server_id": 868,
+        "areaid": 62,
+        "server_name": "文韬武略"
+      },
+      {
+        "server_id": 34,
+        "areaid": 29,
+        "server_name": "玉皇顶"
+      },
+      {
+        "server_id": 920,
+        "areaid": 3,
+        "server_name": "香山红叶"
+      }
+    ]
+  }
+]

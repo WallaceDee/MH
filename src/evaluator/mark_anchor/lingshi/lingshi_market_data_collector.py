@@ -381,9 +381,20 @@ class LingshiMarketDataCollector:
                             filtered_rows.append(row)
                     else:
                         # 3条属性不全相同，优先选择重复的属性
-                        market_attr_set = set(market_attr_types)
-                        target_match_set = set(target_match_attrs)
-                        if len(target_match_set.intersection(market_attr_set)) >= 2:
+                        # 使用计数方式，因为target_match_attrs可能包含重复属性
+                        market_attr_counter = {}
+                        for attr_type in market_attr_types:
+                            market_attr_counter[attr_type] = market_attr_counter.get(attr_type, 0) + 1
+                        
+                        # 检查target_match_attrs中的每个属性是否在市场装备中存在
+                        match_count = 0
+                        for target_attr in target_match_attrs:
+                            if market_attr_counter.get(target_attr, 0) > 0:
+                                match_count += 1
+                                # 减少计数，避免重复计算
+                                market_attr_counter[target_attr] -= 1
+                        
+                        if match_count >= 2:
                             filtered_rows.append(row)
                 else:
                     # 其他情况，使用交集匹配

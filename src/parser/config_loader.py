@@ -13,9 +13,9 @@ from functools import lru_cache
 
 
 class ConfigLoader:
-    """配置加载器 - 从game_auto_config.json读取配置"""
+    """配置加载器 - 从game_auto_config.js读取配置"""
     
-    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '..', 'constant', 'game_auto_config.json')
+    CONFIG_FILE = os.path.join(os.path.dirname(__file__), '..', 'constant', 'game_auto_config.js')
     
     def __init__(self, logger: Optional[logging.Logger] = None):
         self.logger = logger if logger else self._setup_logger()
@@ -45,9 +45,19 @@ class ConfigLoader:
             with open(self.CONFIG_FILE, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            # game_auto_config.json 是一个纯 JSON 文件
-            self._cached_config = json.loads(content)
-            self.logger.info(f"成功加载game_auto_config.json配置，包含{len(self._cached_config)}个配置项")
+            # game_auto_config.js 是一个JavaScript变量文件
+            # 格式：var CBG_GAME_CONFIG={...}
+            var_prefix = 'var CBG_GAME_CONFIG='
+            start_pos = content.find(var_prefix)
+            if start_pos == -1:
+                raise ValueError(f"未找到JavaScript变量: CBG_GAME_CONFIG")
+            
+            # 获取JSON部分（从=号后开始）
+            json_start = start_pos + len(var_prefix)
+            json_content = content[json_start:].strip()
+            
+            self._cached_config = json.loads(json_content)
+            self.logger.info(f"成功加载game_auto_config.js配置，包含{len(self._cached_config)}个配置项")
             return self._cached_config
             
         except json.JSONDecodeError as e:

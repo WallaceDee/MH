@@ -8,7 +8,6 @@ Flask应用工厂
 from flask import Flask
 from flask_cors import CORS
 from .blueprints.api.v1 import api_v1_bp
-from .blueprints.config_bp import config_bp
 from .utils.response import register_error_handlers
 from .utils.logger import setup_logging
 
@@ -25,7 +24,6 @@ def create_app(config_name='default'):
     
     # 注册蓝图
     app.register_blueprint(api_v1_bp, url_prefix='/api/v1')
-    app.register_blueprint(config_bp)
     
     # 注册错误处理器
     register_error_handlers(app)

@@ -1,0 +1,435 @@
+2025-08-23 22:28:47,203 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://198.18.0.1:5000
+2025-08-23 22:28:47,205 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-23 22:28:47,208 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 22:28:49,145 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 22:28:49,152 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 22:29:08,031 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:08] "GET /api/v1/system/config-file/auto_search_config.js HTTP/1.1" 200 -
+2025-08-23 22:29:08,099 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:08] "GET /api/v1/system/config-file/game_auto_config.js HTTP/1.1" 200 -
+2025-08-23 22:29:08,248 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:08] "GET /api/v1/system/config-file/server_list_data.js HTTP/1.1" 200 -
+2025-08-23 22:29:09,086 - src.app.services.spider_service - INFO - === 进入check_cookie_status方法 ===
+2025-08-23 22:29:09,090 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:09] "GET /api/v1/spider/logs?lines=100&type=current HTTP/1.1" 200 -
+2025-08-23 22:29:09,092 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:09] "GET /api/v1/system/config-file/hot_server_list.json HTTP/1.1" 200 -
+2025-08-23 22:29:09,094 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:09] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:29:09,098 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:09] "GET /api/v1/system/config/search-params HTTP/1.1" 200 -
+2025-08-23 22:29:09,174 - src.app.services.spider_service - INFO - Cookie文件路径: E:\workspace\mh\config\cookies.txt
+2025-08-23 22:29:09,177 - src.app.services.spider_service - INFO - Cookie文件大小: 2637 bytes
+2025-08-23 22:29:09,177 - src.app.services.spider_service - INFO - Cookie文件最后修改时间: 2025-08-22 23:39:29
+2025-08-23 22:29:09,178 - src.app.services.spider_service - INFO - 成功读取Cookie文件内容，长度: 2637
+2025-08-23 22:29:09,178 - src.app.services.spider_service - INFO - 强制重新加载Cookie管理器中的内容...
+2025-08-23 22:29:09,179 - src.app.services.spider_service - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 22:29:09,180 - src.app.services.spider_service - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 22:29:09,180 - src.app.services.spider_service - INFO - Cookie管理器内容已重新加载
+2025-08-23 22:29:09,181 - src.app.services.spider_service - INFO - 开始验证Cookie在服务器端的有效性...
+2025-08-23 22:29:16,629 - src.app.services.spider_service - INFO - Cookie验证结果: False
+2025-08-23 22:29:16,630 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:16] "GET /api/v1/spider/cookie/check HTTP/1.1" 200 -
+2025-08-23 22:29:19,767 - src.app.services.spider_service - INFO - 启动Cookie更新程序: C:\Users\Administrator\AppData\Local\Programs\Python\Python313\python.exe -c from src.utils.cookie_manager import update_cookies_from_command_line; update_cookies_from_command_line()
+2025-08-23 22:29:19,789 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:19] "POST /api/v1/spider/cookie/update HTTP/1.1" 200 -
+2025-08-23 22:29:20,448 - src.app.services.spider_service - INFO - Cookie更新: INFO:src.utils.cookie_manager:检测到登录失效，正在启动Cookie更新程序...
+2025-08-23 22:29:21,195 - src.app.services.spider_service - INFO - Cookie更新: INFO:src.utils.cookie_manager:启动浏览器以更新Cookie...
+2025-08-23 22:29:24,805 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:24] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:29:30,111 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:30] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:29:34,805 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:34] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:29:40,124 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:40] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:29:44,815 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:44] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:29:47,786 - src.app.services.spider_service - INFO - Cookie更新: INFO:src.utils.cookie_manager:检测到页面跳转到目标地址: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 22:29:48,832 - src.app.services.spider_service - INFO - Cookie更新: INFO:src.utils.cookie_manager:页面加载完成，开始收集Cookie...
+2025-08-23 22:29:48,846 - src.app.services.spider_service - INFO - Cookie更新: INFO:src.utils.cookie_manager:成功获取到 window.LoginInfo 对象
+2025-08-23 22:29:48,847 - src.app.services.spider_service - INFO - Cookie更新: 2025-08-23 22:29:48,847 - CookieManager - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 22:29:48,847 - src.app.services.spider_service - INFO - Cookie更新: INFO:CookieManager:成功从config/cookies.txt文件加载Cookie
+2025-08-23 22:29:48,848 - src.app.services.spider_service - INFO - Cookie更新: INFO:src.utils.cookie_manager:Cookie已成功更新并保存到 E:\workspace\mh\config\cookies.txt
+2025-08-23 22:29:49,372 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:49] "GET /api/v1/system/config-file/auto_search_config.js HTTP/1.1" 200 -
+2025-08-23 22:29:49,374 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:49] "GET /api/v1/system/config-file/game_auto_config.js HTTP/1.1" 200 -
+2025-08-23 22:29:49,437 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:49] "GET /api/v1/system/config-file/server_list_data.js HTTP/1.1" 200 -
+2025-08-23 22:29:49,981 - src.app.services.spider_service - INFO - === 进入check_cookie_status方法 ===
+2025-08-23 22:29:49,984 - src.app.services.spider_service - INFO - Cookie文件路径: E:\workspace\mh\config\cookies.txt
+2025-08-23 22:29:49,985 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:49] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:29:49,985 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:49] "GET /api/v1/system/config-file/hot_server_list.json HTTP/1.1" 200 -
+2025-08-23 22:29:49,985 - src.app.services.spider_service - INFO - Cookie文件大小: 2338 bytes
+2025-08-23 22:29:49,986 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:49] "GET /api/v1/spider/logs?lines=100&type=current HTTP/1.1" 200 -
+2025-08-23 22:29:49,988 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:49] "GET /api/v1/system/config/search-params HTTP/1.1" 200 -
+2025-08-23 22:29:49,990 - src.app.services.spider_service - INFO - Cookie文件最后修改时间: 2025-08-23 22:29:48
+2025-08-23 22:29:49,992 - src.app.services.spider_service - INFO - 成功读取Cookie文件内容，长度: 2338
+2025-08-23 22:29:49,995 - src.app.services.spider_service - INFO - 强制重新加载Cookie管理器中的内容...
+2025-08-23 22:29:49,997 - src.app.services.spider_service - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 22:29:49,999 - src.app.services.spider_service - INFO - Cookie管理器内容已重新加载
+2025-08-23 22:29:50,000 - src.app.services.spider_service - INFO - 开始验证Cookie在服务器端的有效性...
+2025-08-23 22:29:52,742 - src.app.services.spider_service - INFO - Cookie验证结果: True
+2025-08-23 22:29:52,744 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:29:52] "GET /api/v1/spider/cookie/check HTTP/1.1" 200 -
+2025-08-23 22:30:06,711 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:06] "POST /api/v1/spider/role/start HTTP/1.1" 200 -
+2025-08-23 22:30:06,714 - src.app.services.spider_service - INFO - 执行命令: C:\Users\Administrator\AppData\Local\Programs\Python\Python313\python.exe E:\workspace\mh\run.py basic --type role --pages 100 --delay-min 20 --delay-max 30 --no-browser --cached-params C:\Users\ADMINI~1\AppData\Local\Temp\tmpftbovll0.json
+2025-08-23 22:30:07,040 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:07] "GET /api/v1/spider/logs/stream HTTP/1.1" 200 -
+2025-08-23 22:30:13,192 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:13] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:17,044 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:21,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:27,046 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:31,729 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:37,032 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:41,723 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:47,052 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:51,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:30:57,042 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:30:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:01,732 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:07,035 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:11,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:17,027 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:21,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:27,033 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:31,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:37,025 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:41,725 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:47,028 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:51,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:31:57,039 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:31:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:01,725 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:07,039 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:11,728 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:17,030 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:21,728 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:27,042 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:31,728 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:37,039 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:41,729 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:47,044 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:51,730 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:32:57,034 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:32:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:01,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:07,039 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:11,732 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:17,048 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:21,731 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:27,041 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:31,729 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:37,041 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:41,734 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:47,031 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:51,734 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:33:57,042 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:33:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:01,735 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:07,041 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:11,734 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:17,040 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:21,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:27,033 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:31,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:37,043 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:41,723 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:47,046 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:51,733 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:34:57,043 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:34:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:01,723 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:07,037 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:11,723 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:17,025 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:21,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:27,040 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:31,723 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:37,028 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:41,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:47,031 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:51,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:35:57,036 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:35:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:01,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:07,032 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:11,728 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:17,038 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:21,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:27,038 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:31,729 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:37,033 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:41,731 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:47,043 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:51,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:36:57,030 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:36:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:01,731 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:07,039 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:11,725 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:17,036 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:21,733 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:27,052 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:31,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:37,033 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:41,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:47,045 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:51,735 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:37:57,040 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:37:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:01,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:07,040 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:11,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:17,046 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:21,734 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:27,042 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:31,736 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:37,030 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:41,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:47,042 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:51,736 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:38:57,025 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:38:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:01,723 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:07,034 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:11,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:17,032 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:21,725 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:27,031 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:31,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:37,036 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:41,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:47,033 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:51,724 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:39:57,035 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:39:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:01,725 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:07,038 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:11,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:17,046 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:21,727 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:21] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:27,039 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:27] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:31,726 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:31] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:37,034 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:37] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:41,723 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:41] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:47,045 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:47] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:51,731 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:51] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:40:57,047 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:40:57] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:41:01,733 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:41:01] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:41:07,042 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:41:07] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:41:11,730 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:41:11] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 22:41:14,589 - src.app.services.spider_service - INFO - Spider: 爬虫类型: role
+2025-08-23 22:41:14,590 - src.app.services.spider_service - INFO - Spider: 爬取页数: 100
+2025-08-23 22:41:14,591 - src.app.services.spider_service - INFO - Spider: 延迟范围: 20.0-30.0秒
+2025-08-23 22:41:14,592 - src.app.services.spider_service - INFO - Spider: ============================================================
+2025-08-23 22:41:14,592 - src.app.services.spider_service - INFO - Spider: 已加载缓存参数: 8 个参数
+2025-08-23 22:41:14,593 - src.app.services.spider_service - INFO - Spider: 启动role爬虫...
+2025-08-23 22:41:14,594 - src.app.services.spider_service - INFO - Spider: 成功导入CBGSpider
+2025-08-23 22:41:14,596 - src.app.services.spider_service - INFO - Spider: CBG爬虫初始化完成
+2025-08-23 22:41:14,597 - src.app.services.spider_service - INFO - Spider: 开始爬取数据...
+2025-08-23 22:41:14,597 - src.app.services.spider_service - INFO - Spider: 爬取角色数据，页数: 100
+2025-08-23 22:41:14,741 - src.app.services.spider_service - INFO - role爬虫完成
+2025-08-23 22:41:17,041 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 22:41:17] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 23:01:13,813 - src.app.services.spider_service - INFO - 启动Playwright收集器: C:\Users\Administrator\AppData\Local\Programs\Python\Python313\python.exe E:\workspace\mh\run.py playwright
+2025-08-23 23:01:13,813 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:13] "POST /api/v1/spider/playwright/start HTTP/1.1" 200 -
+2025-08-23 23:01:14,144 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:14] "GET /api/v1/spider/logs/stream HTTP/1.1" 200 -
+2025-08-23 23:01:14,629 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:14,628 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 23:01:16,342 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:16,342 - INFO - 成功加载 41 个Cookie
+2025-08-23 23:01:16,504 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:16,504 - INFO - 已注入 41 个Cookie到浏览器上下文
+2025-08-23 23:01:16,830 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:16,830 - INFO - Playwright浏览器设置完成
+2025-08-23 23:01:16,839 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:16,837 - INFO - Playwright网络监听已设置
+2025-08-23 23:01:16,840 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:16,837 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 23:01:17,968 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:17,964 - INFO - 页面初始加载完成
+2025-08-23 23:01:18,836 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:18] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 23:01:20,414 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:20,414 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1755961277917&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15
+2025-08-23 23:01:20,417 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:20,414 - INFO - 开始创建角色spider实例...
+2025-08-23 23:01:21,035 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,035 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-08-23 23:01:21,036 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,036 - INFO - 成功从config/cookies.txt加载Cookie
+2025-08-23 23:01:21,038 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,038 - CBGSpider_role_2880621434800 - INFO - 日志系统初始化完成
+2025-08-23 23:01:21,038 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,038 - CBGSpider_role_2880621434800 - INFO - 日志文件路径: output\202508\cbg_spider_role_20250823_230121.log
+2025-08-23 23:01:21,041 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,040 - CBGSpider_role_2880621434800 - INFO - 正常角色数据库初始化完成: cbg_roles_202508.db
+2025-08-23 23:01:21,042 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,042 - CBGSpider_role_2880621434800 - INFO - 空号数据库初始化完成: cbg_empty_roles_202508.db
+2025-08-23 23:01:21,042 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,042 - CBGSpider_role_2880621434800 - INFO - 所有数据已初始化完毕
+2025-08-23 23:01:21,043 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,042 - CBGSpider_role_2880621434800 - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 23:01:21,044 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,042 - INFO - 角色spider实例已创建
+2025-08-23 23:01:21,053 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,052 - INFO - 开始保存角色数据，数量: 15
+2025-08-23 23:01:21,053 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,053 - INFO - 检查角色数据库...
+2025-08-23 23:01:21,054 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,053 - INFO - 检查数据库类型: role
+2025-08-23 23:01:21,055 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,053 - INFO - 数据库路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
+2025-08-23 23:01:21,056 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,053 - INFO - 数据库文件是否存在: True
+2025-08-23 23:01:21,057 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,053 - INFO - 获取角色spider实例...
+2025-08-23 23:01:21,057 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,053 - INFO - 调用角色spider的save_role_data方法...
+2025-08-23 23:01:21,091 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,091 - ConfigLoader - INFO - 成功加载game_auto_config.js配置，包含132个配置项
+2025-08-23 23:01:21,093 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,091 - INFO - 成功加载game_auto_config.js配置，包含132个配置项
+2025-08-23 23:01:21,293 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,293 - CBGSpider_role_2880621434800 - INFO - ￥22000.00 - 月影☆雨哲
+2025-08-23 23:01:21,656 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,656 - CBGSpider_role_2880621434800 - INFO - ￥24110.00 - 寒鸠欲化鹰
+2025-08-23 23:01:21,976 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:21,976 - CBGSpider_role_2880621434800 - INFO - ￥23000.00 - 寒鸠欲化鹰
+2025-08-23 23:01:22,254 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:22,253 - CBGSpider_role_2880621434800 - INFO - ￥35555.00 - 宝睿
+2025-08-23 23:01:22,470 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:22,470 - INFO - 角色 202508041900113-132-N8Z1YPKXTJXY 价格从 1777777.0 变更为 1769999，已记录到价格历史
+2025-08-23 23:01:22,602 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:22,601 - CBGSpider_role_2880621434800 - INFO - ￥17699.99 - 偶尔不凝心．
+2025-08-23 23:01:22,855 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:22,855 - CBGSpider_role_2880621434800 - INFO - ￥27999.00 - 久抱她入眠う
+2025-08-23 23:01:23,101 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:23,101 - CBGSpider_role_2880621434800 - INFO - ￥25800.00 - 月影☆雨哲
+2025-08-23 23:01:23,350 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:23,350 - CBGSpider_role_2880621434800 - INFO - ￥14800.00 - 不恋红袖朱砂
+2025-08-23 23:01:23,593 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:23,593 - CBGSpider_role_2880621434800 - INFO - ￥14000.00 - 战天地武乾坤
+2025-08-23 23:01:23,736 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:23,736 - INFO - 角色 202508120900113-132-7XZB1EHATC11 价格从 2222200.0 变更为 2050000，已记录到价格历史
+2025-08-23 23:01:23,859 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:23,859 - CBGSpider_role_2880621434800 - INFO - ￥20500.00 - 林间叶风
+2025-08-23 23:01:23,983 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:23,983 - INFO - 角色 202508120900113-132-3MXXH6UXWX20 价格从 2229900.0 变更为 2050000，已记录到价格历史
+2025-08-23 23:01:24,107 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:24,106 - CBGSpider_role_2880621434800 - INFO - ￥20500.00 - 林间叶风
+2025-08-23 23:01:24,146 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:24] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 23:01:24,367 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:24,367 - CBGSpider_role_2880621434800 - INFO - ￥38888.00 - ·突厥奸细
+2025-08-23 23:01:24,624 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:24,624 - CBGSpider_role_2880621434800 - INFO - ￥16888.00 - 恍如浮生若梦
+2025-08-23 23:01:24,785 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:24,785 - INFO - 角色 202508071400113-132-S3NBYVDUZEQG 价格从 1999900.0 变更为 1888800，已记录到价格历史
+2025-08-23 23:01:24,896 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:24,896 - CBGSpider_role_2880621434800 - INFO - ￥18888.00 - 小黑乌漆嘛嘿(空号) - 无物品 + 无宠物
+2025-08-23 23:01:25,144 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:25,144 - CBGSpider_role_2880621434800 - INFO - ￥26666.00 - 人无再少年﹂
+2025-08-23 23:01:25,264 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:25,264 - INFO - 角色数据已保存: 15 条
+2025-08-23 23:01:25,267 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:25,264 - INFO - 响应数据已保存: role - 15 条记录
+2025-08-23 23:01:25,268 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:25,268 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 23:01:25,269 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:25,268 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-23 23:01:25,270 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:25,268 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 23:01:25,278 - src.app.services.spider_service - INFO - Playwright: 2025-08-23 23:01:25,278 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 23:01:28,829 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:28] "GET /api/v1/spider/status HTTP/1.1" 200 -
+2025-08-23 23:01:40,440 - app.services.role_service - INFO - 数据库文件路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
+2025-08-23 23:01:40,440 - app.services.role_service - INFO - 数据库文件路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
+2025-08-23 23:01:42,588 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:42] "GET /api/v1/role/?page=1&page_size=10&year=2025&month=08&role_type=normal&level_min=109&level_max=175 HTTP/1.1" 200 -
+2025-08-23 23:01:45,216 - app.services.role_service - INFO - 数据库文件路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
+2025-08-23 23:01:45,216 - app.services.role_service - INFO - 数据库文件路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
+2025-08-23 23:01:47,312 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:47] "GET /api/v1/role/?page=1&page_size=10&year=2025&month=08&role_type=normal&level_min=109&level_max=109 HTTP/1.1" 200 -
+2025-08-23 23:01:56,201 - src.app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:01:56,203 - src.app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:01:56,203 - src.app.services.pet_service - WARNING - 第1个宠物的特征提取器未初始化
+2025-08-23 23:01:56,205 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:01:56] "[31m[1mPOST /api/v1/pet/batch-valuation HTTP/1.1[0m" 400 -
+2025-08-23 23:02:04,333 - src.app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:02:04,334 - src.app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:02:04,335 - src.app.services.pet_service - WARNING - 第1个宠物的特征提取器未初始化
+2025-08-23 23:02:04,336 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:02:04] "[31m[1mPOST /api/v1/pet/batch-valuation HTTP/1.1[0m" 400 -
+2025-08-23 23:02:37,625 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://198.18.0.1:5000
+2025-08-23 23:02:37,625 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-23 23:02:37,628 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:02:39,803 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:02:39,810 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:03:45,045 - src.app.controllers.equipment_controller - INFO - 开始批量装备估价，装备数量: 3，策略: fair_value，详细日志: False
+2025-08-23 23:03:45,051 - src.app.services.equipment_service - INFO - 开始批量装备估价，装备数量: 3，策略: fair_value，详细日志: False
+2025-08-23 23:03:47,149 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:03:47] "POST /api/v1/equipment/batch-valuation HTTP/1.1" 200 -
+2025-08-23 23:05:30,018 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\app\\services\\pet_service.py', reloading
+2025-08-23 23:05:30,311 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:05:32,419 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:05:32,427 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:06:34,986 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\app\\services\\equipment_service.py', reloading
+2025-08-23 23:06:35,201 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:06:37,330 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:06:37,337 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:06:57,468 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\app\\services\\pet_service.py', reloading
+2025-08-23 23:06:57,766 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:37:31,406 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://198.18.0.1:5000
+2025-08-23 23:37:31,407 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-23 23:37:31,410 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:37:33,647 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:37:33,654 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:37:35,297 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:37:35] "GET /api/v1/system/config-file/auto_search_config.js HTTP/1.1" 200 -
+2025-08-23 23:37:35,300 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:37:35] "GET /api/v1/system/config-file/game_auto_config.js HTTP/1.1" 200 -
+2025-08-23 23:37:35,603 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:37:35] "GET /api/v1/system/config-file/server_list_data.js HTTP/1.1" 200 -
+2025-08-23 23:37:36,441 - app.services.spider_service - INFO - === 进入check_cookie_status方法 ===
+2025-08-23 23:37:36,441 - app.services.spider_service - INFO - === 进入check_cookie_status方法 ===
+2025-08-23 23:37:36,517 - app.services.spider_service - INFO - Cookie文件路径: E:\workspace\mh\config\cookies.txt
+2025-08-23 23:37:36,517 - app.services.spider_service - INFO - Cookie文件路径: E:\workspace\mh\config\cookies.txt
+2025-08-23 23:37:36,519 - app.services.spider_service - INFO - Cookie文件大小: 2612 bytes
+2025-08-23 23:37:36,519 - app.services.spider_service - INFO - Cookie文件大小: 2612 bytes
+2025-08-23 23:37:36,520 - app.services.spider_service - INFO - Cookie文件最后修改时间: 2025-08-23 23:01:25
+2025-08-23 23:37:36,520 - app.services.spider_service - INFO - Cookie文件最后修改时间: 2025-08-23 23:01:25
+2025-08-23 23:37:36,526 - app.services.spider_service - INFO - 成功读取Cookie文件内容，长度: 2612
+2025-08-23 23:37:36,526 - app.services.spider_service - INFO - 成功读取Cookie文件内容，长度: 2612
+2025-08-23 23:37:36,527 - app.services.spider_service - INFO - 强制重新加载Cookie管理器中的内容...
+2025-08-23 23:37:36,527 - app.services.spider_service - INFO - 强制重新加载Cookie管理器中的内容...
+2025-08-23 23:37:36,529 - app.services.spider_service - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 23:37:36,529 - app.services.spider_service - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 23:37:36,530 - app.services.spider_service - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 23:37:36,530 - app.services.spider_service - INFO - 成功从config/cookies.txt文件加载Cookie
+2025-08-23 23:37:36,531 - app.services.spider_service - INFO - Cookie管理器内容已重新加载
+2025-08-23 23:37:36,531 - app.services.spider_service - INFO - Cookie管理器内容已重新加载
+2025-08-23 23:37:36,534 - app.services.spider_service - INFO - 开始验证Cookie在服务器端的有效性...
+2025-08-23 23:37:36,534 - app.services.spider_service - INFO - 开始验证Cookie在服务器端的有效性...
+2025-08-23 23:37:37,068 - app.services.role_service - INFO - 数据库文件路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
+2025-08-23 23:37:37,068 - app.services.role_service - INFO - 数据库文件路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
+2025-08-23 23:37:40,812 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:37:40] "GET /api/v1/role/?page=1&page_size=10&year=2025&month=08&role_type=normal&level_min=109&level_max=109 HTTP/1.1" 200 -
+2025-08-23 23:37:44,673 - app.services.spider_service - INFO - Cookie验证结果: False
+2025-08-23 23:37:44,673 - app.services.spider_service - INFO - Cookie验证结果: False
+2025-08-23 23:37:44,676 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:37:44] "GET /api/v1/spider/cookie/check HTTP/1.1" 200 -
+2025-08-23 23:37:45,864 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\app\\blueprints\\api\\v1\\pet.py', reloading
+2025-08-23 23:37:46,103 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:37:48,188 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:37:48,196 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:37:48,358 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:48,358 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:48,360 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:48,360 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:48,361 - app.services.pet_service - WARNING - 第1个宠物的特征提取器未初始化
+2025-08-23 23:37:48,361 - app.services.pet_service - WARNING - 第1个宠物的特征提取器未初始化
+2025-08-23 23:37:48,363 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:37:48] "[31m[1mPOST /api/v1/pet/batch-valuation HTTP/1.1[0m" 400 -
+2025-08-23 23:37:50,057 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:50,057 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:50,059 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:50,059 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:37:50,060 - app.services.pet_service - WARNING - 第1个宠物的特征提取器未初始化
+2025-08-23 23:37:50,060 - app.services.pet_service - WARNING - 第1个宠物的特征提取器未初始化
+2025-08-23 23:37:50,062 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:37:50] "[31m[1mPOST /api/v1/pet/batch-valuation HTTP/1.1[0m" 400 -
+2025-08-23 23:38:59,928 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\app\\services\\pet_service.py', reloading
+2025-08-23 23:39:00,188 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:40:28,598 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://198.18.0.1:5000
+2025-08-23 23:40:28,599 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-23 23:40:28,603 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:40:31,422 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:40:31,429 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:40:32,566 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:40:32,566 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:40:32,572 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:40:32,572 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 1，策略: fair_value，详细日志: False
+2025-08-23 23:40:32,576 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:40:32] "POST /api/v1/pet/batch-valuation HTTP/1.1" 200 -
+2025-08-23 23:40:36,546 - werkzeug - INFO -  * Detected change in 'e:\\workspace\\mh\\src\\evaluator\\mark_anchor\\pet\\index.py', reloading
+2025-08-23 23:40:36,858 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:40:39,371 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:40:39,378 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:40:49,008 - werkzeug - INFO -  * Detected change in 'e:\\workspace\\mh\\src\\evaluator\\mark_anchor\\pet\\index.py', reloading
+2025-08-23 23:40:49,281 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:43:36,672 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://198.18.0.1:5000
+2025-08-23 23:43:36,675 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-23 23:43:36,679 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:43:39,807 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:43:39,813 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:43:39,992 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 2，策略: fair_value，详细日志: False
+2025-08-23 23:43:39,992 - app.controllers.pet_controller - INFO - 开始批量宠物估价，宠物数量: 2，策略: fair_value，详细日志: False
+2025-08-23 23:43:39,993 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 2，策略: fair_value，详细日志: False
+2025-08-23 23:43:39,993 - app.services.pet_service - INFO - 开始批量宠物估价，宠物数量: 2，策略: fair_value，详细日志: False
+2025-08-23 23:43:42,070 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:43:42] "POST /api/v1/pet/batch-valuation HTTP/1.1" 200 -
+2025-08-23 23:43:44,753 - app.utils.response - WARNING - Not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-08-23 23:43:44,753 - app.utils.response - WARNING - Not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-08-23 23:43:44,754 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:43:44] "[33mGET /api/v1/system/health HTTP/1.1[0m" 404 -
+2025-08-23 23:43:50,643 - app.utils.response - WARNING - Not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-08-23 23:43:50,643 - app.utils.response - WARNING - Not found: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-08-23 23:43:50,644 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:43:50] "[33mGET /api/v1/system/status HTTP/1.1[0m" 404 -
+2025-08-23 23:44:00,858 - werkzeug - INFO -  * Detected change in 'e:\\workspace\\mh\\src\\evaluator\\mark_anchor\\pet\\index.py', reloading
+2025-08-23 23:44:01,092 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:44:03,711 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:44:03,719 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:52:18,810 - app.controllers.equipment_controller - INFO - 开始批量装备估价，装备数量: 3，策略: fair_value，详细日志: False
+2025-08-23 23:52:18,810 - app.controllers.equipment_controller - INFO - 开始批量装备估价，装备数量: 3，策略: fair_value，详细日志: False
+2025-08-23 23:52:18,811 - app.services.equipment_service - INFO - 开始批量装备估价，装备数量: 3，策略: fair_value，详细日志: False
+2025-08-23 23:52:18,811 - app.services.equipment_service - INFO - 开始批量装备估价，装备数量: 3，策略: fair_value，详细日志: False
+2025-08-23 23:52:19,610 - werkzeug - INFO - 127.0.0.1 - - [23/Aug/2025 23:52:19] "POST /api/v1/equipment/batch-valuation HTTP/1.1" 200 -
+2025-08-23 23:53:09,197 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://198.18.0.1:5000
+2025-08-23 23:53:09,198 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-23 23:53:09,201 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:53:11,265 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:53:11,273 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-23 23:54:43,635 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\tests\\helper\\test_feature_extractor_comparison.py', reloading
+2025-08-23 23:54:43,891 - werkzeug - INFO -  * Restarting with stat
+2025-08-23 23:54:46,279 - werkzeug - WARNING -  * Debugger is active!
+2025-08-23 23:54:46,290 - werkzeug - INFO -  * Debugger PIN: 137-106-568
+2025-08-24 00:00:28,268 - werkzeug - INFO -  * Detected change in 'E:\\workspace\\mh\\src\\evaluator\\feature_extractor\\equip_feature_extractor.py', reloading
+2025-08-24 00:00:28,521 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:01:18,401 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:02:37,162 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:03:50,593 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:04:07,280 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:05:25,738 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:06:43,755 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:08:36,734 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:14:48,741 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:15:35,899 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:15:50,353 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:16:13,770 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:17:45,300 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:18:04,074 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:18:24,052 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:23:31,185 - werkzeug - INFO -  * Restarting with stat
+2025-08-24 00:25:13,512 - werkzeug - INFO -  * Restarting with stat

@@ -1,8 +1,7 @@
 <template>
   <el-container>
-    <Header />
-
-    <el-main>
+    <Header v-if="!$route.meta.hideHeader" />
+    <el-main :style="{padding:$route.meta.hideHeader?'0':'20px'}">
       <router-view />
     </el-main>
   </el-container>
@@ -19,13 +18,14 @@ export default {
 </script>
 
 <style scoped>
-:global(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell){
-  background-color: #ededf4!important;
+:global(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell) {
+  background-color: #ededf4 !important;
 }
 
-:global(.el-table td.el-table__cell ){
-    border-bottom: 1px solid #9ea0bf;
+:global(.el-table .el-table__fixed-header-wrapper) {
+  background-color: #ededf4 !important;
 }
+
 :global(.el-card) {
   border-radius: 8px !important;
 }
@@ -44,12 +44,18 @@ export default {
   text-align: center;
   color: rgb(0, 122, 255);
 }
+
 .el-container {
   flex-direction: column;
 }
+
 .el-main {
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
   background-color: #ECECEC;
   border: 0 solid #C3C5DE;
+}
+
+.el-header+.el-container {
+  min-height: calc(100vh - 60px);
 }
 </style>

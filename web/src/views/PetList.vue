@@ -1,6 +1,10 @@
 <template>
   <div class="pet-list-view">
-    <div class="filters">
+    <el-card class="filters" shadow="never">
+      <div slot="header" class="card-header">
+        <div><span class="emoji-icon">🔍</span> 筛选</div>
+      </div>
+   
       <!-- 筛选和搜索表单 -->
       <el-form :inline="true" :model="filters" @submit.native.prevent="fetchPets" size="mini">
         <el-form-item label="📅数据月份">
@@ -53,7 +57,7 @@
           <el-switch v-model="filters.equip_list_amount_warning" :active-value="1" :inactive-value="0"
             inactive-color="#409EFF" active-color="#F56C6C"></el-switch>
         </el-form-item>
-        <el-form-item label="🔍装备估价异常占比率≤" v-if="filters.equip_list_amount_warning === 1"> 
+        <el-form-item label="🔍装备估价异常占比率≤" v-if="filters.equip_list_amount_warning === 1">
           <el-input-number v-model="filters.warning_rate" placeholder="装备估价异常占比率" :min="0" :max="99" :step="0.1"
             controls></el-input-number>
         </el-form-item>
@@ -61,17 +65,20 @@
           <el-button type="primary" @click="fetchPets">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-alert type="warning"  @close="batchUpdateUnvaluedPets" :loading="unvaluedPetsLoading"
-            v-if="unvaluedPetsCount > 0" :title="` 有（${unvaluedPetsCount}）只召唤兽装备未估价/估价异常`" close-text="更新">
-          </el-alert>
-    </div>
+      <el-alert type="warning" @close="batchUpdateUnvaluedPets" :loading="unvaluedPetsLoading"
+        v-if="unvaluedPetsCount > 0" :title="` 有（${unvaluedPetsCount}）只召唤兽装备未估价/估价异常`" close-text="更新">
+      </el-alert>
+  
+</el-card>
+ 
     <el-table :data="pets" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey"
       v-loading="tableLoading">
       <el-table-column prop="eid" label="操作" width="100" fixed align="center">
         <template #default="scope">
           <el-link :href="getCBGLinkByType(scope.row.eid, 'pet')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <SimilarPetModal :pet="scope.row" :similar-data="similarPets" :valuation="petValuation" @show="loadSimilarPets" />
+          <SimilarPetModal :pet="scope.row" :similar-data="similarPets" :valuation="petValuation"
+            @show="loadSimilarPets" />
         </template>
       </el-table-column>
       <el-table-column fixed label="召唤兽" width="70" align="center">
@@ -86,19 +93,19 @@
           <div v-html="formatFullPrice(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="highlight" label="亮点"  width="100"  align="center" sortable="custom">>
+      <el-table-column prop="highlight" label="亮点" width="100" align="center" sortable="custom">>
         <template slot-scope="scope">
           <span v-html="gen_highlight(scope.row.highlight)"></span>
         </template>
       </el-table-column>
-      <el-table-column prop="dynamic_tags" label="动态"  width="100"  align="center" sortable="custom">
+      <el-table-column prop="dynamic_tags" label="动态" width="100" align="center" sortable="custom">
         <template slot-scope="scope">
           <span v-html="gen_dynamic_tags(scope.row.dynamic_tags)"></span>
         </template>
       </el-table-column>
       <el-table-column prop="equip_list" label="装备" width="171" sortable="custom" align="center">
         <template #default="{ row: { equip_list, equip_list_amount }, row }">
-          <table cellspacing="0" cellpadding="0" class="tb03 size50" id="pet_equip_con">
+          <table cellspacing="0" cellpadding="0" class="tb03 size50">
             <tr>
               <td v-for="(eItem, index) in JSON.parse(equip_list).splice(0, 3)" :key="index">
                 <EquipmentImage v-if="eItem" :placement="'bottom'" :image="false" :equipment="getEquipImageProps(eItem)"
@@ -139,7 +146,7 @@
           <p :class="scope.row.petData.is_baobao === '是' ? 'cBlue' : 'equip_desc_red'">
             <span>{{ scope.row.petData.is_baobao === '是' ? '' : '野生' }}</span>
             <span>{{ scope.row.equip_name }}{{ scope.row.petData.is_baobao === '是' ? '宝宝' : '' }}/{{ scope.row.level
-              }}级</span>
+            }}级</span>
           </p>
           <p>参战等级：{{ scope.row.role_grade_limit }}级</p>
         </template>
@@ -451,28 +458,28 @@ export default {
           const data = valuationResponse.data
           this.petValuation = data
 
-          const { data: { anchors } } = await this.$api.pet.findPetAnchors({
-              pet_data: pet,
-              similarity_threshold: similarityThreshold,
-              max_anchors: 30
-            })
+          const { data: { anchors:allAnchors } } = await this.$api.pet.findPetAnchors({
+            pet_data: pet,
+            similarity_threshold: similarityThreshold,
+            max_anchors: 30
+          })
           // 从估价结果中提取相似宠物信息
           if (data.anchors && data.anchors.length > 0) {
             this.similarPets = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: anchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
+              anchors: allAnchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
               statistics: {
                 price_range: {
-                  min: Math.min(...data.anchors.map((a) => a.price || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.price || 0))
+                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.price || 0))
                 },
                 similarity_range: {
-                  min: Math.min(...data.anchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.similarity || 0)),
+                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
                   avg:
-                    data.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    data.anchors.length
+                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                    allAnchors.length
                 }
               }
             }
@@ -600,7 +607,7 @@ export default {
         } catch (error) {
           console.error('获取任务状态失败:', error)
         }
-      }, 10*1000) // 每10秒更新一次
+      }, 10 * 1000) // 每10秒更新一次
     },
 
     // 停止监控任务进度
@@ -817,7 +824,7 @@ export default {
 
 <style scoped>
 .filters {
-  margin-bottom: 20px;
+  margin-bottom:10px;
 }
 
 .pagination-container {

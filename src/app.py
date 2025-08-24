@@ -9,10 +9,12 @@ import os
 import sys
 
 # 添加src目录到Python路径
-from src.utils.project_path import get_project_root
-project_root = get_project_root()
-src_path = os.path.join(project_root, 'src')
-sys.path.insert(0, src_path)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)  # 向上到src目录
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from utils.project_path import get_project_root
 
 from app import create_app
 

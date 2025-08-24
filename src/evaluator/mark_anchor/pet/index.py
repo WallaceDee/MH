@@ -11,20 +11,10 @@ import numpy as np
 import sys
 import os
 
-# 添加项目根目录到Python路径，解决模块导入问题
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到项目根目录
-sys.path.insert(0, project_root)
 
-
-try:
-    from .pet_market_data_collector import PetMarketDataCollector
-    from ...utils.extreme_value_filter import ExtremeValueFilter
-    from ...utils.base_valuator import BaseValuator
-except ImportError:
-    from pet_market_data_collector import PetMarketDataCollector
-    from utils.extreme_value_filter import ExtremeValueFilter
-    from utils.base_valuator import BaseValuator
+from .pet_market_data_collector import PetMarketDataCollector
+from ...utils.extreme_value_filter import ExtremeValueFilter
+from ...utils.base_valuator import BaseValuator
 
 warnings.filterwarnings('ignore')
 
@@ -143,7 +133,7 @@ class PetMarketAnchorEvaluator(BaseValuator):
                         # 提取价格，如果有equip_list_amount则减去装备估价
                         total_price = market_row.get('price', 0)
                         equip_list_amount = market_row.get('equip_list_amount', 0)
-                        
+                        # TODO:带装备只算了裸价，没有算装备价格？怎么办？
                         # 计算纯宠物价格（总价格减去装备估价）
                         pet_price = total_price - equip_list_amount
                         if equip_list_amount > 0:

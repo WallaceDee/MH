@@ -26,7 +26,7 @@
       </template>
     </el-table-column>
     <el-table-column prop="equip_level" label="等级" width="60"></el-table-column>
-    <el-table-column label="特技/特效/套装" width="120">
+    <el-table-column label="特技/特效/套装" min-width="120">
       <template #default="scope">
         <div class="special-info">
           <div
@@ -103,9 +103,5 @@ export default {
 
 .cbg-link:hover {
   color: #66b1ff;
-}
-
-:deep(.equip_desc_blue) {
-  color: #3498db;
 }
 </style> 

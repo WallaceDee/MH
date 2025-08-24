@@ -6,8 +6,8 @@
 """
 
 from flask import Blueprint, request, jsonify
-from src.app.controllers.equipment_controller import EquipmentController
-from src.app.utils.response import success_response, error_response
+from ....controllers.equipment_controller import EquipmentController
+from ....utils.response import success_response, error_response
 
 equipment_bp = Blueprint('equipment', __name__)
 controller = EquipmentController()
@@ -375,3 +375,92 @@ def get_lingshi_data():
         
     except Exception as e:
         return error_response(f"获取灵石数据失败: {str(e)}") 
+
+@equipment_bp.route('/mark-abnormal', methods=['POST'])
+def mark_equipment_as_abnormal():
+    """标记装备为异常"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供装备数据")
+        
+        equipment_data = data.get('equipment_data')
+        if not equipment_data:
+            return error_response("请提供装备数据")
+        
+        reason = data.get('reason', '标记异常')
+        notes = data.get('notes')
+        
+        result = controller.mark_equipment_as_abnormal(equipment_data, reason, notes)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message=result.get("message", "装备标记异常成功"))
+        
+    except Exception as e:
+        return error_response(f"标记装备异常失败: {str(e)}")
+
+@equipment_bp.route('/abnormal', methods=['GET'])
+def get_abnormal_equipment_list():
+    """获取异常装备列表"""
+    try:
+        params = {
+            'page': request.args.get('page', 1, type=int),
+            'page_size': request.args.get('page_size', 20, type=int),
+            'status': request.args.get('status')
+        }
+        
+        result = controller.get_abnormal_equipment_list(params)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="获取异常装备列表成功")
+        
+    except Exception as e:
+        return error_response(f"获取异常装备列表失败: {str(e)}")
+
+@equipment_bp.route('/abnormal/<string:equip_sn>', methods=['PUT'])
+def update_abnormal_equipment_status(equip_sn):
+    """更新异常装备状态"""
+    try:
+        if not equip_sn:
+            return error_response("装备序列号不能为空")
+        
+        data = request.get_json()
+        if not data:
+            return error_response("请提供更新数据")
+        
+        status = data.get('status')
+        notes = data.get('notes')
+        
+        if not status:
+            return error_response("状态不能为空")
+        
+        result = controller.update_abnormal_equipment_status(equip_sn, status, notes)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message=result.get("message", "异常装备状态更新成功"))
+        
+    except Exception as e:
+        return error_response(f"更新异常装备状态失败: {str(e)}")
+
+@equipment_bp.route('/abnormal/<string:equip_sn>', methods=['DELETE'])
+def delete_abnormal_equipment(equip_sn):
+    """删除异常装备记录"""
+    try:
+        if not equip_sn:
+            return error_response("装备序列号不能为空")
+        
+        result = controller.delete_abnormal_equipment(equip_sn)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message=result.get("message", "异常装备记录删除成功"))
+        
+    except Exception as e:
+        return error_response(f"删除异常装备记录失败: {str(e)}") 

@@ -56,11 +56,25 @@
               <el-tag size="mini">{{ petList[index].equip_level }}级</el-tag>
               <el-tag size="mini" type="success">{{ petList[index].growth }}</el-tag>
             </div>
-            <div class="pet-skills" v-if="petList[index].all_skill">
+            <div class="pet-skills">
               <span class="skill-label">技能:</span>
               <span class="mini-icon"
                 v-html="formatSkills({ petData: { ...petList[index].pet_detail, sp_skill: petList[index].pet_detail.genius } })"></span>
             </div>
+            <div class="pet-equips">
+              <span class="skill-label">装备:</span>
+              <table cellspacing="0" cellpadding="0" class="tb03 size50" style="margin: unset;">
+            <tr>
+              <!-- {{ petList[index] }} -->
+              <td v-for="(eItem, index) in JSON.parse(petList[index].equip_list).splice(0, 3)" :key="index">
+                <EquipmentImage v-if="eItem" :placement="'bottom'" :image="false" :equipment="getEquipImageProps(eItem)"
+                  size="small" :popoverWidth="300" width="40px" height="40px"/>
+                <span v-else>&nbsp;</span>
+              </td>
+            </tr>
+          </table>
+            </div>
+ 
           </div>
         </el-col>
       </el-row>
@@ -74,8 +88,10 @@
 
 <script>
 import PetImage from '@/components/PetImage.vue'
+import EquipmentImage from '@/components/EquipmentImage.vue'
 import SimilarPetModal from '@/components/SimilarPetModal.vue'
 import { petMixin } from '@/utils/mixins/petMixin'
+import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 export default {
   name: 'PetBatchValuationResult',
   props: {
@@ -105,7 +121,7 @@ export default {
       similarData: null
     }
   },
-  mixins: [petMixin],
+  mixins: [petMixin,equipmentMixin],
   computed: {
     totalCount() {
       return this.results.length
@@ -116,6 +132,7 @@ export default {
   },
   components: {
     PetImage,
+    EquipmentImage,
     SimilarPetModal
   },
   methods: {
@@ -137,7 +154,7 @@ export default {
           similarity_threshold: this.valuateParams.similarity_threshold,
           max_anchors: this.valuateParams.max_anchors
         })
-        const { data: { anchors } } = await this.$api.pet.findPetAnchors({
+        const { data: { anchors:allAnchors } } = await this.$api.pet.findPetAnchors({
           pet_data: pet,
           similarity_threshold: this.valuateParams.similarity_threshold,
           max_anchors: this.valuateParams.max_anchors
@@ -151,18 +168,18 @@ export default {
             this.similarData = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: anchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
+              anchors: allAnchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
               statistics: {
                 price_range: {
-                  min: Math.min(...data.anchors.map((a) => a.price || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.price || 0))
+                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.price || 0))
                 },
                 similarity_range: {
-                  min: Math.min(...data.anchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.similarity || 0)),
+                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
                   avg:
-                    data.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    data.anchors.length
+                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                    allAnchors.length
                 }
               }
             }
@@ -269,7 +286,10 @@ export default {
   padding-top: 10px;
   border-top: 1px solid #ebeef5;
 }
-
+.pet-details .size50 td{
+width: 40px;
+height: 40px;
+}
 .pet-info {
   margin-bottom: 5px;
   font-size: 12px;

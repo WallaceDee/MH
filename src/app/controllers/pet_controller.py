@@ -7,7 +7,7 @@
 
 import logging
 from typing import Dict, List, Optional
-from src.app.services.pet_service import PetService
+from ..services.pet_service import PetService
 
 logger = logging.getLogger(__name__)
 

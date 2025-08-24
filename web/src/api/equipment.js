@@ -129,5 +129,42 @@ export const equipmentApi = {
    */
   getLingshiData() {
     return api.get('/equipment/lingshi-data')
+  },
+
+  /**
+   * 标记装备为异常
+   * @param {Object} data - 装备数据和标记原因
+   * @returns {Promise}
+   */
+  markEquipmentAsAbnormal(data) {
+    return api.post('/equipment/mark-abnormal', data)
+  },
+
+  /**
+   * 获取异常装备列表
+   * @param {Object} params - 查询参数
+   * @returns {Promise}
+   */
+  getAbnormalEquipmentList(params = {}) {
+    return api.get('/equipment/abnormal', params)
+  },
+
+  /**
+   * 更新异常装备状态
+   * @param {string} equipSn - 装备序列号
+   * @param {Object} data - 更新数据
+   * @returns {Promise}
+   */
+  updateAbnormalEquipmentStatus(equipSn, data) {
+    return api.put(`/equipment/abnormal/${equipSn}`, data)
+  },
+
+  /**
+   * 删除异常装备记录
+   * @param {string} equipSn - 装备序列号
+   * @returns {Promise}
+   */
+  deleteAbnormalEquipment(equipSn) {
+    return api.delete(`/equipment/abnormal/${equipSn}`)
   }
 } 

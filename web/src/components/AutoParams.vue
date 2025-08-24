@@ -1,0 +1,1454 @@
+<template>
+    <el-card class="spider-system-card" shadow="never">
+        <el-row slot="header" class="card-header" type="flex" justify="space-between" align="middle">
+            <div><span class="emoji-icon">⚙️</span> 配置</div>
+            <div class="tool-buttons">
+                <el-dropdown split-button type="danger" @click="stopTask">
+                    🛑 停止
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item @click.native="resetTask">🛑 重置任务</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+            </div>
+        </el-row>
+        <el-row type="flex">
+            <div style="width: 140px;text-align: center;">
+                <template v-if="externalParams.action">
+                    <el-col :span="24">
+                        <p class="cBlue" style="margin-bottom: 5px;">🎯目标：</p>
+                    </el-col>
+                    <EquipmentImage v-if="externalParams.action === 'similar_equip'" :equipment="externalParams"
+                        :popoverWidth="450"
+                        style="display: flex;flex-direction: column;height: 50px;width: 100%;align-items: center;" />
+                    <PetImage v-if="externalParams.action === 'similar_pet'" :pet="externalParams"
+                        :equipFaceImg="externalParams.equip_face_img" />
+                    <template v-if="externalParams.action">
+                        <!-- <el-cascader :options="server_data" size="mini" filterable v-model="server_data_value" clearable /> -->
+                        <div style="display: inline-block; margin-left: 8px">
+                            <el-link @click="openCBGSearch" :type="isCookieValid ? 'danger' : 'info'"
+                                :style="cbgLinkStyle" :disabled="!isCookieValid">
+                                藏宝阁
+                            </el-link>
+                            <el-tooltip v-if="!isCookieValid" content="请先登录藏宝阁，确保Cookies有效后再使用此功能" placement="top">
+                                <i class="el-icon-warning" style="color: #e6a23c; margin-left: 4px"></i>
+                            </el-tooltip>
+                        </div>
+                    </template>
+
+                </template>
+            </div>
+            <!-- 全局设置 -->
+            <el-form style="width: 100%;flex-shrink: 1;" :model="globalSettings" v-show="activeTab !== 'playwright'">
+                <el-row :gutter="40">
+                    <el-col :span="6">
+                        <el-form-item label="📄 爬取页数" size="small">
+                            <el-input-number v-model="globalSettings.max_pages" :min="1" :max="100"
+                                controls-position="right" style="width: 100%"></el-input-number>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item
+                            :label="`⏱️ 延迟范围(秒) 当前：${globalSettings.delay_min} - ${globalSettings.delay_max} 秒`"
+                            size="small">
+                            <el-slider v-model="delayRange" range show-stops :min="8" :max="30" :step="1"
+                                @change="onDelayRangeChange" style="width: 100%;display: inline-block;">
+                            </el-slider>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-form-item label="⚡ 快速配置" size="small" style="width: 100%;">
+                            <br>
+                            <el-row type="flex" align="middle" style="height:32px;">
+                                <el-tag size="mini" @click="quickConfig('small')" style="cursor: pointer;">10页</el-tag>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-tag size="mini" @click="quickConfig('medium')" style="cursor: pointer;">50页</el-tag>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-tag size="mini" @click="quickConfig('large')" style="cursor: pointer;">100页</el-tag>
+                            </el-row>
+                        </el-form-item></el-col>
+                </el-row>
+                <el-row type="flex" align="middle" v-if="activeTab !== 'role'">
+                    <el-col :span="12">
+                        <el-row type="flex">
+                            <el-form-item label="🌎 全服搜索" size="small" style="width: 150px;">
+                                <el-switch v-model="globalSettings.overall"></el-switch>
+                            </el-form-item>
+                            <el-form-item v-if="!globalSettings.overall" label=" 多区搜索" size="small"
+                                style="width: 150px;">
+                                <el-switch v-model="globalSettings.multi"></el-switch>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col v-if="!globalSettings.overall" :span="12">
+                        <el-form-item label="🎯 目标服务器" size="small">
+                            <el-cascader v-if="globalSettings.multi" :options="hotServers" :props="{
+                                value: 'server_id', label: 'server_name', multiple: true,
+                                emitPath: false
+                            }" collapse-tags size="mini" filterable v-model="target_server_list"
+                                @change="onTargetServerChange" />
+                            <el-cascader v-else :options="server_data" size="mini" filterable
+                                v-model="server_data_value" clearable @change="onServerDataChange" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </el-row>
+        <el-tabs v-model="activeTab" tab-position="left">
+            <!-- Playwright半自动收集器 -->
+            <el-tab-pane label="🖐️ 手动抓取" name="playwright">
+                <el-form :model="playwrightForm" label-width="120px" size="small">
+                    <el-form-item label="无头模式">
+                        <el-switch v-model="playwrightForm.headless" @change="onHeadlessToggle"></el-switch>
+                        <span class="form-tip">关闭后可以看到浏览器操作过程</span>
+                    </el-form-item>
+
+                    <el-form-item label="目标URL">
+                        <el-select v-model="playwrightForm.target_url" style="width: 100%" @change="onTargetUrlChange">
+                            <el-option label="角色推荐搜索" value="role_recommend"></el-option>
+                            <el-option label="装备推荐搜索" value="equip_recommend"></el-option>
+                            <el-option label="宠物推荐搜索" value="pet_recommend"></el-option>
+                            <el-option label="自定义URL" value="custom"></el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item label="自定义URL" v-if="playwrightForm.target_url === 'custom'">
+                        <el-input v-model="playwrightForm.custom_url" placeholder="请输入完整的CBG URL" style="width: 100%">
+                            <template slot="prepend">https://</template>
+                        </el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" @click="startPlaywrightCollector" :loading="isRunning">
+                            🚀 启动
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+            <!-- 角色爬虫 -->
+            <el-tab-pane label="👤 角色" name="role">
+                <el-form :model="roleForm" label-width="100px" size="small">
+                    <!-- JSON参数编辑器 -->
+                    <div class="params-editor">
+                        <div class="params-actions">
+                            <el-button type="text" size="mini" @click="() => resetParam('role')">重置</el-button>
+                            <el-button type="primary" size="mini" @click="() => saveParam('role')" :loading="roleSaving"
+                                :disabled="!!roleJsonError">
+                                保存配置
+                            </el-button>
+                        </div>
+                        <div class="json-editor-wrapper">
+                            <el-input type="textarea" v-model="roleParamsJson" placeholder="请输入角色爬虫参数JSON" :rows="8"
+                                @blur="() => validateParam('role')" class="json-editor">
+                            </el-input>
+                            <div v-if="roleJsonError" class="json-error">
+                                <i class="el-icon-warning"></i> {{ roleJsonError }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <el-form-item>
+                        <el-button type="primary" @click="() => startSpiderByType('role')" :loading="isRunning">
+                            🚀 启动
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+
+            <!-- 装备爬虫 -->
+            <el-tab-pane label="⚔️ 装备" name="equip">
+                <el-form :model="equipForm" label-width="100px" size="small">
+                    <el-form-item label="装备类型">
+                        <el-select v-model="equipForm.equip_type" :disabled="externalParams.action === 'similar_equip'"
+                            @change="onEquipTypeChange" style="width: 100%">
+                            <el-option label="普通装备" value="normal"></el-option>
+                            <el-option label="灵饰装备" value="lingshi"></el-option>
+                            <el-option label="宠物装备" value="pet"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-alert v-if="equipForm.equip_type === 'lingshi'" show-icon :closable="false"
+                        style="margin-bottom: 10px;">
+                        <span slot="title" v-html="lingshiTips"></span>
+                    </el-alert>
+                    <!-- JSON参数编辑器 -->
+                    <div class="params-editor">
+                        <div class="params-actions">
+                            <el-button type="text" size="mini" @click="() => resetParam('equip')">重置</el-button>
+                            <el-button type="primary" size="mini" @click="() => saveParam('equip')" :loading="equipSaving"
+                                :disabled="!!equipJsonError">
+                                保存配置
+                            </el-button>
+                        </div>
+                        <el-row type="flex">
+                            <div class="json-editor-wrapper" v-if="externalParams.action === 'similar_equip'">
+                                <el-input type="textarea" v-model="externalSearchParams" placeholder="搜索指定参数" :rows="10"
+                                    class="json-editor">
+                                </el-input>
+                                <div v-if="equipJsonError" class="json-error">
+                                    <i class="el-icon-warning"></i> {{ equipJsonError }}
+                                </div>
+                            </div>
+                            <div class="json-editor-wrapper">
+                                <el-input type="textarea" v-model="equipParamsJson" placeholder="请输入装备爬虫参数JSON"
+                                    :rows="10" @blur="() => validateParam('equip')" class="json-editor">
+                                </el-input>
+                                <div v-if="equipJsonError" class="json-error">
+                                    <i class="el-icon-warning"></i> {{ equipJsonError }}
+                                </div>
+                            </div>
+                            <div class="json-editor-wrapper">
+                                <el-input type="textarea" readonly :value="cached_params" :rows="10"
+                                    class="json-editor">
+                                </el-input>
+                            </div>
+                        </el-row>
+                    </div>
+
+                    <el-form-item>
+                        <el-button type="primary" @click="() => startSpiderByType('equip')" :loading="isRunning">
+                            🚀 启动
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+
+            <!-- 召唤兽爬虫 -->
+            <el-tab-pane label="🐲 召唤兽" name="pet">
+                <el-form :model="petForm" label-width="100px" size="small">
+                    <!-- JSON参数编辑器 -->
+                    <div class="params-editor">
+                        <div class="params-actions">
+                            <el-button type="mini" size="mini" @click="() => resetParam('pet')">重置</el-button>
+                            <el-button type="primary" size="mini" @click="() => saveParam('pet')" :loading="petSaving"
+                                :disabled="!!petJsonError">
+                                保存配置
+                            </el-button>
+                        </div>
+                        <el-row type="flex">
+                            <div class="json-editor-wrapper" v-if="externalParams.action === 'similar_pet'">
+                                <el-input type="textarea" v-model="externalSearchParams" :rows="10" class="json-editor">
+                                </el-input>
+                            </div>
+                            <div class="json-editor-wrapper">
+                                <el-input type="textarea" v-model="petParamsJson" placeholder="请输入召唤兽爬虫参数JSON"
+                                    :rows="10" @blur="() => validateParam('pet')" class="json-editor">
+                                </el-input>
+                                <div v-if="petJsonError" class="json-error">
+                                    <i class="el-icon-warning"></i> {{ petJsonError }}
+                                </div>
+                            </div>
+                            <div class="json-editor-wrapper">
+                                <el-input type="textarea" readonly :value="cached_params" :rows="10"
+                                    class="json-editor">
+                                </el-input>
+                            </div>
+                        </el-row>
+                    </div>
+
+                    <el-form-item>
+                        <el-button type="primary" @click="() => startSpiderByType('pet')" :loading="isRunning">
+                            🚀 启动
+                        </el-button>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+
+        </el-tabs>
+        <LogMonitor :maxLines="8" simpleMode :isRunning="isRunning" v-if="log" />
+    </el-card>
+</template>
+
+<script>
+import str2gbk from 'str2gbk'
+import qs from 'qs'
+import EquipmentImage from '@/components/EquipmentImage.vue'
+import PetImage from '@/components/PetImage.vue'
+import LogMonitor from '@/components/LogMonitor.vue'
+import windowReuseManager from '@/utils/windowReuseManager'
+
+const server_data_list = []
+for (let key in window.server_data) {
+    let [parent, children] = window.server_data[key]
+    const [label, , , , value] = parent
+    children = children.map(([value, label]) => ({ value, label }))
+    server_data_list.push({
+        label,
+        value,
+        children
+    })
+}
+export default {
+    name: 'AutoParams',
+    props: {
+        log: {
+            type: Boolean,
+            default: true
+        }
+    },
+    components: {
+        EquipmentImage,
+        LogMonitor,
+        PetImage
+    },
+    data() {
+        return {
+            hotServers: [],
+            server_data: server_data_list,
+            target_server_list: [], // 存储server_id的数组（用于el-cascader的v-model）
+            target_server_objects: [], // 存储完整服务器对象的数组
+            // 全局设置
+            globalSettings: {
+                max_pages: 5,
+                delay_min: 8,
+                delay_max: 20,
+                overall: false,
+                multi: false,
+            },
+            // 延迟范围滑块
+            delayRange: [8, 20],
+            // 角色爬虫表单
+            roleForm: {
+            },
+            // 装备爬虫表单
+            equipForm: {
+                equip_type: 'normal',
+            },
+            // 召唤兽爬虫表单
+            petForm: {
+            },
+            // 代理爬虫表单
+            proxyForm: {},
+            // Playwright收集表单
+            playwrightForm: {
+                headless: false,
+                target_url: 'role_recommend',
+                custom_url: ''
+            },
+            // JSON参数字符串
+            roleParamsJson: '',
+            equipParamsJson: '{}',
+            petParamsJson: '',
+            // JSON验证错误
+            roleJsonError: '',
+            equipJsonError: '',
+            petJsonError: '',
+            // 默认参数模板（将从API动态加载）
+            defaultParams: {
+                role: {},
+                equip_normal: {},
+                equip_lingshi: {},
+                equip_pet: {},
+                equip_pet_equip: {},
+                pet: {}
+            },
+            // 加载状态
+            isRunning: false,
+            paramsLoading: false,
+
+            // Tab相关
+            activeTab: 'playwright',
+            // 状态监控
+            statusMonitor: null,
+            // 保存状态
+            roleSaving: false,
+            equipSaving: false,
+            petSaving: false,
+            // 缓存清理定时器
+            cacheCleanupTimer: null,
+
+            // 外部参数
+            externalSearchParams: '{}',
+            targetFeatures: {},
+
+            // 参数管理器配置 - 统一管理所有参数类型
+            paramManager: {
+                role: {
+                    jsonKey: 'roleParamsJson',
+                    errorKey: 'roleJsonError',
+                    savingKey: 'roleSaving',
+                    paramType: 'role',
+                    successMessage: '角色参数配置保存成功',
+                    spiderType: 'role',
+                    spiderName: '角色爬虫',
+                    getParams: () => ({
+                        ...this.globalSettings,
+                        ...this.roleForm,
+                        cached_params: JSON.parse(this.roleParamsJson)
+                    })
+                },
+                equip: {
+                    jsonKey: 'equipParamsJson',
+                    errorKey: 'equipJsonError',
+                    savingKey: 'equipSaving',
+                    paramType: 'equip',
+                    successMessage: '装备参数配置保存成功',
+                    spiderType: 'equip',
+                    spiderName: '装备爬虫',
+                    getParamType: () => this.getEquipParamKey(this.equipForm.equip_type),
+                    getSuccessMessage: () => `${this.getEquipTypeName(this.equipForm.equip_type)}参数配置保存成功`,
+                    getParams: () => {
+                        const params = {
+                            target_server_list: this.target_server_objects,
+                            ...this.equipForm,
+                            ...this.globalSettings,
+                            cached_params: JSON.parse(this.cached_params)
+                        }
+                        if (params.overall) {
+                            params.multi = false
+                            params.target_server_list = undefined
+                        }
+                        return params
+                    }
+                },
+                pet: {
+                    jsonKey: 'petParamsJson',
+                    errorKey: 'petJsonError',
+                    savingKey: 'petSaving',
+                    paramType: 'pet',
+                    successMessage: '宠物参数配置保存成功',
+                    spiderType: 'pet',
+                    spiderName: '召唤兽爬虫',
+                    getParams: () => ({
+                        target_server_list: this.target_server_objects,
+                        ...this.petForm,
+                        ...this.globalSettings,
+                        cached_params: JSON.parse(this.cached_params)
+                    })
+                }
+            }
+        }
+    },
+    computed: {
+        lingshiTips() {
+            const labels = {
+                1: '固伤', 2: '伤害', 3: '速度', 4: '法伤', 5: '狂暴', 6: '物理暴击', 7: '法术暴击',
+                8: '封印', 9: '法伤结果', 10: '穿刺', 11: '治疗', 12: '气血', 13: '防御', 14: '法防',
+                15: '抗物理暴击', 16: '抗法术暴击', 17: '抗封', 18: '格挡', 19: '回复'
+            }
+            const highlighted = new Set()
+            for (let key in JSON.parse(this.externalSearchParams)) {
+                if (key.startsWith('added_attr.')) {
+                    const typeId = Number(key.replace('added_attr.', ''))
+                    if (!Number.isNaN(typeId)) highlighted.add(typeId)
+                }
+            }
+            const parts = []
+            for (let i = 1; i <= 19; i++) {
+                const name = labels[i]
+                const text = highlighted.has(i) ? `<b style="color:#F56C6C;">${name}</b>` : name
+                parts.push(`<b ${highlighted.has(i) ? 'style="color:#F56C6C;"' : ''}>${i}:</b> ${text}`)
+            }
+            return parts.join(', ')
+        },
+        view_loc() {
+            return {
+                view_loc: this.globalSettings.overall ? 'overall_search' : 'search_cond'
+            }
+        },
+        currentServerData() {
+            const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
+            return { server_id, areaid, server_name }
+        },
+        externalParams() {
+            const query = JSON.parse(JSON.stringify(this.$route.query))
+            if (query.action === 'similar_pet') {
+                query.evol_skill_list = JSON.parse(query.evol_skill_list || '{}')
+                query.neidan = JSON.parse(query.neidan || '{}')
+                query.equip_list = JSON.parse(query.equip_list || '{}')
+                query.texing = JSON.parse(query.texing || '{}')
+            }
+            return query
+        },
+        // 从Vuex store获取server_data_valueTODO:::::
+        server_data_value: {
+            get() {
+                return this.$store?.state.server_data_value || {}
+            },
+            set(value) {
+                this.$store.dispatch('setServerDataValue', value)
+            }
+        },
+        // 检查cookies是否有效
+        isCookieValid() {
+            return this.$store.getters['cookie/isCookieCacheValid']
+        },
+        // 藏宝阁链接样式
+        cbgLinkStyle() {
+            return {
+                color: this.isCookieValid ? '#f56c6c' : '#c0c4cc',
+                cursor: this.isCookieValid ? 'pointer' : 'not-allowed',
+                textDecoration: this.isCookieValid ? 'underline' : 'none'
+            }
+        },
+        cached_params() {
+            try {
+                let diyParams = JSON.parse(this.equipParamsJson)
+                if (this.activeTab === 'pet') {
+                    diyParams = JSON.parse(this.petParamsJson)
+                }
+                const mode_params = {
+                    ...this.view_loc,
+                    hide_lingshi: this.activeTab === 'equip' && this.equipForm.equip_type === 'normal' ? 1 : undefined
+                }
+                const currentServerData = this.globalSettings.overall ? { server_id: undefined, server_name: undefined, areaid: undefined } : this.currentServerData
+                return JSON.stringify(Object.assign(JSON.parse(this.externalSearchParams), diyParams, currentServerData, mode_params), null, 2)
+            } catch (error) {
+                return '{}'
+            }
+        }
+    },
+    watch: {
+        isRunning(newVal) {
+            this.$emit('update:isRunning', newVal)
+            if (newVal) {
+                this.startStatusMonitor()
+            } else {
+                this.stopStatusMonitor()
+            }
+        },
+        'globalSettings.multi'(val) {
+            if (val) {
+                // 多服务器模式开启时，自动设置同级别服务器
+                const server_id = Number(this.externalParams.serverid)
+                console.log('开启多服务器模式，当前服务器ID:', server_id)
+                this.globalSettings.max_pages = 2
+                // 根据server_id在hotServers中找到对应的同级别的服务器
+                this.setTargetServersByLevel(server_id)
+            } else {
+                // 多服务器模式关闭时，清空目标服务器列表
+                this.target_server_list = []
+                this.target_server_objects = []
+                console.log('关闭多服务器模式，清空目标服务器列表')
+            }
+        }
+    },
+    mounted() {
+        // 等待Vuex状态恢复后再执行其他操作
+        this.$nextTick(() => {
+            // 自动清理过期缓存
+            this.$store.dispatch('cookie/cleanExpiredCache')
+
+            // 启动缓存清理定时器（每分钟检查一次）
+            this.cacheCleanupTimer = setInterval(() => {
+                this.$store.dispatch('cookie/cleanExpiredCache')
+            }, 60 * 1000)
+
+            this.loadHotServers()
+            this.loadSearchParams()
+            // 页面加载时请求一次状态
+            this.checkTaskStatus()
+            // 初始化延迟范围滑块
+            this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]
+
+            this.loadExternalParams()
+        })
+        // 初始化时设置默认的server_data_value（如果store中没有的话）
+        if (
+            this.externalParams.action &&
+            (!this.$store?.state.server_data_value || this.$store?.state.server_data_value.length === 0)
+        ) {
+            this.$store.dispatch('setServerDataValue', [43, 77])
+        }
+        if (this.externalParams.action) {
+            this.getFeatures()
+        }
+
+        // 初始化窗口复用管理器
+        this.initWindowReuseManager()
+    },
+    beforeDestroy() {
+        this.stopStatusMonitor()
+        // 清理缓存清理定时器
+        if (this.cacheCleanupTimer) {
+            clearInterval(this.cacheCleanupTimer)
+        }
+    },
+    methods: {
+        onServerDataChange() {
+            const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
+            console.log('server_data_value', { server_id, areaid, server_name })
+        },
+        // 处理目标服务器选择变化
+        onTargetServerChange(selectedServerIds) {
+            // 当服务器选择发生变化时，根据server_id查找完整的服务器对象
+            this.target_server_objects = []
+
+            if (selectedServerIds && selectedServerIds.length > 0) {
+                // 遍历所有选中的server_id
+                selectedServerIds.forEach(serverId => {
+                    // 在hotServers中查找对应的完整服务器对象
+                    this.findServerInHotServers(serverId)
+                })
+            }
+        },
+        // 在hotServers嵌套结构中查找服务器
+        findServerInHotServers(serverId) {
+            for (const area of this.hotServers) {
+                if (area.children) {
+                    for (const server of area.children) {
+                        if (server.server_id === serverId) {
+                            this.target_server_objects.push({
+                                server_id: server.server_id,
+                                areaid: area.areaid || server.areaid,
+                                server_name: server.server_name
+                            })
+                            return
+                        }
+                    }
+                }
+            }
+        },
+
+        // 根据服务器ID找到同级别的服务器并设置为目标服务器
+        setTargetServersByLevel(serverId) {
+            if (!this.hotServers || this.hotServers.length === 0) {
+                console.warn('hotServers数据未加载，无法设置目标服务器')
+                return
+            }
+
+            // 查找当前服务器所在的烟花等级组
+            let currentLevel = null
+            let currentServer = null
+
+            for (const level of this.hotServers) {
+                if (level.children) {
+                    for (const server of level.children) {
+                        if (server.server_id === serverId) {
+                            currentLevel = level
+                            currentServer = server
+                            break
+                        }
+                    }
+                    if (currentLevel) break
+                }
+            }
+
+            if (!currentLevel || !currentServer) {
+                console.warn(`未找到服务器ID ${serverId} 对应的烟花等级组`)
+                return
+            }
+
+            console.log(`找到服务器 ${currentServer.server_name} 在烟花等级组: ${currentLevel.server_name}`)
+
+            // 设置同级别服务器的目标列表
+            this.target_server_objects = []
+            this.target_server_list = []
+
+            // 遍历同级别的所有服务器
+            currentLevel.children.forEach(server => {
+                const serverObject = {
+                    server_id: server.server_id,
+                    areaid: currentLevel.areaid || server.areaid,
+                    server_name: server.server_name
+                }
+
+                this.target_server_objects.push(serverObject)
+                this.target_server_list.push(server.server_id)
+            })
+
+            console.log(`已设置 ${this.target_server_objects.length} 个同级别服务器为目标服务器:`, this.target_server_objects)
+
+        },
+        // 初始化窗口复用管理器
+        initWindowReuseManager() {
+            try {
+                // 确保窗口复用管理器已正确初始化
+                if (windowReuseManager && windowReuseManager.isSetup) {
+                    console.log('窗口复用管理器已初始化，状态:', windowReuseManager.getStatus())
+                } else {
+                    console.log('窗口复用管理器正在初始化...')
+                    // 等待初始化完成
+                    setTimeout(() => {
+                        if (windowReuseManager && windowReuseManager.isSetup) {
+                            console.log('窗口复用管理器初始化完成，状态:', windowReuseManager.getStatus())
+                        } else {
+                            console.warn('窗口复用管理器初始化失败')
+                        }
+                    }, 1000)
+                }
+
+                // 监听参数更新事件
+                window.addEventListener('params-updated', (event) => {
+                    const { params, timestamp } = event.detail
+                    console.log('窗口参数已更新:', params)
+
+                    // 强制刷新组件数据
+                    this.$forceUpdate()
+
+                    // 重新加载外部参数
+                    this.loadExternalParams()
+
+                    // 重新获取特征
+                    if (params.action) {
+                        this.getFeatures()
+                    }
+
+                    // 重新初始化装备类型相关的配置
+                    if (params.equip_type) {
+                        this.equipForm.equip_type = params.equip_type
+                        // 重新加载装备参数配置
+                        this.loadSearchParams()
+                    }
+
+                    // 重新设置activeTab
+                    if (params.activeTab) {
+                        this.activeTab = params.activeTab
+                    }
+
+                    console.log('✅ 页面数据已刷新')
+                })
+            } catch (error) {
+                console.warn('初始化窗口复用管理器失败:', error)
+            }
+        },
+
+        // 停止任务
+        async stopTask() {
+            try {
+                const response = await this.$api.spider.stopTask()
+                if (response.code === 200) {
+                    this.$notify.success({
+                        title: '任务状态',
+                        message: response.data?.message || '任务已停止'
+                    })
+                    this.isRunning = false
+                } else {
+                    this.$notify.error({
+                        title: '任务状态',
+                        message: response.message || '停止失败'
+                    })
+                }
+            } catch (error) {
+                this.$notify.error({
+                    title: '任务状态',
+                    message: error.message
+                })
+            }
+        },
+
+        // 重置任务状态
+        async resetTask() {
+            try {
+                const response = await this.$api.spider.resetTask()
+                if (response.code === 200) {
+                    this.$notify.success({
+                        title: '任务状态',
+                        message: response.data?.message || '任务状态已重置'
+                    })
+                    this.isRunning = false
+                } else {
+                    this.$notify.error({
+                        title: '任务状态',
+                        message: response.message || '重置失败'
+                    })
+                }
+            } catch (error) {
+                this.$notify.error({
+                    title: '任务状态',
+                    message: error.message
+                })
+            }
+        },
+
+        genaratePetSearchParams() {
+            const searchParams = {}
+            searchParams.skill = this.externalParams.all_skill.replace(/\|/g, ',')
+            searchParams.texing = this.externalParams.texing?.id
+            searchParams.lingxing = this.externalParams.lx
+            searchParams.growth = this.externalParams.growth * 1000
+            return searchParams
+        },
+        genarateEquipmentSearchParams({ kindid, ...features }) {
+            const searchParams = {}
+            if (window.is_pet_equip(kindid)) {
+                this.equipForm.equip_type = 'pet'
+                searchParams.level = features.equip_level
+                searchParams.speed = features.speed > 0 ? features.speed : undefined
+                searchParams.shanghai = features.shanghai > 0 ? features.shanghai : undefined
+                searchParams.hp = features.qixue > 0 ? features.qixue : undefined
+                searchParams.fangyu = features.fangyu > 0 ? features.fangyu : undefined
+                searchParams.xiang_qian_level = features.xiang_qian_level > 0 ? features.xiang_qian_level : undefined
+                let addon_sum = 0
+                    ;['fali', 'liliang', 'lingli', 'minjie', 'naili'].forEach((item) => {
+                        searchParams[`addon_${item}`] = this.targetFeatures[`addon_${item}`] > 0 ? 1 : undefined
+                        if (item === 'minjie' && this.targetFeatures[`addon_${item}`] < 0) {
+                            searchParams.addon_minjie_reduce = this.targetFeatures[`addon_${item}`] * -1
+                        } else {
+                            addon_sum += this.targetFeatures[`addon_${item}`]
+                        }
+                    })
+                searchParams.addon_sum = addon_sum > 0 ? addon_sum : undefined
+                searchParams.addon_sum_min = searchParams.addon_sum
+                searchParams.addon_status = features.addon_status
+                if (features.fangyu > 0) {
+                    searchParams.equip_pos = 1
+                } else if (features.speed > 0) {
+                    searchParams.equip_pos = 2
+                } else {
+                    searchParams.equip_pos = 3
+                }
+            } else if (window.is_lingshi_equip(kindid)) {
+                searchParams.kindid = kindid
+                this.equipForm.equip_type = 'lingshi'
+                if (features.equip_level) {
+                    searchParams.equip_level_min = features.equip_level
+                    searchParams.equip_level_max = features.equip_level * 1 + 9
+                }
+                // 灵饰附加属性配置
+                const { lingshi_added_attr1, lingshi_added_attr2 } = window.AUTO_SEARCH_CONFIG
+
+                // 属性名称映射表 - 前端显示名称到后端字段名的映射
+                const attr_name_map = {
+                    '法伤结果': '法术伤害结果',
+                    '法伤': '法术伤害',
+                    '固伤': '固定伤害',
+                    '法术暴击': '法术暴击等级',
+                    '物理暴击': '物理暴击等级',
+                    '封印': '封印命中等级',
+                    '狂暴': '狂暴等级',
+                    '穿刺': '穿刺等级',
+                    '治疗': '治疗能力',
+                    '伤害': '伤害',
+                    '速度': '速度',
+                    '抗法术暴击': '抗法术暴击等级',
+                    '抗物理暴击': '抗物理暴击等级',
+                    '抗封': '抵抗封印等级',
+                    '回复': '气血回复效果',
+                    '法防': '法术防御',
+                    '防御': '防御',
+                    '格挡': '格挡值',
+                    '气血': '气血'
+                }
+
+                // 构建属性值到搜索参数的映射
+                const buildAttrValueMapping = () => {
+                    const mapping = {}
+
+                    // 合并两个属性配置
+                    const allAttrs = { ...lingshi_added_attr1, ...lingshi_added_attr2 }
+
+                    // 遍历所有属性，建立映射关系
+                    Object.entries(allAttrs).forEach(([value, displayName]) => {
+                        const backendFieldName = attr_name_map[displayName]
+                        if (backendFieldName) {
+                            mapping[backendFieldName] = value
+                        }
+                    })
+
+                    return mapping
+                }
+
+                // 处理主属性
+                const processMainAttributes = () => {
+                    const mainAttrs = ['damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'fengyin', 'speed']
+                    mainAttrs.forEach(attr => {
+                        if (features[attr] && features[attr] > 0) {
+                            searchParams[attr] = features[attr]
+                        }
+                    })
+                }
+
+                // 处理精炼等级
+                const processGemLevel = () => {
+                    if (features.gem_level && features.gem_level > 0) {
+                        searchParams.jinglian_level = features.gem_level
+                    }
+                }
+
+                // 处理附加属性
+                const processAddedAttributes = () => {
+                    if (!features.attrs || !Array.isArray(features.attrs)) {
+                        return
+                    }
+
+                    const attrValueMapping = buildAttrValueMapping()
+                    const addedAttrsCount = {}
+
+                    // 统计每种附加属性的出现次数
+                    features.attrs.forEach(({ attr_type }) => {
+                        const searchValue = attrValueMapping[attr_type]
+                        if (searchValue) {
+                            addedAttrsCount[searchValue] = (addedAttrsCount[searchValue] || 0) + 1
+                        }
+                    })
+
+                    // 将统计结果添加到搜索参数
+                    Object.entries(addedAttrsCount).forEach(([value, count]) => {
+                        searchParams[`added_attr.${value}`] = count
+                    })
+                }
+
+                // 执行处理
+                processMainAttributes()
+                processGemLevel()
+                processAddedAttributes()
+            } else {
+                searchParams.kindid = kindid
+                let sum_attr_value = 0
+                const sum_attr_type_list = []
+                    ;[['moli', 'magic'], ['liliang', 'power'], ['tizhi', 'physique'], ['minjie', 'dex'], ['naili', 'endurance']].forEach(([featureKey, searchKey]) => {
+                        if (this.targetFeatures[`addon_${featureKey}`] > 0) {
+                            sum_attr_type_list.push(searchKey)
+                        }
+                        sum_attr_value += this.targetFeatures[`addon_${featureKey}`]
+                    })
+                if (sum_attr_value > 0) {
+                    searchParams.sum_attr_type = sum_attr_type_list.join(',')
+                    searchParams.sum_attr_value = sum_attr_value
+                }
+                if (features.gem_level > 0) {
+                    searchParams.gem_level = features.gem_level
+                    searchParams.gem_value = features.gem_value.join(',')
+                }
+                if (features.equip_level) {
+                    searchParams.level_min = features.equip_level
+                    searchParams.level_max = features.equip_level * 1 + 9
+                }
+                if (features.special_effect && features.special_effect.length > 0) {
+                    searchParams.special_mode = 'and'
+                    searchParams.special_effect = features.special_effect.join(',')
+                }
+                if (features.suit_effect) {
+                    searchParams.suit_effect = features.suit_effect
+                }
+                if (features.special_skill) {
+                    searchParams.special_skill = features.special_skill
+                }
+                [
+                    'init_damage',
+                    'init_damage_raw',
+                    'init_defense',
+                    'init_hp',
+                    'init_dex',
+                    'init_wakan',
+                    'all_wakan',
+                    'all_damage',
+                    'damage'
+                ].forEach((value) => {
+                    if (features[value]) {
+                        searchParams[value] = features[value]
+                    }
+                })
+            }
+            return searchParams
+        },
+        // 通过server_id在window.server_data中反查对应的areaid
+        getAreaIdByServerId(serverId) {
+            if (!window || !window.server_data) return undefined
+            const sid = Number(serverId)
+            for (let key in window.server_data) {
+                const [parent, children] = window.server_data[key]
+                const areaValue = parent && parent.length >= 5 ? parent[4] : undefined
+                if (!Array.isArray(children)) continue
+                for (const child of children) {
+                    if (Array.isArray(child) && child[0] === sid) {
+                        return areaValue
+                    }
+                }
+            }
+            return undefined
+        },
+        async getFeatures() {
+            let query = {}
+            if (this.externalParams.action === 'similar_equip') {
+
+                await this.$api.equipment
+                    .extractFeatures({
+                        equipment_data: {
+                            kindid: this.externalParams.kindid * 1 || undefined,
+                            type: this.externalParams.type * 1 || undefined,
+                            large_equip_desc: this.externalParams.large_equip_desc
+                        },
+                        data_type: 'equipment'
+                    })
+                    .then((res) => {
+                        if (res.code === 200 && res.data.features) {
+                            this.targetFeatures = res.data.features
+                            // 使用equip_name,large_equip_desc改变当前title
+                            document.title = this.targetFeatures.equip_level + '级' + this.externalParams.equip_name + ' - ' + this.externalParams.large_equip_desc.replace(/#r|#Y|#G|#c4DBAF4|#W|#cEE82EE|#c7D7E82/g, '')
+                            //使用 this.externalParams.equip_face_img动态改变网页的favicon.ico
+                            document.querySelector('link[rel="icon"]').href = this.externalParams.equip_face_img
+                            query = this.genarateEquipmentSearchParams(res.data.features)
+                        }
+                    })
+            } else if (this.externalParams.action === 'similar_pet') {
+                query = this.genaratePetSearchParams()
+            }
+            if (this.externalParams.serverid) {
+                // 如果serverid存在，则设置server_id，并根据server_data计算areaid
+                const server_id = Number(this.externalParams.serverid)
+                const areaid = this.getAreaIdByServerId(server_id)
+                query.server_id = server_id
+                if (areaid !== undefined) {
+                    query.areaid = areaid
+                }
+                this.server_data_value = [areaid, server_id]
+                query.server_name = this.externalParams.server_name
+            }
+            this.externalSearchParams = JSON.stringify(query, null, 2)
+        },
+        async openCBGSearch() {
+            // 检查cookies是否有效
+            const isCookieValid = this.$store.getters['cookie/isCookieCacheValid']
+
+            if (!isCookieValid) {
+                // Cookies无效，提示用户先登录
+                this.$notify.warning({
+                    message: '请先登录藏宝阁，确保Cookies有效后再使用此功能',
+                    duration: 3000,
+                    showClose: true
+                })
+                return
+            }
+
+            let prefix = ''
+            let search_type = 'search_role_equip'
+            let query = {}
+            if (this.externalParams.action === 'similar_equip') {
+                if (window.is_pet_equip(this.targetFeatures.kindid)) {
+                    // 使用Vuex store中的服务器数据
+                    search_type = 'search_pet_equip'
+                } else if (window.is_lingshi_equip(this.targetFeatures.kindid)) {
+                    search_type = 'search_lingshi'
+                } else {
+                    search_type += '&hide_lingshi=1'
+                }
+                query = this.genarateEquipmentSearchParams(this.targetFeatures)
+            } else {
+                search_type = 'search_pet'
+                query = this.genaratePetSearchParams()
+            }
+            const serverData = this.$store.getters.getCurrentServerData
+            prefix = `https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=${new Date().getTime()}&act=recommd_by_role&server_id=${serverData.server_id
+                }&areaid=${serverData.areaid}&server_name=${serverData.server_name
+                }&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=${search_type}&`
+
+            let target_url = prefix + qs.stringify(query)
+            console.log(target_url, 'target_url')
+            this.$api.spider.startPlaywright({
+                headless: false,
+                target_url
+            })
+        },
+        /**
+        * GBK编码的URL编码
+        * @param {string} str - 要编码的字符串
+        * @returns {Promise<string>} - GBK编码的URL编码字符串
+        */
+        encodeGBK(str) {
+            if (!str) return ''
+
+            try {
+                const gbkBytes = str2gbk(str)
+                // 将字节数组转换为URL编码格式
+                return Array.from(gbkBytes)
+                    .map((b) => `%${b.toString(16).toUpperCase().padStart(2, '0')}`)
+                    .join('')
+            } catch (error) {
+                console.warn('GBK编码失败，使用UTF-8编码作为降级方案:', error)
+                // 降级到UTF-8编码
+                return window.encodeURI(str)
+            }
+        },
+        async loadExternalParams() {
+            if (this.externalParams.activeTab) {
+                this.activeTab = this.externalParams.activeTab
+            }
+            if (this.externalParams.equip_type) {
+                this.equipForm.equip_type = this.externalParams.equip_type
+            }
+        },
+        // 快速配置方法 - 根据当前activeTab配置
+        quickConfig(size) {
+            const configs = {
+                small: { max_pages: 10, delay_min: 10, delay_max: 15 },
+                medium: { max_pages: 50, delay_min: 15, delay_max: 20 },
+                large: { max_pages: 100, delay_min: 20, delay_max: 30 }
+            }
+            const system = configs[size]
+            Object.assign(this.globalSettings, system)
+            // 同步更新滑块值
+            this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]
+        },
+
+        // 延迟范围滑块变化处理
+        onDelayRangeChange(value) {
+            this.globalSettings.delay_min = value[0]
+            this.globalSettings.delay_max = value[1]
+        },
+        async loadHotServers() {
+            try {
+                const response = await this.$api.system.getHotServers()
+                this.hotServers = response
+                console.log('热门服务器数据加载完成:', this.hotServers)
+
+                // 在热门服务器数据加载完成后，处理可能已存在的target_server_list
+                if (this.target_server_list && this.target_server_list.length > 0) {
+                    this.onTargetServerChange(this.target_server_list)
+                }
+
+                // 如果多服务器模式已开启，自动设置同级别服务器
+                if (this.globalSettings.multi && this.externalParams.serverid) {
+                    const server_id = Number(this.externalParams.serverid)
+                    console.log('数据加载完成后，自动设置多服务器模式的目标服务器:', server_id)
+                    this.setTargetServersByLevel(server_id)
+                }
+            } catch (error) {
+                console.error('加载热门服务器数据失败:', error)
+                this.$notify.error('加载热门服务器数据失败: ' + error.message)
+            }
+        },
+        // 加载搜索参数配置
+        async loadSearchParams() {
+            try {
+                this.paramsLoading = true
+                const response = await this.$api.system.getSearchParams()
+
+                if (response.code === 200) {
+                    // 更新默认参数
+                    this.defaultParams = {
+                        role: response.data.role || {},
+                        equip_normal: response.data.equip_normal || {},
+                        equip_lingshi: response.data.equip_lingshi || {},
+                        equip_pet: response.data.equip_pet || {},
+                        equip_pet_equip: response.data.equip_pet_equip || {},
+                        pet: response.data.pet || {}
+                    }
+
+                    // 初始化JSON编辑器
+                    this.initializeDefaultParams()
+                } else {
+                    this.$notify.error(response.message || '加载搜索参数配置失败')
+                    // 使用默认值
+                    this.initializeDefaultParams()
+                }
+            } catch (error) {
+                console.error('加载搜索参数配置失败:', error)
+                this.$notify.error('加载搜索参数配置失败: ' + error.message)
+                // 使用默认值
+                this.initializeDefaultParams()
+            } finally {
+                this.paramsLoading = false
+            }
+        },
+
+        // 初始化默认参数
+        initializeDefaultParams() {
+            this.roleParamsJson = JSON.stringify(this.defaultParams.role, null, 2)
+            // 根据当前装备类型初始化装备参数
+            const equipParamKey = this.getEquipParamKey(this.equipForm.equip_type)
+            this.equipParamsJson = JSON.stringify(this.defaultParams[equipParamKey], null, 2)
+            this.petParamsJson = JSON.stringify(this.defaultParams.pet, null, 2)
+        },
+        // Playwright收集相关方法
+        onHeadlessToggle(headless) {
+            if (headless) {
+                this.$notify.info({
+                    title: '无头模式',
+                    message: '浏览器将在后台运行，不会显示界面'
+                })
+            } else {
+                this.$notify.info({
+                    title: '有头模式',
+                    message: '浏览器将显示界面，可以看到操作过程'
+                })
+            }
+        },
+
+        onTargetUrlChange(value) {
+            if (value === 'custom') {
+                this.playwrightForm.custom_url = ''
+            }
+        },
+
+        onEquipTypeChange() {
+            // 装备类型改变时切换对应的默认参数
+            this.resetParam('equip')
+        },
+
+        // 获取装备参数键
+        getEquipParamKey(equipType) {
+            const paramKeyMap = {
+                normal: 'equip_normal',
+                lingshi: 'equip_lingshi',
+                pet: 'equip_pet_equip'  // 修复：宠物装备应该使用equip_pet_equip
+            }
+            return paramKeyMap[equipType] || 'equip_normal'
+        },
+
+        // 通用参数操作方法
+        getParamConfig(type) {
+            return this.paramManager[type]
+        },
+
+        // 验证指定类型的参数
+        validateParam(type) {
+            const config = this.getParamConfig(type)
+            if (!config) return false
+            
+            this[config.errorKey] = this.validateJson(this[config.jsonKey], type)
+            return !this[config.errorKey]
+        },
+
+        // 重置参数方法 - 统一处理所有类型的参数重置
+        resetParam(type) {
+            const config = this.getParamConfig(type)
+            if (!config) return
+            
+            const paramKey = config.getParamType ? config.getParamType() : config.paramType
+            this[config.jsonKey] = JSON.stringify(this.defaultParams[paramKey], null, 2)
+            this[config.errorKey] = ''
+        },
+
+        // 保存参数方法 - 统一处理所有类型的参数保存
+        async saveParam(type) {
+            const config = this.getParamConfig(type)
+            if (!config) return false
+
+            // 检查JSON错误
+            if (!this.validateParam(type)) {
+                this.$notify.error('请先修复JSON格式错误')
+                return false
+            }
+
+            this[config.savingKey] = true
+            try {
+                const params = JSON.parse(this[config.jsonKey])
+                const paramType = config.getParamType ? config.getParamType() : config.paramType
+                const response = await this.$api.system.updateSearchParam(paramType, params)
+
+                if (response.code === 200) {
+                    const successMessage = config.getSuccessMessage ? config.getSuccessMessage() : config.successMessage
+                    this.$notify.success(successMessage)
+                    // 更新本地默认参数
+                    this.defaultParams[paramType] = params
+                    return true
+                } else {
+                    this.$notify.error({
+                        title: '保存失败',
+                        message: response.message || '保存失败'
+                    })
+                    return false
+                }
+            } catch (error) {
+                console.error(`保存${type}参数失败:`, error)
+                this.$notify.error({
+                    title: '保存失败',
+                    message: '保存失败: ' + error.message
+                })
+                return false
+            } finally {
+                this[config.savingKey] = false
+            }
+        },
+
+        // JSON验证方法 - 统一处理所有类型的JSON验证
+        validateJson(jsonStr, type) {
+            try {
+                if (!jsonStr.trim()) {
+                    return `${type}参数不能为空`
+                }
+                const parsed = JSON.parse(jsonStr)
+                if (typeof parsed !== 'object' || parsed === null) {
+                    return 'JSON必须是一个对象'
+                }
+                return ''
+            } catch (e) {
+                return `JSON格式错误: ${e.message}`
+            }
+        },
+
+
+
+        // 加载缓存参数
+        async loadCachedParams() {
+            try {
+                await this.loadSearchParams()
+                this.$notify.success({
+                    title: '缓存参数',
+                    message: '缓存参数已刷新'
+                })
+            } catch (error) {
+                this.$notify.error({
+                    title: '获取失败',
+                    message: '获取缓存参数失败: ' + error.message
+                })
+            }
+        },
+
+        // 通用启动爬虫方法
+        async startSpiderByType(type) {
+            if (this.isRunning) return
+
+            const config = this.paramManager[type]
+            if (!config) return
+
+            // 检查JSON错误
+            if (this[config.errorKey]) {
+                this.$notify.error('请先修复JSON格式错误')
+                return
+            }
+
+            try {
+                const params = config.getParams()
+                const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params)
+                
+                if (response.code === 200) {
+                    this.$notify.success({
+                        title: '爬虫启动',
+                        message: `${config.spiderName}已启动`
+                    })
+                    this.activeTab = type // 确保切换到对应tab
+                    this.isRunning = true // 立即设置运行状态
+                } else {
+                    this.$notify.error({
+                        title: '启动失败',
+                        message: response.message || '启动失败'
+                    })
+                }
+            } catch (error) {
+                this.$notify.error({
+                    title: '启动失败',
+                    message: '启动失败: ' + error.message
+                })
+            }
+        },
+
+
+
+        // 启动Playwright收集
+        async startPlaywrightCollector() {
+            if (this.isRunning) return
+
+            try {
+                const params = {
+                    headless: this.playwrightForm.headless
+                    // 不传递target_url，使用后端默认值
+                }
+
+                console.log('启动Playwright收集，参数:', params)
+
+                const response = await this.$api.spider.startPlaywright(params)
+                if (response.code === 200) {
+                    this.$notify.success('Playwright收集已启动')
+                    this.activeTab = 'playwright'
+                    this.isRunning = true
+                } else {
+                    this.$notify.error(response.message || '启动失败')
+                }
+            } catch (error) {
+                this.$notify.error('启动失败: ' + error.message)
+            }
+        },
+
+        // 获取装备类型名称
+        getEquipTypeName(type) {
+            const names = {
+                normal: '普通装备',
+                lingshi: '灵饰装备',
+                pet: '宠物装备'
+            }
+            return names[type] || '装备'
+        },
+        // 检查任务状态
+        async checkTaskStatus() {
+            try {
+                const response = await this.$api.spider.getStatus()
+                if (response.code === 200) {
+                    const status = response.data.status
+
+                    // 更新运行状态
+                    this.isRunning = (status === 'running')
+
+                    // 如果任务完成或出错，显示消息并停止监控
+                    if (status === 'completed' || status === 'error' || status === 'stopped') {
+                        if (status === 'error') {
+                            this.$notify.error(response.data.message || '任务执行出错')
+                        } else if (status === 'stopped') {
+                            this.$notify.info(response.data.message || '任务已停止')
+                        }
+                        this.isRunning = false
+                    }
+                }
+            } catch (error) {
+                console.error('状态监控错误:', error)
+            }
+        },
+        // 状态监控方法
+        startStatusMonitor() {
+            // 清除可能存在的旧定时器
+            this.stopStatusMonitor()
+
+            // 启动状态监控定时器
+            this.statusMonitor = setInterval(async () => {
+                await this.checkTaskStatus()
+            }, 5000) // 每2秒检查一次状态
+        },
+        stopStatusMonitor() {
+            if (this.statusMonitor) {
+                clearInterval(this.statusMonitor)
+                this.statusMonitor = null
+            }
+        },
+    }
+}
+</script>
+
+<style scoped>
+.auto-params-view {}
+
+/* 参数编辑器样式 */
+.params-editor {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+    border-left: 4px solid #409eff;
+}
+
+.params-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e4e7ed;
+}
+
+.json-editor-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.json-editor {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.json-editor textarea {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.json-editor textarea:focus {
+    border-color: #409eff;
+    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+.json-error {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: #fef0f0;
+    border: 1px solid #fbc4c4;
+    border-radius: 4px;
+    color: #f56c6c;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.json-error i {
+    margin-right: 4px;
+}
+</style>

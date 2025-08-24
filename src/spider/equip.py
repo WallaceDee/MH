@@ -43,9 +43,10 @@ from src.utils.cookie_manager import (
 # 导入特征提取器
 from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
 from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
+from src.evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
 
 # 导入装备类型常量
-from src.evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_KINDID
+from src.evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_KINDID,WEAPON_KINDIDS,ARMOR_KINDIDS
 
 class CBGEquipSpider:
     def __init__(self):
@@ -70,7 +71,7 @@ class CBGEquipSpider:
         # 初始化特征提取器
         self.lingshi_feature_extractor = LingshiFeatureExtractor()
         self.pet_equip_feature_extractor = PetEquipFeatureExtractor()
-        
+        self.equip_feature_extractor = EquipFeatureExtractor()
         # 配置专用的日志器，避免与其他模块冲突
         self.logger = self._setup_logger()
         
@@ -238,12 +239,12 @@ class CBGEquipSpider:
                     
                     # 初始化 addon_status 变量
                     addon_status = equip.get('addon_status', '')
-                    
+                    addon_moli = equip.get('addon_moli', 0)
+
                     if kindid == PET_EQUIP_KINDID:  # 宠物装备类型要解析套装
                         try:
                             # 使用宠物装备特征提取器解析套装信息
                             desc = equip.get('large_equip_desc', '')
-                            self.logger.info(f"宠物装备套装解析desc: {desc}")
                             if desc:
                                 # 创建临时字典来存储解析结果
                                 parsed_data = {}
@@ -255,6 +256,8 @@ class CBGEquipSpider:
                             self.logger.warning(f"解析宠物装备套装信息失败: {e}")
                             # 保持原始值
 
+                    if kindid in WEAPON_KINDIDS + ARMOR_KINDIDS:
+                        addon_moli = self.equip_feature_extractor._extract_moli_from_agg_added_attrs(equip.get('agg_added_attrs', '[]'))
 
                     # 直接保存所有原始字段，不做解析
                     equipment = {
@@ -353,6 +356,7 @@ class CBGEquipSpider:
                         'addon_minjie': equip.get('addon_minjie'),
                         'addon_fali': equip.get('addon_fali'),
                         'addon_lingli': equip.get('addon_lingli'),
+                        'addon_moli': addon_moli,
                         'addon_total': equip.get('addon_total'),
                         'addon_status': addon_status,
                         'addon_skill_chance': equip.get('addon_skill_chance'),
@@ -683,6 +687,12 @@ class CBGEquipSpider:
         
         # 使用传入的缓存参数或获取新参数
         if cached_params and not use_browser:
+            if 'server_id' in cached_params:
+                # 去掉search_type中的'overall_'
+                if equip_type == 'normal':
+                    search_type = 'search_role_equip'
+                else:
+                    search_type = search_type.replace('overall_', '')
             search_params = cached_params
             self.logger.info(f"📊 使用传入的缓存参数: {len(search_params)} 个")
         else:
@@ -727,6 +737,11 @@ class CBGEquipSpider:
                         self.logger.info(f"￥{price} - {equip_name}({level}级) - {server_name} - {seller_nickname}")
                     
                     self.logger.info(f"✅ 第 {page_num} 页完成，获取 {len(equipments)} 条装备，保存 {saved_count} 条")
+                    
+                    # 判断数据条数是否不足10条，如果不足则说明没有下一页
+                    if len(equipments) < 10:
+                        self.logger.info(f"📄 第 {page_num} 页数据条数({len(equipments)})不足10条，判断为最后一页，爬取结束")
+                        break
                 else:
                     self.logger.info(f"📄 第 {page_num} 页没有数据，爬取结束")
                     break 
@@ -744,6 +759,16 @@ class CBGEquipSpider:
                 break
 
         self.logger.info(f"🎉 {equip_type} 装备爬取完成！成功页数: {successful_pages}/{max_pages}, 总装备数: {total_saved_count}")
+        
+        # 强制刷新所有日志缓冲区，确保日志被完整写入文件
+        import sys
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
+        # 刷新日志处理器缓冲区
+        for handler in self.logger.handlers:
+            if hasattr(handler, 'flush'):
+                handler.flush()
 
     def crawl_all_pages(self, max_pages=10, delay_range=None, use_browser=False, equip_type='normal', cached_params=None):
         """

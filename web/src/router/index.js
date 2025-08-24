@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/HomeView.vue'
-
+import AutoParams from '@/components/AutoParams.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -9,9 +9,17 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
+  },  {
+    path: '/auto-params',
+    name: 'AutoParams',
+    component: AutoParams,
+    meta: {
+      title: '🕷🕷🕷🕷🕷🕷',
+      hideHeader: true
+    }
   },
   {
-    path: '/roles',
+    path: '/roles/:type/:levelRange/:page?',
     name: 'RoleList',
     component: () => import('../views/RoleList.vue'),
     meta: {
@@ -45,7 +53,6 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
   base: process.env.BASE_URL,
   routes
 })

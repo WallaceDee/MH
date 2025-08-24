@@ -150,7 +150,7 @@ async def _collect_params_base_async(url, collector_logic):
         cookies = [{'name': c.split('=', 1)[0], 'value': c.split('=', 1)[1], 'domain': '.163.com', 'path': '/'} for c in cookie_str.split('; ') if '=' in c]
 
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
+            browser = await p.chromium.launch(headless=False, devtools=True, args=['--auto-open-devtools-for-tabs'])
             context = await browser.new_context(user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36')
             await context.add_cookies(cookies)
             page = await context.new_page()

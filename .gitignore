@@ -5,7 +5,6 @@ web/yarn.lock
 web/yarn-error.log
 web/yarn-debug.log
 data/
-logs/
 output/
 **/__pycache__/
 *.pyc

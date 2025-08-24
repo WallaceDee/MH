@@ -1,5 +1,5 @@
 <template>
-  <EquipmentImage v-if="equipment.large_equip_desc||equipment.equip_desc" :image="false" :popover-width="200" :placement="placement" :equipment="equipment"
+  <EquipmentImage v-if="equipment?.large_equip_desc||equipment?.equip_desc" :image="false" :popover-width="200" :placement="placement" :equipment="equipment"
     :lock-type="lock_type" />
 </template>
 <script>

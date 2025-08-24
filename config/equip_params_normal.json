@@ -1,9 +1,4 @@
 {
-  "hide_lingshi": 1,
   "special_mode": "and",
-  "areaid": 43,
-  "search_type": "search_role_equip",
-  "server_id": 77,
-  "server_name": "进贤门",
-  "view_loc": "search_cond"
+  "query_order": "price ASC"
 }

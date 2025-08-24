@@ -6,10 +6,29 @@
 """
 
 import os
+import sys
 import logging
 import platform
 from datetime import datetime
-from src.utils.project_path import get_project_root, get_data_path, get_output_path
+
+# 添加src目录到Python路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_path = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到src目录
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+try:
+    from src.utils.project_path import get_project_root, get_data_path, get_output_path
+except ImportError:
+    # 如果无法导入，直接使用相对路径计算
+    def get_project_root():
+        return src_path
+    
+    def get_data_path():
+        return os.path.join(src_path, 'data')
+    
+    def get_output_path():
+        return os.path.join(src_path, 'output')
 
 logger = logging.getLogger(__name__)
 

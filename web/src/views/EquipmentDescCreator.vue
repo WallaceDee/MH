@@ -5,8 +5,8 @@
         <div><span class="emoji-icon">🎯</span> 模拟目标装备</div>
       </div>
 
-      <el-row type="flex" align="bottom" style="margin-bottom: 10px;">
-        <el-row type="flex" justify="space-between" class="simulate-wrapper">
+      <el-row type="flex" align="top" style="margin-bottom: 10px;">
+        <el-row type="flex" justify="space-between" class="simulate-wrapper" style="flex-shrink: 0;">
           <el-col style="width: 120px; margin-right: 20px">
             <el-image style="width: 120px; height: 120px" :src="getImageUrl(equipment.equip_face_img, 'big')"
               fit="cover" referrerpolicy="no-referrer">
@@ -14,14 +14,106 @@
           </el-col>
           <el-col>
             <p class="equip_desc_yellow" v-if="equipment.equip_name">{{ equipment.equip_name }}</p>
-            <p v-html="parseEquipDesc(equipment.equip_type_desc.replace(/#R/g, '<br />'), '#n')"></p>
+            <p v-html="parseEquipDesc(equipment.equip_type_desc?.replace(/#R/g, '<br />'), '#n')"></p>
             <p v-html="parseEquipDesc(equipment.large_equip_desc)"></p>
           </el-col>
         </el-row>
-        <SimilarEquipmentModal :equipment="equipment" :similar-data="similarEquipments" :valuation="equipmentValuation"
-          @show="loadSimilarEquipments">
-          <el-button type="primary" size="mini" style="margin-left: 10px; ">估价</el-button>
-        </SimilarEquipmentModal>
+        <div style="margin-left: 10px; width: 60px;flex-shrink: 0;">
+          <el-button type="success" size="mini" style="margin-bottom: 10px;" @click="takeSnapshot">拍照</el-button>
+          <br>
+          <SimilarEquipmentModal :equipment="equipment" :similar-data="similarEquipments"
+            :valuation="equipmentValuation" placement="left-start" @show="loadSimilarEquipments">
+            <el-button type="primary" size="mini">估价</el-button>
+          </SimilarEquipmentModal>
+        </div>
+        <div style="margin-left: 10px; height: 300px; overflow-y: auto;width: 100%;">
+          <el-tabs value="first">
+            <el-tab-pane label="快照列表" name="first">
+              <div v-if="snapshots.length === 0" style="color: #999; text-align: center; padding: 20px;">
+                暂无快照，点击拍照按钮创建快照
+              </div>
+              <div v-else>
+                <div v-for="snapshot in snapshots" :key="snapshot.id" style="margin-bottom: 10px;">
+                  <el-tag type="success" style="cursor: pointer; margin-right: 5px;"
+                    @click="showSnapshotDetail(snapshot)" @close="deleteSnapshot(snapshot.id)" closable>
+                    {{ snapshot.name }}
+                  </el-tag>
+                </div>
+              </div>
+            </el-tab-pane>
+            <el-tab-pane label="异常数据" name="second">
+              <div class="abnormal-data-container">
+                <!-- 工具栏 -->
+                <el-row class="abnormal-toolbar">
+                  <el-select v-model="abnormalStatusFilter" placeholder="状态筛选" size="mini"
+                    style="width: 120px; margin-right: 10px;">
+                    <el-option label="全部" value=""></el-option>
+                    <el-option label="待处理" value="pending"></el-option>
+                    <el-option label="已解决" value="resolved"></el-option>
+                    <el-option label="已忽略" value="ignored"></el-option>
+                    <el-option label="调查中" value="investigating"></el-option>
+                  </el-select>
+                  <el-button type="primary" size="mini" @click="loadAbnormalData" :loading="loadingAbnormal">
+                    <i class="el-icon-refresh"></i> 刷新
+                  </el-button>
+                  <el-button type="danger" size="mini" @click="clearAllAbnormal" style="margin-left: 10px;">
+                    <i class="el-icon-delete"></i> 清空所有
+                  </el-button>
+
+                  <!-- 分页 -->
+                  <div v-if="abnormalTotal > 0" class="abnormal-pagination">
+                    <el-pagination @current-change="handleAbnormalPageChange" :current-page="abnormalPage"
+                      :page-size="abnormalPageSize" :total="abnormalTotal" layout="total, prev, pager, next" small>
+                    </el-pagination>
+                  </div>
+                </el-row>
+
+                <!-- 异常装备列表 -->
+                <el-empty v-if="abnormalEquipments.length === 0" description="暂无数据"></el-empty>
+                <el-row v-else type="flex" style="flex-wrap: wrap;" class="abnormal-list">
+                  <el-card v-for="item in abnormalEquipments" :key="item.id" class="abnormal-item" shadow="hover">
+                    <div class="abnormal-header">
+                      <div class="equipment-info">
+                        <EquipmentImage :equipment="item.equipment_data" />
+                        <div style="margin-left: 10px;">
+                          <SimilarEquipmentModal :equipment="item.equipment_data" :similar-data="similarEquipments"
+                            :valuation="equipmentValuation" placement="left-start" @show="loadSimilarEquipments">
+                            <el-link href="javascript:void(0);" class="equipment-name">{{ item.equipment_data.equip_name
+                              || '未知装备' }}</el-link>
+                          </SimilarEquipmentModal>
+                          <p class="equipment-sn">序列号: {{ item.equip_sn }}</p>
+                        </div>
+                      </div>
+                      <div class="abnormal-actions">
+                        <el-tag :type="getStatusTagType(item.status)" size="mini">{{ getStatusText(item.status)
+                        }}</el-tag>
+                        <el-dropdown @command="handleAbnormalAction" trigger="click" style="margin-left: 10px;">
+                          <el-button type="text" size="mini">
+                            <i class="el-icon-more"></i>
+                          </el-button>
+                          <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item :command="`view_${item.equip_sn}`">查看详情</el-dropdown-item>
+                            <el-dropdown-item :command="`edit_${item.equip_sn}`">编辑状态</el-dropdown-item>
+                            <el-dropdown-item :command="`delete_${item.equip_sn}`" divided>删除记录</el-dropdown-item>
+                          </el-dropdown-menu>
+                        </el-dropdown>
+                      </div>
+                    </div>
+
+                    <div class="abnormal-content">
+                      <div class="abnormal-details">
+                        <p><strong>标记原因:</strong> {{ item.mark_reason }}</p>
+                        <p v-if="item.notes"><strong>备注:</strong> {{ item.notes }}</p>
+                        <p><strong>标记时间:</strong> {{ formatTime(item.mark_time) }}</p>
+                      </div>
+                    </div>
+                  </el-card>
+                </el-row>
+
+              </div>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
       </el-row>
     </el-card>
     <el-card class="spider-config-card" shadow="never">
@@ -49,7 +141,7 @@
                   ">
                   {{ equip.name }}-<span style="color: #fff; font-size: 12px">{{
                     equip.desc
-                  }}</span>
+                    }}</span>
                 </p>
               </div>
             </el-option>
@@ -75,9 +167,10 @@
         <el-form-item label="修理失败次数">
           <el-input-number v-model="repair_fail" :min="0" :max="3" :step="1" />
         </el-form-item>
-
-     
-        <el-form-item label="属性">
+        <el-form-item>
+          <template slot="label">
+            属性 <el-button type="text" @click="clearAttrs">清空属性</el-button>
+          </template>
           <el-form-item v-for="item in addonOptions" :key="item[0]" :label="item[1]">
             <el-input-number v-model="addon[item[0]]" controls-position="right" />
           </el-form-item>
@@ -127,16 +220,16 @@
             </el-select>
           </el-form-item>
           <br>
-       </template>   
-          <el-form-item label="特效">
-            <el-select v-model="special_effect" placeholder="请选择特效" multiple clearable filterable>
-              <el-option v-for="(label, value) in equip_special_effect" :key="value"
-                :label="value === '1' ? label + '/超级简易' : label" :value="label">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <br>
-          <template v-if="!is_lingshi_equip">
+        </template>
+        <el-form-item label="特效">
+          <el-select v-model="special_effect" placeholder="请选择特效" multiple clearable filterable>
+            <el-option v-for="(label, value) in equip_special_effect" :key="value"
+              :label="value === '1' ? label + '/超级简易' : label" :value="label">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <br>
+        <template v-if="!is_lingshi_equip">
           <el-form-item label="套装">
             <el-cascader :options="suitOptions" placeholder="请选择套装效果" separator="" clearable filterable
               @change="handleSuitChange" />
@@ -155,12 +248,52 @@
         </template>
       </el-form>
     </el-card>
+
+    <!-- 快照详情弹窗 -->
+    <el-dialog title="快照详情" :visible.sync="snapshotDialogVisible" width="600px"
+      :before-close="() => { snapshotDialogVisible = false; currentSnapshot = null; }">
+      <div v-if="currentSnapshot" class="snapshot-detail">
+        <div class="snapshot-header">
+          <h3>{{ currentSnapshot.name }}</h3>
+          <p class="snapshot-time">创建时间：{{ new Date(currentSnapshot.timestamp).toLocaleString() }}</p>
+        </div>
+
+        <div class="equipment-preview">
+          <el-row type="flex" align="top">
+            <el-col style="width: 120px; margin-right: 20px">
+              <el-image style="width: 120px; height: 120px"
+                :src="getImageUrl(currentSnapshot.equipment.equip_face_img, 'big')" fit="cover"
+                referrerpolicy="no-referrer">
+              </el-image>
+            </el-col>
+            <el-col>
+              <p class="equip_desc_yellow" v-if="currentSnapshot.equipment.equip_name">
+                {{ currentSnapshot.equipment.equip_name }}
+              </p>
+              <p v-html="parseEquipDesc(currentSnapshot.equipment.equip_type_desc?.replace(/#R/g, '<br />'), '#n')"></p>
+              <p v-html="parseEquipDesc(currentSnapshot.equipment.large_equip_desc)"></p>
+            </el-col>
+          </el-row>
+        </div>
+      </div>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="snapshotDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="restoreSnapshot">恢复此快照</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 异常状态编辑对话框 -->
+    <AbnormalStatusEditDialog :visible="statusEditDialogVisible" :equip-sn="currentEditEquipSn"
+      :current-status="currentEditStatus" @success="handleStatusEditSuccess" @close="handleStatusEditClose" />
   </div>
 </template>
 
 <script>
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
+import EquipmentImage from '../components/EquipmentImage.vue'
+import AbnormalStatusEditDialog from '../components/AbnormalStatusEditDialog.vue'
 const suitOptions = []
 
 if (window.AUTO_SEARCH_CONFIG) {
@@ -239,7 +372,9 @@ if (window.AUTO_SEARCH_CONFIG) {
 export default {
   name: 'EquipmentDescCreator',
   components: {
-    SimilarEquipmentModal
+    SimilarEquipmentModal,
+    EquipmentImage,
+    AbnormalStatusEditDialog
   },
   mixins: [commonMixin],
   data() {
@@ -247,6 +382,13 @@ export default {
       suitOptions,
       // 添加localStorage key
       storageKey: 'equipment_desc_creator_data',
+      // 添加快照相关的storage key
+      snapshotStorageKey: 'equipment_snapshots',
+      // 添加快照列表数据
+      snapshots: [],
+      // 添加快照详情弹窗控制
+      snapshotDialogVisible: false,
+      currentSnapshot: null,
       lingshiPerGemAdd: {
         伤害: 4,
         法术伤害结果: 3,
@@ -312,6 +454,7 @@ export default {
         minjie: 0,
         liliang: 0,
         wakan: 0,
+        magic_damage: 0,
         magic_defence: 0,
         mofa: 0,
         mingzhong: 0,
@@ -319,6 +462,8 @@ export default {
         speed: 0,
         defence: 0,
         hp: 0,
+        fengyin: 0,
+        anti_fengyin: 0,
       },
       ronglian_addon: {
         tizhi: 0,
@@ -344,8 +489,11 @@ export default {
         ['liliang', '力量'],
         ['naili', '耐力'],
         ['minjie', '敏捷'],
+        ['magic_damage', '法术伤害'],
         ['magic_defence', '法防'],
-        ['mofa', '魔法']
+        ['mofa', '魔法'],
+        ['fengyin', '封印命中等级'],
+        ['anti_fengyin', '抵抗封印等级'],
       ],
       features: {},
       currentKindid: 0,
@@ -367,7 +515,18 @@ export default {
         '755_4036': '755_4036',
         '756_4037': '756_4037',
         '757_4038': '757_4038'
-      }
+      },
+      // 异常装备相关数据
+      abnormalEquipments: [],
+      abnormalPage: 1,
+      abnormalPageSize: 10,
+      abnormalTotal: 0,
+      abnormalStatusFilter: '',
+      loadingAbnormal: false,
+      // 状态编辑对话框
+      statusEditDialogVisible: false,
+      currentEditEquipSn: '',
+      currentEditStatus: ''
     }
   },
   computed: {
@@ -457,19 +616,27 @@ export default {
         // #r#W制造者：★↑小龙↑★强化打造#
         const level_desc = `等级 ${this.level}`
         desc += level_desc
-        if (this.currentKindid === 61) {
-          let main_attr_desc = ''
-          const main_attr =
-            this.addonOptions.find(([addon_key]) => {
-              if (addon_key === 'shanghai' || addon_key === 'defence') {
-                return this.addon[addon_key] > 0
-              }
-              return false
-            }) || this.addonOptions[0]
-          if (main_attr) {
-            main_attr_desc = `${main_attr[1]} +${this.addon[main_attr[0]]}`
-            desc += '#r' + main_attr_desc
+        let main_attr_desc = ''
+        const main_attr = this.addonOptions.find(([addon_key]) => {
+          if (this.currentKindid === 61 && (addon_key === 'shanghai' || addon_key === 'defence')) {
+            return this.addon[addon_key] > 0
+          } else if (this.currentKindid === 62 && (addon_key === 'magic_damage' || addon_key === 'magic_defence')) {
+            return this.addon[addon_key] > 0
+          } else if (this.currentKindid === 63 && (addon_key === 'fengyin' || addon_key === 'anti_fengyin')) {
+            return this.addon[addon_key] > 0
+          }else if (this.currentKindid === 64 && (addon_key === 'speed')) {
+            return this.addon[addon_key] > 0
           }
+          return false
+        })
+
+        if (main_attr) {
+          let main_attr_label = main_attr[1]
+          if (main_attr_label === '法防') {
+            main_attr_label = '法术防御'
+          }
+          main_attr_desc = `${main_attr_label} +${this.addon[main_attr[0]]}`
+          desc += '#r' + main_attr_desc
         }
 
         //耐久行
@@ -479,15 +646,15 @@ export default {
         }
         desc += '#r' + naijiu_desc
         descList.push(naijiu_desc)
-     //特效行 #c4DBAF4特效：#c4DBAF4精致#Y #c4DBAF4简易#Y
-     if (this.special_effect.length > 0) {
+        //特效行 #c4DBAF4特效：#c4DBAF4精致#Y #c4DBAF4简易#Y
+        if (this.special_effect.length > 0) {
           let special_effect_desc = '#c4DBAF4特效：'
           this.special_effect.forEach((effect, index) => {
             if (index > 0) {
               special_effect_desc += ' '
             }
-            if(effect==='无级别'){
-                effect+='超级简易'
+            if (effect === '无级别') {
+              effect += '超级简易'
             }
             special_effect_desc += `#c4DBAF4${effect}#Y`
           })
@@ -583,7 +750,7 @@ export default {
         }
         desc += '#r' + naijiu_desc
         descList.push(naijiu_desc)
-   
+
         //宝石行
         if (this.gemLevel > 0) {
           const gem_desc = `锻炼等级 ${this.gemLevel}  镶嵌宝石 ${this.gemType.join('、 ')}`
@@ -640,8 +807,8 @@ export default {
             if (index > 0) {
               special_effect_desc += ' '
             }
-            if(effect==='无级别'){
-                effect+='限制'
+            if (effect === '无级别') {
+              effect += '限制'
             }
             special_effect_desc += `#c4DBAF4${effect}#Y`
           })
@@ -749,6 +916,26 @@ export default {
     }
   },
   methods: {
+    clearAttrs() {
+      this.addon = {
+        tizhi: 0,
+        naili: 0,
+        moli: 0,
+        minjie: 0,
+        liliang: 0,
+        wakan: 0,
+        magic_damage: 0,
+        magic_defence: 0,
+        mofa: 0,
+        mingzhong: 0,
+        shanghai: 0,
+        speed: 0,
+        defence: 0,
+        hp: 0,
+        fengyin: 0,
+        anti_fengyin: 0,
+      }
+    },
     handleSuitChange(value) {
       this.suit_effect = value[1]
     },
@@ -813,10 +1000,16 @@ export default {
       try {
         localStorage.removeItem(this.storageKey)
         console.log('localStorage缓存已清除')
-        this.$message.success('缓存已清除')
+        this.$notify.success({
+          title: '提示',
+          message: 'localStorage缓存已清除'
+        })
       } catch (error) {
         console.error('清除localStorage缓存失败:', error)
-        this.$message.error('清除缓存失败')
+        this.$notify.error({
+          title: '提示',
+          message: '清除缓存失败'
+        })
       }
     },
 
@@ -903,12 +1096,248 @@ export default {
         return window.parse_style_info(desc, default_style)
       }
       return desc
+    },
+    takeSnapshot() {
+      // 弹出输入框让用户输入快照名称
+      this.$prompt('请输入快照名称', '创建快照', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /\S+/,
+        inputErrorMessage: '快照名称不能为空'
+      }).then(({ value }) => {
+        const snapshotData = {
+          id: Date.now(),
+          name: value,
+          timestamp: new Date().toISOString(),
+          // 保存当前所有装备配置数据
+          equipment: {
+            iType: this.iType,
+            level: this.level,
+            wu_xing: this.wu_xing,
+            naijiu: this.naijiu,
+            repair_fail: this.repair_fail,
+            gemLevel: this.gemLevel,
+            gemType: [...this.gemType],
+            special_skill: this.special_skill,
+            special_effect: [...this.special_effect],
+            kaiyun_num: this.kaiyun_num,
+            isDoubleKaiyun: this.isDoubleKaiyun,
+            attrs_list: JSON.parse(JSON.stringify(this.attrs_list)),
+            addon: { ...this.addon },
+            ronglian_addon: { ...this.ronglian_addon },
+            suit_effect: this.suit_effect,
+            // 保存装备显示信息
+            equip_name: this.equipment.equip_name,
+            equip_type_desc: this.equipment.equip_type_desc,
+            equip_face_img: this.equipment.equip_face_img,
+            large_equip_desc: this.large_equip_desc
+          }
+        }
+
+        this.snapshots.unshift(snapshotData) // 新快照放在最前面
+        this.saveSnapshotsToStorage()
+        this.$notify.success({
+          title: '提示',
+          message: `快照 "${value}" 已创建！`
+        })
+      }).catch(() => {
+        // 用户取消输入
+      })
+    },
+    showSnapshotDetail(snapshot) {
+      this.currentSnapshot = snapshot
+      this.snapshotDialogVisible = true
+    },
+    deleteSnapshot(id) {
+      this.snapshots = this.snapshots.filter(s => s.id !== id)
+      this.saveSnapshotsToStorage()
+      this.$notify.success({
+        title: '提示',
+        message: '快照已删除！'
+      })
+    },
+    restoreSnapshot() {
+      if (this.currentSnapshot) {
+        // 恢复所有装备配置数据
+        this.iType = this.currentSnapshot.equipment.iType
+        this.level = this.currentSnapshot.equipment.level
+        this.wu_xing = this.currentSnapshot.equipment.wu_xing
+        this.naijiu = this.currentSnapshot.equipment.naijiu
+        this.repair_fail = this.currentSnapshot.equipment.repair_fail
+        this.gemLevel = this.currentSnapshot.equipment.gemLevel
+        this.gemType = [...this.currentSnapshot.equipment.gemType]
+        this.special_skill = this.currentSnapshot.equipment.special_skill
+        this.special_effect = [...this.currentSnapshot.equipment.special_effect]
+        this.kaiyun_num = this.currentSnapshot.equipment.kaiyun_num
+        this.isDoubleKaiyun = this.currentSnapshot.equipment.isDoubleKaiyun
+        this.attrs_list = JSON.parse(JSON.stringify(this.currentSnapshot.equipment.attrs_list))
+        this.addon = { ...this.currentSnapshot.equipment.addon }
+        this.ronglian_addon = { ...this.currentSnapshot.equipment.ronglian_addon }
+        this.suit_effect = this.currentSnapshot.equipment.suit_effect
+
+        // 关闭弹窗并清空当前快照
+        this.snapshotDialogVisible = false
+        this.currentSnapshot = null
+
+        this.$notify.success('快照已恢复！')
+      }
+    },
+    saveSnapshotsToStorage() {
+      localStorage.setItem(this.snapshotStorageKey, JSON.stringify(this.snapshots))
+    },
+    // 异常数据相关方法
+    async loadAbnormalData() {
+      this.loadingAbnormal = true
+      try {
+        const params = {
+          page: this.abnormalPage,
+          page_size: this.abnormalPageSize,
+          status: this.abnormalStatusFilter
+        }
+        const response = await this.$api.equipment.getAbnormalEquipmentList(params)
+        if (response.code === 200) {
+          this.abnormalEquipments = response.data.items || []
+          this.abnormalTotal = response.data.total || 0
+        } else {
+          this.$notify.error(response.message || '加载异常装备数据失败')
+        }
+      } catch (error) {
+        console.error('加载异常装备数据失败:', error)
+        this.$notify.error('加载异常装备数据失败')
+      } finally {
+        this.loadingAbnormal = false
+      }
+    },
+    handleAbnormalPageChange(val) {
+      this.abnormalPage = val
+      this.loadAbnormalData()
+    },
+    clearAllAbnormal() {
+      this.$confirm('确定要清空所有异常装备记录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        // 这里可以实现批量删除的逻辑，暂时显示提示
+        this.$notify.info('批量删除功能待实现')
+        this.loadAbnormalData() // 刷新列表
+      }).catch(() => {
+        // 用户取消
+      })
+    },
+    handleAbnormalAction(command) {
+      const [action, equip_sn] = command.split('_')
+      if (action === 'view') {
+        this.showSnapshotDetail({
+          id: Date.now(), // 模拟ID
+          name: `异常装备-${equip_sn}`,
+          timestamp: new Date().toISOString(),
+          equipment: {
+            iType: this.iType,
+            level: this.level,
+            wu_xing: this.wu_xing,
+            naijiu: this.naijiu,
+            repair_fail: this.repair_fail,
+            gemLevel: this.gemLevel,
+            gemType: [...this.gemType],
+            special_skill: this.special_skill,
+            special_effect: [...this.special_effect],
+            kaiyun_num: this.kaiyun_num,
+            isDoubleKaiyun: this.isDoubleKaiyun,
+            attrs_list: JSON.parse(JSON.stringify(this.attrs_list)),
+            addon: { ...this.addon },
+            ronglian_addon: { ...this.ronglian_addon },
+            suit_effect: this.suit_effect,
+            equip_name: this.equipment.equip_name,
+            equip_type_desc: this.equipment.equip_type_desc,
+            equip_face_img: this.equipment.equip_face_img,
+            large_equip_desc: this.large_equip_desc
+          }
+        })
+      } else if (action === 'edit') {
+        // 打开状态编辑对话框
+        this.currentEditEquipSn = equip_sn
+        this.currentEditStatus = this.abnormalEquipments.find(item => item.equip_sn === equip_sn)?.status || 'pending'
+        this.statusEditDialogVisible = true
+      } else if (action === 'delete') {
+        this.$confirm(`确定要删除序列号为 ${equip_sn} 的异常装备记录吗？`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          try {
+            await this.$api.equipment.deleteAbnormalEquipment(equip_sn)
+            this.$notify.success(`序列号为 ${equip_sn} 的异常装备记录已删除！`)
+            this.loadAbnormalData() // 刷新列表
+          } catch (error) {
+            this.$notify.error('删除记录失败')
+          }
+        }).catch(() => {
+          // 用户取消
+        })
+      }
+    },
+    getStatusTagType(status) {
+      switch (status) {
+        case 'pending':
+          return 'warning'
+        case 'resolved':
+          return 'success'
+        case 'ignored':
+          return 'info'
+        case 'investigating':
+          return 'danger'
+        default:
+          return 'info'
+      }
+    },
+    getStatusText(status) {
+      switch (status) {
+        case 'pending':
+          return '待处理'
+        case 'resolved':
+          return '已解决'
+        case 'ignored':
+          return '已忽略'
+        case 'investigating':
+          return '调查中'
+        default:
+          return '未知'
+      }
+    },
+    formatTime(timeStr) {
+      if (!timeStr) return '未知时间'
+      try {
+        const date = new Date(timeStr)
+        return date.toLocaleString('zh-CN')
+      } catch (error) {
+        return timeStr
+      }
+    },
+    // 处理状态编辑成功
+    handleStatusEditSuccess(data) {
+      // 刷新异常装备列表
+      this.loadAbnormalData()
+    },
+
+    // 处理状态编辑对话框关闭
+    handleStatusEditClose() {
+      this.statusEditDialogVisible = false
+      this.currentEditEquipSn = ''
+      this.currentEditStatus = ''
     }
   },
   mounted() {
     this.getLingshiData()
     // 组件挂载后自动加载缓存数据
     this.loadFromLocalStorage()
+    // 加载快照数据
+    const savedSnapshots = localStorage.getItem(this.snapshotStorageKey)
+    if (savedSnapshots) {
+      this.snapshots = JSON.parse(savedSnapshots)
+    }
+    // 加载异常装备数据
+    this.loadAbnormalData()
   }
 }
 </script>
@@ -923,5 +1352,153 @@ export default {
   font-size: 14px;
   font-family: 宋体, tahoma, arial, hiragino sans gb, sans-serif;
   line-height: 22px;
+}
+
+/* 快照相关样式 */
+.snapshot-detail {
+  padding: 20px 0;
+}
+
+.snapshot-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.snapshot-header h3 {
+  margin: 0 0 10px 0;
+  color: #303133;
+}
+
+.snapshot-time {
+  margin: 0;
+  color: #909399;
+  font-size: 14px;
+}
+
+.equipment-preview {
+  border-radius: 5px;
+  background-color: #2c3e50 !important;
+  padding: 18px !important;
+  border: 2px solid #2782a5 !important;
+  font-size: 14px;
+  font-family: 宋体, tahoma, arial, hiragino sans gb, sans-serif;
+  line-height: 22px;
+}
+
+.equipment-preview .equip_desc_yellow {
+  color: #e6a23c;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+.equipment-preview p {
+  margin: 5px 0;
+  line-height: 1.6;
+}
+
+/* 异常数据相关样式 */
+.abnormal-data-container {
+  padding: 10px 0;
+}
+
+.abnormal-toolbar {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #909399;
+}
+
+.no-data i {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.no-data p {
+  margin: 5px 0;
+}
+
+.abnormal-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.abnormal-item {
+  margin: 8px;
+  border: 1px solid #ebeef5;
+  width: 300px;
+}
+
+.abnormal-item:hover {
+  border-color: #409eff;
+}
+
+.abnormal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.equipment-info {
+  display: flex;
+  align-items: center;
+}
+
+.equipment-name {
+  margin: 0 0 5px 0;
+  color: #303133;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.equipment-sn {
+  margin: 0;
+  color: #909399;
+  font-size: 12px;
+}
+
+.abnormal-actions {
+  display: flex;
+  align-items: center;
+}
+
+.abnormal-content {
+  display: flex;
+  gap: 20px;
+}
+
+.abnormal-details {
+  flex: 1;
+}
+
+.abnormal-details p {
+  margin: 5px 0;
+  font-size: 12px;
+  color: #606266;
+}
+
+.equipment-preview-mini {
+  flex: 1;
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  border-left: 3px solid #409eff;
+}
+
+.equipment-preview-mini p {
+  margin: 3px 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.abnormal-pagination {
+  text-align: center;
 }
 </style>

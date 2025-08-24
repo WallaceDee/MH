@@ -21,7 +21,6 @@ API端点列表:
 - spider_type: 爬虫类型 (role/equip/pet)
 - equip_type: 装备类型 (normal/lingshi/pet) - 仅装备爬虫需要
 - max_pages: 爬取页数 (默认5)
-- use_browser: 是否使用浏览器 (默认true)
 - delay_min: 最小延迟秒数 (默认5.0)
 - delay_max: 最大延迟秒数 (默认8.0)
 
@@ -35,8 +34,8 @@ API端点列表:
 """
 
 from flask import Blueprint, request
-from src.app.controllers.spider_controller import SpiderController
-from src.app.utils.response import success_response, error_response
+from ....controllers.spider_controller import SpiderController
+from ....utils.response import success_response, error_response
 
 spider_bp = Blueprint('spider', __name__)
 controller = SpiderController()
@@ -81,7 +80,6 @@ def start_basic_spider():
         if not isinstance(max_pages, int) or max_pages <= 0:
             return error_response("max_pages必须是大于0的整数")
         
-        use_browser = data.get('use_browser', True)
         delay_min = data.get('delay_min', 5.0)
         delay_max = data.get('delay_max', 8.0)
         
@@ -92,7 +90,6 @@ def start_basic_spider():
             spider_type=spider_type,
             equip_type=equip_type,
             max_pages=max_pages,
-            use_browser=use_browser,
             delay_min=delay_min,
             delay_max=delay_max
         )
@@ -109,7 +106,6 @@ def start_role_spider():
         data = request.json or {}
         result = controller.start_role_spider(
             max_pages=data.get('max_pages', 5),
-            use_browser=data.get('use_browser', True),
             delay_min=data.get('delay_min', 5.0),
             delay_max=data.get('delay_max', 8.0),
             cached_params=data.get('cached_params')
@@ -126,16 +122,66 @@ def start_equip_spider():
         data = request.json or {}
         
         equip_type = data.get('equip_type', 'normal')
+        # 是否多服务器
+        multi = data.get('multi', False)
+        # 目标服务器列表
+        # [
+        #   {
+        #     "server_id": 459,
+        #     "areaid": 3,
+        #     "server_name": "2008"
+        #   },
+        #   {
+        #     "server_id": 527,
+        #     "areaid": 3,
+        #     "server_name": "生日快乐"
+        #   },
+        #   {
+        #     "server_id": 625,
+        #     "areaid": 39,
+        #     "server_name": "钓鱼岛"
+        #   },
+        #   {
+        #     "server_id": 554,
+        #     "areaid": 58,
+        #     "server_name": "兰亭序"
+        #   },
+        #   {
+        #     "server_id": 443,
+        #     "areaid": 28,
+        #     "server_name": "沂水雪山"
+        #   },
+        #   {
+        #     "server_id": 9,
+        #     "areaid": 3,
+        #     "server_name": "紫禁城"
+        #   },
+        #   {
+        #     "server_id": 976,
+        #     "areaid": 58,
+        #     "server_name": "梦幻西游"
+        #   }
+        # ]
+        # 如果multi为True，则根据列表把服务器参数合并到cached_params中，然后依次执行任务
+
+        target_server_list = data.get('target_server_list', [])
         if equip_type not in ['normal', 'lingshi', 'pet']:
             return error_response("equip_type必须是normal、lingshi或pet之一")
+        
+        # 验证target_server_list格式
+        if target_server_list and isinstance(target_server_list, list):
+            for server in target_server_list:
+                if not isinstance(server, dict) or 'server_id' not in server or 'server_name' not in server:
+                    return error_response("target_server_list格式错误，每个服务器必须包含server_id和server_name")
         
         result = controller.start_equip_spider(
             equip_type=equip_type,
             max_pages=data.get('max_pages', 5),
-            use_browser=data.get('use_browser', True),
             delay_min=data.get('delay_min', 5.0),
             delay_max=data.get('delay_max', 8.0),
-            cached_params=data.get('cached_params')
+            cached_params=data.get('cached_params'),
+            target_server_list=target_server_list,
+            multi=multi
         )
         return success_response(data=result, message="装备爬虫已启动")
     except Exception as e:
@@ -147,12 +193,22 @@ def start_pet_spider():
     """启动召唤兽爬虫"""
     try:
         data = request.json or {}
+        target_server_list = data.get('target_server_list', [])
+        multi = data.get('multi', False)
+        
+        # 验证target_server_list格式
+        if target_server_list and isinstance(target_server_list, list):
+            for server in target_server_list:
+                if not isinstance(server, dict) or 'server_id' not in server or 'server_name' not in server:
+                    return error_response("target_server_list格式错误，每个服务器必须包含server_id和server_name")
+        
         result = controller.start_pet_spider(
             max_pages=data.get('max_pages', 5),
-            use_browser=data.get('use_browser', True),
             delay_min=data.get('delay_min', 5.0),
             delay_max=data.get('delay_max', 8.0),
-            cached_params=data.get('cached_params')
+            cached_params=data.get('cached_params'),
+            target_server_list=target_server_list,
+            multi=multi
         )
         return success_response(data=result, message="召唤兽爬虫已启动")
     except Exception as e:
@@ -268,7 +324,7 @@ def get_logs():
 def get_log_files():
     """获取日志文件列表"""
     try:
-        from src.app.controllers.system_controller import SystemController
+        from ...controllers.system_controller import SystemController
         system_controller = SystemController()
         files = system_controller.list_output_files()
         
@@ -297,6 +353,8 @@ def stream_logs():
         """生成日志流"""
         last_position = 0
         last_file = None
+        completed_wait_count = 0  # 任务完成后的等待计数
+        max_completed_wait = 10   # 任务完成后最多再等待10次（10秒）
         
         try:
             while True:
@@ -304,17 +362,38 @@ def stream_logs():
                 # 首先尝试获取当前任务状态，确定爬虫类型
                 task_status = controller.get_task_status()
                 spider_type = None
+                is_task_completed = task_status.get('status') == 'completed'
                 
                 # 如果任务正在运行，尝试从任务状态中获取爬虫类型
                 if task_status.get('status') == 'running':
                     # 从任务ID中提取爬虫类型
                     task_id = task_status.get('details', {}).get('task_id', '')
                     if task_id and '_' in task_id:
-                        spider_type = task_id.split('_')[0]
+                        # 处理多服务器任务ID格式：multi_equip_xxx 或单服务器：equip_xxx
+                        parts = task_id.split('_')
+                        if parts[0] == 'multi' and len(parts) > 1:
+                            spider_type = parts[1]  # 多服务器：取第二部分
+                        else:
+                            spider_type = parts[0]  # 单服务器：取第一部分
                         # print(f"DEBUG: 从task_id提取spider_type - task_id: {task_id}, spider_type: {spider_type}")
                     else:
                         # print(f"DEBUG: task_id格式不正确 - task_id: {task_id}")
                         pass
+                elif is_task_completed:
+                    # 任务已完成，但我们继续监控一段时间以确保所有日志都被读取
+                    task_id = task_status.get('details', {}).get('task_id', '')
+                    if task_id and '_' in task_id:
+                        # 处理多服务器任务ID格式：multi_equip_xxx 或单服务器：equip_xxx
+                        parts = task_id.split('_')
+                        if parts[0] == 'multi' and len(parts) > 1:
+                            spider_type = parts[1]  # 多服务器：取第二部分
+                        else:
+                            spider_type = parts[0]  # 单服务器：取第一部分
+                    
+                    completed_wait_count += 1
+                    if completed_wait_count > max_completed_wait:
+                        yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - 任务已完成，日志监控结束\n\n"
+                        break
                 else:
                     # 任务不在运行状态，直接返回，避免不必要的处理
                     yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - 任务未运行，等待中...\n\n"
@@ -326,8 +405,9 @@ def stream_logs():
                 
                 if not logs or not logs.get('log_file'):
                     # 没有日志文件时，发送心跳
-                    print(f"DEBUG: 没有找到日志文件 - spider_type: {spider_type}")
-                    yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - 等待日志文件...\n\n"
+                    if not is_task_completed:
+                        print(f"DEBUG: 没有找到日志文件 - spider_type: {spider_type}")
+                        yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - 等待日志文件...\n\n"
                     time.sleep(2)
                     continue
                 
@@ -342,12 +422,14 @@ def stream_logs():
                     log_file = log_files[0]  # 使用第一个匹配的文件
                 else:
                     log_file = None
-                    print(f"DEBUG: 没有找到匹配的日志文件")
+                    if not is_task_completed:
+                        print(f"DEBUG: 没有找到匹配的日志文件")
                 
                 if not log_file or not os.path.exists(log_file):
                     # 没有日志文件时，发送心跳
-                    print(f"DEBUG: 日志文件不存在 - spider_type: {spider_type}, log_file: {log_file}")
-                    yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - 等待日志文件...\n\n"
+                    if not is_task_completed:
+                        print(f"DEBUG: 日志文件不存在 - spider_type: {spider_type}, log_file: {log_file}")
+                        yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - 等待日志文件...\n\n"
                     time.sleep(2)
                     continue
                 
@@ -373,8 +455,34 @@ def stream_logs():
                                     yield f"data: {line}\n\n"
                             
                             last_position = f.tell()
+                            
+                            # 如果读取到了新内容且任务已完成，重置等待计数
+                            if new_lines and is_task_completed:
+                                completed_wait_count = 0
+                                
                     except Exception as e:
                         yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - 读取日志文件错误: {str(e)}\n\n"
+                
+                # 添加多服务器任务间的等待日志
+                if task_status.get('multi', False) and task_status.get('status') == 'running':
+                    # 检查是否在等待下一个服务器
+                    current_server = task_status.get('details', {}).get('current_server', {})
+                    completed_servers = task_status.get('details', {}).get('completed_servers', 0)
+                    total_servers = task_status.get('details', {}).get('total_servers', 0)
+                    
+                    # 如果当前没有服务器在运行，说明正在等待
+                    if current_server and completed_servers > 0 and completed_servers < total_servers:
+                        # 计算等待时间（基于延迟参数）
+                        delay_min = 5.0  # 默认最小延迟
+                        delay_max = 8.0  # 默认最大延迟
+                        avg_delay = (delay_min + delay_max) / 2
+                        
+                        # 发送等待日志
+                        yield f"data: {time.strftime('%Y-%m-%d %H:%M:%S')} - [系统] 服务器 {current_server.get('server_name', '未知')} 爬取完成，等待 {avg_delay:.1f} 秒后继续下一个服务器...\n\n"
+                        
+                        # 等待一段时间，避免重复发送等待日志
+                        time.sleep(avg_delay)
+                        continue
                 
                 time.sleep(1)  # 每1秒检查一次
                 
@@ -397,7 +505,7 @@ def stream_logs():
 def list_files():
     """列出输出文件"""
     try:
-        from src.app.controllers.system_controller import SystemController
+        from ...controllers.system_controller import SystemController
         system_controller = SystemController()
         files = system_controller.list_output_files()
         return success_response(data={"items": files})
@@ -409,7 +517,7 @@ def list_files():
 def download_file(filename):
     """下载文件"""
     try:
-        from src.app.controllers.system_controller import SystemController
+        from ...controllers.system_controller import SystemController
         from flask import send_file
         system_controller = SystemController()
         file_path = system_controller.get_file_path(filename)

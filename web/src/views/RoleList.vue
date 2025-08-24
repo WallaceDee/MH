@@ -1,324 +1,156 @@
 <template>
   <div class="role-list">
-    <div class="filter-bar">
-      <el-collapse v-model="activeCollapse">
-        <el-collapse-item title="搜索条件" name="1">
-          <el-form :model="searchForm" class="search-form">
-            <el-form-item label="选择月份">
-              <el-date-picker v-model="searchForm.selectedDate" :clearable="false" type="month" placeholder="选择月份"
-                format="yyyy-MM" value-format="yyyy-MM" @change="handleDateChange" />
-            </el-form-item>
-            <el-form-item label="人物等级">
-              <el-input-number :controls="false" v-model="searchForm.level_min" :min="0" :max="175"
-                style="width: 60px" />
-              <span class="mx-2">-</span>
-              <el-input-number :controls="false" v-model="searchForm.level_max" :min="0" :max="175"
-                style="width: 60px" />
-              <div class="level-quick-select">
-                <el-button v-for="level in [89, 109, 129, 155, 159, 175]" :key="level"
-                  @click="handleQuickLevelSelect(level)">
-                  {{ level }}级
-                </el-button>
-              </div>
-            </el-form-item>
-            <el-form-item label="师门技能">
-              <el-select v-model="searchForm.school_skill_num" placeholder="技能数量" style="width: 80px">
-                <el-option label="不限" value="" />
-                <el-option v-for="n in 7" :key="n" :label="n" :value="n" />
-              </el-select>
-              <span class="mx-2">个技能等级≥</span>
-              <el-input-number :controls="false" v-model="searchForm.school_skill_level" :min="0" :max="180"
-                style="width: 60px" />
-            </el-form-item>
-            <el-form-item label="角色修炼">
-              <div class="cultivation-group">
-                <el-row>
-                  <el-col :span="6">
-                    <span>攻击：</span>
-                    <el-input-number placeholder="攻击" :controls="false" v-model="searchForm.expt_gongji" :min="0"
-                      :max="25" style="width: 60px" />/<el-input-number placeholder="上限" :controls="false"
-                      v-model="searchForm.max_expt_gongji" :min="0" :max="25" style="width: 60px" />
-                  </el-col>
-                  <el-col :span="6">
-                    <span>防御：</span>
-                    <el-input-number placeholder="防御" :controls="false" v-model="searchForm.expt_fangyu" :min="0"
-                      :max="25" style="width: 60px" />/<el-input-number placeholder="上限" :controls="false"
-                      v-model="searchForm.max_expt_fangyu" :min="0" :max="25" style="width: 60px" />
-                  </el-col>
-                  <el-col :span="6">
-                    <span>法术：</span>
-                    <el-input-number placeholder="法术" :controls="false" v-model="searchForm.expt_fashu" :min="0"
-                      :max="25" style="width: 60px" />/<el-input-number placeholder="上限" :controls="false"
-                      v-model="searchForm.max_expt_fashu" :min="0" :max="25" style="width: 60px" /></el-col>
-                  <el-col :span="6">
-                    <span>抗法：</span>
-                    <el-input-number placeholder="抗法" :controls="false" v-model="searchForm.expt_kangfa" :min="0"
-                      :max="25" style="width: 60px" />/<el-input-number placeholder="上限" :controls="false"
-                      v-model="searchForm.max_expt_kangfa" :min="0" :max="25" style="width: 60px" />
-                  </el-col>
-
-                </el-row>
-                <el-row>
-                  <el-col :span="6">
-                    <span>猎术≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.expt_lieshu" :min="0" :max="25"
-                      style="width: 60px" /> <span class="mx-2 text-gray">（不计入修炼总和）</span>
-                  </el-col>
-                  <el-col :span="6">
-                    <span>总和≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.expt_total" :min="0" :max="100"
-                      style="width: 60px" />
-                  </el-col>
-                </el-row>
-              </div>
-            </el-form-item>
-            <el-form-item label="召唤兽修炼">
-              <div class="cultivation-group">
-                <el-row>
-                  <el-col :span="6">
-                    <span>攻击控制≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.bb_expt_gongji" :min="0" :max="25"
-                      style="width: 60px" />
-                  </el-col>
-                  <el-col :span="6">
-                    <span class="mx-2">防御控制≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.bb_expt_fangyu" :min="0" :max="25"
-                      style="width: 60px" />
-                  </el-col>
-                  <el-col :span="6">
-                    <span class="mx-2">法术控制≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.bb_expt_fashu" :min="0" :max="25"
-                      style="width: 60px" />
-                  </el-col>
-                  <el-col :span="6">
-                    <span class="mx-2">抗法控制≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.bb_expt_kangfa" :min="0" :max="25"
-                      style="width: 60px" />
-                  </el-col>
-
-                </el-row>
-
-                <el-row>
-                  <el-col :span="6"> <span>育兽术≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.skill_drive_pet" :min="0" :max="25"
-                      style="width: 60px" />
-                    <span class="mx-2 text-gray">（不计入宠修总和）</span></el-col>
-                  <el-col :span="6">
-                    <span class="mx-2">宠修总和≥</span>
-                    <el-input-number :controls="false" v-model="searchForm.bb_expt_total" :min="0" :max="100"
-                      style="width: 60px" />
-                  </el-col>
-                </el-row>
-              </div>
-            </el-form-item>
-            <el-form-item label="生活技能">
-              <div class="cultivation-group">
-                <el-row>
-                  <el-col :span="4">
-                    <span>强身术≥</span>
-                    <el-input v-model.number="searchForm.skill_qiang_shen" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>强壮≥</span>
-                    <el-input v-model.number="searchForm.skill_qiang_zhuang" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>神速≥</span>
-                    <el-input v-model.number="searchForm.skill_shensu" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>冥想≥</span>
-                    <el-input v-model.number="searchForm.skill_ming_xiang" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>暗器技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_anqi" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>打造技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_dazao" style="width: 60px" clearable />
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="4">
-                    <span>裁缝技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_caifeng" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>巧匠之术≥</span>
-                    <el-input v-model.number="searchForm.skill_qiaojiang" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>炼金术≥</span>
-                    <el-input v-model.number="searchForm.skill_lianjin" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>养生之道≥</span>
-                    <el-input v-model.number="searchForm.skill_yangsheng" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>烹饪技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_pengren" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>中药医理≥</span>
-                    <el-input v-model.number="searchForm.skill_zhongyao" style="width: 60px" clearable />
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="4">
-                    <span>灵石技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_lingshi" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>健身术≥</span>
-                    <el-input v-model.number="searchForm.skill_jianshen" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>逃离技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_taoli" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>追捕技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_zhuibu" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>熔炼技巧≥</span>
-                    <el-input v-model.number="searchForm.skill_ronglian" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>淬灵之术≥</span>
-                    <el-input v-model.number="searchForm.skill_cuiling" style="width: 60px" clearable />
-                  </el-col>
-                </el-row>
-                <el-row>
-                  <el-col :span="4">
-                    <span>风之感应≥</span>
-                    <el-input v-model.number="searchForm.skill_wind_sense" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>雨之感应≥</span>
-                    <el-input v-model.number="searchForm.skill_rain_sense" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="4">
-                    <span>雪之感应≥</span>
-                    <el-input v-model.number="searchForm.skill_snow_sense" style="width: 60px" clearable />
-                  </el-col>
-                </el-row>
-              </div>
-            </el-form-item>
-            <el-form-item label="其他">
-              <div class="cultivation-group">
-                <el-row>
-                  <el-col :span="4">
-                    <span>物品数量≤</span>
-                    <el-input v-model.number="searchForm.equip_num" style="width: 60px" clearable />
-                  </el-col>
-                  <el-col :span="10">
-                    <span>宠物 <el-input placeholder="等级大于" v-model.number="searchForm.pet_num_level" style="width: 100px"
-                        clearable />的数量≤</span>
-                    <el-input placeholder="数量" v-model.number="searchForm.pet_num" style="width: 80px" clearable />
-                  </el-col>
-                </el-row>
-              </div>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleSearch">搜索</el-button>
-              <el-button @click="handleReset">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </el-collapse-item>
-      </el-collapse>
-    </div>
-
-    <el-table v-loading="loading" :data="RoleApi" style="width: 100%;border: 1px solid #9ea0bf;" stripe @sort-change="handleSortChange">
-      <!-- 基本信息 -->
-      <el-table-column width="100" align="center">
-        <template slot-scope="scope">
-          <RoleImage :other_info="scope.row.other_info" :roleInfo="scope.row.roleInfo" />
-          <el-link :href="getCBGLinkByType(scope.row.eid, 'role')" type="danger" target="_blank"
-            style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;"> {{
-              scope.row.role_name || scope.row.seller_nickname }}</el-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="等级/门派/飞升" width="160" align="center">
-        <template slot-scope="scope">
-          <span class="vertical-middle">
-            <i class="icon-chai" v-if="scope.row.is_split_independent_role === 1"></i>
-            <i class="icon-zheng" v-if="scope.row.is_split_main_role === 1"></i>
+    <el-card class="filters" shadow="never">
+      <div slot="header" class="card-header">
+        <div><span class="emoji-icon">🔍</span> 筛选</div>
+      </div>
+      <el-form :model="searchForm" class="search-form" :inline="true">
+        <el-form-item label="选择月份">
+          <el-date-picker v-model="searchForm.selectedDate" :clearable="false" type="month" placeholder="选择月份"
+            format="yyyy-MM" value-format="yyyy-MM" @change="handleDateChange" />
+        </el-form-item>
+        <el-form-item label="人物等级">
+          <el-input-number :controls="false" v-model="searchForm.level_min" :min="0" :max="175" style="width: 60px"
+            size="mini" @change="handleLevelChange" />
+          <span class="mx-2">-</span>
+          <el-input-number :controls="false" v-model="searchForm.level_max" :min="0" :max="175" style="width: 60px"
+            size="mini" @change="handleLevelChange" />
+          <div class="level-quick-select">
+            <el-tag size="mini" v-for="level in [109, 129, 155, 159, 175]" :key="level" :effect="getLevelEffect(level)"
+              @click="handleQuickLevelSelect(level)" style="cursor: pointer;margin-right: 4px;">
+              {{ level }}级
+            </el-tag>
+          </div>
+        </el-form-item>
+        <el-form-item label="物品数量≤">
+          <el-input v-model.number="searchForm.equip_num" style="width: 60px" clearable />
+        </el-form-item>
+        <el-form-item label="宠物数量≤">
+          <el-input v-model.number="searchForm.pet_num" style="width: 60px" clearable />
+        </el-form-item>
+        <el-form-item label="宠物等级≥">
+          <el-input v-model.number="searchForm.pet_num_level" style="width: 60px" clearable />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+          <el-button @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+    <el-checkbox-group v-model="checkedList">
+      <el-table ref="roleTable" v-loading="loading" :data="stickyRoleList.concat(tableData)"
+        style="width: 100%;border: 1px solid #9ea0bf;" stripe @sort-change="handleSortChange">
+        <!-- 基本信息 -->
+        <el-table-column width="110" align="center" fixed="left">
+          <template #header>
+            <el-link :underline="false" v-if="stickyRoleList.length > 0" href="javascript:void(0);"
+              @click.native="clearAllStickyRoles" class="cell"
+              style="font-size: 12px;font-weight: bold;color: #909399;white-space: nowrap;">批量解锁 ({{
+                stickyRoleList.length }})</el-link>
+          </template>
+          <template slot-scope="scope">
+            <div class="sticky-wrapper">
+              <RoleImage :key="scope.row.eid" :other_info="scope.row.other_info" :roleInfo="scope.row.roleInfo">
+              </RoleImage>
+              <el-checkbox :label="scope.row.eid" @change="handleSingleCheckboxChange">锁定</el-checkbox>
+            </div><el-link :href="getCBGLinkByType(scope.row.eid, 'role')" type="danger" target="_blank"
+              style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;"> {{
+                scope.row.seller_nickname || scope.row.seller_nickname }}</el-link>
+          </template>
+        </el-table-column>
+        <el-table-column prop="sum_exp" label="门派/等级/经验" width="160" align="center" sortable="custom">
+          <template slot-scope="scope">
+            <span class="vertical-middle">
+              <i class="icon-chai" v-if="scope.row.is_split_independent_role === 1"></i>
+              <i class="icon-zheng" v-if="scope.row.is_split_main_role === 1"></i>
+            {{ scope.row.server_name }}/
             {{ get_school_name(scope.row.school) }}
-          </span>
-          <div class="js-level cGray">{{ scope.row.level }}级/{{
-            scope.row.sum_exp
-          }}亿</div>
-          {{ scope.row.fly_status }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="highlight" label="亮点" width="100" align="center" sortable="custom">>
-        <template slot-scope="scope">
-          <span v-html="gen_highlight(scope.row.highlight)"></span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="dynamic_tags" label="动态" width="100" align="center" sortable="custom">
-        <template slot-scope="scope">
-          <span v-html="gen_dynamic_tags(scope.row.dynamic_tags)"></span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="price" label="价格 (元)" width="140" sortable="custom" align="center">
-        <template #default="scope">
-          {{ scope.row.server_name }}
-          <div v-html="formatFullPrice(scope.row)"></div>
-        </template>
-      </el-table-column>
-      <el-table-column prop="collect_num" label="收藏" width="60" align="center">
-      </el-table-column>
-      <el-table-column label="装备估价" width="120" align="center">
-        <template #default="scope">
-          <el-link v-if="get_equip_num(scope.row.roleInfo) > 0" @click="handleEquipPrice(scope.row.roleInfo)"
-            type="primary" target="_blank">
-            <el-statistic group-separator="," :precision="2" :value="0"
-              :title="`⚔️ ${get_equip_num(scope.row.roleInfo)}件`" prefix="￥"
-              :value-style="{ fontSize: '14px' }"></el-statistic>
-          </el-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="召唤兽估价" width="120" align="center">
-        <template #default="scope">
-          <el-link v-if="get_pet_num(scope.row.roleInfo) > 0" @click="handlSummonePrice(scope.row)" type="primary"
-            target="_blank">
-            <el-statistic group-separator="," :precision="2" :value="0"
-              :title="`🐲 ${get_pet_num(scope.row.roleInfo)}只`" prefix="￥"
-              :value-style="{ fontSize: '14px' }"></el-statistic>
-          </el-link>
-        </template>
-      </el-table-column>
-      <!-- 修炼信息 -->
-      <el-table-column label="修炼/控制力" width="300" align="center">
-        <template slot-scope="scope">
-          <span class="ml-10">攻:{{ scope.row.expt_ski1 }}/{{ scope.row.max_expt1 }}</span>
-          <span class="ml-10">防:{{ scope.row.expt_ski2 }}/{{ scope.row.max_expt2 }}</span>
-          <span class="ml-10">法:{{ scope.row.expt_ski3 }}/{{ scope.row.max_expt3 }}</span>
-          <span class="ml-10">抗:{{ scope.row.expt_ski4 }}/{{ scope.row.max_expt4 }}</span>
-          <span class="ml-10">猎:{{ scope.row.expt_ski5 }}
-            <div>
-              <span class="ml-10">攻:{{ scope.row.beast_ski1 }}</span>
-              <span class="ml-10">防:{{ scope.row.beast_ski2 }}</span>
-              <span class="ml-10">法:{{ scope.row.beast_ski3 }}</span>
-              <span class="ml-10">抗:{{ scope.row.beast_ski4 }}</span>
-            </div>
-          </span>
-        </template>
-      </el-table-column>
-      <!-- 时间信息 -->
-      <el-table-column prop="update_time" label="更新时间" width="200" />
-      <el-table-column prop="create_time" label="创建时间" width="200" />
-      <el-table-column prop="server" label="操作" width="150">
-        <template slot-scope="scope">
-          <el-link href="javascript:void(0)" type="danger" @click.native="handleDelete(scope.row)">删除</el-link>
-        </template>
-      </el-table-column>
-    </el-table>
-
+            </span>
+            <div class="js-level cGray">{{ scope.row.level }}级/{{
+              scope.row.sum_exp
+              }}亿</div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="highlight" label="亮点" width="100" align="center" sortable="custom">>
+          <template slot-scope="scope">
+            <span v-html="gen_highlight(scope.row.highlight)"></span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="dynamic_tags" label="动态" width="100" align="center" sortable="custom">
+          <template slot-scope="scope">
+            <span v-html="gen_dynamic_tags(scope.row.dynamic_tags)"></span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="price" label="价格 (元)" width="140" sortable="custom" align="center">
+          <template #default="scope">
+            <div v-html="formatFullPrice(scope.row)"></div>
+            <el-tag  v-if="get_price_change(scope.row)!==undefined"  :type="get_price_change(scope.row)>0?'danger':'success'">
+              <i :class="`el-icon-${get_price_change(scope.row)>0?'bottom':'top'}`" :style="`color: #${get_price_change(scope.row)>0?'F56C6C;':'67C23A'}`">￥{{ get_price_change(scope.row) }}</i>
+            </el-tag>
+            </template>
+        </el-table-column>
+        <el-table-column prop="history_price" label="历史价格" width="120" align="center" sortable="custom">
+          <template slot-scope="scope">
+              <span  v-for="(history, index) in JSON.parse(scope.row.history_price)" :key="index" :title="history.timestamp" v-html="formatFullPrice(history.price, true)" style="text-decoration: line-through;filter: grayscale(100%);"> </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="accept_bargain" label="还价" width="80" align="center" sortable="custom">
+          <template slot-scope="scope">
+            <el-tag type="success" v-if="scope.row.accept_bargain == 1">接受</el-tag>
+            <el-tag type="danger" v-else>拒绝</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="collect_num" label="收藏" width="80" align="center" sortable="custom">
+        </el-table-column>
+        <el-table-column label="装备估价" width="120" align="center">
+          <template #default="scope">
+            <el-link v-if="get_equip_num(scope.row.roleInfo) > 0" @click="handleEquipPrice(scope.row)" type="primary"
+              target="_blank">
+              <el-statistic group-separator="," :precision="2" :value="0"
+                :title="`⚔️ ${get_equip_num(scope.row.roleInfo)}件`" prefix="￥"
+                :value-style="{ fontSize: '14px' }"></el-statistic>
+            </el-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="召唤兽估价" width="120" align="center">
+          <template #default="scope">
+            <el-link v-if="get_pet_num(scope.row.roleInfo) > 0" @click="handlSummonePrice(scope.row)" type="primary"
+              target="_blank">
+              <el-statistic group-separator="," :precision="2" :value="0"
+                :title="`🐲 ${get_pet_num(scope.row.roleInfo)}只`" prefix="￥"
+                :value-style="{ fontSize: '14px' }"></el-statistic>
+            </el-link>
+          </template>
+        </el-table-column>
+        <!-- 修炼信息 -->
+        <el-table-column label="修炼/控制力" min-width="400" align="center">
+          <template slot-scope="scope">
+            <el-tag v-for="xiulian in scope.row.roleInfo.role_xiulian" :key="xiulian.name">{{ xiulian.name.replace('修炼',
+              '') }}{{ xiulian.info }}</el-tag>
+            <br>
+            <el-tag v-for="ctrl_skill in scope.row.roleInfo.pet_ctrl_skill" :key="ctrl_skill.name">{{ ctrl_skill.name
+              }}{{
+                ctrl_skill.grade }}</el-tag>
+          </template>
+        </el-table-column>
+        <!-- 时间信息 -->
+        <el-table-column prop="update_time" label="创建、更新" width="200">
+          <template slot-scope="scope">
+            <el-tag type="info">{{ scope.row.create_time }}</el-tag>
+            <el-tag>{{ scope.row.update_time }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="server" label="操作" width="100" fixed="right">
+          <template slot-scope="scope">
+            <el-link href="javascript:void(0)" type="danger" @click.native="handleDelete(scope.row)">删除</el-link>
+            <el-link v-if="roleType === 'normal'" type="primary" href="javascript:void(0)"
+              @click.native="changeRoleType(scope.row)">转为锚点</el-link>
+            <el-link v-else type="primary" href="javascript:void(0)"
+              @click.native="changeRoleType(scope.row)">移除锚点</el-link>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-checkbox-group>
     <div class="pagination-container">
       <el-pagination :current-page.sync="currentPage" :page-size.sync="pageSize" :total="total"
         :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next" @size-change="handleSizeChange"
@@ -350,19 +182,115 @@ import PetBatchValuationResult from '@/components/PetBatchValuationResult.vue'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 export default {
-  name: 'RoleApi',
+  name: 'RoleList',
   mixins: [commonMixin],
   components: {
     RoleImage,
     BatchValuationResult,
     PetBatchValuationResult
   },
+  computed: {
+    roleType() {
+      return this.$route.params.type || 'normal'
+    }
+  },
+  watch: {
+    roleType() {
+      this.currentPage = 1
+
+      // 更新路由参数，移除页码参数（因为重置到第1页）
+      const newParams = {
+        type: this.roleType,
+        levelRange: this.$route.params.levelRange
+      }
+
+      this.$router.replace({
+        name: 'RoleList',
+        params: newParams
+      })
+
+      this.fetchData()
+    },
+
+    // 监听路由参数变化，同步更新表单
+    '$route.params.levelRange': {
+      handler(newLevelRange) {
+        if (newLevelRange) {
+          const [min, max] = newLevelRange.split(',').map(Number)
+          if (!isNaN(min) && !isNaN(max)) {
+            this.searchForm.level_min = min
+            this.searchForm.level_max = max
+          }
+        } else {
+          // 当路由参数为 undefined 时，清空表单等级
+          this.searchForm.level_min = undefined
+          this.searchForm.level_max = undefined
+        }
+      },
+      immediate: true
+    },
+
+    // 监听路由参数变化，同步更新页码
+    '$route.params.page': {
+      handler(newPage) {
+        if (newPage) {
+          const pageNum = parseInt(newPage)
+          if (!isNaN(pageNum) && pageNum > 0) {
+            this.currentPage = pageNum
+          } else {
+            this.currentPage = 1
+          }
+        } else {
+          this.currentPage = 1
+        }
+      },
+      immediate: true
+    },
+
+    // 监听路由query参数变化，同步更新排序状态
+    '$route.query': {
+      handler(newQuery) {
+        // 同步排序参数
+        if (newQuery.sort_by && newQuery.sort_order) {
+          const sortFields = newQuery.sort_by.split(',')
+          const sortOrders = newQuery.sort_order.split(',')
+          
+          // 清空当前排序状态
+          this.sortState = {}
+          
+          // 重新设置排序状态
+          sortFields.forEach((field, index) => {
+            const order = sortOrders[index]
+            if (order === 'ASC') {
+              this.sortState[field] = 'ascending'
+            } else if (order === 'DESC') {
+              this.sortState[field] = 'descending'
+            }
+          })
+          
+          // 更新searchForm中的排序参数
+          this.$set(this.searchForm, 'sort_by', newQuery.sort_by)
+          this.$set(this.searchForm, 'sort_order', newQuery.sort_order)
+        } else {
+          // 如果没有排序参数，清空排序状态
+          this.sortState = {}
+          this.$set(this.searchForm, 'sort_by', undefined)
+          this.$set(this.searchForm, 'sort_order', undefined)
+        }
+      },
+      immediate: true
+    }
+  },
   data() {
     return {
+      stickyRoleList: [],
+      checkedList: [],
       valuationLoading: false,
       batchValuateParams: {
         similarity_threshold: 0.8,
-        max_anchors: 30
+        max_anchors: 30,
+        serverid: undefined,
+        server_name: undefined
       },
       valuationResults: [],
       valuationTotalValue: 0,
@@ -375,58 +303,19 @@ export default {
       petValuationDialogVisible: false,
       petValuationLoading: false,
       loading: false,
-      RoleApi: [],
+      tableData: [],
       currentPage: 1,
-      pageSize: 20,
+      pageSize: 10,
       total: 0,
       searchForm: {
         selectedDate: dayjs().format('YYYY-MM'),
         level_min: undefined,
         level_max: undefined,
-        school_skill_num: '',
-        school_skill_level: undefined,
-        // 角色修炼
-        expt_gongji: undefined,
-        expt_fangyu: undefined,
-        expt_fashu: undefined,
-        expt_kangfa: undefined,
-        expt_total: undefined,
-        max_expt_gongji: undefined,
-        max_expt_fangyu: undefined,
-        max_expt_fashu: undefined,
-        max_expt_kangfa: undefined,
-        expt_lieshu: undefined,
-        // 召唤兽修炼
-        bb_expt_gongji: undefined,
-        bb_expt_fangyu: undefined,
-        bb_expt_fashu: undefined,
-        bb_expt_kangfa: undefined,
-        bb_expt_total: undefined,
-        skill_drive_pet: undefined,
-        skill_qiang_shen: undefined,
-        skill_qiang_zhuang: undefined,
-        skill_shensu: undefined,
-        skill_ming_xiang: undefined,
-        skill_anqi: undefined,
-        skill_dazao: undefined,
-        skill_caifeng: undefined,
-        skill_qiaojiang: undefined,
-        skill_lianjin: undefined,
-        skill_yangsheng: undefined,
-        skill_pengren: undefined,
-        skill_zhongyao: undefined,
-        skill_lingshi: undefined,
-        skill_jianshen: undefined,
-        skill_taoli: undefined,
-        skill_zhuibu: undefined,
-        skill_ronglian: undefined,
-        skill_cuiling: undefined,
-        skill_wind_sense: undefined,
-        skill_rain_sense: undefined,
-        skill_snow_sense: undefined,
         equip_num: undefined,
         pet_num: undefined,
-        pet_num_level: undefined
+        pet_num_level: undefined,
+        sort_by: undefined,
+        sort_order: undefined
       },
       activeCollapse: [],
       sortState: {
@@ -438,10 +327,259 @@ export default {
   },
 
   mounted() {
+    const originalGetHeaderCellClass = this.$refs.roleTable.$refs.tableHeader.getHeaderCellClass
+    this.$refs.roleTable.$refs.tableHeader.getHeaderCellClass = (rowIndex, columnIndex, row, column) => {
+      let classes = originalGetHeaderCellClass(rowIndex, columnIndex, row, column)
+      if (this.sortState[column.property]) {
+        classes += ' ' + this.sortState[column.property]
+      }
+      return classes
+    }
+
+    // 从localStorage加载锁定的角色列表
+    this.loadStickyRoleList()
+
     this.fetchData()
   },
 
+  beforeDestroy() {
+    // 页面卸载前保存数据到localStorage
+    this.saveStickyRoleList()
+  },
+
   methods: {
+    // 检查路由参数是否有变化的工具方法
+    hasRouteChanges(newParams, newQuery = null) {
+      const hasParamChanges = JSON.stringify(newParams) !== JSON.stringify(this.$route.params)
+      if (newQuery) {
+        const hasQueryChanges = JSON.stringify(newQuery) !== JSON.stringify(this.$route.query)
+        return hasParamChanges || hasQueryChanges
+      }
+      return hasParamChanges
+    },
+
+    // 安全更新路由的方法
+    safeRouteUpdate(newParams, newQuery = null) {
+      if (this.hasRouteChanges(newParams, newQuery)) {
+        this.$router.replace({
+          name: this.$route.name,
+          params: newParams,
+          query: newQuery || this.$route.query
+        })
+      }
+    },
+
+    get_price_change({price, history_price}){
+      const history_price_list = JSON.parse(history_price).map(item=>item.price)
+      if(history_price_list.length === 0) return
+      const max_price = Math.max(...history_price_list)
+      return (max_price - price) /  100
+    },
+    // 保存锁定的角色列表到localStorage
+    saveStickyRoleList() {
+      try {
+        // 全量保存数据，包括所有角色信息
+        const stickyData = this.stickyRoleList.map(item => {
+          // 深拷贝对象，避免引用问题
+          const fullData = JSON.parse(JSON.stringify(item))
+          // 添加时间戳
+          fullData.timestamp = Date.now()
+          return fullData
+        })
+
+        localStorage.setItem('cbg_sticky_role_list', JSON.stringify(stickyData))
+        console.log('锁定角色列表已全量保存到localStorage:', stickyData.length)
+      } catch (error) {
+        console.error('保存锁定角色列表失败:', error)
+      }
+    },
+
+    // 从localStorage加载锁定的角色列表
+    loadStickyRoleList() {
+      try {
+        const stored = localStorage.getItem('cbg_sticky_role_list')
+        if (stored) {
+          const stickyData = JSON.parse(stored)
+          // 为每个锁定的角色添加is_sticky标记
+          const processedData = stickyData.map(item => ({
+            ...item,
+            is_sticky: true
+          }))
+
+          this.stickyRoleList = processedData
+          // 更新checkedList以保持复选框状态同步
+          this.checkedList = processedData.map(item => item.eid)
+          console.log('从localStorage加载锁定角色列表:', processedData.length)
+        }
+      } catch (error) {
+        console.error('加载锁定角色列表失败:', error)
+        // 如果加载失败，清空localStorage中的数据
+        localStorage.removeItem('cbg_sticky_role_list')
+        this.stickyRoleList = []
+        this.checkedList = []
+      }
+    },
+    handleSingleCheckboxChange(checked, event) {
+      const eid = event.target.value || event.target.labels[0].textContent
+      if (checked) {
+        const currentRow = this.tableData.find(item => item.eid === eid)
+        if (currentRow) {
+          // 检查是否已经存在于stickyRoleList中
+          const exists = this.stickyRoleList.find(item => item.eid === eid)
+          if (!exists) {
+            currentRow.is_sticky = true
+            this.stickyRoleList.push(currentRow)
+            // this.tableData = this.tableData.filter(item => item.eid !== eid)
+            // 保存到localStorage
+            this.saveStickyRoleList()
+
+            this.$notify.success({
+              title: '锁定成功',
+              message: `已锁定角色: ${currentRow.seller_nickname}`,
+              duration: 2000
+            })
+          }
+        }
+      } else {
+        // 从stickyRoleList中移除
+        this.stickyRoleList = this.stickyRoleList.filter(item => item.eid !== eid)
+        // this.tableData.unshift(this.stickyRoleList.find(item => item.eid === eid))
+        // 保存到localStorage
+        this.saveStickyRoleList()
+
+        // 找到对应的角色信息用于提示
+        const removedRole = this.tableData.find(item => item.eid === eid)
+        if (removedRole) {
+          this.$notify.info({
+            title: '解锁成功',
+            message: `已解锁角色: ${removedRole.seller_nickname}`,
+            duration: 2000
+          })
+        }
+      }
+    },
+
+    // 批量解锁所有锁定的角色
+    clearAllStickyRoles() {
+      this.$confirm('确定要解锁所有锁定的角色吗？', '确认解锁', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.stickyRoleList = []
+        this.checkedList = []
+        // 清除localStorage中的数据
+        localStorage.removeItem('cbg_sticky_role_list')
+
+        this.$notify.success({
+          title: '批量解锁成功',
+          message: '已解锁所有锁定的角色',
+          duration: 2000
+        })
+      }).catch(() => {
+        // 用户取消操作
+      })
+    },
+    getLevelEffect(level) {
+      const [min, max] = this.$route.params.levelRange.split(',').map(Number)
+      if (level >= min && level <= max) {
+        return 'dark'
+      }
+      return 'light'
+    },
+    async changeRoleType(row) {
+      try {
+        // 确认转移
+        await this.$confirm(
+          `确定要转移角色 ${row.seller_nickname} 吗？`,
+          '确认转移',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        // 获取当前年月
+        const [year, month] = this.searchForm.selectedDate.split('-')
+
+        // 调用转移API
+        const response = await this.$api.role.switchRoleType(row.eid, {
+          year,
+          month,
+          role_type: this.roleType,
+          target_role_type: this.roleType === 'empty' ? 'normal' : 'empty'
+        })
+
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '成功',
+            message: '角色转移成功'
+          })
+          // 重新获取数据
+          await this.fetchData()
+        } else {
+          this.$notify.error({
+            title: '错误',
+            message: response.message || '转移失败'
+          })
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('转移角色失败:', error)
+          this.$notify.error({
+            title: '错误',
+            message: '转移角色失败'
+          })
+        }
+      }
+    },
+    async handleDelete(row) {
+      try {
+        // 确认删除
+        await this.$confirm(
+          `确定要删除角色 ${row.seller_nickname} 吗？`,
+          '确认删除',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        // 获取当前年月
+        const [year, month] = this.searchForm.selectedDate.split('-')
+
+        // 调用删除API
+        const response = await this.$api.role.deleteRole(row.eid, {
+          year,
+          month,
+          role_type: this.roleType
+        })
+
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '成功',
+            message: '角色删除成功'
+          })
+          // 重新获取数据
+          await this.fetchData()
+        } else {
+          this.$notify.error({
+            title: '错误',
+            message: response.message || '删除失败'
+          })
+        }
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('删除角色失败:', error)
+          this.$notify.error({
+            title: '错误',
+            message: '删除角色失败'
+          })
+        }
+      }
+    },
     // 关闭装备估价结果对话框
     closeValuationDialog() {
       this.valuationDialogVisible = false
@@ -459,11 +597,14 @@ export default {
       this.petValuationList = []
       this.petValuationLoading = false
     },
-    async handlSummonePrice(summone) {
-      const pet_list_desc = [...summone.roleInfo.pet_info, ...summone.roleInfo.split_pets]
-      let pet_list = JSON.parse(summone.all_summon_json)
+    async handlSummonePrice(role) {
+      const pet_list_desc = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
+      let pet_list = JSON.parse(role.all_summon_json)
       if (!pet_list || pet_list.length === 0) {
-        this.$message.warning('没有可估价的宠物')
+        this.$notify.warning({
+          title: '提示',
+          message: '没有可估价的宠物'
+        })
         return
       }
       pet_list = pet_list.map((item) => {
@@ -480,10 +621,15 @@ export default {
         const equip_list = []
         for (var i = 0; i < 3; i++) {
           var equip = item['summon_equip' + (i + 1)]
+          var equip_info = window.CBG_GAME_CONFIG.equip_info[equip?.iType] || {}
           if (equip) {
             equip_list.push({
               type: equip.iType,
               desc: equip.cDesc,
+              name: equip_info.name,
+              icon: window.ResUrl + `/images/equip/small/${equip?.iType}.gif`,
+              lock_type: role.RoleInfoParser.get_lock_types(equip),
+              static_desc: equip_info.desc?.replace(/#R/g, '<br />')
             })
           } else {
             equip_list.push(null)
@@ -501,6 +647,7 @@ export default {
           }
         }
         const pet_detail = pet_list_desc.find(pet => pet.equip_sn === item.equip_sn)
+        console.log({ pet_detail, item }, '00000000000000000000')
         //召唤兽特征提取必传参数
         return {
           pet_detail,
@@ -510,11 +657,14 @@ export default {
           growth: item.grow / 1000,
           is_baobao: item.iBaobao == 1 ? '是' : '否',
           all_skill: all_skill.join('|'),
-          evol_skill_list,
+          evol_skill_list: JSON.stringify(evol_skill_list),
+          sp_skill: pet_detail.genius,
           texing,
           lx,
           equip_list: JSON.stringify(equip_list),
           neidan: JSON.stringify(neidan),
+          serverid: role.serverid,
+          server_name: role.server_name
         }
       })
       try {
@@ -627,8 +777,8 @@ export default {
     get_equip_num(roleInfo) {
       return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length
     },
-    async handleEquipPrice({ using_equips, not_using_equips, split_equips }) {
-      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ ...item, iType: item.type, cDesc: item.desc }))
+    async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, }, serverid, server_name }) {
+      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ ...item, iType: item.type, cDesc: item.desc, serverid, server_name }))
       try {
         // 先显示弹窗和骨架屏
         this.valuationDialogVisible = true
@@ -674,15 +824,6 @@ export default {
       }
     },
     get_school_name: window.get_school_name,
-    getExAvtJsonDesc(ex_avt_json) {
-      const ex_avt_json_obj = eval(`(${ex_avt_json})`)
-      const exAvtJsonDesc = []
-      for (const key in ex_avt_json_obj) {
-        const item = ex_avt_json_obj[key]
-        exAvtJsonDesc.push(item.cName)
-      }
-      return exAvtJsonDesc
-    },
     handleSortChange({ prop, order }) {
       this.sortState[prop] = order
 
@@ -697,7 +838,30 @@ export default {
 
       this.$set(this.searchForm, 'sort_by', sortFields.join(','))
       this.$set(this.searchForm, 'sort_order', sortOrders.join(','))
+
+      // 更新路由query参数，同步排序状态到地址栏
+      const newQuery = { ...this.$route.query }
+      const oldSortBy = this.$route.query.sort_by
+      const oldSortOrder = this.$route.query.sort_order
+      
+      if (sortFields.length > 0) {
+        newQuery.sort_by = sortFields.join(',')
+        newQuery.sort_order = sortOrders.join(',')
+      } else {
+        // 如果没有排序，移除排序参数
+        delete newQuery.sort_by
+        delete newQuery.sort_order
+      }
+
+      // 只有当排序参数发生变化时才更新路由
+      if (newQuery.sort_by !== oldSortBy || newQuery.sort_order !== oldSortOrder) {
+        this.$router.replace({
+          name: this.$route.name,
+          params: this.$route.params,
+          query: newQuery
+        })
       this.handleSearch()
+      }
     },
     async fetchData() {
       this.loading = true
@@ -707,7 +871,8 @@ export default {
           page: this.currentPage,
           page_size: this.pageSize,
           year,
-          month
+          month,
+          role_type: this.roleType // 添加角色类型参数
         }
 
         // 添加搜索条件
@@ -717,30 +882,15 @@ export default {
         if (this.searchForm.level_max) {
           params.level_max = this.searchForm.level_max
         }
-        if (this.searchForm.school_skill_num) {
-          params.school_skill_num = this.searchForm.school_skill_num
+        if (this.searchForm.equip_num !== undefined) {
+          params.equip_num = this.searchForm.equip_num
         }
-        if (this.searchForm.school_skill_level) {
-          params.school_skill_level = this.searchForm.school_skill_level
+        if (this.searchForm.pet_num) {
+          params.pet_num = this.searchForm.pet_num
         }
-        // 角色修炼参数
-        if (this.searchForm.expt_gongji) params.expt_gongji = this.searchForm.expt_gongji
-        if (this.searchForm.expt_fangyu) params.expt_fangyu = this.searchForm.expt_fangyu
-        if (this.searchForm.expt_fashu) params.expt_fashu = this.searchForm.expt_fashu
-        if (this.searchForm.expt_kangfa) params.expt_kangfa = this.searchForm.expt_kangfa
-        if (this.searchForm.expt_total) params.expt_total = this.searchForm.expt_total
-        if (this.searchForm.max_expt_gongji) params.max_expt_gongji = this.searchForm.max_expt_gongji
-        if (this.searchForm.max_expt_fangyu) params.max_expt_fangyu = this.searchForm.max_expt_fangyu
-        if (this.searchForm.max_expt_fashu) params.max_expt_fashu = this.searchForm.max_expt_fashu
-        if (this.searchForm.max_expt_kangfa) params.max_expt_kangfa = this.searchForm.max_expt_kangfa
-        if (this.searchForm.expt_lieshu) params.expt_lieshu = this.searchForm.expt_lieshu
-        // 召唤兽修炼参数
-        if (this.searchForm.bb_expt_gongji) params.bb_expt_gongji = this.searchForm.bb_expt_gongji
-        if (this.searchForm.bb_expt_fangyu) params.bb_expt_fangyu = this.searchForm.bb_expt_fangyu
-        if (this.searchForm.bb_expt_fashu) params.bb_expt_fashu = this.searchForm.bb_expt_fashu
-        if (this.searchForm.bb_expt_kangfa) params.bb_expt_kangfa = this.searchForm.bb_expt_kangfa
-        if (this.searchForm.bb_expt_total) params.bb_expt_total = this.searchForm.bb_expt_total
-        if (this.searchForm.skill_drive_pet) params.skill_drive_pet = this.searchForm.skill_drive_pet
+        if (this.searchForm.pet_num_level) {
+          params.pet_num_level = this.searchForm.pet_num_level
+        }
         // 排序参数
         if (this.searchForm.sort_by) params.sort_by = this.searchForm.sort_by
         if (this.searchForm.sort_order) params.sort_order = this.searchForm.sort_order
@@ -750,11 +900,14 @@ export default {
 
         if (response.code === 200) {
           // 现在直接使用response.data和response.items
-          this.RoleApi = response.data.data.map(item => {
+          this.tableData = response.data.data.map(item => {
             const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
+            item.RoleInfoParser = roleInfo
             if (roleInfo.result) {
               item.roleInfo = roleInfo.result
             }
+            // 检查当前角色是否在锁定列表中
+            item.is_sticky = this.stickyRoleList.some(sticky => sticky.eid === item.eid)
             return item
           }) || []
           this.total = response.data.total || 0
@@ -764,11 +917,6 @@ export default {
             message: response.message || '获取数据失败'
           })
         }
-      } catch (error) {
-        this.$notify.error({
-          title: '错误',
-          message: '获取数据失败：' + error.message
-        })
       } finally {
         this.loading = false
       }
@@ -777,26 +925,121 @@ export default {
     handleSizeChange(val) {
       this.pageSize = val
       this.currentPage = 1
+
+      // 更新路由参数，移除页码参数（因为重置到第1页）
+      const newParams = {
+        type: this.roleType,
+        levelRange: this.$route.params.levelRange
+      }
+
+      this.safeRouteUpdate(newParams)
+
       this.fetchData()
     },
 
     handleCurrentChange(val) {
       this.currentPage = val
+
+      // 更新路由参数以反映当前页码
+      const newParams = {
+        type: this.roleType,
+        levelRange: this.$route.params.levelRange
+      }
+
+      // 只有当页码大于1时才添加到路由参数中
+      if (val > 1) {
+        newParams.page = val.toString()
+      }
+
+      this.safeRouteUpdate(newParams)
+
       this.fetchData()
     },
 
     handleDateChange() {
       this.currentPage = 1
+
+      // 更新路由参数，移除页码参数（因为重置到第1页）
+      const newParams = {
+        type: this.roleType,
+        levelRange: this.$route.params.levelRange
+      }
+
+      this.safeRouteUpdate(newParams)
+
       this.fetchData()
     },
 
     handleQuickLevelSelect(level) {
       this.searchForm.level_min = level
       this.searchForm.level_max = level
+
+      // 检查是否需要更新路由参数
+      const currentLevelRange = this.$route.params.levelRange
+      const newLevelRange = `${level},${level}`
+
+      // 只有当等级范围发生变化时才更新路由
+      if (currentLevelRange !== newLevelRange) {
+        this.$router.replace({
+          name: 'RoleList',
+          params: {
+            type: this.roleType,
+            levelRange: newLevelRange,
+            page: 1
+          },
+          query: this.$route.query
+        })
+      }
+
+      this.fetchData()
+    },
+
+    handleLevelChange() {
+      // 当等级输入框变化时，更新路由参数
+      const newLevelRange = this.searchForm.level_min && this.searchForm.level_max
+        ? `${this.searchForm.level_min},${this.searchForm.level_max}`
+        : undefined
+
+      const currentLevelRange = this.$route.params.levelRange
+      if (newLevelRange !== currentLevelRange) {
+        this.$router.replace({
+          name: 'RoleList',
+          params: {
+            type: this.roleType,
+            levelRange: newLevelRange
+          },
+          query: this.$route.query
+        })
+      }
     },
 
     handleSearch() {
-      this.currentPage = 1
+      // 更新路由参数以反映当前的搜索条件
+      const newLevelRange = this.searchForm.level_min && this.searchForm.level_max
+        ? `${this.searchForm.level_min},${this.searchForm.level_max}`
+        : undefined
+
+      // 只有当等级范围发生变化时才更新路由
+      const currentLevelRange = this.$route.params.levelRange
+      if (newLevelRange !== currentLevelRange) {
+        this.$router.replace({
+          name: 'RoleList',
+          params: {
+            type: this.roleType,
+            levelRange: newLevelRange
+          }
+        })
+      }
+
+      // 更新路由参数，移除页码参数（因为重置到第1页）
+      const newParams = {
+        type: this.roleType,
+        levelRange: newLevelRange,
+        page: 1
+      }
+
+      this.safeRouteUpdate(newParams)
+
       this.fetchData()
     },
 
@@ -805,52 +1048,66 @@ export default {
         selectedDate: dayjs().format('YYYY-MM'),
         level_min: undefined,
         level_max: undefined,
-        school_skill_num: '',
-        school_skill_level: undefined,
-        // 角色修炼
-        expt_gongji: undefined,
-        expt_fangyu: undefined,
-        expt_fashu: undefined,
-        expt_kangfa: undefined,
-        expt_total: undefined,
-        max_expt_gongji: undefined,
-        max_expt_fangyu: undefined,
-        max_expt_fashu: undefined,
-        max_expt_kangfa: undefined,
-        expt_lieshu: undefined,
-        // 召唤兽修炼
-        bb_expt_gongji: undefined,
-        bb_expt_fangyu: undefined,
-        bb_expt_fashu: undefined,
-        bb_expt_kangfa: undefined,
-        bb_expt_total: undefined,
-        //生活技能 TODO:
-        skill_drive_pet: undefined,
-        skill_qiang_shen: undefined,
-        skill_qiang_zhuang: undefined,
-        skill_shensu: undefined,
-        skill_ming_xiang: undefined,
-        skill_anqi: undefined,
-        skill_dazao: undefined,
-        skill_caifeng: undefined,
-        skill_qiaojiang: undefined,
-        skill_lianjin: undefined,
-        skill_yangsheng: undefined,
-        skill_pengren: undefined,
-        skill_zhongyao: undefined,
-        skill_lingshi: undefined,
-        skill_jianshen: undefined,
-        skill_taoli: undefined,
-        skill_zhuibu: undefined,
-        skill_ronglian: undefined,
-        skill_cuiling: undefined,
-        skill_wind_sense: undefined,
-        skill_rain_sense: undefined,
-        skill_snow_sense: undefined,
+        equip_num: undefined,
+        pet_num: undefined,
+        pet_num_level: undefined,
         sort_by: undefined,
         sort_order: undefined
       }
+
+      // 清空排序状态
+      this.sortState = {}
+
+      // 清除路由中的等级范围参数
+      if (this.$route.params.levelRange) {
+        this.$router.replace({
+          name: 'RoleList',
+          params: {
+            type: this.roleType,
+            levelRange: undefined
+          }
+        })
+      }
+
       this.currentPage = 1
+
+      // 更新路由参数，移除页码参数（因为重置到第1页）
+      const newParams = {
+        type: this.roleType,
+        levelRange: undefined
+      }
+
+      // 同时清除query中的排序参数
+      const newQuery = { ...this.$route.query }
+      delete newQuery.sort_by
+      delete newQuery.sort_order
+
+      // 只有当参数发生变化时才更新路由
+      const hasParamChanges = JSON.stringify(newParams) !== JSON.stringify(this.$route.params)
+      const hasQueryChanges = JSON.stringify(newQuery) !== JSON.stringify(this.$route.query)
+      
+      if (hasParamChanges || hasQueryChanges) {
+        this.$router.replace({
+          name: 'RoleList',
+          params: newParams,
+          query: newQuery
+        })
+      }
+
+      this.fetchData()
+    },
+
+    handleRoleTypeChange() {
+      this.currentPage = 1
+
+      // 更新路由参数，移除页码参数（因为重置到第1页）
+      const newParams = {
+        type: this.roleType,
+        levelRange: this.$route.params.levelRange
+      }
+
+      this.safeRouteUpdate(newParams)
+
       this.fetchData()
     },
 
@@ -859,36 +1116,35 @@ export default {
       // 格式通常是: 服务器ID_其他信息
       const parts = equipId.split('-')
       return parts[1] || null
-    },
+    }
   }
 }
 </script>
 
 <style scoped>
-.filter-bar {
+.page-header {
   margin-bottom: 20px;
+  padding: 16px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  border-left: 4px solid #409eff;
 }
 
-.search-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+.page-header h2 {
+  margin: 0;
+  color: #303133;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.filters {
+  margin-bottom: 10px;
 }
 
 .pagination-container {
   margin-top: 20px;
   display: flex;
   justify-content: center;
-}
-
-.ml-10 {
-  margin-left: 10px;
-}
-
-/* 设置表格行高 */
-.el-table>>>td {
-  padding: 5px 0;
 }
 
 .mx-2 {
@@ -936,5 +1192,38 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.sticky-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+}
+
+.sticky-wrapper .el-checkbox {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 0;
+  line-height: 0;
+  display: none;
+}
+
+.sticky-wrapper .el-checkbox.is-checked {
+  display: block;
+}
+
+.sticky-wrapper :deep(.el-checkbox.is-checked .el-checkbox__inner) {
+  background-color: #F56C6C !important;
+  border-color: #F56C6C !important;
+}
+
+.sticky-wrapper :deep(.el-checkbox .el-checkbox__label) {
+  display: none;
+}
+
+.hover-row .sticky-wrapper .el-checkbox {
+  display: block;
 }
 </style>

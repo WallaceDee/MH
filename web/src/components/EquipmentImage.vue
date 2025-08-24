@@ -17,8 +17,8 @@
 
     </template>
     <div class="equip-desc-content" v-if="visible">
-      <div v-if="lock_type.length > 0" style="position: absolute; width: 14px; right: 12px; top: 12px;">
-        <img v-for="l in lock_type" :key="l" :src="require(`../../public/assets/images/time_lock_${l}.webp`)"
+      <div v-if="lockType.length > 0" style="position: absolute; width: 100px; right: 12px; top: 12px; display: flex;justify-content: flex-end;">
+        <img v-for="l in lockType" :key="l" :src="require(`../../public/assets/images/time_lock_${l}.webp`)"
           style="height: 14px; width: 14px;display: block;">
       </div>
       <el-row type="flex" justify="space-between">
@@ -29,7 +29,7 @@
         </el-col>
         <el-col>
           <p class="equip_desc_yellow" v-if="equipment.equip_name">{{ equipment.equip_name }}</p>
-          <p v-html="parseEquipDesc(equipment.equip_type_desc.replace(/#R/g, '<br />'), '#n')"></p>
+          <p v-html="parseEquipDesc(equipment.equip_type_desc?.replace(/#R/g, '<br />'), '#n')"></p>
           <p v-html="parseEquipDesc(equipment.large_equip_desc)"></p>
         </el-col>
       </el-row>
@@ -75,7 +75,7 @@ export default {
       type: Number,
       default: 405
     },
-    lock_type: {
+    lockType: {
       type: Array,
       default: () => []
     }
@@ -88,10 +88,10 @@ export default {
   },
   computed: {
     rightLock() {
-      return this.lock_type.filter(item => item !== 9 && item !== 'protect' && item !== 'huoyue')
+      return this.lockType.filter(item => item !== 9 && item !== 'protect' && item !== 'huoyue')
     },
     leftLock() {
-      return this.lock_type.filter(item => item === 9 || item === 'protect' || item === 'huoyue')
+      return this.lockType.filter(item => item === 9 || item === 'protect' || item === 'huoyue')
     },
     imageStyle() {
       return {

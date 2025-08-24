@@ -74,6 +74,7 @@ class WeaponPlugin(EquipmentTypePlugin):
         # 单加和双加的上限不一样，双加的addon_total上限要高一些
         addon_total_score = self._calculate_addon_total_score(
             equip_level, addon_total, addon_minjie, addon_liliang, addon_naili, addon_tizhi, addon_moli)
+        print(f"addon_total_score: {equip_level, addon_total, addon_minjie, addon_liliang, addon_naili, addon_tizhi, addon_moli}")
         derived['addon_total_score'] = addon_total_score
 
         return derived
@@ -106,6 +107,9 @@ class WeaponPlugin(EquipmentTypePlugin):
             # 区间4：130-140
             130: (420, 546),
             140: (451, 586),
+            # 区间5：150-160
+            150: (483, 627),
+            160: (490, 667),
         }
 
         # 找到最接近的等级标准
@@ -221,6 +225,8 @@ class WeaponPlugin(EquipmentTypePlugin):
         # 120| 38| 56
         # 130| 42| 64
         # 140| 45| 66
+        # 150| 48| 72
+        # 160| 61| 86
         Args:
             equip_level: 装备等级
             addon_total: 附加属性总和
@@ -244,6 +250,9 @@ class WeaponPlugin(EquipmentTypePlugin):
             # 区间4：130-140
             130: (42, 64),
             140: (45, 66),
+            # 区间5：150-160
+            150: (48, 72),
+            160: (61, 86),
         }
 
         # 找到最接近的等级标准
@@ -288,7 +297,7 @@ class WeaponPlugin(EquipmentTypePlugin):
         return {
             'init_damage_raw_score': 3.0,               # 初伤标准化得分很重要
             'all_damage_score': 3.0,          # 总伤害标准化得分很重要
-            'addon_total_score': 3.0,          # 附加属性总和标准化得分很重要
+            'addon_total_score': 4.0,          # 附加属性总和标准化得分很重要
             'addon_moli': 1.0,                 # 魔力
             'addon_minjie': 1.0,               # 敏捷
             'addon_liliang': 1.0,               # 力量

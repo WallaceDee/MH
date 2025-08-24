@@ -267,9 +267,11 @@ class PlaywrightAutoCollector:
             # 启动浏览器
             self.browser = await self.playwright.chromium.launch(
                 headless=self.headless,
+                devtools=(not self.headless),
                 args=[
                     '--disable-web-security',
                     '--disable-features=VizDisplayCompositor',
+                    '--auto-open-devtools-for-tabs',
                     '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
                 ]
             )

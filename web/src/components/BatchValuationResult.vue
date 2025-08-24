@@ -9,8 +9,11 @@
     <template v-else>
       <el-row :gutter="20" style="margin-bottom: 20px;">
         <el-col :span="6">
-          <el-statistic group-separator="," :precision="2" :value="totalValue / 100" title="估价总值" prefix="¥"
-            :value-style="{ fontSize: '28px', fontWeight: 'bold', color: '#67c23a' }">
+          <el-statistic group-separator="," :precision="2" :value="currentTotalValue / 100" title="估价总值"
+            :value-style="{ fontSize: '28px', fontWeight: 'bold' }">
+            <template slot="formatter">
+              <span v-html="formatPrice(currentTotalValue)"></span>
+            </template>
           </el-statistic>
         </el-col>
         <el-col :span="6">
@@ -23,26 +26,26 @@
         </el-col>
       </el-row>
       <el-row type="flex" style="flex-wrap: wrap;">
-        <el-col :span="8" v-for="(result, index) in results" :key="index" class="result-item"
-          :class="{ error: result.error, success: !result.error }">
+        <el-col :span="8" v-for="(item, index) in currentList" :key="item.equip_sn || index" class="result-item"
+          :class="getResultItemClass(item)">
           <div class="result-header">
-            <span class="item-index">{{equipmentList[index].name||`装备 ${index + 1}`}}</span>
-            <span v-if="!result.error" class="confidence-badge">
-              置信度: {{ (result.confidence * 100).toFixed(1) }}%
-            </span>
-            <span v-else class="error-badge" :title="result.error">估价失败</span>
+            <span class="item-index">{{ item.name || `装备 ${index + 1}` }}</span>
+            <el-tag :type="getConfidenceTagType(item.confidence)" v-if="!item.error">
+              置信度: {{ (item.confidence * 100).toFixed(1) }}%
+            </el-tag>
+            <el-tag v-else type="danger" :title="item.error">估价失败</el-tag>
           </div>
-
           <el-row type="flex" align="middle" justify="space-between">
             <el-col style="width: 50px;">
-              <EquipmentImage placement="top" :image="false" :equipment="getEquipImageProps(equipmentList[index])"
-                :lock_type="equipmentList[index].lock_type" size="small" :popoverWidth="300" />
-              <SimilarEquipmentModal :equipment="equipmentList[index]" :similar-data="similarData" :valuation="result"
-                @show="loadSimilarEquipments" />
+              <EquipmentImage placement="top" :image="false" :equipment="getEquipImageProps(item)"
+                :lock-type="item.lock_type" size="small" :popoverWidth="300" />
+              <SimilarEquipmentModal :equipment="item" :similar-data="similarData" :valuation="item"
+                @show="(e) => loadSimilarEquipments(e, item.resultIndex)" />
             </el-col>
-            <el-col class="price-info" :span="12">
-              <el-statistic group-separator="," :precision="2" :value="result.estimated_price_yuan" title="估价"
-                prefix="¥" :value-style="{ color: '#f56c6c', fontSize: '18px', fontWeight: 'bold' }">
+            <el-col class="price-info" style="width: calc(100% - 50px);">
+              <el-statistic :value-style="getPriceStyle(item.confidence)"> <template slot="formatter">
+                  <span v-html="formatPrice(item.estimated_price)"></span>
+                </template>
               </el-statistic>
             </el-col>
           </el-row>
@@ -60,6 +63,8 @@
 import EquipmentImage from '@/components/EquipmentImage.vue'
 import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+import { commonMixin } from '@/utils/mixins/commonMixin'
+
 export default {
   name: 'BatchValuationResult',
   props: {
@@ -86,13 +91,39 @@ export default {
   },
   data() {
     return {
-      similarData: null
+      similarData: null,
+      currentTotalValue: 0,
+      currentList: []
     }
   },
-  mixins: [equipmentMixin],
+  mixins: [equipmentMixin, commonMixin],
   components: {
     EquipmentImage,
     SimilarEquipmentModal
+  },
+  watch: {
+    totalValue(newVal) {
+      this.currentTotalValue = newVal
+    },
+    results(newVal) {
+      // 为每个结果添加对应的装备信息
+      const resultsWithEquipment = newVal.map((result, index) => ({
+        ...result,
+        ...this.equipmentList[index],
+        resultIndex: index
+      }))
+      
+      // 分离高置信度和低置信度
+      const highConfidenceResults = resultsWithEquipment.filter(result => result.confidence === 1)
+      const lowConfidenceResults = resultsWithEquipment.filter(result => result.confidence !== 1)
+      
+      // 排序
+      highConfidenceResults.sort((a, b) => a.estimated_price - b.estimated_price)
+      lowConfidenceResults.sort((a, b) => a.confidence - b.confidence)
+      
+      // 合并：低置信度在前，高置信度在后
+      this.currentList = [...lowConfidenceResults, ...highConfidenceResults]
+    }
   },
   computed: {
     totalCount() {
@@ -102,15 +133,18 @@ export default {
       return this.results.filter((result) => !result.error).length
     }
   },
+  mounted() {
+    this.currentTotalValue = this.totalValue
+  },
   methods: {
     // 加载相似装备
-    async loadSimilarEquipments(equipment) {
+    async loadSimilarEquipments(equipment, resultIndex) {
       // 使用默认相似度阈值0.8加载
       this.similarData = null
-      await this.loadEquipmentValuation(equipment)
+      await this.loadEquipmentValuation(equipment, resultIndex)
     },
     // 统一的装备估价加载方法
-    async loadEquipmentValuation(equipment) {
+    async loadEquipmentValuation(equipment, resultIndex) {
       try {
         // similarity_threshold:0.8,
         // max_anchors:30
@@ -121,7 +155,7 @@ export default {
           similarity_threshold: this.valuateParams.similarity_threshold,
           max_anchors: this.valuateParams.max_anchors
         })
-        const { data: { anchors } } = await this.$api.equipment.findEquipmentAnchors({
+        const { data: { anchors:allAnchors } } = await this.$api.equipment.findEquipmentAnchors({
           equipment_data: equipment,
           similarity_threshold: this.valuateParams.similarity_threshold,
           max_anchors: this.valuateParams.max_anchors
@@ -129,36 +163,40 @@ export default {
         // 处理估价响应
         if (valuationResponse.code === 200) {
           const data = valuationResponse.data
+          this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price + data.estimated_price
+          this.$set(this.results, resultIndex, data)
           // 从估价结果中提取相似装备信息
           if (data.anchors && data.anchors.length > 0) {
             this.similarData = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: anchors,
+              max_anchors: data.max_anchors,
+              anchors: allAnchors,
               statistics: {
                 price_range: {
-                  min: Math.min(...data.anchors.map((a) => a.price || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.price || 0))
+                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.price || 0))
                 },
                 similarity_range: {
-                  min: Math.min(...data.anchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.similarity || 0)),
+                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
                   avg:
-                    data.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    data.anchors.length
+                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                    allAnchors.length
                 }
               }
             }
           } else {
             this.similarData = {
               anchor_count: 0,
-              similarity_threshold: data.similarity_threshold || this.valuateParams.similarity_threshold,
+              similarity_threshold: data.similarity_threshold,
+              max_anchors: data.max_anchors,
               anchors: [],
               statistics: {
                 price_range: { min: 0, max: 0 },
                 similarity_range: { min: 0, max: 0, avg: 0 }
               },
-              message: '未找到符合条件的市场锚点，建议降低相似度阈值',
+              message: valuationResponse.message,
               canRetry: true,
               equipment: equipment
             }
@@ -168,6 +206,7 @@ export default {
           this.similarData = {
             anchor_count: 0,
             similarity_threshold: this.valuateParams.similarity_threshold,
+            max_anchors: this.valuateParams.max_anchors,
             anchors: [],
             statistics: {
               price_range: { min: 0, max: 0 },
@@ -184,6 +223,59 @@ export default {
         console.error('加载相似装备或估价失败:', error)
       }
     },
+
+    // 根据置信度获取标签类型
+    getConfidenceTagType(confidence) {
+      if (confidence >= 0.9) {
+        return 'success'  // 绿色 - 高置信度
+      } else if (confidence >= 0.7) {
+        return ''  // 蓝色 - 中等置信度
+      } else if (confidence >= 0.5) {
+        return 'info'     // 灰色 - 较低置信度
+      } else if (confidence >= 0.3) {
+        return 'warning'     // 橙色 - 较低置信度
+      } else {
+        return 'danger'   // 红色 - 低置信度
+      }
+    },
+
+    // 根据结果获取结果项的CSS类
+    getResultItemClass(result) {
+      if (result.error) {
+        return 'error'
+      }
+
+      // 根据置信度返回不同的类名
+      const confidence = result.confidence || 0
+      if (confidence >= 0.9) {
+        return 'confidence-high'
+      } else if (confidence >= 0.7) {
+        return 'confidence-medium'
+      } else if (confidence >= 0.5) {
+        return 'confidence-low'
+      } else if (confidence >= 0.3) {
+        return 'confidence-very-low'
+      } else {
+        return 'confidence-extremely-low'
+      }
+    },
+
+    // 根据置信度获取价格样式
+    getPriceStyle(confidence) {
+      const baseStyle = { fontSize: '18px', fontWeight: 'bold' }
+
+      if (!confidence || confidence < 0.3) {
+        return { ...baseStyle, color: '#f56c6c' }  // 红色 - 极低置信度
+      } else if (confidence < 0.5) {
+        return { ...baseStyle, color: '#e6a23c' }  // 橙色 - 很低置信度
+      } else if (confidence < 0.7) {
+        return { ...baseStyle, color: '#909399' }  // 灰色 - 较低置信度
+      } else if (confidence < 0.9) {
+        return { ...baseStyle, color: '#409eff' }  // 蓝色 - 中等置信度
+      } else {
+        return { ...baseStyle, color: '#67c23a' }  // 绿色 - 高置信度
+      }
+    }
   }
 }
 </script>
@@ -246,12 +338,64 @@ export default {
   background-color: #f5f7fa;
 }
 
+/* 根据置信度的悬停效果 */
+.result-item.confidence-high:hover {
+  background-color: rgba(103, 194, 58, 0.1);
+}
+
+.result-item.confidence-medium:hover {
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+.result-item.confidence-low:hover {
+  background-color: rgba(144, 147, 153, 0.1);
+}
+
+.result-item.confidence-very-low:hover {
+  background-color: rgba(230, 162, 60, 0.1);
+}
+
+.result-item.confidence-extremely-low:hover {
+  background-color: rgba(245, 108, 108, 0.1);
+}
+
 .result-item.success {
   border-left: 4px solid #67c23a;
 }
 
 .result-item.error {
   border-left: 4px solid #f56c6c;
+}
+
+/* 根据置信度的颜色变化 */
+.result-item.confidence-high {
+  border-left: 4px solid #67c23a;
+  /* 绿色 - 高置信度 */
+  background-color: rgba(103, 194, 58, 0.05);
+}
+
+.result-item.confidence-medium {
+  border-left: 4px solid #409eff;
+  /* 蓝色 - 中等置信度 */
+  background-color: rgba(64, 158, 255, 0.05);
+}
+
+.result-item.confidence-low {
+  border-left: 4px solid #909399;
+  /* 灰色 - 较低置信度 */
+  background-color: rgba(144, 147, 153, 0.05);
+}
+
+.result-item.confidence-very-low {
+  border-left: 4px solid #e6a23c;
+  /* 橙色 - 很低置信度 */
+  background-color: rgba(230, 162, 60, 0.05);
+}
+
+.result-item.confidence-extremely-low {
+  border-left: 4px solid #f56c6c;
+  /* 红色 - 极低置信度 */
+  background-color: rgba(245, 108, 108, 0.05);
 }
 
 .result-header {
@@ -264,22 +408,6 @@ export default {
 .item-index {
   font-weight: bold;
   color: #303133;
-}
-
-.confidence-badge {
-  background: #67c23a;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-}
-
-.error-badge {
-  background: #f56c6c;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 12px;
 }
 
 

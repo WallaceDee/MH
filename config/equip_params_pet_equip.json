@@ -1,11 +1,4 @@
 {
-  "areaid": 3,
-  "level_max": 145,
-  "level_min": 5,
-  "query_order": "price ASC",
-  "search_type": "search_pet_equip",
-  "server_id": 459,
-  "server_name": "2008",
-  "view_loc": "search_cond",
-  "addon_status": "夜战"
+  "addon_status": "夜战",
+  "query_order": "price ASC"
 }

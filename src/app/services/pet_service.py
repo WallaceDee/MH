@@ -16,6 +16,8 @@ from datetime import datetime
 import sqlite3
 import logging
 
+
+
 from src.utils.project_path import get_project_root, get_data_path
 
 # 导入任务管理器
@@ -23,16 +25,9 @@ from .task_manager import task_manager
 
 logger = logging.getLogger(__name__)
 
-# 动态导入评估器，避免循环导入
-try:
-    from evaluator.mark_anchor.pet.index import PetMarketAnchorEvaluator
-    from evaluator.feature_extractor.pet_feature_extractor import PetFeatureExtractor
-    from evaluator.constants.equipment_types import PET_EQUIP_KINDID
-except ImportError:
-    PetMarketAnchorEvaluator = None
-    PetFeatureExtractor = None
-    logger.warning("无法导入宠物锚点估价器或特征提取器")
-
+from evaluator.mark_anchor.pet.index import PetMarketAnchorEvaluator
+from evaluator.feature_extractor.pet_feature_extractor import PetFeatureExtractor
+from evaluator.constants.equipment_types import PET_EQUIP_KINDID
 
 class BatchUpdateTask:
     """批量更新任务状态管理"""
@@ -202,6 +197,9 @@ class PetService:
             `neidan` - 内丹信息（JSON数组）
             `highlight` - 亮点（字符串）
             `dynamic_tags` - 动态（字符串）
+            `area_name` - 区域名称
+            `server_name` - 服务器名称
+            `serverid` - 服务器ID
 
         """
         try:
@@ -313,8 +311,10 @@ class PetService:
                 if sort_by == 'skill_count':
                     # 按技能数量排序：计算all_skill字段中管道符的数量+1，处理空字符串情况
                     order_clause = f"ORDER BY CASE WHEN all_skill = '' OR all_skill IS NULL THEN 0 ELSE (LENGTH(all_skill) - LENGTH(REPLACE(all_skill, '|', '')) + 1) END {sort_order.upper()}"
-                else:
+                elif sort_by and sort_order:
                     order_clause = f"ORDER BY {sort_by} {sort_order.upper()}"
+                else:
+                    order_clause = "ORDER BY update_time DESC"  # 默认按更新时间倒序，最近更新的在最前
 
                 # 计算总数
                 count_sql = f"SELECT COUNT(*) FROM pets {where_clause}"
@@ -332,7 +332,8 @@ class PetService:
                         pets.level, pets.role_grade_limit, pets.growth,
                           pets.lx, pets.equip_list, pets.equip_list_amount, 
                              pets.desc,pets.equip_level,pets.is_baobao,pets.all_skill,pets.sp_skill,
-                                pets.evol_skill_list,pets.neidan,pets.texing,pets.highlight,pets.dynamic_tags
+                                pets.evol_skill_list,pets.neidan,pets.texing,pets.highlight,pets.dynamic_tags,
+                                    pets.server_name,pets.serverid
                                      FROM pets 
                     {where_clause}
                     {order_clause}

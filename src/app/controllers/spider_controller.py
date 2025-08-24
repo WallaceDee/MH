@@ -9,7 +9,7 @@
 import threading
 import logging
 from typing import Dict, Any, Optional
-from src.app.services.spider_service import SpiderService
+from ..services.spider_service import SpiderService
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,11 @@ class SpiderController:
                           spider_type: str = 'role',
                           equip_type: str = 'normal',
                           max_pages: int = 5,
-                          use_browser: bool = True,
                           delay_min: float = 5.0,
                           delay_max: float = 8.0,
-                          cached_params: dict = None):
+                          cached_params: dict = None,
+                          target_server_list: list = None,
+                          multi: bool = False):
         """
         启动基础爬虫
         
@@ -44,10 +45,11 @@ class SpiderController:
             spider_type: 爬虫类型 (role, equip, pet)
             equip_type: 装备类型 (normal, lingshi, pet) - 仅当spider_type='equip'时有效
             max_pages: 爬取页数
-            use_browser: 是否使用浏览器
             delay_min: 最小延迟
             delay_max: 最大延迟
             cached_params: 缓存的搜索参数
+            target_server_list: 目标服务器列表
+            multi: 是否多服务器模式
         """
         if self.service.is_task_running():
             raise Exception("已有任务在运行中")
@@ -58,10 +60,11 @@ class SpiderController:
                     spider_type=spider_type,
                     equip_type=equip_type,
                     max_pages=max_pages,
-                    use_browser=use_browser,
                     delay_min=delay_min,
                     delay_max=delay_max,
-                    cached_params=cached_params
+                    cached_params=cached_params,
+                    target_server_list=target_server_list,
+                    multi=multi
                 )
             except Exception as e:
                 logger.error(f"基础爬虫执行失败: {e}")
@@ -76,49 +79,51 @@ class SpiderController:
                 "spider_type": spider_type,
                 "equip_type": equip_type if spider_type == 'equip' else None,
                 "max_pages": max_pages,
-                "use_browser": use_browser,
                 "delay_range": [delay_min, delay_max]
             }
         }
     
-    def start_role_spider(self, max_pages: int = 5, use_browser: bool = True, 
+    def start_role_spider(self, max_pages: int = 5, 
                          delay_min: float = 5.0, delay_max: float = 8.0, 
                          cached_params: dict = None):
         """启动角色爬虫"""
         return self.start_basic_spider(
             spider_type='role',
             max_pages=max_pages,
-            use_browser=use_browser,
             delay_min=delay_min,
             delay_max=delay_max,
             cached_params=cached_params
         )
     
-    def start_equip_spider(self, equip_type: str = 'normal', max_pages: int = 5,
-                          use_browser: bool = True, delay_min: float = 5.0, 
-                          delay_max: float = 8.0, cached_params: dict = None):
+    def start_equip_spider(self, equip_type: str = 'normal', max_pages: int = 5, delay_min: float = 5.0, 
+                          delay_max: float = 8.0, cached_params: dict = None,
+                          target_server_list: list = None, multi: bool = False):
         """启动装备爬虫"""
         return self.start_basic_spider(
             spider_type='equip',
             equip_type=equip_type,
             max_pages=max_pages,
-            use_browser=use_browser,
             delay_min=delay_min,
             delay_max=delay_max,
-            cached_params=cached_params
+            cached_params=cached_params,
+            target_server_list=target_server_list,
+            multi=multi
         )
     
-    def start_pet_spider(self, max_pages: int = 5, use_browser: bool = True,
+    def start_pet_spider(self, max_pages: int = 5,
                         delay_min: float = 5.0, delay_max: float = 8.0,
-                        cached_params: dict = None):
+                        cached_params: dict = None,
+                        target_server_list: list = None,
+                        multi: bool = False):
         """启动召唤兽爬虫"""
         return self.start_basic_spider(
             spider_type='pet',
             max_pages=max_pages,
-            use_browser=use_browser,
             delay_min=delay_min,
             delay_max=delay_max,
-            cached_params=cached_params
+            cached_params=cached_params,
+            target_server_list=target_server_list,
+            multi=multi
         )
     
     def start_proxy_spider(self, max_pages: int = 5):

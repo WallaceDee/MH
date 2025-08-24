@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from typing import Dict, Any, Union, List
 import os
-from src.utils.jsonc_loader import load_jsonc_relative_to_file
+from utils.jsonc_loader import load_js_config_relative_to_file
 from src.evaluator.constants.equipment_types import SHOES_KINDID,BELT_KINDID,is_weapon,is_helm,NECKLACE_KINDID, is_armor
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -30,10 +30,8 @@ class EquipFeatureExtractor:
         """加载配置文件"""
         try:
             # 加载自动搜索配置
-            config_path = os.path.join(os.path.dirname(
-                __file__), '../../constant/auto_search_config.json')
-            self.auto_config = load_jsonc_relative_to_file(
-                __file__, '../../constant/auto_search_config.json')
+            self.auto_config = load_js_config_relative_to_file(
+                __file__, '../../constant/auto_search_config.js')
 
             # 特技配置
             self.special_skills = {}
@@ -99,6 +97,7 @@ class EquipFeatureExtractor:
 
                 ===== 宝石特征 =====
                 - gem_value (list): 宝石类型列表
+                - gem_level (int): 宝石等级
                 - gem_score (float): 宝石得分（0-100分，基于宝石等级和类型计算）
 
                 ===== 特技特效套装特征 =====
@@ -150,7 +149,7 @@ class EquipFeatureExtractor:
             ronglian_features = self._extract_ronglian_zhizaobang_features(equip_data)
             
             # 应用熔炼特征到装备特征中
-            self._apply_ronglian_features(features, ronglian_features, equip_data)
+            self._apply_ronglian_features(features, ronglian_features, equip_data,_is_desc_only_data)
 
             return features
 
@@ -211,10 +210,6 @@ class EquipFeatureExtractor:
         # 伤害
         features['shanghai'] = equip_data.get('shanghai', 0)
 
-        # 法术吸收率
-        features['magic_absorption'] = equip_data.get('magic_absorption', 0)
-
-
         return features
 
     def _extract_added_attrs_features(self, equip_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -246,9 +241,7 @@ class EquipFeatureExtractor:
         # 正常模式，从agg_added_attrs解析魔力
         if features['addon_moli'] == 0:
             features['addon_moli'] = self._extract_moli_from_agg_added_attrs(equip_data.get('agg_added_attrs', '[]'))
-        
-        features['addon_total'] = equip_data.get('addon_total', 0)
-
+        # addon_total将在熔炼效果合并后计算
         return features
 
     def _extract_gem_features(self, equip_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -284,6 +277,8 @@ class EquipFeatureExtractor:
 
         # 宝石等级
         gem_level = equip_data.get('gem_level', 0)
+
+        features['gem_level'] = gem_level
         
         # 确保gem_level是整数类型
         if gem_level is None:
@@ -1191,7 +1186,7 @@ class EquipFeatureExtractor:
 
         return is_weapon(kindid) or is_armor(kindid) or kindid == SHOES_KINDID
 
-    def _apply_ronglian_features(self, features: Dict[str, Any], ronglian_features: Dict[str, Any], equip_data: Dict[str, Any]) -> None:
+    def _apply_ronglian_features(self, features: Dict[str, Any], ronglian_features: Dict[str, Any], equip_data: Dict[str, Any],is_desc_only_data:bool) -> None:
         """
         应用熔炼特征到装备特征中
         
@@ -1229,30 +1224,34 @@ class EquipFeatureExtractor:
         
         # 获取装备类型
         kindid = features.get('kindid', 0)
-        
+             
+        # 判断是否为单参数版本（通过检查是否有agg_added_attrs字段）
+        is_single_param_version = 'agg_added_attrs' not in equip_data
         # 应用标准熔炼属性映射
+        # - 多参数版本：从agg_added_attrs解析，已经包含熔炼效果，不需要再加
+        # - 单参数版本：从large_equip_desc解析，不包含熔炼效果，需要加上熔炼效果
         for ronglian_key, target_key in ronglian_mappings.items():
             if ronglian_key in ronglian_features and target_key in features:
                 # 特殊处理：魔力属性
                 if ronglian_key == 'addon_moli_ronglian':
-                    # 魔力是从agg_added_attrs解析的，系统已经算上熔炼属性，所以熔炼魔力不加到魔力上
-                    if '魔力' not in equip_data.get('agg_added_attrs', '[]'):
+                    # 魔力属性处理逻辑：
+                    if is_single_param_version:
                         features[target_key] += ronglian_features[ronglian_key]
+                elif ronglian_key == 'addon_lingli_ronglian':
+                    features['addon_lingli'] = 0
                 else:
-                    features[target_key] += ronglian_features[ronglian_key]
-        
-        # 判断是否为单参数版本（通过检查是否有agg_added_attrs字段）
-        is_single_param_version = 'agg_added_attrs' in equip_data
+                    # 其他属性正常合并熔炼效果
+                    if is_single_param_version:
+                        features[target_key] += ronglian_features[ronglian_key]
+                    elif 'addon_' in target_key:
+                        features[target_key] += ronglian_features[ronglian_key]
         
         # 应用特殊映射规则（装备类型相关）
-        if kindid in special_mappings:
+        if kindid in special_mappings and is_single_param_version:
             for ronglian_key, target_key in special_mappings[kindid].items():
                 if ronglian_key in ronglian_features and target_key in features:
                     # 鞋子类型的熔炼敏捷只操作init_dex
                     if kindid == SHOES_KINDID:
-                        if not is_single_param_version:
-                            features[target_key] += ronglian_features[ronglian_key]
-                    else:
                         features[target_key] += ronglian_features[ronglian_key]
         
         # 应用通用特殊映射规则
@@ -1269,15 +1268,21 @@ class EquipFeatureExtractor:
                 if not skip_general_mapping:
                     features[target_key] += ronglian_features[ronglian_key]
         
-        # 处理只有描述数据的特殊情况
-        if self._is_desc_only_data(equip_data):
+        # # 处理只有描述数据的特殊情况
+        if is_desc_only_data:
             # 基础属性（防御、气血）
-            if 'init_defense' in features and 'init_defense_ronglian' in ronglian_features:
-                features['init_defense'] += ronglian_features['init_defense_ronglian']
-            if 'init_hp' in features and 'init_hp_ronglian' in ronglian_features:
-                features['init_hp'] += ronglian_features['init_hp_ronglian']
+            # if 'init_defense' in features and 'init_defense_ronglian' in ronglian_features:
+            #     features['init_defense'] += ronglian_features['init_defense_ronglian']
+            # if 'init_hp' in features and 'init_hp_ronglian' in ronglian_features:
+            #     features['init_hp'] += ronglian_features['init_hp_ronglian']
             if 'init_wakan' in features and 'addon_lingli_ronglian' in ronglian_features:
                 features['init_wakan'] += ronglian_features['addon_lingli_ronglian']
+        
+        # 计算附加属性总和（在熔炼效果合并后）
+        if all(key in features for key in ['addon_tizhi', 'addon_liliang', 'addon_naili', 'addon_minjie', 'addon_moli']):
+            features['addon_total'] = (features['addon_tizhi'] + features['addon_liliang'] + 
+                                     features['addon_naili'] + features['addon_minjie'] + features['addon_moli'])
+      
 
     def _extract_ronglian_and_zhizao_text(self, desc: str) -> str:
         """

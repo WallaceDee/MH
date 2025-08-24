@@ -1,10 +1,10 @@
 <template>
   <div class="cookie-status-section">
     <el-alert :title="dynamicCookieStatus.text" :type="dynamicCookieStatus.type" :closable="false" show-icon>
-      <el-row class="el-alert__description" type="flex" align="middle">
-        <p v-if="dynamicCookieStatus.lastModified" style=" color: #67c23a;">
+      <el-row class="el-el-alert__title" type="flex" align="middle">
+        <span v-if="dynamicCookieStatus.lastModified">
           最后更新: {{ dynamicCookieStatus.lastModified }}
-        </p>
+        </span>
         <p v-if="getCacheRemainingMinutes > 0" style="margin-left: 10px; color: #67c23a;">
           ⏰ 缓存有效: {{ getCacheRemainingMinutes }}分钟
         </p>
@@ -15,11 +15,11 @@
           :loading="cookieChecking" :disabled="cookieUpdating">
           🔍 检查状态
         </el-button>
-        <el-button v-if="getCacheRemainingMinutes > 0" type="text" size="mini" style="margin-left: 5px;" 
+        <!-- <el-button v-if="getCacheRemainingMinutes > 0" type="text" size="mini" style="margin-left: 5px;" 
           @click="handleClearCache" :disabled="cookieChecking || cookieUpdating">
           🗑️ 清除缓存
-        </el-button>
-        <el-button  type="primary" size="mini" @click="handleUpdateCookies"
+        </el-button> -->
+        <el-button  type="text" size="mini" @click="handleUpdateCookies"
           :loading="cookieUpdating" :disabled="cookieChecking">
           ♻️ 更新/登录
         </el-button>
@@ -132,7 +132,7 @@ export default {
             // Cookie无效，清除缓存
             this.$store.commit('cookie/updateCookieCache', false)
             this.cookiesStatus = {
-              type: 'warning',  
+              type: 'error',  
               text: '🍪 已过期',  
               lastModified: data.last_modified || '未知',
               server_validated: false

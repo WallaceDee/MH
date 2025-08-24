@@ -65,16 +65,17 @@ class BaseValuator(ABC):
             from .invalid_item_detector import InvalidItemDetector
             invalid_detector = InvalidItemDetector()
             
-            should_skip, skip_reason = invalid_detector.should_skip_valuation(target_features)
+            should_skip, skip_reason, skip_value = invalid_detector.should_skip_valuation(target_features)
             if should_skip:
                 if verbose:
                     print(f"物品无效，跳过估价: {skip_reason}")
                 return {
-                    'estimated_price': 1,
+                    'estimated_price': skip_value,
                     'anchor_count': 0,
                     'invalid_item': True,
                     'skip_reason': skip_reason,
-                    'confidence': 1
+                    'confidence': 1 if skip_value > 0 else 0,
+                    'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
                 }
             
             print(target_features, 'target_featurestarget_featurestarget_featurestarget_featurestarget_featurestarget_features')
@@ -86,7 +87,8 @@ class BaseValuator(ABC):
                 return {
                     'estimated_price': 0,
                     'anchor_count': 0,
-                    'error': '未找到相似的市场锚点'
+                    'error': '未找到相似的市场锚点',
+                    'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
                 }
             
             # 提取价格和相似度
@@ -127,7 +129,8 @@ class BaseValuator(ABC):
                 'confidence': float(confidence),
                 'strategy_used': strategy,
                 'invalid_item': False,
-                'anchors': anchors[:5]  # 返回前5个最相似的锚点用于展示
+                'anchors': anchors[:5],  # 返回前5个最相似的锚点用于展示
+                'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
             }
             
             if verbose:
@@ -141,7 +144,8 @@ class BaseValuator(ABC):
                 'estimated_price': 0,
                 'anchor_count': 0,
                 'error': str(e),
-                'invalid_item': False
+                'invalid_item': False,
+                'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
             }
     
     def _weighted_median(self, values: List[float], weights: List[float]) -> float:
@@ -257,7 +261,8 @@ class BaseValuator(ABC):
                 results.append({
                     'item_index': i,
                     'estimated_price': 0,
-                    'error': str(e)
+                    'error': str(e),
+                    'equip_sn': item_features.get('equip_sn', '')  # 添加装备序列号
                 })
         
         if verbose:

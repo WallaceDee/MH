@@ -127,6 +127,9 @@ class roleController:
             sort_by = params.get('sort_by')
             sort_order = params.get('sort_order')
             
+            # 角色类型参数
+            role_type = params.get('role_type', 'normal')
+            
             # 调用服务层
             result = self.service.get_roles(
                 page=page,
@@ -135,29 +138,12 @@ class roleController:
                 month=month,
                 level_min=level_min,
                 level_max=level_max,
-                school_skill_num=school_skill_num,
-                school_skill_level=school_skill_level,
-                expt_gongji=expt_gongji,
-                expt_fangyu=expt_fangyu,
-                expt_fashu=expt_fashu,
-                expt_kangfa=expt_kangfa,
-                expt_total=expt_total,
-                max_expt_gongji=max_expt_gongji,
-                max_expt_fangyu=max_expt_fangyu,
-                max_expt_fashu=max_expt_fashu,
-                max_expt_kangfa=max_expt_kangfa,
-                expt_lieshu=expt_lieshu,
-                bb_expt_gongji=bb_expt_gongji,
-                bb_expt_fangyu=bb_expt_fangyu,
-                bb_expt_fashu=bb_expt_fashu,
-                bb_expt_kangfa=bb_expt_kangfa,
-                bb_expt_total=bb_expt_total,
-                skill_drive_pet=skill_drive_pet,
                 equip_num=equip_num,
                 pet_num=pet_num,
                 pet_num_level=pet_num_level,
                 sort_by=sort_by,
-                sort_order=sort_order
+                sort_order=sort_order,
+                role_type=role_type
             )
             
             return result
@@ -169,13 +155,13 @@ class roleController:
             logger.error(f"获取角色列表时出错: {e}")
             return {"error": f"获取角色列表时出错: {str(e)}"}
     
-    def get_role_details(self, eid: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
+    def get_role_details(self, eid: str, year: Optional[int] = None, month: Optional[int] = None, role_type: str = 'normal') -> Optional[Dict]:
         """获取角色详情"""
         try:
             if not eid:
                 return {"error": "角色eid不能为空"}
             
-            result = self.service.get_role_details(eid, year, month)
+            result = self.service.get_role_details(eid, year, month, role_type)
             
             if result is None:
                 return {"error": "未找到指定的角色"}
@@ -186,13 +172,13 @@ class roleController:
             logger.error(f"获取角色详情时出错: {e}")
             return {"error": f"获取角色详情时出错: {str(e)}"}
  
-    def get_role_feature(self, eid: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
+    def get_role_feature(self, eid: str, year: Optional[int] = None, month: Optional[int] = None, role_type: str = 'normal') -> Optional[Dict]:
         """获取角色特征"""
         try:
             if not eid:
                 return {"error": "角色eid不能为空"}
 
-            result = self.service.get_role_feature(eid, year, month)
+            result = self.service.get_role_feature(eid, year, month, role_type)
 
             if result is None:
                 return {"error": "未找到指定的角色"}
@@ -202,4 +188,70 @@ class roleController:
         except Exception as e:
             logger.error(f"获取角色特征时出错: {e}")
             return {"error": f"获取角色特征时出错: {str(e)}"}
+
+    def delete_role(self, eid: str, params: Dict) -> Dict:
+        """删除角色"""
+        try:
+            if not eid:
+                return {"error": "角色eid不能为空"}
+            
+            # 从参数中提取年月和角色类型
+            year = params.get('year')
+            month = params.get('month')
+            role_type = params.get('role_type', 'normal')
+            
+            # 类型转换
+            if year:
+                year = int(year)
+            if month:
+                month = int(month)
+            
+            result = self.service.delete_role(eid, year, month, role_type)
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except ValueError as e:
+            logger.error(f"参数格式错误: {e}")
+            return {"error": f"参数格式错误: {str(e)}"}
+        except Exception as e:
+            logger.error(f"删除角色时出错: {e}")
+            return {"error": f"删除角色时出错: {str(e)}"}
+
+    def switch_role_type(self, eid: str, params: Dict) -> Dict:
+        """切换角色类型（数据迁移）"""
+        try:
+            if not eid:
+                return {"error": "角色eid不能为空"}
+            
+            # 从参数中提取年月和角色类型
+            year = params.get('year')
+            month = params.get('month')
+            current_role_type = params.get('current_role_type', 'normal')
+            target_role_type = params.get('target_role_type')
+            
+            if not target_role_type:
+                return {"error": "目标角色类型不能为空"}
+            
+            # 类型转换
+            if year:
+                year = int(year)
+            if month:
+                month = int(month)
+            
+            result = self.service.switch_role_type(eid, year, month, current_role_type, target_role_type)
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except ValueError as e:
+            logger.error(f"参数格式错误: {e}")
+            return {"error": f"参数格式错误: {str(e)}"}
+        except Exception as e:
+            logger.error(f"切换角色类型时出错: {e}")
+            return {"error": f"切换角色类型时出错: {str(e)}"}
 

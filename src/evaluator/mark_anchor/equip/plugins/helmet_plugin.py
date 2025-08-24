@@ -111,7 +111,7 @@ class HelmetPlugin(EquipmentTypePlugin):
     def get_weight_overrides(self, kindid: int = None) -> Dict[str, float]:
         """头盔/发钗权重覆盖配置"""
         return {
-            'init_defense': 2.0,                # 初防
+            # 'init_defense': 2.0,                # 初防
             'defense_score': 3.0,               # 防御标准化得分很重要
             'gem_score': 3.0,                   # 宝石重要但不是最重要
         }
@@ -121,7 +121,7 @@ class HelmetPlugin(EquipmentTypePlugin):
         return {
             'defense_score': 0.12,              # 防御标准化得分容忍度小
             'gem_score': 0.5,                  # 宝石得分容忍度中等
-            'init_defense': 0.12,              # 初防容忍度小
+            # 'init_defense': 0.12,              # 初防容忍度小
         }
 
     def calculate_custom_similarity(self,

@@ -2,7 +2,8 @@
   <el-popover v-model="visible" :width="715" :data-equip-sn="$attrs.equip_sn" placement="right" trigger="click"
     popper-class="role-info-popover">
     <template #reference>
-      <el-image :src="imageUrl" fit="cover" :style="imageStyle" referrerpolicy="no-referrer" style="display: block;margin: 0 auto;">
+      <slot></slot>
+      <el-image :src="imageUrl" fit="cover" :style="imageStyle" referrerpolicy="no-referrer" style="display: block;">
         <div slot="error" class="image-slot">
           <i class="el-icon-picture-outline"></i>
         </div>
@@ -524,7 +525,8 @@
                       equip_face_img: equip.small_icon,
                       equip_name: equip.name,
                       equip_type_desc: equip.static_desc,
-                      large_equip_desc: equip.desc
+                      large_equip_desc: equip.desc,
+                      lock_type: equip.lock_type
                     }
                     : null
                     " />
@@ -1687,15 +1689,13 @@ export default {
     if (this.rider_plan_list.length > 0) {
       this.current_rider_plan_index = 0
     }
-    this.EquipLevel = this.roleInfo.equip_level
+    this.EquipLevel = this.basic_info.role_level
     // 初始化锦衣数据
     this.clothes = this.roleInfo.clothes || null
     this.new_clothes = this.roleInfo.new_clothes || null
     
     // 初始化房屋数据
     this.house = this.roleInfo.house || {}
-    
-    console.log(this.roleInfo)
   },
   methods: {
     getPetRightLock(pet) {

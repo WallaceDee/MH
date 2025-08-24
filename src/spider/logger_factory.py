@@ -56,6 +56,14 @@ def get_spider_logger(spider_type: str, output_dir: str = None) -> Tuple[logging
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
     
+    # 设置文件处理器为行缓冲模式，确保日志及时写入
+    if hasattr(file_handler, 'stream') and hasattr(file_handler.stream, 'reconfigure'):
+        try:
+            file_handler.stream.reconfigure(line_buffering=True)
+        except:
+            # 如果不支持reconfigure，则手动设置flush
+            pass
+    
     # 添加处理器到日志器
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)

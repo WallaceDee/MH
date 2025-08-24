@@ -1,5 +1,5 @@
 <template>
-  <el-popover :data-equip-sn="equipment.equip_sn" placement="left-end" width="640" trigger="click"
+  <el-popover :data-equip-sn="equipment.equip_sn" :placement="placement" width="640" trigger="click"
     popper-class="similar-equip-popper" v-model="visible" @show="handleShow">
     <template #reference>
       <slot>
@@ -11,10 +11,13 @@
     <div v-if="visible">
       <div v-if="similarData">
         <div class="similar-header">
-          <h4>相似装备 (共{{ similarData.anchor_count }}个)<em style="font-size: 12px;">-相似度阈值: {{
-            similarData.similarity_threshold }}</em></h4>
+          <h4>相似装备 (共{{ similarData.anchor_count }}个)  <el-divider direction="vertical" />
+            <el-tag type="info" size="mini">相似度阈值: {{ similarData.similarity_threshold }}</el-tag>
+            <el-divider direction="vertical" />
+            <el-tag type="info" size="mini">最大锚点数: {{ similarData.max_anchors }}</el-tag>
+          </h4>
           <!-- 装备估价信息 -->
-          <EquipmentValuation :valuation="valuation" :target-equipment="getEquipImageProps(equipment)" />
+          <EquipmentValuation :valuation="valuation" :target-equipment="getEquipImageProps(equipment)" @refresh="refresh" />
 
           <div v-if="similarData.statistics" class="stats">
             <span>
@@ -65,6 +68,10 @@ export default {
     valuation: {
       type: Object,
       default: null
+    },
+    placement: {
+      type: String,
+      default: 'left-end'
     }
   },
   data() {
@@ -76,6 +83,9 @@ export default {
     handleShow() {
       this.$emit('show', this.equipment)
     },
+    refresh() {
+      this.handleShow()
+    }
   }
 }
 </script>

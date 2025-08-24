@@ -28,6 +28,8 @@ class NecklacePlugin(EquipmentTypePlugin):
     120级 灵力（156～202）
     130级 灵力（169～219）
     140级 灵力（181～235）
+    150级 灵力（194～252）
+    160级 灵力（196～267）
     """
 
     @property
@@ -84,6 +86,9 @@ class NecklacePlugin(EquipmentTypePlugin):
             # 区间4：130-140
             130: (169, 219),
             140: (181, 235),
+            # 区间5：150-160
+            150: (194, 252),
+            160: (196, 267)
         }
 
         # 找到最接近的等级标准
@@ -119,8 +124,8 @@ class NecklacePlugin(EquipmentTypePlugin):
     def get_tolerance_overrides(self, kindid: int = None) -> Dict[str, float]:
         """饰品相对容忍度覆盖配置（已废弃绝对容忍度）"""
         return {
-            'init_wakan': 1,                  # 初灵
-            'wakan_score': 0.12,              # 初灵标准化得分容忍度小
+            'init_wakan':  0.05,                  # 初灵
+            'wakan_score': 0.05,              # 初灵标准化得分容忍度小
             'gem_score': 0.5,                 # 宝石得分容忍度中等
         }
 

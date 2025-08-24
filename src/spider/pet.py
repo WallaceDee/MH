@@ -553,6 +553,8 @@ class CBGPetSpider:
         
         # 使用传入的缓存参数或获取新参数
         if cached_params and not use_browser:
+            if 'server_id' in cached_params:
+                search_type = 'search_pet'
             search_params = cached_params
             self.logger.info(f"📊 使用传入的缓存参数: {len(search_params)} 个")
         else:
@@ -615,6 +617,16 @@ class CBGPetSpider:
                 break
 
         self.logger.info(f"🎉 宠物爬取完成！成功页数: {successful_pages}/{max_pages}, 总宠物数: {total_saved_count}")
+        
+        # 强制刷新所有日志缓冲区，确保日志被完整写入文件
+        import sys
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
+        # 刷新日志处理器缓冲区
+        for handler in self.logger.handlers:
+            if hasattr(handler, 'flush'):
+                handler.flush()
 
     def crawl_all_pages(self, max_pages=10, delay_range=None, use_browser=False, cached_params=None):
         """

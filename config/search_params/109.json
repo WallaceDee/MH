@@ -4,6 +4,7 @@
   "bb_expt_gongji": "17",
   "bb_expt_kangfa": "17",
   "level_max": "109",
-  "level_min": "129",
+  "level_min": "109",
+  "price_min": "555500",
   "order_by": "price ASC"
 }

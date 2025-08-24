@@ -13,7 +13,23 @@ from datetime import datetime
 import sqlite3
 import logging
 
-from src.utils.project_path import get_project_root, get_data_path
+# 添加src目录到Python路径
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_path = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到src目录
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+try:
+    from src.utils.project_path import get_project_root, get_data_path
+except ImportError:
+    # 如果无法导入，直接使用相对路径计算
+    def get_project_root():
+        return os.path.dirname(src_path)
+    
+    def get_data_path():
+        return os.path.join(os.path.dirname(src_path), 'data')
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +41,14 @@ try:
     from evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
     from evaluator.feature_extractor.unified_feature_extractor import UnifiedFeatureExtractor
     from evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_KINDID, is_lingshi, is_pet_equip
-except ImportError:
+    logger.info("装备锚点估价器和特征提取器导入成功")
+except ImportError as e:
     EquipAnchorEvaluator = None
     EquipFeatureExtractor = None
     LingshiFeatureExtractor = None
     PetEquipFeatureExtractor = None
     UnifiedFeatureExtractor = None
-    logger.warning("无法导入装备锚点估价器或特征提取器")
+    logger.warning(f"无法导入装备锚点估价器或特征提取器: {e}")
 
 
 class EquipmentService:
@@ -39,6 +56,8 @@ class EquipmentService:
         # 获取项目根目录
         self.project_root = get_project_root()
         self.data_dir = get_data_path()
+        
+
         
         # 初始化特征提取器
         self.equip_feature_extractor = None
@@ -83,6 +102,199 @@ class EquipmentService:
                 logger.info("统一特征提取器初始化成功")
             except Exception as e:
                 logger.error(f"统一特征提取器初始化失败: {e}")
+        
+        # 初始化异常装备数据库
+        self._init_abnormal_equipment_db()
+    
+
+    
+    def _init_abnormal_equipment_db(self):
+        """初始化异常装备数据库"""
+        try:
+            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
+            with sqlite3.connect(abnormal_db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS abnormal_equipment (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        equip_sn TEXT NOT NULL UNIQUE,
+                        equipment_data TEXT NOT NULL,
+                        mark_reason TEXT DEFAULT '标记异常',
+                        mark_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        status TEXT DEFAULT 'pending',
+                        notes TEXT
+                    )
+                ''')
+                conn.commit()
+                logger.info("异常装备数据库初始化成功")
+        except Exception as e:
+            logger.error(f"异常装备数据库初始化失败: {e}")
+    
+    def mark_equipment_as_abnormal(self, equipment_data: Dict, reason: str = "标记异常", notes: str = None) -> Dict:
+        """标记装备为异常"""
+        try:
+            if not equipment_data:
+                return {"error": "装备数据不能为空"}
+            
+            equip_sn = equipment_data.get('equip_sn')
+            
+            if not equip_sn:
+                return {"error": "装备序列号不能为空"}
+            
+            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
+            with sqlite3.connect(abnormal_db_path) as conn:
+                cursor = conn.cursor()
+                
+                # 检查是否已存在
+                cursor.execute('''
+                    SELECT id FROM abnormal_equipment 
+                    WHERE equip_sn = ?
+                ''', (equip_sn,))
+                
+                existing = cursor.fetchone()
+                
+                if existing:
+                    # 更新现有记录
+                    cursor.execute('''
+                        UPDATE abnormal_equipment 
+                        SET equipment_data = ?, mark_reason = ?, mark_time = CURRENT_TIMESTAMP, 
+                            notes = ?, status = 'pending'
+                        WHERE equip_sn = ?
+                    ''', (json.dumps(equipment_data, ensure_ascii=False), reason, notes, equip_sn))
+                    message = "异常装备记录已更新"
+                else:
+                    # 插入新记录
+                    cursor.execute('''
+                        INSERT INTO abnormal_equipment 
+                        (equip_sn, equipment_data, mark_reason, notes)
+                        VALUES (?, ?, ?, ?)
+                    ''', (equip_sn, json.dumps(equipment_data, ensure_ascii=False), reason, notes))
+                    message = "装备已标记为异常"
+                
+                conn.commit()
+                
+                return {
+                    "success": True,
+                    "message": message,
+                    "equip_sn": equip_sn
+                }
+                
+        except Exception as e:
+            logger.error(f"标记装备异常失败: {e}")
+            return {"error": f"标记装备异常失败: {str(e)}"}
+    
+    def get_abnormal_equipment_list(self, page: int = 1, page_size: int = 20, status: str = None) -> Dict:
+        """获取异常装备列表"""
+        try:
+            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
+            with sqlite3.connect(abnormal_db_path) as conn:
+                cursor = conn.cursor()
+                
+                # 构建查询条件
+                where_clause = ""
+                params = []
+                
+                if status:
+                    where_clause = "WHERE status = ?"
+                    params.append(status)
+                
+                # 获取总数
+                count_sql = f"SELECT COUNT(*) FROM abnormal_equipment {where_clause}"
+                cursor.execute(count_sql, params)
+                total = cursor.fetchone()[0]
+                
+                # 获取分页数据
+                offset = (page - 1) * page_size
+                data_sql = f'''
+                    SELECT id, equip_sn, equipment_data, mark_reason, 
+                           mark_time, status, notes
+                    FROM abnormal_equipment {where_clause}
+                    ORDER BY mark_time DESC
+                    LIMIT ? OFFSET ?
+                '''
+                params.extend([page_size, offset])
+                cursor.execute(data_sql, params)
+                
+                rows = cursor.fetchall()
+                items = []
+                
+                for row in rows:
+                    try:
+                        equipment_data = json.loads(row[2]) if row[2] else {}
+                        items.append({
+                            "id": row[0],
+                            "equip_sn": row[1],
+                            "equipment_data": equipment_data,
+                            "mark_reason": row[3],
+                            "mark_time": row[4],
+                            "status": row[5],
+                            "notes": row[6]
+                        })
+                    except json.JSONDecodeError:
+                        logger.warning(f"解析装备数据失败: {row[2]}")
+                        continue
+                
+                return {
+                    "items": items,
+                    "total": total,
+                    "page": page,
+                    "page_size": page_size
+                }
+                
+        except Exception as e:
+            logger.error(f"获取异常装备列表失败: {e}")
+            return {"error": f"获取异常装备列表失败: {str(e)}"}
+    
+    def update_abnormal_equipment_status(self, equip_sn: str, status: str, notes: str = None) -> Dict:
+        """更新异常装备状态"""
+        try:
+            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
+            with sqlite3.connect(abnormal_db_path) as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    UPDATE abnormal_equipment 
+                    SET status = ?, notes = ?, mark_time = CURRENT_TIMESTAMP
+                    WHERE equip_sn = ?
+                ''', (status, notes, equip_sn))
+                
+                if cursor.rowcount > 0:
+                    conn.commit()
+                    return {
+                        "success": True,
+                        "message": "异常装备状态更新成功"
+                    }
+                else:
+                    return {"error": "未找到指定的异常装备记录"}
+                    
+        except Exception as e:
+            logger.error(f"更新异常装备状态失败: {e}")
+            return {"error": f"更新异常装备状态失败: {str(e)}"}
+    
+    def delete_abnormal_equipment(self, equip_sn: str) -> Dict:
+        """删除异常装备记录"""
+        try:
+            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
+            with sqlite3.connect(abnormal_db_path) as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute('''
+                    DELETE FROM abnormal_equipment 
+                    WHERE equip_sn = ?
+                ''', (equip_sn,))
+                
+                if cursor.rowcount > 0:
+                    conn.commit()
+                    return {
+                        "success": True,
+                        "message": "异常装备记录删除成功"
+                    }
+                else:
+                    return {"error": "未找到指定的异常装备记录"}
+                    
+        except Exception as e:
+            logger.error(f"删除异常装备记录失败: {e}")
+            return {"error": f"删除异常装备记录失败: {str(e)}"}
     
     def _get_feature_extractor(self, kindid: int):
         """根据装备类型获取对应的特征提取器"""
@@ -345,7 +557,7 @@ class EquipmentService:
                 total_pages = (total + page_size - 1) // page_size
                 
                 # 排序
-                order_by_clause = ""
+                order_by_clause = "ORDER BY update_time DESC"  # 默认按更新时间倒序，最近更新的在最前
                 if sort_by and sort_order:
                     allowed_sort_by = [
                         'price', 'highlight', 'dynamic_tags', 'gem_level', 'jinglian_level', 'xiang_qian_level',
@@ -720,7 +932,8 @@ class EquipmentService:
                 "anchors": anchors,  # 使用calculate_value返回的锚点信息
                 "price_range": result.get("price_range", {}),
                 "skip_reason": result.get("skip_reason", ""),
-                "invalid_item": result.get("invalid_item", False)
+                "invalid_item": result.get("invalid_item", False),
+                "equip_sn": result.get("equip_sn", "")  # 添加装备序列号
             }
             
         except Exception as e:
@@ -728,7 +941,8 @@ class EquipmentService:
             return {
                 "error": f"估价时发生错误: {str(e)}",
                 "estimated_price": 0,
-                "estimated_price_yuan": 0
+                "estimated_price_yuan": 0,
+                "equip_sn": equipment_data.get("equip_sn", "") if 'equipment_data' in locals() else ""  # 添加装备序列号
             }
 
     def batch_equipment_valuation(self, equipment_list: List[Dict], 
@@ -771,6 +985,10 @@ class EquipmentService:
                     # 使用特征提取器提取特征
                     equipment_features = feature_extractor.extract_features(equipment_data)
                     
+                    # 确保equip_sn信息被正确传递
+                    if 'equip_sn' in equipment_data:
+                        equipment_features['equip_sn'] = equipment_data['equip_sn']
+                    
                     # 添加原始装备数据用于后续处理
                     equipment_features['index'] = i
                     
@@ -805,7 +1023,8 @@ class EquipmentService:
                         "estimated_price": 0,
                         "estimated_price_yuan": 0,
                         "confidence": 0,
-                        "anchor_count": 0
+                        "anchor_count": 0,
+                        "equip_sn": result.get("equip_sn", "")  # 添加装备序列号
                     }
                 else:
                     # 处理成功情况
@@ -819,7 +1038,8 @@ class EquipmentService:
                         "price_range": result.get("price_range", {}),
                         "strategy": strategy,
                         "skip_reason": result.get("skip_reason", ""),
-                        "invalid_item": result.get("invalid_item", False)
+                        "invalid_item": result.get("invalid_item", False),
+                        "equip_sn": result.get("equip_sn", "")  # 添加装备序列号
                     }
                 
                 processed_results.append(processed_result)

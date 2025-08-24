@@ -70,15 +70,15 @@ export default {
       const ratio = this.priceRatio
       const deviation = Math.abs(ratio - 1) * 100
       if (deviation < 5) {
-        return `✅ 估价极为贴合市场（±${deviation.toFixed(1)}%）`
+        return `估价极为贴合市场（±${deviation.toFixed(1)}%）`
       } else if (deviation < 10) {
-        return `🟢 估价较为贴合（±${deviation.toFixed(1)}%）`
+        return `估价较为贴合（±${deviation.toFixed(1)}%）`
       } else if (deviation < 20) {
-        return `🟡 估价有一定偏差（±${deviation.toFixed(1)}%）`
+        return `估价有一定偏差（±${deviation.toFixed(1)}%）`
       } else if (ratio > 1) {
-        return `🔴 估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`
+        return `估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`
       } else {
-        return `🔵 估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`
+        return `估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`
       }
     },
 

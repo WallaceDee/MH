@@ -1,6 +1,9 @@
 <template>
   <div class="equipment-list-view">
-    <div class="filters">
+    <el-card class="filters" shadow="never">
+      <div slot="header" class="card-header">
+        <div><span class="emoji-icon">🔍</span> 筛选</div>
+      </div>
       <!-- 筛选和搜索表单 -->
       <el-form :inline="true" :model="filters" @submit.native.prevent="fetchEquipments" size="mini">
         <el-form-item label="选择月份">
@@ -74,7 +77,7 @@
           <el-button type="primary" @click="fetchEquipments">查询</el-button>
         </el-form-item>
       </el-form>
-    </div>
+    </el-card>
     <el-table :data="equipments" stripe style="width: 100%" @sort-change="handleSortChange" :key="tableKey"
       v-loading="tableLoading">
       <el-table-column prop="eid" label="操作" width="100" fixed>
@@ -727,7 +730,7 @@ export default {
           const data = valuationResponse.data
           this.equipmentValuation = data
 
-          const { data: { anchors } } = await this.$api.equipment.findEquipmentAnchors({
+          const { data: { anchors:allAnchors } } = await this.$api.equipment.findEquipmentAnchors({
             equipment_data: equipment,
             similarity_threshold: similarityThreshold,
             max_anchors: 30
@@ -737,18 +740,18 @@ export default {
             this.similarEquipments = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: anchors,
+              anchors: allAnchors,
               statistics: {
                 price_range: {
-                  min: Math.min(...data.anchors.map((a) => a.price || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.price || 0))
+                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.price || 0))
                 },
                 similarity_range: {
-                  min: Math.min(...data.anchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.similarity || 0)),
+                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
                   avg:
-                    data.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    data.anchors.length
+                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                    allAnchors.length
                 }
               }
             }
@@ -778,12 +781,8 @@ export default {
 </script>
 
 <style scoped>
-.equipment-list-view {
-  padding: 20px;
-}
-
 .filters {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .pagination-container {

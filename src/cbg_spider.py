@@ -487,9 +487,7 @@ class CBGSpider:
                     'life_skills': life_skills,
                     'school_skills': school_skills,
                     'ju_qing_skills': ju_qing_skills,
-                    'yushoushu_skill': yushoushu_skill,
-                    # 原始数据
-                    'raw_data_json': json.dumps(char, ensure_ascii=False)
+                    'yushoushu_skill': yushoushu_skill
                 }
                
                 # 空号识别逻辑
@@ -501,18 +499,18 @@ class CBGSpider:
                     # 保存到空号数据库的roles表
                     try:
                         self.empty_smart_db.save_role(role_data)
-                        log_info(self.logger, f"￥{char.get('price')} - {char.get('seller_nickname')}(空号) - {empty_reason}")
+                        log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}(空号) - {empty_reason}")
                         saved_count += 1
                     except Exception as e:
-                        log_error(self.logger, f"保存空号数据失败: ￥{char.get('price')}, 错误: {e}")
+                        log_error(self.logger, f"保存空号数据失败: ￥{char.get('price_desc')}, 错误: {e}")
                 else:
                     # 如果不是空号，保存到正常角色数据库
                     try:
                         self.smart_db.save_role(role_data)
-                        log_info(self.logger, f"￥{char.get('price')} - {char.get('seller_nickname')}")
+                        log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}")
                         saved_count += 1
                     except Exception as e:
-                        log_error(self.logger, f"保存角色数据失败: ￥{char.get('price')}, 错误: {e}")
+                        log_error(self.logger, f"保存角色数据失败: ￥{char.get('price_desc')}, 错误: {e}")
                 
                 # 2. 处理详细装备数据（如果存在）
                 # 注意：即使是空号，也要尝试解析详细数据（如果API返回了的话）
@@ -637,8 +635,7 @@ class CBGSpider:
                             'idbid_desc_json': json.dumps(parsed_desc.get('idbid_desc', {}), ensure_ascii=False),
                             'changesch_json': json.dumps(parsed_desc.get('changesch', {}), ensure_ascii=False),
                             'prop_kept_json': json.dumps(parsed_desc.get('propKept', {}), ensure_ascii=False),
-                            'more_attr_json': json.dumps(parsed_desc.get('more_attr', {}), ensure_ascii=False),
-                            'raw_data_json': json.dumps(parsed_desc, ensure_ascii=False)
+                            'more_attr_json': json.dumps(parsed_desc.get('more_attr', {}), ensure_ascii=False)
                         }
                         
                         # 根据是否为空号选择对应的数据库保存详细装备数据
@@ -765,6 +762,17 @@ class CBGSpider:
         
         # 使用统一的任务完成日志格式
         log_task_complete(self.logger, successful_pages, max_pages, total_roles, "角色")
+        
+        # 强制刷新所有日志缓冲区，确保日志被完整写入文件
+        import sys
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
+        # 刷新日志处理器缓冲区
+        for handler in self.logger.handlers:
+            if hasattr(handler, 'flush'):
+                handler.flush()
+                
         return total_roles
 
     def fetch_page(self, page=1, search_params=None):
@@ -786,6 +794,7 @@ class CBGSpider:
             # 构建请求参数
             params = {
                 **search_params,  # 添加搜索参数
+                'server_type': 3,# 默认3年外服务器
                 'callback': 'Request.JSONP.request_map.request_0',
                 '_': str(int(time.time() * 1000)),
                 'act': 'recommd_by_role',
