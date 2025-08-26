@@ -253,7 +253,7 @@ class LingshiPlugin(EquipmentTypePlugin):
         # 基础权重配置
         base_weights = {
             # 灵饰特有的权重配置
-            'gem_score': 0.5,            # 宝石得分非常重要
+            'gem_score': 0.7,            # 宝石得分非常重要
 
             # 附加属性得分权重
             # 'attrs_avg_score': 1.0,       # 附加属性平均得分
@@ -272,7 +272,7 @@ class LingshiPlugin(EquipmentTypePlugin):
             'anti_fengyin_score': 0,
             'speed_score': 0,
             'damage': 0,  # 得分代替
-            'defense': 0,  # 得分代替
+            'defense': 0,  # 得分代替SAD
             'magic_damage': 0,  # 得分代替
             'magic_defense': 0,  # 得分代替
             'fengyin': 0,  # 得分代替
@@ -330,9 +330,9 @@ class LingshiPlugin(EquipmentTypePlugin):
 
             # 附加属性得分容忍度
             # 'attrs_avg_score': 0.4,       # 附加属性平均得分容忍度40%
-            'attr_1_score': 0.25,          # 第一个附加属性得分容忍度25%
-            'attr_2_score': 0.25,          # 第二个附加属性得分容忍度25%
-            'attr_3_score': 0.25,          # 第三个附加属性得分容忍度25%
+            'attr_1_score': 0.3,          # 第一个附加属性得分容忍度25%
+            'attr_2_score': 0.3,          # 第二个附加属性得分容忍度25%
+            'attr_3_score': 0.3,          # 第三个附加属性得分容忍度25%
             'attr_3_type':0,
             # 忽略的特征
             'suit_effect_type': 1,
