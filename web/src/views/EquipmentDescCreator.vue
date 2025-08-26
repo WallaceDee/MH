@@ -21,8 +21,7 @@
         <div style="margin-left: 10px; width: 60px;flex-shrink: 0;">
           <el-button type="success" size="mini" style="margin-bottom: 10px;" @click="takeSnapshot">拍照</el-button>
           <br>
-          <SimilarEquipmentModal :equipment="equipment" :similar-data="similarEquipments"
-            :valuation="equipmentValuation" placement="left-start" @show="loadSimilarEquipments">
+          <SimilarEquipmentModal :equipment="{...equipmentValuation,...equipment}" :similar-data="similarEquipments" placement="left-start" @show="loadSimilarEquipments">
             <el-button type="primary" size="mini">估价</el-button>
           </SimilarEquipmentModal>
         </div>
@@ -76,7 +75,7 @@
                       <div class="equipment-info">
                         <EquipmentImage :equipment="item.equipment_data" />
                         <div style="margin-left: 10px;">
-                          <SimilarEquipmentModal :equipment="item.equipment_data" :similar-data="similarEquipments"
+                          <SimilarEquipmentModal :equipment="{...equipmentValuation,...item.equipment_data}" :similar-data="similarEquipments"
                             :valuation="equipmentValuation" placement="left-start" @show="loadSimilarEquipments">
                             <el-link href="javascript:void(0);" class="equipment-name">{{ item.equipment_data.equip_name
                               || '未知装备' }}</el-link>
@@ -292,7 +291,7 @@
 <script>
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
-import EquipmentImage from '../components/EquipmentImage.vue'
+import EquipmentImage from '../components/EquipmentImage/EquipmentImage.vue'
 import AbnormalStatusEditDialog from '../components/AbnormalStatusEditDialog.vue'
 const suitOptions = []
 
@@ -412,7 +411,7 @@ export default {
       },
       lingshiConfig: {},
       similarEquipments: null,
-      equipmentValuation: null,
+      equipmentValuation: {},
       equip_info: window.CBG_GAME_CONFIG.equip_info,
       equip_special_skills: window.AUTO_SEARCH_CONFIG.equip_special_skills,
       equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
@@ -1017,15 +1016,15 @@ export default {
       const range = this.currentLevelLingshiConfig[type]
       this.$set(this.attrs_list[index], 'range', range)
     },
-    getLingshiData() {
-      this.$api.equipment.getLingshiData().then((res) => {
+    getLingshiConfig() {
+      this.$api.equipment.getLingshiConfig().then((res) => {
         this.lingshiConfig = res.data
       })
     },
     // 加载相似装备
     async loadSimilarEquipments(equipment) {
       // 每次都重新计算，不使用缓存
-      this.equipmentValuation = null
+      this.equipmentValuation = {}
       this.similarEquipments = null
       await this.loadEquipmentValuation(equipment, 0.8)
     },
@@ -1040,51 +1039,52 @@ export default {
           similarity_threshold: similarityThreshold,
           max_anchors: 30
         })
-
+        const data = valuationResponse.data
         // 处理估价响应
-        if (valuationResponse.code === 200) {
-          const data = valuationResponse.data
+        if (valuationResponse.code === 200 && data?.anchor_count > 0) {
           this.equipmentValuation = data
 
           const {
-            data: { anchors }
+            data: { anchors: allAnchors  }
           } = await this.$api.equipment.findEquipmentAnchors({
             equipment_data: equipment,
             similarity_threshold: similarityThreshold,
             max_anchors: 30
           })
           // 从估价结果中提取相似装备信息
-          if (data.anchors && data.anchors.length > 0) {
             this.similarEquipments = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
-              anchors: anchors,
+              anchors: allAnchors,
               statistics: {
                 price_range: {
-                  min: Math.min(...data.anchors.map((a) => a.price || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.price || 0))
+                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.price || 0))
                 },
                 similarity_range: {
-                  min: Math.min(...data.anchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...data.anchors.map((a) => a.similarity || 0)),
+                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
+                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
                   avg:
-                    data.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    data.anchors.length
+                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                    allAnchors.length
                 }
               }
             }
-            return
+        }else if (valuationResponse.code === 400) {
+          this.equipmentValuation = data
+          // 400错误也要显示界面，只是没有锚点数据
+          this.similarData = {
+            anchor_count: 0,
+            similarity_threshold: this.valuateParams.similarity_threshold,
+            max_anchors: this.valuateParams.max_anchors,
+            anchors: [],
+            statistics: {
+              price_range: { min: 0, max: 0 },
+              similarity_range: { min: 0, max: 0, avg: 0 }
+            }
           }
         }
-        this.similarEquipments = {
-          anchor_count: 0,
-          similarity_threshold: similarityThreshold,
-          anchors: [],
-          statistics: {
-            price_range: { min: 0, max: 0 },
-            similarity_range: { min: 0, max: 0, avg: 0 }
-          }
-        }
+
         console.log('估价和相似装备数据:', valuationResponse.data)
       } catch (error) {
         console.error('加载相似装备或估价失败:', error)
@@ -1328,7 +1328,7 @@ export default {
     }
   },
   mounted() {
-    this.getLingshiData()
+    this.getLingshiConfig()
     // 组件挂载后自动加载缓存数据
     this.loadFromLocalStorage()
     // 加载快照数据

@@ -81,12 +81,12 @@
                     </el-col>
                     <el-col v-if="!globalSettings.overall" :span="12">
                         <el-form-item label="🎯 目标服务器" size="small">
-                            <el-cascader v-if="globalSettings.multi" :options="hotServers" :props="{
+                            <el-cascader v-show="globalSettings.multi" :options="hotServers" :props="{
                                 value: 'server_id', label: 'server_name', multiple: true,
                                 emitPath: false
                             }" collapse-tags size="mini" filterable v-model="target_server_list"
                                 @change="onTargetServerChange" />
-                            <el-cascader v-else :options="server_data" size="mini" filterable
+                            <el-cascader  v-show="!globalSettings.multi"  :options="server_data" size="mini" filterable
                                 v-model="server_data_value" clearable @change="onServerDataChange" />
                         </el-form-item>
                     </el-col>
@@ -95,7 +95,7 @@
         </el-row>
         <el-tabs v-model="activeTab" tab-position="left">
             <!-- Playwright半自动收集器 -->
-            <el-tab-pane label="🖐️ 手动抓取" name="playwright">
+            <el-tab-pane label="🖐️ 手动抓取" name="playwright" :disabled="externalParams.action">
                 <el-form :model="playwrightForm" label-width="120px" size="small">
                     <el-form-item label="无头模式">
                         <el-switch v-model="playwrightForm.headless" @change="onHeadlessToggle"></el-switch>
@@ -124,7 +124,7 @@
                 </el-form>
             </el-tab-pane>
             <!-- 角色爬虫 -->
-            <el-tab-pane label="👤 角色" name="role">
+            <el-tab-pane label="👤 角色" name="role" :disabled="externalParams.action">
                 <el-form :model="roleForm" label-width="100px" size="small">
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
@@ -154,7 +154,7 @@
             </el-tab-pane>
 
             <!-- 装备爬虫 -->
-            <el-tab-pane label="⚔️ 装备" name="equip">
+            <el-tab-pane label="⚔️ 装备" name="equip" :disabled="externalParams.action&&externalParams.action!=='similar_equip'">
                 <el-form :model="equipForm" label-width="100px" size="small">
                     <el-form-item label="装备类型">
                         <el-select v-model="equipForm.equip_type" :disabled="externalParams.action === 'similar_equip'"
@@ -211,7 +211,7 @@
             </el-tab-pane>
 
             <!-- 召唤兽爬虫 -->
-            <el-tab-pane label="🐲 召唤兽" name="pet">
+            <el-tab-pane label="🐲 召唤兽" name="pet" :disabled="externalParams.action&&externalParams.action!=='similar_pet'">
                 <el-form :model="petForm" label-width="100px" size="small">
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
@@ -259,7 +259,7 @@
 <script>
 import str2gbk from 'str2gbk'
 import qs from 'qs'
-import EquipmentImage from '@/components/EquipmentImage.vue'
+import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import PetImage from '@/components/PetImage.vue'
 import LogMonitor from '@/components/LogMonitor.vue'
 import windowReuseManager from '@/utils/windowReuseManager'
@@ -385,6 +385,7 @@ export default {
                     getParamType: () => this.getEquipParamKey(this.equipForm.equip_type),
                     getSuccessMessage: () => `${this.getEquipTypeName(this.equipForm.equip_type)}参数配置保存成功`,
                     getParams: () => {
+                        //TODO:target_server_objects要把this.cached_params.server_id排序到第一个
                         const params = {
                             target_server_list: this.target_server_objects,
                             ...this.equipForm,
@@ -838,7 +839,7 @@ export default {
 
                 // 处理主属性
                 const processMainAttributes = () => {
-                    const mainAttrs = ['damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'fengyin', 'speed']
+                    const mainAttrs = ['damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed']
                     mainAttrs.forEach(attr => {
                         if (features[attr] && features[attr] > 0) {
                             searchParams[attr] = features[attr]
@@ -913,7 +914,7 @@ export default {
                     searchParams.special_skill = features.special_skill
                 }
                 [
-                    'init_damage',
+                    // 'init_damage', //all_damage已经包含init_damage
                     'init_damage_raw',
                     'init_defense',
                     'init_hp',

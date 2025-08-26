@@ -346,7 +346,7 @@
 </template>
 
 <script>
-import EquipmentImage from './EquipmentImage.vue'
+import EquipmentImage from './EquipmentImage/EquipmentImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import PetDetail from './RoleInfo/PetDetail.vue'

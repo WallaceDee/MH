@@ -58,7 +58,8 @@ class BaseEquipmentConfig:
             'special_skill': 0,          # 特技，获取市场数据时候已经分类了
             'kindid': 0,                 # 类别在get_market_data已经过滤
             'gem_value': 0,              # 宝石得分已包含
-            'special_effect': 0          # 特技已在get_market_data_for_similarity中过滤
+            'special_effect': 0,          # 特技已在get_market_data_for_similarity中过滤
+            'binding': 0,                 # 绑定状态
         }
 
         # 基础相对容忍度配置
@@ -94,7 +95,8 @@ class BaseEquipmentConfig:
             'kindid': 1,                 # 类别在get_market_data已经过滤
             'gem_level': 1,              # 宝石等级
             'gem_value': 1,              # 宝石得分已包含
-            'special_effect': 1          # 特技已在get_market_data_for_similarity中过滤
+            'special_effect': 1,         # 特技已在get_market_data_for_similarity中过滤
+            'binding': 1,                # 绑定状态
         }
 
 

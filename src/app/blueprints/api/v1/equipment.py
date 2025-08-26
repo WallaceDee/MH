@@ -134,7 +134,8 @@ def get_equipment_valuation():
         )
         
         if "error" in result:
-            return error_response(result["error"])
+            # 估价失败时，返回400状态码，但将完整结果放在data字段中
+            return error_response(result["error"], code=400, http_code=400, data=result)
         
         return success_response(data=result, message="获取装备估价成功")
         
@@ -209,7 +210,8 @@ def get_valuation_by_sn(equip_sn):
         result = controller.get_equipment_valuation(equipment_data, strategy)
         
         if "error" in result:
-            return error_response(result["error"])
+            # 估价失败时，返回400状态码，但将完整结果放在data字段中
+            return error_response(result["error"], code=400, http_code=400, data=result)
         
         return success_response(data=result, message="获取装备估价成功")
         
@@ -321,7 +323,8 @@ def batch_equipment_valuation():
         )
         
         if "error" in result:
-            return error_response(result["error"])
+            # 批量估价失败时，返回400状态码，但将完整结果放在data字段中
+            return error_response(result["error"], code=400, http_code=400, data=result)
         
         return success_response(data=result, message="批量装备估价完成")
         
@@ -362,19 +365,31 @@ def delete_equipment(equip_sn):
     except Exception as e:
         return error_response(f"删除装备失败: {str(e)}") 
 
-@equipment_bp.route('/lingshi-data', methods=['GET'])
-def get_lingshi_data():
-    """获取灵石数据"""
+@equipment_bp.route('/lingshi-config', methods=['GET'])
+def get_lingshi_config():
+    """获取灵饰数据"""
     try:
-        result = controller.get_lingshi_data()
+        result = controller.get_lingshi_config()
         
         if "error" in result:
             return error_response(result["error"])
         
-        return success_response(data=result["data"], message="获取灵石数据成功")
+        return success_response(data=result["data"], message="获取灵饰数据成功")
         
     except Exception as e:
-        return error_response(f"获取灵石数据失败: {str(e)}") 
+        return error_response(f"获取灵饰数据失败: {str(e)}") 
+
+@equipment_bp.route('/weapon-config', methods=['GET'])
+def get_weapon_config():
+    """获取武器数据"""
+    try:
+        result = controller.get_weapon_config()
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result["data"], message="获取武器数据成功")
+    except Exception as e:
+        return error_response(f"获取武器数据失败: {str(e)}")
 
 @equipment_bp.route('/mark-abnormal', methods=['POST'])
 def mark_equipment_as_abnormal():

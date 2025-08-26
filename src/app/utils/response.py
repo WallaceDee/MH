@@ -22,11 +22,11 @@ def success_response(data=None, message="success", code=200):
     }), 200
 
 
-def error_response(message="error", code=400, http_code=400):
+def error_response(message="error", code=400, http_code=400, data=None):
     """错误响应"""
     return jsonify({
         "code": code,
-        "data": None,
+        "data": data,  # 允许传入data参数
         "message": message,
         "timestamp": int(time.time())
     }), http_code

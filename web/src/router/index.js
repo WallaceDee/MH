@@ -35,6 +35,14 @@ const routes = [
     }
   },
   {
+    path: '/equipments/:equip_sn',
+    name: 'EquipmentDetail',
+    component: () => import('../views/EquipmentDetail.vue'),
+    meta: {
+      title: '装备详情'
+    }
+  },
+  {
     path: '/pets',
     name: 'PetList',
     component: () => import('../views/PetList.vue'),

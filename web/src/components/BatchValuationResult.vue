@@ -28,19 +28,11 @@
       <el-row type="flex" style="flex-wrap: wrap;">
         <el-col :span="8" v-for="(item, index) in currentList" :key="item.equip_sn || index" class="result-item"
           :class="getResultItemClass(item)">
-          <div class="result-header">
-            <span class="item-index">{{ item.name || `装备 ${index + 1}` }}</span>
-            <el-tag :type="getConfidenceTagType(item.confidence)" v-if="!item.error">
-              置信度: {{ (item.confidence * 100).toFixed(1) }}%
-            </el-tag>
-            <el-tag v-else type="danger" :title="item.error">估价失败</el-tag>
-          </div>
+
           <el-row type="flex" align="middle" justify="space-between">
             <el-col style="width: 50px;">
               <EquipmentImage placement="top" :image="false" :equipment="getEquipImageProps(item)"
                 :lock-type="item.lock_type" size="small" :popoverWidth="300" />
-              <SimilarEquipmentModal :equipment="item" :similar-data="similarData" :valuation="item"
-                @show="(e) => loadSimilarEquipments(e, item.resultIndex)" />
             </el-col>
             <el-col class="price-info" style="width: calc(100% - 50px);">
               <el-statistic :value-style="getPriceStyle(item.confidence)"> <template slot="formatter">
@@ -49,6 +41,16 @@
               </el-statistic>
             </el-col>
           </el-row>
+          <div class="result-footer">
+            <SimilarEquipmentModal :equipment="item" :similar-data="similarData"
+            @show="(e) => loadSimilarEquipments(e, item.resultIndex)" >
+            <el-link href="javascript:void(0)" type="primary"  style="font-weight: bold;">{{ item.name || `装备 ${index + 1}` }}</el-link>
+          </SimilarEquipmentModal>
+            <el-tag :type="getConfidenceTagType(item.confidence)" v-if="!item.error">
+              置信度: {{ (item.confidence * 100).toFixed(1) }}%
+            </el-tag>
+            <el-tag v-else type="danger" :title="item.error">估价失败</el-tag>
+          </div>
         </el-col>
       </el-row>
     </template>
@@ -60,7 +62,7 @@
 </template>
 
 <script>
-import EquipmentImage from '@/components/EquipmentImage.vue'
+import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
@@ -112,15 +114,15 @@ export default {
         ...this.equipmentList[index],
         resultIndex: index
       }))
-      
+
       // 分离高置信度和低置信度
       const highConfidenceResults = resultsWithEquipment.filter(result => result.confidence === 1)
       const lowConfidenceResults = resultsWithEquipment.filter(result => result.confidence !== 1)
-      
+
       // 排序
       highConfidenceResults.sort((a, b) => a.estimated_price - b.estimated_price)
       lowConfidenceResults.sort((a, b) => a.confidence - b.confidence)
-      
+
       // 合并：低置信度在前，高置信度在后
       this.currentList = [...lowConfidenceResults, ...highConfidenceResults]
     }
@@ -155,53 +157,39 @@ export default {
           similarity_threshold: this.valuateParams.similarity_threshold,
           max_anchors: this.valuateParams.max_anchors
         })
-        const { data: { anchors:allAnchors } } = await this.$api.equipment.findEquipmentAnchors({
-          equipment_data: equipment,
-          similarity_threshold: this.valuateParams.similarity_threshold,
-          max_anchors: this.valuateParams.max_anchors
-        })
-        // 处理估价响应
-        if (valuationResponse.code === 200) {
-          const data = valuationResponse.data
+        const data = valuationResponse.data
+
+        // 从估价结果中提取相似装备信息
+        if (valuationResponse.code === 200 && data?.anchor_count > 0) {
           this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price + data.estimated_price
           this.$set(this.results, resultIndex, data)
-          // 从估价结果中提取相似装备信息
-          if (data.anchors && data.anchors.length > 0) {
-            this.similarData = {
-              anchor_count: data.anchor_count,
-              similarity_threshold: data.similarity_threshold,
-              max_anchors: data.max_anchors,
-              anchors: allAnchors,
-              statistics: {
-                price_range: {
-                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.price || 0))
-                },
-                similarity_range: {
-                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
-                  avg:
-                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    allAnchors.length
-                }
-              }
-            }
-          } else {
-            this.similarData = {
-              anchor_count: 0,
-              similarity_threshold: data.similarity_threshold,
-              max_anchors: data.max_anchors,
-              anchors: [],
-              statistics: {
-                price_range: { min: 0, max: 0 },
-                similarity_range: { min: 0, max: 0, avg: 0 }
+          // 处理估价响应
+          const { data: { anchors: allAnchors } } = await this.$api.equipment.findEquipmentAnchors({
+            equipment_data: equipment,
+            similarity_threshold: this.valuateParams.similarity_threshold,
+            max_anchors: this.valuateParams.max_anchors
+          })
+          this.similarData = {
+            anchor_count: data.anchor_count,
+            similarity_threshold: data.similarity_threshold,
+            max_anchors: data.max_anchors,
+            anchors: allAnchors,
+            statistics: {
+              price_range: {
+                min: Math.min(...allAnchors.map((a) => a.price || 0)),
+                max: Math.max(...allAnchors.map((a) => a.price || 0))
               },
-              message: valuationResponse.message,
-              canRetry: true,
-              equipment: equipment
+              similarity_range: {
+                min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
+                max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
+                avg:
+                  allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
+                  allAnchors.length
+              }
             }
           }
         } else if (valuationResponse.code === 400) {
+          this.$set(this.results, resultIndex, data)
           // 400错误也要显示界面，只是没有锚点数据
           this.similarData = {
             anchor_count: 0,
@@ -211,10 +199,7 @@ export default {
             statistics: {
               price_range: { min: 0, max: 0 },
               similarity_range: { min: 0, max: 0, avg: 0 }
-            },
-            message: valuationResponse.message || '未找到符合条件的市场锚点，建议降低相似度阈值',
-            canRetry: true,
-            equipment: equipment
+            }
           }
         }
 
@@ -262,7 +247,7 @@ export default {
 
     // 根据置信度获取价格样式
     getPriceStyle(confidence) {
-      const baseStyle = { fontSize: '18px', fontWeight: 'bold' }
+      const baseStyle = { fontSize: '18px', fontWeight: 'bold', justifyContent: 'end' }
 
       if (!confidence || confidence < 0.3) {
         return { ...baseStyle, color: '#f56c6c' }  // 红色 - 极低置信度
@@ -398,16 +383,11 @@ export default {
   background-color: rgba(245, 108, 108, 0.05);
 }
 
-.result-header {
+.result-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-}
-
-.item-index {
-  font-weight: bold;
-  color: #303133;
+  margin-top: 8px;
 }
 
 

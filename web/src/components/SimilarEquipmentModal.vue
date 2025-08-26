@@ -17,8 +17,7 @@
             <el-tag type="info" size="mini">最大锚点数: {{ similarData.max_anchors }}</el-tag>
           </h4>
           <!-- 装备估价信息 -->
-          <EquipmentValuation :valuation="valuation" :target-equipment="getEquipImageProps(equipment)" @refresh="refresh" />
-
+          <EquipmentValuation :valuation="equipment" :target-equipment="getEquipImageProps(equipment)" @refresh="refresh" />
           <div v-if="similarData.statistics" class="stats">
             <span>
               价格范围:
@@ -62,10 +61,6 @@ export default {
       required: true
     },
     similarData: {
-      type: Object,
-      default: null
-    },
-    valuation: {
       type: Object,
       default: null
     },

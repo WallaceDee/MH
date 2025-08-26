@@ -3,7 +3,7 @@
     :lock-type="lock_type" />
 </template>
 <script>
-import EquipmentImage from '../EquipmentImage.vue'
+import EquipmentImage from '../EquipmentImage/EquipmentImage.vue'
 
 export default {
   name: 'ItemPopover',

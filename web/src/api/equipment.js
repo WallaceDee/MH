@@ -124,11 +124,19 @@ export const equipmentApi = {
   },
 
   /**
-   * 获取灵石数据
+   * 获取灵饰数据
    * @returns {Promise}
    */
-  getLingshiData() {
-    return api.get('/equipment/lingshi-data')
+  getLingshiConfig() {
+    return api.get('/equipment/lingshi-config')
+  },
+
+  /**
+   * 获取武器数据
+   * @returns {Promise}
+   */
+  getWeaponConfig() {
+    return api.get('/equipment/weapon-config')
   },
 
   /**

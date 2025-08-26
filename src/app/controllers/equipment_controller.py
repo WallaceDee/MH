@@ -411,10 +411,10 @@ class EquipmentController:
             logger.error(f"删除异常装备记录失败: {e}")
             return {"error": f"删除异常装备记录失败: {str(e)}"}
 
-    def get_lingshi_data(self) -> Dict:
-        """获取灵石数据"""
+    def get_lingshi_config(self) -> Dict:
+        """获取灵饰数据"""
         try:
-            result = self.service.get_lingshi_data()
+            result = self.service.get_lingshi_config()
             
             if "error" in result:
                 return result
@@ -422,5 +422,14 @@ class EquipmentController:
             return result
             
         except Exception as e:
-            logger.error(f"获取灵石数据失败: {str(e)}")
-            return {"error": f"获取灵石数据失败: {str(e)}"}
+            logger.error(f"获取灵饰数据失败: {str(e)}")
+            return {"error": f"获取灵饰数据失败: {str(e)}"}
+
+    def get_weapon_config(self) -> Dict:
+        """获取武器数据"""
+        try:
+            result = self.service.get_weapon_config()
+            return result
+        except Exception as e:
+            logger.error(f"获取武器数据失败: {str(e)}")
+            return {"error": f"获取武器数据失败: {str(e)}"}

@@ -66,6 +66,8 @@ class EquipFeatureExtractor:
         self.repair_fail_pattern = r"修理失败\s+(\d+)次"
         # 熔炼效果 - 修复正则表达式以包含#r
         self.ronglian_pattern = r"熔炼效果：#r#Y#r([^#]+(?:#r[^#]+)*)"
+        # #r玩家68766666专用#r   
+        self.binding_pattern = r"玩家(\d+)专用"
 
     def extract_features(self, equip_data: Dict[str, Any]) -> Dict[str, Union[int, float, str]]:
         """
@@ -108,6 +110,7 @@ class EquipFeatureExtractor:
                 ===== 其他特征（从large_equip_desc提取） =====
                 - hole_score (float): 开运孔数得分（0-100分，基于孔数价值计算）
                 - repair_fail_num (int): 修理失败次数
+                - binding (int): 绑定状态（0: 未绑定，1: 绑定）
 
                 特征说明：
                 - 宝石得分计算：基于宝石等级和类型，以10级黑宝石为满分参考
@@ -364,6 +367,7 @@ class EquipFeatureExtractor:
         current_holes = 0
         features['hole_score'] = 0
         features['repair_fail_num'] = 0
+        features['binding'] = 0
 
         # 从large_equip_desc解析
         large_desc = equip_data.get('large_equip_desc', '')
@@ -410,6 +414,13 @@ class EquipFeatureExtractor:
             hole_score = (hole_raw_value / max_hole_value) * \
                 100 if max_hole_value > 0 else 0
             features['hole_score'] = round(hole_score, 2)
+
+            # #r玩家68766666专用#r   
+            binding_match = re.search(self.binding_pattern, large_desc)
+            if binding_match:
+                features['binding'] = 1
+            else:
+                features['binding'] = 0
 
         return features
 

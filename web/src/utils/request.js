@@ -36,11 +36,21 @@ request.interceptors.response.use(
     console.error('响应错误:', error)
     
     let message = '请求失败'
+    let responseData = null
+    
     if (error.response) {
       // 服务器响应了错误状态码
       const { status, data } = error.response
       message = data.message || `请求失败 (${status})`
-      console.log(message,'messagemessagemessagemessagemessage')
+      
+      // 如果后端返回了data字段，使用后端的data；否则使用后端的完整响应
+      if (data.data !== undefined) {
+        responseData = data.data
+      } else {
+        responseData = data
+      }
+      
+      console.log('错误响应数据:', responseData)
     } else if (error.request) {
       // 请求已发出但没有收到响应
       message = '网络错误，请检查网络连接'
@@ -53,9 +63,10 @@ request.interceptors.response.use(
       title: '错误',
       message: message
     })
+    
     return {
       code: error.response?.status || 500,
-      data: null,
+      data: responseData,  // 使用后端返回的data，而不是强制设置为null
       message: message,
       timestamp: Date.now()
     }

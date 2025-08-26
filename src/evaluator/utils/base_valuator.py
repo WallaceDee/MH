@@ -75,6 +75,7 @@ class BaseValuator(ABC):
                     'invalid_item': True,
                     'skip_reason': skip_reason,
                     'confidence': 1 if skip_value > 0 else 0,
+                    'kindid': target_features.get('kindid', ''), 
                     'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
                 }
             
@@ -88,6 +89,7 @@ class BaseValuator(ABC):
                     'estimated_price': 0,
                     'anchor_count': 0,
                     'error': '未找到相似的市场锚点',
+                    'kindid': target_features.get('kindid', ''), 
                     'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
                 }
             
@@ -129,7 +131,7 @@ class BaseValuator(ABC):
                 'confidence': float(confidence),
                 'strategy_used': strategy,
                 'invalid_item': False,
-                'anchors': anchors[:5],  # 返回前5个最相似的锚点用于展示
+                'kindid': target_features.get('kindid', ''), 
                 'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
             }
             
@@ -145,6 +147,7 @@ class BaseValuator(ABC):
                 'anchor_count': 0,
                 'error': str(e),
                 'invalid_item': False,
+                'kindid': target_features.get('kindid', ''), 
                 'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
             }
     
@@ -262,6 +265,7 @@ class BaseValuator(ABC):
                     'item_index': i,
                     'estimated_price': 0,
                     'error': str(e),
+                    'kindid': item_features.get('kindid', 0),
                     'equip_sn': item_features.get('equip_sn', '')  # 添加装备序列号
                 })
         

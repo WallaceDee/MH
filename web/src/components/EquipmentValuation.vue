@@ -2,11 +2,25 @@
   <div class="valuation-info">
     <el-row type="flex" align="middle" justify="space-between">
       <el-row type="flex" align="middle">
-        <equipment-image :equipment="targetEquipment" width="50px" height="50px" placement="left"/>
-        <span v-html="formatFullPrice(targetEquipment)" style="margin-left: 10px"></span>
+        <EquipmentImage :equipment="targetEquipment" width="50px" height="50px" placement="left" />
+        <span v-if="targetEquipment.price" v-html="formatFullPrice(targetEquipment)" style="margin-left: 10px"></span>
+        <div v-if="isWeapon" style="margin-left: 10px">
+          <div style="margin-bottom: 5px"> <el-tag type="success">属性：+{{ targetEquipment.feature.addon_total }}点{{
+            addon_total_standards?.[targetEquipment.feature.equip_level] }}</el-tag>
+            <el-divider direction="vertical" />
+            <el-tag type="primary">总伤：{{ targetEquipment.feature.all_damage }}/{{ parseInt(all_damage_standards?.[targetEquipment.feature.equip_level][1] +(25*targetEquipment.feature.equip_level/30)) }}</el-tag>
+          </div>
+          <div>
+            <el-tag type="danger">初伤：{{ targetEquipment.feature.init_damage_raw }}点{{
+              init_damage_raw_standards?.[targetEquipment.feature.equip_level] }}</el-tag>
+            <el-divider direction="vertical" />
+            <el-tag type="danger">初总伤：{{ targetEquipment.feature.init_damage }}点{{
+              all_damage_standards?.[targetEquipment.feature.equip_level] }}</el-tag>
+          </div>
+        </div>
       </el-row>
       <!-- 无锚点时的重试界面 -->
-      <div>
+      <div style="width: 170px;flex-shrink: 0;">
         <el-button type="primary" @click="$emit('refresh')" size="mini">刷新</el-button>
         <SimilarGetMore :target-equipment="targetEquipment" />
       </div>
@@ -15,7 +29,7 @@
       <span class="valuation-label">装备估价:</span>
       <span class="valuation-price">{{ valuation ? valuation.estimated_price_yuan + '元' : '-' }}</span>
       <span class="valuation-strategy">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>
-      <el-link type="danger" @click.native="markAsAbnormal"  size="mini">标记为异常</el-link>
+      <el-link type="danger" @click.native="markAsAbnormal" size="mini">标记为异常</el-link>
 
       <!-- 价格比率显示 -->
       <span v-if="priceRatio" class="price-ratio" :class="priceRatioClass">
@@ -33,7 +47,7 @@
 </template>
 
 <script>
-import EquipmentImage from './EquipmentImage.vue'
+import EquipmentImage from './EquipmentImage/EquipmentImage.vue'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import SimilarGetMore from './SimilarGetMore.vue'
@@ -55,7 +69,18 @@ export default {
       required: true
     }
   },
+  data() {
+    return {
+      weaponConfig: null,
+      addon_total_standards: null,
+      all_damage_standards: null,
+      init_damage_raw_standards: null,
+    }
+  },
   computed: {
+    isWeapon() {
+      return window.is_weapon_equip(this.targetEquipment?.feature?.kindid)
+    },
     // 计算估价与售价的比率
     priceRatio() {
       if (!this.valuation || !this.valuation.estimated_price_yuan || !this.targetEquipment.price) {
@@ -124,6 +149,16 @@ export default {
     }
   },
   methods: {
+    getWeaponConfig() {
+      this.$api.equipment.getWeaponConfig().then(res => {
+        if (res.code === 200) {
+          this.weaponConfig = res.data
+          this.addon_total_standards = res.data.addon_total_standards
+          this.all_damage_standards = res.data.all_damage_standards
+          this.init_damage_raw_standards = res.data.init_damage_raw_standards
+        }
+      })
+    },
     async markAsAbnormal() {
       try {
         // 调用API标记装备为异常
@@ -132,7 +167,7 @@ export default {
           reason: '标记异常',
           notes: '用户手动标记的异常装备'
         })
-        
+
         if (response.code === 200) {
           this.$notify.success({
             title: '提示',
@@ -162,6 +197,11 @@ export default {
       }
       return strategyNames[strategy] || strategy
     },
+  },
+  mounted() {
+    if (this.isWeapon) {
+      this.getWeaponConfig()
+    }
   }
 }
 </script>

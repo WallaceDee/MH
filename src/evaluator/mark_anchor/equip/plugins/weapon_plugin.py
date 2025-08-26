@@ -7,6 +7,7 @@
 from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
 import sys
 import os
+import json
 from typing import Dict, Any, List, Optional, Tuple
 
 # 添加项目根目录到Python路径
@@ -30,6 +31,34 @@ class WeaponPlugin(EquipmentTypePlugin):
     150 命中(561～729)，伤害（483～627），总伤（670~870）*
     160 命中(571～777)，伤害（490～667），总伤（680.33~926）*
     """
+
+    def __init__(self):
+        super().__init__()
+        self._load_standards()
+
+    def _load_standards(self):
+        """加载武器标准数据"""
+        try:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            json_path = os.path.join(current_dir, 'weapon.jsonc')
+            with open(json_path, 'r', encoding='utf-8') as f:
+                raw_standards = json.load(f)
+                
+            # 将字符串键转换为整数键
+            self.standards = {}
+            for key, value in raw_standards.items():
+                self.standards[key] = {}
+                for level_str, level_data in value.items():
+                    self.standards[key][int(level_str)] = level_data
+                    
+        except Exception as e:
+            print(f"加载武器标准数据失败: {e}")
+            # 使用默认数据作为后备
+            self.standards = {
+                "init_damage_raw_standards": {},
+                "all_damage_standards": {},
+                "addon_total_standards": {}
+            }
 
     @property
     def plugin_name(self) -> str:
@@ -74,7 +103,6 @@ class WeaponPlugin(EquipmentTypePlugin):
         # 单加和双加的上限不一样，双加的addon_total上限要高一些
         addon_total_score = self._calculate_addon_total_score(
             equip_level, addon_total, addon_minjie, addon_liliang, addon_naili, addon_tizhi, addon_moli)
-        print(f"addon_total_score: {equip_level, addon_total, addon_minjie, addon_liliang, addon_naili, addon_tizhi, addon_moli}")
         derived['addon_total_score'] = addon_total_score
 
         return derived
@@ -92,30 +120,13 @@ class WeaponPlugin(EquipmentTypePlugin):
         Returns:
             float:  初始伤害得分（0-100）
         """
-        # 定义各等级 初始伤害标准区间
-        damage_standards = {
-            # 区间1：60-80
-            60: (199, 259),   # 最低～最高
-            70: (231, 300),
-            80: (262, 341),
-            # 区间2：90-100
-            90: (294, 382),
-            100: (325, 423),
-            # 区间3：110-120
-            110: (357, 464),
-            120: (388, 505),
-            # 区间4：130-140
-            130: (420, 546),
-            140: (451, 586),
-            # 区间5：150-160
-            150: (483, 627),
-            160: (490, 667),
-        }
+        # 从JSON文件加载各等级初始伤害标准区间
+        damage_standards = self.standards.get("init_damage_raw_standards", {})
 
         # 找到最接近的等级标准
         closest_level = min(damage_standards.keys(),
                             key=lambda x: abs(x - equip_level))
-        min_damage, max_damage = damage_standards[closest_level]
+        min_damage, max_damage = damage_standards[closest_level][0], damage_standards[closest_level][1]
 
         # 计算标准化得分
         # 武器伤害最差情况是比最低标准低5%
@@ -163,30 +174,13 @@ class WeaponPlugin(EquipmentTypePlugin):
         Returns:
             float: 总伤害得分（0-100）
         """
-        # 定义各等级总伤害标准区间
-        all_damage_standards = {
-            # 区间1：60-80
-            60: (276, 359),   # 最低～最高
-            70: (320, 415),
-            80: (363.33, 472.67),
-            # 区间2：90-100
-            90: (407.67, 529.67),
-            100: (451, 586.67),
-            # 区间3：110-120
-            110: (485, 643.33),
-            120: (538.33, 700.33),
-            # 区间4：130-140
-            130: (582.67, 757.33),
-            140: (626, 813.33),
-            # 区间5：150-160
-            150: (670, 870),
-            160: (680.33, 926),
-        }
+        # 从JSON文件加载各等级总伤害标准区间
+        all_damage_standards = self.standards.get("all_damage_standards", {})
 
         # 找到最接近的等级标准
         closest_level = min(all_damage_standards.keys(),
                             key=lambda x: abs(x - equip_level))
-        min_damage, max_damage = all_damage_standards[closest_level]
+        min_damage, max_damage = all_damage_standards[closest_level][0], all_damage_standards[closest_level][1]
 
         # 计算标准化得分
         # 武器伤害最差情况是比最低标准低5%
@@ -235,30 +229,13 @@ class WeaponPlugin(EquipmentTypePlugin):
         Returns:
             float: 附加属性总和得分（0-100）
         """
-        # 定义各等级附加属性总和标准区间
-        addon_total_standards = {
-            # 区间1：60-80
-            60: (22, 28),   # 单加最高，双加最高
-            70: (26, 34),
-            80: (30, 40),
-            # 区间2：90-100
-            90: (30, 42),
-            100: (34, 48),
-            # 区间3：110-120
-            110: (36, 52),
-            120: (38, 56),
-            # 区间4：130-140
-            130: (42, 64),
-            140: (45, 66),
-            # 区间5：150-160
-            150: (48, 72),
-            160: (61, 86),
-        }
+        # 从JSON文件加载各等级附加属性总和标准区间
+        addon_total_standards = self.standards.get("addon_total_standards", {})
 
         # 找到最接近的等级标准
         closest_level = min(addon_total_standards.keys(),
                             key=lambda x: abs(x - equip_level))
-        max_single_addon_total, max_double_addon_total = addon_total_standards[closest_level]
+        max_single_addon_total, max_double_addon_total = addon_total_standards[closest_level][0], addon_total_standards[closest_level][1]
 
         # 判断是单加还是双加
         positive_attrs = [attr for attr in [addon_minjie, addon_liliang, addon_naili, addon_tizhi, addon_moli] if attr > 0]

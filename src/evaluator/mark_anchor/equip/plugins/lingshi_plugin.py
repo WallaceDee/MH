@@ -393,11 +393,20 @@ class LingshiPlugin(EquipmentTypePlugin):
                                     context: Dict[str, Any] = None) -> Optional[float]:
         """灵饰自定义相似度计算"""
         # 灵饰特有的相似度计算逻辑
+        if feature_name == 'attr_3_score':
+            # 如果attr_3_score为0，则认为相似
+            if target_val == 0 :
+                return 0.0
+            else:
+                return 1.0
+            
         if feature_name == 'attr_3_type':
             # attr_3_type相似度计算
             if target_val is None and market_val is None:
                 return 1.0  # 都没有第三个属性，完全匹配
-            elif target_val is None or market_val is None:
+            elif target_val is None:
+                return 0.0  # 一个有第三个属性一个没有，给予中等相似度
+            elif market_val is None:
                 return 0.5  # 一个有第三个属性一个没有，给予中等相似度
             else:
                 # 都有第三个属性，根据优先级判断是否相似
@@ -412,5 +421,8 @@ class LingshiPlugin(EquipmentTypePlugin):
                     return 0.75  # 优先级相同，认为相似
                 else:
                     return 0.0  # 优先级不同，不相似
+
+
+      
         
         return None  # 其他特征使用默认计算

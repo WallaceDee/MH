@@ -198,7 +198,7 @@
 
 <script>
 import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
-import EquipmentImage from '@/components/EquipmentImage.vue'
+import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import dayjs from 'dayjs'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'

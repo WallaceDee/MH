@@ -88,7 +88,7 @@
 
 <script>
 import PetImage from '@/components/PetImage.vue'
-import EquipmentImage from '@/components/EquipmentImage.vue'
+import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import SimilarPetModal from '@/components/SimilarPetModal.vue'
 import { petMixin } from '@/utils/mixins/petMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'

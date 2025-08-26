@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import EquipmentImage from './EquipmentImage.vue'
+import EquipmentImage from './EquipmentImage/EquipmentImage.vue'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 

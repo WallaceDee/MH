@@ -909,16 +909,29 @@ class EquipmentService:
             
             # 格式化返回结果
             if "error" in result:
+                # 估价失败时，仍然返回包含feature等信息的完整结构，但标记为失败
                 return {
-                    "error": result["error"],
+                    "error": result.get("error", "估价失败"),  # 保留错误信息
+                    "anchor_count": 0,
+                    "confidence": 0.0,
+                    "equip_sn": equipment_features.get("equip_sn", ""),
                     "estimated_price": 0,
-                    "estimated_price_yuan": 0
+                    "estimated_price_yuan": 0,
+                    "feature": equipment_features,
+                    "invalid_item": False,
+                    "max_anchors": max_anchors,
+                    "price_range": {
+                        "max": 0,
+                        "mean": 0,
+                        "median": 0,
+                        "min": 0
+                    },
+                    "similarity_threshold": similarity_threshold,
+                    "skip_reason": result.get("error", "估价失败"),
+                    "strategy": strategy
                 }
             
             estimated_price = result.get("estimated_price", 0)
-            
-            # 直接使用calculate_value返回的锚点信息，避免重复查找
-            anchors = result.get("anchors", [])
             anchor_count = result.get("anchor_count", 0)
             
             return {
@@ -929,10 +942,10 @@ class EquipmentService:
                 "confidence": result.get("confidence", 0),
                 "similarity_threshold": similarity_threshold,
                 "max_anchors": max_anchors,
-                "anchors": anchors,  # 使用calculate_value返回的锚点信息
                 "price_range": result.get("price_range", {}),
                 "skip_reason": result.get("skip_reason", ""),
                 "invalid_item": result.get("invalid_item", False),
+                "feature": equipment_features,
                 "equip_sn": result.get("equip_sn", "")  # 添加装备序列号
             }
             
@@ -940,9 +953,23 @@ class EquipmentService:
             logger.error(f"估价时发生错误: {e}")
             return {
                 "error": f"估价时发生错误: {str(e)}",
+                "anchor_count": 0,
+                "confidence": 0.0,
+                "equip_sn": equipment_data.get("equip_sn", "") if 'equipment_data' in locals() else "",
                 "estimated_price": 0,
                 "estimated_price_yuan": 0,
-                "equip_sn": equipment_data.get("equip_sn", "") if 'equipment_data' in locals() else ""  # 添加装备序列号
+                "feature": equipment_features if 'equipment_features' in locals() else {},
+                "invalid_item": False,
+                "max_anchors": max_anchors,
+                "price_range": {
+                    "max": 0,
+                    "mean": 0,
+                    "median": 0,
+                    "min": 0
+                },
+                "similarity_threshold": similarity_threshold,
+                "skip_reason": f"估价时发生错误: {str(e)}",
+                "strategy": strategy
             }
 
     def batch_equipment_valuation(self, equipment_list: List[Dict], 
@@ -1016,30 +1043,46 @@ class EquipmentService:
             processed_results = []
             for result in batch_results:
                 if "error" in result:
-                    # 处理错误情况
+                    # 处理错误情况，按照统一格式返回，包含feature等字段
                     processed_result = {
                         "index": result.get("equip_index", 0),
-                        "error": result["error"],
+                        "anchor_count": 0,
+                        "confidence": 0.0,
+                        "equip_sn": result.get("equip_sn", ""),
                         "estimated_price": 0,
                         "estimated_price_yuan": 0,
-                        "confidence": 0,
-                        "anchor_count": 0,
-                        "equip_sn": result.get("equip_sn", "")  # 添加装备序列号
+                        "feature": result.get("feature", {}),
+                        "invalid_item": False,
+                        "max_anchors": max_anchors,
+                        "price_range": {
+                            "max": 0,
+                            "mean": 0,
+                            "median": 0,
+                            "min": 0
+                        },
+                        "similarity_threshold": similarity_threshold,
+                        "error": result.get("error", "估价失败"),
+                        "strategy": strategy,
+                        "kindid": result.get("kindid", "")
                     }
                 else:
-                    # 处理成功情况
+                    # 处理成功情况，按照统一格式返回
                     estimated_price = result.get("estimated_price", 0)
                     processed_result = {
                         "index": result.get("equip_index", 0),
+                        "anchor_count": result.get("anchor_count", 0),
+                        "confidence": result.get("confidence", 0),
+                        "equip_sn": result.get("equip_sn", ""),
                         "estimated_price": estimated_price,
                         "estimated_price_yuan": round(estimated_price / 100, 2),
-                        "confidence": result.get("confidence", 0),
-                        "anchor_count": result.get("anchor_count", 0),
-                        "price_range": result.get("price_range", {}),
-                        "strategy": strategy,
-                        "skip_reason": result.get("skip_reason", ""),
+                        "feature": result.get("feature", {}),
                         "invalid_item": result.get("invalid_item", False),
-                        "equip_sn": result.get("equip_sn", "")  # 添加装备序列号
+                        "max_anchors": max_anchors,
+                        "price_range": result.get("price_range", {}),
+                        "similarity_threshold": similarity_threshold,
+                        "skip_reason": result.get("skip_reason", ""),
+                        "strategy": strategy,
+                        "kindid": result.get("kindid", "")
                     }
                 
                 processed_results.append(processed_result)
@@ -1214,19 +1257,19 @@ class EquipmentService:
                 "deleted": False
             }
 
-    def get_lingshi_data(self) -> Dict:
-        """获取灵石数据"""
+    def get_lingshi_config(self) -> Dict:
+        """获取灵饰数据"""
         try:
             import json
             import os
             from src.utils.project_path import get_relative_path
             
-            # 使用项目路径工具获取灵石数据文件路径
+            # 使用项目路径工具获取灵饰数据文件路径
             lingshi_file_path = get_relative_path('src/evaluator/mark_anchor/equip/plugins/lingshi.jsonc')
             
             # 检查文件是否存在
             if not os.path.exists(lingshi_file_path):
-                return {"error": "灵石数据文件不存在"}
+                return {"error": "灵饰数据文件不存在"}
             
             # 读取并解析JSON文件
             with open(lingshi_file_path, 'r', encoding='utf-8') as f:
@@ -1235,8 +1278,33 @@ class EquipmentService:
             return {"data": lingshi_data}
             
         except json.JSONDecodeError as e:
-            return {"error": f"灵石数据文件格式错误: {str(e)}"}
+            return {"error": f"灵饰数据文件格式错误: {str(e)}"}
         except Exception as e:
-            return {"error": f"获取灵石数据失败: {str(e)}"}
+            return {"error": f"获取灵饰数据失败: {str(e)}"}
+
+    def get_weapon_config(self) -> Dict:
+        """获取武器数据"""
+        try:
+            import json
+            import os
+            from src.utils.project_path import get_relative_path
+            
+            # 使用项目路径工具获取武数据文件路径
+            lingshi_file_path = get_relative_path('src/evaluator/mark_anchor/equip/plugins/weapon.jsonc')
+            
+            # 检查文件是否存在
+            if not os.path.exists(lingshi_file_path):
+                return {"error": "武器数据文件不存在"}
+            
+            # 读取并解析JSON文件
+            with open(lingshi_file_path, 'r', encoding='utf-8') as f:
+                lingshi_data = json.load(f)
+            
+            return {"data": lingshi_data}
+            
+        except json.JSONDecodeError as e:
+            return {"error": f"武器数据文件格式错误: {str(e)}"}
+        except Exception as e:
+            return {"error": f"获取武器数据失败: {str(e)}"}
 
 equipment_service = EquipmentService()

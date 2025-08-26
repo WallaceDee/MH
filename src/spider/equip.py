@@ -603,6 +603,7 @@ class CBGEquipSpider:
                 'page': page,
                 'count': 15,
                 'search_type': search_type,
+                'server_type': 3,# 默认3年外服务器
             }
             
             # 构建完整URL
