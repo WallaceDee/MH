@@ -317,14 +317,6 @@ class EquipMarketDataCollector:
                     db_limit = min(limit // len(self.db_paths) + 100, limit)
                     query += f" ORDER BY update_time DESC LIMIT {db_limit}"
 
-                    # 添加详细的SQL调试日志
-                    print(f"=== 数据库 {db_path} 的SQL调试信息 ===")
-                    print(f"完整SQL: {query}")
-                    print(f"SQL参数: {params}")
-                    print(f"参数数量: {len(params)}")
-                    print(f"数据库限制: {db_limit}")
-                    print("=" * 50)
-
                     try:
                         df = pd.read_sql_query(query, conn, params=params)
                         if not df.empty:

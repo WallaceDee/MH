@@ -1,77 +1,269 @@
-2025-08-22 23:39:22,564 - INFO - Spider实例将在需要时延迟创建
-2025-08-22 23:39:24,441 - INFO - 成功加载 41 个Cookie
-2025-08-22 23:39:24,694 - INFO - 已注入 41 个Cookie到浏览器上下文
-2025-08-22 23:39:25,126 - INFO - Playwright浏览器设置完成
-2025-08-22 23:39:25,131 - INFO - Playwright网络监听已设置
-2025-08-22 23:39:25,131 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
-2025-08-22 23:39:26,123 - INFO - 页面初始加载完成
-2025-08-22 23:39:29,142 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/login.py?act=show_mbauth
-2025-08-22 23:39:29,142 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/login.py?act=show_mbauth', 'message': '已登录'}
-2025-08-22 23:39:29,142 - INFO - 检测到已登录状态，更新Cookie...
-2025-08-22 23:39:29,152 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
-2025-08-22 23:39:29,152 - INFO - 数据收集已开始，请在浏览器中正常操作...
-2025-08-22 23:39:29,152 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
-2025-08-22 23:39:52,631 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1755877190646&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
-2025-08-22 23:39:52,631 - INFO - 开始创建角色spider实例...
-2025-08-22 23:39:53,363 - INFO - CBGSpider模块导入成功，开始实例化...
-2025-08-22 23:39:53,364 - INFO - 成功从config/cookies.txt加载Cookie
-2025-08-22 23:39:53,371 - INFO - 角色spider实例已创建
-2025-08-22 23:39:53,379 - INFO - 开始保存角色数据，数量: 15
-2025-08-22 23:39:53,379 - INFO - 检查角色数据库...
-2025-08-22 23:39:53,379 - INFO - 检查数据库类型: role
-2025-08-22 23:39:53,379 - INFO - 数据库路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
-2025-08-22 23:39:53,379 - INFO - 数据库文件是否存在: True
-2025-08-22 23:39:53,379 - INFO - 获取角色spider实例...
-2025-08-22 23:39:53,379 - INFO - 调用角色spider的save_role_data方法...
-2025-08-22 23:39:53,415 - INFO - 成功加载game_auto_config.js配置，包含132个配置项
-2025-08-22 23:39:54,645 - INFO - 角色 202508181400113-132-UUUIWM2R8L91 价格从 2424000.0 变更为 2411000，已记录到价格历史
-2025-08-22 23:39:56,032 - INFO - 角色 202507281400113-132-XT2X7UZIWAVC 价格从 2049900.0 变更为 2022200，已记录到价格历史
-2025-08-22 23:39:56,645 - INFO - 角色 202507281400113-132-DQIV8NKQN2UF 价格从 1600000.0 变更为 1588800，已记录到价格历史
-2025-08-22 23:39:57,755 - INFO - 角色数据已保存: 15 条
-2025-08-22 23:39:57,755 - INFO - 响应数据已保存: role - 15 条记录
-2025-08-22 23:40:26,384 - INFO - 检测到页面关闭，停止数据收集服务
-2025-08-22 23:40:26,432 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
-2025-08-22 23:40:26,762 - INFO - 数据收集已停止
-2025-08-22 23:40:26,762 - INFO - 数据收集已停止
-2025-08-22 23:40:26,974 - INFO - 数据收集已停止
-2025-08-23 23:01:14,628 - INFO - Spider实例将在需要时延迟创建
-2025-08-23 23:01:16,342 - INFO - 成功加载 41 个Cookie
-2025-08-23 23:01:16,504 - INFO - 已注入 41 个Cookie到浏览器上下文
-2025-08-23 23:01:16,830 - INFO - Playwright浏览器设置完成
-2025-08-23 23:01:16,837 - INFO - Playwright网络监听已设置
-2025-08-23 23:01:16,837 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
-2025-08-23 23:01:17,964 - INFO - 页面初始加载完成
-2025-08-23 23:01:20,414 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1755961277917&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
-2025-08-23 23:01:20,414 - INFO - 开始创建角色spider实例...
-2025-08-23 23:01:21,035 - INFO - CBGSpider模块导入成功，开始实例化...
-2025-08-23 23:01:21,036 - INFO - 成功从config/cookies.txt加载Cookie
-2025-08-23 23:01:21,042 - INFO - 角色spider实例已创建
-2025-08-23 23:01:21,052 - INFO - 开始保存角色数据，数量: 15
-2025-08-23 23:01:21,053 - INFO - 检查角色数据库...
-2025-08-23 23:01:21,053 - INFO - 检查数据库类型: role
-2025-08-23 23:01:21,053 - INFO - 数据库路径: E:\workspace\mh\data\202508\cbg_roles_202508.db
-2025-08-23 23:01:21,053 - INFO - 数据库文件是否存在: True
-2025-08-23 23:01:21,053 - INFO - 获取角色spider实例...
-2025-08-23 23:01:21,053 - INFO - 调用角色spider的save_role_data方法...
-2025-08-23 23:01:21,091 - INFO - 成功加载game_auto_config.js配置，包含132个配置项
-2025-08-23 23:01:22,470 - INFO - 角色 202508041900113-132-N8Z1YPKXTJXY 价格从 1777777.0 变更为 1769999，已记录到价格历史
-2025-08-23 23:01:23,736 - INFO - 角色 202508120900113-132-7XZB1EHATC11 价格从 2222200.0 变更为 2050000，已记录到价格历史
-2025-08-23 23:01:23,983 - INFO - 角色 202508120900113-132-3MXXH6UXWX20 价格从 2229900.0 变更为 2050000，已记录到价格历史
-2025-08-23 23:01:24,785 - INFO - 角色 202508071400113-132-S3NBYVDUZEQG 价格从 1999900.0 变更为 1888800，已记录到价格历史
-2025-08-23 23:01:25,264 - INFO - 角色数据已保存: 15 条
-2025-08-23 23:01:25,264 - INFO - 响应数据已保存: role - 15 条记录
-2025-08-23 23:01:25,268 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
-2025-08-23 23:01:25,268 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
-2025-08-23 23:01:25,268 - INFO - 检测到已登录状态，更新Cookie...
-2025-08-23 23:01:25,278 - INFO - 检测到页面关闭，停止数据收集服务
-2025-08-23 23:01:25,284 - INFO - Cookie已更新并保存到 E:\workspace\mh\config\cookies.txt
-2025-08-23 23:01:25,284 - INFO - 数据收集已开始，请在浏览器中正常操作...
-2025-08-23 23:01:25,284 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
-2025-08-23 23:01:25,290 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
-2025-08-23 23:01:25,567 - INFO - 数据收集已停止
-2025-08-23 23:01:25,596 - ERROR - Future exception was never retrieved
+2025-08-23 09:58:37,617 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 09:58:39,391 - INFO - 成功加载 41 个Cookie
+2025-08-23 09:58:39,486 - INFO - 已注入 41 个Cookie到浏览器上下文
+2025-08-23 09:58:39,775 - INFO - Playwright浏览器设置完成
+2025-08-23 09:58:39,791 - INFO - Playwright网络监听已设置
+2025-08-23 09:58:39,791 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 09:58:41,019 - INFO - 页面初始加载完成
+2025-08-23 09:58:43,214 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1755914321008&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-08-23 09:58:43,219 - INFO - 开始创建角色spider实例...
+2025-08-23 09:58:43,864 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-08-23 09:58:43,864 - INFO - 成功从config/cookies.txt加载Cookie
+2025-08-23 09:58:43,874 - INFO - 角色spider实例已创建
+2025-08-23 09:58:43,881 - INFO - 开始保存角色数据，数量: 15
+2025-08-23 09:58:43,881 - INFO - 检查角色数据库...
+2025-08-23 09:58:43,881 - INFO - 检查数据库类型: role
+2025-08-23 09:58:43,881 - INFO - 数据库路径: C:\Users\Administrator\Desktop\mh\data\202508\cbg_roles_202508.db
+2025-08-23 09:58:43,881 - INFO - 数据库文件是否存在: True
+2025-08-23 09:58:43,883 - INFO - 获取角色spider实例...
+2025-08-23 09:58:43,883 - INFO - 调用角色spider的save_role_data方法...
+2025-08-23 09:58:43,916 - INFO - 成功加载game_auto_config.js配置，包含132个配置项
+2025-08-23 09:58:47,108 - INFO - 角色 202508211900113-132-H7ZMTLGMQUDQ 价格从 2388800.0 变更为 2355500，已记录到价格历史
+2025-08-23 09:58:50,076 - INFO - 角色数据已保存: 15 条
+2025-08-23 09:58:50,077 - INFO - 响应数据已保存: role - 15 条记录
+2025-08-23 09:58:50,078 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 09:58:50,079 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-23 09:58:50,079 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 09:58:50,111 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-23 09:58:50,111 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 09:58:50,112 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 09:58:50,287 - INFO - 新页面创建，已附加监听器: https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py?act=show_search_role_form
+2025-08-23 10:00:12,875 - INFO - 新页面创建，已附加监听器: https://xyq.cbg.163.com/cgi-bin/xyq_overall_search.py
+2025-08-23 10:00:14,226 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1755914413104&level_min=109&level_max=109&bb_expt_gongji=17&bb_expt_fangyu=17&bb_expt_fashu=17&bb_expt_kangfa=17&skill_shensu=34&skill_qiang_zhuang=36&skill_ming_xiang=140&price_min=633300&price_max=633300&server_type=3&act=recommd_by_role&page=1&count=15&search_type=overall_search_role&view_loc=overall_search 
+2025-08-23 10:00:14,229 - INFO - 开始保存角色数据，数量: 6
+2025-08-23 10:00:14,229 - INFO - 检查角色数据库...
+2025-08-23 10:00:14,229 - INFO - 检查数据库类型: role
+2025-08-23 10:00:14,229 - INFO - 数据库路径: C:\Users\Administrator\Desktop\mh\data\202508\cbg_roles_202508.db
+2025-08-23 10:00:14,230 - INFO - 数据库文件是否存在: True
+2025-08-23 10:00:14,230 - INFO - 获取角色spider实例...
+2025-08-23 10:00:14,230 - INFO - 调用角色spider的save_role_data方法...
+2025-08-23 10:00:16,164 - INFO - 角色数据已保存: 6 条
+2025-08-23 10:00:16,164 - INFO - 响应数据已保存: role - 6 条记录
+2025-08-23 10:01:33,629 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 10:01:34,031 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-23 10:01:34,458 - INFO - 数据收集已停止
+2025-08-23 10:01:34,484 - ERROR - Future exception was never retrieved
 future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
 playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
-2025-08-23 23:01:25,597 - ERROR - Future exception was never retrieved
+2025-08-23 10:01:34,484 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-08-23 11:51:15,620 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 11:51:17,096 - INFO - 成功加载 45 个Cookie
+2025-08-23 11:51:17,171 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-08-23 11:51:17,415 - INFO - Playwright浏览器设置完成
+2025-08-23 11:51:17,430 - INFO - Playwright网络监听已设置
+2025-08-23 11:51:17,430 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 11:51:17,584 - INFO - 页面初始加载完成
+2025-08-23 11:51:20,595 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 11:51:20,595 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-23 11:51:20,595 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 11:51:20,604 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-23 11:51:20,604 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 11:51:20,604 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 11:51:47,613 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 11:51:47,674 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-23 11:51:47,968 - INFO - 数据收集已停止
+2025-08-23 11:51:47,969 - INFO - 数据收集已停止
+2025-08-23 11:51:47,969 - INFO - 数据收集已停止
+2025-08-23 11:51:55,857 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 11:51:57,556 - INFO - 成功加载 42 个Cookie
+2025-08-23 11:51:57,607 - INFO - 已注入 42 个Cookie到浏览器上下文
+2025-08-23 11:51:57,866 - INFO - Playwright浏览器设置完成
+2025-08-23 11:51:57,880 - INFO - Playwright网络监听已设置
+2025-08-23 11:51:57,880 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 11:52:04,600 - INFO - 页面初始加载完成
+2025-08-23 11:52:07,614 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/login.py?act=show_mbauth
+2025-08-23 11:52:07,614 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/login.py?act=show_mbauth', 'message': '已登录'}
+2025-08-23 11:52:07,614 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 11:52:07,624 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-23 11:52:07,624 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 11:52:07,624 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 11:52:38,512 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 11:52:38,608 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-23 11:52:38,940 - INFO - 数据收集已停止
+2025-08-23 11:52:38,940 - INFO - 数据收集已停止
+2025-08-23 11:52:38,941 - INFO - 数据收集已停止
+2025-08-23 12:49:42,661 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 12:49:44,068 - INFO - 成功加载 41 个Cookie
+2025-08-23 12:49:44,140 - INFO - 已注入 41 个Cookie到浏览器上下文
+2025-08-23 12:49:44,410 - INFO - Playwright浏览器设置完成
+2025-08-23 12:49:44,429 - INFO - Playwright网络监听已设置
+2025-08-23 12:49:44,429 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 12:49:45,143 - INFO - 页面初始加载完成
+2025-08-23 12:49:48,171 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/login.py?act=show_mbauth
+2025-08-23 12:49:48,171 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/login.py?act=show_mbauth', 'message': '已登录'}
+2025-08-23 12:49:48,171 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 12:49:48,182 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-23 12:49:48,182 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 12:49:48,182 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 12:50:05,878 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1755924602735&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-08-23 12:50:05,878 - INFO - 开始创建角色spider实例...
+2025-08-23 12:50:06,502 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-08-23 12:50:06,503 - INFO - 成功从config/cookies.txt加载Cookie
+2025-08-23 12:50:06,512 - INFO - 角色spider实例已创建
+2025-08-23 12:50:06,521 - INFO - 开始保存角色数据，数量: 15
+2025-08-23 12:50:06,521 - INFO - 检查角色数据库...
+2025-08-23 12:50:06,521 - INFO - 检查数据库类型: role
+2025-08-23 12:50:06,521 - INFO - 数据库路径: C:\Users\Administrator\Desktop\mh\data\202508\cbg_roles_202508.db
+2025-08-23 12:50:06,522 - INFO - 数据库文件是否存在: True
+2025-08-23 12:50:06,522 - INFO - 获取角色spider实例...
+2025-08-23 12:50:06,522 - INFO - 调用角色spider的save_role_data方法...
+2025-08-23 12:50:06,554 - INFO - 成功加载game_auto_config.js配置，包含132个配置项
+2025-08-23 12:50:08,527 - INFO - 角色 202508211900113-132-NFSOBYC11Q43 价格从 1944400.0 变更为 1933300，已记录到价格历史
+2025-08-23 12:50:11,448 - INFO - 角色数据已保存: 15 条
+2025-08-23 12:50:11,448 - INFO - 响应数据已保存: role - 15 条记录
+2025-08-23 12:53:55,272 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 12:53:56,765 - INFO - 成功加载 60 个Cookie
+2025-08-23 12:53:56,828 - INFO - 已注入 60 个Cookie到浏览器上下文
+2025-08-23 12:53:57,066 - INFO - Playwright浏览器设置完成
+2025-08-23 12:53:57,090 - INFO - Playwright网络监听已设置
+2025-08-23 12:53:57,090 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 12:53:57,261 - INFO - 页面初始加载完成
+2025-08-23 12:54:00,274 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 12:54:00,274 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-23 12:54:00,274 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 12:54:00,286 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-23 12:54:00,286 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 12:54:00,286 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 12:54:06,641 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 12:54:06,714 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-23 12:54:07,069 - INFO - 数据收集已停止
+2025-08-23 12:54:07,069 - INFO - 数据收集已停止
+2025-08-23 12:54:07,348 - INFO - 数据收集已停止
+2025-08-23 12:54:21,129 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 12:54:22,608 - INFO - 成功加载 42 个Cookie
+2025-08-23 12:54:22,677 - INFO - 已注入 42 个Cookie到浏览器上下文
+2025-08-23 12:54:22,966 - INFO - Playwright浏览器设置完成
+2025-08-23 12:54:22,986 - INFO - Playwright网络监听已设置
+2025-08-23 12:54:22,987 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 12:54:24,578 - INFO - 页面初始加载完成
+2025-08-23 12:54:27,576 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 12:54:27,576 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-23 12:54:27,576 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 12:54:27,588 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-23 12:54:27,588 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 12:54:27,589 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 12:54:38,545 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 12:54:38,662 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-23 12:54:38,954 - INFO - 数据收集已停止
+2025-08-23 12:54:38,963 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-08-23 12:54:38,964 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-08-23 14:05:22,046 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 14:05:24,348 - INFO - 成功加载 39 个Cookie
+2025-08-23 14:05:24,435 - INFO - 已注入 39 个Cookie到浏览器上下文
+2025-08-23 14:05:24,749 - INFO - Playwright浏览器设置完成
+2025-08-23 14:05:24,764 - INFO - Playwright网络监听已设置
+2025-08-23 14:05:24,764 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 14:05:32,995 - INFO - 页面初始加载完成
+2025-08-23 14:05:35,059 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 14:05:35,150 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-23 14:05:35,479 - INFO - 数据收集已停止
+2025-08-23 14:05:35,480 - INFO - 数据收集已停止
+2025-08-23 14:05:36,003 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 14:05:36,003 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-23 14:05:36,003 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-23 14:05:36,009 - ERROR - 更新Cookie失败: BrowserContext.cookies: Target page, context or browser has been closed
+2025-08-23 14:05:36,009 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 14:05:36,010 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 14:05:36,015 - INFO - 数据收集已停止
+2025-08-23 15:43:47,207 - INFO - Spider实例将在需要时延迟创建
+2025-08-23 15:43:48,571 - INFO - 成功加载 5 个Cookie
+2025-08-23 15:43:48,639 - INFO - 已注入 5 个Cookie到浏览器上下文
+2025-08-23 15:43:48,962 - INFO - Playwright浏览器设置完成
+2025-08-23 15:43:48,980 - INFO - Playwright网络监听已设置
+2025-08-23 15:43:48,980 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-23 15:43:56,023 - INFO - 页面初始加载完成
+2025-08-23 15:43:59,023 - INFO - 检测到未登录状态（页面在首页）
+2025-08-23 15:43:59,023 - INFO - 登录状态检查: {'isLoggedIn': False, 'currentUrl': 'https://xyq.cbg.163.com/', 'message': '页面在首页，未登录'}
+2025-08-23 15:43:59,023 - INFO - 未检测到登录状态，请手动登录...
+2025-08-23 15:43:59,023 - INFO - 当前页面URL: https://xyq.cbg.163.com/
+2025-08-23 15:43:59,024 - INFO - URL监听已设置，等待页面跳转到目标地址...
+2025-08-23 15:43:59,024 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-23 15:43:59,024 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-23 15:44:06,072 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-23 15:44:06,149 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-23 15:44:06,165 - INFO - 数据收集已停止
+2025-08-23 15:44:06,475 - INFO - 数据收集已停止
+2025-08-23 15:44:06,487 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-08-26 13:27:48,815 - INFO - Spider实例将在需要时延迟创建
+2025-08-26 13:27:51,370 - INFO - 成功加载 41 个Cookie
+2025-08-26 13:27:51,459 - INFO - 已注入 41 个Cookie到浏览器上下文
+2025-08-26 13:27:51,885 - INFO - Playwright浏览器设置完成
+2025-08-26 13:27:51,901 - INFO - Playwright网络监听已设置
+2025-08-26 13:27:51,902 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-26 13:27:53,375 - INFO - 页面初始加载完成
+2025-08-26 13:27:56,381 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-26 13:27:56,381 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-26 13:27:56,381 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-26 13:27:56,391 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-26 13:27:56,391 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-26 13:27:56,392 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-26 13:27:59,291 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-26 13:27:59,390 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-26 13:27:59,722 - INFO - 数据收集已停止
+2025-08-26 13:27:59,734 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-08-26 13:27:59,734 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-08-26 13:28:15,194 - INFO - Spider实例将在需要时延迟创建
+2025-08-26 13:28:16,710 - INFO - 成功加载 42 个Cookie
+2025-08-26 13:28:16,813 - INFO - 已注入 42 个Cookie到浏览器上下文
+2025-08-26 13:28:17,232 - INFO - Playwright浏览器设置完成
+2025-08-26 13:28:17,246 - INFO - Playwright网络监听已设置
+2025-08-26 13:28:17,247 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-26 13:28:17,412 - INFO - 页面初始加载完成
+2025-08-26 13:28:20,428 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-26 13:28:20,428 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-26 13:28:20,428 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-26 13:28:20,439 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-26 13:28:20,440 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-26 13:28:20,440 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-27 12:37:01,301 - INFO - Spider实例将在需要时延迟创建
+2025-08-27 12:37:03,220 - INFO - 成功加载 41 个Cookie
+2025-08-27 12:37:03,281 - INFO - 已注入 41 个Cookie到浏览器上下文
+2025-08-27 12:37:03,608 - INFO - Playwright浏览器设置完成
+2025-08-27 12:37:03,634 - INFO - Playwright网络监听已设置
+2025-08-27 12:37:03,635 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-27 12:37:04,761 - INFO - 页面初始加载完成
+2025-08-27 12:37:06,237 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1756269424752&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-08-27 12:37:06,237 - INFO - 开始创建角色spider实例...
+2025-08-27 12:37:07,133 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-08-27 12:37:07,133 - INFO - 成功从config/cookies.txt加载Cookie
+2025-08-27 12:37:07,143 - INFO - 角色spider实例已创建
+2025-08-27 12:37:07,154 - INFO - 开始保存角色数据，数量: 15
+2025-08-27 12:37:07,154 - INFO - 检查角色数据库...
+2025-08-27 12:37:07,154 - INFO - 检查数据库类型: role
+2025-08-27 12:37:07,154 - INFO - 数据库路径: C:\Users\Administrator\Desktop\mh\data\202508\cbg_roles_202508.db
+2025-08-27 12:37:07,154 - INFO - 数据库文件是否存在: True
+2025-08-27 12:37:07,155 - INFO - 获取角色spider实例...
+2025-08-27 12:37:07,155 - INFO - 调用角色spider的save_role_data方法...
+2025-08-27 12:37:07,187 - INFO - 成功加载game_auto_config.js配置，包含132个配置项
+2025-08-27 12:37:08,265 - INFO - 角色 202507140000113-132-PACGYUGZWGUF 价格从 1039500.0 变更为 1053500，已记录到价格历史
+2025-08-27 12:37:12,061 - INFO - 角色 202507061100113-132-KHETLOP7FV7I 价格从 160010.0 变更为 150010，已记录到价格历史
+2025-08-27 12:37:13,272 - INFO - 角色 202507292100113-132-QZMXVFKCROAB 价格从 850000.0 变更为 844400，已记录到价格历史
+2025-08-27 12:37:16,230 - INFO - 角色数据已保存: 15 条
+2025-08-27 12:37:16,230 - INFO - 响应数据已保存: role - 15 条记录
+2025-08-27 12:37:16,231 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-08-27 12:37:16,231 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-08-27 12:37:16,231 - INFO - 检测到已登录状态，更新Cookie...
+2025-08-27 12:37:16,272 - INFO - 检测到页面关闭，停止数据收集服务
+2025-08-27 12:37:16,281 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-08-27 12:37:16,282 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-08-27 12:37:16,282 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-08-27 12:37:16,297 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-08-27 12:37:16,601 - INFO - 数据收集已停止
+2025-08-27 12:37:16,622 - ERROR - Future exception was never retrieved
+future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
+playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-08-27 12:37:16,622 - ERROR - Future exception was never retrieved
 future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
 playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed

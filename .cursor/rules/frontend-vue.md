@@ -74,32 +74,20 @@ const response = await this.$api.equipment.getEquipmentList(params)
 // ✅ 标准处理模式
 const response = await this.$api.equipment.getEquipmentList(params)
 
-if (response.success) {
+if (response.code === 200) {
   // 成功处理
   this.equipments = response.items || response.data || []
   this.pagination.total = response.total || 0
   this.pagination.page = response.page || this.pagination.page
 } else {
   // 错误处理（响应拦截器已经显示了错误消息）
-  this.$message.error(response.message || '操作失败')
+  this.$notify.error({
+    title:'错误',
+    message:response.message || '操作失败'
+  })
 }
 ```
 
-### 后端兼容处理
-对于尚未完全迁移的老接口，可以使用code判断：
-
-```javascript
-// 兼容老接口的处理方式
-if (response.code === 200) {
-  // 老接口格式：response.data.data
-  this.equipments = response.data.data || []
-  this.pagination.total = response.data.total || 0
-} else if (response.success) {
-  // 新接口格式：response.items/response.data
-  this.equipments = response.items || response.data || []
-  this.pagination.total = response.total || 0
-}
-```
 
 ### 分页数据处理
 分页数据统一使用以下字段：
@@ -118,7 +106,7 @@ if (response.code === 200) {
 API按功能模块组织：
 ```javascript
 // 在组件中使用
-this.$api.character.getCharacterList()
+this.$api.role.getCharacterList()
 this.$api.equipment.getEquipmentList()
 this.$api.spider.getSpiderStatus()
 ```

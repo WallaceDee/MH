@@ -544,11 +544,7 @@ class EquipmentService:
                     logger.info(f"添加宝石等级筛选: gem_level >= {gem_level}")
               
                 where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-                
-                # 添加完整SQL调试日志
-                logger.info(f"生成的WHERE子句: {where_clause}")
-                logger.info(f"SQL参数: {params}")
-                
+
                 # 获取总数
                 count_sql = f"SELECT COUNT(*) FROM equipments {where_clause}"
                 total = cursor.execute(count_sql, params).fetchone()[0]

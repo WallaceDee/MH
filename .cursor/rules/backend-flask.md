@@ -12,7 +12,7 @@ src/
 │   │       └── v1/                   # API版本控制
 │   │           ├── __init__.py       # 蓝图注册
 │   │           ├── spider.py         # 功能模块蓝图
-│   │           ├── character.py      # 角色API
+│   │           ├── role.py      # 角色API
 │   │           ├── equipment.py      # 装备API
 │   │           └── system.py         # 系统API
 │   ├── controllers/                  # 控制器层
@@ -65,7 +65,7 @@ def create_app(config_name='default'):
 /api/v1/spider/basic/start     → 启动基础爬虫
 /api/v1/spider/proxy/start     → 启动代理爬虫
 /api/v1/system/files           → 文件列表
-/api/v1/characters             → 角色资源
+/api/v1/roles             → 角色资源
 /api/v1/equipments             → 装备资源
 ```
 
@@ -184,7 +184,7 @@ def register_error_handlers(app):
 # 主蓝图注册
 api_v1_bp = Blueprint('api_v1', __name__)
 api_v1_bp.register_blueprint(spider_bp, url_prefix='/spider')
-api_v1_bp.register_blueprint(character_bp, url_prefix='/characters')
+api_v1_bp.register_blueprint(role_bp, url_prefix='/roles')
 
 # 功能模块蓝图
 spider_bp = Blueprint('spider', __name__)

@@ -25,7 +25,7 @@
 │   │   ├── views/          # 页面组件  
 │   │   ├── api/            # API接口封装层 ⭐
 │   │   │   ├── index.js    # 统一API导出
-│   │   │   ├── character.js # 角色相关API
+│   │   │   ├── role.js # 角色相关API
 │   │   │   ├── equipment.js # 装备相关API
 │   │   │   └── request.js  # axios封装和拦截器
 │   │   ├── utils/          # 前端工具类
@@ -60,11 +60,11 @@
 #### API模块组织
 ```javascript
 // api/index.js - 统一导出
-export { characterApi } from './character'
+export { roleApi } from './role'
 export { equipmentApi } from './equipment'
 
 // 组件中使用
-this.$api.character.getCharacterList(params)
+this.$api.role.getCharacterList(params)
 this.$api.equipment.getEquipmentList(params)
 ```
 

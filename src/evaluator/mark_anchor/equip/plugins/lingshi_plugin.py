@@ -330,9 +330,9 @@ class LingshiPlugin(EquipmentTypePlugin):
 
             # 附加属性得分容忍度
             # 'attrs_avg_score': 0.4,       # 附加属性平均得分容忍度40%
-            'attr_1_score': 0.3,          # 第一个附加属性得分容忍度25%
-            'attr_2_score': 0.3,          # 第二个附加属性得分容忍度25%
-            'attr_3_score': 0.3,          # 第三个附加属性得分容忍度25%
+            'attr_1_score': 0.7,          # 第一个附加属性得分容忍度25%
+            'attr_2_score': 0.7,          # 第二个附加属性得分容忍度25%
+            'attr_3_score': 0.7,          # 第三个附加属性得分容忍度25%
             'attr_3_type':0,
             # 忽略的特征
             'suit_effect_type': 1,
@@ -345,8 +345,8 @@ class LingshiPlugin(EquipmentTypePlugin):
         if kindid is not None:
             if kindid == 61:  # 戒指 - 只有伤害和防御
                 base_tolerances.update({
-                    'damage_score': 0.3,      # 戒指伤害得分容忍度30%
-                    'defense_score': 0.3,     # 戒指防御得分容忍度30%
+                    'damage_score': 0.7,      # 戒指伤害得分容忍度30%
+                    'defense_score': 0.7,     # 戒指防御得分容忍度30%
                     'magic_damage_score': 1,  # 其他设为1（忽略）
                     'magic_defense_score': 1,
                     'fengyin_score': 1,
@@ -357,8 +357,8 @@ class LingshiPlugin(EquipmentTypePlugin):
                 base_tolerances.update({
                     'damage_score': 1,
                     'defense_score': 1,
-                    'magic_damage_score': 0.3,    # 耳饰法术伤害得分容忍度30%
-                    'magic_defense_score': 0.3,   # 耳饰法术防御得分容忍度30%
+                    'magic_damage_score': 0.7,    # 耳饰法术伤害得分容忍度30%
+                    'magic_defense_score': 0.7,   # 耳饰法术防御得分容忍度30%
                     'fengyin_score': 1,
                     'anti_fengyin_score': 1,
                     'speed_score': 1,
@@ -369,8 +369,8 @@ class LingshiPlugin(EquipmentTypePlugin):
                     'defense_score': 1,
                     'magic_damage_score': 1,
                     'magic_defense_score': 1,
-                    'fengyin_score': 0.3,         # 手镯封印命中得分容忍度30%
-                    'anti_fengyin_score': 0.3,    # 手镯抵抗封印得分容忍度30%
+                    'fengyin_score': 0.7,         # 手镯封印命中得分容忍度30%
+                    'anti_fengyin_score': 0.7,    # 手镯抵抗封印得分容忍度30%
                     'speed_score': 1,
                 })
             elif kindid == 64:  # 佩饰 - 只有速度
@@ -381,7 +381,7 @@ class LingshiPlugin(EquipmentTypePlugin):
                     'magic_defense_score': 1,
                     'fengyin_score': 1,
                     'anti_fengyin_score': 1,
-                    'speed_score': 0.3,           # 佩饰速度得分容忍度30%
+                    'speed_score': 0.7,           # 佩饰速度得分容忍度30%
                 })
 
         return base_tolerances

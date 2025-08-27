@@ -510,7 +510,7 @@ export default {
                 // 多服务器模式开启时，自动设置同级别服务器
                 const server_id = Number(this.externalParams.serverid)
                 console.log('开启多服务器模式，当前服务器ID:', server_id)
-                this.globalSettings.max_pages = 2
+                this.globalSettings.max_pages = 1
                 // 根据server_id在hotServers中找到对应的同级别的服务器
                 this.setTargetServersByLevel(server_id)
             } else {

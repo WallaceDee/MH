@@ -60,6 +60,8 @@ class EquipFeatureExtractor:
 
     def _init_patterns(self):
         """初始化正则表达式"""
+        # #r星位：伤害#r 中文字而不是数字
+        self.xingwei_pattern = r"#r星位：(\D+)#r"
         # 开运孔数
         self.hole_pattern = r"开运孔数：(\d+)孔/(\d+)孔"
         # 修理失败次数
@@ -373,11 +375,21 @@ class EquipFeatureExtractor:
         large_desc = equip_data.get('large_equip_desc', '')
         if large_desc:
             # 解析开运孔数
-
             hole_match = re.search(self.hole_pattern, large_desc)
             if hole_match:
                 current_holes = int(hole_match.group(1))
                 max_holes = int(hole_match.group(2))
+            # 解析星位
+            xingwei_match = re.search(self.xingwei_pattern, large_desc)
+            if xingwei_match:
+                if(equip_data.get('equip_level', 0) <= 60):
+                   current_holes =2
+                elif(equip_data.get('equip_level', 0) <= 90):
+                    current_holes = 3
+                elif(equip_data.get('equip_level', 0) <= 120):
+                    current_holes = 4
+                else:
+                    current_holes = 5
 
             # 解析修理失败次数
             repair_match = re.search(self.repair_fail_pattern, large_desc)
