@@ -158,7 +158,7 @@
     </div>
 
     <!-- 装备估价结果对话框 -->
-    <el-dialog title="装备估价结果" :visible.sync="valuationDialogVisible" width="760px" :close-on-click-modal="false"
+    <el-dialog :title="valuationDialogTitle" :visible.sync="valuationDialogVisible" width="760px" :close-on-click-modal="false"
       :close-on-press-escape="false" custom-class="batch-valuation-dialog">
       <BatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
         :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
@@ -283,6 +283,7 @@ export default {
   },
   data() {
     return {
+      valuationDialogTitle: '装备估价结果',
       stickyRoleList: [],
       checkedList: [],
       valuationLoading: false,
@@ -777,8 +778,9 @@ export default {
     get_equip_num(roleInfo) {
       return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length
     },
-    async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, }, serverid, server_name }) {
+    async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, basic_info }, serverid, server_name }) {
       const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ ...item, iType: item.type, cDesc: item.desc, serverid, server_name }))
+      this.valuationDialogTitle =`装备估价：${server_name} ${basic_info.school} 角色 ${basic_info.nickname}`
       try {
         // 先显示弹窗和骨架屏
         this.valuationDialogVisible = true

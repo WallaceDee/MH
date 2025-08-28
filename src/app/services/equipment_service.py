@@ -379,7 +379,7 @@ class EquipmentService:
                       suit_transform_charms: Optional[str] = None,
                       gem_value: Optional[str] = None,
                       gem_level: Optional[int] = None,
-                      sort_by: Optional[str] = 'price', sort_order: Optional[str] = 'asc') -> Dict:
+                      sort_by: Optional[str] = '', sort_order: Optional[str] = '') -> Dict:
         """获取分页的装备列表
         ### 基础信息字段
         1. `eid` - 装备ID（用于操作链接和相似装备功能）

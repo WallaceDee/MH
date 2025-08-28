@@ -39,8 +39,8 @@ def get_equipments():
             'suit_transform_charms': request.args.get('suit_transform_charms'),
             'gem_value': request.args.get('gem_value'),
             'gem_level': request.args.get('gem_level'),
-            'sort_by': request.args.get('sort_by', 'price'),
-            'sort_order': request.args.get('sort_order', 'asc')
+            'sort_by': request.args.get('sort_by', ''),
+            'sort_order': request.args.get('sort_order', '')
         }
         
         # 过滤掉空值

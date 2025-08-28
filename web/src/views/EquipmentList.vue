@@ -291,8 +291,8 @@ export default {
         suit_effect: [],
         gem_value: undefined,
         gem_level: undefined,
-        sort_by: 'price',
-        sort_order: 'asc'
+        sort_by: '',
+        sort_order: ''
       },
       pagination: {
         page: 1,

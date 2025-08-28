@@ -115,8 +115,8 @@ class EquipmentController:
                 gem_level = int(gem_level)
             
             # 排序参数
-            sort_by = params.get('sort_by', 'price')
-            sort_order = params.get('sort_order', 'asc')
+            sort_by = params.get('sort_by', '')
+            sort_order = params.get('sort_order', '')
             
             # 添加处理后的参数日志
             filter_params = {
