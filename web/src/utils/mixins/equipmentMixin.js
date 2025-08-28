@@ -8,6 +8,85 @@ export const equipmentMixin = {
     }
   },
   methods: {
+     // 初始化套装选项
+     initSuitOptions() {
+      const suitOptions = []
+      if (window.AUTO_SEARCH_CONFIG) {
+        // 附加状态
+        if (window.AUTO_SEARCH_CONFIG.suit_added_status) {
+          const addedStatusOptions = Object.entries(
+            window.AUTO_SEARCH_CONFIG.suit_added_status
+          ).map(([value, label]) => ({
+            value: `added_status_${value}`,
+            label: label
+          }))
+
+          if (addedStatusOptions.length > 0) {
+            suitOptions.push({
+              value: 'added_status',
+              label: '附加状态',
+              children: addedStatusOptions
+            })
+          }
+        }
+
+        // 追加法术
+        if (window.AUTO_SEARCH_CONFIG.suit_effects) {
+          const suitEffectsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_effects).map(
+            ([value, label]) => ({
+              value: `suit_effects_${value}`,
+              label: label
+            })
+          )
+
+          if (suitEffectsOptions.length > 0) {
+            suitOptions.push({
+              value: 'suit_effects',
+              label: '追加法术',
+              children: suitEffectsOptions
+            })
+          }
+        }
+
+        // 变身术
+        if (window.AUTO_SEARCH_CONFIG.suit_transform_skills) {
+          const transformSkillsOptions = Object.entries(
+            window.AUTO_SEARCH_CONFIG.suit_transform_skills
+          ).map(([value, label]) => ({
+            value: `transform_skills_${value}`,
+            label: label
+          }))
+
+          if (transformSkillsOptions.length > 0) {
+            suitOptions.push({
+              value: 'transform_skills',
+              label: '变身术',
+              children: transformSkillsOptions
+            })
+          }
+        }
+
+        // 变化咒
+        if (window.AUTO_SEARCH_CONFIG.suit_transform_charms) {
+          const transformCharmsOptions = Object.entries(
+            window.AUTO_SEARCH_CONFIG.suit_transform_charms
+          ).map(([value, label]) => ({
+            value: `transform_charms_${value}`,
+            label: label
+          }))
+
+          if (transformCharmsOptions.length > 0) {
+            suitOptions.push({
+              value: 'transform_charms',
+              label: '变化咒',
+              children: transformCharmsOptions
+            })
+          }
+        }
+      }
+
+      this.suitOptions = suitOptions
+    },
     /**
      * 获取装备图片属性
      * @param {Object} eItem - 装备项

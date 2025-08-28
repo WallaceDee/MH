@@ -60,6 +60,7 @@ class BaseEquipmentConfig:
             'gem_value': 0,              # 宝石得分已包含
             'special_effect': 0,          # 特技已在get_market_data_for_similarity中过滤
             'binding': 0,                 # 绑定状态
+            'hole_num': 0,                # 开运孔数
         }
 
         # 基础相对容忍度配置
@@ -97,6 +98,7 @@ class BaseEquipmentConfig:
             'gem_value': 1,              # 宝石得分已包含
             'special_effect': 1,         # 特技已在get_market_data_for_similarity中过滤
             'binding': 1,                # 绑定状态
+            'hole_num': 1,                # 开运孔数
         }
 
 
@@ -928,24 +930,10 @@ class EquipAnchorEvaluator(BaseValuator):
         if target_val == 0 or market_val == 0:
             return 0.1  # 一个有套装一个没有，相似度很低
 
-        # 敏捷套和魔力套的详细分类逻辑
-        # 新增规则：类型kindid为17（男头）、18（男衣）、19（鞋子）敏捷套的不适配跨套装类型匹配，如kindid为17的敏捷套只能和kindid为17的敏捷套匹配，不能再跟kindid为17的魔力套匹配
-        # 因为固伤门派都是女性角色，而鞋子有敏捷属性要求，一般敏捷套装不选鞋子，因为对鞋子等级和初敏要求很高
-        agility_suits = {
-            'B': [1040, 1047, 1049],  # 凤凰, 幽灵, 吸血鬼
-            # 画魂, 雾中仙, 机关鸟, 巴蛇, 猫灵（人型）, 修罗傀儡妖
-            'A': [1053, 1056, 1065, 1067, 1070, 1077]
-        }
-
-        # 魔力套
-        # 新增规则：类型kindid为21（饰品）魔力套的不适配跨套装类型匹配，如kindid为21的魔力套只能和kindid为21的魔力套匹配，不能再跟kindid为21的敏捷套匹配
-        # 因为饰品有灵力属性要求，一般魔力套装不选饰品，因为对饰品等级和初灵要求很高
-        magic_suits = {
-            # 蛟龙, 雨师, 如意仙子, 星灵仙子, 净瓶女娲, 灵符女娲
-            'B': [1041, 1042, 1043, 1046, 1050, 1052],
-            # 灵鹤, 炎魔神, 葫芦宝贝, 混沌兽, 长眉灵猴, 蜃气妖
-            'A': [1057, 1059, 1069, 1073, 1074, 1081]
-        }
+        # 从配置文件加载敏捷套和魔力套的详细分类
+        from .constant import get_agility_suits_detailed, get_magic_suits_detailed
+        agility_suits = get_agility_suits_detailed()
+        magic_suits = get_magic_suits_detailed()
 
         def get_suit_info(suit_id):
             """获取套装信息：(类型, 等级)"""

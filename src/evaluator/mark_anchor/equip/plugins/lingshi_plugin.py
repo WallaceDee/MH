@@ -10,13 +10,6 @@ import sys
 import os
 from typing import Dict, Any, List, Optional, Tuple
 
-# 添加项目根目录到Python路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))))
-sys.path.insert(0, project_root)
-
-
 class LingshiPlugin(EquipmentTypePlugin):
     """灵饰装备插件 - 专注主属性和附加属性估价
     主属性：
@@ -86,11 +79,9 @@ class LingshiPlugin(EquipmentTypePlugin):
     def _load_lingshi_config(self) -> Dict[str, Any]:
         """加载灵饰配置数据"""
         try:
-            import json
-            config_path = os.path.join(
-                os.path.dirname(__file__), 'lingshi.jsonc')
-            with open(config_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+            # 使用绝对导入
+            from src.evaluator.mark_anchor.equip.constant import get_lingshi_config
+            return get_lingshi_config()
         except Exception as e:
             print(f"加载灵饰配置失败: {e}")
             return {}
@@ -152,8 +143,8 @@ class LingshiPlugin(EquipmentTypePlugin):
                         score_100 = base_score + relative_position * score_range
                         scores[f'{attr_field}_score'] = round(score_100, 2)
 
-                        print(
-                            f"[主属性得分] {attr_name}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
+                        # print(
+                        #     f"[主属性得分] {attr_name}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         return scores
 
@@ -235,8 +226,8 @@ class LingshiPlugin(EquipmentTypePlugin):
                     score_key = f'attr_{i+1}_score'
                     scores[score_key] = round(score_100, 2)
 
-                    print(
-                        f"[附加属性得分] {attr_type}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
+                    # print(
+                    #     f"[附加属性得分] {attr_type}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         return scores
 

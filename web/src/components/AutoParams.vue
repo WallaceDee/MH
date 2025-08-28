@@ -86,16 +86,23 @@
                                 emitPath: false
                             }" collapse-tags size="mini" filterable v-model="target_server_list"
                                 @change="onTargetServerChange" />
-                            <el-cascader  v-show="!globalSettings.multi"  :options="server_data" size="mini" filterable
+                            <el-cascader v-show="!globalSettings.multi" :options="server_data" size="mini" filterable
                                 v-model="server_data_value" clearable @change="onServerDataChange" />
                         </el-form-item>
                     </el-col>
+                </el-row>
+                <el-row type="flex" align="middle">
+                    <el-form-item label="最低价格" size="small">
+                        <el-checkbox v-model="price_min_trigger"> </el-checkbox>
+                        <el-input-number v-model="price_min" :min="10" :controls="false"
+                            style="margin-left: 5px;"></el-input-number>
+                    </el-form-item>
                 </el-row>
             </el-form>
         </el-row>
         <el-tabs v-model="activeTab" tab-position="left">
             <!-- Playwright半自动收集器 -->
-            <el-tab-pane label="🖐️ 手动抓取" name="playwright" :disabled="externalParams.action">
+            <el-tab-pane label="🖐️ 手动抓取" name="playwright" :disabled="!!externalParams.action">
                 <el-form :model="playwrightForm" label-width="120px" size="small">
                     <el-form-item label="无头模式">
                         <el-switch v-model="playwrightForm.headless" @change="onHeadlessToggle"></el-switch>
@@ -124,7 +131,7 @@
                 </el-form>
             </el-tab-pane>
             <!-- 角色爬虫 -->
-            <el-tab-pane label="👤 角色" name="role" :disabled="externalParams.action">
+            <el-tab-pane label="👤 角色" name="role" :disabled="!!externalParams.action">
                 <el-form :model="roleForm" label-width="100px" size="small">
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
@@ -154,7 +161,8 @@
             </el-tab-pane>
 
             <!-- 装备爬虫 -->
-            <el-tab-pane label="⚔️ 装备" name="equip" :disabled="externalParams.action&&externalParams.action!=='similar_equip'">
+            <el-tab-pane label="⚔️ 装备" name="equip"
+                :disabled="externalParams.action && externalParams.action !== 'similar_equip'">
                 <el-form :model="equipForm" label-width="100px" size="small">
                     <el-form-item label="装备类型">
                         <el-select v-model="equipForm.equip_type" :disabled="externalParams.action === 'similar_equip'"
@@ -164,6 +172,23 @@
                             <el-option label="宠物装备" value="pet"></el-option>
                         </el-select>
                     </el-form-item>
+                    <el-form-item label="套装效果" v-if="equipForm.equip_type === 'normal' && targetFeatures.suit_effect">
+                        <el-radio-group v-model="suit_effect_type">
+                            <el-radio label=""><span v-html="formatSuitEffect({suit_effect: targetFeatures.suit_effect})"></span> </el-radio>
+                            <el-radio label="select">自选</el-radio>
+                            <el-radio label="agility_detailed.A">敏捷A套</el-radio>
+                            <el-radio label="agility_detailed.B">敏捷B套</el-radio>
+                            <el-radio label="magic_detailed.A">魔力A套</el-radio>
+                            <el-radio label="magic_detailed.B">魔力B套</el-radio>
+                        </el-radio-group>
+                        <el-cascader v-if="suit_effect_type === 'select'" :options="suitOptions" placeholder="请选择套装效果"
+                            separator="" clearable filterable @change="handleSuitChange" />
+                        <el-radio-group v-if="suit_effect_type?.split('.').length > 1" v-model="select_suit_effect">
+                            <el-radio
+                                v-for="itemId in equipConfig?.suits[suit_effect_type.split('.')[0]][suit_effect_type.split('.')[1]]"
+                                :label="itemId.toString()" :key="itemId">{{ suit_transform_skills[itemId] }}</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
                     <el-alert v-if="equipForm.equip_type === 'lingshi'" show-icon :closable="false"
                         style="margin-bottom: 10px;">
                         <span slot="title" v-html="lingshiTips"></span>
@@ -172,8 +197,8 @@
                     <div class="params-editor">
                         <div class="params-actions">
                             <el-button type="text" size="mini" @click="() => resetParam('equip')">重置</el-button>
-                            <el-button type="primary" size="mini" @click="() => saveParam('equip')" :loading="equipSaving"
-                                :disabled="!!equipJsonError">
+                            <el-button type="primary" size="mini" @click="() => saveParam('equip')"
+                                :loading="equipSaving" :disabled="!!equipJsonError">
                                 保存配置
                             </el-button>
                         </div>
@@ -211,7 +236,8 @@
             </el-tab-pane>
 
             <!-- 召唤兽爬虫 -->
-            <el-tab-pane label="🐲 召唤兽" name="pet" :disabled="externalParams.action&&externalParams.action!=='similar_pet'">
+            <el-tab-pane label="🐲 召唤兽" name="pet"
+                :disabled="externalParams.action && externalParams.action !== 'similar_pet'">
                 <el-form :model="petForm" label-width="100px" size="small">
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
@@ -263,6 +289,7 @@ import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import PetImage from '@/components/PetImage.vue'
 import LogMonitor from '@/components/LogMonitor.vue'
 import windowReuseManager from '@/utils/windowReuseManager'
+import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 
 const server_data_list = []
 for (let key in window.server_data) {
@@ -283,6 +310,7 @@ export default {
             default: true
         }
     },
+    mixins: [equipmentMixin],
     components: {
         EquipmentImage,
         LogMonitor,
@@ -290,6 +318,13 @@ export default {
     },
     data() {
         return {
+            price_min: 1,
+            price_min_trigger: false,
+            suit_transform_skills: window.AUTO_SEARCH_CONFIG.suit_transform_skills,
+            suitOptions: [],
+            suit_effect_type: '',
+            select_suit_effect: '',
+            equipConfig: {},
             hotServers: [],
             server_data: server_data_list,
             target_server_list: [], // 存储server_id的数组（用于el-cascader的v-model）
@@ -497,6 +532,28 @@ export default {
         }
     },
     watch: {
+        price_min(newVal) {
+            if(this.price_min_trigger){
+            const params = JSON.parse(this.equipParamsJson)
+            params.price_min = this.price_min_trigger ? newVal * 100 : undefined
+            this.equipParamsJson = JSON.stringify(params, null, 2)
+        }
+        },
+        price_min_trigger(newVal) {
+            const params = JSON.parse(this.equipParamsJson)
+            params.price_min = newVal ? this.price_min * 100 : undefined
+            this.equipParamsJson = JSON.stringify(params, null, 2)
+        },
+        select_suit_effect(newVal) {
+            const params = JSON.parse(this.equipParamsJson)
+            params.suit_effect = newVal ? newVal : undefined
+            this.equipParamsJson = JSON.stringify(params, null, 2)
+        },
+        suit_effect_type(newVal) {
+            if (!newVal) {
+                this.select_suit_effect = ''
+            }
+        },
         isRunning(newVal) {
             this.$emit('update:isRunning', newVal)
             if (newVal) {
@@ -521,26 +578,24 @@ export default {
             }
         }
     },
-    mounted() {
+    async mounted() {
         // 等待Vuex状态恢复后再执行其他操作
-        this.$nextTick(() => {
-            // 自动清理过期缓存
+        // 自动清理过期缓存
+        this.$store.dispatch('cookie/cleanExpiredCache')
+
+        // 启动缓存清理定时器（每分钟检查一次）
+        this.cacheCleanupTimer = setInterval(() => {
             this.$store.dispatch('cookie/cleanExpiredCache')
+        }, 60 * 1000)
 
-            // 启动缓存清理定时器（每分钟检查一次）
-            this.cacheCleanupTimer = setInterval(() => {
-                this.$store.dispatch('cookie/cleanExpiredCache')
-            }, 60 * 1000)
+        this.loadHotServers()
+        await this.loadSearchParams()
+        // 页面加载时请求一次状态
+        this.checkTaskStatus()
+        // 初始化延迟范围滑块
+        this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]
 
-            this.loadHotServers()
-            this.loadSearchParams()
-            // 页面加载时请求一次状态
-            this.checkTaskStatus()
-            // 初始化延迟范围滑块
-            this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]
-
-            this.loadExternalParams()
-        })
+        this.loadExternalParams()
         // 初始化时设置默认的server_data_value（如果store中没有的话）
         if (
             this.externalParams.action &&
@@ -549,9 +604,11 @@ export default {
             this.$store.dispatch('setServerDataValue', [43, 77])
         }
         if (this.externalParams.action) {
-            this.getFeatures()
+            this.getFeatures().then(() => {
+                this.loadEquipConfig()
+            })
         }
-
+        this.initSuitOptions()
         // 初始化窗口复用管理器
         this.initWindowReuseManager()
     },
@@ -563,6 +620,11 @@ export default {
         }
     },
     methods: {
+        handleSuitChange(value) {
+            const [, suitValue] = value
+            const actualValue = suitValue?.split('_').pop() // 提取真实的套装ID
+            this.select_suit_effect = actualValue || ''
+        },
         onServerDataChange() {
             const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
             console.log('server_data_value', { server_id, areaid, server_name })
@@ -913,7 +975,11 @@ export default {
                 if (features.special_skill) {
                     searchParams.special_skill = features.special_skill
                 }
-                [
+                if (features.hole_num) {
+                    searchParams.hole_num = features.hole_num
+                }
+
+                const paramsKey = [
                     // 'init_damage', //all_damage已经包含init_damage
                     'init_damage_raw',
                     'init_defense',
@@ -923,7 +989,16 @@ export default {
                     'all_wakan',
                     'all_damage',
                     'damage'
-                ].forEach((value) => {
+                ]
+                //如果是武器打只太阳石，则忽略all_damage
+                if (searchParams.gem_value === '2') {
+                    paramsKey.splice(paramsKey.indexOf('all_damage'), 1)
+                } else if (searchParams.gem_value === '1') {
+                    //如果是武器打只红玛瑙，则忽略init_damage
+                    paramsKey.splice(paramsKey.indexOf('init_damage'), 1)
+                }
+
+                paramsKey.forEach((value) => {
                     if (features[value]) {
                         searchParams[value] = features[value]
                     }
@@ -1075,6 +1150,13 @@ export default {
             this.globalSettings.delay_min = value[0]
             this.globalSettings.delay_max = value[1]
         },
+        async loadEquipConfig() {
+            const response = await this.$api.equipment.getEquipConfig()
+            this.equipConfig = response.data
+            if (this.targetFeatures.suit_effect) {
+                this.suit_effect_type = ''
+            }
+        },
         async loadHotServers() {
             try {
                 const response = await this.$api.system.getHotServers()
@@ -1184,7 +1266,7 @@ export default {
         validateParam(type) {
             const config = this.getParamConfig(type)
             if (!config) return false
-            
+
             this[config.errorKey] = this.validateJson(this[config.jsonKey], type)
             return !this[config.errorKey]
         },
@@ -1193,7 +1275,7 @@ export default {
         resetParam(type) {
             const config = this.getParamConfig(type)
             if (!config) return
-            
+
             const paramKey = config.getParamType ? config.getParamType() : config.paramType
             this[config.jsonKey] = JSON.stringify(this.defaultParams[paramKey], null, 2)
             this[config.errorKey] = ''
@@ -1291,7 +1373,7 @@ export default {
             try {
                 const params = config.getParams()
                 const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params)
-                
+
                 if (response.code === 200) {
                     this.$notify.success({
                         title: '爬虫启动',

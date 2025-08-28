@@ -426,7 +426,7 @@ class EquipFeatureExtractor:
             hole_score = (hole_raw_value / max_hole_value) * \
                 100 if max_hole_value > 0 else 0
             features['hole_score'] = round(hole_score, 2)
-
+            features['hole_num'] = current_holes
             # #r玩家68766666专用#r   
             binding_match = re.search(self.binding_pattern, large_desc)
             if binding_match:

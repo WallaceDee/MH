@@ -7,27 +7,35 @@ import sqlite3
 import sys
 import os
 
+# 从配置文件加载常量
+from .constant import (
+    get_agility_suits, get_magic_suits, get_high_value_suits,
+    get_precise_filter_suits, get_high_value_effects, get_important_effects,
+    get_high_value_simple_levels, get_simple_effect_id,
+    get_low_value_special_skills, get_low_value_effects
+)
+
 # 套装效果ID常量定义
 # 高价值套装
-AGILITY_SUITS = [1040, 1047, 1049, 1053, 1056, 1065, 1067, 1070, 1077]  # 敏捷套装
-MAGIC_SUITS = [1041, 1042, 1043, 1046, 1050, 1052, 1057, 1059, 1069, 1073, 1074, 1081]  # 魔力套装
-HIGH_VALUE_SUITS = AGILITY_SUITS + MAGIC_SUITS  # 合并高价值套装
+AGILITY_SUITS = get_agility_suits()  # 敏捷套装
+MAGIC_SUITS = get_magic_suits()  # 魔力套装
+HIGH_VALUE_SUITS = get_high_value_suits()  # 合并高价值套装
 
 # 精确筛选套装（允许精确筛选的套装效果）
-PRECISE_FILTER_SUITS = [4002, 4011, 4017, 4019, 3011, 3050]  # 定心术、变身、碎星诀、天神护体、满天花雨、浪涌
+PRECISE_FILTER_SUITS = get_precise_filter_suits()  # 定心术、变身、碎星诀、天神护体、满天花雨、浪涌
 
 # 高价值特效
-HIGH_VALUE_EFFECTS = [1, 3, 5]  # 无级别，愤怒，永不磨损 高价值特效
-IMPORTANT_EFFECTS = [1, 2, 3, 4, 5, 7, 11, 12, 16]  # 相似度计算中重要的特效
+HIGH_VALUE_EFFECTS = get_high_value_effects()  # 无级别，愤怒，永不磨损 高价值特效
+IMPORTANT_EFFECTS = get_important_effects()  # 相似度计算中重要的特效
 
 # 高价值简易装备等级
-HIGH_VALUE_EQUIP_LEVELS = [70, 90, 110, 130]  # 高价值简易装备等级
-SIMPLE_EFFECT_ID = 2  # 简易装备特效编号
+HIGH_VALUE_EQUIP_LEVELS = get_high_value_simple_levels()  # 高价值简易装备等级
+SIMPLE_EFFECT_ID = get_simple_effect_id()  # 简易装备特效编号
 
 # 低价值特技
-LOW_VALUE_SPECIAL_SKILLS = [1001,1002,1003,1004,1005,1006,1007,1050,2001,2004,1041,2041]
+LOW_VALUE_SPECIAL_SKILLS = get_low_value_special_skills()
 # 低价值特效
-LOW_VALUE_EFFECTS = [9, 10, 13, 14, 15, 17, 18]
+LOW_VALUE_EFFECTS = get_low_value_effects()
 
 # 添加项目根目录到Python路径，解决模块导入问题
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -394,7 +402,7 @@ class EquipMarketDataCollector:
             # 检查目标装备是否包含高价值特效
             target_has_high_value_effects = False
             target_has_simple_effect = False
-            print(f"special_effectspecial_effectspecial_effectspecial_effect: {special_effect}-----------------target_equip_level{target_features}")
+            
             if special_effect and len(special_effect) > 0:
                 # 筛选出重要特效用于相似度计算
                 filtered_effects = []

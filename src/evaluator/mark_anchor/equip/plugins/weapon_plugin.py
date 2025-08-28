@@ -5,17 +5,7 @@
 """
 
 from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
-import sys
-import os
-import json
-from typing import Dict, Any, List, Optional, Tuple
-
-# 添加项目根目录到Python路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))))
-sys.path.insert(0, project_root)
-
+from typing import Dict, Any, List, Optional
 
 class WeaponPlugin(EquipmentTypePlugin):
     """武器装备插件 - 专注于伤害、总伤害和属性加成的估价
@@ -39,10 +29,10 @@ class WeaponPlugin(EquipmentTypePlugin):
     def _load_standards(self):
         """加载武器标准数据"""
         try:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            json_path = os.path.join(current_dir, 'weapon.jsonc')
-            with open(json_path, 'r', encoding='utf-8') as f:
-                raw_standards = json.load(f)
+            # 使用绝对导入调用get_weapon_config
+            from src.evaluator.mark_anchor.equip.constant import get_weapon_config
+            
+            raw_standards = get_weapon_config()
                 
             # 将字符串键转换为整数键
             self.standards = {}
@@ -50,6 +40,8 @@ class WeaponPlugin(EquipmentTypePlugin):
                 self.standards[key] = {}
                 for level_str, level_data in value.items():
                     self.standards[key][int(level_str)] = level_data
+            
+            print(f"武器标准数据加载成功: {list(self.standards.keys())}")
                     
         except Exception as e:
             print(f"加载武器标准数据失败: {e}")

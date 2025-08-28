@@ -9,12 +9,6 @@ import sys
 import os
 from typing import Dict, Any, List, Optional, Tuple
 
-# 添加项目根目录到Python路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))))
-sys.path.insert(0, project_root)
-
 
 class PetEquipPlugin(EquipmentTypePlugin):
     """宠物装备插件 - 专注主属性和附加属性估价
@@ -70,11 +64,8 @@ class PetEquipPlugin(EquipmentTypePlugin):
     def _load_pet_equip_config(self) -> Dict[str, Any]:
         """加载宠物装备配置数据"""
         try:
-            import json
-            config_path = os.path.join(
-                os.path.dirname(__file__), 'pet_equip.jsonc')
-            with open(config_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+            from src.evaluator.mark_anchor.equip.constant import get_pet_equip_config
+            return get_pet_equip_config()
         except Exception as e:
             print(f"加载宠物装备配置失败: {e}")
             return {}

@@ -479,3 +479,21 @@ def delete_abnormal_equipment(equip_sn):
         
     except Exception as e:
         return error_response(f"删除异常装备记录失败: {str(e)}") 
+
+@equipment_bp.route('/pet-equip-config', methods=['GET'])
+def get_pet_equip_config():
+    """获取宠物装备数据"""
+    try:
+        result = controller.get_pet_equip_config()
+        return success_response(data=result["data"], message="获取宠物装备数据成功")
+    except Exception as e:
+        return error_response(f"获取宠物装备数据失败: {str(e)}")
+    
+@equipment_bp.route('/equip-config', methods=['GET'])
+def get_equip_config():
+    """获取装备数据"""
+    try:
+        result = controller.get_equip_config()
+        return success_response(data=result["data"], message="获取装备数据成功")
+    except Exception as e:
+        return error_response(f"获取装备数据失败: {str(e)}")

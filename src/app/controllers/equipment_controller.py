@@ -433,3 +433,21 @@ class EquipmentController:
         except Exception as e:
             logger.error(f"获取武器数据失败: {str(e)}")
             return {"error": f"获取武器数据失败: {str(e)}"}
+        
+    def get_pet_equip_config(self) -> Dict:
+        """获取宠物装备数据"""
+        try:
+            result = self.service.get_pet_equip_config()
+            return result
+        except Exception as e:
+            logger.error(f"获取宠物装备数据失败: {str(e)}")
+            return {"error": f"获取宠物装备数据失败: {str(e)}"}
+    
+    def get_equip_config(self) -> Dict:
+        """获取装备数据"""
+        try:
+            result = self.service.get_equip_config()
+            return result
+        except Exception as e:
+            logger.error(f"获取装备数据失败: {str(e)}")
+            return {"error": f"获取装备数据失败: {str(e)}"}

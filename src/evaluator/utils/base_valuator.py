@@ -79,7 +79,6 @@ class BaseValuator(ABC):
                     'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
                 }
             
-            print(target_features, 'target_featurestarget_featurestarget_featurestarget_featurestarget_featurestarget_features')
             # 寻找市场锚点
             anchors = self.find_market_anchors(
                 target_features, similarity_threshold, max_anchors, verbose=verbose)

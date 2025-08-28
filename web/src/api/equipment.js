@@ -140,6 +140,21 @@ export const equipmentApi = {
   },
 
   /**
+   * 获取宠物装备数据
+   * @returns {Promise}
+   */
+  getPetEquipConfig() {
+    return api.get('/equipment/pet-equip-config')
+  },
+
+  /**
+   * 获取装备数据
+   * @returns {Promise}
+   */
+  getEquipConfig() {
+    return api.get('/equipment/equip-config')
+  },
+  /**
    * 标记装备为异常
    * @param {Object} data - 装备数据和标记原因
    * @returns {Promise}

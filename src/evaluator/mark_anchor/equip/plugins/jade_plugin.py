@@ -5,17 +5,8 @@
 """
 
 from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
-from src.evaluator.constants.jade_priorities import is_same_priority
-import sys
-import os
+
 from typing import Dict, Any, List, Optional, Tuple
-
-# 添加项目根目录到Python路径
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))))
-sys.path.insert(0, project_root)
-
 
 class jadePlugin(EquipmentTypePlugin):
     """上古玉魄装备插件 - 专注主属性和附加属性估价
@@ -86,11 +77,8 @@ class jadePlugin(EquipmentTypePlugin):
     def _load_jade_config(self) -> Dict[str, Any]:
         """加载上古玉魄配置数据"""
         try:
-            import json
-            config_path = os.path.join(
-                os.path.dirname(__file__), 'jade.jsonc')
-            with open(config_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
+            from src.evaluator.mark_anchor.equip.constant import get_jade_config
+            return get_jade_config()
         except Exception as e:
             print(f"加载上古玉魄配置失败: {e}")
             return {}
@@ -152,8 +140,8 @@ class jadePlugin(EquipmentTypePlugin):
                         score_100 = base_score + relative_position * score_range
                         scores[f'{attr_field}_score'] = round(score_100, 2)
 
-                        print(
-                            f"[主属性得分] {attr_name}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
+                        # print(
+                        #     f"[主属性得分] {attr_name}: {attr_value} (范围: {min_val}-{max_val}) -> {score_100:.2f}分 (基础分{base_score}+{relative_position*score_range:.2f})")
 
         return scores
 
@@ -379,9 +367,7 @@ class jadePlugin(EquipmentTypePlugin):
                  # 完全相同的属性
                 if target_val == market_val:
                     return 1.0 
-                # 使用优先级判断属性是否相似
-                elif is_same_priority(target_val, market_val, equipment_type):
-                    return 0.75  # 优先级相同，认为相似
+
                 else:
                     return 0.0  # 优先级不同，不相似
         

@@ -1256,51 +1256,54 @@ class EquipmentService:
     def get_lingshi_config(self) -> Dict:
         """获取灵饰数据"""
         try:
-            import json
-            import os
-            from src.utils.project_path import get_relative_path
+            from src.evaluator.mark_anchor.equip.constant import get_lingshi_config
             
-            # 使用项目路径工具获取灵饰数据文件路径
-            lingshi_file_path = get_relative_path('src/evaluator/mark_anchor/equip/plugins/lingshi.jsonc')
-            
-            # 检查文件是否存在
-            if not os.path.exists(lingshi_file_path):
-                return {"error": "灵饰数据文件不存在"}
-            
-            # 读取并解析JSON文件
-            with open(lingshi_file_path, 'r', encoding='utf-8') as f:
-                lingshi_data = json.load(f)
+            # 从constant模块获取灵饰数据
+            lingshi_data = get_lingshi_config()
             
             return {"data": lingshi_data}
             
-        except json.JSONDecodeError as e:
-            return {"error": f"灵饰数据文件格式错误: {str(e)}"}
         except Exception as e:
             return {"error": f"获取灵饰数据失败: {str(e)}"}
 
     def get_weapon_config(self) -> Dict:
         """获取武器数据"""
         try:
-            import json
-            import os
-            from src.utils.project_path import get_relative_path
+            from src.evaluator.mark_anchor.equip.constant import get_weapon_config
             
-            # 使用项目路径工具获取武数据文件路径
-            lingshi_file_path = get_relative_path('src/evaluator/mark_anchor/equip/plugins/weapon.jsonc')
+            # 从constant模块获取武器数据
+            weapon_data = get_weapon_config()
             
-            # 检查文件是否存在
-            if not os.path.exists(lingshi_file_path):
-                return {"error": "武器数据文件不存在"}
+            return {"data": weapon_data}
             
-            # 读取并解析JSON文件
-            with open(lingshi_file_path, 'r', encoding='utf-8') as f:
-                lingshi_data = json.load(f)
-            
-            return {"data": lingshi_data}
-            
-        except json.JSONDecodeError as e:
-            return {"error": f"武器数据文件格式错误: {str(e)}"}
         except Exception as e:
             return {"error": f"获取武器数据失败: {str(e)}"}
+
+    def get_pet_equip_config(self) -> Dict:
+        """获取宠物装备数据"""
+        try:
+            from src.evaluator.mark_anchor.equip.constant import get_pet_equip_config
+            
+            # 从constant模块获取宠物装备数据
+            pet_equip_data = get_pet_equip_config()
+            
+            return {"data": pet_equip_data}
+
+        except Exception as e:
+            return {"error": f"获取宠物装备数据失败: {str(e)}"}
+    
+    def get_equip_config(self) -> Dict:
+        """获取装备数据"""
+        try:
+            from src.evaluator.mark_anchor.equip.constant import get_config
+            
+            # 从constant模块获取装备数据
+            equip_data = get_config()
+
+            return {"data": equip_data}
+
+        except Exception as e:
+            return {"error": f"获取装备数据失败: {str(e)}"}
+
 
 equipment_service = EquipmentService()
