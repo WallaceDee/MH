@@ -324,7 +324,7 @@ def get_logs():
 def get_log_files():
     """获取日志文件列表"""
     try:
-        from ...controllers.system_controller import SystemController
+        from ....controllers.system_controller import SystemController
         system_controller = SystemController()
         files = system_controller.list_output_files()
         
@@ -505,7 +505,7 @@ def stream_logs():
 def list_files():
     """列出输出文件"""
     try:
-        from ...controllers.system_controller import SystemController
+        from ....controllers.system_controller import SystemController
         system_controller = SystemController()
         files = system_controller.list_output_files()
         return success_response(data={"items": files})
@@ -517,13 +517,13 @@ def list_files():
 def download_file(filename):
     """下载文件"""
     try:
-        from ...controllers.system_controller import SystemController
+        from ....controllers.system_controller import SystemController
         from flask import send_file
         system_controller = SystemController()
         file_path = system_controller.get_file_path(filename)
         return send_file(file_path, as_attachment=True)
     except FileNotFoundError:
-        return error_response("文件不存在", code=404, http_code=404)
+        return error_response("文件不存在", code=404, http_code=500)
     except Exception as e:
         return error_response(f"下载失败: {str(e)}", http_code=500)
 

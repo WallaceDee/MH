@@ -457,6 +457,7 @@ export default {
         if (valuationResponse.code === 200) {
           const data = valuationResponse.data
           this.petValuation = data
+          alert(data?.anchor_count)
 
           const { data: { anchors:allAnchors } } = await this.$api.pet.findPetAnchors({
             pet_data: pet,
@@ -464,7 +465,7 @@ export default {
             max_anchors: 30
           })
           // 从估价结果中提取相似宠物信息
-          if (data.anchors && data.anchors.length > 0) {
+          if (data?.anchor_count  > 0) {
             this.similarPets = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
@@ -489,7 +490,6 @@ export default {
         this.similarPets = {
           anchor_count: 0,
           similarity_threshold: similarityThreshold,
-          anchors: [],
           statistics: {
             price_range: { min: 0, max: 0 },
             similarity_range: { min: 0, max: 0, avg: 0 }
@@ -859,7 +859,7 @@ export default {
 /* 批量估价对话框样式 */
 :global(.batch-valuation-dialog) {
   width: 90% !important;
-  max-width: 900px !important;
+  max-width:1000px !important;
 }
 
 :global(.batch-valuation-dialog .el-message-box__content) {

@@ -694,7 +694,6 @@ class PetService:
             estimated_price = result.get("estimated_price", 0)
 
             # 直接使用calculate_value返回的锚点信息，避免重复查找
-            anchors = result.get("anchors", [])
             anchor_count = result.get("anchor_count", 0)
 
             return {
@@ -705,7 +704,6 @@ class PetService:
                 "confidence": result.get("confidence", 0),
                 "similarity_threshold": similarity_threshold,
                 "max_anchors": max_anchors,
-                "anchors": anchors,
                 "price_range": result.get("price_range", {})
             }
         except Exception as e:

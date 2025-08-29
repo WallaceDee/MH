@@ -415,7 +415,7 @@ def update_pet_equipments_price():
         max_anchors = int(data.get('max_anchors', 30))
         
         # 调用装备控制器的批量估价方法
-        from ...controllers.equipment_controller import EquipmentController
+        from ....controllers.equipment_controller import EquipmentController
         equipment_controller = EquipmentController()
         
         result = equipment_controller.batch_equipment_valuation(
