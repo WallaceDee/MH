@@ -84,7 +84,7 @@
         <template #default="scope">
           <el-link :href="getCBGLinkByType(scope.row.eid, 'equip')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <SimilarEquipmentModal :equipment="scope.row" :similar-data="similarEquipments" :valuation="equipmentValuation" @show="loadSimilarEquipments" />
+          <SimilarEquipmentModal :equipment="{...equipmentValuation,...scope.row}" :similar-data="similarEquipments" @show="loadSimilarEquipments" />
         </template>
       </el-table-column>
       <el-table-column fixed label="装备" width=" 70">
@@ -326,7 +326,7 @@ export default {
       },
       // 相似装备相关数据（实时计算，不缓存）
       similarEquipments: null, // 当前显示的相似装备数据
-      equipmentValuation: null, // 当前装备估价信息
+      equipmentValuation: {}, // 当前装备估价信息
 
       // 宠物装备类型配置
       petEquipTypes: window.petEquipTypes,
@@ -629,7 +629,7 @@ export default {
     // 加载相似装备
     async loadSimilarEquipments(equipment) {
       // 每次都重新计算，不使用缓存
-      this.equipmentValuation = null
+      this.equipmentValuation = {}
       this.similarEquipments= null
       await this.loadEquipmentValuation(equipment, 0.8)
     },
@@ -657,7 +657,7 @@ export default {
             max_anchors: 30
           })
           // 从估价结果中提取相似装备信息
-          if (data.anchors && data.anchors.length > 0) {
+          if (data.anchor_count && data.anchor_count > 0) {
             this.similarEquipments = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,

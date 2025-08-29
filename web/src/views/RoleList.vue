@@ -63,12 +63,12 @@
             <span class="vertical-middle">
               <i class="icon-chai" v-if="scope.row.is_split_independent_role === 1"></i>
               <i class="icon-zheng" v-if="scope.row.is_split_main_role === 1"></i>
-            {{ scope.row.server_name }}/
-            {{ get_school_name(scope.row.school) }}
+              {{ scope.row.server_name }}/
+              {{ get_school_name(scope.row.school) }}
             </span>
             <div class="js-level cGray">{{ scope.row.level }}级/{{
               scope.row.sum_exp
-              }}亿</div>
+            }}亿</div>
           </template>
         </el-table-column>
         <el-table-column prop="highlight" label="亮点" width="100" align="center" sortable="custom">>
@@ -84,14 +84,19 @@
         <el-table-column prop="price" label="价格 (元)" width="140" sortable="custom" align="center">
           <template #default="scope">
             <div v-html="formatFullPrice(scope.row)"></div>
-            <el-tag  v-if="get_price_change(scope.row)!==undefined"  :type="get_price_change(scope.row)>0?'danger':'success'">
-              <i :class="`el-icon-${get_price_change(scope.row)>0?'bottom':'top'}`" :style="`color: #${get_price_change(scope.row)>0?'F56C6C;':'67C23A'}`">￥{{ get_price_change(scope.row) }}</i>
+            <el-tag v-if="get_price_change(scope.row) !== undefined"
+              :type="get_price_change(scope.row) > 0 ? 'danger' : 'success'">
+              <i :class="`el-icon-${get_price_change(scope.row) > 0 ? 'bottom' : 'top'}`"
+                :style="`color: #${get_price_change(scope.row) > 0 ? 'F56C6C;' : '67C23A'}`">￥{{ get_price_change(scope.row)
+                }}</i>
             </el-tag>
-            </template>
+          </template>
         </el-table-column>
         <el-table-column prop="history_price" label="历史价格" width="120" align="center" sortable="custom">
           <template slot-scope="scope">
-              <span  v-for="(history, index) in JSON.parse(scope.row.history_price)" :key="index" :title="history.timestamp" v-html="formatFullPrice(history.price, true)" style="text-decoration: line-through;filter: grayscale(100%);"> </span>
+            <span v-for="(history, index) in JSON.parse(scope.row.history_price)" :key="index"
+              :title="history.timestamp" v-html="formatFullPrice(history.price, true)"
+              style="text-decoration: line-through;filter: grayscale(100%);"> </span>
           </template>
         </el-table-column>
         <el-table-column prop="accept_bargain" label="还价" width="80" align="center" sortable="custom">
@@ -129,7 +134,7 @@
               '') }}{{ xiulian.info }}</el-tag>
             <br>
             <el-tag v-for="ctrl_skill in scope.row.roleInfo.pet_ctrl_skill" :key="ctrl_skill.name">{{ ctrl_skill.name
-              }}{{
+            }}{{
                 ctrl_skill.grade }}</el-tag>
           </template>
         </el-table-column>
@@ -158,8 +163,14 @@
     </div>
 
     <!-- 装备估价结果对话框 -->
-    <el-dialog :title="valuationDialogTitle" :visible.sync="valuationDialogVisible" width="760px" :close-on-click-modal="false"
+    <el-dialog :visible.sync="valuationDialogVisible" width="1000px" :close-on-click-modal="false"
       :close-on-press-escape="false" custom-class="batch-valuation-dialog">
+      <span slot="title" class="el-dialog__title">
+        <el-tag size="mini">{{ valuationDialogTitle.server_name }}</el-tag>
+        /
+        <el-tag type="info" size="mini">{{ valuationDialogTitle.school }}</el-tag>/
+        <el-link :href="getCBGLinkByType(valuationDialogTitle.eid)" target="_blank">{{ valuationDialogTitle.nickname }}</el-link>
+      </span>
       <BatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
         :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
         @close="closeValuationDialog" />
@@ -254,10 +265,10 @@ export default {
         if (newQuery.sort_by && newQuery.sort_order) {
           const sortFields = newQuery.sort_by.split(',')
           const sortOrders = newQuery.sort_order.split(',')
-          
+
           // 清空当前排序状态
           this.sortState = {}
-          
+
           // 重新设置排序状态
           sortFields.forEach((field, index) => {
             const order = sortOrders[index]
@@ -267,7 +278,7 @@ export default {
               this.sortState[field] = 'descending'
             }
           })
-          
+
           // 更新searchForm中的排序参数
           this.$set(this.searchForm, 'sort_by', newQuery.sort_by)
           this.$set(this.searchForm, 'sort_order', newQuery.sort_order)
@@ -283,7 +294,12 @@ export default {
   },
   data() {
     return {
-      valuationDialogTitle: '装备估价结果',
+      valuationDialogTitle: {
+        nickname: '',
+        school: '',
+        server_name: '',
+        eid:''
+      },
       stickyRoleList: [],
       checkedList: [],
       valuationLoading: false,
@@ -370,11 +386,11 @@ export default {
       }
     },
 
-    get_price_change({price, history_price}){
-      const history_price_list = JSON.parse(history_price).map(item=>item.price)
-      if(history_price_list.length === 0) return
+    get_price_change({ price, history_price }) {
+      const history_price_list = JSON.parse(history_price).map(item => item.price)
+      if (history_price_list.length === 0) return
       const max_price = Math.max(...history_price_list)
-      return (max_price - price) /  100
+      return (max_price - price) / 100
     },
     // 保存锁定的角色列表到localStorage
     saveStickyRoleList() {
@@ -588,7 +604,12 @@ export default {
       this.valuationTotalValue = 0
       this.valuationEquipmentList = []
       this.valuationLoading = false
-      this.valuationDialogTitle = ''
+      this.valuationDialogTitle = {
+        nickname: '',
+        school: '',
+        server_name: '',
+        eid:''
+      }
     },
     // 关闭宠物估价结果对话框
     closePetValuationDialog() {
@@ -778,9 +799,15 @@ export default {
     get_equip_num(roleInfo) {
       return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length
     },
-    async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, basic_info }, serverid, server_name }) {
+    async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, basic_info }, serverid, server_name,eid }) {
       const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ ...item, iType: item.type, cDesc: item.desc, serverid, server_name }))
-      this.valuationDialogTitle =`装备估价：${server_name} ${basic_info.school} 角色 ${basic_info.nickname}`
+      this.valuationDialogTitle = {
+        nickname:basic_info.nickname,
+        school:basic_info.school,
+        server_name,
+        eid
+      }
+
       try {
         // 先显示弹窗和骨架屏
         this.valuationDialogVisible = true
@@ -845,7 +872,7 @@ export default {
       const newQuery = { ...this.$route.query }
       const oldSortBy = this.$route.query.sort_by
       const oldSortOrder = this.$route.query.sort_order
-      
+
       if (sortFields.length > 0) {
         newQuery.sort_by = sortFields.join(',')
         newQuery.sort_order = sortOrders.join(',')
@@ -862,7 +889,7 @@ export default {
           params: this.$route.params,
           query: newQuery
         })
-      this.handleSearch()
+        this.handleSearch()
       }
     },
     async fetchData() {
@@ -1087,7 +1114,7 @@ export default {
       // 只有当参数发生变化时才更新路由
       const hasParamChanges = JSON.stringify(newParams) !== JSON.stringify(this.$route.params)
       const hasQueryChanges = JSON.stringify(newQuery) !== JSON.stringify(this.$route.query)
-      
+
       if (hasParamChanges || hasQueryChanges) {
         this.$router.replace({
           name: 'RoleList',

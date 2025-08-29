@@ -460,7 +460,7 @@ class EquipMarketDataCollector:
                 # 检查是否包含高价值套装（只对数字套装有效）
                 if isinstance(suit_effect_value, int) and suit_effect_value in high_value_suits:
                     target_has_high_value_suits = True
-                # 检查是否包含精确筛选套装（只对数字套装有效）
+                # 检查是否包含精确筛选套装（只对数字套装有效）TODO: 需要优化需要优化需要优化需要优化需要优化需要优化需要优化
                 elif isinstance(suit_effect_value, int) and suit_effect_value in precise_filter_suits:
                     target_has_precise_filter_suits = True
 

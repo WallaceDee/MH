@@ -4,12 +4,47 @@
 export const equipmentMixin = {
   data() {
     return {
-      lingshiKinds:window.lingshiKinds
+      lingshiKinds: window.lingshiKinds
     }
   },
   methods: {
-     // 初始化套装选项
-     initSuitOptions() {
+    getEquipGemInfoAndBlueBlock(desc, default_style = '#Y') {
+      if (!desc) return {}
+      if (typeof window.parse_style_info === 'function') {
+        let htmlStr = window.parse_style_info(desc, default_style)
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = htmlStr
+        const blueBlock = tempDiv.querySelectorAll('[style="color:#4DBAF4"]')
+        tempDiv.innerHTML = ''
+        const blueBlockList = []
+        blueBlock.forEach((item) => {
+          if (
+            item.innerHTML.indexOf('特技') === -1 &&
+            item.innerHTML.indexOf('特效') === -1 &&
+            item.innerHTML.indexOf('<br>') === -1 &&
+            item.innerHTML.indexOf('+') === -1
+          ) {
+            blueBlockList.push(
+              item.innerHTML.replace(/套装效果：附加状态|套装效果：追加法术|套装效果：变身术之|套装效果：变化咒之/g, '').replace(/<span>/g, '<div>')
+            )
+          }
+        })
+
+        const gemInfo = desc.match(/#r锻炼等级 (\d+) /)
+        let gemLevel = gemInfo ? gemInfo[1] : 0
+        if (gemLevel === 0) {
+          const levelInfo = desc.match(/#r精炼等级 (\d+)/)
+          gemLevel = levelInfo ? levelInfo[1] : 0
+        }
+        return {
+          blueBlock: blueBlockList,
+          gemLevel: gemLevel
+        }
+      }
+      return {}
+    },
+    // 初始化套装选项
+    initSuitOptions() {
       const suitOptions = []
       if (window.AUTO_SEARCH_CONFIG) {
         // 附加状态
@@ -93,17 +128,22 @@ export const equipmentMixin = {
      * @returns {Object} 装备图片属性
      */
     getEquipImageProps(eItem) {
-      if(!eItem){
+      if (!eItem) {
         return {}
       }
       //标准
-      if(eItem.large_equip_desc&&eItem.equip_name&&eItem.equip_face_img&&eItem.equip_type_desc){
+      if (
+        eItem.large_equip_desc &&
+        eItem.equip_name &&
+        eItem.equip_face_img &&
+        eItem.equip_type_desc
+      ) {
         return eItem
       }
       //召唤兽
       return {
         ...eItem,
-        equip_face_img: eItem.icon||eItem.small_icon||eItem.big_icon,
+        equip_face_img: eItem.icon || eItem.small_icon || eItem.big_icon,
         equip_type_desc: eItem.static_desc,
         large_equip_desc: eItem.desc,
         equip_name: eItem.name

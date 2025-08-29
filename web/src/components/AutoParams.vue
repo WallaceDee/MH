@@ -174,7 +174,9 @@
                     </el-form-item>
                     <el-form-item label="套装效果" v-if="equipForm.equip_type === 'normal' && targetFeatures.suit_effect">
                         <el-radio-group v-model="suit_effect_type">
-                            <el-radio label=""><span v-html="formatSuitEffect({suit_effect: targetFeatures.suit_effect})"></span> </el-radio>
+                            <el-radio label=""><span
+                                    v-html="formatSuitEffect({ suit_effect: targetFeatures.suit_effect })"></span>
+                            </el-radio>
                             <el-radio label="select">自选</el-radio>
                             <el-radio label="agility_detailed.A">敏捷A套</el-radio>
                             <el-radio label="agility_detailed.B">敏捷B套</el-radio>
@@ -188,6 +190,17 @@
                                 v-for="itemId in equipConfig?.suits[suit_effect_type.split('.')[0]][suit_effect_type.split('.')[1]]"
                                 :label="itemId.toString()" :key="itemId">{{ suit_transform_skills[itemId] }}</el-radio>
                         </el-radio-group>
+                    </el-form-item>
+                    <el-form-item label="属性加成"
+                        v-if="equipForm.equip_type === 'normal' && targetFeatures.addon_total > 0">
+                        <el-checkbox-group v-model="select_sum_attr_type">
+                            <el-checkbox label="dex">敏捷</el-checkbox>
+                            <el-checkbox label="endurance">耐力</el-checkbox>
+                            <el-checkbox label="magic">魔力</el-checkbox>
+                            <el-checkbox label="physique">体质</el-checkbox>
+                            <el-checkbox label="power">力量</el-checkbox>
+                        </el-checkbox-group>
+                        <el-checkbox v-model="sum_attr_with_melt">计算熔炼效果</el-checkbox>
                     </el-form-item>
                     <el-alert v-if="equipForm.equip_type === 'lingshi'" show-icon :closable="false"
                         style="margin-bottom: 10px;">
@@ -318,6 +331,8 @@ export default {
     },
     data() {
         return {
+            sum_attr_with_melt: true,
+            select_sum_attr_type: [],
             price_min: 1,
             price_min_trigger: false,
             suit_transform_skills: window.AUTO_SEARCH_CONFIG.suit_transform_skills,
@@ -532,12 +547,18 @@ export default {
         }
     },
     watch: {
-        price_min(newVal) {
-            if(this.price_min_trigger){
+        sum_attr_with_melt(newVal) {
             const params = JSON.parse(this.equipParamsJson)
-            params.price_min = this.price_min_trigger ? newVal * 100 : undefined
+            params.sum_attr_with_melt = newVal ? 1 : undefined
+            params.sum_attr_without_melt = !newVal ? 1 : undefined
             this.equipParamsJson = JSON.stringify(params, null, 2)
-        }
+        },
+        price_min(newVal) {
+            if (this.price_min_trigger) {
+                const params = JSON.parse(this.equipParamsJson)
+                params.price_min = this.price_min_trigger ? newVal * 100 : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
         },
         price_min_trigger(newVal) {
             const params = JSON.parse(this.equipParamsJson)
@@ -553,6 +574,24 @@ export default {
             if (!newVal) {
                 this.select_suit_effect = ''
             }
+        },
+        select_sum_attr_type(newVal) {
+            let changed = false
+                //判断newVal数组包含的项是否在targetFeatures中
+                ;[['liliang', 'power'], ['minjie', 'dex'], ['moli', 'magic'], ['naili', 'endurance'], ['tizhi', 'physique']].forEach(([attr, key]) => {
+                    if (this.targetFeatures[`addon_${attr}`] > 0) {
+                        if (!newVal.includes(key)) {
+                            changed = true
+                        }
+                    } else {
+                        if (newVal.includes(key)) {
+                            changed = true
+                        }
+                    }
+                })
+            const params = JSON.parse(this.equipParamsJson)
+            params.sum_attr_type = newVal.length > 0 && changed ? newVal.join(',') : undefined
+            this.equipParamsJson = JSON.stringify(params, null, 2)
         },
         isRunning(newVal) {
             this.$emit('update:isRunning', newVal)
@@ -1155,6 +1194,13 @@ export default {
             this.equipConfig = response.data
             if (this.targetFeatures.suit_effect) {
                 this.suit_effect_type = ''
+            }
+            if (this.targetFeatures.addon_total > 0) {
+                [['liliang', 'power'], ['minjie', 'dex'], ['moli', 'magic'], ['naili', 'endurance'], ['tizhi', 'physique']].forEach(([attr, key]) => {
+                    if (this.targetFeatures[`addon_${attr}`] > 0) {
+                        this.select_sum_attr_type.push(key)
+                    }
+                })
             }
         },
         async loadHotServers() {

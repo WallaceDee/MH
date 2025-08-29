@@ -7,28 +7,31 @@
     <!-- 结果概览 -->
     <!-- 实际结果 -->
     <template v-else>
-      <el-row :gutter="20" style="margin-bottom: 20px;">
-        <el-col :span="6">
-          <el-statistic group-separator="," :precision="2" :value="currentTotalValue / 100" title="估价总值"
-            :value-style="{ fontSize: '28px', fontWeight: 'bold' }">
-            <template slot="formatter">
-              <span v-html="formatPrice(currentTotalValue)"></span>
-            </template>
-          </el-statistic>
-        </el-col>
-        <el-col :span="6">
-          <el-statistic group-separator="," :precision="0" :value="successCount" title="成功估价"
-            :value-style="{ fontSize: '28px', fontWeight: 'bold', color: '#67c23a' }">
-            <template slot="suffix">
-              <span style="color: #909399; font-size: 16px">/ {{ totalCount }}</span>
-            </template>
-          </el-statistic>
-        </el-col>
-      </el-row>
-      <el-row type="flex" style="flex-wrap: wrap;">
-        <el-col :span="8" v-for="(item, index) in currentList" :key="item.equip_sn || index" class="result-item"
-          :class="getResultItemClass(item)">
+      <div class="result-item" :class="getOverviewClass()" style="min-height: unset;">
+        <el-row :gutter="20" style="margin-bottom: 20px;">
+          <el-col :span="6">
+            <el-statistic group-separator="," :precision="2" :value="currentTotalValue / 100" title="估价总值"
+              :value-style="{ fontSize: '28px', fontWeight: 'bold' }">
+              <template slot="formatter">
+                <span v-html="formatPrice(currentTotalValue)"></span>
+              </template>
+            </el-statistic>
+          </el-col>
+          <el-col :span="6">
+            <el-statistic group-separator="," :precision="0" :value="successCount" title="成功估价"
+              :value-style="{ fontSize: '28px', fontWeight: 'bold', color: '#67c23a' }">
+              <template slot="suffix">
+                <span style="color: #909399; font-size: 16px">/ {{ totalCount }}</span>
+              </template>
+            </el-statistic>
+          </el-col>
+        </el-row>
+      </div>
 
+      <el-row type="flex" style="flex-wrap: wrap;">
+        <el-col :span="6" v-for="(item, index) in currentList" :key="item.equip_sn || index" class="result-item"
+          :class="getResultItemClass(item)">
+      
           <el-row type="flex" align="middle" justify="space-between">
             <el-col style="width: 50px;">
               <EquipmentImage placement="top" :image="false" :equipment="getEquipImageProps(item)"
@@ -43,13 +46,19 @@
           </el-row>
           <div class="result-footer">
             <SimilarEquipmentModal :equipment="item" :similar-data="similarData"
-            @show="(e) => loadSimilarEquipments(e, item.resultIndex)" >
-            <el-link href="javascript:void(0)" type="primary"  style="font-weight: bold;">{{ item.name || `装备 ${index + 1}` }}</el-link>
-          </SimilarEquipmentModal>
+              @show="(e) => loadSimilarEquipments(e, item.resultIndex)">
+              <el-link href="javascript:void(0)" type="primary" style="font-weight: bold;">{{ item.name || `装备 ${index +
+                1}`
+                }}</el-link>
+            </SimilarEquipmentModal>
             <el-tag :type="getConfidenceTagType(item.confidence)" v-if="!item.error">
               置信度: {{ (item.confidence * 100).toFixed(1) }}%
             </el-tag>
             <el-tag v-else type="danger" :title="item.error">估价失败</el-tag>
+          </div>
+          <div class="equip-tag-info">
+            <el-tag type="success" v-if="getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel">{{ getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel }}锻</el-tag>
+            <el-tag v-for="tag in getEquipGemInfoAndBlueBlock(item.cDesc).blueBlock" :key="tag" type="primary">{{ tag }}</el-tag>
           </div>
         </el-col>
       </el-row>
@@ -260,6 +269,22 @@ export default {
       } else {
         return { ...baseStyle, color: '#67c23a' }  // 绿色 - 高置信度
       }
+    },
+
+    // 获取概览卡片的颜色类
+    getOverviewClass() {
+      const successRate = this.totalCount > 0 ? (this.successCount / this.totalCount) : 0
+      if (successRate >= 0.9) {
+        return 'confidence-high'
+      } else if (successRate >= 0.7) {
+        return 'confidence-medium'
+      } else if (successRate >= 0.5) {
+        return 'confidence-low'
+      } else if (successRate >= 0.3) {
+        return 'confidence-very-low'
+      } else {
+        return 'confidence-extremely-low'
+      }
     }
   }
 }
@@ -267,7 +292,7 @@ export default {
 
 <style scoped>
 .batch-valuation-result {
-  width: 720px;
+  width: 960px;
   margin: 0 auto;
 }
 
@@ -395,6 +420,9 @@ export default {
   display: flex;
   align-items: center;
 }
+:global(.price-info .el-statistic .con){
+justify-content: flex-end;
+}
 
 .equipment-info {
   text-align: right;
@@ -472,5 +500,11 @@ export default {
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
+}
+.equip-tag-info{
+  margin-top: 5px;
+}
+.equip-tag-info>*{
+  margin-right: 5px;
 }
 </style>

@@ -14,7 +14,7 @@ const routes = [
     name: 'AutoParams',
     component: AutoParams,
     meta: {
-      title: '🕷🕷🕷🕷🕷🕷',
+      title: '',
       hideHeader: true
     }
   },
