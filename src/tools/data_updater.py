@@ -110,7 +110,7 @@ class DataUpdater:
                     if fabao:
                         updates['all_fabao_json'] = json.dumps(fabao, ensure_ascii=False)
                     
-                    # # 更新宠物数据
+                    # # 更新召唤兽数据
                     # pets = self.pet_parser.process_role_pets(parsed_desc, seller_nickname)
                     # if pets:
                     #     updates['all_pets_json'] = json.dumps(pets, ensure_ascii=False)

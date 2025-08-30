@@ -165,7 +165,7 @@ class AddonStatusFixer:
                 """)
                 
                 records = cursor.fetchall()
-                print(f"找到 {len(records)} 条宠物记录需要检查")
+                print(f"找到 {len(records)} 条召唤兽记录需要检查")
                 
                 updated_count = 0
                 error_count = 0
@@ -185,11 +185,11 @@ class AddonStatusFixer:
                                     (extracted_suit, eid)
                                 )
                                 updated_count += 1
-                                print(f"更新宠物 {eid}: {extracted_suit}")
+                                print(f"更新召唤兽 {eid}: {extracted_suit}")
                         
                     except Exception as e:
                         error_count += 1
-                        print(f"处理宠物 {record[0]} 时出错: {e}")
+                        print(f"处理召唤兽 {record[0]} 时出错: {e}")
                 
                 conn.commit()
                 print(f"pets表修复完成: 更新 {updated_count} 条记录, 错误 {error_count} 条")

@@ -1276,7 +1276,7 @@ function show_role_tips_box_common(el, other_info) {
         result: {},
         raw_info: other_info
       });
-      // 角色修炼信息 和 宠物控制技能
+      // 角色修炼信息 和 召唤兽控制技能
       proto.parse_role_xiulian.call(data);
       proto.parse_pet_ctrl_skill.call(data);
       
@@ -2934,7 +2934,7 @@ var split_equip_dict = {}; // 拆售商品数据
 </table>
 
 <div class="blank12"></div>
-<h4>特殊宠物</h4>
+<h4>特殊召唤兽</h4>
 <div class="blank9"></div>
 <%
 	var pets = this.special_pet_info;

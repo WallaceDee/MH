@@ -395,7 +395,7 @@ class EquipAnchorEvaluator(BaseValuator):
         # 初始化灵饰装备市场数据采集器
         self.lingshi_market_collector = LingshiMarketDataCollector()
 
-        # 初始化宠物装备市场数据采集器
+        # 初始化召唤兽装备市场数据采集器
         self.pet_equip_market_collector = PetEquipMarketDataCollector()
 
         # 初始化特征提取器
@@ -478,9 +478,9 @@ class EquipAnchorEvaluator(BaseValuator):
                 # 灵饰使用灵饰市场数据采集器
                 market_data = self.lingshi_market_collector.get_market_data_with_business_rules(pre_filters)
             elif is_pet_equip(target_kindid):
-                # 宠物装备使用宠物装备市场数据采集器
+                # 召唤兽装备使用召唤兽装备市场数据采集器
                 if verbose:
-                    print(f"宠物装备类型target_features: {pre_filters}")
+                    print(f"召唤兽装备类型target_features: {pre_filters}")
                 market_data = self.pet_equip_market_collector.get_market_data_with_addon_classification({
                         **pre_filters,
                         **target_features
@@ -530,12 +530,12 @@ class EquipAnchorEvaluator(BaseValuator):
                         continue
 
                     # 从市场数据获取特征
-                    # 注意：数据库中的灵饰/宠物装备数据已经包含提取好的特征，不需要重新提取
+                    # 注意：数据库中的灵饰/召唤兽装备数据已经包含提取好的特征，不需要重新提取
                     if self.base_config.is_lingshi(target_kindid):
                         # 灵饰数据已经在数据库中完成特征提取，直接使用
                         market_features = self._convert_pandas_row_to_dict(market_row)
                     elif target_kindid == PET_EQUIP_KINDID:
-                        # 宠物装备数据已经在数据库中完成特征提取，直接使用
+                        # 召唤兽装备数据已经在数据库中完成特征提取，直接使用
                         market_features = self._convert_pandas_row_to_dict(market_row)
                     else:
                         # 普通装备需要从原始数据中提取特征

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class PetFeatureExtractor:
-    """梦幻西游宠物特征提取器"""
+    """梦幻西游召唤兽特征提取器"""
 
     def __init__(self):
         """初始化特征提取器"""

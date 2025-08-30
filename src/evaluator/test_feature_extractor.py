@@ -335,8 +335,8 @@ def test_lingshi_feature_extraction():
             logger.info("数据库连接已关闭")
 
 def test_pet_equipment_feature_extraction():
-    """测试宠物装备特征提取"""
-    # 创建宠物装备特征提取器
+    """测试召唤兽装备特征提取"""
+    # 创建召唤兽装备特征提取器
     extractor = PetEquipFeatureExtractor()
     
     # 连接数据库
@@ -354,8 +354,8 @@ def test_pet_equipment_feature_extraction():
         available_fields = [col[1] for col in columns_info]
         logger.info(f"可用字段数量: {len(available_fields)}")
         
-        # 获取宠物装备数据 - 只查询宠物装备类型（kindid = PET_EQUIP_KINDID）
-        logger.info("正在查询宠物装备数据...")
+        # 获取召唤兽装备数据 - 只查询召唤兽装备类型（kindid = PET_EQUIP_KINDID）
+        logger.info("正在查询召唤兽装备数据...")
         cursor.execute("""
             SELECT 
                 eid as equip_id, equip_level, kindid, 
@@ -373,17 +373,17 @@ def test_pet_equipment_feature_extraction():
         logger.info(f"查询字段: {columns}")
         
         rows = cursor.fetchall()
-        print(f"查询到宠物装备数量: {len(rows)}")
+        print(f"查询到召唤兽装备数量: {len(rows)}")
         if not rows:
-            print("没有查询到任何宠物装备数据，请检查数据库内容和查询条件！")
+            print("没有查询到任何召唤兽装备数据，请检查数据库内容和查询条件！")
             return
         
         # 存储所有特征
         all_features = []
         
-        # 处理每个宠物装备
+        # 处理每个召唤兽装备
         for i, row in enumerate(rows, 1):
-            logger.info(f"\n处理第 {i} 个宠物装备...")
+            logger.info(f"\n处理第 {i} 个召唤兽装备...")
             
             # 转换为字典
             equip_data = dict(zip(columns, row))
@@ -401,7 +401,7 @@ def test_pet_equipment_feature_extraction():
                 
                 # 打印装备基本信息
                 print("\n" + "="*50)
-                print(f"宠物装备ID: {equip_data.get('equip_id', 'N/A')}")
+                print(f"召唤兽装备ID: {equip_data.get('equip_id', 'N/A')}")
                 print(f"装备等级: {equip_data.get('equip_level', 'N/A')}")
                 print(f"装备类型: {equip_data.get('kindid', 'N/A')}")
                 print(f"命中: {equip_data.get('mingzhong', 'N/A')}")
@@ -418,7 +418,7 @@ def test_pet_equipment_feature_extraction():
                     print(f"装备描述: {large_desc[:200]}...")
                 
                 # 打印提取的特征
-                print("\n提取的宠物装备特征:")
+                print("\n提取的召唤兽装备特征:")
                 for category, value in features.items():
                     if isinstance(value, list) and len(value) > 5:
                         print(f"  {category}: {value[:5]}... (共{len(value)}项)")
@@ -427,18 +427,18 @@ def test_pet_equipment_feature_extraction():
                 
                 # 如果有前5个装备，停止显示详细信息
                 if i >= 5:
-                    print(f"... 继续处理剩余宠物装备（不显示详细信息）")
+                    print(f"... 继续处理剩余召唤兽装备（不显示详细信息）")
                     break
                 
             except Exception as e:
-                print(f"处理宠物装备数据时出错: {e}")
+                print(f"处理召唤兽装备数据时出错: {e}")
                 traceback.print_exc()
                 continue
         
         # 所有装备处理完后，一次性计算统计信息
         if all_features:
             df = pd.DataFrame(all_features)
-            print("\n宠物装备特征统计:")
+            print("\n召唤兽装备特征统计:")
             print(df.describe())
             
             # 显示特征列的数据类型
@@ -462,7 +462,7 @@ def main():
     print("1. 测试装备特征提取")
     print("2. 测试角色特征提取")
     print("3. 测试灵饰特征提取")
-    print("4. 测试宠物装备特征提取")
+    print("4. 测试召唤兽装备特征提取")
     print("5. 同时测试所有特征提取")
     print("="*60)
     
@@ -478,7 +478,7 @@ def main():
         print("\n开始测试灵饰特征提取...")
         test_lingshi_feature_extraction()
     elif choice == "4":
-        print("\n开始测试宠物装备特征提取...")
+        print("\n开始测试召唤兽装备特征提取...")
         test_pet_equipment_feature_extraction()
     elif choice == "5":
         print("\n开始测试装备特征提取...")
@@ -490,10 +490,10 @@ def main():
         print("开始测试灵饰特征提取...")
         test_lingshi_feature_extraction()
         print("\n" + "="*60)
-        print("开始测试宠物装备特征提取...")
+        print("开始测试召唤兽装备特征提取...")
         test_pet_equipment_feature_extraction()
     else:
-        print("无效选择，默认测试宠物装备特征提取...")
+        print("无效选择，默认测试召唤兽装备特征提取...")
         test_pet_equipment_feature_extraction()
     
     input("\n按回车键退出...")

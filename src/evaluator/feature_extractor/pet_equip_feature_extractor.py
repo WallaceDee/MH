@@ -94,16 +94,12 @@ class PetEquipFeatureExtractor:
         Returns:
             bool: 如果只有large_equip_desc字段则返回True
         """
-        # 检查是否只有desc字段
-        if 'desc' not in equip_data:
+        # 检查是否只有desc和kindid字段，不能多传其他字段
+        if len(equip_data) != 2:
             return False
-        
-        # 检查其他关键字段是否缺失
-        key_fields = ['kindid', 'equip_level', 'speed', 'qixue', 'fangyu', 'shanghai']
-        missing_fields = [field for field in key_fields if field not in equip_data or equip_data[field] is None]
-        
-        # 如果大部分关键字段都缺失，认为是desc_only数据
-        return len(missing_fields) >= len(key_fields) * 0.7
+        elif 'desc' in equip_data and 'kindid' in equip_data:
+            return True
+        return False
 
     def _parse_equip_data_from_desc(self, equip_data: Dict[str, Any]) -> Dict[str, Any]:
         """

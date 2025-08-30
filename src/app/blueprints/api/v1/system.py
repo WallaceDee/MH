@@ -150,7 +150,7 @@ def get_search_params():
             except Exception as e:
                 logger.error(f"读取角色搜索参数失败: {e}")
         
-        # 处理宠物搜索参数（使用equip_params_pet作为基础）
+        # 处理召唤兽搜索参数（使用equip_params_pet作为基础）
         pet_params = result.get('equip_params_pet', {})
         
         # 构建前端需要的格式
@@ -192,7 +192,7 @@ def get_search_param_by_type(param_type: str):
             'equip_pet_equip': 'equip_params_pet_equip.json'
         }
         
-        # 特殊处理角色和宠物参数
+        # 特殊处理角色和召唤兽参数
         if param_type == 'role':
             search_params_dir = os.path.join(config_dir, 'search_params')
             if os.path.exists(search_params_dir):
@@ -211,7 +211,7 @@ def get_search_param_by_type(param_type: str):
             else:
                 return error_response("角色配置目录不存在")
         elif param_type == 'pet':
-            # 宠物参数使用equip_params_pet
+            # 召唤兽参数使用equip_params_pet
             filename = 'equip_params_pet.json'
             file_path = os.path.join(config_dir, filename)
         elif param_type not in type_to_file:
@@ -266,7 +266,7 @@ def update_search_param(param_type: str):
         if not data:
             return error_response("请提供要更新的参数数据")
         
-        # 特殊处理角色和宠物参数
+        # 特殊处理角色和召唤兽参数
         if param_type == 'role':
             search_params_dir = os.path.join(config_dir, 'search_params')
             if not os.path.exists(search_params_dir):
@@ -274,7 +274,7 @@ def update_search_param(param_type: str):
             filename = '109.json'
             file_path = os.path.join(search_params_dir, filename)
         elif param_type == 'pet':
-            # 宠物参数使用equip_params_pet
+            # 召唤兽参数使用equip_params_pet
             filename = 'equip_params_pet.json'
             file_path = os.path.join(config_dir, filename)
         elif param_type not in type_to_file:

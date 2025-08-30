@@ -123,7 +123,7 @@ def log_task_complete(logger: logging.Logger, success_pages: int, total_pages: i
         success_pages: 成功页数
         total_pages: 总页数
         total_data: 总数据数
-        data_type: 数据类型 (角色/装备/宠物等)
+        data_type: 数据类型 (角色/装备/召唤兽等)
     """
     logger.info(f"爬取完成！成功页数: {success_pages}/{total_pages}, 总{data_type}数: {total_data}")
 

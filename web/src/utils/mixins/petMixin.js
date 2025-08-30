@@ -1,5 +1,5 @@
 /**
- * 宠物相关公用方法Mixin
+ * 召唤兽相关公用方法Mixin
  */
 export const petMixin = {
   methods: {
@@ -18,9 +18,9 @@ export const petMixin = {
     },
 
     /**
-     * 解析宠物信息
-     * @param {string} desc - 宠物描述
-     * @returns {Object} 解析后的宠物信息
+     * 解析召唤兽信息
+     * @param {string} desc - 召唤兽描述
+     * @returns {Object} 解析后的召唤兽信息
      */
     parsePetInfo(desc) {
       const pet_desc = window.parse_desc_info(desc)
@@ -52,7 +52,7 @@ export const petMixin = {
 
     /**
      * 格式化技能
-     * @param {Object} pet - 宠物对象
+     * @param {Object} pet - 召唤兽对象
      * @returns {string} 格式化后的技能HTML
      */
     formatSkills({ petData },row=2,col=8) {
@@ -90,7 +90,7 @@ export const petMixin = {
     },
     /**
      * 获取增强信息
-     * @param {Object} pet - 宠物对象
+     * @param {Object} pet - 召唤兽对象
      * @returns {Object} 增强信息
      */
     getEnhanceInfo(pet) {
@@ -117,9 +117,9 @@ export const petMixin = {
     },
 
     /**
-     * 格式化宠物技能差异（用于相似宠物表格）
-     * @param {string} allSkill - 当前宠物技能
-     * @param {Object} targetPet - 目标宠物
+     * 格式化召唤兽技能差异（用于相似召唤兽表格）
+     * @param {string} allSkill - 当前召唤兽技能
+     * @param {Object} targetPet - 目标召唤兽
      * @returns {string} 差异技能描述
      */
     formatSkillsDiff(allSkill, targetPet) {
@@ -131,7 +131,7 @@ export const petMixin = {
       const targetSkills = targetPetSkill.split('|').filter((skill) => skill.trim())
       const currentSkills = allSkill.split('|').filter((skill) => skill.trim())
 
-      // 找出当前宠物有但目标宠物没有的技能
+      // 找出当前召唤兽有但目标召唤兽没有的技能
       const diffSkills = currentSkills.filter((skill) => !targetSkills.includes(skill))
 
       // 如果有差异技能，返回差异技能列表

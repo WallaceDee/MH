@@ -7,7 +7,7 @@
         <div v-html="formatFullPrice(scope.row)"></div>
       </template>
     </el-table-column>
-    <el-table-column fixed label="宠物" width="70">
+    <el-table-column fixed label="召唤兽" width="70">
       <template #default="scope">
         <pet-image :pet="scope.row.petData" :equipFaceImg="scope.row.equip_face_img" trigger="hover" />
       </template>

@@ -160,6 +160,7 @@ class EquipMarketDataCollector:
 
         Returns:
             装备市场数据DataFrame
+            
         """
         all_data = []
 
@@ -182,7 +183,7 @@ class EquipMarketDataCollector:
 
                     if special_skill is not None:
                         # 只有当不需要排除高价值特技时，才添加具体的特技筛选条件
-                        if not exclude_high_value_special_skills:
+                        if not ( exclude_high_value_special_skills or not require_high_value_suits):
                             query += " AND special_skill = ?"
                             params.append(special_skill)
                         else:

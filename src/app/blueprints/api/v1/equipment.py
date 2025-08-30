@@ -30,7 +30,7 @@ def get_equipments():
             # 修复多选参数 - 使用getlist获取数组参数
             'equip_sn': request.args.get('equip_sn'),
             'kindid': request.args.getlist('kindid') or request.args.getlist('kindid[]') or None,
-            'equip_type': request.args.getlist('equip_type') or request.args.getlist('equip_type[]') or None,  # 宠物装备类型（多选）
+            'equip_type': request.args.getlist('equip_type') or request.args.getlist('equip_type[]') or None,  # 召唤兽装备类型（多选）
             'equip_special_skills': request.args.getlist('equip_special_skills') or request.args.getlist('equip_special_skills[]') or None,
             'equip_special_effect': request.args.getlist('equip_special_effect') or request.args.getlist('equip_special_effect[]') or None,
             'suit_effect': request.args.get('suit_effect'),
@@ -482,12 +482,12 @@ def delete_abnormal_equipment(equip_sn):
 
 @equipment_bp.route('/pet-equip-config', methods=['GET'])
 def get_pet_equip_config():
-    """获取宠物装备数据"""
+    """获取召唤兽装备数据"""
     try:
         result = controller.get_pet_equip_config()
-        return success_response(data=result["data"], message="获取宠物装备数据成功")
+        return success_response(data=result["data"], message="获取召唤兽装备数据成功")
     except Exception as e:
-        return error_response(f"获取宠物装备数据失败: {str(e)}")
+        return error_response(f"获取召唤兽装备数据失败: {str(e)}")
     
 @equipment_bp.route('/equip-config', methods=['GET'])
 def get_equip_config():

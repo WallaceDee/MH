@@ -1,11 +1,11 @@
 import { api } from '@/utils/request'
 
 /**
- * 宠物相关API
+ * 召唤兽相关API
  */
 export const petApi = {
   /**
-   * 获取宠物列表
+   * 获取召唤兽列表
    * @param {Object} params - 查询参数
    * @returns {Promise}
    */
@@ -14,8 +14,8 @@ export const petApi = {
   },
 
   /**
-   * 获取宠物详情
-   * @param {string} petSn - 宠物序列号
+   * 获取召唤兽详情
+   * @param {string} petSn - 召唤兽序列号
    * @param {Object} params - 额外参数（如年月）
    * @returns {Promise}
    */
@@ -24,8 +24,8 @@ export const petApi = {
   },
 
   /**
-   * 寻找宠物市场锚点
-   * @param {Object} data - 宠物数据和查询参数
+   * 寻找召唤兽市场锚点
+   * @param {Object} data - 召唤兽数据和查询参数
    * @returns {Promise}
    */
   findPetAnchors(data) {
@@ -33,8 +33,8 @@ export const petApi = {
   },
 
   /**
-   * 获取宠物估价
-   * @param {Object} data - 宠物数据和估价参数
+   * 获取召唤兽估价
+   * @param {Object} data - 召唤兽数据和估价参数
    * @returns {Promise}
    */
   getPetValuation(data) {
@@ -42,8 +42,8 @@ export const petApi = {
   },
 
   /**
-   * 批量宠物估价
-   * @param {Object} data - 宠物列表和估价参数
+   * 批量召唤兽估价
+   * @param {Object} data - 召唤兽列表和估价参数
    * @returns {Promise}
    */
   batchPetValuation(data) {
@@ -51,8 +51,8 @@ export const petApi = {
   },
 
   /**
-   * 通过宠物SN查找锚点（便捷接口）
-   * @param {string} petSn - 宠物序列号
+   * 通过召唤兽SN查找锚点（便捷接口）
+   * @param {string} petSn - 召唤兽序列号
    * @param {Object} params - 查询参数
    * @returns {Promise}
    */
@@ -61,8 +61,8 @@ export const petApi = {
   },
 
   /**
-   * 通过宠物SN获取估价（便捷接口）
-   * @param {string} petSn - 宠物序列号
+   * 通过召唤兽SN获取估价（便捷接口）
+   * @param {string} petSn - 召唤兽序列号
    * @param {Object} params - 估价参数
    * @returns {Promise}
    */
@@ -131,8 +131,8 @@ export const petApi = {
   },
 
   /**
-   * 删除宠物
-   * @param {string} petSn - 宠物序列号
+   * 删除召唤兽
+   * @param {string} petSn - 召唤兽序列号
    * @param {Object} params - 查询参数（年月）
    * @returns {Promise}
    */

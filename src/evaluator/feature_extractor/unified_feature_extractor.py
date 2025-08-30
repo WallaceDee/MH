@@ -20,9 +20,9 @@ class UnifiedFeatureExtractor:
     
     根据kindid自动调用相应的特征提取器：
     - kindid 61-64: 灵饰装备 -> LingshiFeatureExtractor
-    - kindid 29: 宠物装备 -> PetEquipFeatureExtractor
+    - kindid 29: 召唤兽装备 -> PetEquipFeatureExtractor
     - 其他: 普通装备 -> EquipFeatureExtractor
-    - 宠物: 使用PetFeatureExtractor
+    - 召唤兽: 使用PetFeatureExtractor
     """
     
     def __init__(self):
@@ -40,8 +40,8 @@ class UnifiedFeatureExtractor:
             # 灵饰装备 (61-64)
             **{kindid: 'lingshi' for kindid in LINGSHI_KINDIDS},
             
-            # 宠物装备
-            PET_EQUIP_KINDID: 'pet_equip',  # 宠物装备
+            # 召唤兽装备
+            PET_EQUIP_KINDID: 'pet_equip',  # 召唤兽装备
             
             # 默认使用普通装备提取器
             'default': 'equip'
@@ -121,7 +121,7 @@ class UnifiedFeatureExtractor:
         """
         try:
             if data_type == 'pet':
-                # 宠物数据使用宠物特征提取器
+                # 召唤兽数据使用召唤兽特征提取器
                 return self.pet_extractor.extract_features(data)
             
             # 装备数据根据kindid选择提取器
@@ -159,7 +159,7 @@ class UnifiedFeatureExtractor:
         """
         try:
             if data_type == 'pet':
-                # 宠物数据使用宠物特征提取器
+                # 召唤兽数据使用召唤兽特征提取器
                 return self.pet_extractor.extract_features_batch(data_list)
             
             # 装备数据按kindid分组处理

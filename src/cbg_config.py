@@ -199,34 +199,34 @@ DB_SCHEMA_CONFIG = {
     
     'pets': '''
         CREATE TABLE IF NOT EXISTS pets (
-            equip_sn TEXT PRIMARY KEY,          -- 宠物序列号
-            eid TEXT UNIQUE,                    -- 宠物唯一标识符
-            equipid INTEGER,                    -- 宠物ID
+            equip_sn TEXT PRIMARY KEY,          -- 召唤兽序列号
+            eid TEXT UNIQUE,                    -- 召唤兽唯一标识符
+            equipid INTEGER,                    -- 召唤兽ID
             
             -- 服务器和卖家信息
             server_name TEXT,                   -- 服务器名称
             serverid INTEGER,                   -- 服务器ID
-            equip_server_sn TEXT,               -- 宠物服务器序列号
+            equip_server_sn TEXT,               -- 召唤兽服务器序列号
             seller_nickname TEXT,               -- 卖家昵称
             seller_roleid TEXT,                 -- 卖家角色ID
             area_name TEXT,                     -- 区域名称
             
-            -- 宠物基本信息
-            equip_name TEXT,                    -- 宠物名称
-            equip_type TEXT,                    -- 宠物类型
-            equip_type_name TEXT,               -- 宠物类型名称
-            equip_type_desc TEXT,               -- 宠物类型描述
-            level INTEGER,                      -- 宠物等级
-            equip_level INTEGER,                -- 宠物等级
-            equip_level_desc TEXT,              -- 宠物等级描述
+            -- 召唤兽基本信息
+            equip_name TEXT,                    -- 召唤兽名称
+            equip_type TEXT,                    -- 召唤兽类型
+            equip_type_name TEXT,               -- 召唤兽类型名称
+            equip_type_desc TEXT,               -- 召唤兽类型描述
+            level INTEGER,                      -- 召唤兽等级
+            equip_level INTEGER,                -- 召唤兽等级
+            equip_level_desc TEXT,              -- 召唤兽等级描述
             level_desc TEXT,                    -- 等级描述
             subtitle TEXT,                      -- 副标题
-            equip_pos INTEGER,                  -- 宠物位置
+            equip_pos INTEGER,                  -- 召唤兽位置
             position INTEGER,                   -- 位置
             school INTEGER,                     -- 门派限制
             role_grade_limit INTEGER,           -- 角色等级限制
             min_buyer_level INTEGER,            -- 最低购买者等级
-            equip_count INTEGER,                -- 宠物数量
+            equip_count INTEGER,                -- 召唤兽数量
             
             -- 价格和交易信息
             price REAL,                         -- 价格
@@ -238,13 +238,13 @@ DB_SCHEMA_CONFIG = {
             bargain_info TEXT,                  -- 还价信息（JSON格式）
             
             -- 状态和时间信息
-            equip_status INTEGER,               -- 宠物状态
-            equip_status_desc TEXT,             -- 宠物状态描述
+            equip_status INTEGER,               -- 召唤兽状态
+            equip_status_desc TEXT,             -- 召唤兽状态描述
             status_desc TEXT,                   -- 状态描述
             onsale_expire_time_desc TEXT,       -- 在售过期时间描述
             time_left TEXT,                     -- 剩余时间
             expire_time TEXT,                   -- 过期时间
-            create_time_equip TEXT,             -- 宠物创建时间
+            create_time_equip TEXT,             -- 召唤兽创建时间
             selling_time TEXT,                  -- 销售时间
             selling_time_ago_desc TEXT,         -- 销售时间前描述
             first_onsale_time TEXT,             -- 首次上架时间
@@ -262,7 +262,7 @@ DB_SCHEMA_CONFIG = {
             score INTEGER DEFAULT 0,            -- 评分
             icon_index INTEGER DEFAULT 0,       -- 图标索引
             icon INTEGER DEFAULT 0,             -- 图标
-            equip_face_img TEXT,                -- 宠物头像图片
+            equip_face_img TEXT,                -- 召唤兽头像图片
             kindid INTEGER,                     -- 种类ID
             game_channel TEXT,                  -- 游戏渠道
             
@@ -287,9 +287,9 @@ DB_SCHEMA_CONFIG = {
             is_split_sale INTEGER DEFAULT 0,    -- 是否拆分销售
             is_split_main_role INTEGER DEFAULT 0, -- 是否拆分主角
             is_split_independent_role INTEGER DEFAULT 0, -- 是否独立角色拆分
-            is_split_independent_equip INTEGER DEFAULT 0, -- 是否独立宠物拆分
-            split_equip_sold_happen INTEGER DEFAULT 0,   -- 拆分宠物销售发生
-            show_split_equip_sold_remind INTEGER DEFAULT 0, -- 显示拆分宠物销售提醒
+            is_split_independent_equip INTEGER DEFAULT 0, -- 是否独立召唤兽拆分
+            split_equip_sold_happen INTEGER DEFAULT 0,   -- 拆分召唤兽销售发生
+            show_split_equip_sold_remind INTEGER DEFAULT 0, -- 显示拆分召唤兽销售提醒
             
             -- 保护相关
             is_onsale_protection_period INTEGER DEFAULT 0, -- 是否在售保护期
@@ -298,9 +298,9 @@ DB_SCHEMA_CONFIG = {
             is_time_lock INTEGER DEFAULT 0,     -- 是否时间锁定
             
             -- 测试服相关
-            equip_in_test_server INTEGER DEFAULT 0,        -- 宠物在测试服
+            equip_in_test_server INTEGER DEFAULT 0,        -- 召唤兽在测试服
             buyer_in_test_server INTEGER DEFAULT 0,        -- 买家在测试服
-            equip_in_allow_take_away_server INTEGER DEFAULT 0, -- 宠物在允许带走服务器
+            equip_in_allow_take_away_server INTEGER DEFAULT 0, -- 召唤兽在允许带走服务器
             
             -- 其他标识
             is_weijianding INTEGER DEFAULT 0,   -- 是否未鉴定
@@ -311,7 +311,7 @@ DB_SCHEMA_CONFIG = {
             is_xyq_game_role_kunpeng_reach_limit INTEGER DEFAULT 0, -- 是否达到鲲鹏限制
             
             -- 版本和存储相关
-            equip_onsale_version INTEGER DEFAULT 0, -- 宠物上架版本
+            equip_onsale_version INTEGER DEFAULT 0, -- 召唤兽上架版本
             storage_type INTEGER DEFAULT 0,         -- 存储类型
             agent_trans_time INTEGER DEFAULT 0,     -- 代理传输时间
             
@@ -333,7 +333,7 @@ DB_SCHEMA_CONFIG = {
             
             -- 详细描述
             desc TEXT,                          -- 描述
-            large_equip_desc TEXT,              -- 大宠物描述
+            large_equip_desc TEXT,              -- 大召唤兽描述
             desc_sumup TEXT,                    -- 描述总结
             desc_sumup_short TEXT,              -- 描述总结简短
             diy_desc TEXT,                      -- 自定义描述
@@ -353,9 +353,9 @@ DB_SCHEMA_CONFIG = {
             search_type TEXT,                   -- 搜索类型
             
             -- decode_desc解析出的字段
-            pet_name TEXT,                      -- 解析出的宠物名称
+            pet_name TEXT,                      -- 解析出的召唤兽名称
             type_id TEXT,                       -- 解析出的类型ID
-            pet_grade TEXT,                     -- 解析出的宠物等级
+            pet_grade TEXT,                     -- 解析出的召唤兽等级
             blood TEXT,                         -- 解析出的气血
             magic TEXT,                         -- 解析出的魔法
             attack INTEGER DEFAULT 0,           -- 解析出的攻击
@@ -695,7 +695,7 @@ DB_SCHEMA_CONFIG = {
             max_expt3 INTEGER,              -- 法术修炼上限(iMaxExpt3)
             max_expt4 INTEGER,              -- 抗法修炼上限(iMaxExpt4)
             
-            -- 宠物控制技能
+            -- 召唤兽控制技能
             beast_ski1 INTEGER,             -- 攻击控制力(iBeastSki1)
             beast_ski2 INTEGER,             -- 防御控制力(iBeastSki2)
             beast_ski3 INTEGER,             -- 法术控制力(iBeastSki3)
@@ -776,7 +776,7 @@ DB_SCHEMA_CONFIG = {
             version_code TEXT,              -- 版本码(equip_desc_version_code)
             
             -- JSON数据字段
-            pet TEXT,                       -- 特殊宠物JSON(pet)
+            pet TEXT,                       -- 特殊召唤兽JSON(pet)
             all_skills_json TEXT,           -- 所有技能JSON(all_skills)
             all_equip_json TEXT,            -- 所有装备JSON(AllEquip)
             all_summon_json TEXT,           -- 所有召唤兽JSON(AllSummon)

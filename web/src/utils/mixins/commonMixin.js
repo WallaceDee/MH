@@ -170,7 +170,7 @@ export const commonMixin = {
     },
     /**
      * 获取CBG链接（通用版本，支持不同类型）
-     * @param {string} eid - 装备/宠物ID
+     * @param {string} eid - 装备/召唤兽ID
      * @param {string} type - 类型：'equip', 'pet', 'role'
      * @returns {string} CBG链接
      */

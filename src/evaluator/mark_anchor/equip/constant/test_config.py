@@ -60,9 +60,9 @@ def test_config_loading():
     print(f"玉佩配置类型: {list(jade_config.keys())}")
     print(f"类型0主属性: {list(jade_config.get('0', {}).get('main', {}).keys())}")
     
-    print("\n测试宠物装备配置:")
+    print("\n测试召唤兽装备配置:")
     pet_config = get_pet_equip_config()
-    print(f"宠物装备等级: {list(pet_config.keys())}")
+    print(f"召唤兽装备等级: {list(pet_config.keys())}")
     print(f"65级属性: {list(pet_config.get('65', {}).keys())}")
 
 if __name__ == "__main__":

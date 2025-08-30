@@ -25,17 +25,17 @@
           <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
         </el-form-item>
         <el-form-item label="类型">
-          <el-cascader v-model="filters.kindid" :options="kindidOptions" placeholder="请选择宠物装备类型" multiple clearable
+          <el-cascader v-model="filters.kindid" :options="kindidOptions" placeholder="请选择召唤兽装备类型" multiple clearable
             filterable collapse-tags collapse-tags-tooltip :props="{
               multiple: true,
               emitPath: false
             }" @change="handleKindidChange">
           </el-cascader>
         </el-form-item>
-        <!-- 宠物装备类型选择器 -->
-        <el-form-item v-if="showPetEquipType" label="宠物装备类型">
+        <!-- 召唤兽装备类型选择器 -->
+        <el-form-item v-if="showPetEquipType" label="召唤兽装备类型">
           <el-cascader v-model="filters.equip_type" :options="petEquipTypeOptions" :props="cascaderProps"
-            placeholder="请选择宠物装备类型" multiple clearable filterable collapse-tags collapse-tags-tooltip>
+            placeholder="请选择召唤兽装备类型" multiple clearable filterable collapse-tags collapse-tags-tooltip>
           </el-cascader>
         </el-form-item>
         <el-form-item label="特技">
@@ -262,7 +262,7 @@ const kindidOptions = [{
   children: window.lingshiKinds.map(([value, label]) => ({ value, label }))
 }, {
   value: 29,
-  label: '宠物装备'
+  label: '召唤兽装备'
 }]
 export default {
   name: 'EquipmentList',
@@ -285,7 +285,7 @@ export default {
         price_min: undefined,
         price_max: undefined,
         kindid: [],
-        equip_type: [], // 宠物装备类型（多选）
+        equip_type: [], // 召唤兽装备类型（多选）
         equip_special_skills: [],
         equip_special_effect: [],
         suit_effect: [],
@@ -328,7 +328,7 @@ export default {
       similarEquipments: null, // 当前显示的相似装备数据
       equipmentValuation: {}, // 当前装备估价信息
 
-      // 宠物装备类型配置
+      // 召唤兽装备类型配置
       petEquipTypes: window.petEquipTypes,
 
       // 级联选择器配置
@@ -348,7 +348,7 @@ export default {
     }
   },
   computed: {
-    // 是否显示宠物装备类型选择器
+    // 是否显示召唤兽装备类型选择器
     showPetEquipType() {
       return this.filters.kindid && this.filters.kindid.includes(29)
     },
@@ -481,12 +481,12 @@ export default {
           }
         })
 
-        // 特殊处理：如果不是宠物装备，移除equip_type参数
+        // 特殊处理：如果不是召唤兽装备，移除equip_type参数
         if (!params.kindid || !params.kindid.includes(29)) {
           delete params.equip_type
         }
 
-        // 处理宠物装备类型多选参数
+        // 处理召唤兽装备类型多选参数
         if (params.equip_type && Array.isArray(params.equip_type) && params.equip_type.length === 0) {
           delete params.equip_type
         }
@@ -619,7 +619,7 @@ export default {
     },
     // 处理装备类型变化
     handleKindidChange(value) {
-      // 如果不再包含宠物装备，清空宠物装备类型选择
+      // 如果不再包含召唤兽装备，清空召唤兽装备类型选择
       if (!value || !value.includes(29)) {
         this.filters.equip_type = []
       }

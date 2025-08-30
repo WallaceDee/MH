@@ -74,8 +74,8 @@ class roleService:
             level_min: 最低等级
             level_max: 最高等级
             equip_num: 装备数量限制
-            pet_num: 宠物数量限制
-            pet_num_level: 宠物等级限制
+            pet_num: 召唤兽数量限制
+            pet_num_level: 召唤兽等级限制
             sort_by: 排序字段
             sort_order: 排序方向
             role_type: 角色类型，'normal' 表示正常角色，'empty' 表示空号角色
@@ -130,10 +130,10 @@ class roleService:
                         """)
                         level_params.append(equip_num)
 
-                # 构建宠物（大于pet_level）物数量小于等于pet_num过滤条件
+                # 构建召唤兽（大于pet_level）物数量小于等于pet_num过滤条件
                 if pet_num is not None and pet_num_level is not None:
                     if pet_num == 0:
-                        # 当pet_num为0时,表示没有宠物
+                        # 当pet_num为0时,表示没有召唤兽
                         level_conditions.append(
                             "(l.all_summon_json IS NULL OR l.all_summon_json = '[]')")
                     else:

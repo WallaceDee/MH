@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 梦幻西游藏宝阁召唤兽爬虫模块
-专门用于爬取召唤兽（宠物）数据
+专门用于爬取召唤兽（召唤兽）数据
 """
 
 import os
@@ -35,7 +35,7 @@ from src.utils.cookie_manager import (
     verify_cookie_validity
 )
 
-# 导入宠物描述解析相关模块
+# 导入召唤兽描述解析相关模块
 from src.spider.helper.decode_desc import parse_pet_info
 
 
@@ -51,7 +51,7 @@ class CBGPetSpider:
         from src.utils.project_path import get_data_path
         current_month = datetime.now().strftime('%Y%m')
         
-        # 宠物数据库路径
+        # 召唤兽数据库路径
         db_filename = f"cbg_pets_{current_month}.db"
         self.db_path = os.path.join(get_data_path(), current_month, db_filename)
 
@@ -103,7 +103,7 @@ class CBGPetSpider:
         logger.propagate = False
         
         # 测试日志写入
-        logger.info("🎉 CBG宠物爬虫日志系统初始化完成")
+        logger.info("🎉 CBG召唤兽爬虫日志系统初始化完成")
         logger.info(f"📁 日志文件路径: {log_file}")
         
         return logger
@@ -131,15 +131,15 @@ class CBGPetSpider:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
-            # 只创建宠物相关的表
+            # 只创建召唤兽相关的表
             cursor.execute(DB_SCHEMA_CONFIG['pets'])
-            self.logger.debug("宠物数据库创建表: pets")
+            self.logger.debug("召唤兽数据库创建表: pets")
             
             conn.commit()
-            self.logger.info(f"宠物数据库初始化完成: {os.path.basename(self.db_path)}")
+            self.logger.info(f"召唤兽数据库初始化完成: {os.path.basename(self.db_path)}")
             
         except Exception as e:
-            self.logger.error(f"初始化宠物数据库失败: {e}")
+            self.logger.error(f"初始化召唤兽数据库失败: {e}")
             raise
         finally:
             conn.close()
@@ -174,7 +174,7 @@ class CBGPetSpider:
             raise
 
     def parse_jsonp_response(self, text):
-        """解析JSONP响应，提取宠物数据"""
+        """解析JSONP响应，提取召唤兽数据"""
         try:
             # 提取JSON部分
             start = text.find('(') + 1
@@ -194,7 +194,7 @@ class CBGPetSpider:
             
             if not equip_list:
                 self.logger.warning(text)
-                self.logger.warning("没有找到任何宠物数据")
+                self.logger.warning("没有找到任何召唤兽数据")
                 return []
                 
             pets = []
@@ -202,17 +202,17 @@ class CBGPetSpider:
                 try:
                     # 引入decode_desc.py中的decode_desc函数，解析desc字段，把解析的字段存入数据库 
                     
-                    # 获取并解析宠物描述字段
+                    # 获取并解析召唤兽描述字段
                     raw_desc = pet.get('desc', '')
                     parsed_pet_attrs = {}
                     
-                    # 如果存在desc字段，则解析宠物属性
+                    # 如果存在desc字段，则解析召唤兽属性
                     if raw_desc:
                         try:
                             parsed_pet_attrs = parse_pet_info(raw_desc)
-                            self.logger.debug(f"成功解析宠物描述，获得{len(parsed_pet_attrs)}个属性字段")
+                            self.logger.debug(f"成功解析召唤兽描述，获得{len(parsed_pet_attrs)}个属性字段")
                         except Exception as e:
-                            self.logger.warning(f"解析宠物描述失败: {e}")
+                            self.logger.warning(f"解析召唤兽描述失败: {e}")
                             parsed_pet_attrs = {}
                     
                     # 直接保存所有原始字段，不做解析
@@ -365,7 +365,7 @@ class CBGPetSpider:
                         'raw_data_json': json.dumps(pet, ensure_ascii=False)
                     }
                     
-                    # 添加解析后的宠物属性字段 - 直接使用原始字段名
+                    # 添加解析后的召唤兽属性字段 - 直接使用原始字段名
                     if parsed_pet_attrs:
                         # 直接将所有解析出的字段添加到pet_data中
                         for field_name, field_value in parsed_pet_attrs.items():
@@ -378,7 +378,7 @@ class CBGPetSpider:
                     pets.append(pet_data)
                     
                 except Exception as e:
-                    self.logger.error(f"解析单个宠物数据时出错: {str(e)}")
+                    self.logger.error(f"解析单个召唤兽数据时出错: {str(e)}")
                     continue
             
             return pets
@@ -389,7 +389,7 @@ class CBGPetSpider:
 
     def get_search_params(self, use_browser=False):
         """
-        获取宠物搜索参数
+        获取召唤兽搜索参数
         - use_browser=True: 启动浏览器手动设置参数
         - use_browser=False: 从本地文件或默认配置加载参数
         """
@@ -405,7 +405,7 @@ class CBGPetSpider:
 
     def fetch_page_sync(self, page=1, search_params=None, search_type='overall_search_pet'):
         """
-        同步获取单页宠物数据
+        同步获取单页召唤兽数据
         """
         if search_params is None:
             search_params = {}
@@ -432,35 +432,35 @@ class CBGPetSpider:
             return pets
 
         except Exception as e:
-            self.logger.error(f"获取宠物数据失败 (页码: {page}): {e}")
+            self.logger.error(f"获取召唤兽数据失败 (页码: {page}): {e}")
             return None
 
     def save_pet_data(self, pets):
-        """保存宠物数据到数据库"""
+        """保存召唤兽数据到数据库"""
         if not pets:
-            self.logger.info("没有宠物数据需要保存")
+            self.logger.info("没有召唤兽数据需要保存")
             return 0
         
         # 确保数据库已初始化
         self._ensure_database_initialized()
         
         try:
-            self.logger.info(f"开始保存 {len(pets)} 条宠物数据到数据库")
+            self.logger.info(f"开始保存 {len(pets)} 条召唤兽数据到数据库")
             # 使用正确的方法名：save_pets_batch
             success = self.smart_db.save_pets_batch(pets)
             if success:
-                self.logger.info(f"成功保存 {len(pets)} 条宠物数据到数据库")
+                self.logger.info(f"成功保存 {len(pets)} 条召唤兽数据到数据库")
                 return len(pets)
             else:
-                self.logger.error("保存宠物数据到数据库失败")
+                self.logger.error("保存召唤兽数据到数据库失败")
                 return 0
         except Exception as e:
-            self.logger.error(f"保存宠物数据到数据库失败: {e}")
+            self.logger.error(f"保存召唤兽数据到数据库失败: {e}")
             return 0
 
     async def fetch_page(self, page=1, search_params=None, search_type='overall_search_pet'):
         """
-        获取单页宠物数据
+        获取单页召唤兽数据
         
         Args:
             page: 页码
@@ -468,7 +468,7 @@ class CBGPetSpider:
             search_type: 搜索类型
             
         Returns:
-            list: 解析后的宠物数据
+            list: 解析后的召唤兽数据
         """
         try:
             # 确保search_params不为None
@@ -517,12 +517,12 @@ class CBGPetSpider:
                 return None
                 
         except Exception as e:
-            self.logger.error(f"获取宠物第{page}页数据时出错: {e}")
+            self.logger.error(f"获取召唤兽第{page}页数据时出错: {e}")
             return None
 
     async def crawl_all_pages_async(self, max_pages=10, delay_range=None, use_browser=False, cached_params=None):
         """
-        异步爬取所有宠物页面
+        异步爬取所有召唤兽页面
         """
         # 首先验证Cookie有效性
         self.logger.info("正在验证Cookie有效性...")
@@ -542,7 +542,7 @@ class CBGPetSpider:
 
         search_type = 'overall_search_pet'
 
-        self.logger.info(f"🚀 开始宠物爬取，最大页数: {max_pages}")
+        self.logger.info(f"🚀 开始召唤兽爬取，最大页数: {max_pages}")
 
         # 获取参数
         params_file = 'config/pet_params.json'
@@ -564,7 +564,7 @@ class CBGPetSpider:
                 self.logger.info(f"📊 使用搜索参数: {search_params}")
 
         if not search_params:
-            self.logger.error(f"无法获取宠物的搜索参数，爬取中止")
+            self.logger.error(f"无法获取召唤兽的搜索参数，爬取中止")
             return
             
         total_saved_count = 0
@@ -573,7 +573,7 @@ class CBGPetSpider:
         for page_num in range(1, max_pages + 1):
             try:
                 # 确保日志立即输出
-                self.logger.info(f"📄 正在爬取宠物第 {page_num} 页...")
+                self.logger.info(f"📄 正在爬取召唤兽第 {page_num} 页...")
                 # 强制刷新日志缓冲
                 import sys
                 sys.stdout.flush()
@@ -590,17 +590,17 @@ class CBGPetSpider:
                     total_saved_count += saved_count
                     successful_pages += 1
                     
-                    # 打印每条宠物的简要信息
+                    # 打印每条召唤兽的简要信息
                     for pet in pets:
                         price = pet.get('price_desc', pet.get('price', '未知'))
-                        pet_name = pet.get('equip_name', '未知宠物')
+                        pet_name = pet.get('equip_name', '未知召唤兽')
                         level = pet.get('level', '未知')
                         server_name = pet.get('server_name', '未知服务器')
                         seller_nickname = pet.get('seller_nickname', '未知卖家')
                         desc_sumup_short = pet.get('desc_sumup_short', '无描述')
                         self.logger.info(f" ￥{price} - {pet_name}({level}级) - {desc_sumup_short} - {server_name} - {seller_nickname}")
                     
-                    self.logger.info(f"✅ 第 {page_num} 页完成，获取 {len(pets)} 条宠物，保存 {saved_count} 条")
+                    self.logger.info(f"✅ 第 {page_num} 页完成，获取 {len(pets)} 条召唤兽，保存 {saved_count} 条")
                 else:
                     self.logger.info(f"📄 第 {page_num} 页没有数据，爬取结束")
                     break 
@@ -617,7 +617,7 @@ class CBGPetSpider:
                 traceback.print_exc()
                 break
 
-        self.logger.info(f"🎉 宠物爬取完成！成功页数: {successful_pages}/{max_pages}, 总宠物数: {total_saved_count}")
+        self.logger.info(f"🎉 召唤兽爬取完成！成功页数: {successful_pages}/{max_pages}, 总召唤兽数: {total_saved_count}")
         
         # 强制刷新所有日志缓冲区，确保日志被完整写入文件
         import sys
@@ -631,7 +631,7 @@ class CBGPetSpider:
 
     def crawl_all_pages(self, max_pages=10, delay_range=None, use_browser=False, cached_params=None):
         """
-        同步启动异步宠物爬虫的入口
+        同步启动异步召唤兽爬虫的入口
         """
         try:
             asyncio.run(self.crawl_all_pages_async(
@@ -641,7 +641,7 @@ class CBGPetSpider:
                 cached_params=cached_params
             ))
         except Exception as e:
-            self.logger.error(f"启动宠物爬虫失败: {e}")
+            self.logger.error(f"启动召唤兽爬虫失败: {e}")
             import traceback
             traceback.print_exc()
 
@@ -656,7 +656,7 @@ def main():
         max_pages_to_crawl = 2
         # ----------------
         
-        print(f"\n--- 正在测试: 宠物爬虫 ---")
+        print(f"\n--- 正在测试: 召唤兽爬虫 ---")
         
         try:
             await spider.crawl_all_pages_async(
@@ -664,9 +664,9 @@ def main():
                 delay_range=(1, 3), 
                 use_browser=use_browser_for_test
             )
-            print(f"--- ✅ 宠物爬虫测试完成 ---")
+            print(f"--- ✅ 召唤兽爬虫测试完成 ---")
         except Exception as e:
-            print(f"--- ❌ 宠物爬虫测试失败: {e} ---")
+            print(f"--- ❌ 召唤兽爬虫测试失败: {e} ---")
             import traceback
             traceback.print_exc()
 

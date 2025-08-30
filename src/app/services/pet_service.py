@@ -673,7 +673,44 @@ class PetService:
             # 特征提取
             pet_features = self.pet_feature_extractor.extract_features(
                 pet_data)
-
+                
+            # 装备单独估价
+            equip_list_raw = pet_data.get('equip_list', '[]')
+            try:
+                equip_list = json.loads(equip_list_raw)
+            except Exception:
+                equip_list = []
+            
+            equip_valuations = []
+            if len(equip_list) > 0:
+                # 过滤有效的装备数据，参考其他地方的处理方式
+                valid_equips = []
+                for equip in equip_list:
+                    if equip and isinstance(equip, dict) and 'desc' in equip:
+                        valid_equips.append({
+                            'kindid': PET_EQUIP_KINDID,  # 宠物装备类型ID
+                            'desc': equip.get('desc', '')
+                        })
+                
+                if valid_equips:
+                    from src.app.services.equipment_service import equipment_service
+                    try:
+                        result = equipment_service.batch_equipment_valuation(
+                            valid_equips, 'fair_value', 0.8, 30)
+                        if isinstance(result, dict):
+                            equip_valuations = result.get('results', [])
+                        else:
+                            equip_valuations = result
+                        logger.info(
+                            f"批量装备估价完成，成功估价 {len(equip_valuations)} 个装备")
+                    except Exception as e:
+                        import traceback
+                        logger.warning(f"批量装备估价时部分装备失败: {e}")
+                        equip_valuations = [{} for _ in valid_equips]
+                else:
+                    logger.info("没有有效的装备数据需要估价")
+                    equip_valuations = []
+            
             # 确保特征中包含equip_sn信息，用于排除自身
             if 'equip_sn' in pet_data:
                 pet_features['equip_sn'] = pet_data['equip_sn']
@@ -704,7 +741,9 @@ class PetService:
                 "confidence": result.get("confidence", 0),
                 "similarity_threshold": similarity_threshold,
                 "max_anchors": max_anchors,
-                "price_range": result.get("price_range", {})
+                "price_range": result.get("price_range", {}),
+                "equip_valuations": equip_valuations,
+                "equip_estimated_price": sum(equip_val.get("estimated_price", 0) for equip_val in equip_valuations if isinstance(equip_val, dict))
             }
         except Exception as e:
             logger.error(f"获取宠物估价时出错: {e}")
@@ -1246,7 +1285,7 @@ class PetService:
 
                 if cursor.rowcount > 0:
                     logger.info(f"删除宠物成功: {pet_sn}")
-                    return {"success": True, "message": f"宠物 {pet_sn} 删除成功"}
+                    return {"success": True, "message": f"召唤兽 {pet_sn} 删除成功"}
                 else:
                     return {"error": f"删除宠物失败: {pet_sn}"}
 
@@ -1313,6 +1352,7 @@ class PetService:
                     
                     # 添加原始宠物数据用于后续处理
                     pet_features['index'] = i
+                    pet_features['original_pet_data'] = pet_data  # 保存原始数据，包含equip_list
                     
                     pet_features_list.append(pet_features)
                     
@@ -1354,11 +1394,61 @@ class PetService:
                         "estimated_price": 0,
                         "estimated_price_yuan": 0,
                         "confidence": 0,
-                        "anchor_count": 0
+                        "anchor_count": 0,
+                        "equip_estimated_price": 0,
+                        "equip_valuations": []
                     }
                 else:
                     # 处理成功情况
                     estimated_price = result.get("estimated_price", 0)
+                    
+                    # 计算装备估价
+                    equip_estimated_price = 0
+                    equip_valuations = []
+                    
+                    # 从原始宠物数据中获取装备信息并计算估价
+                    pet_index = result.get("pet_index", 0)
+                    if pet_index < len(pet_features_list):
+                        original_pet_data = pet_features_list[pet_index].get('original_pet_data', {})
+                        equip_list_raw = original_pet_data.get('equip_list', '[]')
+                        
+                        try:
+                            equip_list = json.loads(equip_list_raw)
+                            if equip_list and len(equip_list) > 0:
+                                # 过滤有效的装备数据
+                                valid_equips = []
+                                for equip in equip_list:
+                                    if equip and isinstance(equip, dict) and 'desc' in equip:
+                                        valid_equips.append({
+                                            'kindid': PET_EQUIP_KINDID,
+                                            'desc': equip.get('desc', '')
+                                        })
+                                
+                                if valid_equips:
+                                    from src.app.services.equipment_service import equipment_service
+                                    try:
+                                        equip_result = equipment_service.batch_equipment_valuation(
+                                            valid_equips, 'fair_value', 0.8, 30)
+                                        if isinstance(equip_result, dict):
+                                            equip_valuations = equip_result.get('results', [])
+                                        else:
+                                            equip_valuations = equip_result
+                                        
+                                        # 计算装备总估价
+                                        equip_estimated_price = sum(
+                                            equip_val.get("estimated_price", 0) 
+                                            for equip_val in equip_valuations 
+                                            if isinstance(equip_val, dict)
+                                        )
+                                        
+                                        logger.info(f"宠物{pet_index}装备估价完成，装备数量: {len(valid_equips)}，总估价: {equip_estimated_price}")
+                                        
+                                    except Exception as e:
+                                        logger.warning(f"宠物{pet_index}装备估价失败: {e}")
+                                        equip_valuations = [{} for _ in valid_equips]
+                        except Exception as e:
+                            logger.warning(f"宠物{pet_index}装备列表解析失败: {e}")
+                    
                     processed_result = {
                         "index": result.get("pet_index", 0),
                         "estimated_price": estimated_price,
@@ -1366,7 +1456,9 @@ class PetService:
                         "confidence": result.get("confidence", 0),
                         "anchor_count": result.get("anchor_count", 0),
                         "price_range": result.get("price_range", {}),
-                        "strategy": strategy
+                        "strategy": strategy,
+                        "equip_estimated_price": equip_estimated_price,
+                        "equip_valuations": equip_valuations
                     }
                 
                 processed_results.append(processed_result)

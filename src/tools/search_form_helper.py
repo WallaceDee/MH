@@ -552,7 +552,7 @@ async def _collect_pet_equip_logic(page):
     """收集召唤兽装备搜索逻辑 - 参考overall_search_pet_equips.js"""
     params_dict = {}
     
-    print("🚀 开始收集宠物装备参数...")
+    print("🚀 开始收集召唤兽装备参数...")
     
     # 1. 等级范围参数 - 从LevelSlider对象获取
     try:
@@ -838,11 +838,11 @@ async def _collect_pet_logic(page):
     
     print("🚀 开始收集召唤兽参数...")
     
-    # 1. 宠物类型 - 原JS: if ($('pet_select_box').value) { var pet_type = this.get_pet_type_value(); arg['type'] = pet_type; }
+    # 1. 召唤兽类型 - 原JS: if ($('pet_select_box').value) { var pet_type = this.get_pet_type_value(); arg['type'] = pet_type; }
     try:
         pet_name = await page.evaluate('() => document.getElementById("pet_select_box")?.value')
         if pet_name:
-            # 获取宠物类型值
+            # 获取召唤兽类型值
             pet_type = await page.evaluate(f'''
                 () => {{
                     var result = [];
@@ -859,11 +859,11 @@ async def _collect_pet_logic(page):
             ''')
             if pet_type:
                 params_dict['type'] = pet_type
-                print(f"✅ 宠物类型: {pet_name} -> {pet_type}")
+                print(f"✅ 召唤兽类型: {pet_name} -> {pet_type}")
             else:
-                print(f"❌ 宠物类型无效: {pet_name}")
+                print(f"❌ 召唤兽类型无效: {pet_name}")
     except Exception as e:
-        print(f"❌ 获取宠物类型参数失败: {e}")
+        print(f"❌ 获取召唤兽类型参数失败: {e}")
     
     # 2. 收集各种选择器参数 - 原JS: var check_items = [['low_skill', this.low_skill_checker, false], ...]
     check_panels = [
@@ -1839,7 +1839,7 @@ async def main():
     if params_pet_sync:
         print(f"✅ 成功获取召唤兽装备参数 (同步): \n{json.dumps(params_pet_sync, ensure_ascii=False, indent=2)}")
     
-    # 测试4: 新增宠物搜索接口
+    # 测试4: 新增召唤兽搜索接口
     print("\n--- 测试4: 异步接口 - 召唤兽 ---")
     params_pet_async = await get_pet_search_params_async(use_browser=False)
     if params_pet_async:

@@ -558,7 +558,7 @@ class SpiderService:
             "equip_types": [
                 {"value": "normal", "label": "普通装备", "description": "武器、防具等普通装备"},
                 {"value": "lingshi", "label": "灵饰", "description": "灵饰装备"},
-                {"value": "pet", "label": "召唤兽装备", "description": "宠物装备"}
+                {"value": "pet", "label": "召唤兽装备", "description": "召唤兽装备"}
             ],
             "default_config": {
                 "pages": 5,

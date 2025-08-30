@@ -9,8 +9,8 @@
       <SimilarGetMore :target-equipment="targetPet" type="pet"/>
     </el-row>
     <div class="valuation-main">
-      <span class="valuation-label">宠物估价:</span>
-      <span class="valuation-price">{{ valuation ? valuation.estimated_price_yuan + '元' : '-' }}</span>
+      <span class="valuation-label">召唤兽估价:</span>
+      <span class="valuation-price">{{ valuation ? (valuation.estimated_price_yuan+valuation.equip_estimated_price/100 ).toFixed(2) + '元' : '-' }} </span>
       <span class="valuation-strategy">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>
 
       <!-- 价格比率显示 -->
@@ -19,6 +19,10 @@
           {{ priceRatioText }}
         </el-tag>
       </span>
+    </div>
+    <div class="valuation-equip">
+      <el-tag>裸宠:￥{{ valuation.estimated_price_yuan }}</el-tag> <el-divider direction="vertical" />
+      <el-tag type="success">装备:￥{{ valuation.equip_estimated_price/100 }}</el-tag>
     </div>
     <div class="valuation-details">
       <span>置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}</span>

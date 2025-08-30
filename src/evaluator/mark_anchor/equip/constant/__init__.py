@@ -35,7 +35,7 @@ def get_jade_config() -> Dict[str, Any]:
     return _load_config('jade.jsonc')
 
 def get_pet_equip_config() -> Dict[str, Any]:
-    """获取宠物装备配置"""
+    """获取召唤兽装备配置"""
     return _load_config('pet_equip.jsonc')
 
 # 便捷访问函数

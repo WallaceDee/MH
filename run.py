@@ -140,14 +140,14 @@ def show_help_examples():
     print("4. 爬取召唤兽装备数据:")
     print("   python run.py basic --type equip --equip-type pet --pages 5")
     print()
-    print("5. 爬取召唤兽（宠物）数据:")
+    print("5. 爬取召唤兽（召唤兽）数据:")
     print("   python run.py basic --type pet --pages 8")
     print()
-    print("6. 爬取召唤兽（宠物）数据 - 使用浏览器设置筛选条件:")
+    print("6. 爬取召唤兽（召唤兽）数据 - 使用浏览器设置筛选条件:")
     print("   python run.py basic --type pet --use-browser --pages 5")
-    print("   # 可设置: 等级范围、价格范围、宠物类型、技能数量、成长值、资质等")
+    print("   # 可设置: 等级范围、价格范围、召唤兽类型、技能数量、成长值、资质等")
     print()
-    print("7. 爬取召唤兽（宠物）数据 - 使用缓存参数:")
+    print("7. 爬取召唤兽（召唤兽）数据 - 使用缓存参数:")
     print("   python run.py basic --type pet --no-browser --pages 10")
     print("   # 使用 config/pet_params.json 中的搜索参数")
     print()
@@ -165,8 +165,8 @@ def show_help_examples():
     print("    python run.py playwright --headless --target-url https://xyq.cbg.163.com/")
     print()
     print("召唤兽爬虫特色功能:")
-    print("   - 支持完整的宠物属性: 等级、气血、伤害、防御、速度、法伤、法防等")
-    print("   - 支持宠物筛选条件: 宠物类型、技能数量、成长值、资质范围等")
+    print("   - 支持完整的召唤兽属性: 等级、气血、伤害、防御、速度、法伤、法防等")
+    print("   - 支持召唤兽筛选条件: 召唤兽类型、技能数量、成长值、资质范围等")
     print("   - 支持浏览器手动设置复杂搜索条件")
     print("   - 数据按月分割存储: cbg_pets_YYYYMM.db")
     print("   - 支持参数缓存，避免重复设置")
@@ -259,7 +259,7 @@ def run_spider(spider_type='role', equip_type='normal', max_pages=10, delay_rang
         
         try:
             cbg_pet_spider = CBGPetSpider()
-            print("CBG宠物爬虫初始化完成")
+            print("CBG召唤兽爬虫初始化完成")
             
             # 爬取数据
             print("开始爬取数据...")
@@ -294,7 +294,7 @@ def main():
   python run.py basic --type equip --equip-type normal          # 爬取普通装备
   python run.py basic --type equip --equip-type lingshi --use-browser  # 爬取灵饰(浏览器设置)
   python run.py basic --type equip --equip-type pet             # 爬取召唤兽装备
-  python run.py basic --type pet --pages 8                      # 爬取召唤兽(宠物)
+  python run.py basic --type pet --pages 8                      # 爬取召唤兽(召唤兽)
   python run.py basic --type pet --use-browser --pages 5        # 爬取召唤兽(浏览器设置筛选条件)
   python run.py proxy --pages 10                                # 使用代理爬取
   python run.py proxy-manager                                   # 管理代理IP
@@ -305,14 +305,14 @@ def main():
 半自动数据收集模式说明:
   - 启动浏览器并监听所有CBG API请求
   - 自动捕获对 recommend.py 的请求并解析参数
-  - 根据请求参数自动分类: 角色、装备、灵饰、宠物、宠物装备
+  - 根据请求参数自动分类: 角色、装备、灵饰、召唤兽、召唤兽装备
   - 数据自动保存到对应的SQLite数据库
   - 支持交互式操作和后台监控
   - 可导出数据为JSON格式
 
 召唤兽爬虫详细说明:
   - 召唤兽数据包含: 基本信息、属性、技能、资质、成长、价格等完整数据
-  - 支持浏览器模式手动设置筛选条件: 等级、价格、宠物类型、技能数、成长值、资质等
+  - 支持浏览器模式手动设置筛选条件: 等级、价格、召唤兽类型、技能数、成长值、资质等
   - 支持本地参数缓存模式，避免重复设置搜索条件
   - 数据存储到 data/cbg_pets_YYYYMM.db，按月分割便于管理
         """
@@ -376,14 +376,14 @@ def main():
             }
             print(f"装备类型: {equip_type_names.get(args.equip_type, args.equip_type)}")
         elif args.type == 'pet':
-            print(f"召唤兽爬虫: 支持完整宠物数据")
+            print(f"召唤兽爬虫: 支持完整召唤兽数据")
             print(f"数据库: cbg_pets_{datetime.now().strftime('%Y%m')}.db")
         print(f"爬取页数: {args.pages}")
         print(f"延迟范围: {args.delay_min}-{args.delay_max}秒")
         if args.use_browser:
             print("浏览器模式: 启用")
             if args.type == 'pet':
-                print("   - 可设置: 等级、价格、宠物类型、技能数、成长值、资质等筛选条件")
+                print("   - 可设置: 等级、价格、召唤兽类型、技能数、成长值、资质等筛选条件")
     elif args.mode == 'playwright':
         print("Playwright半自动数据收集模式")
         if args.headless:

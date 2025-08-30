@@ -123,16 +123,16 @@ class PlaywrightAutoCollector:
         return self.role_spider
 
     def _get_pet_spider(self):
-        """延迟创建宠物spider实例"""
+        """延迟创建召唤兽spider实例"""
         if self.pet_spider is None:
             try:
-                logger.info("开始创建宠物spider实例...")
+                logger.info("开始创建召唤兽spider实例...")
                 from src.spider.pet import CBGPetSpider
                 logger.info("CBGPetSpider模块导入成功，开始实例化...")
                 self.pet_spider = CBGPetSpider()
-                logger.info("宠物spider实例已创建")
+                logger.info("召唤兽spider实例已创建")
             except Exception as e:
-                logger.error(f"创建宠物spider实例失败: {e}")
+                logger.error(f"创建召唤兽spider实例失败: {e}")
                 import traceback
                 logger.error(f"详细错误信息: {traceback.format_exc()}")
                 return None
@@ -211,9 +211,9 @@ class PlaywrightAutoCollector:
                 logger.info(f"装备数据库 {db_path} 表结构创建完成")
 
             elif db_type == 'pet':
-                logger.info(f"创建宠物数据库表结构...")
+                logger.info(f"创建召唤兽数据库表结构...")
                 cursor.execute(DB_SCHEMA_CONFIG['pets'])
-                logger.info(f"宠物数据库 {db_path} 表结构创建完成")
+                logger.info(f"召唤兽数据库 {db_path} 表结构创建完成")
 
             conn.commit()
             conn.close()
@@ -460,7 +460,7 @@ class PlaywrightAutoCollector:
                 if pet_spider:
                     return pet_spider.parse_jsonp_response(response_text)
                 else:
-                    logger.warning("宠物spider实例创建失败，跳过数据解析")
+                    logger.warning("召唤兽spider实例创建失败，跳过数据解析")
                     return None
             elif data_type == 'equipment':
                 equip_spider = self._get_equip_spider()
@@ -525,7 +525,7 @@ class PlaywrightAutoCollector:
             logger.error(f"详细错误信息: {traceback.format_exc()}")
             
     async def _save_pet_data(self, pets, request_info: Dict):
-        """保存宠物数据"""
+        """保存召唤兽数据"""
         try:
             # 确保数据库存在
             self._ensure_database('pet')
@@ -533,14 +533,14 @@ class PlaywrightAutoCollector:
             pet_spider = self._get_pet_spider()
             if pet_spider:
                 pet_spider.save_pet_data(pets)
-                logger.info(f"宠物数据已保存: {len(pets)} 条")
+                logger.info(f"召唤兽数据已保存: {len(pets)} 条")
             else:
-                logger.warning("宠物spider实例创建失败，跳过数据保存")
+                logger.warning("召唤兽spider实例创建失败，跳过数据保存")
         except Exception as e:
-            logger.error(f"保存宠物数据失败: {e}")
+            logger.error(f"保存召唤兽数据失败: {e}")
             
     async def _save_equipment_data(self, equipments, request_info: Dict):
-        """保存装备数据（包括灵饰、宠物装备等）"""
+        """保存装备数据（包括灵饰、召唤兽装备等）"""
         try:
             # 确保数据库存在
             self._ensure_database('equipment')
@@ -792,7 +792,7 @@ class PlaywrightAutoCollector:
                 return
 
             print("\n浏览器已启动，请进行以下操作：")
-            print("1. 在CBG网站中搜索角色、装备、宠物等")
+            print("1. 在CBG网站中搜索角色、装备、召唤兽等")
             print("2. 所有API请求将被自动捕获")
             print("3. 数据将按类型保存到不同数据库")
             print("4. 关闭浏览器窗口即可自动停止收集")

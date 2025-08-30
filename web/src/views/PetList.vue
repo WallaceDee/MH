@@ -275,9 +275,9 @@ export default {
         150: '150'
       },
       tableKey: 0,
-      // 相似宠物相关数据（实时计算，不缓存）
-      similarPets: null, // 当前显示的相似宠物数据
-      petValuation: null, // 当前宠物估价信息
+      // 相似召唤兽相关数据（实时计算，不缓存）
+      similarPets: null, // 当前显示的相似召唤兽数据
+      petValuation: null, // 当前召唤兽估价信息
       equipmentValuationLoading: false, // 装备批量估价加载状态
       // 装备估价结果对话框相关数据
       valuationDialogVisible: false,
@@ -437,7 +437,7 @@ export default {
     handleLevelRangeChange(value) {
       this.filters.level_range = value
     },
-    // 加载相似宠物
+    // 加载相似召唤兽
     async loadSimilarPets(pet) {
       this.similarPets = null
       this.petValuation = null
@@ -445,26 +445,24 @@ export default {
     },
     async loadPetValuation({ petData, ...pet }, similarityThreshold = 0.8) {
       try {
-        console.log(petData)
-        // 获取估价信息（包含相似宠物）
+        // 获取估价信息（包含相似召唤兽）
         const valuationResponse = await this.$api.pet.getPetValuation({
           pet_data: pet,
           strategy: 'fair_value',
           similarity_threshold: similarityThreshold,
           max_anchors: 30
         })
+
         // 处理估价响应
         if (valuationResponse.code === 200) {
           const data = valuationResponse.data
           this.petValuation = data
-          alert(data?.anchor_count)
-
           const { data: { anchors:allAnchors } } = await this.$api.pet.findPetAnchors({
             pet_data: pet,
             similarity_threshold: similarityThreshold,
             max_anchors: 30
           })
-          // 从估价结果中提取相似宠物信息
+          // 从估价结果中提取相似召唤兽信息
           if (data?.anchor_count  > 0) {
             this.similarPets = {
               anchor_count: data.anchor_count,
@@ -496,7 +494,7 @@ export default {
           }
         }
       } catch (error) {
-        console.error('加载相似宠物或估价失败:', error)
+        console.error('加载相似召唤兽或估价失败:', error)
       }
     },
     // 关闭装备估价结果对话框
@@ -695,7 +693,7 @@ export default {
 
       // 重新获取未估价数量
       this.getUnvaluedPetsCount()
-      // 刷新宠物列表
+      // 刷新召唤兽列表
       this.fetchPets()
     },
 
@@ -723,7 +721,7 @@ export default {
       this.taskStatus = null
     },
 
-    // 删除宠物
+    // 删除召唤兽
     async handleDelete(row) {
       try {
         // 确认删除
@@ -851,7 +849,7 @@ export default {
   border: 1px solid #c00;
 }
 
-/* 相似宠物弹窗样式 */
+/* 相似召唤兽弹窗样式 */
 :global(.similar-pet-popper) {
   padding: 16px;
 }

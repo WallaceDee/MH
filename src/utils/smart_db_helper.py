@@ -367,14 +367,14 @@ class CBGSmartDB:
         return self.db_helper.insert_data('equipments', equipments_list, on_conflict="UPDATE")
     
     def save_pet_data(self, pet_data: Dict[str, Any]) -> bool:
-        """智能保存宠物数据，冲突时保留create_time"""
+        """智能保存召唤兽数据，冲突时保留create_time"""
         # 添加更新时间，使用SQLite标准格式
         pet_data['update_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         return self.db_helper.insert_data('pets', pet_data, on_conflict="UPDATE")
     
     def save_pets_batch(self, pets_list: List[Dict[str, Any]]) -> bool:
-        """批量保存宠物数据，冲突时保留create_time"""
+        """批量保存召唤兽数据，冲突时保留create_time"""
         if not pets_list:
             return True
         

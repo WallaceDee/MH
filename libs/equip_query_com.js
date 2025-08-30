@@ -640,7 +640,7 @@ function save_equip_price_info(equipid, price, isProtect, isDraw, endTime) {
       ['price_max', 0, MaxTradeYuan, '价格'],
       ['sum_exp_min', 0, 3000000, '总经验'],
       ['sum_exp_max', 0, 3000000, '总经验'],
-      ['bb_expt', 0, 100, '宠物修炼'],
+      ['bb_expt', 0, 100, '召唤兽修炼'],
       ['qian_yuan_dan', 0, 200, '乾元丹'],
       ['school_skill_level', 0, 200, '师门技能等级'],
       ['qian_neng_guo', 0, 500, '潜能果数']

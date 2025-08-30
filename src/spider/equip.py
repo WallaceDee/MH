@@ -241,19 +241,19 @@ class CBGEquipSpider:
                     addon_status = equip.get('addon_status', '')
                     addon_moli = equip.get('addon_moli', 0)
 
-                    if kindid == PET_EQUIP_KINDID:  # 宠物装备类型要解析套装
+                    if kindid == PET_EQUIP_KINDID:  # 召唤兽装备类型要解析套装
                         try:
-                            # 使用宠物装备特征提取器解析套装信息
+                            # 使用召唤兽装备特征提取器解析套装信息
                             desc = equip.get('large_equip_desc', '')
                             if desc:
                                 # 创建临时字典来存储解析结果
                                 parsed_data = {}
                                 self.pet_equip_feature_extractor._parse_suit_info_from_desc(desc, parsed_data)
                                 addon_status = parsed_data.get('addon_status', '')
-                                print(f"宠物装备套装解析结果: {addon_status}")
-                                self.logger.debug(f"宠物装备套装解析结果: {addon_status}")
+                                print(f"召唤兽装备套装解析结果: {addon_status}")
+                                self.logger.debug(f"召唤兽装备套装解析结果: {addon_status}")
                         except Exception as e:
-                            self.logger.warning(f"解析宠物装备套装信息失败: {e}")
+                            self.logger.warning(f"解析召唤兽装备套装信息失败: {e}")
                             # 保持原始值
 
                     if kindid in WEAPON_KINDIDS + ARMOR_KINDIDS:

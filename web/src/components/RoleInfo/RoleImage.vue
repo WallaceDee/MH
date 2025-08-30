@@ -832,8 +832,8 @@
 
             <div class="blank12"></div>
 
-            <!-- 特殊宠物 -->
-            <h4>特殊宠物</h4>
+            <!-- 特殊召唤兽 -->
+            <h4>特殊召唤兽</h4>
             <div class="blank9"></div>
             <table cellspacing="0" cellpadding="0" class="tb02">
               <tr v-if="special_pet_info === undefined">

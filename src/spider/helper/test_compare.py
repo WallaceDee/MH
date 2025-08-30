@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-宠物信息解析比较脚本
+召唤兽信息解析比较脚本
 比较Python版本和JavaScript版本的解析结果差异
 """
 
@@ -107,8 +107,8 @@ def analyze_differences(test_cases: List[Dict]) -> None:
             if differences:
                 cases_with_diffs += 1
                 print(f"\n📋 测试用例 {i}/{total_cases}")
-                print(f"宠物名称: {expected_result.get('pet_name', 'Unknown')}")
-                print(f"宠物ID: {expected_result.get('type_id', 'Unknown')}")
+                print(f"召唤兽名称: {expected_result.get('pet_name', 'Unknown')}")
+                print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
                 print(f"❌ 发现 {len(differences)} 个差异:")
                 
                 # 按路径分组显示差异
@@ -141,8 +141,8 @@ def analyze_differences(test_cases: List[Dict]) -> None:
                 
         except Exception as e:
             print(f"\n📋 测试用例 {i}/{total_cases}")
-            print(f"宠物名称: {expected_result.get('pet_name', 'Unknown')}")
-            print(f"宠物ID: {expected_result.get('type_id', 'Unknown')}")
+            print(f"召唤兽名称: {expected_result.get('pet_name', 'Unknown')}")
+            print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
             print(f"❌ 解析失败: {e}")
             cases_with_diffs += 1
     
@@ -168,8 +168,8 @@ def detailed_analysis(test_cases: List[Dict]) -> None:
             differences = compare_dicts(py_result, expected_result)
             
             if differences:
-                print(f"宠物名称: {expected_result.get('pet_name', 'Unknown')}")
-                print(f"宠物ID: {expected_result.get('type_id', 'Unknown')}")
+                print(f"召唤兽名称: {expected_result.get('pet_name', 'Unknown')}")
+                print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
                 print(f"发现 {len(differences)} 个差异:")
                 
                 # 按类型分组显示差异

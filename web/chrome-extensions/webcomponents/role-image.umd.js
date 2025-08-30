@@ -38087,7 +38087,7 @@ var render = function render() {
     })], 2);
   })], 2), _c('div', {
     staticClass: "blank12"
-  }), _c('h4', [_vm._v("特殊宠物")]), _c('div', {
+  }), _c('h4', [_vm._v("特殊召唤兽")]), _c('div', {
     staticClass: "blank9"
   }), _c('table', {
     staticClass: "tb02",
@@ -38818,7 +38818,7 @@ const commonMixin = {
     },
     /**
      * 获取CBG链接（通用版本，支持不同类型）
-     * @param {string} eid - 装备/宠物ID
+     * @param {string} eid - 装备/召唤兽ID
      * @param {string} type - 类型：'equip', 'pet', 'role'
      * @returns {string} CBG链接
      */

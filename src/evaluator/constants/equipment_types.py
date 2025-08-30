@@ -23,7 +23,7 @@ LINGSHI_KINDIDS = [61, 62, 63, 64]
 # 上古玉魄装备类型（暂定）
 JADE_KINDIDS = [99, 98 ]
 
-# 宠物装备类型
+# 召唤兽装备类型
 PET_EQUIP_KINDID = 29
 
 # 武器类装备类型
@@ -62,9 +62,9 @@ EQUIP_CATEGORIES = {
         'description': '包含灵饰'
     },
     'pet_equip': {
-        'name': '宠物装备',
+        'name': '召唤兽装备',
         'kindids': [PET_EQUIP_KINDID],
-        'description': '包含宠物装备'
+        'description': '包含召唤兽装备'
     },
     'jade':{
         'name': '上古玉魄',
@@ -84,7 +84,7 @@ def is_lingshi(kindid: int) -> bool:
 
 
 def is_pet_equip(kindid: int) -> bool:
-    """判断是否为宠物装备"""
+    """判断是否为召唤兽装备"""
     return kindid == PET_EQUIP_KINDID
 
 

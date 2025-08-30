@@ -386,7 +386,7 @@ class MarketDataCollector:
                     (filtered_data['total_cultivation'] <= cult_max)
                 ]
             
-            # 宠物控制力总和过滤
+            # 召唤兽控制力总和过滤
             if 'total_beast_cultivation_range' in filters:
                 beast_min, beast_max = filters['total_beast_cultivation_range']
                 filtered_data = filtered_data[

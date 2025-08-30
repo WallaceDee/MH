@@ -1,4 +1,5 @@
 {
   "evol_skill_mode": 0,
+  "query_order": "price ASC",
   "server_type": "3"
 }

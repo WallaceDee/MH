@@ -140,7 +140,7 @@ export const equipmentApi = {
   },
 
   /**
-   * 获取宠物装备数据
+   * 获取召唤兽装备数据
    * @returns {Promise}
    */
   getPetEquipConfig() {

@@ -9,7 +9,7 @@ constant/
 ├── weapon.jsonc         # 武器配置（伤害标准、附加属性标准）
 ├── lingshi.jsonc        # 灵石配置（各等级属性范围）
 ├── jade.jsonc           # 玉佩配置（各类型属性范围）
-├── pet_equip.jsonc      # 宠物装备配置（各等级属性标准）
+├── pet_equip.jsonc      # 召唤兽装备配置（各等级属性标准）
 ├── test_config.py       # 配置测试文件
 └── README.md            # 说明文档
 ```
@@ -92,7 +92,7 @@ lingshi_config = get_lingshi_config()
 - 按类型分类（0、1类型）
 - 每个类型包含主属性和附加属性的范围配置
 
-### 宠物装备配置 (pet_equip.jsonc)
+### 召唤兽装备配置 (pet_equip.jsonc)
 - 按等级分类（65-145级）
 - 每个等级包含各属性的最大值标准
 
@@ -120,7 +120,7 @@ lingshi_config = get_lingshi_config()
 - `get_weapon_config()` - 获取武器配置
 - `get_lingshi_config()` - 获取灵石配置
 - `get_jade_config()` - 获取玉佩配置
-- `get_pet_equip_config()` - 获取宠物装备配置
+- `get_pet_equip_config()` - 获取召唤兽装备配置
 
 ## 套装分类说明
 

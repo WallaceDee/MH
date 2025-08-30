@@ -217,7 +217,7 @@ class ConfigLoader:
             raise e
     
     def get_pet_skill_config(self) -> Dict[str, str]:
-        """获取宠物技能配置"""
+        """获取召唤兽技能配置"""
         try:
             config = self._load_full_config()
             pet_skills_for_front = config.get('pet_skills_for_front', {})
@@ -225,15 +225,15 @@ class ConfigLoader:
             # 转换为ID->名称的映射
             mapping = {str(k): str(v) for k, v in pet_skills_for_front.items()}
             
-            self.logger.debug(f"加载了{len(mapping)}个宠物技能配置")
+            self.logger.debug(f"加载了{len(mapping)}个召唤兽技能配置")
             return mapping
             
         except Exception as e:
-            self.logger.error(f"获取宠物技能配置失败: {e}")
+            self.logger.error(f"获取召唤兽技能配置失败: {e}")
             raise e
     
     def get_pet_neidan_config(self) -> Dict[str, Dict[str, str]]:
-        """获取宠物内丹配置"""
+        """获取召唤兽内丹配置"""
         try:
             config = self._load_full_config()
             neidan_desc = config.get('neidan_desc', {})
@@ -258,15 +258,15 @@ class ConfigLoader:
                         'desc': ''
                     }
             
-            self.logger.debug(f"加载了{len(mapping)}个宠物内丹配置")
+            self.logger.debug(f"加载了{len(mapping)}个召唤兽内丹配置")
             return mapping
             
         except Exception as e:
-            self.logger.error(f"获取宠物内丹配置失败: {e}")
+            self.logger.error(f"获取召唤兽内丹配置失败: {e}")
             raise e
     
     def get_pet_type_config(self) -> Dict[str, str]:
-        """获取宠物类型配置"""
+        """获取召唤兽类型配置"""
         try:
             config = self._load_full_config()
             
@@ -298,15 +298,15 @@ class ConfigLoader:
                 if type_id not in mapping:
                     mapping[type_id] = str(type_name)
             
-            self.logger.debug(f"加载了{len(mapping)}个宠物类型配置")
+            self.logger.debug(f"加载了{len(mapping)}个召唤兽类型配置")
             return mapping
             
         except Exception as e:
-            self.logger.error(f"获取宠物类型配置失败: {e}")
+            self.logger.error(f"获取召唤兽类型配置失败: {e}")
             raise e
     
     def get_pet_shipin_config(self) -> Dict[str, str]:
-        """获取宠物饰品配置"""
+        """获取召唤兽饰品配置"""
         try:
             config = self._load_full_config()
             pet_shipin_info = config.get('pet_shipin_info', {})
@@ -314,11 +314,11 @@ class ConfigLoader:
             # 转换为ID->名称的映射
             mapping = {str(k): str(v) for k, v in pet_shipin_info.items()}
             
-            self.logger.debug(f"加载了{len(mapping)}个宠物饰品配置")
+            self.logger.debug(f"加载了{len(mapping)}个召唤兽饰品配置")
             return mapping
             
         except Exception as e:
-            self.logger.error(f"获取宠物饰品配置失败: {e}")
+            self.logger.error(f"获取召唤兽饰品配置失败: {e}")
             raise e
     
     def get_equipment_config(self) -> Dict[str, str]:

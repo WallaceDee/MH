@@ -29,7 +29,7 @@ except ImportError:
 
 
 class PetEquipMarketDataCollector:
-    """宠物装备市场数据采集器 - 从数据库中获取和处理宠物装备市场数据"""
+    """召唤兽装备市场数据采集器 - 从数据库中获取和处理召唤兽装备市场数据"""
 
     def __init__(self, db_paths: Optional[List[str]] = None):
         """
@@ -42,10 +42,10 @@ class PetEquipMarketDataCollector:
         self.feature_extractor = PetEquipFeatureExtractor()
         self.logger = logging.getLogger(__name__)
 
-        print(f"宠物装备数据采集器初始化，加载数据库: {self.db_paths}")
+        print(f"召唤兽装备数据采集器初始化，加载数据库: {self.db_paths}")
 
     def _find_recent_dbs(self) -> List[str]:
-        """查找所有可用的宠物装备数据库文件"""
+        """查找所有可用的召唤兽装备数据库文件"""
         import glob
         from datetime import datetime, timedelta
 
@@ -73,9 +73,9 @@ class PetEquipMarketDataCollector:
                 found_dbs.append(db_file)
                 print(f"找到指定月份数据库文件: {db_file}")
 
-        # 如果没找到指定月份的，则查找所有可用的宠物装备数据库文件
+        # 如果没找到指定月份的，则查找所有可用的召唤兽装备数据库文件
         if not found_dbs:
-            print("未找到指定月份的数据库文件，查找所有可用的宠物装备数据库文件")
+            print("未找到指定月份的数据库文件，查找所有可用的召唤兽装备数据库文件")
             # 查找所有年月文件夹下的数据库文件
             pattern = os.path.join(data_path, "*", "cbg_equip_*.db")
             all_dbs = glob.glob(pattern)
@@ -251,7 +251,7 @@ class PetEquipMarketDataCollector:
 
             # 再做附加属性分类过滤（原有逻辑）
             target_classification = self._get_target_addon_classification(classification_features)
-            print(f"目标宠物装备属性分类: {target_classification}")
+            print(f"目标召唤兽装备属性分类: {target_classification}")
             print(f"classification_features: {classification_features}")
             market_data['addon_classification'] = market_data.apply(
                 lambda row: self._classify_addon_attributes(
@@ -284,15 +284,15 @@ class PetEquipMarketDataCollector:
                         (market_data['addon_classification'] == "无属性")
                     ]
                     after_filter_count = len(market_data)
-                    print(f"宠物装备属性分类过滤: {target_classification} -> 同类属性 {target_group}")
+                    print(f"召唤兽装备属性分类过滤: {target_classification} -> 同类属性 {target_group}")
                     print(f"过滤结果: {before_filter_count} -> {after_filter_count} 条数据")
                 else:
                     print(f"未找到属性分类 {target_classification} 对应的分组，不进行过滤")
             else:
-                print(f"目标宠物装备无属性，不进行属性分类过滤")
+                print(f"目标召唤兽装备无属性，不进行属性分类过滤")
             return market_data
         except Exception as e:
-            self.logger.error(f"按属性分类获取宠物装备市场数据失败: {e}")
+            self.logger.error(f"按属性分类获取召唤兽装备市场数据失败: {e}")
             return pd.DataFrame()
 
     def get_market_data_with_business_rules(self,
@@ -351,9 +351,9 @@ class PetEquipMarketDataCollector:
                                   addon_liliang: int = 0, addon_minjie: int = 0, 
                                   addon_naili: int = 0, addon_tizhi: int = 0) -> str:
         """
-        根据宠物装备的附加属性分类
+        根据召唤兽装备的附加属性分类
         
-        宠物装备属性点加成分类规则：
+        召唤兽装备属性点加成分类规则：
         1. "法力" - 纯法力加成
         2. "灵力" - 纯灵力加成  
         3. "力量" - 纯力量加成
@@ -454,10 +454,10 @@ class PetEquipMarketDataCollector:
 
     def _get_target_addon_classification(self, target_features: Dict[str, Any]) -> str:
         """
-        获取目标宠物装备的属性分类
+        获取目标召唤兽装备的属性分类
         
         Args:
-            target_features: 目标宠物装备特征
+            target_features: 目标召唤兽装备特征
             
         Returns:
             str: 属性分类类型

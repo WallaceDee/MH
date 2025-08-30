@@ -669,7 +669,6 @@ export default {
           }
         }
         const pet_detail = pet_list_desc.find(pet => pet.equip_sn === item.equip_sn)
-        console.log({ pet_detail, item }, '00000000000000000000')
         //召唤兽特征提取必传参数
         return {
           pet_detail,
@@ -700,7 +699,6 @@ export default {
         // 调用批量宠物估价API
         const response = await this.$api.pet.batchPetValuation({
           pet_list: pet_list.map(({ pet_detail, ...item }) => {
-            console.log(pet_detail)
             return item
           }),
           strategy: 'fair_value',
@@ -712,7 +710,7 @@ export default {
           const data = response.data
           const results = data.results || []
           const totalValue = results.reduce((sum, result) => {
-            return sum + (result.estimated_price || 0)
+            return sum + (result.estimated_price || 0) + (result.equip_estimated_price || 0)
           }, 0)
 
           // 更新弹窗内容，显示实际数据

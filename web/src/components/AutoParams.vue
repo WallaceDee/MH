@@ -113,7 +113,7 @@
                         <el-select v-model="playwrightForm.target_url" style="width: 100%" @change="onTargetUrlChange">
                             <el-option label="角色推荐搜索" value="role_recommend"></el-option>
                             <el-option label="装备推荐搜索" value="equip_recommend"></el-option>
-                            <el-option label="宠物推荐搜索" value="pet_recommend"></el-option>
+                            <el-option label="召唤兽推荐搜索" value="pet_recommend"></el-option>
                             <el-option label="自定义URL" value="custom"></el-option>
                         </el-select>
                     </el-form-item>
@@ -169,7 +169,7 @@
                             @change="onEquipTypeChange" style="width: 100%">
                             <el-option label="普通装备" value="normal"></el-option>
                             <el-option label="灵饰装备" value="lingshi"></el-option>
-                            <el-option label="宠物装备" value="pet"></el-option>
+                            <el-option label="召唤兽装备" value="pet"></el-option>
                         </el-select>
                     </el-form-item>
                     <el-form-item label="套装效果" v-if="equipForm.equip_type === 'normal' && targetFeatures.suit_effect">
@@ -454,7 +454,7 @@ export default {
                     errorKey: 'petJsonError',
                     savingKey: 'petSaving',
                     paramType: 'pet',
-                    successMessage: '宠物参数配置保存成功',
+                    successMessage: '召唤兽参数配置保存成功',
                     spiderType: 'pet',
                     spiderName: '召唤兽爬虫',
                     getParams: () => ({
@@ -1298,7 +1298,7 @@ export default {
             const paramKeyMap = {
                 normal: 'equip_normal',
                 lingshi: 'equip_lingshi',
-                pet: 'equip_pet_equip'  // 修复：宠物装备应该使用equip_pet_equip
+                pet: 'equip_pet_equip'  // 修复：召唤兽装备应该使用equip_pet_equip
             }
             return paramKeyMap[equipType] || 'equip_normal'
         },
@@ -1473,7 +1473,7 @@ export default {
             const names = {
                 normal: '普通装备',
                 lingshi: '灵饰装备',
-                pet: '宠物装备'
+                pet: '召唤兽装备'
             }
             return names[type] || '装备'
         },

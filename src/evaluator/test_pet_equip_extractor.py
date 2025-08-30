@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-宠物装备特征提取器测试脚本
+召唤兽装备特征提取器测试脚本
 """
 
 import sys
@@ -17,9 +17,9 @@ import sqlite3
 from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
 
 def test_pet_equip_extractor():
-    """测试宠物装备特征提取器"""
+    """测试召唤兽装备特征提取器"""
     print("="*60)
-    print("宠物装备特征提取器测试")
+    print("召唤兽装备特征提取器测试")
     print("="*60)
     
     # 创建提取器
@@ -34,7 +34,7 @@ def test_pet_equip_extractor():
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
-        # 查询宠物装备数据
+        # 查询召唤兽装备数据
         cursor.execute("""
             SELECT 
                 eid as equip_id, equip_level, kindid, 
@@ -50,7 +50,7 @@ WHERE equip_level > 0 AND kindid = {PET_EQUIP_KINDID} AND fangyu > 0
         columns = [description[0] for description in cursor.description]
         rows = cursor.fetchall()
         
-        print(f"查询到 {len(rows)} 个宠物装备")
+        print(f"查询到 {len(rows)} 个召唤兽装备")
         
         for i, row in enumerate(rows, 1):
             print(f"\n{'='*50}")

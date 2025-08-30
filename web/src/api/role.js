@@ -14,8 +14,8 @@ export const roleApi = {
    * @param {number} params.level_min - 最低等级
    * @param {number} params.level_max - 最高等级
    * @param {number} params.equip_num - 装备数量限制
-   * @param {number} params.pet_num - 宠物数量限制
-   * @param {number} params.pet_num_level - 宠物等级限制
+   * @param {number} params.pet_num - 召唤兽数量限制
+   * @param {number} params.pet_num_level - 召唤兽等级限制
    * @param {string} params.sort_by - 排序字段
    * @param {string} params.sort_order - 排序方向
    * @param {string} params.role_type - 角色类型，'normal' 表示正常角色，'empty' 表示空号角色

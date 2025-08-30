@@ -25,9 +25,9 @@
         <el-col :span="8" v-for="(result, index) in results" :key="index" class="result-item"
           :class="{ error: result.error, success: !result.error }">
           <div class="result-header">
-            <span class="item-index">{{ petList[index].pet_detail.pet_name || `宠物 ${index + 1}` }}-{{
+            <span class="item-index">{{ petList[index].pet_detail.pet_name || `召唤兽 ${index + 1}` }}-{{
               petList[index].equip_level
-              }}级</span>
+            }}级</span>
             <span v-if="!result.error" class="confidence-badge">
               置信度: {{ (result.confidence * 100).toFixed(1) }}%
             </span>
@@ -37,12 +37,11 @@
             <el-col style="width: 50px;">
               <PetImage placement="top" :pet="petList[index].pet_detail" size="small"
                 :equip_sn="petList[index].equip_sn" :equipFaceImg="petList[index].pet_detail.icon" />
-              <SimilarPetModal
-                :pet="genPetData(petList[index])"
-                :similar-data="similarData" :valuation="result" @show="loadSimilarPets" />
+              <SimilarPetModal :pet="genPetData(petList[index])" :similar-data="similarData" :valuation="result"
+                @show="loadSimilarPets" />
             </el-col>
             <el-col class="price-info" :span="12">
-              <el-statistic group-separator="," :precision="2" :value="result.estimated_price_yuan" title="估价"
+              <el-statistic group-separator="," :precision="2" :value="(result.estimated_price+result.equip_estimated_price)/100" title="估价"
                 prefix="¥" :value-style="{ color: '#f56c6c', fontSize: '18px', fontWeight: 'bold' }">
               </el-statistic>
             </el-col>
@@ -52,7 +51,7 @@
           <div class="pet-details" v-if="petList[index]">
             <div class="pet-info">
               <el-tag size="mini" :type="petList[index].is_baobao === '是' ? 'success' : 'danger'">{{
-                petList[index].is_baobao === '是' ?'宝宝':'野生'}}</el-tag>
+                petList[index].is_baobao === '是' ? '宝宝' : '野生' }}</el-tag>
               <el-tag size="mini">{{ petList[index].equip_level }}级</el-tag>
               <el-tag size="mini" type="success">{{ petList[index].growth }}</el-tag>
             </div>
@@ -62,19 +61,19 @@
                 v-html="formatSkills({ petData: { ...petList[index].pet_detail, sp_skill: petList[index].pet_detail.genius } })"></span>
             </div>
             <div class="pet-equips">
-              <span class="skill-label">装备:</span>
-              <table cellspacing="0" cellpadding="0" class="tb03 size50" style="margin: unset;">
-            <tr>
-              <!-- {{ petList[index] }} -->
-              <td v-for="(eItem, index) in JSON.parse(petList[index].equip_list).splice(0, 3)" :key="index">
-                <EquipmentImage v-if="eItem" :placement="'bottom'" :image="false" :equipment="getEquipImageProps(eItem)"
-                  size="small" :popoverWidth="300" width="40px" height="40px"/>
-                <span v-else>&nbsp;</span>
-              </td>
-            </tr>
-          </table>
+              <span class="skill-label" >装备:<el-tag>￥{{ result.equip_estimated_price/100 }}</el-tag> <el-link type="danger" @click="showEquipValuation(petList[index])">查看估价</el-link> </span>
+              <table cellspacing="0" cellpadding="0" class="tb03 size50" style="margin: unset;margin-top: 3px;" >
+                <tr>
+                  <!-- {{ petList[index] }} -->
+                  <td v-for="(eItem, index) in JSON.parse(petList[index].equip_list).splice(0, 3)" :key="index">
+                    <EquipmentImage v-if="eItem" :placement="'bottom'" :image="false"
+                      :equipment="getEquipImageProps(eItem)" size="small" :popoverWidth="300" width="40px"
+                      height="40px" />
+                    <span v-else>&nbsp;</span>
+                  </td>
+                </tr>
+              </table>
             </div>
- 
           </div>
         </el-col>
       </el-row>
@@ -121,7 +120,7 @@ export default {
       similarData: null
     }
   },
-  mixins: [petMixin,equipmentMixin],
+  mixins: [petMixin, equipmentMixin],
   computed: {
     totalCount() {
       return this.results.length
@@ -136,6 +135,71 @@ export default {
     SimilarPetModal
   },
   methods: {
+    async showEquipValuation(pet) {
+      try {
+        // 获取宠物的装备列表
+        const equip_list_raw = pet.equip_list || '[]'
+        let equip_list = []
+        
+        try {
+          equip_list = JSON.parse(equip_list_raw)
+        } catch (e) {
+          console.error('解析装备列表失败:', e)
+          this.$notify.error('装备列表格式错误')
+          return
+        }
+        
+        // 过滤有效的装备数据，只取前三个，并补上kindid: 29 
+        // TODO: 角色宠物装备估价跟 召唤兽装备批量估价接口不一致，需要统一
+        const validEquipments = equip_list
+          .filter((item, index) => item && item.desc && index < 3)
+          .map(item => ({ 
+            kindid: 29,  // 硬编码补上召唤兽装备类型ID
+            desc: item.desc  // 确保有large_equip_desc字段
+          }))
+        
+        if (validEquipments.length === 0) {
+          this.$notify.warning('该召唤兽没有携带装备')
+          return
+        }
+        
+        // 调用通用的装备批量估价API
+        const response = await this.$api.equipment.batchEquipmentValuation({
+          equipment_list: validEquipments,
+          strategy: 'fair_value',
+          similarity_threshold: this.valuateParams.similarity_threshold,
+          max_anchors: this.valuateParams.max_anchors
+        })
+        
+        if (response.code === 200) {
+          const data = response.data
+          const results = data.results || []
+          const totalValue = results.reduce((sum, result) => {
+            return sum + (result.estimated_price || 0)
+          }, 0)
+          
+          // 显示装备估价结果
+          this.$notify.success({
+            title: '装备估价完成',
+            message: `成功估价 ${results.length} 件装备，总价值: ${(totalValue / 100).toFixed(2)} 元`
+          })
+          
+          // 这里可以进一步处理装备估价结果，比如显示详细弹窗
+          console.log('装备估价结果:', {
+            equipment_list: validEquipments,
+            results: results,
+            total_value: totalValue
+          })
+          
+        } else {
+          this.$notify.error(response.message || '装备估价失败')
+        }
+        
+      } catch (error) {
+        console.error('装备估价失败:', error)
+        this.$notify.error('装备估价失败')
+      }
+    },
     genPetData(pet) {
       return { ...pet, petData: pet.pet_detail, equip_face_img: pet.pet_detail.icon }
     },
@@ -154,17 +218,17 @@ export default {
           similarity_threshold: this.valuateParams.similarity_threshold,
           max_anchors: this.valuateParams.max_anchors
         })
-        const { data: { anchors:allAnchors } } = await this.$api.pet.findPetAnchors({
-          pet_data: pet,
-          similarity_threshold: this.valuateParams.similarity_threshold,
-          max_anchors: this.valuateParams.max_anchors
-        })
 
         // 处理估价响应
         if (valuationResponse.code === 200) {
           const data = valuationResponse.data
           // 从估价结果中提取相似宠物信息
-          if (data.anchors && data.anchors.length > 0) {
+          if (data.anchor_count > 0) {
+            const { data: { anchors: allAnchors } } = await this.$api.pet.findPetAnchors({
+              pet_data: pet,
+              similarity_threshold: this.valuateParams.similarity_threshold,
+              max_anchors: this.valuateParams.max_anchors
+            })
             this.similarData = {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
@@ -192,8 +256,6 @@ export default {
                 price_range: { min: 0, max: 0 },
                 similarity_range: { min: 0, max: 0, avg: 0 }
               },
-              message: '未找到符合条件的市场锚点，建议降低相似度阈值',
-              canRetry: true,
               pet: pet
             }
           }
@@ -207,8 +269,6 @@ export default {
               price_range: { min: 0, max: 0 },
               similarity_range: { min: 0, max: 0, avg: 0 }
             },
-            message: valuationResponse.message || '未找到符合条件的市场锚点，建议降低相似度阈值',
-            canRetry: true,
             pet: pet
           }
         }
@@ -286,10 +346,12 @@ export default {
   padding-top: 10px;
   border-top: 1px solid #ebeef5;
 }
-.pet-details .size50 td{
-width: 40px;
-height: 40px;
+
+.pet-details .size50 td {
+  width: 40px;
+  height: 40px;
 }
+
 .pet-info {
   margin-bottom: 5px;
   font-size: 12px;
@@ -303,11 +365,12 @@ height: 40px;
 .pet-skills {
   font-size: 12px;
   color: #606266;
+  margin-bottom: 5px;
 }
 
 .skill-label {
   font-weight: bold;
-  margin-right: 5px;
+  margin: 5px;
 }
 
 .skill-text {

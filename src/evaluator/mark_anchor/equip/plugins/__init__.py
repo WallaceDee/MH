@@ -78,7 +78,7 @@ def get_all_plugins() -> List[EquipmentTypePlugin]:
         from .lingshi_plugin import LingshiPlugin
         plugins.append(LingshiPlugin())
 
-        # 宠物装备插件
+        # 召唤兽装备插件
         from .pet_equip_plugin import PetEquipPlugin
         plugins.append(PetEquipPlugin())
         

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-测试单个宠物信息解析用例
+测试单个召唤兽信息解析用例
 """
 
 import json
@@ -21,8 +21,8 @@ def test_single_case():
     desc = test_case['desc']
     expected_result = test_case['petData']
     
-    print(f"测试宠物: {expected_result.get('pet_name', 'Unknown')}")
-    print(f"宠物ID: {expected_result.get('type_id', 'Unknown')}")
+    print(f"测试召唤兽: {expected_result.get('pet_name', 'Unknown')}")
+    print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
     
     try:
         # 使用Python版本解析

@@ -72,8 +72,8 @@ class MarketAnchorEvaluator(BaseValuator):
             'packet_page': 2,        # 行囊页数允许±2差异
             'allow_pet_count': 2,    # 召唤兽上限允许±2差异
             
-            # 宠物和法宝系统
-            'premium_pet_count': 2,     # 特殊宠物允许±2差异
+            # 召唤兽和法宝系统
+            'premium_pet_count': 2,     # 特殊召唤兽允许±2差异
             'premium_fabao_count': 10,   # 法宝允许±10差异
             'hight_grow_rider_count': 1, # 高成长坐骑允许±1差异
             
@@ -290,7 +290,7 @@ class MarketAnchorEvaluator(BaseValuator):
                 total_cultivation + cultivation_tolerance
             )
  
-        # 宠物控制力总和相差(±30)
+        # 召唤兽控制力总和相差(±30)
         if 'total_beast_cultivation' in target_features:
             total_beast_cultivation = target_features['total_beast_cultivation']
             beast_cultivation_tolerance = 30

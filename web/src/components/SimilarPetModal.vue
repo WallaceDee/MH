@@ -5,13 +5,13 @@
       <el-link type="primary" style="font-size: 12px;">查看相似</el-link>
     </template>
     
-    <!-- 相似宠物内容 -->
+    <!-- 相似召唤兽内容 -->
     <div v-if="visible">
       <div v-if="similarData">
         <div class="similar-header">
-          <h4>相似宠物 (共{{ similarData.anchor_count }}个)<em style="font-size: 12px;">-相似度阈值: {{
+          <h4>相似召唤兽 (共{{ similarData.anchor_count }}个)<em style="font-size: 12px;">-相似度阈值: {{
             similarData.similarity_threshold }}</em></h4>
-          <!-- 宠物估价信息 -->
+          <!-- 召唤兽估价信息 -->
           <PetValuation :valuation="valuation" :target-pet="pet" :equip_sn="pet.equip_sn"/>
           <div v-if="similarData.statistics" class="stats">
             <span>
@@ -23,7 +23,7 @@
             <span> 平均相似度: {{ similarData.statistics.similarity_range.avg.toFixed(3) }} </span>
           </div>
         </div>
-        <!-- 相似宠物表格 -->
+        <!-- 相似召唤兽表格 -->
         <similar-pet-table v-if="similarData.anchors?.length>0" :anchors="similarData.anchors" :target-pet="pet" />
         <el-empty v-else  description="暂无数据"></el-empty>
       </div>

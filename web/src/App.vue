@@ -27,11 +27,11 @@ export default {
 }
 /* :global(img) {
   opacity: 0 !important;
-}
+}*/
 :global(html) {
-    filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
-    -webkit-filter: grayscale(100%);
-} */
+    /* filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
+    -webkit-filter: grayscale(100%); */
+} 
 :global(.el-card) {
   border-radius: 8px !important;
 }

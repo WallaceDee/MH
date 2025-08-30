@@ -1,7 +1,7 @@
 """
-宠物装备插件
+召唤兽装备插件
 
-专门处理宠物装备的估价逻辑，重点主属性和附加属性
+专门处理召唤兽装备的估价逻辑，重点主属性和附加属性
 """
 
 from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 
 
 class PetEquipPlugin(EquipmentTypePlugin):
-    """宠物装备插件 - 专注主属性和附加属性估价
+    """召唤兽装备插件 - 专注主属性和附加属性估价
     主属性：
             damage: int - 伤害值 (戒指主属性)
             defense: int - 防御值 (戒指主属性)
@@ -26,25 +26,25 @@ class PetEquipPlugin(EquipmentTypePlugin):
     @property
     def plugin_name(self) -> str:
         from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
-        return f"宠物装备(kindid:{PET_EQUIP_KINDID})专用插件"
+        return f"召唤兽装备(kindid:{PET_EQUIP_KINDID})专用插件"
 
     @property
     def supported_kindids(self) -> List[int]:
         from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
-        return [PET_EQUIP_KINDID]  # 宠物装备的kindid
+        return [PET_EQUIP_KINDID]  # 召唤兽装备的kindid
 
     @property
     def priority(self) -> int:
         return 100  # 高优先级
 
     def get_derived_features(self, features: Dict[str, Any]) -> Dict[str, Any]:
-        """宠物装备派生特征"""
+        """召唤兽装备派生特征"""
         derived = {}
 
         # 获取装备等级和基础属性
         equip_level = features.get('equip_level', 1)
 
-        # 加载宠物装备配置数据
+        # 加载召唤兽装备配置数据
         config_data = self._load_pet_equip_config()
 
         # 计算主属性标准化得分
@@ -62,12 +62,12 @@ class PetEquipPlugin(EquipmentTypePlugin):
         return derived
 
     def _load_pet_equip_config(self) -> Dict[str, Any]:
-        """加载宠物装备配置数据"""
+        """加载召唤兽装备配置数据"""
         try:
             from src.evaluator.mark_anchor.equip.constant import get_pet_equip_config
             return get_pet_equip_config()
         except Exception as e:
-            print(f"加载宠物装备配置失败: {e}")
+            print(f"加载召唤兽装备配置失败: {e}")
             return {}
 
     def _calculate_main_attr_scores(self, features: Dict[str, Any], equip_level: int, config_data: Dict[str, Any]) -> Dict[str, float]:
@@ -87,12 +87,12 @@ class PetEquipPlugin(EquipmentTypePlugin):
                 print(f"使用等级 {closest_level} 的配置计算等级 {equip_level} 的装备")
 
         if level_key not in config_data:
-            print(f"未找到等级 {equip_level} 的宠物装备配置")
+            print(f"未找到等级 {equip_level} 的召唤兽装备配置")
             return scores
 
         level_config = config_data[level_key]
 
-        # 主属性字段映射（宠物装备的属性字段）
+        # 主属性字段映射（召唤兽装备的属性字段）
         main_attrs = {
             'shanghai': '伤害',
             'fangyu': '防御', 
@@ -108,11 +108,11 @@ class PetEquipPlugin(EquipmentTypePlugin):
                 max_val = level_config.get(attr_name, 0)
                 if max_val > 0:
                     # 使用改进的标准化得分计算方法
-                    # 基础分制 - 避免0分问题，适用于宠物装备（下限为0的情况）
+                    # 基础分制 - 避免0分问题，适用于召唤兽装备（下限为0的情况）
                     base_score = 30  # 基础分数，避免最小值为0分
                     score_range = 70  # 可变分数范围 (100 - 30)
                     
-                    # 计算相对位置 (0-1)，宠物装备最小值为0
+                    # 计算相对位置 (0-1)，召唤兽装备最小值为0
                     relative_position = attr_value / max_val
                     # 限制在0-1范围内
                     relative_position = max(0.0, min(1.0, relative_position))
@@ -142,12 +142,12 @@ class PetEquipPlugin(EquipmentTypePlugin):
                 print(f"使用等级 {closest_level} 的配置计算等级 {equip_level} 的装备")
 
         if level_key not in config_data:
-            print(f"未找到等级 {equip_level} 的宠物装备配置")
+            print(f"未找到等级 {equip_level} 的召唤兽装备配置")
             return scores
 
         level_config = config_data[level_key]
 
-        # 主属性字段映射（宠物装备的属性字段）
+        # 主属性字段映射（召唤兽装备的属性字段）
         main_attrs = {
             'addon_fali': '法力',
             'addon_lingli': '灵力', 
@@ -165,11 +165,11 @@ class PetEquipPlugin(EquipmentTypePlugin):
                 max_val = level_config.get(attr_name, 0)
                 if max_val > 0:
                     # 使用改进的标准化得分计算方法
-                    # 基础分制 - 避免0分问题，适用于宠物装备（下限为0的情况）
+                    # 基础分制 - 避免0分问题，适用于召唤兽装备（下限为0的情况）
                     base_score = 30  # 基础分数，避免最小值为0分
                     score_range = 70  # 可变分数范围 (100 - 30)
                     
-                    # 计算相对位置 (0-1)，宠物装备最小值为0
+                    # 计算相对位置 (0-1)，召唤兽装备最小值为0
                     relative_position = attr_value / max_val
                     # 限制在0-1范围内
                     relative_position = max(0.0, min(1.0, relative_position))
@@ -245,7 +245,7 @@ class PetEquipPlugin(EquipmentTypePlugin):
             
             if shanghai > 20:
                 # 物理系装备：伤害>20，忽略法力和灵力附加属性
-                # print(f"物理系宠物装备 (shanghai={shanghai}>20): 忽略法力和灵力权重")
+                # print(f"物理系召唤兽装备 (shanghai={shanghai}>20): 忽略法力和灵力权重")
                 base_weights['addon_fali'] = 0
                 base_weights['addon_fali_score'] = 0
                 base_weights['addon_lingli'] = 0
@@ -254,7 +254,7 @@ class PetEquipPlugin(EquipmentTypePlugin):
             elif shanghai <= 20:
                 if addon_fali > 0 or addon_lingli > 0:
                     # 法系装备：有法力或灵力属性，忽略shanghai
-                    # print(f"法系宠物装备 (shanghai={shanghai}<=20, 有法力/灵力): 忽略伤害权重")
+                    # print(f"法系召唤兽装备 (shanghai={shanghai}<=20, 有法力/灵力): 忽略伤害权重")
                     base_weights['shanghai'] = 0
                     base_weights['shanghai_score'] = 0
                 # else:
@@ -324,7 +324,7 @@ class PetEquipPlugin(EquipmentTypePlugin):
             
             if shanghai > 20:
                 # 物理系装备：伤害>20，忽略法力和灵力附加属性
-                # print(f"物理系宠物装备 (shanghai={shanghai}>20): 设置法力和灵力容忍度为1")
+                # print(f"物理系召唤兽装备 (shanghai={shanghai}>20): 设置法力和灵力容忍度为1")
                 base_tolerances['addon_fali'] = 1
                 base_tolerances['addon_fali_score'] = 1
                 base_tolerances['addon_lingli'] = 1
@@ -333,7 +333,7 @@ class PetEquipPlugin(EquipmentTypePlugin):
             elif shanghai <= 20:
                 if addon_fali > 0 or addon_lingli > 0:
                     # 法系装备：有法力或灵力属性，忽略shanghai
-                    # print(f"法系宠物装备 (shanghai={shanghai}<=20, 有法力/灵力): 设置伤害容忍度为1")
+                    # print(f"法系召唤兽装备 (shanghai={shanghai}<=20, 有法力/灵力): 设置伤害容忍度为1")
                     base_tolerances['shanghai'] = 1
                     base_tolerances['shanghai_score'] = 1
                 # else:
@@ -348,7 +348,7 @@ class PetEquipPlugin(EquipmentTypePlugin):
                                     target_val: Any,
                                     market_val: Any) -> Optional[float]:
         """
-        宠物装备的自定义相似度计算
+        召唤兽装备的自定义相似度计算
 
         Args:
             feature_name: 特征名称

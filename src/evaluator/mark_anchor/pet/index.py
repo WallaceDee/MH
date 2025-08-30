@@ -134,7 +134,7 @@ class PetMarketAnchorEvaluator(BaseValuator):
                         total_price = market_row.get('price', 0)
                         equip_list_amount = market_row.get('equip_list_amount', 0)
                         # TODO:带装备只算了裸价，没有算装备价格？怎么办？
-                        # 计算纯宠物价格（总价格减去装备估价）
+                        # 计算纯召唤兽价格（总价格减去装备估价）
                         pet_price = total_price - equip_list_amount
                         if equip_list_amount > 0:
                             print({
@@ -148,7 +148,7 @@ class PetMarketAnchorEvaluator(BaseValuator):
                         anchor_candidates.append({
                             'equip_sn': current_equip_sn,
                             'similarity': similarity,
-                            'price': pet_price,  # 使用纯宠物价格
+                            'price': pet_price,  # 使用纯召唤兽价格
                             'total_price': total_price,  # 保留总价格用于参考
                             'equip_list_amount': equip_list_amount,  # 保留装备估价用于参考
                             'features': market_row.to_dict()

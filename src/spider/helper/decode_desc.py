@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 梦幻西游藏宝阁召唤兽信息解析模块
-Python版本的宠物信息解析函数，对应JavaScript版本的实现
+Python版本的召唤兽信息解析函数，对应JavaScript版本的实现
 """
 
 import json
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class PetDescDecoder:
-    """宠物描述信息解码器"""
+    """召唤兽描述信息解码器"""
     
     def __init__(self):
         # 字符串数组，对应JavaScript版本中的混淆数组
@@ -47,7 +47,7 @@ class PetDescDecoder:
     
     def decode_desc(self, encoded_string: str, cookie_key: str = '') -> str:
         """
-        解码加密的宠物描述信息
+        解码加密的召唤兽描述信息
         对应JavaScript版本的decode_desc函数
         
         Args:
@@ -160,7 +160,7 @@ class PetDescDecoder:
 
 
 class PetInfoParser:
-    """宠物信息解析器"""
+    """召唤兽信息解析器"""
     
     def __init__(self):
         self.decoder = PetDescDecoder()
@@ -168,11 +168,11 @@ class PetInfoParser:
     
     def parse_desc_info(self, desc_info: str) -> str:
         """
-        解析宠物描述信息
+        解析召唤兽描述信息
         对应JavaScript版本的parse_desc_info函数
         
         Args:
-            desc_info: 宠物描述信息
+            desc_info: 召唤兽描述信息
             
         Returns:
             解析后的描述信息
@@ -191,7 +191,7 @@ class PetInfoParser:
         对应JavaScript版本的parse_fashang_fafang函数
         
         Args:
-            desc_info: 宠物描述信息
+            desc_info: 召唤兽描述信息
             
         Returns:
             包含法伤和法防的字典
@@ -209,20 +209,20 @@ class PetInfoParser:
     
     def get_pet_attrs_info(self, pet_desc: str, options: Optional[Dict] = None) -> Dict[str, Any]:
         """
-        获取宠物属性信息
+        获取召唤兽属性信息
         对应JavaScript版本的get_pet_attrs_info函数
         
         Args:
-            pet_desc: 宠物描述字符串
+            pet_desc: 召唤兽描述字符串
             options: 解析选项
             
         Returns:
-            宠物属性信息字典
+            召唤兽属性信息字典
         """
         if options is None:
             options = {}
         
-        # 修正宠物描述格式
+        # 修正召唤兽描述格式
         pet_desc = self._correct_pet_desc(pet_desc)
         
         # 分割属性
@@ -254,18 +254,18 @@ class PetInfoParser:
     
     def _get_pet_ext_zz(self, data: Dict[str, Any], options: Dict[str, Any]) -> None:
         """
-        处理宠物额外资质
+        处理召唤兽额外资质
         对应JavaScript版本的get_pet_ext_zz函数
         
         Args:
-            data: 宠物属性信息字典
+            data: 召唤兽属性信息字典
             options: 选项参数
         """
         try:
             # 神兽类型列表
             SHENSHOU_ITYPES = [102005, 102008, 102016, 102018, 102019, 102020, 102021, 102031, 102032, 102035, 102049, 102050, 102051, 102060, 102100, 102101, 102108, 102109, 102110, 102131, 102132, 102249, 102250, 102255, 102256, 102257, 102258, 102259, 102260, 102261, 102262, 102263, 102264, 102265, 102266, 102267, 102268, 102269, 102270, 102271, 102272, 102273, 102274, 102275, 102276, 102277, 102311, 102312, 102313, 102314, 102315, 102316, 102317, 102318, 102825, 102826, 102827, 102828, 102487, 102459, 102497, 102488, 102490, 102498, 112000, 112002, 112027, 112016, 112034, 112028, 112017, 112035]
             
-            # 完整的宠物战斗等级类型配置
+            # 完整的召唤兽战斗等级类型配置
             PET_BATTLE_LEVEL_TYPES = [[2559, 0], [2047, 0], [2046, 0], [2045, 0], [2044, 0], [2555, 0], [2554, 0], [2042, 0], [2553, 0], [2041, 0], [2552, 0], [2040, 0], [2039, 0], [2038, 0], [2037, 0], [2036, 0], [2548, 0], [2547, 0], [2034, 0], [2546, 0], [2033, 0], [2545, 0], [2544, 0], [2030, 0], [2542, 0], [2029, 0], [2541, 0], [2028, 0], [2540, 0], [2539, 0], [2538, 0], [2537, 0], [2024, 0], [2536, 0], [2023, 0], [2534, 0], [2022, 0], [2533, 0], [2530, 0], [2529, 0], [2017, 0], [2528, 0], [2015, 0], [2012, 0], [2524, 0], [2523, 0], [2011, 0], [2010, 0], [2522, 0], [2009, 0], [2007, 0], [2006, 0], [2517, 0], [2004, 0], [2003, 0], [2515, 0], [2002, 0], [2001, 0], [2512, 0], [2511, 0], [2510, 0], [2509, 0], [2507, 0], [2506, 0], [2504, 0], [2502, 0], [2501, 0], [2324, 2], [2323, 2], [2322, 2], [2321, 2], [2320, 2], [2319, 2], [2824, 2], [2823, 2], [2310, 0], [2822, 2], [2309, 0], [2821, 2], [2308, 0], [2820, 2], [2307, 0], [2819, 2], [2306, 0], [2305, 0], [2304, 0], [2303, 0], [2300, 0], [2810, 0], [2809, 0], [2808, 0], [2807, 0], [2806, 0], [2805, 0], [2804, 0], [2803, 0], [2283, 0], [2783, 0], [2247, 2], [2246, 2], [2245, 2], [2244, 2], [2243, 2], [2242, 2], [2241, 1], [2240, 1], [2239, 1], [2238, 0], [2237, 0], [2236, 0], [2235, 0], [2747, 2], [2234, 0], [2746, 2], [2233, 0], [2745, 2], [2232, 1], [2744, 2], [2231, 1], [2743, 2], [2230, 1], [2742, 2], [2229, 0], [2741, 1], [2228, 0], [2740, 1], [2227, 0], [2739, 1], [2226, 0], [2738, 0], [2225, 0], [2737, 0], [2224, 0], [2736, 0], [2735, 0], [2223, 0], [2222, 0], [2734, 0], [2221, 0], [2733, 0], [2220, 0], [2732, 1], [2219, 0], [2731, 1], [2218, 0], [2730, 1], [2217, 0], [2729, 0], [2216, 0], [2728, 0], [2215, 0], [2727, 0], [2214, 0], [2726, 0], [2213, 0], [2725, 0], [2212, 0], [2724, 0], [2723, 0], [2211, 0], [2722, 0], [2210, 0], [2209, 0], [2721, 0], [2208, 0], [2720, 0], [2207, 0], [2719, 0], [2206, 0], [2718, 0], [2205, 0], [2717, 0], [2204, 0], [2716, 0], [2715, 0], [2203, 0], [2714, 0], [2202, 0], [2713, 0], [2201, 0], [2712, 0], [2200, 0], [2711, 0], [2199, 0], [2198, 0], [2710, 0], [2197, 0], [2709, 0], [2708, 0], [2196, 0], [2707, 0], [2195, 0], [2706, 0], [2194, 0], [2705, 0], [2193, 0], [2704, 0], [2192, 0], [2703, 0], [2191, 0], [2702, 0], [2190, 0], [2701, 0], [2189, 0], [2188, 0], [2700, 0], [2187, 0], [2699, 0], [2698, 0], [2186, 0], [2185, 0], [2697, 0], [2184, 0], [2696, 0], [2183, 0], [2695, 0], [2694, 0], [2182, 0], [2693, 0], [2181, 0], [2692, 0], [2180, 0], [2691, 0], [2179, 0], [2690, 0], [2178, 0], [2689, 0], [2688, 0], [2687, 0], [2686, 0], [2685, 0], [2684, 0], [2683, 0], [2682, 0], [2681, 0], [2680, 0], [2679, 0], [2678, 0], [2164, 0], [2163, 1], [2162, 0], [2161, 1], [2160, 1], [2159, 0], [2153, 0], [2664, 0], [2152, 0], [2663, 1], [2151, 0], [2662, 0], [2150, 0], [2661, 1], [2660, 1], [2659, 0], [2144, 0], [2143, 0], [2142, 0], [2141, 0], [2653, 0], [2140, 0], [2652, 0], [2139, 0], [2651, 0], [2138, 0], [2650, 0], [2137, 0], [2136, 0], [2135, 0], [2134, 0], [2133, 0], [2130, 1], [2129, 0], [2128, 1], [2127, 0], [2126, 1], [2125, 0], [2124, 0], [2123, 0], [2122, 0], [2121, 0], [2120, 0], [2119, 0], [2630, 1], [2118, 0], [2629, 0], [2117, 0], [2628, 1], [2116, 0], [2627, 0], [2115, 0], [2626, 1], [2114, 0], [2625, 0], [2113, 0], [2624, 0], [2112, 0], [2623, 0], [2111, 0], [2622, 0], [2621, 0], [2620, 0], [2619, 0], [2107, 0], [2618, 0], [2106, 0], [2617, 0], [2105, 0], [2616, 0], [2104, 0], [2615, 0], [2103, 0], [2614, 0], [2102, 0], [2613, 0], [2612, 0], [2099, 0], [2611, 0], [2098, 0], [2097, 0], [2096, 0], [2607, 0], [2095, 0], [2606, 0], [2094, 0], [2605, 0], [2093, 0], [2604, 0], [2603, 0], [2602, 0], [2599, 0], [2087, 0], [2598, 0], [2086, 0], [2597, 0], [2085, 0], [2596, 0], [2595, 0], [2594, 0], [2593, 0], [2078, 0], [2077, 0], [2076, 0], [2587, 0], [2586, 0], [2074, 0], [2585, 0], [2073, 0], [2072, 0], [2071, 0], [2070, 0], [2068, 0], [2067, 0], [2578, 0], [2066, 0], [2577, 0], [2065, 0], [2576, 0], [2064, 0], [2063, 0], [2574, 0], [2062, 0], [2061, 0], [2573, 0], [2572, 0], [2571, 0], [2059, 0], [2570, 0], [2568, 0], [2567, 0], [2055, 0], [2054, 0], [2566, 0], [2053, 0], [2565, 0], [2052, 0], [2564, 0], [2563, 0], [2562, 0], [2561, 0], [2048, 0], [2411, 2], [2413, 0], [2414, 0], [2415, 0], [2416, 0], [2417, 0], [2418, 0], [2419, 0], [2420, 0], [2421, 0], [2422, 0], [2423, 0], [2424, 0], [2425, 0], [2426, 0], [2427, 0], [2428, 0], [2429, 0], [2430, 0], [2431, 0], [2432, 0], [2433, 0], [2434, 0], [2435, 0], [2436, 0], [2437, 0], [2438, 0], [2439, 0], [2440, 0], [2441, 0], [2442, 0], [2443, 0], [2445, 0], [2447, 0], [2451, 0], [2449, 0], [2450, 0], [2452, 0], [2458, 0], [2453, 0], [2454, 0], [2455, 0], [2456, 0], [2448, 0], [2446, 0], [2444, 0], [2475, 0], [2473, 0], [2471, 1], [2477, 0], [2481, 0], [2479, 2]]
             
             def is_shenshou_pet(pet_id: str, is_super_sum: Optional[int]) -> bool:
@@ -282,7 +282,7 @@ class PetInfoParser:
                     return False
             
             def get_pet_battle_level(pet_id: str) -> int:
-                """获取宠物战斗等级类型"""
+                """获取召唤兽战斗等级类型"""
                 try:
                     pet_id_int = int(pet_id)
                     for pet_info in PET_BATTLE_LEVEL_TYPES:
@@ -342,7 +342,7 @@ class PetInfoParser:
             
             zz = max_zz[carrygradezz]
             
-            # 特殊宠物处理
+            # 特殊召唤兽处理
             if data.get('pet_name', '').startswith('泡泡灵仙'):
                 zz = [1770, 1900, 1650, 2000, 9700, 4800]
             
@@ -392,11 +392,11 @@ class PetInfoParser:
                         continue
                         
         except Exception as e:
-            logger.warning(f"处理宠物额外资质失败: {e}")
+            logger.warning(f"处理召唤兽额外资质失败: {e}")
     
     def _fix_pet_decay_attr(self, pet: Dict[str, Any], attr_type: int, down_zz: int) -> None:
         """
-        修复宠物衰减属性
+        修复召唤兽衰减属性
         对应JavaScript版本的fix_pet_decay_attr函数
         """
         try:
@@ -465,11 +465,11 @@ class PetInfoParser:
                 try_decay(['wakan', 'ling_li'], decay_lingli)
                 
         except Exception as e:
-            logger.warning(f"修复宠物衰减属性失败: {e}")
+            logger.warning(f"修复召唤兽衰减属性失败: {e}")
     
     def _correct_pet_desc(self, pet_desc: str) -> str:
         """
-        修正宠物描述格式
+        修正召唤兽描述格式
         对应JavaScript版本的correct_pet_desc函数
         """
         import re
@@ -626,7 +626,7 @@ class PetInfoParser:
                 attrs_info["jinjie_cnt"] = jinjie_info.get("cnt", "0")
                 attrs_info["texing"] = jinjie_info.get("core", {})
                 
-                # 处理宠物锦衣列表 - 参考pet.js第142-163行的逻辑
+                # 处理召唤兽锦衣列表 - 参考pet.js第142-163行的逻辑
                 if other_attr.get('avt_list') and isinstance(other_attr['avt_list'], list):
                     avt_list_result = self._parse_avt_list(other_attr)
                     other_attr['avt_list_format'] = avt_list_result.get('avt_list_format', [])
@@ -635,7 +635,7 @@ class PetInfoParser:
                 if "core_close" in other_attr:
                     attrs_info["core_close"] = "已开启" if other_attr["core_close"] == 0 else "已关闭"
                 
-                # 处理宠物额外资质 - 参考pet.js第171-181行的逻辑
+                # 处理召唤兽额外资质 - 参考pet.js第171-181行的逻辑
                 if other_attr.get('csavezz'):
                     self._get_pet_ext_zz(attrs_info, {
                         'attrs': 'attack_ext,defence_ext,speed_ext,avoid_ext,physical_ext,magic_ext',
@@ -785,7 +785,7 @@ class PetInfoParser:
             return ''
     
     def _parse_pet_equips(self, other_attr: Dict) -> List[Dict]:
-        """解析宠物装备信息，确保与JS版本一致"""
+        """解析召唤兽装备信息，确保与JS版本一致"""
         equip_list = []
         
         try:
@@ -816,13 +816,13 @@ class PetInfoParser:
                 else:
                     equip_list.append(None)
             
-            # 第4个装备位置：宠物饰品，从 summon_equip4_type 获取
+            # 第4个装备位置：召唤兽饰品，从 summon_equip4_type 获取
             # 只有当 summon_equip4_type 存在时才添加第4个装备
             if other_attr.get('summon_equip4_type'):
                 equip_type = other_attr['summon_equip4_type']
                 equip_desc = other_attr.get('summon_equip4_desc', '')
                 
-                # 获取宠物饰品名称
+                # 获取召唤兽饰品名称
                 equip_name = self._get_pet_shipin_info(equip_type)
                 
                 # 无论饰品名称是否存在，都添加第4个装备，与JavaScript版本保持一致
@@ -835,7 +835,7 @@ class PetInfoParser:
                 })
                 
         except Exception as e:
-            logger.warning(f"解析宠物装备失败: {e}")
+            logger.warning(f"解析召唤兽装备失败: {e}")
             # 返回3个None
             equip_list = [None, None, None]
             
@@ -872,7 +872,7 @@ class PetInfoParser:
             }
     
     def _get_pet_shipin_info(self, equip_type: int) -> str:
-        """获取宠物饰品信息，对应JS版本的RoleNameInfo.pet_shipin_info"""
+        """获取召唤兽饰品信息，对应JS版本的RoleNameInfo.pet_shipin_info"""
         try:
             from parser.config_loader import get_config_loader
             config_loader = get_config_loader()
@@ -881,7 +881,7 @@ class PetInfoParser:
             # 如果配置中不存在该ID，返回None，表示不添加该装备
             return pet_shipin_config.get(str(equip_type))
         except Exception as e:
-            logger.warning(f"获取宠物饰品信息失败: {e}")
+            logger.warning(f"获取召唤兽饰品信息失败: {e}")
             return None
     
     def _parse_evol_skill_list(self, other_attr: Dict, attrs_info: Dict) -> List[Dict]:
@@ -1016,7 +1016,7 @@ class PetInfoParser:
     
     def _parse_avt_list(self, other_attr: Dict) -> Dict[str, Any]:
         """
-        解析宠物锦衣列表
+        解析召唤兽锦衣列表
         对应JavaScript版本第142-163行的逻辑
         
         Args:
@@ -1123,7 +1123,7 @@ class PetInfoParser:
             }
             
         except Exception as e:
-            logger.warning(f"解析宠物锦衣列表失败: {e}")
+            logger.warning(f"解析召唤兽锦衣列表失败: {e}")
             return {
                 'avt_list_format': [],
                 'current_on_avt': None
@@ -1131,11 +1131,11 @@ class PetInfoParser:
     
     def _get_pet_jinyi_config(self) -> Dict[str, Any]:
         """
-        获取宠物锦衣配置
+        获取召唤兽锦衣配置
         对应JavaScript中的window.CBG_GAME_CONFIG.pet_jinyi
         
         Returns:
-            宠物锦衣配置字典
+            召唤兽锦衣配置字典
         """
         try:
             from parser.config_loader import get_config_loader
@@ -1153,7 +1153,7 @@ class PetInfoParser:
             # 静默处理配置加载异常，返回空配置
             # 这样不会影响程序运行，只是锦衣名称会使用默认值
             try:
-                logger.warning(f"获取宠物锦衣配置失败: {e}")
+                logger.warning(f"获取召唤兽锦衣配置失败: {e}")
             except:
                 # 如果logger也有问题，静默处理
                 pass
@@ -1259,14 +1259,14 @@ class PetInfoParser:
 
 def parse_pet_info(desc: str) -> Dict[str, Any]:
     """
-    解析宠物信息的统一接口
+    解析召唤兽信息的统一接口
     对应JavaScript版本的parsePetInfo函数
     
     Args:
-        desc: 宠物描述信息
+        desc: 召唤兽描述信息
         
     Returns:
-        解析后的宠物属性信息
+        解析后的召唤兽属性信息
     """
     parser = PetInfoParser()
     
@@ -1276,7 +1276,7 @@ def parse_pet_info(desc: str) -> Dict[str, Any]:
     # 解析法伤法防
     linli_data = parser.parse_fashang_fafang(desc)
     
-    # 获取宠物属性信息
+    # 获取召唤兽属性信息
     pet_attrs = parser.get_pet_attrs_info(pet_desc, {
         'only_basic_attr': False,
         'fashang': linli_data.get('fashang'),

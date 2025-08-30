@@ -218,7 +218,7 @@ class FeatureExtractor:
             self.logger.error(f"神器统计失败: {e}")
             print(f"错误详情: {str(e)}")
             
-        # 特殊宠物 灵佑
+        # 特殊召唤兽 灵佑
         try:
             special_pets_raw = data.get('pet', '[]')
             if not special_pets_raw or special_pets_raw == '':

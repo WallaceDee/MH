@@ -876,11 +876,11 @@ class CBGSpider:
     def is_empty_role(self, all_equips, pets):
         """
         判断是否为空号
-        空号条件：物品个数等于0，且宠物等级大于100的数量为0
+        空号条件：物品个数等于0，且召唤兽等级大于100的数量为0
         
         Args:
             all_equips: 装备数据
-            pets: 宠物数据
+            pets: 召唤兽数据
             
         Returns:
             bool: True表示是空号，False表示不是空号
@@ -894,14 +894,14 @@ class CBGSpider:
                     if key.isdigit() and isinstance(value, dict):
                         equip_count += 1
             
-            # 检查高等级宠物数量（等级大于100）
+            # 检查高等级召唤兽数量（等级大于100）
             high_level_pet_count = self.count_high_level_pets(pets)
             
-            # 空号判断：物品个数为0 且 高等级宠物数量为0
+            # 空号判断：物品个数为0 且 高等级召唤兽数量为0
             is_empty = (equip_count == 0) and (high_level_pet_count == 0)
             
             if is_empty:
-                # self.logger.debug(f"识别空号: {char_data.get('seller_nickname')} - 物品数:{equip_count}, 高级宠物数:{high_level_pet_count}")
+                # self.logger.debug(f"识别空号: {char_data.get('seller_nickname')} - 物品数:{equip_count}, 高级召唤兽数:{high_level_pet_count}")
                 pass
             
             return is_empty
@@ -912,13 +912,13 @@ class CBGSpider:
     
     def count_high_level_pets(self, pets):
         """
-        统计等级大于100的宠物数量
+        统计等级大于100的召唤兽数量
         
         Args:
-            pets: 宠物数据列表
+            pets: 召唤兽数据列表
             
         Returns:
-            int: 高等级宠物数量
+            int: 高等级召唤兽数量
         """
         try:
             if not pets or not isinstance(pets, list):
@@ -927,7 +927,7 @@ class CBGSpider:
             high_level_count = 0
             for pet in pets:
                 if isinstance(pet, dict):
-                    # 从宠物数据中获取等级
+                    # 从召唤兽数据中获取等级
                     pet_level = pet.get('iGrade', 0)
                     if isinstance(pet_level, (int, float)) and pet_level > 100:
                         high_level_count += 1
@@ -942,7 +942,7 @@ class CBGSpider:
             return high_level_count
             
         except Exception as e:
-            log_error(self.logger, f"统计高等级宠物时出错: {e}")
+            log_error(self.logger, f"统计高等级召唤兽时出错: {e}")
             return 0
     
     def get_empty_reason(self, all_equips, pets):
@@ -951,7 +951,7 @@ class CBGSpider:
         
         Args:
             all_equips: 装备数据
-            pets: 宠物数据
+            pets: 召唤兽数据
             
         Returns:
             str: 空号识别原因
@@ -970,14 +970,14 @@ class CBGSpider:
             if equip_count == 0:
                 reasons.append("无物品")
             
-            # 检查高等级宠物
+            # 检查高等级召唤兽
             high_level_pet_count = self.count_high_level_pets(pets)
             if high_level_pet_count == 0:
                 total_pets = len(pets) if pets else 0
                 if total_pets == 0:
-                    reasons.append("无宠物")
+                    reasons.append("无召唤兽")
                 else:
-                    reasons.append(f"无高级宠物(共{total_pets}只宠物)")
+                    reasons.append(f"无高级召唤兽(共{total_pets}只召唤兽)")
             
             return " + ".join(reasons) if reasons else "空号"
             

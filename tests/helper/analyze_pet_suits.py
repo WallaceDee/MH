@@ -9,7 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 from evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
 
 def analyze_pet_suits():
-    """分析宠物数据库中的装备套装类型统计 - 全量分析"""
+    """分析召唤兽数据库中的装备套装类型统计 - 全量分析"""
     db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', '202508', 'cbg_pets_202508.db')
     
     try:
@@ -20,13 +20,13 @@ def analyze_pet_suits():
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
-        print("开始全量分析宠物装备套装类型...")
+        print("开始全量分析召唤兽装备套装类型...")
         print("=" * 60)
         
-        # 统计有装备的宠物数量（通过equip_list列）
+        # 统计有装备的召唤兽数量（通过equip_list列）
         cursor.execute("SELECT COUNT(*) FROM pets WHERE equip_list IS NOT NULL AND equip_list != '' AND equip_list != '[]'")
         total_with_equipment = cursor.fetchone()[0]
-        print(f"有装备的宠物总数: {total_with_equipment}")
+        print(f"有装备的召唤兽总数: {total_with_equipment}")
         
         # 查看equip_list列的数据样例
         print(f"\n查看equip_list列的数据样例:")
@@ -54,7 +54,7 @@ def analyze_pet_suits():
         # 使用特征提取器分析套装信息 - 全量分析
         print(f"\n使用特征提取器进行全量分析套装信息...")
         
-        # 获取所有有装备的宠物的large_equip_desc - 全量
+        # 获取所有有装备的召唤兽的large_equip_desc - 全量
         cursor.execute("SELECT large_equip_desc FROM pets WHERE large_equip_desc IS NOT NULL AND large_equip_desc != '' AND large_equip_desc != '[]'")
         equip_descs = cursor.fetchall()
         
@@ -149,7 +149,7 @@ def analyze_pet_suits():
             except:
                 continue
         
-        print("套装个数".ljust(15) + "宠物数量".ljust(15) + "占比")
+        print("套装个数".ljust(15) + "召唤兽数量".ljust(15) + "占比")
         print("-" * 45)
         
         total_suit_pets = sum(suit_count_distribution.values())
@@ -180,7 +180,7 @@ def analyze_pet_suits():
                 # 解析失败，默认为1个装备
                 equip_count_distribution[1] = equip_count_distribution.get(1, 0) + 1
         
-        print("装备数量".ljust(15) + "宠物数量".ljust(15) + "占比")
+        print("装备数量".ljust(15) + "召唤兽数量".ljust(15) + "占比")
         print("-" * 45)
         
         total_pets_with_equip = sum(equip_count_distribution.values())
@@ -196,8 +196,8 @@ def analyze_pet_suits():
         print(f"实际分析记录数: {total_analyzed}")
         print(f"套装类型总数: {len(suit_stats)}")
         print(f"套装分类总数: {len(suit_categories)}")
-        print(f"有套装效果宠物数: {sum(suit_stats.values())}")
-        print(f"无套装效果宠物数: {total_analyzed - sum(suit_stats.values())}")
+        print(f"有套装效果召唤兽数: {sum(suit_stats.values())}")
+        print(f"无套装效果召唤兽数: {total_analyzed - sum(suit_stats.values())}")
         
         conn.close()
         

@@ -33,7 +33,7 @@ class PetMarketDataCollector:
         self.logger = logging.getLogger(__name__)
     
     def _find_recent_dbs(self) -> List[str]:
-        """查找所有可用的宠物数据库文件"""
+        """查找所有可用的召唤兽数据库文件"""
         import glob
         from datetime import datetime, timedelta
 
@@ -59,7 +59,7 @@ class PetMarketDataCollector:
             if os.path.exists(db_file):
                 found_dbs.append(db_file)
 
-        # 如果没找到指定月份的，则查找所有可用的宠物数据库文件
+        # 如果没找到指定月份的，则查找所有可用的召唤兽数据库文件
         if not found_dbs:
             # 查找所有年月文件夹下的数据库文件
             pattern = os.path.join(data_path, "*", "cbg_pets_*.db")
