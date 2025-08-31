@@ -1385,11 +1385,12 @@ class PetService:
             
             # 处理批量估价结果
             processed_results = []
-            for result in batch_results:
+            
+            for i, result in enumerate(batch_results):
                 if "error" in result:
                     # 处理错误情况
                     processed_result = {
-                        "index": result.get("pet_index", 0),
+                        "index": i,  # 直接使用循环索引
                         "error": result["error"],
                         "estimated_price": 0,
                         "estimated_price_yuan": 0,
@@ -1407,7 +1408,8 @@ class PetService:
                     equip_valuations = []
                     
                     # 从原始宠物数据中获取装备信息并计算估价
-                    pet_index = result.get("pet_index", 0)
+                    pet_index = i  # 直接使用循环索引
+                    
                     if pet_index < len(pet_features_list):
                         original_pet_data = pet_features_list[pet_index].get('original_pet_data', {})
                         equip_list_raw = original_pet_data.get('equip_list', '[]')
@@ -1450,7 +1452,7 @@ class PetService:
                             logger.warning(f"宠物{pet_index}装备列表解析失败: {e}")
                     
                     processed_result = {
-                        "index": result.get("pet_index", 0),
+                        "index": i,  # 直接使用循环索引
                         "estimated_price": estimated_price,
                         "estimated_price_yuan": round(estimated_price / 100, 2),
                         "confidence": result.get("confidence", 0),

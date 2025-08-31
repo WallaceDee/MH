@@ -650,7 +650,7 @@ export default {
               desc: equip.cDesc,
               name: equip_info.name,
               icon: window.ResUrl + `/images/equip/small/${equip?.iType}.gif`,
-              lock_type: role.RoleInfoParser.get_lock_types(equip),
+              //lock_type: role.RoleInfoParser.get_lock_types(equip),
               static_desc: equip_info.desc?.replace(/#R/g, '<br />')
             })
           } else {

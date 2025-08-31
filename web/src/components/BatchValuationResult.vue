@@ -1,5 +1,5 @@
 <template>
-  <div class="batch-valuation-result">
+  <div class="batch-valuation-result" :style="$attrs.style">
     <!-- Loading骨架屏 -->
     <div v-if="loading" class="skeleton-container">
       <el-skeleton :rows="12" animated />
@@ -29,9 +29,8 @@
       </div>
 
       <el-row type="flex" style="flex-wrap: wrap;">
-        <el-col :span="6" v-for="(item, index) in currentList" :key="item.equip_sn || index" class="result-item"
+        <el-col :span="colSpan" v-for="(item, index) in currentList" :key="item.equip_sn || index" class="result-item"
           :class="getResultItemClass(item)">
-      
           <el-row type="flex" align="middle" justify="space-between">
             <el-col style="width: 50px;">
               <EquipmentImage placement="top" :image="false" :equipment="getEquipImageProps(item)"
@@ -49,7 +48,7 @@
               @show="(e) => loadSimilarEquipments(e, item.resultIndex)">
               <el-link href="javascript:void(0)" type="primary" style="font-weight: bold;">{{ item.name || `装备 ${index +
                 1}`
-                }}</el-link>
+              }}</el-link>
             </SimilarEquipmentModal>
             <el-tag :type="getConfidenceTagType(item.confidence)" v-if="!item.error">
               置信度: {{ (item.confidence * 100).toFixed(1) }}%
@@ -57,8 +56,10 @@
             <el-tag v-else type="danger" :title="item.error">估价失败</el-tag>
           </div>
           <div class="equip-tag-info">
-            <el-tag type="success" v-if="getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel">{{ getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel }}锻</el-tag>
-            <el-tag v-for="tag in getEquipGemInfoAndBlueBlock(item.cDesc).blueBlock" :key="tag" type="primary">{{ tag }}</el-tag>
+            <el-tag type="success" v-if="getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel">{{
+              getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel }}锻</el-tag>
+            <el-tag v-for="tag in getEquipGemInfoAndBlueBlock(item.cDesc).blueBlock" :key="tag" type="primary">{{ tag
+              }}</el-tag>
           </div>
         </el-col>
       </el-row>
@@ -98,6 +99,10 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    colSpan: {
+      type: Number,
+      default: 6
     }
   },
   data() {
@@ -160,6 +165,12 @@ export default {
         // similarity_threshold:0.8,
         // max_anchors:30
         // 获取估价信息（包含相似装备）
+        if(window.is_pet_equip(equipment.kindid)){
+          equipment={
+            kindid: 29,
+            desc: equipment.desc
+          }
+        }
         const valuationResponse = await this.$api.equipment.getEquipmentValuation({
           equipment_data: equipment,
           strategy: 'fair_value',
@@ -381,31 +392,31 @@ export default {
 .result-item.confidence-high {
   border-left: 4px solid #67c23a;
   /* 绿色 - 高置信度 */
-  background-color: rgba(103, 194, 58, 0.05);
+  background: linear-gradient(135deg, #f0f9ff 0%, #e1f3d8 100%);
 }
 
 .result-item.confidence-medium {
   border-left: 4px solid #409eff;
   /* 蓝色 - 中等置信度 */
-  background-color: rgba(64, 158, 255, 0.05);
+  background: linear-gradient(135deg, #f0f8ff 0%, #e1f5fe 100%);
 }
 
 .result-item.confidence-low {
   border-left: 4px solid #909399;
   /* 灰色 - 较低置信度 */
-  background-color: rgba(144, 147, 153, 0.05);
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .result-item.confidence-very-low {
   border-left: 4px solid #e6a23c;
   /* 橙色 - 很低置信度 */
-  background-color: rgba(230, 162, 60, 0.05);
+  background: linear-gradient(135deg, #fdf6ec 0%, #fdf2e9 100%);
 }
 
 .result-item.confidence-extremely-low {
   border-left: 4px solid #f56c6c;
   /* 红色 - 极低置信度 */
-  background-color: rgba(245, 108, 108, 0.05);
+  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
 }
 
 .result-footer {
@@ -420,8 +431,9 @@ export default {
   display: flex;
   align-items: center;
 }
-:global(.price-info .el-statistic .con){
-justify-content: flex-end;
+
+:global(.price-info .el-statistic .con) {
+  justify-content: flex-end;
 }
 
 .equipment-info {
@@ -501,10 +513,12 @@ justify-content: flex-end;
   align-items: flex-end;
   gap: 8px;
 }
-.equip-tag-info{
+
+.equip-tag-info {
   margin-top: 5px;
 }
-.equip-tag-info>*{
+
+.equip-tag-info>* {
   margin-right: 5px;
 }
 </style>
