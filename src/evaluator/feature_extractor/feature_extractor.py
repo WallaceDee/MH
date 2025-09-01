@@ -23,9 +23,6 @@ class FeatureExtractor:
         self.config = load_jsonc_relative_to_file(
             __file__, '../config/rule_setting.jsonc')
 
-        # 从配置文件加载高价值法宝
-        self.premium_fabao = self.config.get('PremiumFabao', [])
-
     def extract_features(self, role_data: Dict[str, Any]) -> Dict[str, Union[int, float, str]]:
         """
         提取所有特征
@@ -59,7 +56,6 @@ class FeatureExtractor:
                 - hours_listed (int): 上架时间(小时)
                 - collect_num (int): 收藏数量
                 - allow_pet_count (int): 最大召唤兽携带数量
-                - premium_fabao_count (int): 高价值法宝数量
                 -- 规则引擎使用
                 - limited_skin_value (int): 限量锦衣价值（规则引擎使用）
                 - limited_huge_horse_value (int): 限量祥瑞价值（规则引擎使用）
@@ -137,18 +133,6 @@ class FeatureExtractor:
         except (json.JSONDecodeError, TypeError, ValueError):
             hightGrowRiderCount = 0
             
-        # 格式已改变，是字典    
-        # # 有价值的法宝数量 在 all_fabao_json（格式[{"name": "附灵玉", "cDesc": "0#Y灵气：#G50 #Y 五行：#G水#Y#r修炼境界：第#G4#Y层 #c13E1EC预知福祸#Y"}, {"name": "重明战鼓", "cDesc": "0#Y灵气：#G500#Y 五行：#G水#Y#r修炼境界：第#G14#Y层 #cFF6F28返璞归真#Y#r#n#Y最佳五行属性奖励：额外增加召唤兽等级*3％的物攻和法攻#G（已生效）#Y"}, {"name": "拭剑石", "cDesc": "0#Y灵气：#G192#Y 五行：#G水#Y#r修炼境界：第#G9#Y层 #cFF6F28不堕轮回#Y"}, {"name": "仓颉神木", "cDesc": "0【专用】修炼境界：第#G4#Y层"}]）在找出名字在 self.premium_fabao 列表中的格式 ，
-        # fabao_json = data.get('fabao_json')
-        # if fabao_json is None or fabao_json == '':
-        #     premiumFabaoCount = 0
-        # else:
-        #     try:
-        #         fabao_data = json.loads(fabao_json)
-        #         premiumFabaoCount = sum(1 for fabao in fabao_data
-        #                                 if fabao.get('name') in self.premium_fabao)
-        #     except (json.JSONDecodeError, TypeError):
-        #         premiumFabaoCount = 0
 
         # 神器解析 数据在 shenqi_json 字段（格式：{"full": 0, "power": 1200, "suit": [{"max_use_count": 125, "curr_illusion": 0, "my_use_count": 0, "components": [{"unlock": 1, "wuxing": [{"status": 0, "new_id": 0, "attr": "固定伤害 +3", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 16, "wuxingshi_level": 1}, {"status": 0, "new_id": 0, "attr": "气血 +21", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 1}, {"status": 0, "new_id": 0, "attr": "抵抗封印 +6", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 4, "wuxingshi_level": 1}, {"status": 0, "new_id": 0, "attr": "气血 +21", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 1}], "level": 1}, {"unlock": 0, "wuxing": [{"status": 0, "new_id": 0, "attr": "封印命中 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 8, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "气血 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "封印命中 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 8, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "气血 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 2, "wuxingshi_level": 0}], "level": 0}, {"unlock": 0, "wuxing": [{"status": 0, "new_id": 0, "attr": "固定伤害 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 16, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "抵抗封印 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 4, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "抵抗封印 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 4, "wuxingshi_level": 0}, {"status": 0, "new_id": 0, "attr": "速度 +0", "wuxingshi_affix": 0, "affix_disable": 0, "new_attr": "", "id": 1, "wuxingshi_level": 0}], "level": 0}], "actived": 1, "attributes": [{"new_id": 1, "disable": 1, "new_attr": "速度 +0", "attr": "速度 +0", "id": 1}, {"new_id": 2, "disable": 0, "new_attr": "气血 +0", "attr": "气血 +42", "id": 2}, {"new_id": 8, "disable": 1, "new_attr": "封印命中 +0", "attr": "封印命中 +0", "id": 8}, {"new_id": 16, "disable": 0, "new_attr": "固定伤害 +0", "attr": "固定伤害 +3", "id": 16}, {"new_id": 4, "disable": 0, "new_attr": "抵抗封印 +0", "attr": "抵抗封印 +6", "id": 4}], "illusion": 0}], "active": 0, "my_fu_count": 0, "skill": 0, "skill_level": 1, "illusion": 0, "skill_desc": "", "id": 6205}）
         # 遍历 json 的 suit 字段
@@ -274,8 +258,7 @@ class FeatureExtractor:
             'hight_grow_rider_count': hightGrowRiderCount,
             # 最大召唤兽携带数量
             'allow_pet_count': safe_float_to_int(data.get('allow_pet_count')),
-            # TODO:
-            # 'premium_fabao_count': premiumFabaoCount,  # 高价值法宝数量
+
             'shenqi': shenqi,
             'gender': gender,
             'lingyou_count': lingyou_count  # 灵佑数量
@@ -365,7 +348,15 @@ class FeatureExtractor:
                         skill_levels.append(level)
                     except (ValueError, TypeError):
                         continue
-                features['school_skills'] = skill_levels
+                # 确保skill_levels不为None且是列表
+                if skill_levels and isinstance(skill_levels, list):
+                    features['school_skills'] = skill_levels
+                else:
+                    features['school_skills'] = [0, 0, 0, 0, 0, 0, 0]
+            else:
+                # 确保默认值
+                features['school_skills'] = [0, 0, 0, 0, 0, 0, 0]
+                
             # 生活技能
             life_skills = data.get('life_skills', {})
             if isinstance(life_skills, str):
@@ -388,11 +379,20 @@ class FeatureExtractor:
                     except (ValueError, TypeError):
                         continue
 
-                if life_skill_levels:
+                if life_skill_levels and isinstance(life_skill_levels, list):
                     features['life_skills'] = life_skill_levels
+                else:
+                    features['life_skills'] = []
+            else:
+                # 确保默认值
+                features['life_skills'] = []
 
         except Exception as e:
             self.logger.error(f"提取技能特征失败: {e}")
+            # 确保异常情况下也有默认值
+            features['school_skills'] = [0, 0, 0, 0, 0, 0, 0]
+            features['qiangzhuang&shensu'] = [0, 0]
+            features['life_skills'] = []
 
         return features
 

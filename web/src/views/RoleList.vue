@@ -342,6 +342,11 @@ export default {
         server_name: '',
         eid: ''
       },
+      // 角色估价相关
+      loadingStates: {}, // 用于控制各个操作的加载状态
+      currentYear: new Date().getFullYear(),
+      currentMonth: new Date().getMonth() + 1,
+      currentRoleType: 'normal',
       loading: false,
       tableData: [],
       currentPage: 1,
@@ -650,7 +655,78 @@ export default {
     },
     async handleBasePrice(role, rowIndex) {
       console.log({ rowIndex })
-      // this.$set(this.tableData[rowIndex], 'base_price', role.base_price)
+      
+      try {
+        // 显示加载状态
+        this.$set(this.loadingStates, `basePrice_${rowIndex}`, true)
+        
+        // 调用角色估价接口
+        const response = await this.$api.role.getRoleValuation({
+          eid: role.eid,
+          year: this.currentYear,
+          month: this.currentMonth,
+          role_type: this.currentRoleType,
+          strategy: 'fair_value', // 使用公允价值策略
+          similarity_threshold: 0.7,
+          max_anchors: 30
+        })
+        
+        if (response.code === 200) {
+          const result = response.data
+          const estimatedPrice = result.estimated_price_yuan
+          
+          // 显示估价结果
+          this.$notify.success({
+            title: '角色估价成功',
+            message: `角色 ${role.eid} 估价: ${estimatedPrice}元`,
+            duration: 3000
+          })
+          
+          // 更新角色数据中的估价信息
+          this.$set(role, 'base_price', result.estimated_price)
+          this.$set(role, 'estimated_price_yuan', estimatedPrice)
+          this.$set(role, 'valuation_confidence', result.confidence)
+          
+          // 可选：更新数据库中的估价价格
+          try {
+            await this.$api.role.updateRoleBasePrice({
+              eid: role.eid,
+              base_price: result.estimated_price,
+              year: this.currentYear,
+              month: this.currentMonth,
+              role_type: this.currentRoleType
+            })
+            console.log(`成功更新角色 ${role.eid} 的估价价格`)
+          } catch (updateError) {
+            console.warn(`更新角色估价价格失败: ${updateError}`)
+            // 不影响估价结果的显示，只记录警告
+          }
+          
+        } else {
+          // 估价失败
+          this.$notify.error({
+            title: '角色估价失败',
+            message: response.message || '估价计算失败',
+            duration: 3000
+          })
+          
+          // 显示详细错误信息
+          if (response.data && response.data.error) {
+            console.error('估价错误详情:', response.data.error)
+          }
+        }
+        
+      } catch (error) {
+        console.error('调用角色估价接口失败:', error)
+        this.$notify.error({
+          title: '估价请求失败',
+          message: '网络请求异常，请稍后重试',
+          duration: 3000
+        })
+      } finally {
+        // 隐藏加载状态
+        this.$set(this.loadingStates, `basePrice_${rowIndex}`, false)
+      }
     },
     async handlSummonePrice(role, rowIndex) {
       const pet_list_desc = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]

@@ -14,6 +14,7 @@ class ItemType(Enum):
     """物品类型枚举"""
     EQUIPMENT = "equipment"      # 装备
     PET = "pet"                  # 召唤兽
+    ROLE = "role"                # 角色
 
 
 class InvalidReason(Enum):
@@ -54,6 +55,12 @@ class InvalidItemDetector:
                 return self._detect_invalid_equipment(item_data)
             elif item_type == ItemType.PET:
                 return self._detect_invalid_pet(item_data)
+            elif item_type == ItemType.ROLE:
+                # 角色通常不需要跳过估价，直接返回有效
+                return False, None, "角色估价", 0.0
+            else:
+                # 未知类型，也不跳过估价
+                return False, None, f"未知物品类型: {item_type}", 0.0
                 
         except Exception as e:
             self.logger.error(f"检测无效物品时出错: {e}")
@@ -68,9 +75,10 @@ class InvalidItemDetector:
                 return ItemType.EQUIPMENT
             elif item_data.get('iType', 0) == 17320:
                 return ItemType.EQUIPMENT
-            else:
+            elif item_data.get('iType', 0)!=0:
                 return ItemType.PET
-   
+            else:
+                return ItemType.ROLE
                     
         except Exception as e:
             self.logger.warning(f"自动检测物品类型失败: {e}")

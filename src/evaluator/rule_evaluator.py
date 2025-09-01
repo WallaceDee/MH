@@ -14,6 +14,7 @@ import logging
 import numpy as np
 from typing import Dict,  Optional, Union
 import pandas as pd
+from src.utils.jsonc_loader import load_jsonc_from_config_dir
 
 
 
@@ -341,16 +342,7 @@ class RuleEvaluator:
                 value_breakdown['pet_count'] = discount_value
                 total_value += discount_value
                 print(f"召唤兽携带量: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('pet_count', 1.0)})")
-            
-            # 18. 有价值法宝数量
-            premium_fabao_count = features.get('premium_fabao_count', 0)
-            raw_value = premium_fabao_count * RULE.get('PremiumFabaoValuePerCount', 0)
-            discount_value = raw_value * DISCOUNT_RATES.get('fabao', 1.0)
-            if raw_value > 0:
-                value_breakdown['fabao'] = discount_value
-                total_value += discount_value
-                print(f"有价值法宝: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('fabao', 1.0)})")
-            
+                  
             # 19. 神器
             shenqi = features.get('shenqi', [0,0,0,0,0,0,0,0])
             ShenqiAttr2Value = RULE.get('ShenqiAttr2Value', {})

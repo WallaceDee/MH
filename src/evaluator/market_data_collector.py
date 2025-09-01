@@ -38,23 +38,13 @@ class MarketDataCollector:
         
         # 自动查找数据库文件
         if db_path is None:
-            self.db_path = self._find_recent_dbs()
+            found_dbs = self._find_recent_dbs()
+            # 使用第一个找到的数据库文件
+            self.db_path = found_dbs[0] if found_dbs else None
         else:
             self.db_path = db_path
             
-        # 定义特征名映射（中文 -> 英文）
-        self.feature_name_mapping = {
-            '等级': 'level',
-            '门派': 'school',
-            '总经验': 'sum_exp',
-            '服务器': 'server_name',
-            '价格': 'price',
-            '修炼': 'cultivation',
-            '宝石': 'gems',
-            '特技': 'special_skills',
-            '召唤兽': 'pets',
-            '装备': 'equipment'
-        }
+
         
         print(f"空号市场数据采集器初始化完成，数据库路径: {self.db_path}")
     
@@ -81,17 +71,35 @@ class MarketDataCollector:
 
         # 首先查找指定月份的数据库文件
         for month in target_months:
-            db_file = os.path.join(data_path, month, f"empty_roles_{month}.db")
-            if os.path.exists(db_file):
-                found_dbs.append(db_file)
-                print(f"找到指定月份数据库文件: {db_file}")
+            # 尝试多种数据库文件命名模式
+            possible_names = [
+                f"cbg_roles_{month}.db",  # 普通角色数据库
+                f"cbg_empty_roles_{month}.db",  # 空号角色数据库
+                f"empty_roles_{month}.db",  # 旧格式空号角色数据库
+                f"empty_characters_{month}.db"  # 另一种格式
+            ]
+            
+            for db_name in possible_names:
+                db_file = os.path.join(data_path, month, db_name)
+                if os.path.exists(db_file):
+                    found_dbs.append(db_file)
+                    print(f"找到指定月份数据库文件: {db_file}")
+                    break  # 找到一个就跳出
 
-        # 如果没找到指定月份的，则查找所有可用的空号角色数据库文件
+        # 如果没找到指定月份的，则查找所有可用的角色数据库文件
         if not found_dbs:
-            print("未找到指定月份的数据库文件，查找所有可用的空号角色数据库文件")
+            print("未找到指定月份的数据库文件，查找所有可用的角色数据库文件")
             # 查找所有年月文件夹下的数据库文件
-            pattern = os.path.join(data_path, "*", "empty_roles_*.db")
-            all_dbs = glob.glob(pattern)
+            patterns = [
+                os.path.join(data_path, "*", "cbg_roles_*.db"),
+                os.path.join(data_path, "*", "cbg_empty_roles_*.db"),
+                os.path.join(data_path, "*", "empty_roles_*.db"),
+                os.path.join(data_path, "*", "empty_characters_*.db")
+            ]
+            
+            all_dbs = []
+            for pattern in patterns:
+                all_dbs.extend(glob.glob(pattern))
             
             # 按文件名排序，最新的在前
             all_dbs.sort(reverse=True)
@@ -119,23 +127,23 @@ class MarketDataCollector:
         try:
             print(f"开始刷新市场数据，最大记录数: {max_records}")
             
+            # 检查数据库路径
+            if not self.db_path:
+                raise ValueError("数据库路径未设置或未找到有效的数据库文件")
+            
+            if not os.path.exists(self.db_path):
+                raise FileNotFoundError(f"数据库文件不存在: {self.db_path}")
+            
+            print(f"使用数据库文件: {self.db_path}")
+            
             # 连接数据库
             conn = sqlite3.connect(self.db_path)
             
-            # 构建SQL查询
+            # 构建SQL查询 - 修复列名：roles表和large_equip_desc_data表都使用eid
             base_query = """
-                SELECT 
-                    c.id, c.equip_id, c.server_name, c.seller_nickname, c.level, c.price,
-                    c.price_desc, c.school AS school_desc, c.area_name, c.icon_index,
-                    c.kindid, c.game_ordersn, c.pass_fair_show, c.fair_show_end_time,
-                    c.accept_bargain, c.status_desc, c.onsale_expire_time_desc, c.expire_time,
-                    c.race, c.fly_status, c.collect_num, c.life_skills, c.school_skills,
-                    c.ju_qing_skills, c.yushoushu_skill, c.all_pets_json, c.all_equip_json,
-                    c.all_shenqi_json, c.all_rider_json, c.all_fabao_json,
-                    c.ex_avt_json, c.create_time, c.update_time,
-                    l.*
+                SELECT c.*, l.*
                 FROM roles c
-                LEFT JOIN large_equip_desc_data l ON c.equip_id = l.equip_id
+                LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
                 WHERE c.price > 0
             """
             
@@ -179,12 +187,12 @@ class MarketDataCollector:
                     # 提取特征
                     features = self.feature_extractor.extract_features(role_data)
                     
-                    # 添加基本信息
+                    # 添加基本信息 - 使用eid而不是equip_id
                     features.update({
-                        'equip_id': role_data.get('equip_id', ''),
+                        'equip_id': role_data.get('eid', ''),  # 修复：使用eid
                         'price': role_data.get('price', 0),
                         'server_name': role_data.get('server_name', ''),
-                        'school_desc': role_data.get('school_desc', ''),
+                        'school_desc': role_data.get('school', ''),  # 修复：使用school
                         'collect_num': role_data.get('collect_num', 0),
                         'create_time': role_data.get('create_time', ''),
                         'seller_nickname': role_data.get('seller_nickname', '')
@@ -248,16 +256,22 @@ class MarketDataCollector:
             beast_cultivation_values.append(0 if value is None else value)
         features['total_beast_cultivation'] = sum(beast_cultivation_values)
         
-        # 总技能等级 - 只保留平均值特征
+        # 总技能等级 - 安全处理None值和空列表
         school_skills = features.get('school_skills', [])
+        if school_skills is None or not isinstance(school_skills, list):
+            school_skills = []
         features['avg_school_skills'] = (sum(school_skills) / len(school_skills)) if school_skills else 0
         
-        # 生活技能统计 - 只保留高等级技能数量
+        # 生活技能统计 - 安全处理None值和空列表
         life_skills = features.get('life_skills', [])
+        if life_skills is None or not isinstance(life_skills, list):
+            life_skills = []
         features['high_life_skills_count'] = sum(1 for skill in life_skills if skill >= 140) if life_skills else 0
         
-        # 强壮神速统计
+        # 强壮神速统计 - 安全处理None值和空列表
         qiangzhuang_shensu = features.get('qiangzhuang&shensu', [])
+        if qiangzhuang_shensu is None or not isinstance(qiangzhuang_shensu, list):
+            qiangzhuang_shensu = []
         features['total_qiangzhuang_shensu'] = sum(qiangzhuang_shensu) if qiangzhuang_shensu else 0
         
         # 综合评分（用于快速筛选） - 更新公式，移除冗余特征
@@ -361,54 +375,76 @@ class MarketDataCollector:
         Returns:
             pd.DataFrame: 市场数据
         """
+        self.logger.info(f"[GET_SIMILARITY_DATA] 开始获取相似度计算数据，filters: {filters}")
+        
         market_data = self.get_market_data()
         
+        self.logger.info(f"[GET_SIMILARITY_DATA] 原始市场数据大小: {len(market_data)}")
+        
         if market_data.empty:
+            self.logger.warning("[GET_SIMILARITY_DATA] 市场数据为空")
             return market_data
         
         # 应用预过滤条件以提高效率
         if filters:
+            self.logger.info(f"[GET_SIMILARITY_DATA] 应用预过滤条件: {filters}")
             filtered_data = market_data.copy()
             
             # 等级过滤
-            if 'level_range' in filters:
-                level_min, level_max = filters['level_range']
-                filtered_data = filtered_data[
-                    (filtered_data['level'] >= level_min) & 
-                    (filtered_data['level'] <= level_max)
-                ]
+            if 'level_range' in filters and filters['level_range'] is not None:
+                level_range = filters['level_range']
+                self.logger.debug(f"[GET_SIMILARITY_DATA] 等级过滤：level_range={level_range}, 类型={type(level_range)}")
+                if isinstance(level_range, (tuple, list)) and len(level_range) == 2:
+                    self.logger.debug(f"[GET_SIMILARITY_DATA] 开始解包等级范围...")
+                    level_min, level_max = level_range
+                    self.logger.debug(f"[GET_SIMILARITY_DATA] 等级范围解包成功: {level_min} - {level_max}")
+                    filtered_data = filtered_data[
+                        (filtered_data['level'] >= level_min) & 
+                        (filtered_data['level'] <= level_max)
+                    ]
             
             # 总修炼等级过滤
-            if 'total_cultivation_range' in filters:
-                cult_min, cult_max = filters['total_cultivation_range']
-                filtered_data = filtered_data[
-                    (filtered_data['total_cultivation'] >= cult_min) & 
-                    (filtered_data['total_cultivation'] <= cult_max)
-                ]
+            if 'total_cultivation_range' in filters and filters['total_cultivation_range'] is not None:
+                cultivation_range = filters['total_cultivation_range']
+                self.logger.debug(f"[GET_SIMILARITY_DATA] 修炼过滤：cultivation_range={cultivation_range}, 类型={type(cultivation_range)}")
+                if isinstance(cultivation_range, (tuple, list)) and len(cultivation_range) == 2:
+                    self.logger.debug(f"[GET_SIMILARITY_DATA] 开始解包修炼范围...")
+                    cult_min, cult_max = cultivation_range
+                    self.logger.debug(f"[GET_SIMILARITY_DATA] 修炼范围解包成功: {cult_min} - {cult_max}")
+                    filtered_data = filtered_data[
+                        (filtered_data['total_cultivation'] >= cult_min) & 
+                        (filtered_data['total_cultivation'] <= cult_max)
+                    ]
             
             # 召唤兽控制力总和过滤
-            if 'total_beast_cultivation_range' in filters:
-                beast_min, beast_max = filters['total_beast_cultivation_range']
-                filtered_data = filtered_data[
-                    (filtered_data['total_beast_cultivation'] >= beast_min) & 
-                    (filtered_data['total_beast_cultivation'] <= beast_max)
-                ]
+            if 'total_beast_cultivation_range' in filters and filters['total_beast_cultivation_range'] is not None:
+                beast_range = filters['total_beast_cultivation_range']
+                if isinstance(beast_range, (tuple, list)) and len(beast_range) == 2:
+                    beast_min, beast_max = beast_range
+                    filtered_data = filtered_data[
+                        (filtered_data['total_beast_cultivation'] >= beast_min) & 
+                        (filtered_data['total_beast_cultivation'] <= beast_max)
+                    ]
             
             # 师门技能平均值过滤
-            if 'avg_school_skills_range' in filters:
-                skills_min, skills_max = filters['avg_school_skills_range']
-                filtered_data = filtered_data[
-                    (filtered_data['avg_school_skills'] >= skills_min) & 
-                    (filtered_data['avg_school_skills'] <= skills_max)
-                ]
+            if 'avg_school_skills_range' in filters and filters['avg_school_skills_range'] is not None:
+                skills_range = filters['avg_school_skills_range']
+                if isinstance(skills_range, (tuple, list)) and len(skills_range) == 2:
+                    skills_min, skills_max = skills_range
+                    filtered_data = filtered_data[
+                        (filtered_data['avg_school_skills'] >= skills_min) & 
+                        (filtered_data['avg_school_skills'] <= skills_max)
+                    ]
             
             # 价格过滤
-            if 'price_range' in filters:
-                price_min, price_max = filters['price_range']
-                filtered_data = filtered_data[
-                    (filtered_data['price'] >= price_min) & 
-                    (filtered_data['price'] <= price_max)
-                ]
+            if 'price_range' in filters and filters['price_range'] is not None:
+                price_range = filters['price_range']
+                if isinstance(price_range, (tuple, list)) and len(price_range) == 2:
+                    price_min, price_max = price_range
+                    filtered_data = filtered_data[
+                        (filtered_data['price'] >= price_min) & 
+                        (filtered_data['price'] <= price_max)
+                    ]
             
             # 其他范围过滤条件（通用处理）
             range_keys = ['total_cultivation_range', 'total_beast_cultivation_range', 

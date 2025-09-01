@@ -17,12 +17,61 @@ from src.utils.project_path import get_project_root, get_data_path
 
 logger = logging.getLogger(__name__)
 
+# 尝试导入估价器相关模块
+try:
+    from src.evaluator.market_anchor_evaluator import MarketAnchorEvaluator
+    from src.evaluator.rule_evaluator import RuleEvaluator
+    from src.evaluator.hybrid_valuation_engine import HybridValuationEngine
+    from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
+except ImportError as e:
+    MarketAnchorEvaluator = None
+    RuleEvaluator = None
+    HybridValuationEngine = None
+    FeatureExtractor = None
+    logger.warning(f"无法导入角色估价器相关模块: {e}")
+
 
 class roleService:
     def __init__(self):
         # 获取项目根目录
         self.project_root = get_project_root()
         self.data_dir = get_data_path()
+
+        # 初始化特征提取器
+        self.feature_extractor = None
+        if FeatureExtractor:
+            try:
+                self.feature_extractor = FeatureExtractor()
+                logger.info("角色特征提取器初始化成功")
+            except Exception as e:
+                logger.error(f"角色特征提取器初始化失败: {e}")
+
+        # 初始化混合估价引擎
+        self.hybrid_engine = None
+        if HybridValuationEngine:
+            try:
+                self.hybrid_engine = HybridValuationEngine()
+                logger.info("角色混合估价引擎初始化成功")
+            except Exception as e:
+                logger.error(f"角色混合估价引擎初始化失败: {e}")
+
+        # 初始化市场锚定估价器
+        self.market_evaluator = None
+        if MarketAnchorEvaluator:
+            try:
+                self.market_evaluator = MarketAnchorEvaluator()
+                logger.info("角色市场锚定估价器初始化成功")
+            except Exception as e:
+                logger.error(f"角色市场锚定估价器初始化失败: {e}")
+
+        # 初始化规则估价器
+        self.rule_evaluator = None
+        if RuleEvaluator:
+            try:
+                self.rule_evaluator = RuleEvaluator()
+                logger.info("角色规则估价器初始化成功")
+            except Exception as e:
+                logger.error(f"角色规则估价器初始化失败: {e}")
 
     def _validate_year_month(self, year: Optional[int], month: Optional[int]) -> Tuple[int, int]:
         """验证并获取有效的年月"""
@@ -129,6 +178,44 @@ class roleService:
                     
         except Exception as e:
             logger.error(f"更新角色宠物估价价格失败: {e}")
+            return False
+
+    def update_role_base_price(self, eid: str, base_price: float, year: Optional[int] = None, month: Optional[int] = None) -> bool:
+        """更新角色的总估价价格
+        
+        Args:
+            eid: 角色唯一标识符
+            base_price: 总估价价格（分）
+            year: 年份
+            month: 月份
+            
+        Returns:
+            bool: 更新是否成功
+        """
+        try:
+            year, month = self._validate_year_month(year, month)
+            db_file = self._get_db_file(year, month)
+            
+            if not os.path.exists(db_file):
+                logger.warning(f"数据库文件不存在: {db_file}")
+                return False
+                
+            with sqlite3.connect(db_file) as conn:
+                cursor = conn.cursor()
+                
+                # 更新裸号估价价格（使用base_price字段）
+                sql = "UPDATE roles SET base_price = ?, update_time = CURRENT_TIMESTAMP WHERE eid = ?"
+                cursor.execute(sql, [base_price, eid])
+                
+                if cursor.rowcount > 0:
+                    logger.info(f"更新角色总估价价格成功: {eid} = {base_price}分")
+                    return True
+                else:
+                    logger.warning(f"未找到角色记录: {eid}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"更新角色总估价价格失败: {e}")
             return False
 
     def get_roles(self, page: int = 1, page_size: int = 10, year: Optional[int] = None, month: Optional[int] = None,
@@ -552,3 +639,198 @@ class roleService:
         except Exception as e:
             logger.error(f"切换角色类型时出错: {e}")
             return {"error": f"切换角色类型时出错: {str(e)}"}
+
+    def get_role_valuation(self, eid: str, year: Optional[int] = None, month: Optional[int] = None,
+                          role_type: str = 'normal', strategy: str = 'fair_value',
+                          similarity_threshold: float = 0.7, max_anchors: int = 30) -> Dict:
+        """获取角色估价"""
+        try:
+            if not self.hybrid_engine:
+                return {
+                    "error": "角色混合估价引擎未初始化",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            if not self.feature_extractor:
+                return {
+                    "error": "角色特征提取器未初始化",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            # 先查询角色数据
+            role_data = self.get_role_details(eid, year, month, role_type)
+            if not role_data:
+                return {
+                    "error": f"未找到角色 {eid} 的数据",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            # 使用特征提取器提取特征
+            try:
+                role_features = self.feature_extractor.extract_features(role_data)
+            except Exception as e:
+                return {
+                    "error": f"特征提取失败: {str(e)}",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            # 验证策略参数
+            valid_strategies = ['fair_value', 'competitive', 'premium']
+            if strategy not in valid_strategies:
+                return {
+                    "error": f"无效的估价策略: {strategy}，有效策略: {', '.join(valid_strategies)}",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            # 验证相似度阈值和最大锚点数量
+            if not 0.0 <= similarity_threshold <= 1.0:
+                return {
+                    "error": "相似度阈值必须在0.0-1.0之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            if not 1 <= max_anchors <= 100:
+                return {
+                    "error": "最大锚点数量必须在1-100之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0
+                }
+            
+            # 调用混合估价引擎
+            try:
+                result = self.hybrid_engine.evaluate(role_data)
+                
+                # 格式化返回结果
+                estimated_price = result.final_value if hasattr(result, 'final_value') else 0
+                estimated_price_yuan = estimated_price / 100.0  # 转换为元
+                
+                return {
+                    "estimated_price": int(estimated_price),
+                    "estimated_price_yuan": round(estimated_price_yuan, 2),
+                    "confidence": getattr(result, 'confidence', 0.0),
+                    "market_value": getattr(result, 'market_value', 0),
+                    "rule_value": getattr(result, 'rule_value', 0),
+                    "integration_strategy": getattr(result, 'integration_strategy', ''),
+                    "anomaly_score": getattr(result, 'anomaly_score', 0.0),
+                    "anchor_count": getattr(result, 'anchor_count', 0),
+                    "value_breakdown": getattr(result, 'value_breakdown', {}),
+                    "warnings": getattr(result, 'warnings', []),
+                    "feature": role_features,
+                    "eid": eid,
+                    "strategy": strategy,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors
+                }
+                
+            except Exception as e:
+                return {
+                    "error": f"估价计算失败: {str(e)}",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0,
+                    "feature": role_features,
+                    "eid": eid
+                }
+            
+        except Exception as e:
+            logger.error(f"获取角色估价时出错: {e}")
+            return {
+                "error": f"获取角色估价时出错: {str(e)}",
+                "estimated_price": 0,
+                "estimated_price_yuan": 0
+            }
+
+    def batch_role_valuation(self, eid_list: List[str], year: Optional[int] = None, month: Optional[int] = None,
+                            role_type: str = 'normal', strategy: str = 'fair_value',
+                            similarity_threshold: float = 0.7, max_anchors: int = 30, verbose: bool = False) -> Dict:
+        """批量角色估价"""
+        try:
+            if not eid_list:
+                return {"error": "角色eid列表不能为空"}
+            
+            if not self.hybrid_engine:
+                return {"error": "角色混合估价引擎未初始化"}
+            
+            if not self.feature_extractor:
+                return {"error": "角色特征提取器未初始化"}
+            
+            results = []
+            total_value = 0
+            success_count = 0
+            error_count = 0
+            
+            for i, eid in enumerate(eid_list):
+                try:
+                    if verbose:
+                        logger.info(f"正在估价第 {i+1}/{len(eid_list)} 个角色: {eid}")
+                    
+                    # 单个角色估价
+                    result = self.get_role_valuation(
+                        eid=eid,
+                        year=year,
+                        month=month,
+                        role_type=role_type,
+                        strategy=strategy,
+                        similarity_threshold=similarity_threshold,
+                        max_anchors=max_anchors
+                    )
+                    
+                    if "error" not in result:
+                        success_count += 1
+                        total_value += result.get("estimated_price", 0)
+                        results.append({
+                            "index": i,
+                            "eid": eid,
+                            "success": True,
+                            "data": result
+                        })
+                    else:
+                        error_count += 1
+                        results.append({
+                            "index": i,
+                            "eid": eid,
+                            "success": False,
+                            "error": result.get("error", "估价失败"),
+                            "data": result
+                        })
+                        
+                except Exception as e:
+                    error_count += 1
+                    logger.error(f"第 {i+1} 个角色 {eid} 估价失败: {e}")
+                    results.append({
+                        "index": i,
+                        "eid": eid,
+                        "success": False,
+                        "error": f"估价异常: {str(e)}",
+                        "data": None
+                    })
+            
+            # 构建返回结果
+            return {
+                "total_roles": len(eid_list),
+                "success_count": success_count,
+                "error_count": error_count,
+                "total_value": total_value,
+                "total_value_yuan": round(total_value / 100.0, 2),
+                "strategy": strategy,
+                "similarity_threshold": similarity_threshold,
+                "max_anchors": max_anchors,
+                "results": results
+            }
+            
+        except Exception as e:
+            logger.error(f"批量角色估价失败: {e}")
+            return {
+                "error": f"批量角色估价失败: {str(e)}",
+                "total_roles": len(eid_list) if 'eid_list' in locals() else 0,
+                "success_count": 0,
+                "error_count": len(eid_list) if 'eid_list' in locals() else 0,
+                "total_value": 0,
+                "total_value_yuan": 0,
+                "results": []
+            }

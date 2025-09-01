@@ -1,1 +1,1 @@
-_flow_group_v2=g36; _external_mark=direct; fingerprint=hcq6hv0osv50qmx0; wallet_data=%7B%22is_locked%22%3A%20false%2C%20%22checking_balance%22%3A%200%2C%20%22balance%22%3A%200%2C%20%22freeze_link%22%3A%20%22%22%2C%20%22free_balance%22%3A%200%7D; __session__=1
+_flow_group_v2=g7; _external_mark=direct; fingerprint=jlahr38c4uoger8e; wallet_data=%7B%22is_locked%22%3A%20false%2C%20%22checking_balance%22%3A%200%2C%20%22balance%22%3A%200%2C%20%22freeze_link%22%3A%20%22%22%2C%20%22free_balance%22%3A%200%7D; __session__=1

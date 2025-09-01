@@ -11,6 +11,7 @@ from ....utils.response import success_response, error_response
 import os
 import sys
 import json
+import logging
 
 # 添加src目录到Python路径以便导入utils
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +23,7 @@ from utils.project_path import get_relative_path
 
 role_bp = Blueprint('role', __name__)
 controller = roleController()
+logger = logging.getLogger(__name__)
 
 
 @role_bp.route('/', methods=['GET'])
@@ -198,6 +200,212 @@ def get_role_detail_by_eid(year, month, eid):
 def health_check():
     """健康检查"""
     return success_response(data={"status": "healthy"}, message="角色API服务正常运行")
+
+
+@role_bp.route('/valuation', methods=['POST'])
+def get_role_valuation():
+    """获取角色估价"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供角色参数")
+        
+        eid = data.get('eid')
+        if not eid:
+            return error_response("请提供角色eid")
+        
+        year = data.get('year')
+        month = data.get('month')
+        role_type = data.get('role_type', 'normal')
+        strategy = data.get('strategy', 'fair_value')
+        similarity_threshold = data.get('similarity_threshold', 0.7)
+        max_anchors = data.get('max_anchors', 30)
+        
+        # 验证年月参数
+        if year:
+            try:
+                year = int(year)
+            except ValueError:
+                return error_response("年份参数格式错误")
+        if month:
+            try:
+                month = int(month)
+            except ValueError:
+                return error_response("月份参数格式错误")
+        
+        result = controller.get_role_valuation(
+            eid, 
+            year, 
+            month, 
+            role_type,
+            strategy, 
+            similarity_threshold, 
+            max_anchors
+        )
+        
+        if "error" in result:
+            # 估价失败时，返回400状态码，但将完整结果放在data字段中
+            return error_response(result["error"], code=400, http_code=400, data=result)
+        
+        return success_response(data=result, message="获取角色估价成功")
+        
+    except Exception as e:
+        return error_response(f"获取角色估价失败: {str(e)}")
+
+
+@role_bp.route('/batch-valuation', methods=['POST'])
+def batch_role_valuation():
+    """批量角色估价"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供角色参数")
+        
+        eid_list = data.get('eid_list')
+        if not eid_list or not isinstance(eid_list, list):
+            return error_response("请提供有效的角色eid列表")
+        
+        year = data.get('year')
+        month = data.get('month')
+        role_type = data.get('role_type', 'normal')
+        strategy = data.get('strategy', 'fair_value')
+        similarity_threshold = data.get('similarity_threshold', 0.7)
+        max_anchors = data.get('max_anchors', 30)
+        verbose = data.get('verbose', False)
+        
+        # 验证年月参数
+        if year:
+            try:
+                year = int(year)
+            except ValueError:
+                return error_response("年份参数格式错误")
+        if month:
+            try:
+                month = int(month)
+            except ValueError:
+                return error_response("月份参数格式错误")
+        
+        result = controller.batch_role_valuation(
+            eid_list, 
+            year, 
+            month, 
+            role_type,
+            strategy, 
+            similarity_threshold, 
+            max_anchors, 
+            verbose
+        )
+        
+        if "error" in result:
+            return error_response(result["error"], code=400, http_code=400, data=result)
+        
+        return success_response(data=result, message="批量角色估价完成")
+        
+    except ValueError:
+        return error_response("参数格式错误")
+    except Exception as e:
+        return error_response(f"批量角色估价失败: {str(e)}")
+
+
+@role_bp.route('/<string:eid>/update-base-price', methods=['POST'])
+def update_role_base_price(eid: str):
+    """更新角色裸号价格"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供更新参数")
+        
+        base_price = data.get('base_price')
+        if base_price is None:
+            return error_response("请提供裸号价格")
+        
+        try:
+            base_price = float(base_price)
+        except (ValueError, TypeError):
+            return error_response("裸号价格格式错误")
+        
+        year = data.get('year')
+        month = data.get('month')
+        role_type = data.get('role_type', 'normal')
+        
+        # 验证年月参数
+        if year:
+            try:
+                year = int(year)
+            except ValueError:
+                return error_response("年份参数格式错误")
+        if month:
+            try:
+                month = int(month)
+            except ValueError:
+                return error_response("月份参数格式错误")
+        
+        # 调用服务层更新价格
+        success = controller.update_role_base_price(eid, base_price, year, month, role_type)
+        
+        if success:
+            return success_response(
+                data={
+                    "eid": eid,
+                    "base_price": base_price,
+                    "base_price_yuan": round(base_price / 100.0, 2),
+                    "year": year,
+                    "month": month,
+                    "role_type": role_type
+                },
+                message="角色裸号价格更新成功"
+            )
+        else:
+            return error_response("角色裸号价格更新失败")
+        
+    except Exception as e:
+        logger.error(f"更新角色裸号价格时出错: {e}")
+        return error_response(f"更新角色裸号价格失败: {str(e)}")
+
+
+@role_bp.route('/valuation/<string:eid>', methods=['GET'])
+def get_valuation_by_eid(eid):
+    """通过角色eid获取估价（便捷接口）"""
+    try:
+        if not eid:
+            return error_response("角色eid不能为空")
+        
+        # 获取角色详情
+        year = request.args.get('year')
+        month = request.args.get('month')
+        role_type = request.args.get('role_type', 'normal')
+        
+        if year:
+            year = int(year)
+        if month:
+            month = int(month)
+        
+        role_data = controller.get_role_details(eid, year, month, role_type)
+        
+        if not role_data or "error" in role_data:
+            return error_response("未找到指定的角色")
+        
+        # 获取估价参数
+        strategy = request.args.get('strategy', 'fair_value')
+        similarity_threshold = request.args.get('similarity_threshold', 0.7, type=float)
+        max_anchors = request.args.get('max_anchors', 30, type=int)
+        
+        result = controller.get_role_valuation(
+            role_data, 
+            strategy, 
+            similarity_threshold, 
+            max_anchors
+        )
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="获取角色估价成功")
+        
+    except ValueError:
+        return error_response("参数格式错误")
+    except Exception as e:
+        return error_response(f"获取角色估价失败: {str(e)}")
 
 
  

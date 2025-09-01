@@ -154,7 +154,8 @@ class MarketAnchorEvaluator(BaseValuator):
     def find_market_anchors(self, 
                            target_features: Dict[str, Any],
                            similarity_threshold: float = 0.7,
-                           max_anchors: int = 30) -> List[Dict[str, Any]]:
+                           max_anchors: int = 30,
+                           verbose: bool = True) -> List[Dict[str, Any]]:
         """
         寻找市场锚点角色
         
@@ -171,19 +172,30 @@ class MarketAnchorEvaluator(BaseValuator):
                 - features: 完整特征数据
         """
         try:
-            print(f"开始寻找市场锚点，相似度阈值: {similarity_threshold}")
+            print(f"[MARKET_ANCHOR] 开始寻找市场锚点，相似度阈值: {similarity_threshold}")
+            print(f"[MARKET_ANCHOR] 目标特征类型: {type(target_features)}")
+            print(f"[MARKET_ANCHOR] 目标特征字段: {list(target_features.keys()) if isinstance(target_features, dict) else 'not dict'}")
+            
+            self.logger.info(f"[FIND_ANCHORS] 开始寻找市场锚点，相似度阈值: {similarity_threshold}")
+            self.logger.debug(f"[FIND_ANCHORS] 目标特征: {target_features}")
             
             # 构建预过滤条件以提高效率
+            print(f"[MARKET_ANCHOR] 开始构建预过滤条件...")
             pre_filters = self._build_pre_filters(target_features)
+            print(f"[MARKET_ANCHOR] 预过滤条件构建完成: {pre_filters}")
+            self.logger.debug(f"[FIND_ANCHORS] 预过滤条件: {pre_filters}")
             
             # 获取预过滤的市场数据
+            self.logger.info(f"[FIND_ANCHORS] 开始获取市场数据...")
             market_data = self.market_collector.get_market_data_for_similarity(pre_filters)
+            self.logger.info(f"[FIND_ANCHORS] 市场数据获取完成，类型: {type(market_data)}")
             
             if market_data.empty:
-                print("市场数据为空，无法找到锚点")
+                self.logger.warning("[FIND_ANCHORS] 市场数据为空，无法找到锚点")
                 return []
             
-            print(f"预过滤后获得 {len(market_data)} 条候选数据")
+            self.logger.info(f"[FIND_ANCHORS] 预过滤后获得 {len(market_data)} 条候选数据")
+            self.logger.debug(f"[FIND_ANCHORS] 市场数据列名: {list(market_data.columns)}")
             
             # 统计数据质量
             total_rows = len(market_data)
@@ -202,10 +214,20 @@ class MarketAnchorEvaluator(BaseValuator):
             anchor_candidates = []
             error_count = 0
             
-            for equip_id, market_row in market_data.iterrows():
+            self.logger.info(f"[FIND_ANCHORS] 开始计算相似度，处理 {len(market_data)} 条数据")
+            
+            for i, (equip_id, market_row) in enumerate(market_data.iterrows()):
                 try:
+                    if i < 3:  # 只记录前3条的详细日志，避免日志过多
+                        self.logger.debug(f"[FIND_ANCHORS] 处理第 {i+1} 条数据，equip_id: {equip_id}")
+                        self.logger.debug(f"[FIND_ANCHORS] market_row类型: {type(market_row)}")
+                    
                     # 计算相似度 - 确保数据类型转换
                     market_dict = self._convert_pandas_row_to_dict(market_row)
+                    
+                    if i < 3:
+                        self.logger.debug(f"[FIND_ANCHORS] market_dict转换完成，包含 {len(market_dict)} 个字段")
+                    
                     similarity = self._calculate_similarity(target_features, market_dict)
                     
                     if similarity >= similarity_threshold:
@@ -276,10 +298,14 @@ class MarketAnchorEvaluator(BaseValuator):
         """
         filters = {}
         
+        self.logger.debug(f"[BUILD_FILTERS] 开始构建预过滤条件，目标特征: {target_features}")
+        
         # 等级过滤（±30级）
         if 'level' in target_features:
             level = target_features['level']
-            filters['level_range'] = (max(1, level - 30), level + 30)
+            level_range = (max(1, level - 30), level + 30)
+            filters['level_range'] = level_range
+            self.logger.debug(f"[BUILD_FILTERS] 等级过滤: {level_range} (目标等级: {level})")
             
         # 修炼等级总和相差(±30) 不包含猎修
         if 'total_cultivation' in target_features:
@@ -309,38 +335,6 @@ class MarketAnchorEvaluator(BaseValuator):
             )
 
         return filters
-    
-    def _create_feature_vector(self, features: Dict[str, Any]) -> np.ndarray:
-        """
-        创建特征向量
-        
-        Args:
-            features: 特征字典
-            
-        Returns:
-            np.ndarray: 标准化的特征向量
-        """
-        vector = []
-        # 合并所有特征名称
-        all_features = set(self.absolute_tolerances.keys()) | set(self.relative_tolerances.keys())
-        
-        for feature_name in sorted(all_features):
-            value = features.get(feature_name, 0)
-            # 简单标准化
-            if feature_name == 'level':
-                normalized_value = value / 200.0  # 假设最高等级200
-            elif feature_name in ['sum_exp']:
-                normalized_value = min(value / 10000.0, 1.0)  # 经验标准化
-            elif feature_name in ['total_cultivation', 'total_beast_cultivation']:
-                normalized_value = value / 400.0  # 修炼标准化（假设最高100*4）
-            elif feature_name in ['total_gem_level']:
-                normalized_value = value / 1000.0  # 宝石标准化
-            else:
-                normalized_value = min(value / 50.0, 1.0)  # 通用标准化
-            
-            vector.append(normalized_value)
-        
-        return np.array(vector)
     
     def _calculate_similarity(self, 
                             target_features: Dict[str, Any], 
@@ -379,6 +373,13 @@ class MarketAnchorEvaluator(BaseValuator):
                     
                 target_val = target_features_adjusted.get(feature_name, 0)
                 market_val = market_features_adjusted.get(feature_name, 0)
+                
+                # 安全处理None值
+                if target_val is None:
+                    target_val = 0
+                if market_val is None:
+                    market_val = 0
+                
                 weight = self.feature_weights.get(feature_name, 0.5)
                 
                 # 计算特征相似度

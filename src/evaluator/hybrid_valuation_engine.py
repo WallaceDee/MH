@@ -165,8 +165,14 @@ class HybridValuationEngine:
         """执行双引擎估价"""
         try:
             print("执行市场锚定估价...")
+            print(f"[HYBRID_DEBUG] market_evaluator类型: {type(self.market_evaluator)}")
+            print(f"[HYBRID_DEBUG] features类型: {type(features)}")
+            print(f"[HYBRID_DEBUG] 开始调用 calculate_value...")
+            
             # 市场锚定估价
             market_result = self.market_evaluator.calculate_value(features, 'fair_value')
+            
+            print(f"[HYBRID_DEBUG] market_result: {market_result}")
             
             print("执行规则引擎估价...")
             # 规则引擎估价

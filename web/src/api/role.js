@@ -34,15 +34,17 @@ export const roleApi = {
   getRoleDetail(equipId, params = {}) {
     return api.get(`/role/${equipId}`, params)
   },
-    /**
+
+  /**
    * 删除角色
    * @param {string} eid - 角色订单号
    * @param {Object} params - 额外参数（如年月、role_type）
    * @returns {Promise}
    */
-    deleteRole(eid, params = {}) {
-      return api.delete(`/role/${eid}`, params)
-    },
+  deleteRole(eid, params = {}) {
+    return api.delete(`/role/${eid}`, params)
+  },
+
   /**
    * 切换角色类型（数据迁移）
    * @param {string} eid - 角色订单号
@@ -52,6 +54,54 @@ export const roleApi = {
   switchRoleType(eid, params = {}) {
     return api.post(`/role/${eid}/switch-type`, params)
   },
+
+  /**
+   * 角色估价
+   * @param {Object} params - 估价参数
+   * @param {string} params.eid - 角色唯一标识符
+   * @param {number} params.year - 年份（可选）
+   * @param {number} params.month - 月份（可选）
+   * @param {string} params.role_type - 角色类型（可选，默认normal）
+   * @param {string} params.strategy - 估价策略（可选，默认fair_value）
+   * @param {number} params.similarity_threshold - 相似度阈值（可选，默认0.7）
+   * @param {number} params.max_anchors - 最大锚点数量（可选，默认30）
+   * @returns {Promise}
+   */
+  getRoleValuation(params = {}) {
+    return api.post('/role/valuation', params)
+  },
+
+  /**
+   * 批量角色估价
+   * @param {Object} params - 批量估价参数
+   * @param {Array} params.eid_list - 角色eid列表
+   * @param {number} params.year - 年份（可选）
+   * @param {number} params.month - 月份（可选）
+   * @param {string} params.role_type - 角色类型（可选，默认normal）
+   * @param {string} params.strategy - 估价策略（可选，默认fair_value）
+   * @param {number} params.similarity_threshold - 相似度阈值（可选，默认0.7）
+   * @param {number} params.max_anchors - 最大锚点数量（可选，默认30）
+   * @param {boolean} params.verbose - 是否详细日志（可选，默认false）
+   * @returns {Promise}
+   */
+  batchRoleValuation(params = {}) {
+    return api.post('/role/batch-valuation', params)
+  },
+
+  /**
+   * 更新角色裸号价格
+   * @param {Object} params - 更新参数
+   * @param {string} params.eid - 角色唯一标识符
+   * @param {number} params.base_price - 裸号价格（分）
+   * @param {number} params.year - 年份（可选）
+   * @param {number} params.month - 月份（可选）
+   * @param {string} params.role_type - 角色类型（可选，默认normal）
+   * @returns {Promise}
+   */
+  updateRoleBasePrice(params = {}) {
+    return api.post(`/role/${params.eid}/update-base-price`, params)
+  },
+
   /**
    * 健康检查
    * @returns {Promise}

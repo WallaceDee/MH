@@ -1,7 +1,6 @@
 {
   "RMB2MHB": 15,
   "MARKET_FACTOR": 0.5,
-  "PremiumFabaoValuePerCount": 150,
   "LearnCash2CashRate": 0.7,
   "XiulianguoValuePerCount": 80,
   "HightGrowRidePerValue": 3300,
@@ -10,15 +9,6 @@
   "qianyuandanBreakthroughValue": 10000,
   "JiyuanValuePerCount": 300,
   "ExpValuePerHundredMillion": 15,
-  "PremiumFabao": [
-    "九黎战鼓",
-    "风袋",
-    "试剑石",
-    "碧玉葫芦",
-    "汇灵盏",
-    "金甲仙衣",
-    "神行飞剑"
-  ],
   "ShenqiAttr2Value": {
     "1": 10,
     "1attr": 150,
