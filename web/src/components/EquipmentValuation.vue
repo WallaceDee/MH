@@ -8,7 +8,9 @@
           <div style="margin-bottom: 5px"> <el-tag type="success">属性：+{{ targetEquipment.feature.addon_total }}点{{
             addon_total_standards?.[targetEquipment.feature.equip_level] }}</el-tag>
             <el-divider direction="vertical" />
-            <el-tag type="primary">总伤：{{ targetEquipment.feature.all_damage }}/{{ parseInt(all_damage_standards?.[targetEquipment.feature.equip_level][1] +(25*targetEquipment.feature.equip_level/30)) }}</el-tag>
+            <el-tag type="primary">总伤：{{ targetEquipment.feature.all_damage }}/{{
+              parseInt(all_damage_standards?.[targetEquipment.feature.equip_level][1]
+                + (25 * targetEquipment.feature.equip_level/30)) }}</el-tag>
           </div>
           <div>
             <el-tag type="danger">初伤：{{ targetEquipment.feature.init_damage_raw }}点{{
@@ -19,7 +21,7 @@
           </div>
         </div>
       </el-row>
-      <!-- 无锚点时的重试界面 -->
+      <!-- 刷新和相似装备界面 -->
       <div style="width: 170px;flex-shrink: 0;">
         <el-button type="primary" @click="$emit('refresh')" size="mini">刷新</el-button>
         <SimilarGetMore :target-equipment="targetEquipment" />

@@ -61,7 +61,11 @@ DB_SCHEMA_CONFIG = {
             equip_count INTEGER,                -- 角色数量
             
             -- 价格和交易信息
-            history_price TEXT DEFAULT '[]',                 -- 历史价格（JSON格式）
+            history_price TEXT DEFAULT '[]',    -- 历史价格（JSON格式）
+            split_price_desc TEXT DEFAULT '[]', -- 装备和召唤兽估价价格描述（JSON格式）
+            base_price REAL,                    -- 基本空号价格
+            equip_price REAL,                   -- 装备估价价格
+            pet_price REAL,                     -- 召唤兽估价价格
             price REAL,                         -- 价格
             price_desc TEXT,                    -- 价格描述
             unit_price_desc TEXT,               -- 单价描述

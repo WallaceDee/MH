@@ -5,9 +5,12 @@
 宠物API蓝图
 """
 
+import logging
 from flask import Blueprint, request, jsonify
 from ....controllers.pet_controller import PetController
 from ....utils.response import success_response, error_response
+
+logger = logging.getLogger(__name__)
 
 pet_bp = Blueprint('pet', __name__)
 controller = PetController()
@@ -470,6 +473,9 @@ def batch_pet_valuation():
         similarity_threshold = float(data.get('similarity_threshold', 0.8))
         max_anchors = int(data.get('max_anchors', 30))
         
+        # 获取角色eid参数（可选）
+        eid = data.get('eid')
+        
         # 调用批量估价
         result = controller.batch_pet_valuation(
             pet_list=pet_list,
@@ -480,6 +486,29 @@ def batch_pet_valuation():
         
         if "error" in result:
             return error_response(result["error"])
+        
+        # 如果有eid参数，更新角色的宠物估价价格
+        if eid:
+            try:
+                # 计算宠物总价值（包括宠物本身和装备）
+                total_pet_price = 0
+                for item in result.get('results', []):
+                    total_pet_price += item.get('estimated_price', 0)
+                    total_pet_price += item.get('equip_estimated_price', 0)
+                
+                # 更新角色数据库中的宠物估价价格
+                from ....services.role_service import roleService
+                role_service = roleService()
+                success = role_service.update_role_pet_price(eid, total_pet_price)
+                result["pet_price"] = total_pet_price
+                if success:
+                    logger.info(f"成功更新角色 {eid} 的宠物估价价格: {total_pet_price}分")
+                else:
+                    logger.warning(f"更新角色 {eid} 的宠物估价价格失败")
+                    
+            except Exception as e:
+                logger.error(f"更新角色宠物估价价格时出错: {e}")
+                # 不影响估价结果的返回，只记录错误日志
         
         return success_response(data=result, message="批量宠物估价完成")
         

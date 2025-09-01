@@ -85,11 +85,39 @@
           <template #default="scope">
             <div v-html="formatFullPrice(scope.row)"></div>
             <el-tag v-if="get_price_change(scope.row) !== undefined"
-              :type="get_price_change(scope.row) > 0 ? 'danger' : 'success'">
-              <i :class="`el-icon-${get_price_change(scope.row) > 0 ? 'bottom' : 'top'}`"
-                :style="`color: #${get_price_change(scope.row) > 0 ? 'F56C6C;' : '67C23A'}`">￥{{ get_price_change(scope.row)
-                }}</i>
+              :type="get_price_change(scope.row) < 0 ? 'danger' : 'success'">
+              <i :class="`el-icon-${get_price_change(scope.row) < 0 ? 'bottom' : 'top'}`"
+                :style="`color: #${get_price_change(scope.row) < 0 ? 'F56C6C;' : '67C23A'}`">{{get_price_change(scope.row)}}</i>
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="裸号估价" width="120" align="center">
+          <template #default="scope">
+            <el-link 
+              @click.native="handleBasePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
+              <div v-html="formatFullPrice({ price: scope.row.base_price })"></div>
+                估价
+            </el-link>
+          </template>
+        </el-table-column>
+        <el-table-column label="装备估价" width="120" align="center">
+          <template #default="scope">
+            <el-link v-if="get_equip_num(scope.row.roleInfo) > 0"
+              @click.native="handleEquipPrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
+              <div v-html="formatFullPrice({ price: scope.row.equip_price })"></div>⚔️
+              {{ get_equip_num(scope.row.roleInfo) }}件
+            </el-link>
+            <div v-else>-</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="召唤兽估价" width="120" align="center">
+          <template #default="scope">
+            <el-link v-if="get_pet_num(scope.row.roleInfo) > 0"
+              @click.native="handlSummonePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
+              <div v-html="formatFullPrice({ price: scope.row.pet_price })"></div>🐲 {{ get_pet_num(scope.row.roleInfo)
+              }}只
+            </el-link>
+            <div v-else>-</div>
           </template>
         </el-table-column>
         <el-table-column prop="history_price" label="历史价格" width="120" align="center" sortable="custom">
@@ -106,26 +134,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="collect_num" label="收藏" width="80" align="center" sortable="custom">
-        </el-table-column>
-        <el-table-column label="装备估价" width="120" align="center">
-          <template #default="scope">
-            <el-link v-if="get_equip_num(scope.row.roleInfo) > 0" @click="handleEquipPrice(scope.row)" type="primary"
-              target="_blank">
-              <el-statistic group-separator="," :precision="2" :value="0"
-                :title="`⚔️ ${get_equip_num(scope.row.roleInfo)}件`" prefix="￥"
-                :value-style="{ fontSize: '14px' }"></el-statistic>
-            </el-link>
-          </template>
-        </el-table-column>
-        <el-table-column label="召唤兽估价" width="120" align="center">
-          <template #default="scope">
-            <el-link v-if="get_pet_num(scope.row.roleInfo) > 0" @click="handlSummonePrice(scope.row)" type="primary"
-              target="_blank">
-              <el-statistic group-separator="," :precision="2" :value="0"
-                :title="`🐲 ${get_pet_num(scope.row.roleInfo)}只`" prefix="￥"
-                :value-style="{ fontSize: '14px' }"></el-statistic>
-            </el-link>
-          </template>
         </el-table-column>
         <!-- 修炼信息 -->
         <el-table-column label="修炼/控制力" min-width="400" align="center">
@@ -169,7 +177,8 @@
         <el-tag size="mini">{{ valuationDialogTitle.server_name }}</el-tag>
         /
         <el-tag type="info" size="mini">{{ valuationDialogTitle.school }}</el-tag>/
-        <el-link :href="getCBGLinkByType(valuationDialogTitle.eid)" target="_blank">{{ valuationDialogTitle.nickname }}</el-link>
+        <el-link :href="getCBGLinkByType(valuationDialogTitle.eid)" target="_blank">{{ valuationDialogTitle.nickname
+        }}</el-link>
       </span>
       <BatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
         :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
@@ -177,8 +186,16 @@
     </el-dialog>
 
     <!-- 宠物估价结果对话框 -->
-    <el-dialog title="宠物估价结果" :visible.sync="petValuationDialogVisible" width="900px" :close-on-click-modal="false"
+    <el-dialog :visible.sync="petValuationDialogVisible" width="900px" :close-on-click-modal="false"
       :close-on-press-escape="false" custom-class="batch-valuation-dialog">
+      <span slot="title" class="el-dialog__title">
+        <el-tag size="mini">{{ petValuationDialogTitle.server_name }}</el-tag>
+        /
+        <el-tag type="info" size="mini">{{ petValuationDialogTitle.school }}</el-tag>/
+        <el-link :href="getCBGLinkByType(petValuationDialogTitle.eid)" target="_blank">{{
+          petValuationDialogTitle.nickname
+        }}</el-link>
+      </span>
       <PetBatchValuationResult :results="petValuationResults" :total-value="petValuationTotalValue"
         :pet-list="petValuationList" :valuate-params="batchValuateParams" :loading="petValuationLoading"
         @close="closePetValuationDialog" />
@@ -298,7 +315,7 @@ export default {
         nickname: '',
         school: '',
         server_name: '',
-        eid:''
+        eid: ''
       },
       stickyRoleList: [],
       checkedList: [],
@@ -319,6 +336,12 @@ export default {
       petValuationList: [],
       petValuationDialogVisible: false,
       petValuationLoading: false,
+      petValuationDialogTitle: {
+        nickname: '',
+        school: '',
+        server_name: '',
+        eid: ''
+      },
       loading: false,
       tableData: [],
       currentPage: 1,
@@ -390,7 +413,7 @@ export default {
       const history_price_list = JSON.parse(history_price).map(item => item.price)
       if (history_price_list.length === 0) return
       const max_price = Math.max(...history_price_list)
-      return (max_price - price) / 100
+      return (price - max_price) / 100
     },
     // 保存锁定的角色列表到localStorage
     saveStickyRoleList() {
@@ -608,7 +631,7 @@ export default {
         nickname: '',
         school: '',
         server_name: '',
-        eid:''
+        eid: ''
       }
     },
     // 关闭宠物估价结果对话框
@@ -618,8 +641,18 @@ export default {
       this.petValuationTotalValue = 0
       this.petValuationList = []
       this.petValuationLoading = false
+      this.petValuationDialogTitle = {
+        nickname: '',
+        school: '',
+        server_name: '',
+        eid: ''
+      }
     },
-    async handlSummonePrice(role) {
+    async handleBasePrice(role, rowIndex) {
+      console.log({ rowIndex })
+      // this.$set(this.tableData[rowIndex], 'base_price', role.base_price)
+    },
+    async handlSummonePrice(role, rowIndex) {
       const pet_list_desc = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
       let pet_list = JSON.parse(role.all_summon_json)
       if (!pet_list || pet_list.length === 0) {
@@ -688,6 +721,15 @@ export default {
           server_name: role.server_name
         }
       })
+
+      // 设置宠物估价对话框标题
+      this.petValuationDialogTitle = {
+        nickname: role.roleInfo.basic_info.nickname,
+        school: role.roleInfo.basic_info.school,
+        server_name: role.server_name,
+        eid: role.eid
+      }
+
       try {
         // 先显示弹窗和骨架屏
         this.petValuationDialogVisible = true
@@ -698,6 +740,7 @@ export default {
 
         // 调用批量宠物估价API
         const response = await this.$api.pet.batchPetValuation({
+          eid: role.eid,
           pet_list: pet_list.map(({ pet_detail, ...item }) => {
             return item
           }),
@@ -712,7 +755,7 @@ export default {
           const totalValue = results.reduce((sum, result) => {
             return sum + (result.estimated_price || 0) + (result.equip_estimated_price || 0)
           }, 0)
-
+          this.$set(this.tableData[rowIndex], 'pet_price', data.pet_price)
           // 更新弹窗内容，显示实际数据
           this.petValuationResults = results
           this.petValuationTotalValue = totalValue
@@ -797,11 +840,12 @@ export default {
     get_equip_num(roleInfo) {
       return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length
     },
-    async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, basic_info }, serverid, server_name,eid }) {
+    async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, basic_info }, serverid, server_name, eid }, rowIndex) {
+      console.log({ rowIndex })
       const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ ...item, iType: item.type, cDesc: item.desc, serverid, server_name }))
       this.valuationDialogTitle = {
-        nickname:basic_info.nickname,
-        school:basic_info.school,
+        nickname: basic_info.nickname,
+        school: basic_info.school,
         server_name,
         eid
       }
@@ -813,9 +857,9 @@ export default {
         this.valuationResults = []
         this.valuationTotalValue = 0
         this.valuationEquipmentList = equip_list
-        console.log(equip_list)
         // 调用批量估价API
         const response = await this.$api.equipment.batchEquipmentValuation({
+          eid,
           equipment_list: equip_list,
           strategy: 'fair_value',
           similarity_threshold: this.batchValuateParams.similarity_threshold,
@@ -828,6 +872,7 @@ export default {
           const totalValue = results.reduce((sum, result) => {
             return sum + (result.estimated_price || 0)
           }, 0)
+          this.$set(this.tableData[rowIndex], 'equip_price', data.equip_price)
           // 更新弹窗内容，显示实际数据
           this.valuationResults = results
           this.valuationTotalValue = totalValue

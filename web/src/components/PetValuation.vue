@@ -5,8 +5,11 @@
         <PetImage :pet="targetPet.petData" trigger="hover" :equipFaceImg="targetPet.equip_face_img" />
         <span v-html="formatFullPrice(targetPet)" style="margin-left: 10px"></span>
       </el-row>
-      <!-- 无锚点时的重试界面 -->
-      <SimilarGetMore :target-equipment="targetPet" type="pet"/>
+      <!-- 刷新和相似界面 -->
+      <div style="width: 170px;flex-shrink: 0;">
+      <el-button type="primary" @click="$emit('refresh')" size="mini">刷新</el-button>
+        <SimilarGetMore :target-equipment="targetPet" type="pet" />
+      </div>
     </el-row>
     <div class="valuation-main">
       <span class="valuation-label">召唤兽估价:</span>

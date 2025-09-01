@@ -55,6 +55,82 @@ class roleService:
             
         return os.path.join(self.data_dir, f'{year}{month:02d}', db_filename)
 
+    def update_role_equip_price(self, eid: str, equip_price: float, year: Optional[int] = None, month: Optional[int] = None) -> bool:
+        """更新角色的装备估价价格
+        
+        Args:
+            eid: 角色唯一标识符
+            equip_price: 装备估价价格（分）
+            year: 年份
+            month: 月份
+            
+        Returns:
+            bool: 更新是否成功
+        """
+        try:
+            year, month = self._validate_year_month(year, month)
+            db_file = self._get_db_file(year, month)
+            
+            if not os.path.exists(db_file):
+                logger.warning(f"数据库文件不存在: {db_file}")
+                return False
+                
+            with sqlite3.connect(db_file) as conn:
+                cursor = conn.cursor()
+                
+                # 更新装备估价价格
+                sql = "UPDATE roles SET equip_price = ?, update_time = CURRENT_TIMESTAMP WHERE eid = ?"
+                cursor.execute(sql, [equip_price, eid])
+                
+                if cursor.rowcount > 0:
+                    logger.info(f"更新角色装备估价价格成功: {eid} = {equip_price}分")
+                    return True
+                else:
+                    logger.warning(f"未找到角色记录: {eid}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"更新角色装备估价价格失败: {e}")
+            return False
+
+    def update_role_pet_price(self, eid: str, pet_price: float, year: Optional[int] = None, month: Optional[int] = None) -> bool:
+        """更新角色的宠物估价价格
+        
+        Args:
+            eid: 角色唯一标识符
+            pet_price: 宠物估价价格（分）
+            year: 年份
+            month: 月份
+            
+        Returns:
+            bool: 更新是否成功
+        """
+        try:
+            year, month = self._validate_year_month(year, month)
+            db_file = self._get_db_file(year, month)
+            
+            if not os.path.exists(db_file):
+                logger.warning(f"数据库文件不存在: {db_file}")
+                return False
+                
+            with sqlite3.connect(db_file) as conn:
+                cursor = conn.cursor()
+                
+                # 更新宠物估价价格
+                sql = "UPDATE roles SET pet_price = ?, update_time = CURRENT_TIMESTAMP WHERE eid = ?"
+                cursor.execute(sql, [pet_price, eid])
+                
+                if cursor.rowcount > 0:
+                    logger.info(f"更新角色宠物估价价格成功: {eid} = {pet_price}分")
+                    return True
+                else:
+                    logger.warning(f"未找到角色记录: {eid}")
+                    return False
+                    
+        except Exception as e:
+            logger.error(f"更新角色宠物估价价格失败: {e}")
+            return False
+
     def get_roles(self, page: int = 1, page_size: int = 10, year: Optional[int] = None, month: Optional[int] = None,
                   level_min: Optional[int] = None, level_max: Optional[int] = None,
                   # 其他参数
@@ -180,7 +256,11 @@ class roleService:
 
                 # 为了解决字段名冲突，明确列出所有字段并为冲突字段使用别名
                 query = f"""
-                    SELECT l.all_equip_json,l.all_summon_json,l.sum_exp,c.serverid,c.server_name,c.eid,c.seller_nickname,c.level,c.school,c.price,c.accept_bargain,c.history_price,c.dynamic_tags,c.highlight,c.create_time,c.update_time,c.is_split_independent_role,c.is_split_main_role,c.collect_num,c.other_info,c.large_equip_desc FROM roles c
+                    SELECT l.all_equip_json,l.all_summon_json,l.sum_exp,c.serverid,c.server_name,c.eid,
+                    c.seller_nickname,c.level,c.school,c.price,c.accept_bargain,c.history_price,c.dynamic_tags,
+                    c.highlight,c.create_time,c.update_time,c.is_split_independent_role,c.is_split_main_role,c.collect_num,
+                    c.other_info,c.large_equip_desc,c.split_price_desc,c.base_price,c.equip_price,c.pet_price
+                    FROM roles c
                     LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
                     WHERE {level_where}
                     ORDER BY {order_by}

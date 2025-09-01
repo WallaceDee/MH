@@ -59,7 +59,7 @@
             <el-tag type="success" v-if="getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel">{{
               getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel }}锻</el-tag>
             <el-tag v-for="tag in getEquipGemInfoAndBlueBlock(item.cDesc).blueBlock" :key="tag" type="primary">{{ tag
-              }}</el-tag>
+            }}</el-tag>
           </div>
         </el-col>
       </el-row>
@@ -165,8 +165,8 @@ export default {
         // similarity_threshold:0.8,
         // max_anchors:30
         // 获取估价信息（包含相似装备）
-        if(window.is_pet_equip(equipment.kindid)){
-          equipment={
+        if (window.is_pet_equip(equipment.kindid)) {
+          equipment = {
             kindid: 29,
             desc: equipment.desc
           }
@@ -386,37 +386,39 @@ export default {
 
 .result-item.error {
   border-left: 4px solid #f56c6c;
+  /* 红色 - 极低置信度 */
+  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);
 }
 
 /* 根据置信度的颜色变化 */
 .result-item.confidence-high {
   border-left: 4px solid #67c23a;
   /* 绿色 - 高置信度 */
-  background: linear-gradient(135deg, #f0f9ff 0%, #e1f3d8 100%);
+  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);
 }
 
 .result-item.confidence-medium {
   border-left: 4px solid #409eff;
   /* 蓝色 - 中等置信度 */
-  background: linear-gradient(135deg, #f0f8ff 0%, #e1f5fe 100%);
+  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);
 }
 
 .result-item.confidence-low {
   border-left: 4px solid #909399;
   /* 灰色 - 较低置信度 */
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .result-item.confidence-very-low {
   border-left: 4px solid #e6a23c;
   /* 橙色 - 很低置信度 */
-  background: linear-gradient(135deg, #fdf6ec 0%, #fdf2e9 100%);
+  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);
 }
 
 .result-item.confidence-extremely-low {
   border-left: 4px solid #f56c6c;
   /* 红色 - 极低置信度 */
-  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
+  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);
 }
 
 .result-footer {

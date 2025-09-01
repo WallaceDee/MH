@@ -5,9 +5,12 @@
 装备API蓝图
 """
 
+import logging
 from flask import Blueprint, request, jsonify
 from ....controllers.equipment_controller import EquipmentController
 from ....utils.response import success_response, error_response
+
+logger = logging.getLogger(__name__)
 
 equipment_bp = Blueprint('equipment', __name__)
 controller = EquipmentController()
@@ -314,6 +317,9 @@ def batch_equipment_valuation():
         similarity_threshold = float(data.get('similarity_threshold', 0.8))
         max_anchors = int(data.get('max_anchors', 30))
         
+        # 获取角色eid参数（可选）
+        eid = data.get('eid')
+        
         # 调用批量估价
         result = controller.batch_equipment_valuation(
             equipment_list=equipment_list,
@@ -325,6 +331,28 @@ def batch_equipment_valuation():
         if "error" in result:
             # 批量估价失败时，返回400状态码，但将完整结果放在data字段中
             return error_response(result["error"], code=400, http_code=400, data=result)
+        
+        # 如果有eid参数，更新角色的装备估价价格
+        if eid:
+            try:
+                # 计算装备总价值
+                total_equip_price = 0
+                for item in result.get('results', []):
+                    total_equip_price += item.get('estimated_price', 0)
+                
+                # 更新角色数据库中的装备估价价格
+                from ....services.role_service import roleService
+                role_service = roleService()
+                success = role_service.update_role_equip_price(eid, total_equip_price)
+                result["equip_price"] = total_equip_price
+                if success:
+                    logger.info(f"成功更新角色 {eid} 的装备估价价格: {total_equip_price}分")
+                else:
+                    logger.warning(f"更新角色 {eid} 的装备估价价格失败")
+                    
+            except Exception as e:
+                logger.error(f"更新角色装备估价价格时出错: {e}")
+                # 不影响估价结果的返回，只记录错误日志
         
         return success_response(data=result, message="批量装备估价完成")
         

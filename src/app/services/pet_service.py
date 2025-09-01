@@ -722,12 +722,35 @@ class PetService:
                 similarity_threshold=similarity_threshold,
                 max_anchors=max_anchors
             )
+            
+            # 检查是否有错误或无效物品
             if "error" in result:
                 return {
                     "error": result["error"],
                     "estimated_price": 0,
-                    "estimated_price_yuan": 0
+                    "estimated_price_yuan": 0,
+                    "skip_reason": result.get("skip_reason", "")
                 }
+            
+            # 检查是否是无效物品（被跳过估价）
+            if result.get("invalid_item", False):
+                skip_reason = result.get("skip_reason", "")
+                estimated_price = result.get("estimated_price", 0)
+                return {
+                    "estimated_price": estimated_price,
+                    "estimated_price_yuan": round(estimated_price / 100, 2),
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "confidence": result.get("confidence", 0),
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": equip_valuations,
+                    "equip_estimated_price": sum(equip_val.get("estimated_price", 0) for equip_val in equip_valuations if isinstance(equip_val, dict)),
+                    "skip_reason": skip_reason,
+                    "invalid_item": True
+                }
+            
             estimated_price = result.get("estimated_price", 0)
 
             # 直接使用calculate_value返回的锚点信息，避免重复查找
@@ -743,7 +766,9 @@ class PetService:
                 "max_anchors": max_anchors,
                 "price_range": result.get("price_range", {}),
                 "equip_valuations": equip_valuations,
-                "equip_estimated_price": sum(equip_val.get("estimated_price", 0) for equip_val in equip_valuations if isinstance(equip_val, dict))
+                "equip_estimated_price": sum(equip_val.get("estimated_price", 0) for equip_val in equip_valuations if isinstance(equip_val, dict)),
+                "skip_reason": result.get("skip_reason", ""),
+                "invalid_item": False
             }
         except Exception as e:
             logger.error(f"获取宠物估价时出错: {e}")
@@ -1397,7 +1422,8 @@ class PetService:
                         "confidence": 0,
                         "anchor_count": 0,
                         "equip_estimated_price": 0,
-                        "equip_valuations": []
+                        "equip_valuations": [],
+                        "skip_reason": result.get("skip_reason", "")
                     }
                 else:
                     # 处理成功情况
@@ -1460,7 +1486,9 @@ class PetService:
                         "price_range": result.get("price_range", {}),
                         "strategy": strategy,
                         "equip_estimated_price": equip_estimated_price,
-                        "equip_valuations": equip_valuations
+                        "equip_valuations": equip_valuations,
+                        "skip_reason": result.get("skip_reason", ""),
+                        "invalid_item": result.get("invalid_item", False)
                     }
                 
                 processed_results.append(processed_result)

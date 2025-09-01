@@ -12,7 +12,7 @@
           <h4>相似召唤兽 (共{{ similarData.anchor_count }}个)<em style="font-size: 12px;">-相似度阈值: {{
             similarData.similarity_threshold }}</em></h4>
           <!-- 召唤兽估价信息 -->
-          <PetValuation :valuation="valuation" :target-pet="pet" :equip_sn="pet.equip_sn"/>
+          <PetValuation :valuation="valuation" :target-pet="pet" :equip_sn="pet.equip_sn" @refresh="refresh"/>
           <div v-if="similarData.statistics" class="stats">
             <span>
               价格范围:
@@ -69,6 +69,9 @@ export default {
     handleShow() {
       this.$emit('show', this.pet)
     },
+    refresh() {
+      this.handleShow()
+    }
   }
 }
 </script>

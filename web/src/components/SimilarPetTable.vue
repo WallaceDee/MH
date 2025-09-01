@@ -1,7 +1,7 @@
 <template>
   <el-table :data="anchors" stripe max-height="300" style="width: 100%" sortable :sort-by="['price', 'similarity']"
     :sort-order="['ascending', 'descending']">
-    <el-table-column fixed prop="price" label="价格 (元)" width="100" sortable>
+    <el-table-column fixed prop="price" label="价格 (元)" width="140" sortable>
       <template #default="scope">
         <span>{{ scope.row.server_name }}</span>
         <div v-html="formatFullPrice(scope.row)"></div>
