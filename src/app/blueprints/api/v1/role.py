@@ -253,6 +253,54 @@ def get_role_valuation():
         return error_response(f"获取角色估价失败: {str(e)}")
 
 
+@role_bp.route('/find-anchors', methods=['POST'])
+def find_role_anchors():
+    """查找相似角色锚点"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供角色参数")
+        
+        eid = data.get('eid')
+        if not eid:
+            return error_response("请提供角色eid")
+        
+        year = data.get('year')
+        month = data.get('month')
+        role_type = data.get('role_type', 'normal')
+        similarity_threshold = data.get('similarity_threshold', 0.7)
+        max_anchors = data.get('max_anchors', 30)
+        
+        # 验证年月参数
+        if year:
+            try:
+                year = int(year)
+            except ValueError:
+                return error_response("年份参数格式错误")
+        if month:
+            try:
+                month = int(month)
+            except ValueError:
+                return error_response("月份参数格式错误")
+        
+        result = controller.find_role_anchors(
+            eid, 
+            year, 
+            month, 
+            role_type,
+            similarity_threshold, 
+            max_anchors
+        )
+        
+        if "error" in result:
+            return error_response(result["error"], code=400, data=result)
+        
+        return success_response(data=result, message="查找相似角色锚点成功")
+        
+    except Exception as e:
+        return error_response(f"查找相似角色锚点失败: {str(e)}")
+
+
 @role_bp.route('/batch-valuation', methods=['POST'])
 def batch_role_valuation():
     """批量角色估价"""

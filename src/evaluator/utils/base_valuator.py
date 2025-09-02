@@ -78,15 +78,10 @@ class BaseValuator(ABC):
                     'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
                 }
             
+            print(target_features, 'target_featurestarget_featurestarget_featurestarget_featurestarget_featurestarget_features')
             # 寻找市场锚点
-            print(f"[DEBUG] 开始寻找市场锚点，特征类型: {type(target_features)}")
-            print(f"[DEBUG] 特征字段: {list(target_features.keys()) if isinstance(target_features, dict) else 'not dict'}")
-            print(f"[DEBUG] 参数：threshold={similarity_threshold}, max_anchors={max_anchors}")
-            
             anchors = self.find_market_anchors(
                 target_features, similarity_threshold, max_anchors, verbose=verbose)
-            
-            print(f"[DEBUG] 锚点搜索完成，找到 {len(anchors) if anchors else 0} 个锚点")
             
             if len(anchors) == 0:
                 return {
@@ -98,33 +93,8 @@ class BaseValuator(ABC):
                 }
             
             # 提取价格和相似度
-            print(f"[DEBUG] 开始提取锚点价格和相似度，锚点数量: {len(anchors)}")
-            print(f"[DEBUG] 锚点内容: {anchors}")
-            
-            anchor_prices = []
-            anchor_similarities = []
-            
-            for i, anchor in enumerate(anchors):
-                print(f"[DEBUG] 处理锚点 {i}: {anchor}")
-                print(f"[DEBUG] 锚点类型: {type(anchor)}")
-                
-                if anchor is None:
-                    print(f"[DEBUG] 锚点 {i} 是 None，跳过")
-                    continue
-                
-                try:
-                    price = anchor['price']
-                    similarity = anchor['similarity']
-                    print(f"[DEBUG] 锚点 {i} 提取成功: price={price}, similarity={similarity}")
-                    anchor_prices.append(price)
-                    anchor_similarities.append(similarity)
-                except Exception as e:
-                    print(f"[DEBUG] 锚点 {i} 提取失败: {e}")
-                    print(f"[DEBUG] 锚点 {i} 详细内容: {anchor}")
-                    raise
-            
-            print(f"[DEBUG] 价格列表: {anchor_prices}")
-            print(f"[DEBUG] 相似度列表: {anchor_similarities}")
+            anchor_prices = [anchor['price'] for anchor in anchors]
+            anchor_similarities = [anchor['similarity'] for anchor in anchors]
             
             # 根据策略计算估价
             if strategy == 'competitive':
@@ -191,40 +161,23 @@ class BaseValuator(ABC):
         Returns:
             float: 加权中位数
         """
-        print(f"[DEBUG _weighted_median] values: {values}")
-        print(f"[DEBUG _weighted_median] weights: {weights}")
-        print(f"[DEBUG _weighted_median] values type: {type(values)}")
-        print(f"[DEBUG _weighted_median] weights type: {type(weights)}")
-        
         if not values or not weights:
             return 0.0
         
         # 将数值和权重配对并排序
         paired = list(zip(values, weights))
-        print(f"[DEBUG _weighted_median] paired: {paired}")
         paired.sort(key=lambda x: x[0])
         
         # 计算累积权重
         total_weight = sum(weights)
         cumulative_weight = 0
         
-        for i, item in enumerate(paired):
-            print(f"[DEBUG _weighted_median] item {i}: {item}, type: {type(item)}")
-            if item is None:
-                print(f"[DEBUG _weighted_median] 发现None项在索引 {i}")
-                continue
-            try:
-                value, weight = item
-                print(f"[DEBUG _weighted_median] 解包成功: value={value}, weight={weight}")
-                cumulative_weight += weight
-                if cumulative_weight >= total_weight * 0.5:
-                    return float(value)
-            except Exception as e:
-                print(f"[DEBUG _weighted_median] 解包失败在索引 {i}: {e}")
-                print(f"[DEBUG _weighted_median] 问题项内容: {item}")
-                raise
+        for value, weight in paired:
+            cumulative_weight += weight
+            if cumulative_weight >= total_weight * 0.5:
+                return float(value)
         
-        return float(paired[-1][0]) if paired else 0.0  # fallback
+        return float(paired[-1][0])  # fallback
     
     def _calculate_confidence(self, anchors: List[Dict[str, Any]], anchor_count: int) -> float:
         """
@@ -320,81 +273,3 @@ class BaseValuator(ABC):
         
         return results
     
-    def value_distribution_report(self, target_features: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        生成价值分布报告（通用方法）
-        
-        Args:
-            target_features: 目标特征字典
-            
-        Returns:
-            Dict[str, Any]: 价值分布报告
-        """
-        try:
-            print("生成价值分布报告...")
-            
-            # 寻找锚点
-            anchors = self.find_market_anchors(
-                target_features, similarity_threshold=0.5, max_anchors=50)
-            
-            if len(anchors) == 0:
-                return {
-                    'error': '未找到足够的市场锚点',
-                    'min_price': 0,
-                    'max_price': 0,
-                    'median_price': 0,
-                    'anchor_count': 0
-                }
-            
-            # 提取价格数据
-            prices = [anchor['price'] for anchor in anchors]
-            similarities = [anchor['similarity'] for anchor in anchors]
-            
-            # 计算统计量
-            min_price = float(min(prices))
-            max_price = float(max(prices))
-            median_price = float(np.median(prices))
-            percentile_25 = float(np.percentile(prices, 25))
-            percentile_75 = float(np.percentile(prices, 75))
-            
-            # 计算推荐价格
-            competitive_result = self.calculate_value(
-                target_features, 'competitive', max_anchors=len(anchors))
-            fair_result = self.calculate_value(
-                target_features, 'fair_value', max_anchors=len(anchors))
-            
-            # 生成价格分布直方图数据
-            hist_bins = 10
-            hist_counts, hist_edges = np.histogram(prices, bins=hist_bins)
-            
-            # 构建报告
-            report = {
-                'min_price': min_price,
-                'max_price': max_price,
-                'median_price': median_price,
-                'percentile_25': percentile_25,
-                'percentile_75': percentile_75,
-                'recommended_competitive': competitive_result['estimated_price'],
-                'recommended_fair': fair_result['estimated_price'],
-                'anchor_count': len(anchors),
-                'price_distribution': {
-                    'bins': [float(edge) for edge in hist_edges],
-                    'counts': [int(count) for count in hist_counts]
-                },
-                'anchor_details': [
-                    {
-                        'id': anchor.get('equip_sn', anchor.get('equip_id', anchor.get('id', i))),
-                        'price': float(anchor['price']),
-                        'similarity': round(float(anchor['similarity']), 3)
-                    }
-                    for i, anchor in enumerate(anchors[:20])  # 返回前20个详细信息
-                ]
-            }
-            
-            print(f"价值分布报告生成完成，基于 {len(anchors)} 个锚点")
-            
-            return report
-            
-        except Exception as e:
-            self.logger.error(f"生成价值分布报告失败: {e}")
-            return {'error': str(e)} 

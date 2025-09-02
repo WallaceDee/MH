@@ -662,6 +662,7 @@ export default {
               anchor_count: data.anchor_count,
               similarity_threshold: data.similarity_threshold,
               anchors: allAnchors,
+              max_anchors: data.max_anchors,
               statistics: {
                 price_range: {
                   min: Math.min(...allAnchors.map((a) => a.price || 0)),

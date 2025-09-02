@@ -78,7 +78,7 @@ import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 
 export default {
-  name: 'BatchValuationResult',
+  name: 'EquipBatchValuationResult',
   props: {
     results: {
       type: Array,

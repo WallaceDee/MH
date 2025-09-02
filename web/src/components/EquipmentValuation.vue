@@ -1,5 +1,5 @@
 <template>
-  <div class="valuation-info">
+  <div class="valuation-info" :class="confidenceClass">
     <el-row type="flex" align="middle" justify="space-between">
       <el-row type="flex" align="middle">
         <EquipmentImage :equipment="targetEquipment" width="50px" height="50px" placement="left" />
@@ -10,7 +10,7 @@
             <el-divider direction="vertical" />
             <el-tag type="primary">总伤：{{ targetEquipment.feature.all_damage }}/{{
               parseInt(all_damage_standards?.[targetEquipment.feature.equip_level][1]
-                + (25 * targetEquipment.feature.equip_level/30)) }}</el-tag>
+                + (25 * targetEquipment.feature.equip_level / 30)) }}</el-tag>
           </div>
           <div>
             <el-tag type="danger">初伤：{{ targetEquipment.feature.init_damage_raw }}点{{
@@ -34,14 +34,18 @@
       <el-link type="danger" @click.native="markAsAbnormal" size="mini">标记为异常</el-link>
 
       <!-- 价格比率显示 -->
-      <span v-if="priceRatio" class="price-ratio" :class="priceRatioClass">
+      <span v-if="priceRatio" class="price-ratio">
         <el-tag :type="priceRatioTagType" disable-transitions>
           {{ priceRatioText }}
         </el-tag>
       </span>
     </div>
     <div class="valuation-details">
-      <span>置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}</span>
+      <span class="confidence-display" :class="confidenceTextClass">
+        <i :class="confidenceIcon"></i>
+        置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}
+        <span class="confidence-level">{{ confidenceLevel }}</span>
+      </span>
       <span>基于{{ valuation ? valuation.anchor_count + '个锚点' : '-' }}</span>
       <span v-if="priceRatio">估价比率: {{ (priceRatio * 100).toFixed(1) }}%</span>
     </div>
@@ -126,29 +130,86 @@ export default {
         return `估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`
       }
     },
-
-    // 根据比率生成样式类
-    priceRatioClass() {
-      if (!this.priceRatio) return ''
-
-      const ratio = this.priceRatio
-
-      if (ratio >= 1.5) {
-        return 'ratio-severe-high'
-      } else if (ratio >= 1.2) {
-        return 'ratio-high'
-      } else if (ratio >= 1.1) {
-        return 'ratio-slightly-high'
-      } else if (ratio >= 0.95) {
-        return 'ratio-reasonable'
-      } else if (ratio >= 0.8) {
-        return 'ratio-slightly-low'
-      } else if (ratio >= 0.5) {
-        return 'ratio-low'
-      } else {
-        return 'ratio-severe-low'
+    // 根据置信度返回对应的CSS类
+    confidenceClass() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return 'confidence-extremely-low'
       }
-    }
+      
+      const confidence = this.valuation.confidence
+      
+      if (confidence >= 0.8) {
+        return 'confidence-high'        // >= 80%: 高置信度 (绿色)
+      } else if (confidence >= 0.6) {
+        return 'confidence-medium'      // 60-79%: 中等置信度 (蓝色)
+      } else if (confidence >= 0.4) {
+        return 'confidence-low'         // 40-59%: 较低置信度 (灰色)
+      } else if (confidence >= 0.2) {
+        return 'confidence-very-low'    // 20-39%: 很低置信度 (橙色)
+      } else {
+        return 'confidence-extremely-low' // < 20%: 极低置信度 (红色)
+      }
+    },
+    // 置信度文本颜色类
+    confidenceTextClass() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return 'text-danger'
+      }
+      
+      const confidence = this.valuation.confidence
+      
+      if (confidence >= 0.8) {
+        return 'text-success'
+      } else if (confidence >= 0.6) {
+        return 'text-primary'
+      } else if (confidence >= 0.4) {
+        return 'text-info'
+      } else if (confidence >= 0.2) {
+        return 'text-warning'
+      } else {
+        return 'text-danger'
+      }
+    },
+    // 置信度图标
+    confidenceIcon() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return 'el-icon-warning'
+      }
+      
+      const confidence = this.valuation.confidence
+      
+      if (confidence >= 0.8) {
+        return 'el-icon-success'
+      } else if (confidence >= 0.6) {
+        return 'el-icon-info'
+      } else if (confidence >= 0.4) {
+        return 'el-icon-question'
+      } else if (confidence >= 0.2) {
+        return 'el-icon-warning'
+      } else {
+        return 'el-icon-error'
+      }
+    },
+    // 置信度等级描述
+    confidenceLevel() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return '(数据缺失)'
+      }
+      
+      const confidence = this.valuation.confidence
+      
+      if (confidence >= 0.8) {
+        return '(高)'
+      } else if (confidence >= 0.6) {
+        return '(中)'
+      } else if (confidence >= 0.4) {
+        return '(偏低)'
+      } else if (confidence >= 0.2) {
+        return '(很低)'
+      } else {
+        return '(极低)'
+      }
+    },
   },
   methods: {
     getWeaponConfig() {
@@ -252,56 +313,70 @@ export default {
   flex-wrap: wrap;
 }
 
-/* 价格比率样式 */
-.price-ratio {
-  font-size: 12px;
+.confidence-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-weight: 500;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: 8px;
 }
 
-.ratio-severe-high {
-  background-color: #fef0f0;
-  color: #f56c6c;
-  border: 1px solid #fbc4c4;
-  font-weight: 600;
+.confidence-display i {
+  font-size: 14px;
 }
 
-.ratio-high {
-  background-color: #fef0f0;
-  color: #f56c6c;
-  border: 1px solid #fbc4c4;
+.confidence-level {
+  font-size: 11px;
+  opacity: 0.8;
 }
 
-.ratio-slightly-high {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-  border: 1px solid #f5dab1;
+/* 置信度文本颜色 */
+.text-success {
+  color: #67c23a !important;
 }
 
-.ratio-reasonable {
-  background-color: #f0f9ff;
-  color: #67c23a;
-  border: 1px solid #c2e7b0;
+.text-primary {
+  color: #409eff !important;
 }
 
-.ratio-slightly-low {
-  background-color: #f0f9ff;
-  color: #409eff;
-  border: 1px solid #b3d8ff;
+.text-info {
+  color: #909399 !important;
 }
 
-.ratio-low {
-  background-color: #f4f4f5;
-  color: #909399;
-  border: 1px solid #d3d4d6;
+.text-warning {
+  color: #e6a23c !important;
 }
 
-.ratio-severe-low {
-  background-color: #f4f4f5;
-  color: #909399;
-  border: 1px solid #d3d4d6;
-  font-weight: 600;
+.text-danger {
+  color: #f56c6c !important;
+}
+/* 根据置信度的颜色变化 */
+.valuation-info.confidence-high {
+  border-left: 4px solid #67c23a;
+  /* 绿色 - 高置信度 */
+  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);
+}
+
+.valuation-info.confidence-medium {
+  border-left: 4px solid #409eff;
+  /* 蓝色 - 中等置信度 */
+  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);
+}
+
+.valuation-info.confidence-low {
+  border-left: 4px solid #909399;
+  /* 灰色 - 较低置信度 */
+  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.valuation-info.confidence-very-low {
+  border-left: 4px solid #e6a23c;
+  /* 橙色 - 很低置信度 */
+  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);
+}
+
+.valuation-info.confidence-extremely-low {
+  border-left: 4px solid #f56c6c;
+  /* 红色 - 极低置信度 */
+  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);
 }
 </style>

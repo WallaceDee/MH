@@ -436,7 +436,6 @@ class HybridValuationEngine:
             
             # 获取详细的市场分析
             features = self._extract_and_calibrate_features(role_data)
-            market_distribution = self.market_evaluator.value_distribution_report(features)
             
             # 构建综合报告
             report = {
@@ -453,7 +452,6 @@ class HybridValuationEngine:
                     'rule_confidence': result.rule_confidence,
                     'anchor_count': result.anchor_count
                 },
-                'market_distribution': market_distribution,
                 'value_breakdown': result.value_breakdown,
                 'risk_assessment': {
                     'anomaly_detected': result.anomaly_score > 0.5,

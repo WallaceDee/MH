@@ -45,58 +45,50 @@ class MarketAnchorEvaluator(BaseValuator):
             self.market_collector = MarketDataCollector()
         else:
             self.market_collector = market_data_collector
-            
-
         
-        # 定义特征容忍度配置 - 分为绝对容忍度和相对容忍度
-        # 绝对容忍度：用于整数值特征（如修炼等级）
-        self.absolute_tolerances = {
-            # 修炼系统特征 - 绝对差值容忍度
-            'expt_ski1': 1,          # 攻击修炼允许±1级差异
-            'expt_ski2': 1,          # 防御修炼允许±1级差异
-            'expt_ski3': 1,          # 法术修炼允许±1级差异
-            'expt_ski4': 1,          # 抗法修炼允许±1级差异
-            'expt_ski5': 1,          # 猎术修炼允许±1级差异
-            'beast_ski1': 1,         # 召唤兽攻击修炼允许±1级差异
-            'beast_ski2': 1,         # 召唤兽防御修炼允许±1级差异
-            'beast_ski3': 1,         # 召唤兽法术修炼允许±1级差异
-            'beast_ski4': 1,         # 召唤兽抗法修炼允许±1级差异
-            'total_cultivation': 5,  # 总修炼允许±5级差异
-            'total_beast_cultivation': 4,  # 召唤兽总修炼允许±4级差异
+        # 相对容忍度：统一配置所有特征的相对差值比例
+        self.relative_tolerances = {
+            # 修炼系统特征 - 相对容忍度
+            'expt_ski1': 0.05,       # 攻击修炼容忍度5%
+            'expt_ski2': 0.05,       # 防御修炼容忍度5%
+            'expt_ski3': 0.05,       # 法术修炼容忍度5%
+            'expt_ski4': 0.05,       # 抗法修炼容忍度5%
+            'expt_ski5': 0.10,       # 猎术修炼容忍度10%
+            'beast_ski1': 0.05,      # 召唤兽攻击修炼容忍度5%
+            'beast_ski2': 0.05,      # 召唤兽防御修炼容忍度5%
+            'beast_ski3': 0.05,      # 召唤兽法术修炼容忍度5%
+            'beast_ski4': 0.05,      # 召唤兽抗法修炼容忍度5%
+            'total_cultivation': 0.1,  # 总修炼容忍度5%
+            'total_beast_cultivation': 0.1,  # 召唤兽总修炼容忍度5%
             
-            # 等级和关键整数特征
-            'level': 30,              # 等级允许±30级差异
-            'all_new_point': 0,      # 乾元丹必须完全一致
-            'three_fly_lv': 0,       # 化圣等级必须一致
-            'school_history_count': 1,  # 历史门派数允许±1差异
-            'packet_page': 2,        # 行囊页数允许±2差异
-            'allow_pet_count': 2,    # 召唤兽上限允许±2差异
+            # 等级和关键特征
+            'level': 0.25,           # 等级容忍度25%
+            'all_new_point': 0.0,    # 乾元丹必须完全一致
+            'three_fly_lv': 0.0,     # 化圣等级必须一致
+            'school_history_count': 0.20,  # 历史门派数容忍度20%
+            'packet_page': 0.15,     # 行囊页数容忍度15%
+            'sum_amount': 0.15, # 召唤兽上限容忍度15%
             
             # 召唤兽和法宝系统
-            'premium_pet_count': 2,     # 特殊召唤兽允许±2差异
-            'premium_fabao_count': 10,   # 法宝允许±10差异
-            'hight_grow_rider_count': 1, # 高成长坐骑允许±1差异
+            'hight_grow_rider_count': 0.25, # 高成长坐骑容忍度25%
             
             # 特殊状态
-            'qianyuandan_breakthrough': 0,  # 乾元丹突破必须一致
-        }
-        
-        # 相对容忍度：用于大数值特征（如经验、金钱等）
-        self.relative_tolerances = {
-            # 经验和成长系统 - 相对容忍度
-            'sum_exp': 1.0,         # 总经验容忍度30%
+            'qianyuandan_breakthrough': 0.0,  # 乾元丹突破必须一致
+            
+            # 经验和成长系统
+            'sum_exp': 0.5,         # 总经验容忍度50%
             'yushoushu_skill': 1.0,  # 育兽术等级容忍度100%
             
             # 其他增值系统
             'lingyou_count': 0.50,   # 灵佑次数容忍度50%
             'jiyuan_amount': 0.50,   # 机缘值容忍度50%
-            'xianyu_amount': 1.0,   # 仙玉容忍度80%
+            'xianyu_amount': 0.8,   # 仙玉容忍度80%
             'learn_cash': 0.80,      # 储备金容忍度80%
             
-            # 技能系统 - 组合特征（移除冗余特征）
-            'avg_school_skills': 0.05,      # 师门技能平均值
-            'high_life_skills_count': 0.20, # 高等级生活技能数量
-            'total_qiangzhuang_shensu': 0.10, # 强壮神速总和
+            # 技能系统 - 组合特征
+            'avg_school_skills': 0.05,      # 师门技能平均值容忍度5%
+            'high_life_skills_count': 0.20, # 高等级生活技能数量容忍度20%
+            'total_qiangzhuang_shensu': 0.10, # 强壮神速总和容忍度10%
             
             # 外观和神器系统
             'shenqi_score': 0.5,           # 神器得分容忍度50%
@@ -116,12 +108,12 @@ class MarketAnchorEvaluator(BaseValuator):
             
             # 很重要特征 - 显著影响价值
             'total_beast_cultivation': 1, # 召唤兽总修炼
-            'total_cultivation': 1, # 总修炼
+            'total_cultivation': 0.5, # 总修炼
             
             # 重要特征 - 中等影响
             'avg_school_skills': 0.8,
-            'three_fly_lv': 1, # 化圣等级
-            'total_qiangzhuang_shensu': 0.6, # 强壮神速总和
+            'three_fly_lv': 1.0, # 化圣等级
+            'total_qiangzhuang_shensu': 1.0, # 强壮神速总和
             'school_history_count': 0.6, # 历史门派数
             'high_life_skills_count': 0.6, # 高等级生活技能数量
          
@@ -131,22 +123,20 @@ class MarketAnchorEvaluator(BaseValuator):
             'hight_grow_rider_count': 0.4, # 高成长坐骑数量
             
             # 外观和神器特征 - 中等权重
-            'shenqi_score': 0.5, # 神器得分
+            'shenqi_score': 1.0, # 神器得分
             'limited_skin_score': 0.5, # 限量锦衣得分
             'limited_huge_horse_score': 0.5, # 限量祥瑞得分
             
             # 次要特征 - 低权重
-            'jiyuan_amount': 0.3, # 机缘值
+            'jiyuan_amount': 1.0, # 机缘值
             
             # 可选特征 - 最低权重
-            'premium_pet_count': 0.1,
             'yushoushu_skill': 0.1,
             'xianyu_amount': 0.1,
-            'learn_cash': 0.2,
-            'sum_exp': 0.2,
+            'learn_cash': 0.1,
+            'sum_exp': 0.1,
             'packet_page': 0.1,
-            'allow_pet_count': 0.1,
-            'premium_fabao_count': 0.1
+            'sum_amount': 0.1,
         }
         
         print("市场锚定估价器初始化完成")
@@ -168,7 +158,7 @@ class MarketAnchorEvaluator(BaseValuator):
             List[Dict[str, Any]]: 锚点角色列表，每个元素包含：
                 - similarity: 相似度分数
                 - price: 价格
-                - equip_id: 装备ID
+                - eid: 角色藏宝阁上架ID
                 - features: 完整特征数据
         """
         try:
@@ -216,10 +206,10 @@ class MarketAnchorEvaluator(BaseValuator):
             
             self.logger.info(f"[FIND_ANCHORS] 开始计算相似度，处理 {len(market_data)} 条数据")
             
-            for i, (equip_id, market_row) in enumerate(market_data.iterrows()):
+            for i, (eid, market_row) in enumerate(market_data.iterrows()):
                 try:
                     if i < 3:  # 只记录前3条的详细日志，避免日志过多
-                        self.logger.debug(f"[FIND_ANCHORS] 处理第 {i+1} 条数据，equip_id: {equip_id}")
+                        self.logger.debug(f"[FIND_ANCHORS] 处理第 {i+1} 条数据，eid: {eid}")
                         self.logger.debug(f"[FIND_ANCHORS] market_row类型: {type(market_row)}")
                     
                     # 计算相似度 - 确保数据类型转换
@@ -228,39 +218,18 @@ class MarketAnchorEvaluator(BaseValuator):
                     if i < 3:
                         self.logger.debug(f"[FIND_ANCHORS] market_dict转换完成，包含 {len(market_dict)} 个字段")
                     
-                    similarity = self._calculate_similarity(target_features, market_dict)
+                    similarity = self._calculate_similarity(target_features, market_dict, verbose=verbose and i < 3)
                     
                     if similarity >= similarity_threshold:
                         anchor_candidates.append({
-                            'equip_id': equip_id,
-                            'similarity': float(similarity),
+                            'eid': eid,
+                            'similarity': round(float(similarity), 3),
                             'price': float(market_row.get('price', 0)),
                             'features': market_dict
                         })
                         
                 except Exception as e:
-                    # 详细记录有问题的数据
-                    market_dict = self._convert_pandas_row_to_dict(market_row)
-                    self.logger.error(f"处理角色 {equip_id} 时出错: {e}")
-                    self.logger.error(f"问题数据内容: {market_dict}")
-                    
-                    # 记录具体的修炼字段值，帮助诊断
-                    cultivation_fields = ['expt_ski1', 'expt_ski2', 'expt_ski3', 'expt_ski4', 'expt_ski5', 
-                                        'beast_ski1', 'beast_ski2', 'beast_ski3', 'beast_ski4']
-                    problematic_fields = {}
-                    for field in cultivation_fields:
-                        if field in market_dict:
-                            value = market_dict[field]
-                            if value is None or (isinstance(value, str) and value.strip() == ''):
-                                problematic_fields[field] = value
-                    
-                    if problematic_fields:
-                        self.logger.error(f"发现问题字段: {problematic_fields}")
-                    
-                    # 记录数据类型信息
-                    field_types = {k: type(v).__name__ for k, v in market_dict.items() if k in cultivation_fields}
-                    self.logger.error(f"字段类型信息: {field_types}")
-                    
+                    self.logger.error(f"处理角色 {eid} 时出错")
                     error_count += 1
                     continue
             
@@ -303,48 +272,24 @@ class MarketAnchorEvaluator(BaseValuator):
         # 等级过滤（±30级）
         if 'level' in target_features:
             level = target_features['level']
-            level_range = (max(1, level - 30), level + 30)
+            level_range = (max(1, level - 0), level + 0)
             filters['level_range'] = level_range
             self.logger.debug(f"[BUILD_FILTERS] 等级过滤: {level_range} (目标等级: {level})")
             
-        # 修炼等级总和相差(±30) 不包含猎修
-        if 'total_cultivation' in target_features:
-            total_cultivation = target_features['total_cultivation']
-            cultivation_tolerance = 30
-            filters['total_cultivation_range'] = (
-                max(0, total_cultivation - cultivation_tolerance),
-                total_cultivation + cultivation_tolerance
-            )
- 
-        # 召唤兽控制力总和相差(±30)
-        if 'total_beast_cultivation' in target_features:
-            total_beast_cultivation = target_features['total_beast_cultivation']
-            beast_cultivation_tolerance = 30
-            filters['total_beast_cultivation_range'] = (
-                max(0, total_beast_cultivation - beast_cultivation_tolerance),
-                total_beast_cultivation + beast_cultivation_tolerance
-            )
- 
-        # 师门技能平均值相差(±30)
-        if 'avg_school_skills' in target_features:
-            avg_school_skills = target_features['avg_school_skills']
-            school_skills_tolerance = 30
-            filters['avg_school_skills_range'] = (
-                max(0, avg_school_skills - school_skills_tolerance),
-                avg_school_skills + school_skills_tolerance
-            )
 
         return filters
     
     def _calculate_similarity(self, 
                             target_features: Dict[str, Any], 
-                            market_features: Dict[str, Any]) -> float:
+                            market_features: Dict[str, Any],
+                            verbose: bool = False) -> float:
         """
         计算两个角色特征的相似度
         
         Args:
             target_features: 目标角色特征
             market_features: 市场角色特征
+            verbose: 是否显示详细调试日志
             
         Returns:
             float: 相似度分数（0-1）
@@ -358,14 +303,17 @@ class MarketAnchorEvaluator(BaseValuator):
             total_weight = 0
             weighted_similarity = 0
             
-            # 合并所有特征名称
-            all_features = set(self.absolute_tolerances.keys()) | set(self.relative_tolerances.keys())
+            # 获取所有特征名称
+            all_features = set(self.relative_tolerances.keys())
             
             # 实现门派修炼智能匹配逻辑
             # 在梦幻西游中，物理门派主修攻击修炼(expt_ski1)，法术门派主修法术修炼(expt_ski3)
             # 两者价值等同，需要智能匹配最优组合
             target_features_adjusted = self._adjust_cultivation_features(target_features)
             market_features_adjusted = self._adjust_cultivation_features(market_features)
+            
+            # 收集所有特征的计算结果，用于按得分排序输出
+            feature_results = []
             
             for feature_name in all_features:
                 if feature_name not in target_features_adjusted and feature_name not in market_features_adjusted:
@@ -382,34 +330,36 @@ class MarketAnchorEvaluator(BaseValuator):
                 
                 weight = self.feature_weights.get(feature_name, 0.5)
                 
-                # 计算特征相似度
+                # 权重为0的特征不参与计算
+                if weight == 0:
+                    continue
+                
+                # 计算特征相似度 - 统一使用相对容忍度
+                calculation_method = ""
                 if target_val == 0 and market_val == 0:
                     # 两者都为0，完全匹配
                     feature_similarity = 1.0
+                    calculation_method = "零值匹配"
                 elif feature_name in ['all_new_point', 'qianyuandan_breakthrough', 'three_fly_lv']:
                     # 关键特征必须完全一致
                     feature_similarity = 1.0 if target_val == market_val else 0.0
-                elif feature_name in self.absolute_tolerances:
-                    # 使用绝对容忍度计算
-                    tolerance = self.absolute_tolerances[feature_name]
-                    abs_diff = abs(target_val - market_val)
-                    
-                    if abs_diff <= tolerance:
-                        # 在容忍度内，相似度为1
-                        feature_similarity = 1.0
-                    elif abs_diff <= tolerance * 2:
-                        # 超出容忍度但在2倍范围内，线性递减
-                        feature_similarity = max(0, 1.0 - (abs_diff - tolerance) / max(tolerance, 1))
-                    else:
-                        # 差异太大，相似度为0
-                        feature_similarity = 0.0
+                    calculation_method = "精确匹配"
                 elif feature_name in self.relative_tolerances:
                     # 使用相对容忍度计算
                     tolerance = self.relative_tolerances[feature_name]
                     
-                    if target_val == 0 or market_val == 0:
+                    if tolerance == 0.0:
+                        # 容忍度为0表示必须完全一致
+                        feature_similarity = 1.0 if target_val == market_val else 0.0
+                        calculation_method = "精确匹配"
+                    elif target_val == 0 and market_val == 0:
+                        # 两者都为0，完全匹配
+                        feature_similarity = 1.0
+                        calculation_method = "零值匹配"
+                    elif target_val == 0 or market_val == 0:
                         # 一个为0一个不为0，给予部分相似度
                         feature_similarity = 0.3
+                        calculation_method = "零值处理"
                     else:
                         # 计算相对差异
                         denominator = max(abs(target_val), abs(market_val))
@@ -424,16 +374,55 @@ class MarketAnchorEvaluator(BaseValuator):
                         else:
                             # 差异太大，相似度为0
                             feature_similarity = 0.0
+                        calculation_method = f"相对容忍({tolerance:.2f})"
                 else:
                     # 未配置的特征，使用默认逻辑
                     if target_val == market_val:
                         feature_similarity = 1.0
                     else:
                         feature_similarity = 0.5  # 给予中等相似度
+                    calculation_method = "默认逻辑"
+                
+                # 计算加权得分
+                weighted_score = feature_similarity * weight
+                
+                # 收集特征结果
+                feature_results.append({
+                    'name': feature_name,
+                    'target_val': target_val,
+                    'market_val': market_val,
+                    'weight': weight,
+                    'similarity': feature_similarity,
+                    'weighted_score': weighted_score,
+                    'method': calculation_method
+                })
                 
                 weighted_similarity += feature_similarity * weight
                 total_weight += weight
             
+            # 按权重降序排序并输出调试信息
+            feature_results.sort(key=lambda x: x['weight'], reverse=True)
+
+            # 添加特征权重日志
+            if verbose:
+                print(f"\n=== 角色相似度计算详情 ===")
+                print("特征名称                 | 目标值    | 市场值    | 权重     | 相似度   | 加权得分 | 计算方法")
+                print("-" * 100)
+
+                for result in feature_results:
+                    if result['weight'] > 0.05:  # 只显示权重大于0.05的特征
+                        # 格式化数值显示
+                        target_val_str = f"{result['target_val']:.2f}" if isinstance(result['target_val'], float) else str(result['target_val'])
+                        market_val_str = f"{result['market_val']:.2f}" if isinstance(result['market_val'], float) else str(result['market_val'])
+                        
+                        print(f"{result['name']:20s} | {target_val_str:>8s} | {market_val_str:>8s} | {result['weight']:7.2f} | {result['similarity']:7.3f} | {result['weighted_score']:7.3f} | {result['method']}")
+
+                print("-" * 100)
+                print(f"{'总计':20s} | {'':8s} | {'':8s} | {total_weight:7.2f} | {'':7s} | {weighted_similarity:7.3f} | {'':>12s}")
+                final_similarity = weighted_similarity / total_weight if total_weight > 0 else 0.0
+                print(f"最终相似度: {weighted_similarity:.3f} / {total_weight:.3f} = {final_similarity:.3f}")
+                print("=" * 100)
+
             # 计算加权平均相似度
             if total_weight > 0:
                 final_similarity = weighted_similarity / total_weight
@@ -506,16 +495,7 @@ class MarketAnchorEvaluator(BaseValuator):
             adjusted_features['expt_ski3'] = second_cultivation  # 统一主修炼
             adjusted_features['expt_ski4'] = expt_ski4  # 抗法修炼保持原值
             adjusted_features['expt_ski5'] = expt_ski5  # 猎术修炼保持原值
-            
-            # 重新计算人物总修炼值（基于调整后的数值），确保所有值都是数字
-            total_cultivation = (
-                adjusted_features.get('expt_ski1', 0) + 
-                adjusted_features.get('expt_ski2', 0) + 
-                adjusted_features.get('expt_ski3', 0) + 
-                adjusted_features.get('expt_ski4', 0) 
-            )
-            adjusted_features['total_cultivation'] = total_cultivation
-            
+
             # 召唤兽总修炼保持原值，不重新计算
             # total_beast_cultivation 保持原始值
             

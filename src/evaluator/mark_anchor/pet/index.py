@@ -86,7 +86,6 @@ class PetMarketAnchorEvaluator(BaseValuator):
             List[Dict[str, Any]]: 锚点召唤兽列表，每个元素包含：
                 - similarity: 相似度分数
                 - price: 价格
-                - equip_id: 装备ID
                 - features: 完整特征数据
         """
         try:

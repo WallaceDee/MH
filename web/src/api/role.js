@@ -103,6 +103,21 @@ export const roleApi = {
   },
 
   /**
+   * 查找相似角色锚点
+   * @param {Object} params - 查询参数
+   * @param {string} params.eid - 角色唯一标识符
+   * @param {number} params.year - 年份
+   * @param {number} params.month - 月份
+   * @param {string} params.role_type - 角色类型（可选，默认normal）
+   * @param {number} params.similarity_threshold - 相似度阈值（可选，默认0.7）
+   * @param {number} params.max_anchors - 最大锚点数量（可选，默认30）
+   * @returns {Promise}
+   */
+  findRoleAnchors(params = {}) {
+    return api.post('/role/find-anchors', params)
+  },
+
+  /**
    * 健康检查
    * @returns {Promise}
    */

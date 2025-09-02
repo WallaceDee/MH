@@ -128,7 +128,7 @@ class roleService:
                 cursor = conn.cursor()
                 
                 # 更新装备估价价格
-                sql = "UPDATE roles SET equip_price = ?, update_time = CURRENT_TIMESTAMP WHERE eid = ?"
+                sql = "UPDATE roles SET equip_price = ? WHERE eid = ?"
                 cursor.execute(sql, [equip_price, eid])
                 
                 if cursor.rowcount > 0:
@@ -166,7 +166,7 @@ class roleService:
                 cursor = conn.cursor()
                 
                 # 更新宠物估价价格
-                sql = "UPDATE roles SET pet_price = ?, update_time = CURRENT_TIMESTAMP WHERE eid = ?"
+                sql = "UPDATE roles SET pet_price = ? WHERE eid = ?"
                 cursor.execute(sql, [pet_price, eid])
                 
                 if cursor.rowcount > 0:
@@ -204,7 +204,7 @@ class roleService:
                 cursor = conn.cursor()
                 
                 # 更新裸号估价价格（使用base_price字段）
-                sql = "UPDATE roles SET base_price = ?, update_time = CURRENT_TIMESTAMP WHERE eid = ?"
+                sql = "UPDATE roles SET base_price = ? WHERE eid = ?"
                 cursor.execute(sql, [base_price, eid])
                 
                 if cursor.rowcount > 0:
@@ -410,7 +410,22 @@ class roleService:
 
                 # 使用联接查询获取完整信息
                 query = """
-                    SELECT  l.*,c.*  FROM roles c
+                    SELECT 
+                        c.eid, c.serverid, c.server_name, c.seller_nickname, c.level, c.school,
+                        c.price, c.accept_bargain, c.history_price, c.dynamic_tags,
+                        c.highlight, c.create_time, c.update_time, c.collect_num,
+                        c.other_info, c.base_price, c.equip_price, c.pet_price,
+                        c.is_split_independent_role, c.is_split_main_role,
+                        c.large_equip_desc, c.split_price_desc,
+                        c.yushoushu_skill, c.school_skills, c.life_skills, c.expire_time,
+                        l.sum_exp, l.three_fly_lv, l.all_new_point,
+                        l.jiyuan_amount, l.packet_page, l.xianyu_amount, l.learn_cash,
+                        l.sum_amount, l.role_icon,
+                        l.expt_ski1, l.expt_ski2, l.expt_ski3, l.expt_ski4, l.expt_ski5,
+                        l.beast_ski1, l.beast_ski2, l.beast_ski3, l.beast_ski4,
+                        l.changesch_json, l.ex_avt_json, l.huge_horse_json, l.shenqi_json,
+                        l.all_equip_json, l.all_summon_json, l.all_rider_json
+                    FROM roles c
                     LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
                     WHERE c.eid = ?
                 """
@@ -710,6 +725,18 @@ class roleService:
                 estimated_price = result.final_value if hasattr(result, 'final_value') else 0
                 estimated_price_yuan = estimated_price / 100.0  # 转换为元
                 
+                # 估价成功后自动更新数据库中的base_price
+                if estimated_price > 0:
+                    try:
+                        update_success = self.update_role_base_price(eid, int(estimated_price), year, month)
+                        if update_success:
+                            logger.info(f"自动更新角色 {eid} 的估价价格: {estimated_price}分")
+                        else:
+                            logger.warning(f"自动更新角色 {eid} 的估价价格失败")
+                    except Exception as update_error:
+                        logger.error(f"自动更新角色 {eid} 估价价格时出错: {update_error}")
+                        # 不影响估价结果的返回，只记录错误
+                
                 return {
                     "estimated_price": int(estimated_price),
                     "estimated_price_yuan": round(estimated_price_yuan, 2),
@@ -743,6 +770,125 @@ class roleService:
                 "error": f"获取角色估价时出错: {str(e)}",
                 "estimated_price": 0,
                 "estimated_price_yuan": 0
+            }
+
+    def find_role_anchors(self, eid: str, year: Optional[int] = None, month: Optional[int] = None,
+                         role_type: str = 'normal', similarity_threshold: float = 0.7, max_anchors: int = 30) -> Dict:
+        """查找相似角色锚点"""
+        try:
+            # 先查询角色数据
+            role_data = self.get_role_details(eid, year, month, role_type)
+            if not role_data:
+                return {
+                    "error": f"未找到角色 {eid} 的数据",
+                    "anchors": [],
+                    "anchor_count": 0
+                }
+            
+            # 使用特征提取器提取特征
+            try:
+                role_features = self.feature_extractor.extract_features(role_data)
+            except Exception as e:
+                return {
+                    "error": f"特征提取失败: {str(e)}",
+                    "anchors": [],
+                    "anchor_count": 0
+                }
+            
+            # 获取市场锚定评估器
+            if not self.market_evaluator:
+                return {
+                    "error": "市场锚定评估器未初始化",
+                    "anchors": [],
+                    "anchor_count": 0
+                }
+            
+            market_evaluator = self.market_evaluator
+            
+            # 查找相似角色锚点
+            try:
+                anchors = market_evaluator.find_market_anchors(
+                    target_features=role_features,
+                    similarity_threshold=similarity_threshold,
+                    max_anchors=max_anchors,
+                    verbose=False
+                )
+                
+                if not anchors:
+                    return {
+                        "anchors": [],
+                        "anchor_count": 0,
+                        "statistics": None,
+                        "message": "未找到相似角色"
+                    }
+                
+                # 格式化锚点数据中的相似度，保留三位小数并获取完整角色信息
+                result_anchors = []
+                for anchor in anchors:
+                    # 从空号数据库获取完整的角色信息
+                    anchor_eid = anchor.get('eid')
+                    full_role_info = self.get_role_details(anchor_eid, year, month, role_type='empty')
+                    
+                    if full_role_info:
+                        # 组合锚点信息和完整角色信息
+                        anchor_info = {
+                            **full_role_info,  # 包含所有角色基础信息
+                            'eid': anchor_eid,
+                            'similarity': round(float(anchor.get('similarity', 0)), 3),
+                            'price': float(anchor.get('price', 0))
+                        }
+                    else:
+                        # 如果无法获取完整信息，使用基础信息
+                        anchor_info = {
+                            'eid': anchor_eid,
+                            'similarity': round(float(anchor.get('similarity', 0)), 3),
+                            'price': float(anchor.get('price', 0)),
+                            'nickname': '未知角色',
+                            'server_name': '未知服务器',
+                            'level': 0,
+                            'school': '未知门派'
+                        }
+                    result_anchors.append(anchor_info)
+                
+                # 计算统计信息
+                prices = [anchor.get('price', 0) for anchor in result_anchors]
+                similarities = [anchor.get('similarity', 0) for anchor in result_anchors]
+                
+                statistics = {
+                    "price_range": {
+                        "min": min(prices) if prices else 0,
+                        "max": max(prices) if prices else 0,
+                        "avg": sum(prices) / len(prices) if prices else 0
+                    },
+                    "similarity_range": {
+                        "min": round(min(similarities), 3) if similarities else 0,
+                        "max": round(max(similarities), 3) if similarities else 0,
+                        "avg": round(sum(similarities) / len(similarities), 3) if similarities else 0
+                    }
+                }
+                
+                return {
+                    "anchors": result_anchors,
+                    "anchor_count": len(result_anchors),
+                    "statistics": statistics,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "target_features": role_features
+                }
+                
+            except Exception as e:
+                return {
+                    "error": f"查找锚点失败: {str(e)}",
+                    "anchors": [],
+                    "anchor_count": 0
+                }
+            
+        except Exception as e:
+            logger.error(f"查找相似角色锚点时出错: {e}")
+            return {
+                "error": f"查找相似角色锚点时出错: {str(e)}",
+                "anchors": [],
+                "anchor_count": 0
             }
 
     def batch_role_valuation(self, eid_list: List[str], year: Optional[int] = None, month: Optional[int] = None,

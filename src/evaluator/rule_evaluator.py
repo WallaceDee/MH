@@ -89,17 +89,10 @@ class RuleEvaluator:
             print("正在查询数据库...")
             cursor.execute("""
                 SELECT 
-                    c.id, c.equip_id, c.server_name, c.seller_nickname, c.level, c.price,
-                    c.price_desc, c.school AS school_desc, c.area_name, c.icon_index,
-                    c.kindid, c.game_ordersn, c.pass_fair_show, c.fair_show_end_time,
-                    c.accept_bargain, c.status_desc, c.onsale_expire_time_desc, c.expire_time,
-                    c.race, c.fly_status, c.collect_num, c.life_skills, c.school_skills,
-                    c.ju_qing_skills,c.yushoushu_skill, c.all_pets_json, c.all_equip_json AS all_equip_json_desc,
-                    c.all_shenqi_json, c.all_rider_json AS all_rider_json_desc, c.all_fabao_json,
-                    c.ex_avt_json AS ex_avt_json_desc, c.create_time, c.update_time,
+                    c.*,
                     l.*
                 FROM roles c
-                LEFT JOIN large_equip_desc_data l ON c.equip_id = l.equip_id
+                LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
                 WHERE c.price > 0 AND l.all_equip_json =='{}' AND l.all_summon_json == '[]'
             """)
 
@@ -115,7 +108,7 @@ class RuleEvaluator:
                 role_data = dict(zip(columns, row))
                 features = self._extract_features(role_data, conn)
                 features['price'] = role_data.get('price', 0)
-                features['equip_id'] = role_data.get('equip_id', '')
+                features['eid'] = role_data.get('eid', '')
                 data.append(features)
                 if (i + 1) % 10 == 0:
                     print(f"已处理 {i + 1}/{len(rows)} 条数据")
@@ -124,7 +117,7 @@ class RuleEvaluator:
             # 转换为DataFrame
             self.df = pd.DataFrame(data)
             print(f"DataFrame 形状: {self.df.shape}")
-            self.df.set_index('equip_id', inplace=True)
+            self.df.set_index('eid', inplace=True)
 
             print("数据加载和预处理完成")
 
@@ -335,8 +328,8 @@ class RuleEvaluator:
                 print(f"高成长坐骑: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('rider', 1.0)})")
             
             # 17. 召唤兽最大携带量
-            allow_pet_count = features.get('allow_pet_count', 0)
-            raw_value = RULE.get('AllowPetCount2Value', {}).get(str(allow_pet_count), 0)
+            sum_amount = features.get('sum_amount', 0)
+            raw_value = RULE.get('AllowPetCount2Value', {}).get(str(sum_amount), 0)
             discount_value = raw_value * DISCOUNT_RATES.get('pet_count', 1.0)
             if raw_value > 0:
                 value_breakdown['pet_count'] = discount_value
@@ -385,7 +378,7 @@ class RuleEvaluator:
                 print(f"限量祥瑞: 直接计入 {limited_huge_horse_value} 元")
             
             # 最终价值转换
-            final_value = total_value / RULE['RMB2MHB'] * RULE['MARKET_FACTOR']
+            final_value = total_value / RULE['RMB2MHB'] *100* RULE['MARKET_FACTOR']
             # 直接加上限量锦衣和祥瑞的元价值
             final_value += limited_skin_value + limited_huge_horse_value
             

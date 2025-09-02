@@ -49,7 +49,7 @@ class MarketDataCollector:
         print(f"空号市场数据采集器初始化完成，数据库路径: {self.db_path}")
     
     def _find_recent_dbs(self) -> List[str]:
-        """查找所有可用的空号角色数据库文件"""
+        """查找当月和上月的装备数据库文件"""
         import glob
         from datetime import datetime, timedelta
 
@@ -66,54 +66,36 @@ class MarketDataCollector:
         print(f"优先查找数据库文件，目标月份: {target_months}")
 
         # 数据库文件固定存放在根目录的data文件夹中
-        data_path = "data"
+        from src.utils.project_path import get_data_path
+        data_path = get_data_path()
         found_dbs = []
 
         # 首先查找指定月份的数据库文件
         for month in target_months:
-            # 尝试多种数据库文件命名模式
-            possible_names = [
-                f"cbg_roles_{month}.db",  # 普通角色数据库
-                f"cbg_empty_roles_{month}.db",  # 空号角色数据库
-                f"empty_roles_{month}.db",  # 旧格式空号角色数据库
-                f"empty_characters_{month}.db"  # 另一种格式
-            ]
-            
-            for db_name in possible_names:
-                db_file = os.path.join(data_path, month, db_name)
-                if os.path.exists(db_file):
-                    found_dbs.append(db_file)
-                    print(f"找到指定月份数据库文件: {db_file}")
-                    break  # 找到一个就跳出
+            db_file = os.path.join(data_path, month, f"cbg_empty_roles_{month}.db")
+            if os.path.exists(db_file):
+                found_dbs.append(db_file)
+                print(f"找到指定月份数据库文件: {db_file}")
 
-        # 如果没找到指定月份的，则查找所有可用的角色数据库文件
+        # 如果没找到指定月份的，则查找所有可用的装备数据库文件
         if not found_dbs:
-            print("未找到指定月份的数据库文件，查找所有可用的角色数据库文件")
+            print("未找到指定月份的数据库文件，查找所有可用的装备数据库文件")
             # 查找所有年月文件夹下的数据库文件
-            patterns = [
-                os.path.join(data_path, "*", "cbg_roles_*.db"),
-                os.path.join(data_path, "*", "cbg_empty_roles_*.db"),
-                os.path.join(data_path, "*", "empty_roles_*.db"),
-                os.path.join(data_path, "*", "empty_characters_*.db")
-            ]
-            
-            all_dbs = []
-            for pattern in patterns:
-                all_dbs.extend(glob.glob(pattern))
-            
+            pattern = os.path.join(data_path, "*", "cbg_empty_roles_*.db")
+            all_dbs = glob.glob(pattern)
+
             # 按文件名排序，最新的在前
             all_dbs.sort(reverse=True)
-            
+
             # 取最新的2个数据库文件
             found_dbs = all_dbs[:2]
             print(f"找到所有数据库文件: {all_dbs}")
             print(f"使用最新的数据库文件: {found_dbs}")
-
         return found_dbs
     
     def refresh_market_data(self, 
                            filters: Optional[Dict[str, Any]] = None,
-                           max_records: int = 10000) -> pd.DataFrame:
+                           max_records: int = 1000) -> pd.DataFrame:
         """
         刷新市场数据
         
@@ -187,19 +169,14 @@ class MarketDataCollector:
                     # 提取特征
                     features = self.feature_extractor.extract_features(role_data)
                     
-                    # 添加基本信息 - 使用eid而不是equip_id
+                    # 添加基本信息 - 使用eid而不是eid
                     features.update({
-                        'equip_id': role_data.get('eid', ''),  # 修复：使用eid
-                        'price': role_data.get('price', 0),
-                        'server_name': role_data.get('server_name', ''),
-                        'school_desc': role_data.get('school', ''),  # 修复：使用school
-                        'collect_num': role_data.get('collect_num', 0),
-                        'create_time': role_data.get('create_time', ''),
-                        'seller_nickname': role_data.get('seller_nickname', '')
+                        'eid': role_data.get('eid', ''),  # 修复：使用eid
+                        'price': role_data.get('price', 0)
                     })
                     
                     # 计算派生特征
-                    features = self._calculate_derived_features(features)
+                    # features = self._calculate_derived_features(features)
                     
                     market_data.append(features)
                     
@@ -214,7 +191,7 @@ class MarketDataCollector:
             self.market_data = pd.DataFrame(market_data)
             
             if not self.market_data.empty:
-                self.market_data.set_index('equip_id', inplace=True)
+                self.market_data.set_index('eid', inplace=True)
                 print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据")
                 print(f"数据特征维度: {len(self.market_data.columns)}")
                 print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
@@ -228,62 +205,7 @@ class MarketDataCollector:
             self.logger.error(f"刷新市场数据失败: {e}")
             raise
     
-    def _calculate_derived_features(self, features: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        计算派生特征
-        
-        Args:
-            features: 原始特征字典
-            
-        Returns:
-            Dict[str, Any]: 包含派生特征的字典
-        """
-        # 总修炼等级 - 安全处理None值
-        cultivation_keys = ['expt_ski1', 'expt_ski2', 'expt_ski3', 'expt_ski4']
-        cultivation_values = []
-        for key in cultivation_keys:
-            value = features.get(key, 0)
-            # 如果值是None，转换为0
-            cultivation_values.append(0 if value is None else value)
-        features['total_cultivation'] = sum(cultivation_values)
-        
-        # 总召唤兽修炼等级 - 安全处理None值
-        beast_cultivation_keys = ['beast_ski1', 'beast_ski2', 'beast_ski3', 'beast_ski4']
-        beast_cultivation_values = []
-        for key in beast_cultivation_keys:
-            value = features.get(key, 0)
-            # 如果值是None，转换为0
-            beast_cultivation_values.append(0 if value is None else value)
-        features['total_beast_cultivation'] = sum(beast_cultivation_values)
-        
-        # 总技能等级 - 安全处理None值和空列表
-        school_skills = features.get('school_skills', [])
-        if school_skills is None or not isinstance(school_skills, list):
-            school_skills = []
-        features['avg_school_skills'] = (sum(school_skills) / len(school_skills)) if school_skills else 0
-        
-        # 生活技能统计 - 安全处理None值和空列表
-        life_skills = features.get('life_skills', [])
-        if life_skills is None or not isinstance(life_skills, list):
-            life_skills = []
-        features['high_life_skills_count'] = sum(1 for skill in life_skills if skill >= 140) if life_skills else 0
-        
-        # 强壮神速统计 - 安全处理None值和空列表
-        qiangzhuang_shensu = features.get('qiangzhuang&shensu', [])
-        if qiangzhuang_shensu is None or not isinstance(qiangzhuang_shensu, list):
-            qiangzhuang_shensu = []
-        features['total_qiangzhuang_shensu'] = sum(qiangzhuang_shensu) if qiangzhuang_shensu else 0
-        
-        # 综合评分（用于快速筛选） - 更新公式，移除冗余特征
-        features['comprehensive_score'] = (
-            features.get('total_cultivation', 0) * 0.5 +
-            features.get('total_beast_cultivation', 0) * 0.5 +
-            features.get('high_life_skills_count', 0) * 0.3 +
-            features.get('total_qiangzhuang_shensu', 0) * 0.1 +
-            features.get('avg_school_skills', 0) * 0.2 
-        )
-        
-        return features
+
     
     def get_market_data(self) -> pd.DataFrame:
         """
@@ -298,38 +220,6 @@ class MarketDataCollector:
         
         return self.market_data
     
-    def get_market_summary(self) -> Dict[str, Any]:
-        """
-        获取市场数据摘要
-        
-        Returns:
-            Dict[str, Any]: 市场摘要信息
-        """
-        if self.market_data.empty:
-            return {'error': '市场数据为空'}
-        
-        df = self.market_data
-        
-        summary = {
-            'total_count': len(df),
-            'price_stats': {
-                'min': df['price'].min(),
-                'max': df['price'].max(),
-                'mean': df['price'].mean(),
-                'median': df['price'].median(),
-                'std': df['price'].std()
-            },
-            'level_distribution': df['level'].value_counts().to_dict(),
-            'school_distribution': df.get('school_desc', pd.Series()).value_counts().to_dict(),
-            'server_distribution': df.get('server_name', pd.Series()).value_counts().to_dict(),
-            'feature_stats': {
-                'avg_cultivation': df.get('total_cultivation', pd.Series()).mean(),
-                'avg_gems': df.get('total_gem_level', pd.Series()).mean(),
-                'premium_skill_rate': (df.get('premium_skill_count', 0) > 0).mean() if 'premium_skill_count' in df.columns else 0
-            }
-        }
-        
-        return summary
     
     def filter_market_data(self, 
                           level_range: Optional[tuple] = None,
@@ -464,32 +354,3 @@ class MarketDataCollector:
             return filtered_data
         
         return market_data
-
-
-if __name__ == "__main__":
-    # 测试代码
-    try:
-        collector = MarketDataCollector()
-        
-        # 刷新市场数据
-        market_data = collector.refresh_market_data(max_records=1000)
-        
-        # 获取市场摘要
-        summary = collector.get_market_summary()
-        print("\n=== 市场数据摘要 ===")
-        print(f"总数据量: {summary['total_count']}")
-        print(f"价格范围: {summary['price_stats']['min']:.1f} - {summary['price_stats']['max']:.1f}")
-        print(f"平均价格: {summary['price_stats']['mean']:.1f}")
-        print(f"中位价格: {summary['price_stats']['median']:.1f}")
-        
-        # 测试筛选功能
-        filtered_data = collector.filter_market_data(
-            level_range=(109, 175),
-            price_range=(1000, 50000)
-        )
-        print(f"\n筛选后数据量: {len(filtered_data)}")
-        
-    except Exception as e:
-        print(f"测试失败: {e}")
-        import traceback
-        traceback.print_exc() 

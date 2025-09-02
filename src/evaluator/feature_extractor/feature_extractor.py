@@ -55,7 +55,7 @@ class FeatureExtractor:
                 - lingyou_count (int): 灵佑数量
                 - hours_listed (int): 上架时间(小时)
                 - collect_num (int): 收藏数量
-                - allow_pet_count (int): 最大召唤兽携带数量
+                - sum_amount (int): 最大召唤兽携带数量
                 -- 规则引擎使用
                 - limited_skin_value (int): 限量锦衣价值（规则引擎使用）
                 - limited_huge_horse_value (int): 限量祥瑞价值（规则引擎使用）
@@ -65,6 +65,12 @@ class FeatureExtractor:
                 - limited_other_score (int): 限量其他得分（市场锚定法使用）
                 - limited_skin_score (int): 限量祥瑞得分（市场锚定法使用）
                 - shenqi_score (float): 神器得分（归一化0-100）
+                -- 派生特征
+                - total_cultivation (int): 总修炼等级（攻击+防御+法术+抗法修炼）
+                - total_beast_cultivation (int): 总召唤兽修炼等级（召唤兽攻击+防御+法术+抗法修炼）
+                - avg_school_skills (float): 平均师门技能等级
+                - high_life_skills_count (int): 高等级生活技能数量（≥140级）
+                - total_qiangzhuang_shensu (int): 强壮神速技能总和
 
         """
         try:
@@ -95,6 +101,9 @@ class FeatureExtractor:
             max_score = 50000
             shenqi_score = min(raw_score / max_score * 100, 100) if max_score > 0 else 0
             features['shenqi_score'] = round(shenqi_score, 2)
+
+            # 七、计算派生特征
+            features.update(self._calculate_derived_features(features))
 
             return features
 
@@ -257,7 +266,7 @@ class FeatureExtractor:
             'learn_cash': safe_float_to_int(data.get('learn_cash')),  # 储备金
             'hight_grow_rider_count': hightGrowRiderCount,
             # 最大召唤兽携带数量
-            'allow_pet_count': safe_float_to_int(data.get('allow_pet_count')),
+            'sum_amount': safe_float_to_int(data.get('sum_amount')),
 
             'shenqi': shenqi,
             'gender': gender,
@@ -738,3 +747,53 @@ class FeatureExtractor:
         except (ValueError, TypeError) as e:
             self.logger.error(f"获取角色性别失败: {e}")
             return "0"
+
+    def _calculate_derived_features(self, features: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        计算派生特征
+        
+        Args:
+            features: 原始特征字典
+            
+        Returns:
+            Dict[str, Any]: 包含派生特征的字典
+        """
+        derived_features = {}
+        
+        # 总修炼等级 - 安全处理None值
+        cultivation_keys = ['expt_ski1', 'expt_ski2', 'expt_ski3', 'expt_ski4']
+        cultivation_values = []
+        for key in cultivation_keys:
+            value = features.get(key, 0)
+            # 如果值是None，转换为0
+            cultivation_values.append(0 if value is None else value)
+        derived_features['total_cultivation'] = sum(cultivation_values)
+        
+        # 总召唤兽修炼等级 - 安全处理None值
+        beast_cultivation_keys = ['beast_ski1', 'beast_ski2', 'beast_ski3', 'beast_ski4']
+        beast_cultivation_values = []
+        for key in beast_cultivation_keys:
+            value = features.get(key, 0)
+            # 如果值是None，转换为0
+            beast_cultivation_values.append(0 if value is None else value)
+        derived_features['total_beast_cultivation'] = sum(beast_cultivation_values)
+        
+        # 总技能等级 - 安全处理None值和空列表
+        school_skills = features.get('school_skills', [])
+        if school_skills is None or not isinstance(school_skills, list):
+            school_skills = []
+        derived_features['avg_school_skills'] = (sum(school_skills) / len(school_skills)) if school_skills else 0
+        
+        # 生活技能统计 - 安全处理None值和空列表
+        life_skills = features.get('life_skills', [])
+        if life_skills is None or not isinstance(life_skills, list):
+            life_skills = []
+        derived_features['high_life_skills_count'] = sum(1 for skill in life_skills if skill >= 140) if life_skills else 0
+        
+        # 强壮神速统计 - 安全处理None值和空列表
+        qiangzhuang_shensu = features.get('qiangzhuang&shensu', [])
+        if qiangzhuang_shensu is None or not isinstance(qiangzhuang_shensu, list):
+            qiangzhuang_shensu = []
+        derived_features['total_qiangzhuang_shensu'] = sum(qiangzhuang_shensu) if qiangzhuang_shensu else 0
+
+        return derived_features

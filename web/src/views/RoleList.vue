@@ -93,18 +93,25 @@
         </el-table-column>
         <el-table-column label="裸号估价" width="120" align="center">
           <template #default="scope">
-            <el-link 
-              @click.native="handleBasePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
-              <div v-html="formatFullPrice({ price: scope.row.base_price })"></div>
+            <div class="role-valuation-cell">
+              
+              <SimilarRoleModal 
+                :role="scope.row" 
+                :similar-data="roleSimilarData"
+                @show="loadSimilarRoles($event, scope.$index)">
+                <el-link type="primary" href="javascript:void(0)">
+                  <div v-html="formatFullPrice({ price: scope.row.base_price })" style="font-size: 12px;"></div>
                 估价
-            </el-link>
+              </el-link>
+              </SimilarRoleModal>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="装备估价" width="120" align="center">
           <template #default="scope">
             <el-link v-if="get_equip_num(scope.row.roleInfo) > 0"
               @click.native="handleEquipPrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
-              <div v-html="formatFullPrice({ price: scope.row.equip_price })"></div>⚔️
+              <div v-html="formatFullPrice({ price: scope.row.equip_price })" style="font-size: 12px;"></div>⚔️
               {{ get_equip_num(scope.row.roleInfo) }}件
             </el-link>
             <div v-else>-</div>
@@ -114,7 +121,7 @@
           <template #default="scope">
             <el-link v-if="get_pet_num(scope.row.roleInfo) > 0"
               @click.native="handlSummonePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
-              <div v-html="formatFullPrice({ price: scope.row.pet_price })"></div>🐲 {{ get_pet_num(scope.row.roleInfo)
+              <div v-html="formatFullPrice({ price: scope.row.pet_price })" style="font-size: 12px;"></div>🐲 {{ get_pet_num(scope.row.roleInfo)
               }}只
             </el-link>
             <div v-else>-</div>
@@ -180,7 +187,7 @@
         <el-link :href="getCBGLinkByType(valuationDialogTitle.eid)" target="_blank">{{ valuationDialogTitle.nickname
         }}</el-link>
       </span>
-      <BatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
+      <EquipBatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
         :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
         @close="closeValuationDialog" />
     </el-dialog>
@@ -205,8 +212,9 @@
 
 <script>
 import dayjs from 'dayjs'
-import BatchValuationResult from '@/components/BatchValuationResult.vue'
+import EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'
 import PetBatchValuationResult from '@/components/PetBatchValuationResult.vue'
+import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 export default {
@@ -214,8 +222,9 @@ export default {
   mixins: [commonMixin],
   components: {
     RoleImage,
-    BatchValuationResult,
-    PetBatchValuationResult
+    EquipBatchValuationResult,
+    PetBatchValuationResult,
+    SimilarRoleModal
   },
   computed: {
     roleType() {
@@ -311,6 +320,7 @@ export default {
   },
   data() {
     return {
+      roleSimilarData:null,
       valuationDialogTitle: {
         nickname: '',
         school: '',
@@ -344,9 +354,6 @@ export default {
       },
       // 角色估价相关
       loadingStates: {}, // 用于控制各个操作的加载状态
-      currentYear: new Date().getFullYear(),
-      currentMonth: new Date().getMonth() + 1,
-      currentRoleType: 'normal',
       loading: false,
       tableData: [],
       currentPage: 1,
@@ -653,53 +660,66 @@ export default {
         eid: ''
       }
     },
-    async handleBasePrice(role, rowIndex) {
-      console.log({ rowIndex })
-      
+    // 角色估价和相似角色数据加载
+    async loadSimilarRoles(role, rowIndex) {
       try {
+        this.roleSimilarData=null
+        console.log('角色估价和加载相似数据:', role.eid)
         // 显示加载状态
         this.$set(this.loadingStates, `basePrice_${rowIndex}`, true)
-        
         // 调用角色估价接口
+        const [year, month] = this.searchForm.selectedDate.split('-')
         const response = await this.$api.role.getRoleValuation({
           eid: role.eid,
-          year: this.currentYear,
-          month: this.currentMonth,
-          role_type: this.currentRoleType,
-          strategy: 'fair_value', // 使用公允价值策略
+          year: parseInt(year),
+          month: parseInt(month),
+          role_type: this.roleType,
+          strategy: 'fair_value',
           similarity_threshold: 0.7,
           max_anchors: 30
         })
-        
         if (response.code === 200) {
           const result = response.data
           const estimatedPrice = result.estimated_price_yuan
-          
-          // 显示估价结果
-          this.$notify.success({
-            title: '角色估价成功',
-            message: `角色 ${role.eid} 估价: ${estimatedPrice}元`,
-            duration: 3000
-          })
-          
-          // 更新角色数据中的估价信息
+          // 更新角色数据中的估价信息（后端已自动更新数据库）
           this.$set(role, 'base_price', result.estimated_price)
-          this.$set(role, 'estimated_price_yuan', estimatedPrice)
-          this.$set(role, 'valuation_confidence', result.confidence)
           
-          // 可选：更新数据库中的估价价格
-          try {
-            await this.$api.role.updateRoleBasePrice({
-              eid: role.eid,
-              base_price: result.estimated_price,
-              year: this.currentYear,
-              month: this.currentMonth,
-              role_type: this.currentRoleType
-            })
-            console.log(`成功更新角色 ${role.eid} 的估价价格`)
-          } catch (updateError) {
-            console.warn(`更新角色估价价格失败: ${updateError}`)
-            // 不影响估价结果的显示，只记录警告
+          // 查询相似角色锚点数据
+          if (result?.anchor_count > 0) {
+            try {
+              // 调用专门的锚点查询接口
+              const anchorsResponse = await this.$api.role.findRoleAnchors({
+                eid: role.eid,
+                year: parseInt(year),
+                month: parseInt(month),
+                role_type: this.roleType,
+                similarity_threshold: 0.7,
+                max_anchors: 30
+              })
+              
+              if (anchorsResponse.code === 200 && anchorsResponse.data.anchors) {
+                const anchorsData = anchorsResponse.data
+                
+                // 保存相似角色数据，用于相似角色模态框
+                this.roleSimilarData = {
+                  anchor_count: anchorsData.anchors.length,
+                  similarity_threshold: 0.7,
+                  max_anchors: 30,
+                  anchors: anchorsData.anchors,
+                  statistics: anchorsData.statistics,
+                  valuation: {
+                    estimated_price_yuan: estimatedPrice,
+                    confidence: result.confidence,
+                    strategy: result.strategy || 'fair_value'
+                  }
+                }
+              } else {
+                console.warn('未获取到相似角色锚点数据:', anchorsResponse.message)
+              }
+            } catch (error) {
+              console.error('查询相似角色锚点失败:', error)
+              // 锚点查询失败不影响估价结果显示
+            }
           }
           
         } else {
@@ -717,7 +737,7 @@ export default {
         }
         
       } catch (error) {
-        console.error('调用角色估价接口失败:', error)
+        console.error('角色估价失败:', error)
         this.$notify.error({
           title: '估价请求失败',
           message: '网络请求异常，请稍后重试',
@@ -1373,5 +1393,13 @@ export default {
 
 .hover-row .sticky-wrapper .el-checkbox {
   display: block;
+}
+
+/* 角色估价单元格样式 */
+.role-valuation-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 </style>

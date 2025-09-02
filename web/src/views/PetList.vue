@@ -168,7 +168,7 @@
     <!-- 装备估价结果对话框 -->
     <el-dialog :title="valuationDialogTitle" :visible.sync="valuationDialogVisible" width="90%"
       :close-on-click-modal="false" :close-on-press-escape="false" custom-class="batch-valuation-dialog">
-      <BatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
+      <EquipBatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
         :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
         @close="closeValuationDialog" />
     </el-dialog>
@@ -204,7 +204,7 @@
 
 <script>
 import SimilarPetModal from '@/components/SimilarPetModal.vue'
-import BatchValuationResult from '@/components/BatchValuationResult.vue'
+import EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'
 import dayjs from 'dayjs'
 import PetImage from '@/components/PetImage.vue'
 import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
@@ -230,7 +230,7 @@ export default {
     SimilarPetModal,
     PetImage,
     EquipmentImage,
-    BatchValuationResult
+    EquipBatchValuationResult
   },
   mixins: [equipmentMixin, commonMixin, petMixin],
   data() {

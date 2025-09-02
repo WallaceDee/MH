@@ -219,6 +219,37 @@ class roleController:
             logger.error(f"获取角色估价时出错: {e}")
             return {"error": f"获取角色估价时出错: {str(e)}"}
 
+    def find_role_anchors(self, eid: str, year: Optional[int] = None, month: Optional[int] = None, 
+                         role_type: str = 'normal', similarity_threshold: float = 0.7, max_anchors: int = 30) -> Dict:
+        """查找相似角色锚点"""
+        try:
+            if not eid:
+                return {"error": "角色eid不能为空"}
+            
+            # 验证相似度阈值
+            if not 0.0 <= similarity_threshold <= 1.0:
+                return {"error": "相似度阈值必须在0.0-1.0之间"}
+            
+            # 验证最大锚点数量
+            if not 1 <= max_anchors <= 100:
+                return {"error": "最大锚点数量必须在1-100之间"}
+            
+            # 调用服务层查找锚点
+            result = self.service.find_role_anchors(
+                eid=eid,
+                year=year,
+                month=month,
+                role_type=role_type,
+                similarity_threshold=similarity_threshold,
+                max_anchors=max_anchors
+            )
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"查找相似角色锚点时出错: {e}")
+            return {"error": f"查找相似角色锚点时出错: {str(e)}"}
+
     def batch_role_valuation(self, eid_list: List[str], year: Optional[int] = None, month: Optional[int] = None,
                             role_type: str = 'normal', strategy: str = 'fair_value',
                             similarity_threshold: float = 0.7, max_anchors: int = 30, verbose: bool = False) -> Dict:
