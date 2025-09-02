@@ -10,11 +10,11 @@
   >
     <el-table-column fixed prop="price" label="价格 (元)" width="100" sortable>
       <template #default="scope">
-        <div class="price-cell">{{ formatPrice(scope.row.price) }}</div>
+        <span v-html="formatPrice(scope.row.price)"></span>
       </template>
     </el-table-column>
 
-    <el-table-column prop="similarity" label="相似度" width="90" sortable>
+    <el-table-column prop="similarity" label="相似度" width="80" sortable  align="center">
       <template #default="scope">
         <el-tag :type="getSimilarityTagType(scope.row.similarity)">
           {{ scope.row.similarity.toFixed(3) }}
@@ -22,33 +22,40 @@
       </template>
     </el-table-column>
 
-    <el-table-column prop="nickname" label="角色名" width="120">
+    <el-table-column prop="nickname" label="角色" width="60" align="center">
       <template #default="scope">
-        <div class="role-name">{{ scope.row.nickname }}</div>
+       <RoleImage :roleInfo="scope.row.roleInfo" :other_info="scope.row.other_info" />
       </template>
     </el-table-column>
-
-    <el-table-column prop="level" label="等级" width="80" sortable></el-table-column>
-
-    <el-table-column prop="school_desc" label="门派" width="80">
+    <el-table-column prop="server_name" label="服务器" width="90">
       <template #default="scope">
-        <el-tag size="mini" :type="getSchoolTagType(scope.row.school_desc)">
-          {{ scope.row.school_desc }}
+        <div class="server-info">
+          <span>{{ scope.row.server_name }}</span>
+          <div v-if="scope.row.is_cross_server" class="cross-server-tag">
+            <el-tag size="mini" type="info">跨服</el-tag>
+          </div>
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column prop="school_desc" label="等级/门派" width="80" align="center">
+      <template #default="scope">
+        <el-tag size="mini">
+          {{ scope.row.level }}
+        </el-tag>
+        <el-tag type="danger" size="mini">
+          {{ scope.row.roleInfo.basic_info.school }}
         </el-tag>
       </template>
     </el-table-column>
-
-    <el-table-column label="修炼信息" min-width="140">
+    <el-table-column label="修炼信息" min-width="70">
       <template #default="scope">
         <div class="cultivation-info">
           <div class="cultivation-row">
-            <span class="cultivation-label">攻防法抗:</span>
             <span class="cultivation-values">
               {{ scope.row.expt_ski1 || 0 }}/{{ scope.row.expt_ski2 || 0 }}/{{ scope.row.expt_ski3 || 0 }}/{{ scope.row.expt_ski4 || 0 }}
             </span>
           </div>
           <div class="cultivation-row">
-            <span class="cultivation-label">召兽修炼:</span>
             <span class="cultivation-values">
               {{ scope.row.beast_ski1 || 0 }}/{{ scope.row.beast_ski2 || 0 }}/{{ scope.row.beast_ski3 || 0 }}/{{ scope.row.beast_ski4 || 0 }}
             </span>
@@ -84,16 +91,7 @@
       </template>
     </el-table-column>
 
-    <el-table-column prop="server_name" label="服务器" width="90">
-      <template #default="scope">
-        <div class="server-info">
-          <span>{{ scope.row.server_name }}</span>
-          <div v-if="scope.row.is_cross_server" class="cross-server-tag">
-            <el-tag size="mini" type="info">跨服</el-tag>
-          </div>
-        </div>
-      </template>
-    </el-table-column>
+
 
     <el-table-column label="操作" width="80" fixed="right">
       <template #default="scope">
@@ -105,9 +103,12 @@
 
 <script>
 import { commonMixin } from '@/utils/mixins/commonMixin'
-
+import RoleImage from './RoleInfo/RoleImage.vue'
 export default {
   name: 'SimilarRoleTable',
+  components: {
+    RoleImage
+  },
   mixins: [commonMixin],
   props: {
     anchors: {
@@ -116,10 +117,6 @@ export default {
     }
   },
   methods: {
-    formatPrice(price) {
-      if (!price) return '0元'
-      return `${(price / 100).toFixed(2)}元`
-    },
     getSimilarityTagType(similarity) {
       if (similarity >= 0.9) {
         return 'success'
@@ -131,25 +128,6 @@ export default {
         return 'warning'
       } else {
         return 'danger'
-      }
-    },
-    getSchoolTagType(school) {
-      // 根据门派返回不同的标签类型
-      const physicalSchools = ['大唐官府', '狮驼岭', '神木林']
-      const magicSchools = ['龙宫', '魔王寨', '五庄观']
-      const healSchools = ['普陀山', '化生寺']
-      const speedSchools = ['盘丝岭', '女儿村']
-      
-      if (physicalSchools.includes(school)) {
-        return 'danger'
-      } else if (magicSchools.includes(school)) {
-        return 'primary'
-      } else if (healSchools.includes(school)) {
-        return 'success'
-      } else if (speedSchools.includes(school)) {
-        return 'warning'
-      } else {
-        return 'info'
       }
     }
   }

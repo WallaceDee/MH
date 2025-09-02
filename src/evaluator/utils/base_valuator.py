@@ -20,6 +20,7 @@ class BaseValuator(ABC):
         from .extreme_value_filter import ExtremeValueFilter
         self.extreme_value_filter = ExtremeValueFilter()
     
+    print
     @abstractmethod
     def find_market_anchors(self,
                            target_features: Dict[str, Any],
@@ -61,24 +62,23 @@ class BaseValuator(ABC):
         """
         try:
             # 首先检测物品是否无效
-            from .invalid_item_detector import InvalidItemDetector
-            invalid_detector = InvalidItemDetector()
+            # from .invalid_item_detector import InvalidItemDetector
+            # invalid_detector = InvalidItemDetector()
             
-            should_skip, skip_reason, skip_value = invalid_detector.should_skip_valuation(target_features)
-            if should_skip:
-                if verbose:
-                    print(f"物品无效，跳过估价: {skip_reason}")
-                return {
-                    'estimated_price': skip_value,
-                    'anchor_count': 0,
-                    'invalid_item': True,
-                    'skip_reason': skip_reason,
-                    'confidence': 1 if skip_value > 0 else 0,
-                    'kindid': target_features.get('kindid', ''), 
-                    'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
-                }
+            # should_skip, skip_reason, skip_value = invalid_detector.should_skip_valuation(target_features)
+            # if should_skip:
+            #     if verbose:
+            #         print(f"物品无效，跳过估价: {skip_reason}")
+            #     return {
+            #         'estimated_price': skip_value,
+            #         'anchor_count': 0,
+            #         'invalid_item': True,
+            #         'skip_reason': skip_reason,
+            #         'confidence': 1 if skip_value > 0 else 0,
+            #         'kindid': target_features.get('kindid', ''), 
+            #         'equip_sn': target_features.get('equip_sn', '')  # 添加装备序列号
+            #     }
             
-            print(target_features, 'target_featurestarget_featurestarget_featurestarget_featurestarget_featurestarget_features')
             # 寻找市场锚点
             anchors = self.find_market_anchors(
                 target_features, similarity_threshold, max_anchors, verbose=verbose)
@@ -272,4 +272,3 @@ class BaseValuator(ABC):
             print(f"批量估价完成，成功估价 {len([r for r in results if 'error' not in r])} 个项目")
         
         return results
-    

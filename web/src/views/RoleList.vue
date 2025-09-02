@@ -699,13 +699,21 @@ export default {
               
               if (anchorsResponse.code === 200 && anchorsResponse.data.anchors) {
                 const anchorsData = anchorsResponse.data
+                const parsedAnchors = anchorsData.anchors.map((item) => {
+                  const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
+                  item.RoleInfoParser = roleInfo
+                  if (roleInfo.result) {
+                    item.roleInfo = roleInfo.result
+                  }
+                  return item
+                })
                 
                 // 保存相似角色数据，用于相似角色模态框
                 this.roleSimilarData = {
                   anchor_count: anchorsData.anchors.length,
                   similarity_threshold: 0.7,
                   max_anchors: 30,
-                  anchors: anchorsData.anchors,
+                  anchors: parsedAnchors,
                   statistics: anchorsData.statistics,
                   valuation: {
                     estimated_price_yuan: estimatedPrice,

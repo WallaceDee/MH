@@ -1,5 +1,6 @@
 import sys
 import os
+import threading
 
 # 添加项目根目录到Python路径，解决模块导入问题
 from src.utils.project_path import get_project_root
@@ -12,7 +13,7 @@ import numpy as np
 import json
 import logging
 from typing import Dict, Any, List, Optional, Union
-from datetime import datetime
+from datetime import datetime, timedelta
 
 try:
     from .feature_extractor.feature_extractor import FeatureExtractor
@@ -21,20 +22,50 @@ except ImportError:
 
 
 class MarketDataCollector:
-    """市场数据采集器 - 从数据库中获取和处理角色市场数据"""
+    """市场数据采集器 - 支持单例模式的数据缓存共享"""
+    
+    _instances = {}  # 存储不同类型的单例实例
+    _lock = threading.Lock()  # 线程锁，确保线程安全
+    
+    def __new__(cls, db_path: Optional[str] = None, db_type: str = 'normal'):
+        """
+        单例模式实现 - 根据 db_type 创建不同的单例实例
+        这样可以支持 normal 和 empty 数据库的独立缓存
+        """
+        with cls._lock:
+            # 为不同的数据库类型创建独立的单例实例
+            if db_type not in cls._instances:
+                instance = super(MarketDataCollector, cls).__new__(cls)
+                cls._instances[db_type] = instance
+                # 标记实例是否已初始化，避免重复初始化
+                instance._initialized = False
+                print(f"创建新的 MarketDataCollector 单例实例，类型: {db_type}")
+            else:
+                print(f"使用现有的 MarketDataCollector 单例实例，类型: {db_type}")
+            
+            return cls._instances[db_type]
     
     def __init__(self, db_path: Optional[str] = None, db_type: str = 'normal'):
         """
-        初始化市场数据采集器
+        初始化市场数据采集器（单例模式下只初始化一次）
         
         Args:
             db_path: 数据库文件路径，如果为None则自动查找
             db_type: 数据库类型，'normal' 或 'empty'
         """
+        # 避免重复初始化
+        if hasattr(self, '_initialized') and self._initialized:
+            return
+        
         self.logger = logging.getLogger(__name__)
         self.feature_extractor = FeatureExtractor()
         self.market_data = pd.DataFrame()
         self.db_type = db_type
+        
+        # 数据缓存相关属性
+        self._data_loaded = False
+        self._last_refresh_time = None
+        self._cache_expiry_hours = 2  # 缓存过期时间（小时）
         
         # 自动查找数据库文件
         if db_path is None:
@@ -43,10 +74,9 @@ class MarketDataCollector:
             self.db_path = found_dbs[0] if found_dbs else None
         else:
             self.db_path = db_path
-            
-
         
-        print(f"空号市场数据采集器初始化完成，数据库路径: {self.db_path}")
+        self._initialized = True
+        print(f"市场数据采集器单例初始化完成，数据库路径: {self.db_path}, 类型: {db_type}")
     
     def _find_recent_dbs(self) -> List[str]:
         """查找当月和上月的装备数据库文件"""
@@ -207,18 +237,50 @@ class MarketDataCollector:
     
 
     
-    def get_market_data(self) -> pd.DataFrame:
+    def get_market_data(self, force_refresh: bool = False) -> pd.DataFrame:
         """
-        获取当前的市场数据
+        获取当前的市场数据，支持智能缓存和过期检查
         
+        Args:
+            force_refresh: 是否强制刷新数据
+            
         Returns:
             pd.DataFrame: 市场数据
         """
-        if self.market_data.empty:
-            print("市场数据为空，正在刷新...")
+        # 检查是否需要刷新数据
+        need_refresh = (
+            force_refresh or 
+            not self._data_loaded or 
+            self.market_data.empty or 
+            self._is_cache_expired()
+        )
+        
+        if need_refresh:
+            if force_refresh:
+                print("强制刷新市场数据...")
+            elif not self._data_loaded:
+                print("首次加载市场数据...")
+            elif self.market_data.empty:
+                print("市场数据为空，正在刷新...")
+            elif self._is_cache_expired():
+                print(f"缓存已过期（超过{self._cache_expiry_hours}小时），正在刷新...")
+            
             self.refresh_market_data()
+            self._data_loaded = True
+            self._last_refresh_time = datetime.now()
+        else:
+            print(f"使用缓存的市场数据，上次刷新时间: {self._last_refresh_time}, "
+                  f"数据量: {len(self.market_data)}")
         
         return self.market_data
+    
+    def _is_cache_expired(self) -> bool:
+        """检查缓存是否过期"""
+        if not self._last_refresh_time:
+            return True
+        
+        elapsed_time = datetime.now() - self._last_refresh_time
+        return elapsed_time > timedelta(hours=self._cache_expiry_hours)
     
     
     def filter_market_data(self, 
@@ -354,3 +416,53 @@ class MarketDataCollector:
             return filtered_data
         
         return market_data
+    
+    @classmethod
+    def clear_all_cache(cls):
+        """清空所有单例实例的缓存"""
+        with cls._lock:
+            for instance in cls._instances.values():
+                if hasattr(instance, 'market_data'):
+                    instance.market_data = pd.DataFrame()
+                    instance._data_loaded = False
+                    instance._last_refresh_time = None
+                    print(f"已清空 {instance.db_type} 类型的缓存")
+    
+    @classmethod
+    def get_cache_status(cls) -> Dict[str, Dict[str, Any]]:
+        """获取所有单例实例的缓存状态"""
+        status = {}
+        with cls._lock:
+            for db_type, instance in cls._instances.items():
+                status[db_type] = {
+                    'data_loaded': getattr(instance, '_data_loaded', False),
+                    'last_refresh_time': getattr(instance, '_last_refresh_time', None),
+                    'cache_expired': instance._is_cache_expired() if hasattr(instance, '_is_cache_expired') else True,
+                    'data_size': len(instance.market_data) if hasattr(instance, 'market_data') and not instance.market_data.empty else 0,
+                    'db_path': getattr(instance, 'db_path', None)
+                }
+        return status
+    
+    def clear_cache(self):
+        """清空当前实例的缓存"""
+        self.market_data = pd.DataFrame()
+        self._data_loaded = False
+        self._last_refresh_time = None
+        print(f"已清空 {self.db_type} 类型的缓存")
+    
+    def set_cache_expiry(self, hours: float):
+        """设置缓存过期时间"""
+        self._cache_expiry_hours = hours
+        print(f"缓存过期时间已设置为 {hours} 小时")
+    
+    def get_cache_info(self) -> Dict[str, Any]:
+        """获取当前实例的缓存信息"""
+        return {
+            'db_type': self.db_type,
+            'data_loaded': self._data_loaded,
+            'last_refresh_time': self._last_refresh_time,
+            'cache_expired': self._is_cache_expired(),
+            'data_size': len(self.market_data) if not self.market_data.empty else 0,
+            'cache_expiry_hours': self._cache_expiry_hours,
+            'db_path': self.db_path
+        }

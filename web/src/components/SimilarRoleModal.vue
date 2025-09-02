@@ -24,9 +24,11 @@
                 <RoleImage :key="role.eid" :other_info="role.other_info" :roleInfo="role.roleInfo" />
                 <div style="margin-left: 10px">
                   <div class="role-basic-info">
-                    <span class="server-name">{{ role.server_name }}</span>
-                    <el-divider direction="vertical" />
-                    <span class="role-level">等级 {{ role.level }}</span>
+                    <el-tag type="info" size="mini">{{ role.server_name }}</el-tag>
+                    /
+                    <el-tag type="primary" size="mini">{{ role.level }}</el-tag>
+                    /
+                    <el-tag type="danger" size="mini">{{ role.roleInfo.basic_info.school }}</el-tag>
                   </div>
                 </div>
               </el-row>
@@ -207,8 +209,6 @@ export default {
 
 <style scoped>
 .similar-header {
-  margin-top: 16px;
-  margin-bottom: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid #ebeef5;
 }
