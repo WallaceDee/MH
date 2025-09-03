@@ -24,7 +24,7 @@
                 <RoleImage :key="role.eid" :other_info="role.other_info" :roleInfo="role.roleInfo" />
                 <div style="margin-left: 10px">
                   <div class="role-basic-info">
-                    <el-tag type="danger" size="mini">  {{ getServerHeatLabel(role.serverid) }}/{{ role.server_name }}</el-tag>
+                    <el-tag type="danger" size="mini">  {{ getServerHeatLabel(role.serverid)||'其他' }}/{{ role.server_name }}</el-tag>
                     /
                     <el-tag type="primary" size="mini">{{ role.level }}</el-tag>
                     /

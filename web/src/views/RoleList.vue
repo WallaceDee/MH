@@ -90,51 +90,43 @@
             <el-tag v-if="get_price_change(scope.row) !== undefined"
               :type="get_price_change(scope.row) < 0 ? 'danger' : 'success'">
               <i :class="`el-icon-${get_price_change(scope.row) < 0 ? 'bottom' : 'top'}`"
-                :style="`color: #${get_price_change(scope.row) < 0 ? 'F56C6C;' : '67C23A'}`">{{get_price_change(scope.row)}}</i>
+                :style="`color: #${get_price_change(scope.row) < 0 ? 'F56C6C;' : '67C23A'}`">{{
+                  get_price_change(scope.row) }}</i>
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="裸号估价" width="120" align="center">
+        <el-table-column label="估价" width="120" align="center">
           <template #default="scope">
             <div class="role-valuation-cell">
-              
-              <SimilarRoleModal 
-                :role="scope.row" 
-                :similar-data="roleSimilarData"
-                @show="loadSimilarRoles($event, scope.$index)">
-                <el-link type="primary" href="javascript:void(0)">
-                  <div v-html="formatFullPrice({ price: scope.row.base_price })" style="font-size: 12px;"></div>
-                估价
-              </el-link>
-              </SimilarRoleModal>
+              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.base_price })" style="font-size: 12px;"></span>
+              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.equip_price })" style="font-size: 12px;"></span>
+              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.pet_price })" style="font-size: 12px;"></span>
+              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.base_price + scope.row.equip_price + scope.row.pet_price })" style="font-size: 12px;"></span>
             </div>
           </template>
         </el-table-column>
         <el-table-column label="装备估价" width="120" align="center">
           <template #default="scope">
-            <el-link v-if="get_equip_num(scope.row.roleInfo) > 0"
-              @click.native="handleEquipPrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
-              <div v-html="formatFullPrice({ price: scope.row.equip_price })" style="font-size: 12px;"></div>⚔️
-              {{ get_equip_num(scope.row.roleInfo) }}件
-            </el-link>
-            <div v-else>-</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="召唤兽估价" width="120" align="center">
-          <template #default="scope">
+            <SimilarRoleModal :role="scope.row" :similar-data="roleSimilarData"
+              @show="loadSimilarRoles($event, scope.$index)">
+              <div> <el-link type="primary" href="javascript:void(0)">裸号估价</el-link></div>
+            </SimilarRoleModal>
+            <div v-if="get_equip_num(scope.row.roleInfo) > 0"> <el-link
+                @click.native="handleEquipPrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">⚔️ {{
+                  get_equip_num(scope.row.roleInfo) }}件</el-link></div>
+            <div v-else>无装备</div>
             <el-link v-if="get_pet_num(scope.row.roleInfo) > 0"
               @click.native="handlSummonePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
-              <div v-html="formatFullPrice({ price: scope.row.pet_price })" style="font-size: 12px;"></div>🐲 {{ get_pet_num(scope.row.roleInfo)
-              }}只
+              🐲 {{ get_pet_num(scope.row.roleInfo) }}只
             </el-link>
-            <div v-else>-</div>
+            <div v-else>无召唤兽</div>
           </template>
         </el-table-column>
         <el-table-column prop="history_price" label="历史价格" width="120" align="center" sortable="custom">
           <template slot-scope="scope">
-            <span v-for="(history, index) in JSON.parse(scope.row.history_price)" :key="index"
+            <div v-for="(history, index) in JSON.parse(scope.row.history_price)" :key="index"
               :title="history.timestamp" v-html="formatFullPrice(history.price, true)"
-              style="text-decoration: line-through;filter: grayscale(100%);"> </span>
+              style="text-decoration: line-through;filter: grayscale(100%);"></div>
           </template>
         </el-table-column>
         <el-table-column prop="accept_bargain" label="还价" width="80" align="center" sortable="custom">
@@ -323,7 +315,7 @@ export default {
   },
   data() {
     return {
-      roleSimilarData:null,
+      roleSimilarData: null,
       valuationDialogTitle: {
         nickname: '',
         school: '',
@@ -404,6 +396,9 @@ export default {
   },
 
   methods: {
+    formatFullPriceWithoutPerfix(item) {
+      return this.formatFullPrice(item, true).replace('￥', '')
+    },
     // 检查路由参数是否有变化的工具方法
     hasRouteChanges(newParams, newQuery = null) {
       const hasParamChanges = JSON.stringify(newParams) !== JSON.stringify(this.$route.params)
@@ -667,7 +662,7 @@ export default {
     // 角色估价和相似角色数据加载
     async loadSimilarRoles(role, rowIndex) {
       try {
-        this.roleSimilarData=null
+        this.roleSimilarData = null
         console.log('角色估价和加载相似数据:', role.eid)
         // 显示加载状态
         this.$set(this.loadingStates, `basePrice_${rowIndex}`, true)
@@ -687,7 +682,7 @@ export default {
           const estimatedPrice = result.estimated_price_yuan
           // 更新角色数据中的估价信息（后端已自动更新数据库）
           this.$set(role, 'base_price', result.estimated_price)
-          
+
           // 查询相似角色锚点数据
           if (result?.anchor_count > 0) {
             try {
@@ -700,7 +695,7 @@ export default {
                 similarity_threshold: 0.7,
                 max_anchors: 30
               })
-              
+
               if (anchorsResponse.code === 200 && anchorsResponse.data.anchors) {
                 const anchorsData = anchorsResponse.data
                 const parsedAnchors = anchorsData.anchors.map((item) => {
@@ -711,7 +706,7 @@ export default {
                   }
                   return item
                 })
-                
+
                 // 保存相似角色数据，用于相似角色模态框
                 this.roleSimilarData = {
                   anchor_count: anchorsData.anchors.length,
@@ -733,7 +728,7 @@ export default {
               // 锚点查询失败不影响估价结果显示
             }
           }
-          
+
         } else {
           // 估价失败
           this.$notify.error({
@@ -741,13 +736,13 @@ export default {
             message: response.message || '估价计算失败',
             duration: 3000
           })
-          
+
           // 显示详细错误信息
           if (response.data && response.data.error) {
             console.error('估价错误详情:', response.data.error)
           }
         }
-        
+
       } catch (error) {
         console.error('角色估价失败:', error)
         this.$notify.error({
@@ -1417,5 +1412,10 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+}
+.role-valuation-cell >*{
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
 }
 </style>

@@ -385,42 +385,11 @@ class CBGSmartDB:
         
         return self.db_helper.insert_data('pets', pets_list, on_conflict="UPDATE")
 
-if __name__ == "__main__":
-    # 简单测试
-    print("🧪 测试智能数据库助手...")
-    
-    # 创建测试数据
-    test_data = {
-        'eid': 'test_001',
-        'role_name': '测试角色',
-        'level': 100,
-        'price': 1234.56,
-        'complex_data': {'skill': 'test', 'level': 5},  # 字典会自动转JSON
-        'boolean_field': True,  # 布尔值会自动转整数
-        'none_field': None,  # None值保持
-        'extra_field_not_in_table': 'will_be_ignored'  # 不存在的字段会被忽略
-    }
-    
-    try:
-        smart_db = CBGSmartDB("test_smart_db.db")
-        print("✅ 智能数据库助手创建成功")
-        print(f"📊 测试数据: {test_data}")
-        print("✨ 智能数据库助手会自动处理：")
-        print("   - 字段类型转换（字典→JSON，布尔→整数）")
-        print("   - 字段过滤（只保留表中存在的字段）")
-        print("   - 自动生成SQL占位符（不需要手动写?）")
-        print("   - 防止字段数量不匹配错误")
-        print("   - 冲突时保留create_time字段（UPDATE模式）")
+    def check_role_exists_by_eid(self, eid: str) -> bool:
+        """检查角色是否存在"""
+        with self.db_helper.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM roles WHERE eid = ?", (eid,))
+            result = cursor.fetchone()
+            return result[0] > 0
         
-        # 测试冲突处理
-        print("\n🔄 冲突处理模式测试：")
-        print("   - REPLACE: 完全替换记录")
-        print("   - IGNORE: 忽略新数据")
-        print("   - UPDATE: 更新记录但保留create_time")
-        
-    except Exception as e:
-        print(f"❌ 测试失败: {e}")
-        import traceback
-        traceback.print_exc()
-    
-    print("🏁 测试完成") 

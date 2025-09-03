@@ -193,11 +193,10 @@ def get_search_param_by_type(param_type: str):
         
         # 特殊处理角色和召唤兽参数
         if param_type == 'role':
-            search_params_dir = os.path.join(config_dir, 'search_params')
-            if os.path.exists(search_params_dir):
+            if os.path.exists(config_dir):
                 try:
                     # 读取109等级的配置作为默认角色配置
-                    role_file = os.path.join(search_params_dir, '109.json')
+                    role_file = os.path.join(config_dir, '109.json')
                     if os.path.exists(role_file):
                         with open(role_file, 'r', encoding='utf-8') as f:
                             content = json.load(f)
@@ -267,11 +266,10 @@ def update_search_param(param_type: str):
         
         # 特殊处理角色和召唤兽参数
         if param_type == 'role':
-            search_params_dir = os.path.join(config_dir, 'search_params')
-            if not os.path.exists(search_params_dir):
-                os.makedirs(search_params_dir, exist_ok=True)
+            if not os.path.exists(config_dir):
+                os.makedirs(config_dir, exist_ok=True)
             filename = '109.json'
-            file_path = os.path.join(search_params_dir, filename)
+            file_path = os.path.join(config_dir, filename)
         elif param_type == 'pet':
             # 召唤兽参数使用equip_params_pet
             filename = 'equip_params_pet.json'

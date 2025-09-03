@@ -886,6 +886,10 @@ class CBGSpider:
             bool: True表示是空号，False表示不是空号
         """
         try:
+            # 检查是不是已经人为设置为空号，即eid是否存在在cbg_empty_roles_202509.db的roles表中
+            if self.empty_smart_db.check_role_exists_by_eid(eid):
+                return True
+            
             # 检查物品个数
             equip_count = 0
             if all_equips and isinstance(all_equips, dict):

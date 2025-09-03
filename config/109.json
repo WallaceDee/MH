@@ -5,6 +5,6 @@
   "bb_expt_kangfa": "17",
   "level_max": "109",
   "level_min": "109",
-  "price_min": "439000",
-  "order_by": "price ASC"
+  "order_by": "price ASC",
+  "price_min": "538000"
 }
