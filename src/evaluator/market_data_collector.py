@@ -125,7 +125,7 @@ class MarketDataCollector:
     
     def refresh_market_data(self, 
                            filters: Optional[Dict[str, Any]] = None,
-                           max_records: int = 1000) -> pd.DataFrame:
+                           max_records: int = 99999) -> pd.DataFrame:
         """
         刷新市场数据
         
@@ -153,7 +153,19 @@ class MarketDataCollector:
             
             # 构建SQL查询 - 修复列名：roles表和large_equip_desc_data表都使用eid
             base_query = """
-                SELECT c.*, l.*
+                SELECT 
+                        c.eid, c.serverid, c.level, c.school,
+                        c.price,c.collect_num,
+                        c.other_info,
+                        c.large_equip_desc,
+                        c.yushoushu_skill, c.school_skills, c.life_skills, c.expire_time,
+                        l.sum_exp, l.three_fly_lv, l.all_new_point,
+                        l.jiyuan_amount, l.packet_page, l.xianyu_amount, l.learn_cash,
+                        l.sum_amount, l.role_icon,
+                        l.expt_ski1, l.expt_ski2, l.expt_ski3, l.expt_ski4, l.expt_ski5,
+                        l.beast_ski1, l.beast_ski2, l.beast_ski3, l.beast_ski4,
+                        l.changesch_json, l.ex_avt_json, l.huge_horse_json, l.shenqi_json,
+                        l.all_equip_json, l.all_summon_json, l.all_rider_json
                 FROM roles c
                 LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
                 WHERE c.price > 0
@@ -178,7 +190,7 @@ class MarketDataCollector:
             if conditions:
                 base_query += " AND " + " AND ".join(conditions)
             
-            base_query += f" ORDER BY c.price DESC LIMIT {max_records}"
+            base_query += f" ORDER BY c.price ASC LIMIT {max_records}"
             
             print(f"执行SQL查询...")
             

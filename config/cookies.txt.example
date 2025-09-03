@@ -1,9 +1,0 @@
-# CBG爬虫Cookie配置文件
-# 请将你的Cookie字符串粘贴到下面，并重命名此文件为 cookies.txt
-# 获取方法：
-# 1. 打开浏览器，访问 https://xyq.cbg.163.com/
-# 2. 按F12打开开发者工具
-# 3. 在Network面板中找到任意请求
-# 4. 复制请求头中的Cookie字段
-
-your_cookie_string_here 

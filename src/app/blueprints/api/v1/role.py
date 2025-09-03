@@ -42,6 +42,8 @@ def get_roles():
             'equip_num': request.args.get('equip_num'),
             'pet_num': request.args.get('pet_num'),
             'pet_num_level': request.args.get('pet_num_level'),
+            # 接受还价参数
+            'accept_bargain': request.args.get('accept_bargain'),
             # 排序参数
             'sort_by': request.args.get('sort_by'),
             'sort_order': request.args.get('sort_order'),

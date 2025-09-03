@@ -115,6 +115,7 @@ class roleController:
             equip_num = params.get('equip_num')
             pet_num = params.get('pet_num')
             pet_num_level = params.get('pet_num_level')
+            accept_bargain = params.get('accept_bargain')
             
             if equip_num is not None:
                 equip_num = int(equip_num)
@@ -122,6 +123,8 @@ class roleController:
                 pet_num = int(pet_num)
             if pet_num_level is not None:
                 pet_num_level = int(pet_num_level)
+            if accept_bargain is not None:
+                accept_bargain = int(accept_bargain)
             
             # 排序参数
             sort_by = params.get('sort_by')
@@ -141,6 +144,7 @@ class roleController:
                 equip_num=equip_num,
                 pet_num=pet_num,
                 pet_num_level=pet_num_level,
+                accept_bargain=accept_bargain,
                 sort_by=sort_by,
                 sort_order=sort_order,
                 role_type=role_type

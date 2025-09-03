@@ -16,13 +16,9 @@ import warnings
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
+from .market_data_collector import MarketDataCollector
+from .utils.base_valuator import BaseValuator
 
-try:
-    from .market_data_collector import MarketDataCollector
-    from .utils.base_valuator import BaseValuator
-except ImportError:
-    from market_data_collector import MarketDataCollector
-    from utils.base_valuator import BaseValuator
 
 warnings.filterwarnings('ignore')
 
@@ -48,10 +44,12 @@ class MarketAnchorEvaluator(BaseValuator):
         
         # 相对容忍度：统一配置所有特征的相对差值比例
         self.relative_tolerances = {
+            'gender':0.0,   # 性别必须一致
+            'server_heat':0.1,   # 服务器热度容忍度10%
             # 修炼系统特征 - 相对容忍度
-            'expt_ski1': 0.05,       # 攻击修炼容忍度5%
+            'expt_ski1': 0.05,       # 主修炼容忍度5%
             'expt_ski2': 0.05,       # 防御修炼容忍度5%
-            'expt_ski3': 0.05,       # 法术修炼容忍度5%
+            'expt_ski3': 0.25,       # 副修炼容忍度25%
             'expt_ski4': 0.05,       # 抗法修炼容忍度5%
             'expt_ski5': 0.10,       # 猎术修炼容忍度10%
             'beast_ski1': 0.05,      # 召唤兽攻击修炼容忍度5%
@@ -99,8 +97,9 @@ class MarketAnchorEvaluator(BaseValuator):
         # 定义关键特征权重（用于相似度计算）
         self.feature_weights = {
             # 最重要特征 
+            'server_heat': 1, # 服务器热度
             # 修炼细节特征 - 提高权重以增强影响力
-            'expt_ski1': 1, 'expt_ski2': 1, 'expt_ski3': 1, 'expt_ski4': 1, 'expt_ski5': 0.4,
+            'expt_ski1': 1, 'expt_ski2': 1, 'expt_ski3': 0.5, 'expt_ski4': 1, 'expt_ski5': 0.4,
             'beast_ski1': 1, 'beast_ski2': 1, 'beast_ski3': 1, 'beast_ski4': 1,
             # 乾元丹和乾元丹突破
             'all_new_point': 1.0,
@@ -120,7 +119,7 @@ class MarketAnchorEvaluator(BaseValuator):
             # 辅助特征 - 较低权重
             'level': 0.5, # 等级
             'lingyou_count': 0.4, # 灵佑次数    
-            'hight_grow_rider_count': 0.4, # 高成长坐骑数量
+            'hight_grow_rider_count': 1.0, # 高成长坐骑数量
             
             # 外观和神器特征 - 中等权重
             'shenqi_score': 1.0, # 神器得分
@@ -137,6 +136,7 @@ class MarketAnchorEvaluator(BaseValuator):
             'sum_exp': 0.1,
             'packet_page': 0.1,
             'sum_amount': 0.1,
+            'gender': 0.1,
         }
         
         print("市场锚定估价器初始化完成")
@@ -340,10 +340,7 @@ class MarketAnchorEvaluator(BaseValuator):
                     # 两者都为0，完全匹配
                     feature_similarity = 1.0
                     calculation_method = "零值匹配"
-                elif feature_name in ['all_new_point', 'qianyuandan_breakthrough', 'three_fly_lv']:
-                    # 关键特征必须完全一致
-                    feature_similarity = 1.0 if target_val == market_val else 0.0
-                    calculation_method = "精确匹配"
+                # 删除冗余代码，因为容忍度为0的特征已经在下面的逻辑中处理
                 elif feature_name in self.relative_tolerances:
                     # 使用相对容忍度计算
                     tolerance = self.relative_tolerances[feature_name]
@@ -352,13 +349,10 @@ class MarketAnchorEvaluator(BaseValuator):
                         # 容忍度为0表示必须完全一致
                         feature_similarity = 1.0 if target_val == market_val else 0.0
                         calculation_method = "精确匹配"
-                    elif target_val == 0 and market_val == 0:
-                        # 两者都为0，完全匹配
-                        feature_similarity = 1.0
-                        calculation_method = "零值匹配"
+                    # 删除重复的零值判断，因为在外层已经处理过
                     elif target_val == 0 or market_val == 0:
                         # 一个为0一个不为0，给予部分相似度
-                        feature_similarity = 0.3
+                        feature_similarity = 0.1
                         calculation_method = "零值处理"
                     else:
                         # 计算相对差异

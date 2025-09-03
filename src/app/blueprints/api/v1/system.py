@@ -131,19 +131,18 @@ def get_search_params():
         
         # 处理角色搜索参数（从search_params目录读取）
         role_params = {}
-        search_params_dir = os.path.join(config_dir, 'search_params')
-        if os.path.exists(search_params_dir):
+        if os.path.exists(config_dir):
             try:
                 # 读取109等级的配置作为默认角色配置
-                role_file = os.path.join(search_params_dir, '109.json')
+                role_file = os.path.join(config_dir, '109.json')
                 if os.path.exists(role_file):
                     with open(role_file, 'r', encoding='utf-8') as f:
                         role_params = json.load(f)
                 else:
                     # 如果没有109.json，读取第一个可用的文件
-                    for filename in os.listdir(search_params_dir):
+                    for filename in os.listdir(config_dir):
                         if filename.endswith('.json'):
-                            role_file = os.path.join(search_params_dir, filename)
+                            role_file = os.path.join(config_dir, filename)
                             with open(role_file, 'r', encoding='utf-8') as f:
                                 role_params = json.load(f)
                             break

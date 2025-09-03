@@ -30,7 +30,8 @@
     <el-table-column prop="server_name" label="服务器" width="90">
       <template #default="scope">
         <div class="server-info">
-          <span>{{ scope.row.server_name }}</span>
+          <div>  <el-tag type="danger" size="mini">{{ getServerHeatLabel(scope.row.serverid)||'' }}</el-tag></div>
+          <div> <el-tag type="danger" size="mini">{{ scope.row.server_name }}</el-tag></div>
           <div v-if="scope.row.is_cross_server" class="cross-server-tag">
             <el-tag size="mini" type="info">跨服</el-tag>
           </div>
@@ -42,7 +43,7 @@
         <el-tag size="mini">
           {{ scope.row.level }}
         </el-tag>
-        <el-tag type="danger" size="mini">
+        <el-tag type="success" size="mini">
           {{ scope.row.roleInfo.basic_info.school }}
         </el-tag>
       </template>
@@ -117,6 +118,10 @@ export default {
     }
   },
   methods: {
+    getServerHeatLabel(serverid){
+      const serverHeat = window.hotServersConfig?.find(item => item.children.find(child => child.server_id === serverid))
+      return serverHeat?.server_name||''
+    },
     getSimilarityTagType(similarity) {
       if (similarity >= 0.9) {
         return 'success'

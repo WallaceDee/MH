@@ -218,38 +218,83 @@ class roleService:
             logger.error(f"更新角色总估价价格失败: {e}")
             return False
 
-    def get_roles(self, page: int = 1, page_size: int = 10, year: Optional[int] = None, month: Optional[int] = None,
-                  level_min: Optional[int] = None, level_max: Optional[int] = None,
-                  # 其他参数
+    def get_roles(self, page: int = 1, page_size: int = 15, year: Optional[int] = None, 
+                  month: Optional[int] = None, level_min: Optional[int] = None, 
+                  level_max: Optional[int] = None, sort_by: Optional[str] = None, 
+                  sort_order: Optional[str] = None, role_type: str = 'normal',
                   equip_num: Optional[int] = None, pet_num: Optional[int] = None,
-                  pet_num_level: Optional[int] = None,
-                  # 排序参数
-                  sort_by: Optional[str] = None, sort_order: Optional[str] = None,
-                  # 角色类型参数
-                  role_type: str = 'normal') -> Dict:
-        """获取分页的角色列表
+                  pet_num_level: Optional[int] = None, accept_bargain: Optional[int] = None) -> Dict:
+        """获取角色列表
         
         Args:
             page: 页码
-            page_size: 每页大小
+            page_size: 每页数量
             year: 年份
             month: 月份
-            level_min: 最低等级
-            level_max: 最高等级
-            equip_num: 装备数量限制
-            pet_num: 召唤兽数量限制
-            pet_num_level: 召唤兽等级限制
+            level_min: 最小等级
+            level_max: 最大等级
             sort_by: 排序字段
             sort_order: 排序方向
             role_type: 角色类型，'normal' 表示正常角色，'empty' 表示空号角色
+            equip_num: 物品数量上限（小于等于）
+            pet_num: 召唤兽数量上限（小于等于）
+            pet_num_level: 召唤兽等级下限（大于）
+            accept_bargain: 是否接受还价，1表示接受还价
+        """
+        return self.get_role_list(
+            page=page,
+            page_size=page_size,
+            year=year,
+            month=month,
+            level_min=level_min,
+            level_max=level_max,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            role_type=role_type,
+            equip_num=equip_num,
+            pet_num=pet_num,
+            pet_num_level=pet_num_level,
+            accept_bargain=accept_bargain
+        )
+
+    def get_role_list(self, page: int = 1, page_size: int = 15, year: Optional[int] = None, 
+                      month: Optional[int] = None, level_min: Optional[int] = None, 
+                      level_max: Optional[int] = None, sort_by: Optional[str] = None, 
+                      sort_order: Optional[str] = None, role_type: str = 'normal',
+                      equip_num: Optional[int] = None, pet_num: Optional[int] = None,
+                      pet_num_level: Optional[int] = None, accept_bargain: Optional[int] = None) -> Dict:
+        """获取角色列表
+        
+        Args:
+            page: 页码
+            page_size: 每页数量
+            year: 年份
+            month: 月份
+            level_min: 最小等级
+            level_max: 最大等级
+            sort_by: 排序字段
+            sort_order: 排序方向
+            role_type: 角色类型，'normal' 表示正常角色，'empty' 表示空号角色
+            equip_num: 物品数量上限（小于等于）
+            pet_num: 召唤兽数量上限（小于等于）
+            pet_num_level: 召唤兽等级下限（大于）
+            accept_bargain: 是否接受还价，1表示接受还价
         """
         try:
+            # 验证页码和每页数量
+            if page < 1:
+                page = 1
+            if page_size < 1 or page_size > 100:
+                page_size = 15
+                
             # 验证年月
             year, month = self._validate_year_month(year, month)
+            
+            # 获取数据库文件路径
             db_file = self._get_db_file(year, month, role_type)
-
+            
             logger.info(f"数据库文件路径: {db_file}")
-
+            
             if not os.path.exists(db_file):
                 return {
                     "total": 0,
@@ -261,11 +306,11 @@ class roleService:
                     "month": month,
                     "message": f"未找到 {year}年{month}月 的数据文件"
                 }
-
+                
             with sqlite3.connect(db_file) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
-
+                
                 # 构建等级过滤条件
                 level_conditions = []
                 level_params = []
@@ -275,7 +320,12 @@ class roleService:
                 if level_max is not None:
                     level_conditions.append("c.level <= ?")
                     level_params.append(level_max)
-
+                    
+                # 添加接受还价过滤条件
+                if accept_bargain is not None:
+                    level_conditions.append("c.accept_bargain = ?")
+                    level_params.append(accept_bargain)
+                
                 # 根据all_equip_json构建物品数量小于等于过滤条件
                 if equip_num is not None:
                     if equip_num == 0:

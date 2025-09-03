@@ -11,12 +11,12 @@
     <div v-if="visible">
       <div v-if="similarData">
         <div class="similar-header">
-          <h4>相似角色 (共{{ similarData.anchor_count }}个)  <el-divider direction="vertical" />
+          <h4>相似角色 (共{{ similarData.anchor_count }}个) <el-divider direction="vertical" />
             <el-tag type="info" size="mini">相似度阈值: {{ similarData.similarity_threshold }}</el-tag>
             <el-divider direction="vertical" />
             <el-tag type="info" size="mini">最大锚点数: {{ similarData.max_anchors }}</el-tag>
           </h4>
-          
+
           <!-- 角色估价信息 -->
           <div class="valuation-info" :class="confidenceClass">
             <el-row type="flex" align="middle" justify="space-between">
@@ -24,11 +24,11 @@
                 <RoleImage :key="role.eid" :other_info="role.other_info" :roleInfo="role.roleInfo" />
                 <div style="margin-left: 10px">
                   <div class="role-basic-info">
-                    <el-tag type="info" size="mini">{{ role.server_name }}</el-tag>
+                    <el-tag type="danger" size="mini">  {{ getServerHeatLabel(role.serverid) }}/{{ role.server_name }}</el-tag>
                     /
                     <el-tag type="primary" size="mini">{{ role.level }}</el-tag>
                     /
-                    <el-tag type="danger" size="mini">{{ role.roleInfo.basic_info.school }}</el-tag>
+                    <el-tag type="info" size="mini">{{ role.roleInfo.basic_info.school }}</el-tag>
                   </div>
                 </div>
               </el-row>
@@ -53,14 +53,14 @@
               <span>锚点数: {{ similarData?.anchor_count || '-' }}</span>
             </div>
           </div>
-          
+
           <!-- 统计信息 -->
           <div v-if="similarData.statistics" class="stats">
             <span>
               价格范围:
-              <span v-html="formatPrice(similarData.statistics.price_range.min) "></span>
+              <span v-html="formatPrice(similarData.statistics.price_range.min)"></span>
               -
-              <span v-html="formatPrice(similarData.statistics.price_range.max) "></span>
+              <span v-html="formatPrice(similarData.statistics.price_range.max)"></span>
             </span>
             <span>平均相似度: {{ similarData.statistics.similarity_range.avg.toFixed(3) }}</span>
           </div>
@@ -98,7 +98,7 @@ export default {
     },
     similarData: {
       type: Object,
-      default:  null
+      default: null
     },
     placement: {
       type: String,
@@ -107,17 +107,19 @@ export default {
   },
   data() {
     return {
-      visible: false
+      visible: false,
+      hotServersConfig: window.hotServersConfig || []
     }
   },
   computed: {
+
     confidenceClass() {
       if (!this.similarData?.valuation?.confidence) {
         return 'confidence-extremely-low'
       }
-      
+
       const confidence = this.similarData.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return 'confidence-high'
       } else if (confidence >= 0.6) {
@@ -134,9 +136,9 @@ export default {
       if (!this.similarData?.valuation?.confidence) {
         return 'text-danger'
       }
-      
+
       const confidence = this.similarData.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return 'text-success'
       } else if (confidence >= 0.6) {
@@ -153,9 +155,9 @@ export default {
       if (!this.similarData?.valuation?.confidence) {
         return 'el-icon-warning'
       }
-      
+
       const confidence = this.similarData.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return 'el-icon-success'
       } else if (confidence >= 0.6) {
@@ -172,9 +174,9 @@ export default {
       if (!this.similarData?.valuation?.confidence) {
         return '(数据缺失)'
       }
-      
+
       const confidence = this.similarData.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return '(高)'
       } else if (confidence >= 0.6) {
@@ -188,7 +190,27 @@ export default {
       }
     }
   },
+  watch: {
+    visible: {
+      handler(newVal) {
+        if(newVal) {
+          this.loadHotServers()
+        }
+      },
+      immediate: true
+    }
+  },
   methods: {
+    getServerHeatLabel(serverid){
+      const serverHeat = this.hotServersConfig.find(item => item.children.find(child => child.server_id === serverid))
+      return serverHeat?.server_name||''
+    },
+    async loadHotServers() {
+      if (!window.hotServersConfig) {
+        window.hotServersConfig = await this.$api.system.getHotServers()
+      }
+      this.hotServersConfig = window.hotServersConfig
+    },
     handleShow() {
       this.$emit('show', this.role)
     },
@@ -297,11 +319,25 @@ export default {
 }
 
 /* 置信度文本颜色 */
-.text-success { color: #67c23a !important; }
-.text-primary { color: #409eff !important; }
-.text-info { color: #909399 !important; }
-.text-warning { color: #e6a23c !important; }
-.text-danger { color: #f56c6c !important; }
+.text-success {
+  color: #67c23a !important;
+}
+
+.text-primary {
+  color: #409eff !important;
+}
+
+.text-info {
+  color: #909399 !important;
+}
+
+.text-warning {
+  color: #e6a23c !important;
+}
+
+.text-danger {
+  color: #f56c6c !important;
+}
 
 /* 根据置信度的颜色变化 */
 .valuation-info.confidence-high {

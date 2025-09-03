@@ -31,6 +31,9 @@
         <el-form-item label="宠物等级≥">
           <el-input v-model.number="searchForm.pet_num_level" style="width: 60px" clearable />
         </el-form-item>
+        <el-form-item label="接受还价">
+          <el-checkbox v-model="searchForm.accept_bargain" true-label="1" false-label="" />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="handleReset">重置</el-button>
@@ -367,7 +370,8 @@ export default {
         pet_num: undefined,
         pet_num_level: undefined,
         sort_by: undefined,
-        sort_order: undefined
+        sort_order: undefined,
+        accept_bargain: undefined
       },
       activeCollapse: [],
       sortState: {
@@ -759,6 +763,7 @@ export default {
     async handlSummonePrice(role, rowIndex) {
       const pet_list_desc = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
       let pet_list = JSON.parse(role.all_summon_json)
+      console.log('pet_list', pet_list)
       if (!pet_list || pet_list.length === 0) {
         this.$notify.warning({
           title: '提示',
@@ -1066,6 +1071,9 @@ export default {
         }
         if (this.searchForm.pet_num_level) {
           params.pet_num_level = this.searchForm.pet_num_level
+        }
+        if (this.searchForm.accept_bargain) {
+          params.accept_bargain = this.searchForm.accept_bargain
         }
         // 排序参数
         if (this.searchForm.sort_by) params.sort_by = this.searchForm.sort_by

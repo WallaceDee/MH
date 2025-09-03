@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Any, Union, List
 import os
 from src.utils.jsonc_loader import load_jsonc_from_config_dir, load_jsonc_relative_to_file
+from utils.project_path import get_project_root
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +23,10 @@ class FeatureExtractor:
         # 加载规则配置
         self.config = load_jsonc_relative_to_file(
             __file__, '../config/rule_setting.jsonc')
+
+        # 加载hot_server_list配置
+        self.hot_server_list = load_jsonc_relative_to_file(
+            __file__, '../../constant/hot_server_list.json')
 
     def extract_features(self, role_data: Dict[str, Any]) -> Dict[str, Union[int, float, str]]:
         """
@@ -54,6 +59,7 @@ class FeatureExtractor:
                 - life_skills (List[int]): 生活技能等级列表(≥80级)
                 - lingyou_count (int): 灵佑数量
                 - hours_listed (int): 上架时间(小时)
+                - server_heat (int): 服务器热度
                 - collect_num (int): 收藏数量
                 - sum_amount (int): 最大召唤兽携带数量
                 -- 规则引擎使用
@@ -675,7 +681,12 @@ class FeatureExtractor:
         features = {
             'hours_listed': 0,
             'collect_num': 0,
+            'server_heat': 0,
         }
+        # self.hot_server_list 加载了服务器热度配置，根据serverid获取热度
+        # 根据serverid获取热度
+        server_id = data.get('serverid', 0)
+        features['server_heat'] = self._get_server_heat(server_id)
 
         # 上架时间（小时）
         # expire_time是上架过期的时间 "2025-06-13 21:28:50" 上架时间固定是14天正的
@@ -692,7 +703,34 @@ class FeatureExtractor:
             features['collect_num'] = data.get('collect_num', 0)
 
         return features
-
+         
+    def _get_server_heat(self, server_id):
+        """
+        根据服务器ID获取服务器热度
+        
+        Args:
+            server_id: 服务器ID
+            
+        Returns:
+            int: 服务器热度值，默认为0
+        """
+        try:
+            # 遍历所有热度分组
+            for heat_group in self.hot_server_list:
+                server_heat = heat_group.get('server_heat', 0)
+                
+                # 检查该组中的所有服务器
+                for server in heat_group.get('children', []):
+                    if server.get('server_id') == server_id:
+                        return server_heat
+                        
+            # 如果没有找到匹配的服务器，返回默认热度0
+            return 0
+            
+        except Exception as e:
+            logging.error(f"获取服务器热度失败: {e}")
+            return 0
+        
     def get_gender(self, icon_id):
         """
         根据图标ID获取角色性别
