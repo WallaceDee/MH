@@ -1021,7 +1021,7 @@
                 </tr>
                 <template v-else>
                   <tr v-for="xiangrui in nosale_xiangrui" :key="xiangrui.name">
-                    <th>{{ xiangrui.name }}</th>
+                    <th :class="{enhance:limitedSkinList.includes(xiangrui.name)}">{{ xiangrui.name }}</th>
                     <td>
                       技能：
                       <span v-if="xiangrui.skill_name">
@@ -1132,7 +1132,7 @@
                   :class="'module module-jinyi module-jinyi—' + index">
                   <p class="jinyi-sub-title">{{ item.title }}</p>
                   <ul v-if="item.list.length > 0" class="jinyi-attr-list">
-                    <li v-for="(clothesItem, clothesIndex) in item.list" :key="clothesIndex" class="item">
+                    <li v-for="(clothesItem, clothesIndex) in item.list" :key="clothesIndex" class="item" :style="limitedSkinList.includes(clothesItem.name)? 'background:rgba(255, 102, 0, 0.5);color:rgb(0,255,0);' : ''" >
                       {{ clothesItem.name }}
                     </li>
                   </ul>
@@ -1155,7 +1155,7 @@
                       <th>&nbsp;</th>
                     </tr>
                     <tr v-for="(row, rowIndex) in clothesRows" :key="rowIndex">
-                      <th v-for="(clothesItem, colIndex) in row" :key="colIndex" style="text-align: left">
+                      <th v-for="(clothesItem, colIndex) in row" :key="colIndex" style="text-align: left" >
                         {{ clothesItem ? clothesItem.name : '' }}
                       </th>
                     </tr>
@@ -1280,6 +1280,7 @@ export default {
   },
   data() {
     return {
+      limitedSkinList:window.limitedSkinList || [],
       ResUrl: window.ResUrl,
       shenqi_visible: false,
       visible: false,
@@ -1632,6 +1633,16 @@ export default {
       return rows
     }
   },
+  watch: {
+    visible: {
+      handler(newVal) {
+        if(newVal) {
+          this.getLimitedSkinConfig()
+        }
+      },
+      immediate: true
+    }
+  },
   mounted() {
     this.basic_info = this.roleInfo.basic_info || {}
     this.role_xiulian = this.roleInfo.role_xiulian || []
@@ -1698,6 +1709,19 @@ export default {
     this.house = this.roleInfo.house || {}
   },
   methods: {
+    async getLimitedSkinConfig() {
+      if (!window.limitedSkinList) {
+        const config = await this.$api.system.getLimitedSkinConfig()
+        const limitedSkinList = []
+        for (const itemType in config) {
+          for (const kName in config[itemType]) {
+            limitedSkinList.push(kName)
+          }
+        }
+        window.limitedSkinList  = limitedSkinList
+      }
+      this.limitedSkinList = window.limitedSkinList
+    },
     getPetRightLock(pet) {
       return pet.lock_type?.filter(item => item !== 9 && item !== 'protect' && item !== 'huoyue')
     },

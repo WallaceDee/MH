@@ -89,9 +89,9 @@ class MarketAnchorEvaluator(BaseValuator):
             'total_qiangzhuang_shensu': 0.10, # 强壮神速总和容忍度10%
             
             # 外观和神器系统
-            'shenqi_score': 0.5,           # 神器得分容忍度50%
-            'limited_skin_score': 0.5,     # 限量锦衣得分容忍度50%
-            'limited_huge_horse_score': 0.5, # 限量祥瑞得分容忍度50%
+            'shenqi_score': 0.80,           # 神器得分容忍度50%
+            'limited_skin_value': 0.5,     # 限量锦衣价值容忍度50%
+            'limited_huge_horse_value': 0.5, # 限量祥瑞得分容忍度50%
         }
         
         # 定义关键特征权重（用于相似度计算）
@@ -123,8 +123,10 @@ class MarketAnchorEvaluator(BaseValuator):
             
             # 外观和神器特征 - 中等权重
             'shenqi_score': 1.0, # 神器得分
-            'limited_skin_score': 0.5, # 限量锦衣得分
-            'limited_huge_horse_score': 0.5, # 限量祥瑞得分
+            'limited_skin_value': 1.0, # 限量锦衣价值（直接使用价值而非得分）
+            'limited_huge_horse_value': 1.0, # 限量祥瑞价值（直接使用价值而非得分）
+            # 'limited_skin_score': 0.5, # 限量锦衣得分（不再使用）
+            # 'limited_huge_horse_score': 0.5, # 限量祥瑞得分（不再使用）
             
             # 次要特征 - 低权重
             'jiyuan_amount': 1.0, # 机缘值

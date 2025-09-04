@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from typing import Dict, Any, Union, List
 import os
-from src.utils.jsonc_loader import load_jsonc_from_config_dir, load_jsonc_relative_to_file
+from src.utils.jsonc_loader import load_jsonc, load_jsonc_from_config_dir, load_jsonc_relative_to_file
 from utils.project_path import get_project_root
 
 # 配置日志
@@ -69,7 +69,7 @@ class FeatureExtractor:
                 --市场锚定法使用
                 - limited_skin_score (int): 限量锦衣得分（市场锚定法使用）
                 - limited_other_score (int): 限量其他得分（市场锚定法使用）
-                - limited_skin_score (int): 限量祥瑞得分（市场锚定法使用）
+                - limited_huge_horse_score (int): 限量祥瑞得分（市场锚定法使用）
                 - shenqi_score (float): 神器得分（归一化0-100）
                 -- 派生特征
                 - total_cultivation (int): 总修炼等级（攻击+防御+法术+抗法修炼）
@@ -104,9 +104,9 @@ class FeatureExtractor:
                 "allTheSameCount", "same9Count", "3attr", "3", "2attr", "2", "1attr", "1"
             ]
             raw_score = sum(shenqi[i] * value_map.get(keys[i], 0) for i in range(8))
-            max_score = 50000
-            shenqi_score = min(raw_score / max_score * 100, 100) if max_score > 0 else 0
-            features['shenqi_score'] = round(shenqi_score, 2)
+            # max_score = 50000
+            # shenqi_score = min(raw_score / max_score * 100, 100) if max_score > 0 else 0
+            features['shenqi_score'] = round(raw_score, 2)
 
             # 七、计算派生特征
             features.update(self._calculate_derived_features(features))
@@ -414,12 +414,13 @@ class FeatureExtractor:
     def _extract_appearance_features(self, role_data):
         """提取外观特征，基于价值配置转化为0-100标准化得分"""
         features = {
-            'limited_skin_value': 0,      # 限量锦衣价值得分
-            'limited_huge_horse_value': 0,     # 限量祥瑞价值得分
-            'limited_other_value': 0,        # 限量其他价值得分
-            'limited_skin_score': 0,        # 限量锦衣得分
-            'limited_huge_horse_score': 0,  # 限量祥瑞得分
-            'limited_other_score': 0,       # 限量其他得分
+            'limited_skin_value': 0,      # 限量锦衣价值
+            'limited_huge_horse_value': 0,     # 限量祥瑞价值
+            'limited_other_value': 0,        # 限量其他价值
+            # 以下得分特征不再使用，改为直接使用价值
+            # 'limited_skin_score': 0,        # 限量锦衣得分
+            # 'limited_huge_horse_score': 0,  # 限量祥瑞得分
+            # 'limited_other_score': 0,       # 限量其他得分
         }
 
         try:
@@ -449,11 +450,11 @@ class FeatureExtractor:
                                 if skin_name in limited_avt_widget:
                                     skin_total_value += limited_avt_widget.get(
                                         skin_name, 0)
-                        # 锦衣总价值 规则引擎使用
+                        # 锦衣总价值 规则引擎和市场锚定法都直接使用价值
                         features['limited_skin_value'] = skin_total_value
-                        # 转化为标准化得分 市场锚定法使用
-                        features['limited_skin_score'] = self._calculate_appearance_score(
-                            skin_total_value)
+                        # 不再计算标准化得分
+                        # features['limited_skin_score'] = self._calculate_appearance_score(
+                        #    skin_total_value)
 
                 except (json.JSONDecodeError, TypeError) as e:
                     self.logger.warning(f"解析锦衣数据失败: {e}")
@@ -475,11 +476,11 @@ class FeatureExtractor:
                                     huge_horse_name, gender, 'limited_huge_horses', '祥瑞')
                                 huge_horses_value += huge_horse_value
 
-                    # 祥瑞总价值 规则引擎使用
+                    # 祥瑞总价值 规则引擎和市场锚定法都直接使用价值
                     features['limited_huge_horse_value'] = huge_horses_value
-                    # 转化为标准化得分 市场锚定法使用
-                    features['limited_huge_horse_score'] = self._calculate_appearance_score(
-                        huge_horses_value)
+                    # 不再计算标准化得分
+                    # features['limited_huge_horse_score'] = self._calculate_appearance_score(
+                    #    huge_horses_value)
                 except (json.JSONDecodeError, TypeError) as e:
                     self.logger.warning(f"解析祥瑞数据失败: {e}")
 
@@ -668,9 +669,9 @@ class FeatureExtractor:
     def _load_appearance_config(self):
         """加载外观价值配置文件"""
         try:
-            # 构建相对路径：从evaluator目录到config/ex_avt_value.jsonc
-            relative_path = os.path.join('..','config', 'ex_avt_value.jsonc')
-            return load_jsonc_relative_to_file(__file__, relative_path)
+            # 从constant目录加载外观配置文件
+            constant_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'constant', 'ex_avt_value.jsonc')
+            return load_jsonc(constant_path)
 
         except Exception as e:
             self.logger.error(f"加载外观配置文件失败: {e}")

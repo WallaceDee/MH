@@ -491,7 +491,7 @@ class CBGSpider:
                 }
                
                 # 空号识别逻辑
-                is_empty_role = self.is_empty_role(parsed_desc.get('AllEquip', {}), parsed_desc.get('AllSummon', {}))
+                is_empty_role = self.is_empty_role(parsed_desc.get('AllEquip', {}), parsed_desc.get('AllSummon', {}), char.get('eid'))
                 
                 if is_empty_role:
                     # 如果是空号，添加空号识别信息并保存到空号数据库
@@ -873,7 +873,7 @@ class CBGSpider:
         owner_names = {0: "无", 1: "自己", 2: "配偶"}
         return owner_names.get(owner_status, "未知")
     
-    def is_empty_role(self, all_equips, pets):
+    def is_empty_role(self, all_equips, pets, eid):
         """
         判断是否为空号
         空号条件：物品个数等于0，且召唤兽等级大于100的数量为0

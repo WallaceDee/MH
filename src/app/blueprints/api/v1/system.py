@@ -82,7 +82,17 @@ def get_config_file(filename):
         
         with open(config_path, 'r', encoding='utf-8') as f:
             js_content = f.read()
+        # 将jsonc需要去除注释
+        # 简单处理JSONC注释（移除//注释）
+        lines = js_content.split('\n')
+        cleaned_lines = []
+        for line in lines:
+            # 移除行内注释
+            if '//' in line:
+                line = line[:line.index('//')]
+            cleaned_lines.append(line)
         
+        js_content = '\n'.join(cleaned_lines)
         # 直接返回文件内容
         return Response(js_content, mimetype='text/plain')
         

@@ -37,6 +37,15 @@ export const systemApi = {
     return api.get('/system/config-file/hot_server_list.json')
   },
 
+  
+  /**
+   * 获取限量锦衣祥瑞配置
+   * @returns {Promise} 直接返回限量锦衣祥瑞配置
+   */
+  getLimitedSkinConfig() {
+    return api.get('/system/config-file/ex_avt_value.jsonc')
+  },
+
   /**
    * 获取所有搜索参数配置
    * @returns {Promise}

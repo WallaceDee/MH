@@ -267,3 +267,21 @@ playwright._impl._errors.TargetClosedError: Target page, context or browser has 
 2025-08-27 12:37:16,622 - ERROR - Future exception was never retrieved
 future: <Future finished exception=TargetClosedError('Target page, context or browser has been closed')>
 playwright._impl._errors.TargetClosedError: Target page, context or browser has been closed
+2025-09-04 13:32:14,362 - INFO - Spider实例将在需要时延迟创建
+2025-09-04 13:32:16,837 - INFO - 成功加载 40 个Cookie
+2025-09-04 13:32:16,964 - INFO - 已注入 40 个Cookie到浏览器上下文
+2025-09-04 13:32:17,449 - INFO - Playwright浏览器设置完成
+2025-09-04 13:32:17,483 - INFO - Playwright网络监听已设置
+2025-09-04 13:32:17,483 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-04 13:32:17,687 - INFO - 页面初始加载完成
+2025-09-04 13:32:20,697 - INFO - 检测到已登录状态，当前URL: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-04 13:32:20,697 - INFO - 登录状态检查: {'isLoggedIn': True, 'currentUrl': 'https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1', 'message': '已登录'}
+2025-09-04 13:32:20,697 - INFO - 检测到已登录状态，更新Cookie...
+2025-09-04 13:32:20,720 - INFO - Cookie已更新并保存到 C:\Users\Administrator\Desktop\mh\config\cookies.txt
+2025-09-04 13:32:20,720 - INFO - 数据收集已开始，请在浏览器中正常操作...
+2025-09-04 13:32:20,720 - INFO - 所有对 recommend.py 的请求将被自动捕获和保存
+2025-09-04 13:32:23,245 - INFO - 检测到页面关闭，停止数据收集服务
+2025-09-04 13:32:23,432 - INFO - 检测到浏览器上下文关闭，停止数据收集服务
+2025-09-04 13:32:24,111 - INFO - 数据收集已停止
+2025-09-04 13:32:24,111 - INFO - 数据收集已停止
+2025-09-04 13:32:24,111 - INFO - 数据收集已停止

@@ -30,7 +30,7 @@
     <el-table-column prop="server_name" label="服务器" width="90">
       <template #default="scope">
         <div class="server-info">
-          <div>  <el-tag type="danger" size="mini">{{ getServerHeatLabel(scope.row.serverid)||'' }}</el-tag></div>
+          <div>  <el-tag type="danger" size="mini">{{ getServerHeatLabel(scope.row.serverid)||'其他' }}</el-tag></div>
           <div> <el-tag type="danger" size="mini">{{ scope.row.server_name }}</el-tag></div>
           <div v-if="scope.row.is_cross_server" class="cross-server-tag">
             <el-tag size="mini" type="info">跨服</el-tag>
@@ -91,9 +91,6 @@
         </div>
       </template>
     </el-table-column>
-
-
-
     <el-table-column label="操作" width="80" fixed="right">
       <template #default="scope">
         <el-link :href="getCBGLinkByType(scope.row.eid)" type="danger" target="_blank">藏宝阁</el-link>

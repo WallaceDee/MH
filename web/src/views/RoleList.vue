@@ -95,13 +95,23 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="估价" width="120" align="center">
+        <el-table-column label="估价" width="220" align="center">
           <template #default="scope">
             <div class="role-valuation-cell">
-              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.base_price })" style="font-size: 12px;"></span>
-              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.equip_price })" style="font-size: 12px;"></span>
-              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.pet_price })" style="font-size: 12px;"></span>
-              <span v-html="formatFullPriceWithoutPerfix({ price: scope.row.base_price + scope.row.equip_price + scope.row.pet_price })" style="font-size: 12px;"></span>
+              <div>
+                <el-tag>👤<span v-html="formatFullPriceWithoutPerfix({ price: scope.row.base_price })"
+                    style="font-size: 12px;"></span></el-tag>
+                <el-tag v-if="get_equip_num(scope.row.roleInfo) > 0">⚔️<span
+                    v-html="formatFullPriceWithoutPerfix({ price: scope.row.equip_price })"
+                    style="font-size: 12px;"></span></el-tag>
+                <el-tag v-if="get_pet_num(scope.row.roleInfo) > 0">🐲<span
+                    v-html="formatFullPriceWithoutPerfix({ price: scope.row.pet_price })"
+                    style="font-size: 12px;"></span></el-tag>
+              </div>
+              <el-tag type="success">总估价：
+                <span
+                  v-html="formatFullPriceWithoutPerfix({ price: scope.row.base_price + scope.row.equip_price + scope.row.pet_price })"
+                  style="font-size: 12px;"></span></el-tag>
             </div>
           </template>
         </el-table-column>
@@ -109,23 +119,21 @@
           <template #default="scope">
             <SimilarRoleModal :role="scope.row" :similar-data="roleSimilarData"
               @show="loadSimilarRoles($event, scope.$index)">
-              <div> <el-link type="primary" href="javascript:void(0)">裸号估价</el-link></div>
+              <div> <el-link type="primary" href="javascript:void(0)">👤 裸号</el-link></div>
             </SimilarRoleModal>
             <div v-if="get_equip_num(scope.row.roleInfo) > 0"> <el-link
                 @click.native="handleEquipPrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">⚔️ {{
                   get_equip_num(scope.row.roleInfo) }}件</el-link></div>
-            <div v-else>无装备</div>
             <el-link v-if="get_pet_num(scope.row.roleInfo) > 0"
-              @click.native="handlSummonePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">
-              🐲 {{ get_pet_num(scope.row.roleInfo) }}只
+              @click.native="handlSummonePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">🐲 {{
+                get_pet_num(scope.row.roleInfo) }}只
             </el-link>
-            <div v-else>无召唤兽</div>
           </template>
         </el-table-column>
         <el-table-column prop="history_price" label="历史价格" width="120" align="center" sortable="custom">
           <template slot-scope="scope">
-            <div v-for="(history, index) in JSON.parse(scope.row.history_price)" :key="index"
-              :title="history.timestamp" v-html="formatFullPrice(history.price, true)"
+            <div v-for="(history, index) in JSON.parse(scope.row.history_price)" :key="index" :title="history.timestamp"
+              v-html="formatFullPrice(history.price, true)"
               style="text-decoration: line-through;filter: grayscale(100%);"></div>
           </template>
         </el-table-column>
@@ -397,7 +405,7 @@ export default {
 
   methods: {
     formatFullPriceWithoutPerfix(item) {
-      return this.formatFullPrice(item, true).replace('￥', '')
+      return this.formatFullPrice(item, true).replace('￥', '').replace('-', '???')
     },
     // 检查路由参数是否有变化的工具方法
     hasRouteChanges(newParams, newQuery = null) {
@@ -1413,9 +1421,10 @@ export default {
   align-items: center;
   gap: 4px;
 }
-.role-valuation-cell >*{
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+
+.role-valuation-cell>* {
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 </style>
