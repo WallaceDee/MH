@@ -6,7 +6,10 @@ import logging
 from typing import Dict, Any, Union, List
 import os
 from src.utils.jsonc_loader import load_jsonc, load_jsonc_from_config_dir, load_jsonc_relative_to_file
-from utils.project_path import get_project_root
+try:
+    from utils.project_path import get_project_root
+except ImportError:
+    from src.utils.project_path import get_project_root
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +30,16 @@ class FeatureExtractor:
         # 加载hot_server_list配置
         self.hot_server_list = load_jsonc_relative_to_file(
             __file__, '../../constant/hot_server_list.json')
+        
+        # 初始化规则估价器（延迟导入避免循环依赖）
+        self.rule_evaluator = None
+
+    def _get_rule_evaluator(self):
+        """获取规则估价器实例（延迟初始化）"""
+        if self.rule_evaluator is None:
+            from ..rule_evaluator import RuleEvaluator
+            self.rule_evaluator = RuleEvaluator()
+        return self.rule_evaluator
 
     def extract_features(self, role_data: Dict[str, Any]) -> Dict[str, Union[int, float, str]]:
         """
@@ -71,6 +84,10 @@ class FeatureExtractor:
                 - limited_other_score (int): 限量其他得分（市场锚定法使用）
                 - limited_huge_horse_score (int): 限量祥瑞得分（市场锚定法使用）
                 - shenqi_score (float): 神器得分（归一化0-100）
+                -- 规则估价特征
+                - rule_total_value (float): 规则估价总价值（MHB万元）
+                - rule_final_value (float): 规则估价最终价值（元）
+                - rule_{component}_value (float): 各项价值分解（如rule_school_history_value等）
                 -- 派生特征
                 - total_cultivation (int): 总修炼等级（攻击+防御+法术+抗法修炼）
                 - total_beast_cultivation (int): 总召唤兽修炼等级（召唤兽攻击+防御+法术+抗法修炼）
@@ -108,7 +125,26 @@ class FeatureExtractor:
             # shenqi_score = min(raw_score / max_score * 100, 100) if max_score > 0 else 0
             features['shenqi_score'] = round(raw_score, 2)
 
-            # 七、计算派生特征
+            # 七、规则估价特征
+            try:
+                rule_evaluator = self._get_rule_evaluator()
+                if rule_evaluator is not None:
+                    # 使用已提取的特征进行规则估价，避免重复解析
+                    rule_evaluation = rule_evaluator.calc_rule_evaluation_from_features(features)
+                    # 将规则估价结果作为特征添加
+                    features['rule_value'] = rule_evaluation.get('rule_value', 0.0)
+                    self.logger.info(f"规则估价特征提取成功: 总价值={features['rule_value']:.2f}")
+                else:
+                    # 如果规则估价器初始化失败，设置默认值
+                    features['rule_value'] = 0.0
+                    
+            except Exception as e:
+                self.logger.warning(f"规则估价特征提取失败: {e}")
+                features['rule_value'] = 0.0
+                # 设置默认值确保不影响其他特征
+                
+
+            # 八、计算派生特征
             features.update(self._calculate_derived_features(features))
 
             return features
