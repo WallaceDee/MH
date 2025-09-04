@@ -20,13 +20,9 @@ logger = logging.getLogger(__name__)
 # 尝试导入估价器相关模块
 try:
     from src.evaluator.market_anchor_evaluator import MarketAnchorEvaluator
-    from src.evaluator.rule_evaluator import RuleEvaluator
-    from src.evaluator.hybrid_valuation_engine import HybridValuationEngine
     from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
 except ImportError as e:
     MarketAnchorEvaluator = None
-    RuleEvaluator = None
-    HybridValuationEngine = None
     FeatureExtractor = None
     logger.warning(f"无法导入角色估价器相关模块: {e}")
 
@@ -46,15 +42,6 @@ class roleService:
             except Exception as e:
                 logger.error(f"角色特征提取器初始化失败: {e}")
 
-        # 初始化混合估价引擎
-        self.hybrid_engine = None
-        if HybridValuationEngine:
-            try:
-                self.hybrid_engine = HybridValuationEngine()
-                logger.info("角色混合估价引擎初始化成功")
-            except Exception as e:
-                logger.error(f"角色混合估价引擎初始化失败: {e}")
-
         # 初始化市场锚定估价器
         self.market_evaluator = None
         if MarketAnchorEvaluator:
@@ -63,15 +50,6 @@ class roleService:
                 logger.info("角色市场锚定估价器初始化成功")
             except Exception as e:
                 logger.error(f"角色市场锚定估价器初始化失败: {e}")
-
-        # 初始化规则估价器
-        self.rule_evaluator = None
-        if RuleEvaluator:
-            try:
-                self.rule_evaluator = RuleEvaluator()
-                logger.info("角色规则估价器初始化成功")
-            except Exception as e:
-                logger.error(f"角色规则估价器初始化失败: {e}")
 
     def _validate_year_month(self, year: Optional[int], month: Optional[int]) -> Tuple[int, int]:
         """验证并获取有效的年月"""
@@ -708,11 +686,11 @@ class roleService:
     def get_role_valuation(self, eid: str, year: Optional[int] = None, month: Optional[int] = None,
                           role_type: str = 'normal', strategy: str = 'fair_value',
                           similarity_threshold: float = 0.7, max_anchors: int = 30) -> Dict:
-        """获取角色估价"""
+        """获取角色估价 - 使用市场锚定法"""
         try:
-            if not self.hybrid_engine:
+            if not self.market_evaluator:
                 return {
-                    "error": "角色混合估价引擎未初始化",
+                    "error": "角色市场锚定估价器未初始化",
                     "estimated_price": 0,
                     "estimated_price_yuan": 0
                 }
@@ -767,12 +745,18 @@ class roleService:
                     "estimated_price_yuan": 0
                 }
             
-            # 调用混合估价引擎
+            # 调用市场锚定估价器
             try:
-                result = self.hybrid_engine.evaluate(role_data)
+                result = self.market_evaluator.calculate_value(
+                    target_features=role_features,
+                    strategy=strategy,
+                    similarity_threshold=similarity_threshold,
+                    max_anchors=max_anchors,
+                    verbose=False
+                )
                 
                 # 格式化返回结果
-                estimated_price = result.final_value if hasattr(result, 'final_value') else 0
+                estimated_price = result.get('estimated_price', 0)
                 estimated_price_yuan = estimated_price / 100.0  # 转换为元
                 
                 # 估价成功后自动更新数据库中的base_price
@@ -790,14 +774,9 @@ class roleService:
                 return {
                     "estimated_price": int(estimated_price),
                     "estimated_price_yuan": round(estimated_price_yuan, 2),
-                    "confidence": getattr(result, 'confidence', 0.0),
-                    "market_value": getattr(result, 'market_value', 0),
-                    "rule_value": getattr(result, 'rule_value', 0),
-                    "integration_strategy": getattr(result, 'integration_strategy', ''),
-                    "anomaly_score": getattr(result, 'anomaly_score', 0.0),
-                    "anchor_count": getattr(result, 'anchor_count', 0),
-                    "value_breakdown": getattr(result, 'value_breakdown', {}),
-                    "warnings": getattr(result, 'warnings', []),
+                    "confidence": result.get('confidence', 0.0),
+                    "market_value": int(estimated_price),  # 市场锚定估价即为最终价值
+                    "anchor_count": result.get('anchor_count', 0),
                     "feature": role_features,
                     "eid": eid,
                     "strategy": strategy,
@@ -944,13 +923,13 @@ class roleService:
     def batch_role_valuation(self, eid_list: List[str], year: Optional[int] = None, month: Optional[int] = None,
                             role_type: str = 'normal', strategy: str = 'fair_value',
                             similarity_threshold: float = 0.7, max_anchors: int = 30, verbose: bool = False) -> Dict:
-        """批量角色估价"""
+        """批量角色估价 - 使用市场锚定法"""
         try:
             if not eid_list:
                 return {"error": "角色eid列表不能为空"}
             
-            if not self.hybrid_engine:
-                return {"error": "角色混合估价引擎未初始化"}
+            if not self.market_evaluator:
+                return {"error": "角色市场锚定估价器未初始化"}
             
             if not self.feature_extractor:
                 return {"error": "角色特征提取器未初始化"}
