@@ -1,14 +1,3 @@
-import os
-import sys
-# 添加项目根目录到Python路径，解决模块导入问题
-from src.utils.project_path import get_project_root
-project_root = get_project_root()
-sys.path.insert(0, project_root)
-
-try:
-    from .feature_extractor.feature_extractor import FeatureExtractor
-except ImportError:
-    from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
 import sqlite3
 import logging
 import numpy as np
@@ -22,116 +11,32 @@ class RuleEvaluator:
     def __init__(self):
     
         self.logger = logging.getLogger(__name__)
-        self.feature_extractor = FeatureExtractor()
-        self.df = None
 
-    def _extract_features(self, role_data, conn=None):
-        """提取角色特征
 
-        使用 FeatureExtractor 提取特征
-        """
-        try:
-            # 使用 FeatureExtractor 提取特征
-            features = self.feature_extractor.extract_features(role_data)
-            return features
-
-        except Exception as e:
-            self.logger.error(f"特征提取失败: {e}")
-            raise
-
-    def calc_appearance_value(self, features):
-        """计算外观系统价值"""
-        value = 0
-
-        # 限量锦衣价值
-        if 'limited_skin_value' in features:
-            # 指数衰减模型：前几件价值高，后面边际递减
-            skin_value = features['limited_skin_value']
-            value += 1000 * (1 - np.exp(-skin_value / 500))
-
-        return value
-
-    def evaluate(self, role_data):
-        """评估角色价值
+    def calc_rule_evaluation_from_features(self, features):
+        """基于已提取的特征计算规则估价
+        
+        这个方法专门用于接收已经提取好的特征，避免重复解析原始数据
         
         Args:
-            role_data: 角色数据
+            features: 已提取的特征字典
+            
+        Returns:
+            Dict: 包含规则估价结果的字典
         """
         try:
-            # 1.提取特征
-            features = self._extract_features(role_data)
+            # 直接使用传入的特征进行规则估价
+            rule_evaluation = self.calc_base_attributes_value(features)
             
-            # 使用改进的算法
-            improved_result = self.calc_base_attributes_value_improved(features)
+            self.logger.debug(f"基于特征的规则估价完成: 最终价值={rule_evaluation.get('rule_value', 0):.2f}")
             
-            evaluation_result = {
-                'features': features,
-                'base_value': improved_result['final_value'],
-                'value_breakdown': improved_result['value_breakdown'],
-                'total_raw_value': improved_result['total_raw_value'],
-                'algorithm_version': 'improved'
-            }
-
-            return evaluation_result
-
+            return rule_evaluation
+            
         except Exception as e:
-            self.logger.error(f"角色评估失败: {e}")
+            self.logger.error(f"基于特征的规则估价失败: {e}")
             raise
 
-    def batch_evaluate(self, db_path):
-        """加载数据"""
-        try:
-            print(f"正在连接数据库: {db_path}")
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-
-            # 获取所有角色数据
-            print("正在查询数据库...")
-            cursor.execute("""
-                SELECT 
-                    c.*,
-                    l.*
-                FROM roles c
-                LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
-                WHERE c.price > 0 AND l.all_equip_json =='{}' AND l.all_summon_json == '[]'
-            """)
-
-            # 获取列名
-            columns = [description[0] for description in cursor.description]
-            print(f"查询完成，开始获取数据...")
-            rows = cursor.fetchall()
-            print(f"获取到 {len(rows)} 条数据")
-            # 准备训练数据
-            print("开始提取特征...")
-            data = []
-            for i, row in enumerate(rows):
-                role_data = dict(zip(columns, row))
-                features = self._extract_features(role_data, conn)
-                features['price'] = role_data.get('price', 0)
-                features['eid'] = role_data.get('eid', '')
-                data.append(features)
-                if (i + 1) % 10 == 0:
-                    print(f"已处理 {i + 1}/{len(rows)} 条数据")
-
-            print("特征提取完成，转换为DataFrame...")
-            # 转换为DataFrame
-            self.df = pd.DataFrame(data)
-            print(f"DataFrame 形状: {self.df.shape}")
-            self.df.set_index('eid', inplace=True)
-
-            print("数据加载和预处理完成")
-
-        except Exception as e:
-            print(f"数据加载失败: {str(e)}")
-            import traceback
-            print(traceback.format_exc())
-            raise
-        finally:
-            if 'conn' in locals():
-                conn.close()
-
-
-    def calc_base_attributes_value_improved(self, features: Dict[str, Union[int, float, str]]) -> Dict[str, float]:
+    def calc_base_attributes_value(self, features: Dict[str, Union[int, float, str]]) -> Dict[str, float]:
         """
         简化的改进基础属性价值计算，只引入市场折价系数
         
@@ -378,19 +283,14 @@ class RuleEvaluator:
                 print(f"限量祥瑞: 直接计入 {limited_huge_horse_value} 元")
             
             # 最终价值转换
-            final_value = total_value / RULE['RMB2MHB'] *100* RULE['MARKET_FACTOR']
+            rule_value = total_value / RULE['RMB2MHB'] *100* RULE['MARKET_FACTOR']
             # 直接加上限量锦衣和祥瑞的元价值
-            final_value += limited_skin_value + limited_huge_horse_value
+            rule_value += limited_skin_value + limited_huge_horse_value
             
-            print(f"\n=== 简化版价值分解 ===")
-            for attr, value in value_breakdown.items():
-                print(f"{attr}: {value:.0f}")
-            print(f"总计: {total_value:.0f} -> 最终: {final_value:.0f}")
             
             return {
                 'value_breakdown': value_breakdown,
-                'total_raw_value': total_value,
-                'final_value': final_value
+                'rule_value': rule_value
             }
             
         except Exception as e:
@@ -399,6 +299,5 @@ class RuleEvaluator:
             self.logger.error(f"详细错误: {traceback.format_exc()}")
             return {
                 'value_breakdown': {},
-                'total_raw_value': 0.0,
-                'final_value': 0.0
+                'rule_value': 0.0
             }
