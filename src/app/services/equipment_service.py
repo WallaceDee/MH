@@ -1006,6 +1006,11 @@ class EquipmentService:
                         continue
                     
                     # 使用特征提取器提取特征
+                    if kindid==PET_EQUIP_KINDID:
+                        equipment_data = {
+                            'kindid':kindid,
+                            'desc':equipment_data.get('cDesc',equipment_data.get('desc','')),
+                        }
                     equipment_features = feature_extractor.extract_features(equipment_data)
                     
                     # 确保equip_sn信息被正确传递

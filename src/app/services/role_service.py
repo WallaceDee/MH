@@ -752,7 +752,7 @@ class roleService:
                     strategy=strategy,
                     similarity_threshold=similarity_threshold,
                     max_anchors=max_anchors,
-                    verbose=False
+                    verbose=True
                 )
                 
                 # 格式化返回结果

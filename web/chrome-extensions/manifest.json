@@ -1,17 +1,10 @@
-{
+﻿{
   "manifest_version": 3,
   "name": "CBG爬虫助手",
   "version": "1.0.0",
   "description": "梦幻西游CBG爬虫系统浏览器插件",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://*.163.com/*",
-    "https://*.cbg.163.com/*"
-  ],
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["https://*.163.com/*", "https://*.cbg.163.com/*"],
   "action": {
     "default_title": "CBG爬虫助手",
     "default_icon": {
@@ -21,14 +14,22 @@
       "128": "icons/icon128.png"
     }
   },
-  "background": {
-    "service_worker": "background.js"
-  },
+  "background": { "service_worker": "background.js" },
   "content_scripts": [
+    { 
+      "matches": ["https://*.cbg.163.com/*"], 
+      "js": ["content.js"], 
+      "css": ["content.css"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+  "devtools_page": "devtools.html",
+  "web_accessible_resources": [
     {
-      "matches": ["https://*.cbg.163.com/*"],
-      "js": ["content.js"],
-      "css": ["content.css"]
+      "resources": ["content.js"],
+      "matches": ["https://*.cbg.163.com/*"]
     }
   ],
   "icons": {
@@ -37,4 +38,4 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   }
-} 
+}

@@ -133,7 +133,6 @@ class FeatureExtractor:
                     rule_evaluation = rule_evaluator.calc_rule_evaluation_from_features(features)
                     # 将规则估价结果作为特征添加
                     features['rule_value'] = rule_evaluation.get('rule_value', 0.0)
-                    self.logger.info(f"规则估价特征提取成功: 总价值={features['rule_value']:.2f}")
                 else:
                     # 如果规则估价器初始化失败，设置默认值
                     features['rule_value'] = 0.0

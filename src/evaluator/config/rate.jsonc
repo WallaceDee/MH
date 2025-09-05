@@ -1,21 +1,22 @@
 {
-    "school_history": 0.2, // 历史门派
-    "qianyuandan": 0.85, // 乾元丹
-    "jiyuan": 0.2, // 机缘
-    "exp": 0.2, // 经验
-    "school_skills": 0.8, // 师门技能
-    "packet": 0.2, // 行囊
-    "learn_cash": 0.5, // 储备金
-    "xianyu": 0, // 仙玉
-    "cultivation": 1, // 修炼
-    "beast_cultivation": 1, // 召唤兽控制力
-    "life_skills": 0.5, // 生活技能
-    "qiangzhuang_shensu": 1, // 强壮神速
-    "lingyou": 0.4, // 灵佑
-    "rider": 0.8, // 坐骑
-    "pet_count": 0.2, // 召唤兽格子
-    "fabao": 0.7, // 法宝
-    "shenqi": 0.75, // 神器
-    "limited_skin": 0.6, // 限量锦衣
-    "limited_huge_horse": 0.7 // 限量祥瑞
+    "school_history": 1,
+    "qianyuandan": 1,
+    "jiyuan": 1,
+    "school_skills": 1,
+    "cultivation": 1,
+    "beast_cultivation": 1,
+    "life_skills": 1,
+    "qiangzhuang_shensu": 1,
+    "lingyou": 1,
+    "rider": 1,
+    "shenqi": 1,
+    "limited_skin": 1,
+    "limited_huge_horse": 1,
+    "cultivation_level": 1,
+    "cultivation_limit": 1,
+    "exp": 0,
+    "pet_count": 0,
+    "packet": 0,
+    "learn_cash": 0,
+    "xianyu": 0
 }

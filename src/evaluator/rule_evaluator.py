@@ -64,7 +64,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['school_history'] = discount_value
                 total_value += discount_value
-                print(f"历史门派数: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('school_history', 1.0)})")
+                # print(f"历史门派数: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('school_history', 1.0)})")
             
             # 2. 乾元丹加成
             all_new_point = features.get('all_new_point', 0)
@@ -74,7 +74,7 @@ class RuleEvaluator:
                 discount_value = raw_value * DISCOUNT_RATES.get('qianyuandan', 1.0)
                 value_breakdown['qianyuandan'] = discount_value
                 total_value += discount_value
-                print(f"乾元丹: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('qianyuandan', 1.0)})")
+                # print(f"乾元丹: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('qianyuandan', 1.0)})")
             
             # 3. 乾元丹突破加成
             if features.get('qianyuandan_breakthrough', False):
@@ -82,7 +82,7 @@ class RuleEvaluator:
                 discount_value = raw_value * DISCOUNT_RATES.get('qianyuandan', 1.0)  # 使用乾元丹的系数
                 value_breakdown['qianyuandan_breakthrough'] = discount_value
                 total_value += discount_value
-                print(f"乾元丹突破: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('qianyuandan', 1.0)})")
+                # print(f"乾元丹突破: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('qianyuandan', 1.0)})")
             
             # 4. 月饼粽子机缘
             jiyuan_amount = features.get('jiyuan_amount', 0)
@@ -91,7 +91,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['jiyuan'] = discount_value
                 total_value += discount_value
-                print(f"月饼粽子机缘: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('jiyuan', 1.0)})")
+                # print(f"月饼粽子机缘: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('jiyuan', 1.0)})")
             
             # 5. 总经验
             sum_exp = features.get('sum_exp', 0)
@@ -100,7 +100,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['exp'] = discount_value
                 total_value += discount_value
-                print(f"总经验: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('exp', 1.0)})")
+                # print(f"总经验: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('exp', 1.0)})")
             
             # 6. 师门技能
             school_skills = features.get('school_skills', [])
@@ -113,7 +113,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['school_skills'] = discount_value
                 total_value += discount_value
-                print(f"师门技能: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('school_skills', 1.0)})")
+                # print(f"师门技能: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('school_skills', 1.0)})")
             
             # 7. 行囊
             packet_page = features.get('packet_page', 0)
@@ -123,7 +123,7 @@ class RuleEvaluator:
                 discount_value = raw_value * DISCOUNT_RATES.get('packet', 1.0)
                 value_breakdown['packet'] = discount_value
                 total_value += discount_value
-                print(f"行囊: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('packet', 1.0)})")
+                # print(f"行囊: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('packet', 1.0)})")
             
             # 8. 储备金
             learn_cash = features.get('learn_cash', 0)
@@ -132,7 +132,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['learn_cash'] = discount_value
                 total_value += discount_value
-                print(f"储备金: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('learn_cash', 1.0)})")
+                # print(f"储备金: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('learn_cash', 1.0)})")
             
             # 9. 仙玉
             xianyu_amount = features.get('xianyu_amount', 0)
@@ -141,7 +141,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['xianyu'] = discount_value
                 total_value += discount_value
-                print(f"仙玉: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('xianyu', 1.0)})")
+                # print(f"仙玉: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('xianyu', 1.0)})")
             
             # 10. 修炼等级上限
             max_cultivate_dict = RULE.get('MaxCultivateGrade2Value', {})
@@ -157,7 +157,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['cultivation_limit'] = discount_value
                 total_value += discount_value
-                print(f"修炼等级上限: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('cultivation', 1.0)})")
+                # print(f"修炼等级上限: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('cultivation', 1.0)})")
             
             # 11. 修炼等级
             cultivate_learn_count_dict = RULE['CultivateGrade2LearnCount']
@@ -171,7 +171,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['cultivation_level'] = discount_value
                 total_value += discount_value
-                print(f"修炼等级: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('cultivation', 1.0)})")
+                # print(f"修炼等级: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('cultivation', 1.0)})")
             
             # 12. 控制力
             control_dict = RULE.get('ControlGrade2XiulianguoCount', {})
@@ -186,7 +186,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['beast_cultivation'] = discount_value
                 total_value += discount_value
-                print(f"控制力: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('beast_cultivation', 1.0)})")
+                # print(f"控制力: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('beast_cultivation', 1.0)})")
             
             # 13. 生活技能
             life_skills = features.get('life_skills', [])
@@ -199,7 +199,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['life_skills'] = discount_value
                 total_value += discount_value
-                print(f"生活技能: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('life_skills', 1.0)})")
+                # print(f"生活技能: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('life_skills', 1.0)})")
             
             # 14. 强壮、神速
             qiangzhuang_shensu = features.get('qiangzhuang&shensu', [])
@@ -212,7 +212,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['qiangzhuang_shensu'] = discount_value
                 total_value += discount_value
-                print(f"强壮、神速: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('qiangzhuang_shensu', 1.0)})")
+                # print(f"强壮、神速: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('qiangzhuang_shensu', 1.0)})")
             
             # 15. 灵佑次数
             lingyou_count = features.get('lingyou_count', 0)
@@ -221,7 +221,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['lingyou'] = discount_value
                 total_value += discount_value
-                print(f"灵佑次数: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('lingyou', 1.0)})")
+                # print(f"灵佑次数: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('lingyou', 1.0)})")
             
             # 16. 高成长坐骑数量
             hight_grow_rider_count = features.get('hight_grow_rider_count', 0)
@@ -230,7 +230,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['rider'] = discount_value
                 total_value += discount_value
-                print(f"高成长坐骑: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('rider', 1.0)})")
+                # print(f"高成长坐骑: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('rider', 1.0)})")
             
             # 17. 召唤兽最大携带量
             sum_amount = features.get('sum_amount', 0)
@@ -239,7 +239,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['pet_count'] = discount_value
                 total_value += discount_value
-                print(f"召唤兽携带量: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('pet_count', 1.0)})")
+                # print(f"召唤兽携带量: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('pet_count', 1.0)})")
                   
             # 19. 神器
             shenqi = features.get('shenqi', [0,0,0,0,0,0,0,0])
@@ -264,7 +264,7 @@ class RuleEvaluator:
             if raw_value > 0:
                 value_breakdown['shenqi'] = discount_value
                 total_value += discount_value
-                print(f"神器: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('shenqi', 1.0)})")
+                # print(f"神器: 原始{raw_value:.0f}万 MHB -> 市场{discount_value/RULE.get('RMB2MHB',15)*RULE.get('MARKET_FACTOR'):.0f}元 (系数{DISCOUNT_RATES.get('shenqi', 1.0)})")
             
             # 20. 限量锦衣价值
             limited_skin_value = features.get('limited_skin_value', 0)
@@ -272,7 +272,7 @@ class RuleEvaluator:
                 # 直接以元为单位计入
                 value_breakdown['limited_skin'] = limited_skin_value
                 total_value += 0  # 不再计入MHB
-                print(f"限量锦衣: 直接计入 {limited_skin_value} 元")
+                # print(f"限量锦衣: 直接计入 {limited_skin_value} 元")
             
             # 21. 限量祥瑞价值
             limited_huge_horse_value = features.get('limited_huge_horse_value', 0)
@@ -280,17 +280,16 @@ class RuleEvaluator:
                 # 直接以元为单位计入
                 value_breakdown['limited_huge_horse'] = limited_huge_horse_value
                 total_value += 0  # 不再计入MHB
-                print(f"限量祥瑞: 直接计入 {limited_huge_horse_value} 元")
+                # print(f"限量祥瑞: 直接计入 {limited_huge_horse_value} 元")
             
             # 最终价值转换
-            rule_value = total_value / RULE['RMB2MHB'] *100* RULE['MARKET_FACTOR']
+            rule_value = total_value / RULE['RMB2MHB'] * RULE['MARKET_FACTOR']
             # 直接加上限量锦衣和祥瑞的元价值
             rule_value += limited_skin_value + limited_huge_horse_value
             
-            
             return {
                 'value_breakdown': value_breakdown,
-                'rule_value': rule_value
+                'rule_value': rule_value * 100
             }
             
         except Exception as e:

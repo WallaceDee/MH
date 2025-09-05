@@ -1,6 +1,6 @@
 {
   "RMB2MHB": 15,
-  "MARKET_FACTOR": 0.7,
+  "MARKET_FACTOR": 1.0,
   "LearnCash2CashRate": 0.7,
   "XiulianguoValuePerCount": 80,
   "HightGrowRidePerValue": 3300,

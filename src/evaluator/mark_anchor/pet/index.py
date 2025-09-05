@@ -126,8 +126,6 @@ class PetMarketAnchorEvaluator(BaseValuator):
                     # 计算相似度
                     similarity = self._calculate_similarity(
                         target_features, market_row.to_dict())
-                    print(
-                        f"相似度------------------: {similarity}{target_features}")
                     if similarity >= similarity_threshold:
                         # 提取价格，如果有equip_list_amount则减去装备估价
                         total_price = market_row.get('price', 0)
