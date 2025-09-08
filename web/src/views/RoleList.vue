@@ -287,9 +287,26 @@ export default {
       immediate: true
     },
 
-    // 监听路由query参数变化，同步更新排序状态
+    // 监听路由query参数变化，同步更新搜索表单和排序状态
     '$route.query': {
       handler(newQuery) {
+        // 同步搜索表单参数
+        if (newQuery.selectedDate) {
+          this.searchForm.selectedDate = newQuery.selectedDate
+        }
+        if (newQuery.equip_num !== undefined) {
+          this.searchForm.equip_num = newQuery.equip_num ? parseInt(newQuery.equip_num) : undefined
+        }
+        if (newQuery.pet_num !== undefined) {
+          this.searchForm.pet_num = newQuery.pet_num ? parseInt(newQuery.pet_num) : undefined
+        }
+        if (newQuery.pet_num_level !== undefined) {
+          this.searchForm.pet_num_level = newQuery.pet_num_level ? parseInt(newQuery.pet_num_level) : undefined
+        }
+        if (newQuery.accept_bargain !== undefined) {
+          this.searchForm.accept_bargain = newQuery.accept_bargain
+        }
+
         // 同步排序参数
         if (newQuery.sort_by && newQuery.sort_order) {
           const sortFields = newQuery.sort_by.split(',')
@@ -1157,6 +1174,7 @@ export default {
       this.fetchData()
     },
 
+
     handleQuickLevelSelect(level) {
       this.searchForm.level_min = level
       this.searchForm.level_max = level
@@ -1206,26 +1224,62 @@ export default {
         ? `${this.searchForm.level_min},${this.searchForm.level_max}`
         : undefined
 
-      // 只有当等级范围发生变化时才更新路由
-      const currentLevelRange = this.$route.params.levelRange
-      if (newLevelRange !== currentLevelRange) {
-        this.$router.replace({
-          name: 'RoleList',
-          params: {
-            type: this.roleType,
-            levelRange: newLevelRange
-          }
-        })
+      // 构建query参数，包含所有搜索表单参数
+      const newQuery = { ...this.$route.query }
+      
+      // 同步搜索表单参数到query
+      if (this.searchForm.selectedDate) {
+        newQuery.selectedDate = this.searchForm.selectedDate
+      } else {
+        delete newQuery.selectedDate
+      }
+      
+      if (this.searchForm.equip_num !== undefined && this.searchForm.equip_num !== '') {
+        newQuery.equip_num = this.searchForm.equip_num.toString()
+      } else {
+        delete newQuery.equip_num
+      }
+      
+      if (this.searchForm.pet_num !== undefined && this.searchForm.pet_num !== '') {
+        newQuery.pet_num = this.searchForm.pet_num.toString()
+      } else {
+        delete newQuery.pet_num
+      }
+      
+      if (this.searchForm.pet_num_level !== undefined && this.searchForm.pet_num_level !== '') {
+        newQuery.pet_num_level = this.searchForm.pet_num_level.toString()
+      } else {
+        delete newQuery.pet_num_level
+      }
+      
+      if (this.searchForm.accept_bargain !== undefined && this.searchForm.accept_bargain !== '') {
+        newQuery.accept_bargain = this.searchForm.accept_bargain
+      } else {
+        delete newQuery.accept_bargain
       }
 
       // 更新路由参数，移除页码参数（因为重置到第1页）
       const newParams = {
         type: this.roleType,
-        levelRange: newLevelRange,
-        page: 1
+        levelRange: newLevelRange
       }
 
-      this.safeRouteUpdate(newParams)
+      // 只有当页码大于1时才添加到路由参数中
+      if (this.currentPage > 1) {
+        newParams.page = this.currentPage.toString()
+      }
+
+      // 检查是否需要更新路由
+      const hasParamChanges = JSON.stringify(newParams) !== JSON.stringify(this.$route.params)
+      const hasQueryChanges = JSON.stringify(newQuery) !== JSON.stringify(this.$route.query)
+
+      if (hasParamChanges || hasQueryChanges) {
+        this.$router.replace({
+          name: 'RoleList',
+          params: newParams,
+          query: newQuery
+        })
+      }
 
       this.fetchData()
     },
@@ -1239,22 +1293,12 @@ export default {
         pet_num: undefined,
         pet_num_level: undefined,
         sort_by: undefined,
-        sort_order: undefined
+        sort_order: undefined,
+        accept_bargain: undefined
       }
 
       // 清空排序状态
       this.sortState = {}
-
-      // 清除路由中的等级范围参数
-      if (this.$route.params.levelRange) {
-        this.$router.replace({
-          name: 'RoleList',
-          params: {
-            type: this.roleType,
-            levelRange: undefined
-          }
-        })
-      }
 
       this.currentPage = 1
 
@@ -1264,8 +1308,13 @@ export default {
         levelRange: undefined
       }
 
-      // 同时清除query中的排序参数
+      // 清除query中的所有搜索参数
       const newQuery = { ...this.$route.query }
+      delete newQuery.selectedDate
+      delete newQuery.equip_num
+      delete newQuery.pet_num
+      delete newQuery.pet_num_level
+      delete newQuery.accept_bargain
       delete newQuery.sort_by
       delete newQuery.sort_order
 
