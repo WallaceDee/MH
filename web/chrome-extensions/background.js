@@ -1,4 +1,4 @@
-﻿// Chrome插件后台服务工作者 - 支持DevTools Protocol
+﻿// Chrome插件后台服务工作者 - 仅支持DevTools
 class BackgroundService {
   constructor() {
     this.init();
@@ -15,7 +15,7 @@ class BackgroundService {
       this.handleInstall(details);
     });
 
-    // 监听来自popup和content script的消息
+    // 监听来自devtools的消息
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       this.handleMessage(message, sender, sendResponse);
     });
@@ -29,7 +29,7 @@ class BackgroundService {
         await chrome.storage.local.set({ recommendData: [] });
       }
       
-      console.log('存储初始化完成');
+      console.log('DevTools存储初始化完成');
     } catch (error) {
       console.error('存储初始化失败:', error);
     }
@@ -37,9 +37,9 @@ class BackgroundService {
 
   handleInstall(details) {
     if (details.reason === 'install') {
-      console.log('CBG爬虫助手插件已安装');
+      console.log('CBG爬虫助手DevTools插件已安装');
     } else if (details.reason === 'update') {
-      console.log('CBG爬虫助手插件已更新到版本:', details.previousVersion);
+      console.log('CBG爬虫助手DevTools插件已更新');
     }
   }
 
@@ -60,6 +60,7 @@ class BackgroundService {
           await this.saveRecommendData(message.data);
           sendResponse({ success: true });
           break;
+
 
         default:
           sendResponse({ success: false, error: '未知操作' });
@@ -85,7 +86,7 @@ class BackgroundService {
   async clearRecommendData() {
     try {
       await chrome.storage.local.set({ recommendData: [] });
-      console.log('数据已清空');
+      console.log('DevTools数据已清空');
     } catch (error) {
       console.error('清空数据失败:', error);
     }
@@ -94,11 +95,12 @@ class BackgroundService {
   async saveRecommendData(data) {
     try {
       await chrome.storage.local.set({ recommendData: data });
-      console.log('数据已保存');
+      console.log('DevTools数据已保存');
     } catch (error) {
       console.error('保存数据失败:', error);
     }
   }
+
 }
 
 // 初始化后台服务
