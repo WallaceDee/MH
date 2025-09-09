@@ -1,9 +1,15 @@
 import axios from 'axios'
 import { Notification } from 'element-ui'
 
+// 判断是否为Chrome插件环境
+const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
+
+// 根据环境设置不同的baseURL
+const baseURL = isChromeExtension ? 'http://localhost:5000/api/v1' : '/api/v1'
+
 // 创建axios实例
 const request = axios.create({
-  baseURL: '/api/v1', // API基础路径
+  baseURL: baseURL, // API基础路径
   headers: {
     'Content-Type': 'application/json'
   }

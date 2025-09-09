@@ -170,23 +170,9 @@ class DevToolsListener {
         );
 
         if (response.body) {
-          let responseData = null;
-          try {
-            responseData = response.body||''
-            //需求从"Request.JSONP.request_map.request_0(.....)"中获取到responseData
-            const match = responseData.match(/Request\.JSONP\.request_map\.request_0\((.*)\)/);
-            if (match) {
-              responseData = JSON.parse(match[1]);
-            }
-            console.log('📦 获取到响应内容responseData:', responseData);
-          } catch (e) {
-            console.error('获取响应内容失败:', e);
-            responseData = response.body;
-          }
-
+          let responseData = response.body||'';
           this.recommendData[requestIndex].responseData = responseData;
           this.recommendData[requestIndex].status = 'completed';
-          
           this.updateUI();
         }
       } catch (error) {

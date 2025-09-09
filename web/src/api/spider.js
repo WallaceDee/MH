@@ -173,5 +173,16 @@ export const spiderApi = {
    */
   updateCookies() {
     return api.post('/spider/cookie/update')
+  },
+
+  /**
+   * 解析响应数据
+   * @param {Object} data - 解析参数
+   * @param {string} data.url - CBG请求的完整URL
+   * @param {string} data.response_text - 服务器返回的响应文本
+   * @returns {Promise}
+   */
+  parseResponse(data) {
+    return api.post('/spider/parse/response', data)
   }
 } 

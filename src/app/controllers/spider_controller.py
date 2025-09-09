@@ -221,4 +221,8 @@ class SpiderController:
     
     def reset_task_status(self):
         """重置任务状态"""
-        return self.service.reset_task_status() 
+        return self.service.reset_task_status()
+    
+    def parse_response_data(self, url: str, response_text: str):
+        """解析响应数据"""
+        return self.service.parse_response_data(url, response_text) 

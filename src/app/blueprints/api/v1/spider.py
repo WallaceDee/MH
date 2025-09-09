@@ -532,4 +532,38 @@ def download_file(filename):
 @spider_bp.route('/proxies/manage', methods=['POST'])
 def manage_proxies_legacy():
     """管理代理IP（兼容性端点）"""
-    return manage_proxies() 
+    return manage_proxies()
+
+
+@spider_bp.route('/parse/response', methods=['POST'])
+def parse_response_data():
+    """解析响应数据"""
+    try:
+        data = request.json or {}
+        
+        # 参数验证
+        url = data.get('url')
+        response_text = data.get('response_text')
+        
+        if not url:
+            return error_response("url参数不能为空")
+        
+        if not response_text:
+            return error_response("response_text参数不能为空")
+        
+        if not isinstance(url, str):
+            return error_response("url必须是字符串")
+        
+        if not isinstance(response_text, str):
+            return error_response("response_text必须是字符串")
+        
+        # 调用控制器方法
+        result = controller.parse_response_data(url, response_text)
+        
+        if result.get('success'):
+            return success_response(data=result, message=result.get('message', '解析成功'))
+        else:
+            return error_response(result.get('message', '解析失败'))
+            
+    except Exception as e:
+        return error_response(f"解析响应数据失败: {str(e)}") 

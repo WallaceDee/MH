@@ -25,6 +25,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         message: request.message
       });
       break;
+      
+    case 'clearRecommendData':
+      // 转发清空数据请求到所有DevTools面板
+      chrome.runtime.sendMessage({
+        action: 'clearRecommendData'
+      });
+      break;
   }
 });
 

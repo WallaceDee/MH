@@ -1324,3 +1324,36 @@ class SpiderService:
             raise Exception(error_msg)
         
         return {"stdout": stdout, "stderr": stderr}
+    
+    def parse_response_data(self, url: str, response_text: str):
+        """解析响应数据"""
+        try:
+            # 导入PlaywrightAutoCollector
+            from src.spider.playwright_collector import PlaywrightAutoCollector
+            
+            # 创建PlaywrightAutoCollector实例
+            collector = PlaywrightAutoCollector()
+            
+            # 调用_parse_and_save_response方法
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(collector._parse_and_save_response(url, response_text))
+                return {
+                    "success": True,
+                    "message": "响应数据解析完成",
+                    "url": url,
+                    "data_length": len(response_text)
+                }
+            finally:
+                loop.close()
+                
+        except Exception as e:
+            logger.error(f"解析响应数据失败: {e}")
+            return {
+                "success": False,
+                "message": f"解析响应数据失败: {str(e)}",
+                "url": url,
+                "error": str(e)
+            }
