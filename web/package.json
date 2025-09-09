@@ -8,8 +8,8 @@
     "lint": "vue-cli lint",
     "dev:chrome": "vue-cli-service serve --mode chrome",
     "build:webcomponents": "node build-webcomponents.js",
-    "build:devtools-panel": "node build-devtools-simple.js",
-    "dev:devtools-panel": "node build-devtools-simple.js --watch"
+    "build:devtools-panel": "webpack --config webpack.chrome-extension.config.js",
+    "dev:devtools-panel": "webpack --config webpack.chrome-extension.config.js --watch"
   },
   "dependencies": {
     "axios": "^1.9.0",

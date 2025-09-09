@@ -1,20 +1,10 @@
-// // 创建DevTools标签页
-// chrome.devtools.panels.create(
-//     "CBG爬虫助手",
-//     "icons/icon16.png", 
-//     "panel.html",
-//     function(panel) {
-//         console.log("CBG爬虫助手DevTools面板已创建");
-//     }
-// );
-
-// 创建Vue版本面板
+// 创建DevTools标签页
 chrome.devtools.panels.create(
-    "CBG爬虫助手-Vue",
+    "CBG爬虫助手",
     "icons/icon16.png", 
-    "devtools-panel.html",
+    "panel.html",
     function(panel) {
-        console.log("CBG爬虫助手Vue面板已创建");
+        console.log("CBG爬虫助手DevTools面板已创建");
     }
 );
 
@@ -156,8 +146,8 @@ class DevToolsListener {
         };
         this.recommendData[requestIndex].status = 'completed';
       }
-      console.log('📊 推荐数据更新:', this.recommendData[requestIndex])
-      console.log('📈 当前总数据量:', this.recommendData.length)
+      console.log('📊 推荐数据更新:', this.recommendData[requestIndex]);
+      console.log('📈 当前总数据量:', this.recommendData.length);
       this.updateUI();
     }
   }
