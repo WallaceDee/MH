@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Chrome API 调试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .debug-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .debug-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>Chrome API 调试页面</h1>
+        
+        <div class="debug-section">
+            <h3>基础Chrome对象检查</h3>
+            <div id="chrome-basic"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>Chrome Action API 检查</h3>
+            <div id="chrome-action"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>Chrome Side Panel API 检查</h3>
+            <div id="chrome-sidepanel"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>Chrome Runtime API 检查</h3>
+            <div id="chrome-runtime"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>Chrome Tabs API 检查</h3>
+            <div id="chrome-tabs"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>Chrome Debugger API 检查</h3>
+            <div id="chrome-debugger"></div>
+        </div>
+    </div>
+
+    <script>
+        function addDebugItem(containerId, text, type = 'info') {
+            const container = document.getElementById(containerId);
+            const item = document.createElement('div');
+            item.className = `debug-item ${type}`;
+            item.textContent = text;
+            container.appendChild(item);
+        }
+
+        function checkChromeBasic() {
+            addDebugItem('chrome-basic', `typeof chrome: ${typeof chrome}`, typeof chrome !== 'undefined' ? 'success' : 'error');
+            
+            if (typeof chrome !== 'undefined') {
+                addDebugItem('chrome-basic', `chrome.runtime: ${typeof chrome.runtime}`, typeof chrome.runtime !== 'undefined' ? 'success' : 'error');
+                addDebugItem('chrome-basic', `chrome.runtime.id: ${chrome.runtime?.id || 'undefined'}`, chrome.runtime?.id ? 'success' : 'warning');
+            }
+        }
+
+        function checkChromeAction() {
+            if (typeof chrome === 'undefined') {
+                addDebugItem('chrome-action', 'Chrome对象不可用', 'error');
+                return;
+            }
+            
+            addDebugItem('chrome-action', `chrome.action: ${typeof chrome.action}`, typeof chrome.action !== 'undefined' ? 'success' : 'error');
+            
+            if (chrome.action) {
+                addDebugItem('chrome-action', `chrome.action.onClicked: ${typeof chrome.action.onClicked}`, typeof chrome.action.onClicked !== 'undefined' ? 'success' : 'error');
+                addDebugItem('chrome-action', `chrome.action.onClicked.addListener: ${typeof chrome.action.onClicked?.addListener}`, typeof chrome.action.onClicked?.addListener === 'function' ? 'success' : 'error');
+                addDebugItem('chrome-action', `chrome.action.setTitle: ${typeof chrome.action.setTitle}`, typeof chrome.action.setTitle === 'function' ? 'success' : 'error');
+            }
+        }
+
+        function checkChromeSidePanel() {
+            if (typeof chrome === 'undefined') {
+                addDebugItem('chrome-sidepanel', 'Chrome对象不可用', 'error');
+                return;
+            }
+            
+            addDebugItem('chrome-sidepanel', `chrome.sidePanel: ${typeof chrome.sidePanel}`, typeof chrome.sidePanel !== 'undefined' ? 'success' : 'error');
+            
+            if (chrome.sidePanel) {
+                addDebugItem('chrome-sidepanel', `chrome.sidePanel.open: ${typeof chrome.sidePanel.open}`, typeof chrome.sidePanel.open === 'function' ? 'success' : 'error');
+            }
+        }
+
+        function checkChromeRuntime() {
+            if (typeof chrome === 'undefined') {
+                addDebugItem('chrome-runtime', 'Chrome对象不可用', 'error');
+                return;
+            }
+            
+            addDebugItem('chrome-runtime', `chrome.runtime: ${typeof chrome.runtime}`, typeof chrome.runtime !== 'undefined' ? 'success' : 'error');
+            
+            if (chrome.runtime) {
+                addDebugItem('chrome-runtime', `chrome.runtime.onMessage: ${typeof chrome.runtime.onMessage}`, typeof chrome.runtime.onMessage !== 'undefined' ? 'success' : 'error');
+                addDebugItem('chrome-runtime', `chrome.runtime.sendMessage: ${typeof chrome.runtime.sendMessage}`, typeof chrome.runtime.sendMessage === 'function' ? 'success' : 'error');
+            }
+        }
+
+        function checkChromeTabs() {
+            if (typeof chrome === 'undefined') {
+                addDebugItem('chrome-tabs', 'Chrome对象不可用', 'error');
+                return;
+            }
+            
+            addDebugItem('chrome-tabs', `chrome.tabs: ${typeof chrome.tabs}`, typeof chrome.tabs !== 'undefined' ? 'success' : 'error');
+            
+            if (chrome.tabs) {
+                addDebugItem('chrome-tabs', `chrome.tabs.query: ${typeof chrome.tabs.query}`, typeof chrome.tabs.query === 'function' ? 'success' : 'error');
+                addDebugItem('chrome-tabs', `chrome.tabs.create: ${typeof chrome.tabs.create}`, typeof chrome.tabs.create === 'function' ? 'success' : 'error');
+                addDebugItem('chrome-tabs', `chrome.tabs.onUpdated: ${typeof chrome.tabs.onUpdated}`, typeof chrome.tabs.onUpdated !== 'undefined' ? 'success' : 'error');
+            }
+        }
+
+        function checkChromeDebugger() {
+            if (typeof chrome === 'undefined') {
+                addDebugItem('chrome-debugger', 'Chrome对象不可用', 'error');
+                return;
+            }
+            
+            addDebugItem('chrome-debugger', `chrome.debugger: ${typeof chrome.debugger}`, typeof chrome.debugger !== 'undefined' ? 'success' : 'error');
+            
+            if (chrome.debugger) {
+                addDebugItem('chrome-debugger', `chrome.debugger.attach: ${typeof chrome.debugger.attach}`, typeof chrome.debugger.attach === 'function' ? 'success' : 'error');
+                addDebugItem('chrome-debugger', `chrome.debugger.detach: ${typeof chrome.debugger.detach}`, typeof chrome.debugger.detach === 'function' ? 'success' : 'error');
+                addDebugItem('chrome-debugger', `chrome.debugger.sendCommand: ${typeof chrome.debugger.sendCommand}`, typeof chrome.debugger.sendCommand === 'function' ? 'success' : 'error');
+            }
+        }
+
+        // 页面加载完成后开始检查
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugItem('chrome-basic', '开始检查Chrome API...', 'info');
+            checkChromeBasic();
+            checkChromeAction();
+            checkChromeSidePanel();
+            checkChromeRuntime();
+            checkChromeTabs();
+            checkChromeDebugger();
+            addDebugItem('chrome-basic', 'Chrome API检查完成', 'info');
+        });
+    </script>
+</body>
+</html>

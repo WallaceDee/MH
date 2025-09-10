@@ -3,10 +3,16 @@
   "name": "梦幻灵瞳",
   "version": "1.0.0",
   "description": "梦幻灵瞳",
-  "permissions": ["activeTab", "storage", "debugger", "cookies"],
+  "permissions": ["activeTab", "storage", "debugger", "cookies", "sidePanel"],
   "host_permissions": ["https://*.163.com/*", "https://*.cbg.163.com/*"],
   "background": { "service_worker": "background.js" },
-  "devtools_page": "devtools.html",
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "action": {
+    "default_title": "梦幻灵瞳",
+    "default_popup": ""
+  },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
