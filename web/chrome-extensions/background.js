@@ -6,6 +6,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('后台收到消息:', request);
   
   switch (request.action) {
+    case 'ping':
+      // 处理ping消息，用于检查连接状态
+      console.log('收到ping消息，返回pong');
+      sendResponse({ success: true, message: 'pong' });
+      return true;
+      
     case 'getCookies':
       handleGetCookies(sendResponse);
       return true; // 保持消息通道开放

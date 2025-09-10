@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "CBG爬虫助手",
+  "name": "梦幻灵瞳",
   "version": "1.0.0",
-  "description": "梦幻西游CBG爬虫系统DevTools插件",
+  "description": "梦幻灵瞳",
   "permissions": ["activeTab", "storage", "debugger", "cookies"],
   "host_permissions": ["https://*.163.com/*", "https://*.cbg.163.com/*"],
   "background": { "service_worker": "background.js" },

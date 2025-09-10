@@ -30,6 +30,22 @@ module.exports = defineConfig({
     
     // 配置webpack忽略MooTools相关的模块解析
     config.resolve.alias.set('mootools-core', false);
+    
+    // 配置图片文件处理
+    config.module
+      .rule('images')
+      .test(/\.(png|jpe?g|gif|svg|webp)$/i)
+      .use('url-loader')
+      .loader('url-loader')
+      .options({
+        limit: 8192,
+        fallback: {
+          loader: 'file-loader',
+          options: {
+            name: 'assets/images/[name].[hash:8].[ext]'
+          }
+        }
+      });
   },
   
   // 如果是构建DevTools面板，设置输出目录

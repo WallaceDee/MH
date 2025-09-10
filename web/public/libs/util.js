@@ -101,12 +101,51 @@ function getAbsolutePos(el) {
             }
             var _0x1b3f48 = function s(_0x1c0cdf) {
                 try {
-                    return _0xcbc80b['\x65\x76\x61\x6c']('\x28' + _0x1c0cdf + '\x29');
+                    // 在Chrome插件环境中，eval被CSP阻止，使用Function构造函数替代
+                    var func = new Function('return (' + _0x1c0cdf + ')');
+                    return func();
                 } catch (_0x40b9c3) {
-                    return null;
+                    // Function构造函数也失败，尝试JSON.parse
+                    try {
+                        return JSON.parse(_0x1c0cdf);
+                    } catch (e2) {
+                        // JSON.parse也失败，尝试手动解析
+                        try {
+                            // 手动解析简单的JavaScript对象格式
+                            var cleaned = _0x1c0cdf.replace(/^\(|\)$/g, '').trim();
+                            if (cleaned.startsWith('{') && cleaned.endsWith('}')) {
+                                // 尝试修复常见的JavaScript对象格式问题
+                                var fixed = cleaned
+                                    .replace(/(\d+):/g, '"$1":')  // 修复数字键名
+                                    .replace(/,\s*}/g, '}')        // 移除多余的逗号
+                                    .replace(/,\s*]/g, ']')        // 移除多余的逗号
+                                    .replace(/:\s*([^",\[\]{}]+)([,}\]])/g, function(match, value, ending) {
+                                        // 处理未加引号的字符串值
+                                        if (value.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/) && 
+                                            !value.match(/^\d+$/) && 
+                                            value !== 'true' && 
+                                            value !== 'false' && 
+                                            value !== 'null') {
+                                            return ':"' + value + '"' + ending;
+                                        }
+                                        return match;
+                                    });
+                                return JSON.parse(fixed);
+                            }
+                        } catch (e3) {
+                            // 所有解析方法都失败，返回原始数据
+                            return _0x1c0cdf;
+                        }
+                    }
                 }
             }(_0x1c0cdf = _0xcbc80b[_0x3a8e('0x2')](_0x1c0cdf));
             _0x1b3f48 && '\x6f\x62\x6a\x65\x63\x74' == typeof _0x1b3f48 && _0x1b3f48['\x64'] && (_0x1b3f48 = _0x1b3f48['\x64']);
+            
+            // 在Chrome插件环境中，需要检查_0x1b3f48是否为有效字符串
+            if (!_0x1b3f48 || typeof _0x1b3f48 !== 'string') {
+                return _0x1c0cdf; // 返回原始数据
+            }
+            
             for (var _0x20b9fa = [], _0x10503c = 0x0, _0x1a524d = 0x0; _0x1a524d < _0x1b3f48['\x6c\x65\x6e\x67\x74\x68']; _0x1a524d++) {
                 var _0x3641ed = _0x1b3f48['\x63\x68\x61\x72\x43\x6f\x64\x65\x41\x74'](_0x1a524d)
                   , _0x341952 = _0x36ab38[_0x3a8e('0x3')](_0x10503c % _0x36ab38['\x6c\x65\x6e\x67\x74\x68']);
@@ -374,8 +413,270 @@ function lpc_2_js(lpc_str) {
     return lpc_str.replace(parser, convert);
 }
 function js_eval(js_str) {
-    return eval("(" + js_str + ")");
+    // 由于Chrome扩展CSP限制，完全避免动态代码执行
+    try {
+        // 首先尝试直接JSON.parse
+        return JSON.parse(js_str);
+    } catch (e) {
+        // 如果失败，尝试清理字符串后再次解析
+        try {
+            var cleaned = js_str
+                .replace(/^\(/, '')  // 移除开头的括号
+                .replace(/\)$/, '')  // 移除结尾的括号
+                .replace(/;\s*$/, '') // 移除结尾的分号
+                .trim();
+            return JSON.parse(cleaned);
+        } catch (e2) {
+            // 如果还是失败，尝试手动解析简单的对象格式
+            try {
+                return parseSimpleObject(js_str);
+            } catch (e3) {
+                // 如果parseSimpleObject也失败，尝试使用eval作为最后手段
+                try {
+                    if (typeof eval !== 'undefined') {
+                        return eval('(' + js_str + ')');
+                    }
+                } catch (e4) {
+                    // eval也失败了
+                }
+                
+                console.error('js_eval failed to parse:', js_str, e3);
+                return null;
+            }
+        }
+    }
 }
+
+// 手动解析简单对象格式的辅助函数
+function parseSimpleObject(str) {
+    // 移除括号和分号
+    var cleaned = str.replace(/^\(|\)$|;\s*$/g, '').trim();
+    
+    // 如果是空字符串或null/undefined
+    if (!cleaned || cleaned === 'null' || cleaned === 'undefined') {
+        return null;
+    }
+    
+    // 尝试解析为JSON
+    try {
+        return JSON.parse(cleaned);
+    } catch (e) {
+        // 如果JSON.parse失败，尝试修复JavaScript对象格式
+        try {
+            // 将数字键名转换为字符串键名，使其符合JSON格式
+            var fixed = cleaned.replace(/(\d+):/g, '"$1":');
+            return JSON.parse(fixed);
+        } catch (e2) {
+            // 如果还是失败，尝试更复杂的修复
+            try {
+                // 处理嵌套对象中的数字键名
+                var complexFixed = cleaned
+                    .replace(/(\d+):/g, '"$1":')  // 修复数字键名
+                    .replace(/,\s*}/g, '}')        // 移除多余的逗号
+                    .replace(/,\s*]/g, ']');       // 移除多余的逗号
+                return JSON.parse(complexFixed);
+            } catch (e3) {
+                // 如果还是失败，尝试更复杂的修复
+                try {
+                    // 处理更复杂的JavaScript对象格式
+                    var advancedFixed = cleaned
+                        .replace(/(\d+):/g, '"$1":')  // 修复数字键名
+                        .replace(/,\s*}/g, '}')        // 移除多余的逗号
+                        .replace(/,\s*]/g, ']')        // 移除多余的逗号
+                        .replace(/:\s*([^",\[\]{}]+)([,}\]])/g, function(match, value, ending) {
+                            // 处理未加引号的字符串值，但排除数字
+                            if (value.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/) && !value.match(/^\d+$/)) {
+                                return ':"' + value + '"' + ending;
+                            }
+                            return match;
+                        });
+                    return JSON.parse(advancedFixed);
+                } catch (e4) {
+                    // 如果还是失败，尝试使用Function构造函数（Chrome插件环境兼容）
+                    try {
+                        var func = new Function('return (' + cleaned + ')');
+                        return func();
+                    } catch (e5) {
+                        // Function构造函数也失败了，尝试手动解析
+                        try {
+                            // 最后尝试：手动解析复杂的JavaScript对象
+                            if (cleaned.startsWith('{') && cleaned.endsWith('}')) {
+                                return parseComplexObject(cleaned);
+                            }
+                        } catch (e6) {
+                            // 手动解析也失败了
+                        }
+                    }
+                    
+                    console.warn('parseSimpleObject: All parsing attempts failed, returning null:', cleaned.substring(0, 100) + '...');
+                    return null;
+                }
+            }
+        }
+    }
+}
+
+// 手动解析复杂JavaScript对象的辅助函数
+function parseComplexObject(str) {
+    try {
+        // 使用更智能的方法来解析复杂的JavaScript对象
+        var result = {};
+        var content = str.slice(1, -1); // 移除大括号
+        var depth = 0;
+        var inString = false;
+        var escapeNext = false;
+        var currentKey = '';
+        var currentValue = '';
+        var currentPair = '';
+        var pairs = [];
+        
+        // 按字符遍历，正确处理嵌套对象和字符串
+        for (var i = 0; i < content.length; i++) {
+            var char = content[i];
+            
+            if (escapeNext) {
+                currentPair += char;
+                escapeNext = false;
+                continue;
+            }
+            
+            if (char === '\\') {
+                escapeNext = true;
+                currentPair += char;
+                continue;
+            }
+            
+            if (char === '"' || char === "'") {
+                inString = !inString;
+                currentPair += char;
+                continue;
+            }
+            
+            if (!inString) {
+                if (char === '{' || char === '[') {
+                    depth++;
+                    currentPair += char;
+                } else if (char === '}' || char === ']') {
+                    depth--;
+                    currentPair += char;
+                } else if (char === ',' && depth === 0) {
+                    pairs.push(currentPair.trim());
+                    currentPair = '';
+                } else {
+                    currentPair += char;
+                }
+            } else {
+                currentPair += char;
+            }
+        }
+        
+        if (currentPair.trim()) {
+            pairs.push(currentPair.trim());
+        }
+        
+        // 解析每个键值对
+        for (var j = 0; j < pairs.length; j++) {
+            var pair = pairs[j];
+            if (!pair) continue;
+            
+            var colonIndex = pair.indexOf(':');
+            if (colonIndex > 0) {
+                var key = pair.substring(0, colonIndex).trim();
+                var value = pair.substring(colonIndex + 1).trim();
+                
+                // 清理键名
+                key = key.replace(/^["']|["']$/g, '');
+                if (key.match(/^\d+$/)) {
+                    key = '"' + key + '"';
+                }
+                
+                // 解析值
+                var parsedValue = parseValue(value);
+                result[key] = parsedValue;
+            }
+        }
+        
+        return result;
+    } catch (e) {
+        console.warn('parseComplexObject failed:', e);
+        return null;
+    }
+}
+
+// 解析值的辅助函数
+function parseValue(value) {
+    value = value.trim();
+    
+    // 处理字符串
+    if ((value.startsWith('"') && value.endsWith('"')) || 
+        (value.startsWith("'") && value.endsWith("'"))) {
+        return value.slice(1, -1);
+    }
+    
+    // 处理数字
+    if (value.match(/^-?\d+$/)) {
+        return parseInt(value);
+    }
+    if (value.match(/^-?\d+\.\d+$/)) {
+        return parseFloat(value);
+    }
+    
+    // 处理布尔值
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    if (value === 'null') return null;
+    
+    // 处理对象
+    if (value.startsWith('{') && value.endsWith('}')) {
+        return parseComplexObject(value);
+    }
+    
+    // 处理数组
+    if (value.startsWith('[') && value.endsWith(']')) {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            // 手动解析数组
+            var arrayContent = value.slice(1, -1);
+            var items = [];
+            var currentItem = '';
+            var depth = 0;
+            var inString = false;
+            
+            for (var i = 0; i < arrayContent.length; i++) {
+                var char = arrayContent[i];
+                
+                if (char === '"' || char === "'") {
+                    inString = !inString;
+                }
+                
+                if (!inString) {
+                    if (char === '{' || char === '[') {
+                        depth++;
+                    } else if (char === '}' || char === ']') {
+                        depth--;
+                    } else if (char === ',' && depth === 0) {
+                        items.push(parseValue(currentItem.trim()));
+                        currentItem = '';
+                        continue;
+                    }
+                }
+                
+                currentItem += char;
+            }
+            
+            if (currentItem.trim()) {
+                items.push(parseValue(currentItem.trim()));
+            }
+            
+            return items;
+        }
+    }
+    
+    // 默认返回原始值
+    return value;
+}
+
 function safe_attr(attr) {
     if (attr == null || attr == undefined) {
         return "";
@@ -3850,4 +4151,17 @@ function changeTimeFomateToRemindTime(timeString) {
         return get_exact_remain_time_desc(targetTimeStamp - currentTimeStamp, true, false);
     }
     return '';
+}
+
+// 将关键函数暴露到全局作用域，供其他模块使用
+if (typeof window !== 'undefined') {
+    window.js_eval = js_eval;
+    window.lpc_2_js = lpc_2_js;
+    window.decode_desc = decode_desc;
+    window.trim = function(str) {
+        if (str) {
+            return str.trim ? str.trim() : str.toString().replace(/^\s+|\s+$/g, '');
+        }
+        return '';
+    };
 }

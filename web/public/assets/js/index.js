@@ -365,7 +365,7 @@ window.is_lingshi_equip = function (kindid) {
   return window.lingshiKinds.some((item) => item[0] == kindid)
 }
 
-function get_role_icon(raw_info) {
+window.get_role_icon=function(raw_info) {
   var role_info = js_eval(lpc_2_js(decode_desc(raw_info)))
   return get_role_iconid(role_info['iIcon'])
 }

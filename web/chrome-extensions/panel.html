@@ -2,21 +2,24 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>CBG爬虫助手 - Vue面板</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        #app {
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
-<script defer src="panel.js"></script></head>
+    <title>梦幻灵瞳</title>
+    <link rel="stylesheet" href="./assets/css/global.css"></link>
+    <link rel="stylesheet" href="./assets/css/pages.css"></link>
+    <link rel="stylesheet" href="./assets/css/index.css"></link>
+    <!-- 按依赖顺序加载JavaScript文件 -->
+    <script src="./assets/js/index.js"></script>
+    <script src="./libs/config/auto_search_config.js"></script>
+    <script src="./libs/config/game_auto_config.js"></script>
+    <script src="./libs/config/server_list_data.js"></script>
+    <script src="./libs/role_info_config.js"></script>
+    <script src="./libs/util.js"></script>
+    <script src="./libs/pet.js"></script>
+    <script src="./libs/parse_role.js"></script>
+    <script src="./libs/equip_query_com.js"></script>
+    <script src="./libs/show_role_detail.js"></script>
+    <script src="./libs/xyq_setting_config.js"></script>
+    <script src="./libs/equip_desc_parser.js"></script>
+<script defer src="vendors.js"></script><script defer src="panel.js"></script></head>
 <body>
     <div id="app"></div>
 </body>
