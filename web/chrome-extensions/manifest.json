@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "梦幻灵瞳",
   "permissions": ["activeTab", "storage", "debugger", "cookies", "sidePanel"],
-  "host_permissions": ["https://*.163.com/*", "https://*.cbg.163.com/*"],
+  "host_permissions": ["https://xyq.cbg.163.com/*"],
   "background": { "service_worker": "background.js" },
   "side_panel": {
     "default_path": "panel.html"

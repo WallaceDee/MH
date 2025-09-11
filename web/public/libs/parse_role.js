@@ -428,9 +428,14 @@ function get_role_kind_name(icon) {
             var raw_skill_info = this.raw_info["all_skills"];
             this.result["yu_shou_shu"] = this.raw_info["all_skills"]["221"];
             for (var skill in raw_skill_info) {
+                skill = JSON.parse(skill);
+                var skill_grade = raw_skill_info[skill];
+                if(skill_grade == undefined) {
+                    skill_grade = raw_skill_info[JSON.stringify(skill)];
+                }
                 var info = {
                     "skill_id": skill,
-                    "skill_grade": raw_skill_info[skill],
+                    "skill_grade": skill_grade,
                     "skill_pos": 0
                 };
                 info["skill_icon"] = get_skill_icon(skill);
@@ -979,7 +984,7 @@ function get_role_kind_name(icon) {
                 if (all_skills) {
                     var all_skill_str = [];
                     for (var typeid in all_skills) {
-                        all_skill_str.push('' + typeid);
+                        all_skill_str.push('' + JSON.parse(typeid));
                     }
                     window.xs_sort_pet_skills && xs_sort_pet_skills(info["type_id"], all_skill_str);
                     for (var i = 0, max = all_skill_str.length; i < max; i++) {
@@ -1241,6 +1246,7 @@ function get_role_kind_name(icon) {
             }
             var that = this;
             var get_skill_icon = function(typeid) {
+                typeid = JSON.parse(typeid);
                 return ResUrl + "/images/rider_skill/" + that.make_img_name(typeid) + ".gif";
             };
             var all_rider = this.raw_info["AllRider"];

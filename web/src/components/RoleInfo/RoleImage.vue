@@ -1830,7 +1830,7 @@ export default {
   width: 98px;
   height: 26px;
   line-height: 26px;
-  background: url(../../../public/assets/images/tag1.webp) no-repeat;
+  background: url(~@/../public/assets/images/tag1.webp) no-repeat;
   text-align: center;
   float: left;
   margin-right: 3px;
@@ -1840,7 +1840,7 @@ export default {
 }
 
 ::v-deep .role-info-tabs .el-tabs__nav .el-tabs__item.is-active {
-  background: url(../../../public/assets/images/tag2.webp) no-repeat;
+  background: url(~@/../public/assets/images/tag2.webp) no-repeat;
   color: #fff;
 }
 
@@ -1868,7 +1868,7 @@ export default {
 
 :global(.role-info-popover .el-tabs__content) {
   padding: 12px;
-  background: url(../../../public/assets/images/areabg.webp) repeat-y -100px;
+  background: url(~@/../public/assets/images/areabg.webp) repeat-y -100px;
   min-height: 510px;
 }
 

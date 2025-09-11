@@ -1226,32 +1226,32 @@ export default {
 
       // 构建query参数，包含所有搜索表单参数
       const newQuery = { ...this.$route.query }
-      
+
       // 同步搜索表单参数到query
       if (this.searchForm.selectedDate) {
         newQuery.selectedDate = this.searchForm.selectedDate
       } else {
         delete newQuery.selectedDate
       }
-      
+
       if (this.searchForm.equip_num !== undefined && this.searchForm.equip_num !== '') {
         newQuery.equip_num = this.searchForm.equip_num.toString()
       } else {
         delete newQuery.equip_num
       }
-      
+
       if (this.searchForm.pet_num !== undefined && this.searchForm.pet_num !== '') {
         newQuery.pet_num = this.searchForm.pet_num.toString()
       } else {
         delete newQuery.pet_num
       }
-      
+
       if (this.searchForm.pet_num_level !== undefined && this.searchForm.pet_num_level !== '') {
         newQuery.pet_num_level = this.searchForm.pet_num_level.toString()
       } else {
         delete newQuery.pet_num_level
       }
-      
+
       if (this.searchForm.accept_bargain !== undefined && this.searchForm.accept_bargain !== '') {
         newQuery.accept_bargain = this.searchForm.accept_bargain
       } else {

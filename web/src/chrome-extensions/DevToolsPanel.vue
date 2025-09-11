@@ -1,16 +1,21 @@
 <template>
-  <div class="devtools-panel">
+  <div class="panel">
     <div class="panel-header">
-      <h3>梦幻灵瞳</h3>
+      <el-row  type="flex" align="middle">
+        <div style="width: 32px;height: 32px;margin-right: 10px;position: relative;">
+          <img src="~@/assets/logo.png" alt="梦幻灵瞳"
+          style="width: 32px;height: 32px;">
+          <span class="status-dot"
+          :class="{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }"></span>
+        </div> 
+      <h3 style="color: #fff;">梦幻灵瞳</h3>
+      </el-row>
       <div class="connection-status">
-        <el-tag :type="devtoolsConnected ? 'success' : 'warning'" size="mini">
-          {{ connectionStatus }}
-        </el-tag>
-        <el-button @click="prevPage" size="mini">上一页</el-button>
-        <el-button @click="nextPage" size="mini">下一页</el-button>
+        <div class="pages"><a href="javascript:goto(1)" @click="prevPage">上一页</a><a href="javascript:goto(1)" @click="nextPage">下一页</a></div>
         <el-button @click="getPageInfo" size="mini" type="info">页码信息</el-button>
         <el-button @click="reconnectDevTools" size="mini" type="warning" v-if="!devtoolsConnected">重连</el-button>
-        <el-button @click="clearData" size="mini" type="danger">清空数据</el-button>
+        <a  v-if="!isInNewWindow" href="javascript:;" class=" btn1 js_alert_btn_0" @click="openInNewTab">新窗口打开</a>
+        <a href="javascript:;" class=" btn1 js_alert_btn_0" @click="clearData">清空数据</a>
       </div>
     </div>
     <div class="data-section">
@@ -20,15 +25,41 @@
           :class="{ 'completed': item.status === 'completed' }">
           <div class="request-info">
             <div class="request-meta">
-              <span class="status" :class="item.status">{{ item.status }}</span>
+              <span class="status" :class="item.status">{{ item.status === 'completed' ? '解析完成' : '解析中' }}</span>
               <span class="timestamp">{{ formatTime(item.timestamp) }}</span>
             </div>
           </div>
           <div v-if="item.responseData" class="response-data">
-            <el-row class="roles" type="flex">
-              <span v-for="role in parseListData(item.responseData)?.equip_list" :key="role.eid">
+            <el-row :gutter="4">
+              <el-col v-for="role in parseListData(item.responseData)?.equip_list" :key="role.eid"
+                style="width: 20%;margin-bottom: 2px;margin-top: 2px;">
+                <el-card class="role-card" :class="{ 'empty-role': isEmptyRole(parserRoleData(role)) }">
+                  <el-row type="flex" justify="space-between">
+                    <el-col style="width:50px;flex-shrink: 0;margin-right: 4px;">
                 <RoleImage :key="role.eid" :other_info="role.other_info" :roleInfo="parserRoleData(role)" />
-              </span>
+                      <el-link :href="getCBGLinkByType(role.eid, 'role')" type="danger" target="_blank"
+                        style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;">
+                        {{ role.seller_nickname }}</el-link>
+                    </el-col>
+                    <el-col>
+                      <div>
+                        <el-tag type="success" v-if="role.accept_bargain == 1">接受还价</el-tag>
+                        <el-tag type="danger" v-else>拒绝还价</el-tag>
+                      </div>
+                      <div>
+                        <span v-html="formatFullPrice(role.price, true)"></span>
+                      </div>
+                      <div>
+                        <el-tag type="danger" v-if="isEmptyRole(parserRoleData(role))">空号</el-tag>
+                        <template v-else>
+                          <el-tag>⚔️{{ get_equip_num(parserRoleData(role)) }}</el-tag>
+                          <el-tag>🐲{{ get_pet_num(parserRoleData(role)) }}</el-tag>
+                        </template>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-card>
+              </el-col>
             </el-row>
           </div>
         </div>
@@ -38,6 +69,7 @@
 </template>
 <script>
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
+import { commonMixin } from '@/utils/mixins/commonMixin'
 export default {
   name: 'DevToolsPanel',
   data() {
@@ -47,9 +79,11 @@ export default {
       processedRequests: new Set(), // 记录已处理的请求ID
       devtoolsConnected: false, // DevTools Protocol连接状态
       connectionStatus: '检查中...', // 连接状态描述
-      connectionCheckTimer: null // 连接检查定时器
+      connectionCheckTimer: null, // 连接检查定时器
+      isInNewWindow: false // 是否在新窗口中打开
     }
   },
+  mixins: [commonMixin],
   components: {
     RoleImage
   },
@@ -59,6 +93,7 @@ export default {
   mounted() {
     this.initMessageListener()
     this.checkConnectionStatus()
+    this.checkIfInNewWindow()
 
     // // 设置定时检查（每5秒检查一次）
     // this.connectionCheckTimer = setInterval(() => {
@@ -78,41 +113,62 @@ export default {
     this.expandedItems = []
   },
   methods: {
-    nextPage(){
+    isEmptyRole(roleInfo) {
+      const noEquip = this.get_equip_num(roleInfo) === 0
+      let noPet = true
+      for (let pet of roleInfo.pet_info) {
+        if (pet.pet_grade > 100 && pet.is_baobao === '是') {
+          noPet = false
+          break
+        }
+        if (pet.pet_grade > 100 && pet.is_baobao === '否' && pet.all_skills.length > 4) {
+          noPet = false
+          break
+        }
+      }
+      return noEquip && noPet
+    },
+    get_pet_num(roleInfo) {
+      return roleInfo.pet_info.length + roleInfo.split_pets.length
+    },
+    get_equip_num(roleInfo) {
+      return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length
+    },
+    nextPage() {
       // 通过Chrome调试API查找并点击页面上的分页器
       this.clickPageButton('next')
     },
-    
-    prevPage(){
+
+    prevPage() {
       // 通过Chrome调试API查找并点击页面上的分页器
       this.clickPageButton('prev')
     },
-    
-    getPageInfo(){
+
+    getPageInfo() {
       // 获取当前分页器信息
       this.getPagerInfo()
     },
-    
-    reconnectDevTools(){
+
+    reconnectDevTools() {
       // 重新连接DevTools
       this.connectionStatus = '重连中...'
       this.checkConnectionStatus()
-      this.$message.info('正在尝试重新连接DevTools...')
+      this.$notify.info('正在尝试重新连接DevTools...')
     },
-    
+
     async clickPageButton(direction) {
       try {
         // 获取当前活动标签页
         const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
-        
+
         if (!activeTab || !activeTab.url.includes('cbg.163.com')) {
-          this.$message.warning('请先访问梦幻西游藏宝阁页面')
+          this.$notify.warning('请先访问梦幻西游藏宝阁页面')
           return
         }
 
         // 检查Chrome调试API连接状态
         if (!this.devtoolsConnected) {
-          this.$message.warning('DevTools连接已断开，请重新加载页面')
+          this.$notify.warning('DevTools连接已断开，请重新加载页面')
           return
         }
 
@@ -233,55 +289,56 @@ export default {
         )
 
         // 处理Chrome调试API的返回结果
-          if (result && result.result && result.result.value) {
-            const message = result.result.value
-            
-            if (message.startsWith('SUCCESS:')) {
-              this.$message.success(message.substring(8)) // 移除"SUCCESS:"前缀
-              console.log(`${direction === 'next' ? '下一页' : '上一页'}按钮点击成功`)
-            } else if (message.startsWith('ERROR:')) {
-              this.$message.warning(message.substring(6)) // 移除"ERROR:"前缀
-              console.warn(`${direction === 'next' ? '下一页' : '上一页'}按钮点击失败:`, message)
-            } else {
-              this.$message.error('执行页面操作失败：未知返回结果')
-              console.error('页面操作结果异常:', result)
-            }
+        if (result && result.result && result.result.value) {
+          const message = result.result.value
+
+          if (message.startsWith('SUCCESS:')) {
+            this.$notify.success(message.substring(8)) // 移除"SUCCESS:"前缀
+            console.log(`${direction === 'next' ? '下一页' : '上一页'}按钮点击成功`)
+          } else if (message.startsWith('ERROR:')) {
+            this.$notify.warning(message.substring(6)) // 移除"ERROR:"前缀
+            console.warn(`${direction === 'next' ? '下一页' : '上一页'}按钮点击失败:`, message)
           } else {
-            this.$message.error('执行页面操作失败')
+            this.$notify.error('执行页面操作失败：未知返回结果')
             console.error('页面操作结果异常:', result)
           }
-          
-        } catch (error) {
-          console.error(`点击${direction === 'next' ? '下一页' : '上一页'}按钮失败:`, error)
-          
-          // 检查是否是连接断开错误
-          if (error.message && error.message.includes('Could not establish connection')) {
-            this.devtoolsConnected = false
-            this.connectionStatus = '连接断开'
-            this.$message.error('DevTools连接已断开，请重新加载页面或刷新扩展')
-          } else {
-            this.$message.error('操作失败: ' + error.message)
-          }
+        } else {
+          this.$notify.error('执行页面操作失败')
+          console.error('页面操作结果异常:', result)
         }
+
+      } catch (error) {
+        console.error(`点击${direction === 'next' ? '下一页' : '上一页'}按钮失败:`, error)
+
+        // 检查是否是连接断开错误
+        if (error.message && error.message.includes('Could not establish connection')) {
+          this.devtoolsConnected = false
+          this.connectionStatus = '连接断开'
+          this.$notify.error('DevTools连接已断开，请重新加载页面或刷新扩展')
+        } else {
+          this.$notify.error('操作失败: ' + error.message)
+        }
+      }
     },
-    
+
     async getPagerInfo() {
       try {
         // 获取当前活动标签页
         const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
-        
+
         if (!activeTab || !activeTab.url.includes('cbg.163.com')) {
-          this.$message.warning('请先访问梦幻西游藏宝阁页面')
+          this.$notify.warning('请先访问梦幻西游藏宝阁页面')
           return
         }
 
         // 检查Chrome调试API连接状态
         if (!this.devtoolsConnected) {
-          this.$message.warning('DevTools连接已断开，请重新加载页面')
+          this.$notify.warning('DevTools连接已断开，请重新加载页面')
           return
         }
 
         // 通过Chrome调试API执行页面JavaScript代码获取分页器信息
+        //在pagerDiv的innerText中查找 `共100页`，获取100
         const result = await chrome.debugger.sendCommand(
           { tabId: activeTab.id },
           'Runtime.evaluate',
@@ -302,18 +359,23 @@ export default {
                     currentPage = currentPageLink.textContent.trim()
                   }
                   
-                  // 获取所有页码链接
-                  const allPageLinks = pagerDiv.querySelectorAll('a[href*="goto("]')
-                  const pageNumbers = []
-                  allPageLinks.forEach(link => {
-                    const text = link.textContent.trim()
-                    if (text.match(/^\d+$/)) {
-                      pageNumbers.push(parseInt(text))
-                    }
-                  })
+                  // 从innerText中查找"共X页"模式
+                  let totalPages = '未知'
+                  const innerText = pagerDiv.innerText || pagerDiv.textContent || ''
                   
-                  // 计算总页数（取最大页码）
-                  const totalPages = pageNumbers.length > 0 ? Math.max(...pageNumbers) : '未知'
+                  // 手动查找"共"和"页"之间的数字
+                  const gongIndex = innerText.indexOf('共')
+                  const yeIndex = innerText.indexOf('页', gongIndex)
+                  
+                  if (gongIndex !== -1 && yeIndex !== -1) {
+                    const textBetween = innerText.substring(gongIndex + 1, yeIndex).trim()
+                    totalPages = textBetween
+                    console.log('textBetween:', textBetween)
+                    const numberMatch = textBetween.match(/(\d+)/)
+                    if (numberMatch) {
+                      totalPages = numberMatch[1]
+                    }
+                  }
                   
                   // 检查是否有上一页/下一页按钮
                   const hasPrev = pagerDiv.querySelector('a[href*="goto("]') && 
@@ -333,37 +395,38 @@ export default {
         // 处理返回结果
         if (result && result.result && result.result.value) {
           const message = result.result.value
-          
+
           if (message.startsWith('SUCCESS:')) {
-            this.$message.info(message.substring(8)) // 移除"SUCCESS:"前缀
+            this.$notify.info(message.substring(8)) // 移除"SUCCESS:"前缀
             console.log('分页器信息获取成功:', message)
           } else if (message.startsWith('ERROR:')) {
-            this.$message.warning(message.substring(6)) // 移除"ERROR:"前缀
+            this.$notify.warning(message.substring(6)) // 移除"ERROR:"前缀
             console.warn('分页器信息获取失败:', message)
           } else {
-            this.$message.error('获取分页器信息失败：未知返回结果')
+            this.$notify.error('获取分页器信息失败：未知返回结果')
             console.error('分页器信息获取结果异常:', result)
           }
         } else {
-          this.$message.error('获取分页器信息失败')
+          this.$notify.error('获取分页器信息失败')
           console.error('分页器信息获取结果异常:', result)
         }
-        
+
       } catch (error) {
         console.error('获取分页器信息失败:', error)
-        
+
         // 检查是否是连接断开错误
         if (error.message && error.message.includes('Could not establish connection')) {
           this.devtoolsConnected = false
           this.connectionStatus = '连接断开'
-          this.$message.error('DevTools连接已断开，请重新加载页面或刷新扩展')
+          this.$notify.error('DevTools连接已断开，请重新加载页面或刷新扩展')
         } else {
-          this.$message.error('操作失败: ' + error.message)
+          this.$notify.error('操作失败: ' + error.message)
         }
       }
     },
     parserRoleData(data) {
       const roleInfo = new window.RoleInfoParser(data.large_equip_desc, { equip_level: data.equip_level })
+      console.log('roleInfo:', roleInfo)
       return roleInfo.result
       // return {
       //   RoleInfoParser: roleInfo,
@@ -401,9 +464,17 @@ export default {
       let templateJSONStr = '{}'
       if (match) {
         templateJSONStr = match[1]
+      } else {
+        templateJSONStr = responseDataStr
       }
       try {
-        const templateJSON = JSON.parse(templateJSONStr)
+        let templateJSON = {}
+        if (typeof templateJSONStr === 'string') {
+          templateJSON = JSON.parse(templateJSONStr)
+        } else {
+          // h5
+          templateJSON = templateJSONStr
+        }
         return templateJSON
       } catch (error) {
         console.error('解析响应数据失败:', error)
@@ -473,6 +544,9 @@ export default {
         case 'updateRecommendData':
           this.recommendData = request.data || []
 
+          // 按时间戳倒序排列，最新的在最上面
+          this.recommendData.filter(item => parseListData(item.responseData)?.advance_search_type === 'overall_role_search').sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+
           // 只处理新完成的请求，避免重复处理
           if (this.recommendData && this.recommendData.length > 0) {
             this.recommendData.forEach(item => {
@@ -510,13 +584,13 @@ export default {
         case 'devtoolsConnected':
           this.devtoolsConnected = true
           this.connectionStatus = '已连接'
-          this.$message.success(request.message)
+          this.$notify.success(request.message)
           break
 
         case 'showDebuggerWarning':
           this.devtoolsConnected = false
           this.connectionStatus = '连接冲突'
-          this.$message.warning(request.message)
+          this.$notify.warning(request.message)
           break
 
         case 'clearRecommendData':
@@ -553,19 +627,119 @@ export default {
       if (!timestamp) return ''
       const date = new Date(timestamp)
       return date.toLocaleTimeString()
-    }
+    },
+
+    checkIfInNewWindow() {
+      // 检测是否在新窗口中打开
+      try {
+
+        // 方法1: 检查chrome.devtools API是否存在（最可靠的方法）
+        if (typeof chrome !== 'undefined' && chrome.devtools && chrome.devtools.inspectedWindow) {
+          this.isInNewWindow = false
+          console.log('在Chrome扩展SidePanel中打开（通过API检测）')
+          return
+        }
+
+        // 方法2: 检查URL模式 - 区分SidePanel和新窗口
+        const currentUrl = window.location.href
+        if (currentUrl.includes('chrome-extension://')) {
+          // 检查是否是SidePanel页面
+          if (currentUrl.includes('panel.html')) {
+            // panel.html是SidePanel页面
+            this.isInNewWindow = false
+            console.log('在Chrome扩展SidePanel中打开（通过URL检测）')
+            return
+          } else if (currentUrl.includes('panel.html')) {
+            // panel.html是新窗口页面
+            this.isInNewWindow = true
+            console.log('在新窗口中打开（通过URL检测）')
+            return
+          }
+        }
+
+        // 方法3: 检查页面标题
+        if (document.title === '梦幻灵瞳') {
+          // 需要进一步区分是SidePanel还是新窗口
+          if (currentUrl.includes('panel.html')) {
+            this.isInNewWindow = false
+            console.log('在Chrome扩展SidePanel中打开（通过标题+URL检测）')
+            return
+          } else {
+            this.isInNewWindow = true
+            console.log('在新窗口中打开（通过标题检测）')
+            return
+          }
+        }
+
+        // 方法4: 检查是否在iframe中
+        if (window.self !== window.top) {
+          this.isInNewWindow = false
+          console.log('在Chrome扩展SidePanel中打开（通过iframe检测）')
+          return
+        }
+
+        // 方法5: 检查parent窗口
+        if (window.parent === window) {
+          // 顶级窗口，需要进一步判断
+          if (currentUrl.includes('panel.html')) {
+            this.isInNewWindow = false
+            console.log('在Chrome扩展SidePanel中打开（通过parent+URL检测）')
+          } else {
+            this.isInNewWindow = true
+            console.log('在新窗口中打开（通过parent检测）')
+          }
+        } else {
+          this.isInNewWindow = false
+          console.log('在Chrome扩展SidePanel中打开（通过parent检测）')
+        }
+
+      } catch (error) {
+        console.error('检测窗口环境失败:', error)
+        // 默认假设在新窗口中
+        this.isInNewWindow = true
+        console.log('检测失败，默认在新窗口中打开')
+      }
+    },
+
+    async openInNewTab() {
+      try {
+        // 直接创建新标签页打开扩展页面
+        const extensionUrl = chrome.runtime.getURL('panel.html')
+
+        // 使用chrome.tabs.create在新标签页中打开
+        await chrome.tabs.create({
+          url: extensionUrl,
+          active: true // 激活新标签页
+        })
+
+        this.$notify.success('已在新标签页中打开扩展面板')
+
+      } catch (error) {
+        console.error('打开新标签页失败:', error)
+
+        // 如果chrome.tabs.create失败，尝试使用window.open
+        try {
+          const extensionUrl = chrome.runtime.getURL('panel.html')
+          window.open(extensionUrl, '_blank')
+          this.$notify.success('已在新窗口中打开扩展面板')
+        } catch (fallbackError) {
+          console.error('备用方法也失败:', fallbackError)
+          this.$notify.error('打开新窗口失败: ' + error.message)
+        }
+      }
+    },
   }
 }
 </script>
 
 <style scoped>
-.devtools-panel {
+.panel {
   box-sizing: border-box;
   padding: 16px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: #f5f5f5;
   min-height: 100vh;
-  background: url(../../public/assets/images/areabg.webp) repeat-y;
+  background: url(~@/../public/assets/images/areabg.webp) repeat-y;
   width: 960px;
   margin: 0 auto;
 }
@@ -589,6 +763,128 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.status-dot.connected {
+  background-color: #52c41a;
+  animation: pulse-green-strong 1.5s infinite;
+}
+
+.status-dot.disconnected {
+  background-color: #faad14;
+  animation: pulse-orange-strong 1s infinite;
+}
+
+/* 绿色强烈闪烁动画 */
+@keyframes pulse-green-strong {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
+    opacity: 1;
+  }
+}
+
+/* 橙色强烈闪烁动画 */
+@keyframes pulse-orange-strong {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(-50%, -50%) scale(1.3);
+    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);
+    opacity: 1;
+  }
+}
+
+.status-text {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.mode-indicator {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+.mode-indicator.sidepanel {
+  background-color: #1890ff;
+  color: white;
+}
+
+.mode-indicator.new-window {
+  background-color: #52c41a;
+  color: white;
+}
+
+.new-window-tip {
+  margin-bottom: 16px;
+  border-radius: 6px;
+}
+
+.new-window-tip p {
+  margin: 4px 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sidebar-tip {
+  margin-bottom: 16px;
+  border-radius: 6px;
+}
+
+.sidebar-tip p {
+  margin: 4px 0;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .data-section h4 {
@@ -701,5 +997,40 @@ export default {
   color: #333;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.role-card /deep/.el-card__body {
+  padding: 8px;
+}
+
+/* 空号卡片置灰样式 */
+.role-card.empty-role {
+  opacity: 0.6;
+  filter: grayscale(0.8);
+  background-color: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.role-card.empty-role:hover {
+  opacity: 0.8;
+  filter: grayscale(0.6);
+}
+
+.role-card.empty-role /deep/.el-card__body {
+  background-color: #fafafa;
+}
+
+/* 空号卡片内的元素也置灰 */
+.role-card.empty-role .el-tag {
+  opacity: 0.7;
+}
+
+.role-card.empty-role .el-link {
+  opacity: 0.7;
+}
+
+.role-card.empty-role span {
+  opacity: 0.7;
 }
 </style>

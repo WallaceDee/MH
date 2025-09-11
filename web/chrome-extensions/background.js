@@ -7,6 +7,7 @@ class DevToolsListener {
     this.tabId = null
     this.isListening = false
     this.recommendData = []
+    this.pendingMessage = null // 存储待发送的消息
     this.init()
   }
 
@@ -21,8 +22,8 @@ class DevToolsListener {
         console.log('检测到CBG页面加载完成:', tab.url);
         this.tabId = tabId
         this.startListening()
-        // 当检测到CBG页面时，自动打开side panel
-        chrome.sidePanel.open({ tabId: tabId });
+        // 当检测到CBG页面时，不自动打开side panel（避免用户手势错误）
+        // chrome.sidePanel.open({ tabId: tabId });
       }
     }
 
@@ -33,8 +34,8 @@ class DevToolsListener {
           console.log('激活CBG页面:', tab.url);
           this.tabId = activeInfo.tabId
           this.startListening()
-          // 当激活CBG页面时，自动打开side panel
-          chrome.sidePanel.open({ tabId: activeInfo.tabId });
+          // 当激活CBG页面时，不自动打开side panel（避免用户手势错误）
+          // chrome.sidePanel.open({ tabId: activeInfo.tabId });
         }
       })
     }
@@ -160,15 +161,7 @@ class DevToolsListener {
     const { request, requestId, timestamp } = params
     const url = request.url
 
-    console.log('收到网络请求事件:', {
-      method: 'requestWillBeSent',
-      url: url,
-      requestId: requestId,
-      isCbgUrl: this.isCbgApiUrl(url)
-    })
-
     if (this.isCbgApiUrl(url)) {
-      console.log('🔍 检测到CBG API请求:', url)
 
       const requestData = {
         requestId: requestId,
@@ -244,15 +237,7 @@ class DevToolsListener {
 
     // 检查是否是CBG相关的API请求
     const isCbgDomain = url.includes('cbg.163.com')
-    const isApiRequest = url.includes('recommend.py') || url.includes('api') || url.includes('query')
-    
-    console.log('URL检查:', {
-      url: url,
-      isCbgDomain: isCbgDomain,
-      isApiRequest: isApiRequest,
-      result: isCbgDomain && isApiRequest
-    })
-
+    const isApiRequest = url.includes('recommend.py')
     return isCbgDomain && isApiRequest
   }
 
@@ -267,21 +252,34 @@ class DevToolsListener {
 
   // 发送消息到side panel，带重试机制
   sendMessageToSidePanel(message, retryCount = 0) {
-    const maxRetries = 3
-    const retryDelay = 1000 // 1秒
+    const maxRetries = 5
+    const retryDelay = 2000 // 2秒
 
     chrome.runtime.sendMessage(message).then(() => {
       console.log('✅ 消息发送成功:', message.action)
     }).catch((error) => {
       console.warn(`❌ 消息发送失败 (尝试 ${retryCount + 1}/${maxRetries + 1}):`, error.message)
       
+      // 检查错误类型
+      if (error.message.includes('Could not establish connection')) {
+        console.log('接收端不存在，可能是DevTools Panel还未加载完成')
+      } else if (error.message.includes('Receiving end does not exist')) {
+        console.log('接收端不存在，等待DevTools Panel初始化')
+      }
+      
       if (retryCount < maxRetries) {
-        console.log(`将在 ${retryDelay}ms 后重试...`)
+        const delay = retryDelay * (retryCount + 1) // 递增延迟
+        console.log(`将在 ${delay}ms 后重试...`)
         setTimeout(() => {
           this.sendMessageToSidePanel(message, retryCount + 1)
-        }, retryDelay)
+        }, delay)
       } else {
         console.error('❌ 消息发送最终失败，停止重试:', message.action)
+        // 如果是重要消息，可以考虑存储起来稍后发送
+        if (message.action === 'devtoolsConnected') {
+          console.log('存储devtoolsConnected消息，等待面板加载后发送')
+          this.pendingMessage = message
+        }
       }
     })
   }
@@ -307,6 +305,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case 'ping':
       // 处理ping消息，用于检查连接状态
       console.log('收到ping消息，返回pong');
+      
+      // 如果有待发送的消息，现在发送
+      if (devToolsListener.pendingMessage) {
+        console.log('发送待发送的消息:', devToolsListener.pendingMessage.action);
+        devToolsListener.sendMessageToSidePanel(devToolsListener.pendingMessage);
+        devToolsListener.pendingMessage = null;
+      }
+      
       sendResponse({ success: true, message: 'pong' });
       return true;
       
@@ -398,8 +404,8 @@ setTimeout(() => {
     if (typeof chrome !== 'undefined' && chrome.action && chrome.action.onClicked) {
       chrome.action.onClicked.addListener((tab) => {
         console.log('扩展图标被点击，当前标签页:', tab.url);
-    if (tab.url && tab.url.includes('cbg.163.com')) {
-          // 如果当前页面是CBG页面，打开side panel
+        if (tab.url && tab.url.includes('cbg.163.com')) {
+          // 如果当前页面是CBG页面，打开side panel（用户点击扩展图标，这是用户手势）
           chrome.sidePanel.open({ tabId: tab.id });
           console.log('✅ 已打开Side Panel');
         } else {
