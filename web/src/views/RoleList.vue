@@ -117,8 +117,9 @@
         </el-table-column>
         <el-table-column label="装备估价" width="120" align="center">
           <template #default="scope">
-            <SimilarRoleModal :role="scope.row" :similar-data="roleSimilarData"
-              @show="loadSimilarRoles($event, scope.$index)">
+            <SimilarRoleModal :role="scope.row" 
+              :search-params="{ selectedDate: searchForm.selectedDate, roleType: roleType }"
+              @update-role-price="handleRolePriceUpdate">
               <div> <el-link type="primary" href="javascript:void(0)">👤 裸号</el-link></div>
             </SimilarRoleModal>
             <div v-if="get_equip_num(scope.row.roleInfo) > 0"> <el-link
@@ -340,7 +341,6 @@ export default {
   },
   data() {
     return {
-      roleSimilarData: null,
       valuationDialogTitle: {
         nickname: '',
         school: '',
@@ -684,100 +684,12 @@ export default {
         eid: ''
       }
     },
-    // 角色估价和相似角色数据加载
-    async loadSimilarRoles(role, rowIndex) {
-      try {
-        this.roleSimilarData = null
-        console.log('角色估价和加载相似数据:', role.eid)
-        // 显示加载状态
-        this.$set(this.loadingStates, `basePrice_${rowIndex}`, true)
-        // 调用角色估价接口
-        const [year, month] = this.searchForm.selectedDate.split('-')
-        const response = await this.$api.role.getRoleValuation({
-          eid: role.eid,
-          year: parseInt(year),
-          month: parseInt(month),
-          role_type: this.roleType,
-          strategy: 'fair_value',
-          similarity_threshold: 0.7,
-          max_anchors: 30
-        })
-        if (response.code === 200) {
-          const result = response.data
-          const estimatedPrice = result.estimated_price_yuan
-          // 更新角色数据中的估价信息（后端已自动更新数据库）
-          this.$set(role, 'base_price', result.estimated_price)
-
-          // 查询相似角色锚点数据
-          if (result?.anchor_count > 0) {
-            try {
-              // 调用专门的锚点查询接口
-              const anchorsResponse = await this.$api.role.findRoleAnchors({
-                eid: role.eid,
-                year: parseInt(year),
-                month: parseInt(month),
-                role_type: this.roleType,
-                similarity_threshold: 0.7,
-                max_anchors: 30
-              })
-
-              if (anchorsResponse.code === 200 && anchorsResponse.data.anchors) {
-                const anchorsData = anchorsResponse.data
-                const parsedAnchors = anchorsData.anchors.map((item) => {
-                  const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
-                  item.RoleInfoParser = roleInfo
-                  if (roleInfo.result) {
-                    item.roleInfo = roleInfo.result
-                  }
-                  return item
-                })
-
-                // 保存相似角色数据，用于相似角色模态框
-                this.roleSimilarData = {
-                  anchor_count: anchorsData.anchors.length,
-                  similarity_threshold: 0.7,
-                  max_anchors: 30,
-                  anchors: parsedAnchors,
-                  statistics: anchorsData.statistics,
-                  valuation: {
-                    estimated_price_yuan: estimatedPrice,
-                    confidence: result.confidence,
-                    strategy: result.strategy || 'fair_value'
-                  }
-                }
-              } else {
-                console.warn('未获取到相似角色锚点数据:', anchorsResponse.message)
-              }
-            } catch (error) {
-              console.error('查询相似角色锚点失败:', error)
-              // 锚点查询失败不影响估价结果显示
-            }
-          }
-
-        } else {
-          // 估价失败
-          this.$notify.error({
-            title: '角色估价失败',
-            message: response.message || '估价计算失败',
-            duration: 3000
-          })
-
-          // 显示详细错误信息
-          if (response.data && response.data.error) {
-            console.error('估价错误详情:', response.data.error)
-          }
-        }
-
-      } catch (error) {
-        console.error('角色估价失败:', error)
-        this.$notify.error({
-          title: '估价请求失败',
-          message: '网络请求异常，请稍后重试',
-          duration: 3000
-        })
-      } finally {
-        // 隐藏加载状态
-        this.$set(this.loadingStates, `basePrice_${rowIndex}`, false)
+    // 处理角色价格更新事件
+    handleRolePriceUpdate({ eid, basePrice }) {
+      // 更新表格中对应角色的估价信息
+      const role = this.tableData.find(item => item.eid === eid)
+      if (role) {
+        this.$set(role, 'base_price', basePrice)
       }
     },
     async handlSummonePrice(role, rowIndex) {

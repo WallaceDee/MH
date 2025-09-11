@@ -34,7 +34,7 @@
               </el-row>
               <!-- 刷新按钮 -->
               <div style="width: 60px;flex-shrink: 0;">
-                <el-button type="primary" @click="refresh" size="mini">刷新</el-button>
+                <el-button type="primary" @click="refresh" size="mini" :loading="loading">刷新</el-button>
               </div>
             </el-row>
 
@@ -96,18 +96,24 @@ export default {
       type: Object,
       required: true
     },
-    similarData: {
-      type: Object,
-      default: null
-    },
     placement: {
       type: String,
       default: 'left-end'
+    },
+    // 新增：从父组件传入的搜索参数
+    searchParams: {
+      type: Object,
+      default: () => ({
+        selectedDate: '2025-01',
+        roleType: 'empty'
+      })
     }
   },
   data() {
     return {
       visible: false,
+      loading: false,
+      similarData: null,
       hotServersConfig: window.hotServersConfig || []
     }
   },
@@ -211,11 +217,114 @@ export default {
       }
       this.hotServersConfig = window.hotServersConfig
     },
-    handleShow() {
+    async handleShow() {
+      // 触发父组件事件（保持向后兼容）
       this.$emit('show', this.role)
+      // 加载相似角色数据
+      await this.loadSimilarRoles()
     },
-    refresh() {
-      this.handleShow()
+    async refresh() {
+      await this.loadSimilarRoles()
+    },
+    // 内聚的相似角色数据加载方法
+    async loadSimilarRoles() {
+      try {
+        this.loading = true
+        this.similarData = null
+        console.log('角色估价和加载相似数据:', this.role.eid)
+        
+        // 调用角色估价接口
+        const [year, month] = this.searchParams.selectedDate.split('-')
+        const response = await this.$api.role.getRoleValuation({
+          eid: this.role.eid,
+          year: parseInt(year),
+          month: parseInt(month),
+          role_type: this.searchParams.roleType,
+          strategy: 'fair_value',
+          similarity_threshold: 0.7,
+          max_anchors: 30
+        })
+        
+        if (response.code === 200) {
+          const result = response.data
+          const estimatedPrice = result.estimated_price_yuan
+          
+          // 更新角色数据中的估价信息（如果父组件需要的话）
+          this.$emit('update-role-price', {
+            eid: this.role.eid,
+            basePrice: result.estimated_price
+          })
+
+          // 查询相似角色锚点数据
+          if (result?.anchor_count > 0) {
+            try {
+              // 调用专门的锚点查询接口
+              const anchorsResponse = await this.$api.role.findRoleAnchors({
+                eid: this.role.eid,
+                year: parseInt(year),
+                month: parseInt(month),
+                role_type: this.searchParams.roleType,
+                similarity_threshold: 0.7,
+                max_anchors: 30
+              })
+
+              if (anchorsResponse.code === 200 && anchorsResponse.data.anchors) {
+                const anchorsData = anchorsResponse.data
+                const parsedAnchors = anchorsData.anchors.map((item) => {
+                  const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
+                  item.RoleInfoParser = roleInfo
+                  if (roleInfo.result) {
+                    item.roleInfo = roleInfo.result
+                  }
+                  return item
+                })
+
+                // 保存相似角色数据
+                this.similarData = {
+                  anchor_count: anchorsData.anchors.length,
+                  similarity_threshold: 0.7,
+                  max_anchors: 30,
+                  anchors: parsedAnchors,
+                  statistics: anchorsData.statistics,
+                  valuation: {
+                    estimated_price_yuan: estimatedPrice,
+                    confidence: result.confidence,
+                    strategy: result.strategy || 'fair_value'
+                  }
+                }
+              } else {
+                console.warn('未获取到相似角色锚点数据:', anchorsResponse.message)
+              }
+            } catch (error) {
+              console.error('查询相似角色锚点失败:', error)
+              // 锚点查询失败不影响估价结果显示
+            }
+          }
+
+        } else {
+          // 估价失败
+          this.$notify.error({
+            title: '角色估价失败',
+            message: response.message || '估价计算失败',
+            duration: 3000
+          })
+
+          // 显示详细错误信息
+          if (response.data && response.data.error) {
+            console.error('估价错误详情:', response.data.error)
+          }
+        }
+
+      } catch (error) {
+        console.error('角色估价失败:', error)
+        this.$notify.error({
+          title: '估价请求失败',
+          message: '网络请求异常，请稍后重试',
+          duration: 3000
+        })
+      } finally {
+        this.loading = false
+      }
     },
     getStrategyName(strategy) {
       const strategyNames = {

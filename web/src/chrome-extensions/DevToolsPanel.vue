@@ -1,20 +1,20 @@
 <template>
   <div class="panel">
     <div class="panel-header">
-      <el-row  type="flex" align="middle">
+      <el-row type="flex" align="middle">
         <div style="width: 32px;height: 32px;margin-right: 10px;position: relative;">
-          <img src="~@/assets/logo.png" alt="梦幻灵瞳"
-          style="width: 32px;height: 32px;">
+          <img src="~@/assets/logo.png" alt="梦幻灵瞳" style="width: 32px;height: 32px;">
           <span class="status-dot"
-          :class="{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }"></span>
-        </div> 
-      <h3 style="color: #fff;">梦幻灵瞳</h3>
+            :class="{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }"></span>
+        </div>
+        <h3 style="color: #fff;">梦幻灵瞳</h3>
       </el-row>
       <div class="connection-status">
-        <div class="pages"><a href="javascript:goto(1)" @click="prevPage">上一页</a><a href="javascript:goto(1)" @click="nextPage">下一页</a></div>
+        <div class="pages"><a href="javascript:goto(1)" @click="prevPage">上一页</a><a href="javascript:goto(1)"
+            @click="nextPage">下一页</a></div>
         <el-button @click="getPageInfo" size="mini" type="info">页码信息</el-button>
         <el-button @click="reconnectDevTools" size="mini" type="warning" v-if="!devtoolsConnected">重连</el-button>
-        <a  v-if="!isInNewWindow" href="javascript:;" class=" btn1 js_alert_btn_0" @click="openInNewTab">新窗口打开</a>
+        <a v-if="!isInNewWindow" href="javascript:;" class=" btn1 js_alert_btn_0" @click="openInNewTab">新窗口打开</a>
         <a href="javascript:;" class=" btn1 js_alert_btn_0" @click="clearData">清空数据</a>
       </div>
     </div>
@@ -36,7 +36,7 @@
                 <el-card class="role-card" :class="{ 'empty-role': isEmptyRole(parserRoleData(role)) }">
                   <el-row type="flex" justify="space-between">
                     <el-col style="width:50px;flex-shrink: 0;margin-right: 4px;">
-                <RoleImage :key="role.eid" :other_info="role.other_info" :roleInfo="parserRoleData(role)" />
+                      <RoleImage :key="role.eid" :other_info="role.other_info" :roleInfo="parserRoleData(role)" />
                       <el-link :href="getCBGLinkByType(role.eid, 'role')" type="danger" target="_blank"
                         style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;">
                         {{ role.seller_nickname }}</el-link>
@@ -52,15 +52,27 @@
                       <div>
                         <el-tag type="danger" v-if="isEmptyRole(parserRoleData(role))">空号</el-tag>
                         <template v-else>
-                          <el-tag>⚔️{{ get_equip_num(parserRoleData(role)) }}</el-tag>
-                          <el-tag>🐲{{ get_pet_num(parserRoleData(role)) }}</el-tag>
+                          <el-tag>⚔️ {{ get_equip_num(parserRoleData(role)) }}</el-tag>
+                          <el-tag type="success">🐲 {{ get_pet_num(parserRoleData(role)) }}</el-tag>
                         </template>
+                      </div>
+                      <div>
+                        <SimilarRoleModal :role="role"
+                          :search-params="{ selectedDate: selectedDate, roleType: 'normal' }">
+                          <div> <el-link type="primary" href="javascript:void(0)">👤 裸号</el-link></div>
+                        </SimilarRoleModal>
                       </div>
                     </el-col>
                   </el-row>
                 </el-card>
               </el-col>
             </el-row>
+            <el-button @click="toggleResponse(index)" size="mini" type="text">
+              {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据
+            </el-button>
+            <div v-if="expandedItems.includes(index)" class="response-content">
+              <pre>{{ JSON.stringify(item.responseData, null, 2) }}</pre>
+            </div>
           </div>
         </div>
       </div>
@@ -68,12 +80,15 @@
   </div>
 </template>
 <script>
+import dayjs from 'dayjs'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
+import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 export default {
   name: 'DevToolsPanel',
   data() {
     return {
+      selectedDate: dayjs().format('YYYY-MM'),
       recommendData: [],
       expandedItems: [],
       processedRequests: new Set(), // 记录已处理的请求ID
@@ -85,7 +100,8 @@ export default {
   },
   mixins: [commonMixin],
   components: {
-    RoleImage
+    RoleImage,
+    SimilarRoleModal
   },
   computed: {
 
@@ -800,11 +816,13 @@ export default {
     box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
     opacity: 1;
   }
+
   50% {
     transform: translate(-50%, -50%) scale(1.2);
     box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);
     opacity: 0.8;
   }
+
   100% {
     transform: translate(-50%, -50%) scale(1);
     box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);
@@ -819,21 +837,25 @@ export default {
     box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);
     opacity: 1;
   }
+
   25% {
     transform: translate(-50%, -50%) scale(1.3);
     box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);
     opacity: 0.6;
   }
+
   50% {
     transform: translate(-50%, -50%) scale(1.1);
     box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);
     opacity: 0.8;
   }
+
   75% {
     transform: translate(-50%, -50%) scale(1.2);
     box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);
     opacity: 0.7;
   }
+
   100% {
     transform: translate(-50%, -50%) scale(1);
     box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);
