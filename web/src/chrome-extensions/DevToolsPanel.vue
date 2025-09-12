@@ -10,22 +10,42 @@
         <h3 style="color: #fff;">梦幻灵瞳</h3>
       </el-row>
       <div class="connection-status">
-        <div class="pages"><a href="javascript:goto(1)" @click="prevPage">上一页</a><a href="javascript:goto(1)"
-            @click="nextPage">下一页</a></div>
-        <el-button @click="getPageInfo" size="mini" type="info">页码信息</el-button>
-        <el-button @click="reconnectDevTools" size="mini" type="warning" v-if="!devtoolsConnected">重连</el-button>
-        <a v-if="!isInNewWindow" href="javascript:;" class=" btn1 js_alert_btn_0" @click="openInNewTab">新窗口打开</a>
-        <a href="javascript:;" class=" btn1 js_alert_btn_0" @click="clearData">清空数据</a>
+        <div id="pager" class="fr" v-if="pageInfo.hasPager">
+          <el-row class="pages" type="flex" align="middle">
+            <span style="color: #fff;margin-right: 10px;"> 第{{ pageInfo.currentPage }}页, 共{{ pageInfo.total }}页 </span>
+            <a v-if="pageInfo.hasPrev" href="javascript:void 0;" @click.prevent="prevPage"
+              style="line-height: 1.2em;">上一页</a>
+            <a v-if="pageInfo.hasNext" href="javascript:void 0;" @click.prevent="nextPage"
+              style="line-height: 1.2em;">下一页</a>
+          </el-row>
+        </div>
+        <a v-if="!devtoolsConnected" href="javascript:void 0;" @click="reconnectDevTools">重连</a>
+        <a v-if="!isInNewWindow" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
+          @click.prevent="openInNewTab">新窗口打开</a>
+        <a v-if="!pageInfo.hasPager" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
+          @click.prevent="refreshCurrentPage">刷新页面</a>
+        <a v-if="recommendData.length > 0" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
+          @click.prevent="clearData">清空数据</a>
       </div>
     </div>
     <div class="data-section">
       <el-empty v-if="recommendData.length === 0" class="empty-state" description="暂无数据，请访问梦幻西游藏宝阁页面"></el-empty>
       <div v-else class="request-list">
-        <div v-for="item in recommendData" :key="item.requestId" class="request-item"
-          :class="{ 'completed': item.status === 'completed' }">
+        <div v-for="(item, index) in recommendData" :key="item.requestId" class="request-item"
+          :class="{ 'parsing': item.status === 'parsing' }">
           <div class="request-info">
             <div class="request-meta">
-              <span class="status" :class="item.status">{{ item.status === 'completed' ? '解析完成' : '解析中' }}</span>
+              <span class="status" :class="item.status">
+                <template v-if="item.status === 'parsing'">
+                  <i class="el-icon-loading"></i> 解析中...
+                </template>
+                <template v-else-if="item.status === 'completed'">
+                  <i class="el-icon-success"></i> 解析完成
+                </template>
+                <template v-else>
+                  <i class="el-icon-error"></i> 解析失败
+                </template>
+              </span>
               <span class="timestamp">{{ formatTime(item.timestamp) }}</span>
             </div>
           </div>
@@ -46,7 +66,7 @@
                         <el-tag type="success" v-if="role.accept_bargain == 1">接受还价</el-tag>
                         <el-tag type="danger" v-else>拒绝还价</el-tag>
                       </div>
-                      <div>
+                      <div style="padding: 5px 0;">
                         <span v-html="formatFullPrice(role.price, true)"></span>
                       </div>
                       <div>
@@ -56,14 +76,17 @@
                           <el-tag type="success">🐲 {{ get_pet_num(parserRoleData(role)) }}</el-tag>
                         </template>
                       </div>
-                      <div>
-                        <SimilarRoleModal :role="role"
-                          :search-params="{ selectedDate: selectedDate, roleType: 'normal' }">
-                          <div> <el-link type="primary" href="javascript:void(0)">👤 裸号</el-link></div>
-                        </SimilarRoleModal>
-                      </div>
+
                     </el-col>
                   </el-row>
+                  <div>
+                    <SimilarRoleModal :role="{ ...role, roleInfo: parserRoleData(role) }"
+                      :search-params="{ selectedDate: selectedDate, roleType: 'normal' }">
+                      <div> <el-link type="primary" href="javascript:void 0;" @click.prevent
+                          :disabled="item.status !== 'completed'">👤
+                          裸号</el-link></div>
+                    </SimilarRoleModal>
+                  </div>
                 </el-card>
               </el-col>
             </el-row>
@@ -88,6 +111,13 @@ export default {
   name: 'DevToolsPanel',
   data() {
     return {
+      pageInfo: {
+        hasPager: false,
+        currentPage: 0,
+        total: 0,
+        hasPrev: false,
+        hasNext: false
+      },
       selectedDate: dayjs().format('YYYY-MM'),
       recommendData: [],
       expandedItems: [],
@@ -107,6 +137,16 @@ export default {
 
   },
   mounted() {
+    // 通知background script侧边栏已打开
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      chrome.runtime.sendMessage({
+        action: 'sidePanelOpened'
+      })
+    }
+
+    // 监听页面可见性变化，当页面不可见时通知关闭
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
+
     this.initMessageListener()
     this.checkConnectionStatus()
     this.checkIfInNewWindow()
@@ -117,6 +157,16 @@ export default {
     // }, 5000)
   },
   beforeDestroy() {
+    // 通知background script侧边栏已关闭
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      chrome.runtime.sendMessage({
+        action: 'sidePanelClosed'
+      })
+    }
+
+    // 移除可见性变化监听器
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
+
     // 移除Chrome消息监听器
     this.removeMessageListener()
     // 清理定时器
@@ -129,6 +179,27 @@ export default {
     this.expandedItems = []
   },
   methods: {
+    handleVisibilityChange() {
+      // 当页面不可见时，通知background script侧边栏已关闭
+      if (document.hidden) {
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+          chrome.runtime.sendMessage({
+            action: 'sidePanelClosed'
+          })
+        }
+      } else {
+        this.getPagerInfo().then(res => {
+          this.pageInfo = res
+        })
+        // 当页面重新可见时，通知background script侧边栏已打开
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+          chrome.runtime.sendMessage({
+            action: 'sidePanelOpened'
+          })
+        }
+      }
+    },
+
     isEmptyRole(roleInfo) {
       const noEquip = this.get_equip_num(roleInfo) === 0
       let noPet = true
@@ -158,11 +229,6 @@ export default {
     prevPage() {
       // 通过Chrome调试API查找并点击页面上的分页器
       this.clickPageButton('prev')
-    },
-
-    getPageInfo() {
-      // 获取当前分页器信息
-      this.getPagerInfo()
     },
 
     reconnectDevTools() {
@@ -303,7 +369,7 @@ export default {
             `
           }
         )
-
+        this.pageInfo = await this.getPagerInfo()
         // 处理Chrome调试API的返回结果
         if (result && result.result && result.result.value) {
           const message = result.result.value
@@ -361,22 +427,23 @@ export default {
           {
             expression: `
               (function() {
+                let hasPager = false
                 try {
                   // 查找id为pager的div
                   const pagerDiv = document.getElementById('pager')
                   if (!pagerDiv) {
                     return 'ERROR:未找到分页器元素'
                   }
-                  
+                  hasPager = true
                   // 获取当前页码
                   const currentPageLink = pagerDiv.querySelector('a.on')
-                  let currentPage = '未知'
+                  let currentPage = 0
                   if (currentPageLink) {
                     currentPage = currentPageLink.textContent.trim()
                   }
                   
                   // 从innerText中查找"共X页"模式
-                  let totalPages = '未知'
+                  let total = 0
                   const innerText = pagerDiv.innerText || pagerDiv.textContent || ''
                   
                   // 手动查找"共"和"页"之间的数字
@@ -385,11 +452,11 @@ export default {
                   
                   if (gongIndex !== -1 && yeIndex !== -1) {
                     const textBetween = innerText.substring(gongIndex + 1, yeIndex).trim()
-                    totalPages = textBetween
+                    total = textBetween
                     console.log('textBetween:', textBetween)
                     const numberMatch = textBetween.match(/(\d+)/)
                     if (numberMatch) {
-                      totalPages = numberMatch[1]
+                      total = numberMatch[1]
                     }
                   }
                   
@@ -399,7 +466,14 @@ export default {
                   const hasNext = pagerDiv.querySelector('a[href*="goto("]') && 
                                  pagerDiv.textContent.includes('下一页')
                   
-                  return 'SUCCESS:第' + currentPage + '页，共' + totalPages + '页 (上一页:' + (hasPrev ? '有' : '无') + ', 下一页:' + (hasNext ? '有' : '无') + ')'
+                  // return 'SUCCESS:第' + currentPage + '页，共' + total + '页 (上一页:' + (hasPrev ? '有' : '无') + ', 下一页:' + (hasNext ? '有' : '无') + ')'
+                  return JSON.stringify({
+                    hasPager: hasPager,
+                    currentPage: currentPage*1,
+                    total: total*1,
+                    hasPrev: hasPrev,
+                    hasNext: hasNext
+                  })
                 } catch (error) {
                   return 'ERROR:获取分页器信息失败 - ' + error.message
                 }
@@ -407,42 +481,32 @@ export default {
             `
           }
         )
-
+        console.log('resultresultresultresult:', result)
         // 处理返回结果
         if (result && result.result && result.result.value) {
-          const message = result.result.value
-
-          if (message.startsWith('SUCCESS:')) {
-            this.$notify.info(message.substring(8)) // 移除"SUCCESS:"前缀
-            console.log('分页器信息获取成功:', message)
-          } else if (message.startsWith('ERROR:')) {
-            this.$notify.warning(message.substring(6)) // 移除"ERROR:"前缀
-            console.warn('分页器信息获取失败:', message)
-          } else {
-            this.$notify.error('获取分页器信息失败：未知返回结果')
-            console.error('分页器信息获取结果异常:', result)
-          }
+          return JSON.parse(result.result.value)
         } else {
-          this.$notify.error('获取分页器信息失败')
-          console.error('分页器信息获取结果异常:', result)
+          return {
+            hasPager: false,
+            currentPage: 0,
+            total: 0,
+            hasPrev: false,
+            hasNext: false
+          }
         }
-
       } catch (error) {
         console.error('获取分页器信息失败:', error)
-
-        // 检查是否是连接断开错误
-        if (error.message && error.message.includes('Could not establish connection')) {
-          this.devtoolsConnected = false
-          this.connectionStatus = '连接断开'
-          this.$notify.error('DevTools连接已断开，请重新加载页面或刷新扩展')
-        } else {
-          this.$notify.error('操作失败: ' + error.message)
+        return {
+          hasPager: false,
+          currentPage: 0,
+          total: 0,
+          hasPrev: false,
+          hasNext: false
         }
       }
     },
     parserRoleData(data) {
       const roleInfo = new window.RoleInfoParser(data.large_equip_desc, { equip_level: data.equip_level })
-      console.log('roleInfo:', roleInfo)
       return roleInfo.result
       // return {
       //   RoleInfoParser: roleInfo,
@@ -554,46 +618,70 @@ export default {
         this.connectionStatus = 'Chrome环境不可用'
       }
     },
+    changeRecommendDataStatus({ requestId, status }) {
+      const targetIndex = this.recommendData.findIndex(item => item.requestId === requestId)
+      if (targetIndex !== -1) {
+        // this.recommendData[targetIndex].status = status
+        this.$set(this.recommendData[targetIndex], 'status', status)
+      }
+    },
+    processNewData(dataArray) {
+      // 只处理新完成的请求，避免重复处理
+      if (dataArray && dataArray.length > 0) {
+        dataArray.forEach(item => {
+          if (item.responseData &&
+            item.url &&
+            item.requestId &&
+            !this.processedRequests.has(item.requestId)) {
+
+            // 标记为已处理
+            this.processedRequests.add(item.requestId)
+            console.log(`开始处理新请求: ${item.requestId}`)
+
+            // 调用解析响应数据接口
+            this.$api.spider.parseResponse({
+              url: item.url,
+              response_text: item.responseData
+            }).then(res => {
+              console.log(`请求 ${item.requestId} 解析结果:`, res)
+              if (res.code === 200) {
+                console.log(`请求 ${item.requestId} 数据解析成功:`, res.data)
+                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed' })
+              } else {
+                console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)
+                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })
+              }
+            }).catch(error => {
+              console.error(`请求 ${item.requestId} 解析请求失败:`, error)
+              // 解析失败时移除标记，允许重试
+              this.processedRequests.delete(item.requestId)
+              this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })
+            })
+          }
+        })
+      }
+    },
 
     handleChromeMessage(request, sender, sendResponse) {
       switch (request.action) {
-        case 'updateRecommendData':
-          this.recommendData = request.data || []
-
-          // 按时间戳倒序排列，最新的在最上面
-          this.recommendData.filter(item => parseListData(item.responseData)?.advance_search_type === 'overall_role_search').sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-
-          // 只处理新完成的请求，避免重复处理
-          if (this.recommendData && this.recommendData.length > 0) {
-            this.recommendData.forEach(item => {
-              if (item.status === 'completed' &&
-                item.responseData &&
-                item.url &&
-                item.requestId &&
-                !this.processedRequests.has(item.requestId)) {
-
-                // 标记为已处理
-                this.processedRequests.add(item.requestId)
-                console.log(`开始处理新请求: ${item.requestId}`)
-
-                // 调用解析响应数据接口
-                this.$api.spider.parseResponse({
-                  url: item.url,
-                  response_text: item.responseData
-                }).then(res => {
-                  console.log(`请求 ${item.requestId} 解析结果:`, res)
-                  if (res.code === 200) {
-                    console.log(`请求 ${item.requestId} 数据解析成功:`, res.data)
-                  } else {
-                    console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)
-                  }
-                }).catch(error => {
-                  console.error(`请求 ${item.requestId} 解析请求失败:`, error)
-                  // 解析失败时移除标记，允许重试
-                  this.processedRequests.delete(item.requestId)
-                })
-              }
+        case 'addRecommendData':
+          console.log('接收到增量数据:', request)
+          // 处理增量数据
+          const newData = request.data.map(item => {
+            return {
+              ...item,
+              status: 'parsing'
+            }
+          }) || []
+          if (newData.length > 0) {
+            // 将新数据添加到现有数组中
+            this.recommendData.unshift(...newData)
+            this.getPagerInfo().then(res => {
+              this.pageInfo = res
             })
+            console.log('📥 接收到增量数据，新增:', newData.length, '总计:', this.recommendData.length)
+            // 处理新数据
+            this.processNewData(newData)
           }
           break
 
@@ -622,10 +710,45 @@ export default {
     clearData() {
       this.recommendData = []
       this.expandedItems = []
+      this.processedRequests.clear() // 清空已处理请求记录
       // 通知background script清空数据
       if (typeof chrome !== 'undefined' && chrome.runtime) {
         chrome.runtime.sendMessage({
           action: 'clearRecommendData'
+        })
+      }
+    },
+
+    // 刷新当前页面
+    refreshCurrentPage() {
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        chrome.runtime.sendMessage({
+          action: 'refreshCurrentPage'
+        }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('刷新页面失败:', chrome.runtime.lastError)
+            this.$notify.error({
+              title: '刷新失败',
+              message: '无法刷新页面，请检查扩展权限'
+            })
+          } else if (response && response.success) {
+            console.log('页面刷新成功:', response.message)
+            this.$notify.success({
+              title: '刷新成功',
+              message: '页面正在刷新...'
+            })
+          } else {
+            console.error('刷新页面失败:', response.error)
+            this.$notify.error({
+              title: '刷新失败',
+              message: response.error || '未知错误'
+            })
+          }
+        })
+      } else {
+        this.$notify.error({
+          title: '刷新失败',
+          message: 'Chrome扩展环境不可用'
         })
       }
     },
@@ -945,9 +1068,24 @@ export default {
   background-color: #fafafa;
 }
 
-.request-item.completed {
+.request-item.parsing {
   background-color: #f0f9ff;
-  border-left: 3px solid #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);
+  }
+
+  100% {
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  }
 }
 
 .request-info {
@@ -989,6 +1127,30 @@ export default {
 
 .status.completed {
   background: #52c41a;
+  color: white;
+}
+
+.status.parsing {
+  background: #1890ff;
+  color: white;
+}
+
+.status.parsing .el-icon-loading {
+  animation: rotating 2s linear infinite;
+}
+
+@keyframes rotating {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.status.failed {
+  background: #ff4d4f;
   color: white;
 }
 

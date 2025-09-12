@@ -8,6 +8,7 @@ class DevToolsListener {
     this.isListening = false
     this.recommendData = []
     this.pendingMessage = null // 存储待发送的消息
+    this.sentRequests = new Set() // 跟踪已发送的请求ID
     this.init()
   }
 
@@ -18,10 +19,22 @@ class DevToolsListener {
   bindEvents() {
     // 监听标签页更新
     const onUpdatedListener = (tabId, changeInfo, tab) => {
+      console.log('标签页更新事件:', {
+        tabId,
+        changeInfo,
+        url: tab?.url,
+        status: changeInfo?.status
+      })
+      
       if (changeInfo.status === 'complete' && tab.url && tab.url.includes('cbg.163.com')) {
         console.log('检测到CBG页面加载完成:', tab.url);
-        this.tabId = tabId
-        this.startListening()
+        // 只有在还没有连接或者连接的是不同标签页时才重新连接
+        if (!this.isListening || this.tabId !== tabId) {
+          this.tabId = tabId
+          this.startListening()
+        } else {
+          console.log('DevTools Protocol已连接，无需重复连接')
+        }
         // 当检测到CBG页面时，不自动打开side panel（避免用户手势错误）
         // chrome.sidePanel.open({ tabId: tabId });
       }
@@ -29,11 +42,23 @@ class DevToolsListener {
 
     // 监听标签页激活
     const onActivatedListener = (activeInfo) => {
+      console.log('标签页激活事件:', activeInfo)
       chrome.tabs.get(activeInfo.tabId, (tab) => {
+        console.log('激活的标签页信息:', {
+          tabId: tab?.id,
+          url: tab?.url,
+          status: tab?.status
+        })
+        
         if (tab.url && tab.url.includes('cbg.163.com')) {
           console.log('激活CBG页面:', tab.url);
-          this.tabId = activeInfo.tabId
-          this.startListening()
+          // 只有在还没有连接或者连接的是不同标签页时才重新连接
+          if (!this.isListening || this.tabId !== activeInfo.tabId) {
+            this.tabId = activeInfo.tabId
+            this.startListening()
+          } else {
+            console.log('DevTools Protocol已连接，无需重复连接')
+          }
           // 当激活CBG页面时，不自动打开side panel（避免用户手势错误）
           // chrome.sidePanel.open({ tabId: activeInfo.tabId });
         }
@@ -54,12 +79,23 @@ class DevToolsListener {
   async checkCurrentTab() {
     try {
       const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+      console.log('检查当前活动标签页:', {
+        tabId: activeTab?.id,
+        url: activeTab?.url,
+        status: activeTab?.status
+      })
+      
       if (activeTab && activeTab.url && activeTab.url.includes('cbg.163.com')) {
         console.log('检测到当前活动标签页是CBG页面，立即连接DevTools Protocol')
         this.tabId = activeTab.id
         this.startListening()
       } else {
         console.log('当前活动标签页不是CBG页面，等待用户切换到CBG页面')
+        console.log('当前标签页信息:', {
+          exists: !!activeTab,
+          url: activeTab?.url,
+          isCbg: activeTab?.url?.includes('cbg.163.com')
+        })
       }
     } catch (error) {
       console.error('检查当前标签页失败:', error)
@@ -73,11 +109,13 @@ class DevToolsListener {
       recommendDataLength: this.recommendData.length
     })
     
-    if (this.isListening || !this.tabId) {
-      console.log('DevTools Protocol连接条件不满足:', {
-        isListening: this.isListening,
-        tabId: this.tabId
-      })
+    if (this.isListening) {
+      console.log('DevTools Protocol已连接，跳过重复连接')
+      return
+    }
+    
+    if (!this.tabId) {
+      console.log('DevTools Protocol连接条件不满足: 缺少tabId')
       return
     }
 
@@ -242,12 +280,27 @@ class DevToolsListener {
   }
 
   updateUI() {
-    console.log('📤 发送数据更新到side panel，数据量:', this.recommendData.length)
-    // 通知side panel更新UI
-    this.sendMessageToSidePanel({
-      action: 'updateRecommendData',
-      data: this.recommendData
-    })
+    // 只发送新增的已完成且有响应数据的数据
+    const newData = this.recommendData.filter(item => 
+      item.status === 'completed' && 
+      item.responseData && 
+      !this.sentRequests.has(item.requestId)
+    )
+    
+    if (newData.length > 0) {
+      // 标记为已发送
+      newData.forEach(item => this.sentRequests.add(item.requestId))
+      
+      console.log('📤 发送增量数据到side panel，新增数据量:', newData.length, '总数据量:', this.recommendData.length)
+      
+      // 发送增量数据
+      this.sendMessageToSidePanel({
+        action: 'addRecommendData',
+        data: newData
+      })
+    } else {
+      console.log('📤 没有新数据需要发送')
+    }
   }
 
   // 发送消息到side panel，带重试机制
@@ -290,6 +343,7 @@ class DevToolsListener {
 
   clearRecommendData() {
     this.recommendData = []
+    this.sentRequests.clear() // 清空已发送请求跟踪
     this.updateUI()
   }
 }
@@ -316,18 +370,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ success: true, message: 'pong' });
       return true;
       
-    case 'getCookies':
-      handleGetCookies(sendResponse);
-      return true; // 保持消息通道开放
-      
-    case 'updateRecommendData':
-      // 转发数据到side panel
-      chrome.runtime.sendMessage({
-        action: 'updateRecommendData',
-        data: request.data
-      });
-      break;
-      
     case 'showDebuggerWarning':
       // 转发警告到side panel
       chrome.runtime.sendMessage({
@@ -348,37 +390,50 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         data: devToolsListener.getRecommendData()
       });
       return true;
+      
+    case 'refreshCurrentPage':
+      // 刷新当前页面
+      handleRefreshCurrentPage(sendResponse);
+      return true; // 保持消息通道开放
   }
 });
 
-// 处理获取Cookie请求
-async function handleGetCookies(sendResponse) {
+// 处理刷新当前页面的请求
+async function handleRefreshCurrentPage(sendResponse) {
   try {
     // 获取当前活动标签页
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    if (!tab || !tab.url.includes('cbg.163.com')) {
-      sendResponse({ success: false, error: '当前页面不是CBG页面' });
+    if (!activeTab) {
+      sendResponse({ success: false, error: '无法获取当前活动标签页' });
       return;
     }
     
-    // 获取Cookie
-    const cookies = await chrome.cookies.getAll({ domain: '.163.com' });
+    // 检查是否是插件页面
+    if (activeTab.url.startsWith('chrome-extension://')) {
+      sendResponse({ success: false, error: '无法刷新插件页面' });
+      return;
+    }
     
-    // 格式化Cookie字符串
-    const cookieString = cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ');
+    // 刷新页面
+    await chrome.tabs.reload(activeTab.id);
     
+    console.log('✅ 页面刷新成功:', activeTab.url);
     sendResponse({ 
       success: true, 
-      cookies: cookieString,
-      count: cookies.length 
+      message: '页面刷新成功',
+      url: activeTab.url
     });
     
   } catch (error) {
-    console.error('获取Cookie失败:', error);
-    sendResponse({ success: false, error: error.message });
+    console.error('❌ 刷新页面失败:', error);
+    sendResponse({ 
+      success: false, 
+      error: `刷新页面失败: ${error.message}` 
+    });
   }
 }
+
 
 // 扩展安装时的初始化
 chrome.runtime.onInstalled.addListener((details) => {
@@ -408,9 +463,11 @@ setTimeout(() => {
           // 如果当前页面是CBG页面，打开side panel（用户点击扩展图标，这是用户手势）
           chrome.sidePanel.open({ tabId: tab.id });
           console.log('✅ 已打开Side Panel');
-        } else {
+        }
+        //如果当前页面是CBG页面，已打开side panel，则打开插件官网页面https://xyq.lintong.com/
+        else {
           // 如果不是CBG页面，提示用户
-          chrome.tabs.create({ url: 'https://cbg.163.com' });
+          chrome.tabs.create({ url: 'https://xyq.cbg.163.com/' });
           console.log('✅ 已打开CBG页面');
         }
       });

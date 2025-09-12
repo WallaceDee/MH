@@ -9,7 +9,8 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home
-  },  {
+  },
+  {
     path: '/auto-params',
     name: 'AutoParams',
     component: AutoParams,
@@ -66,7 +67,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || '🤡'
+  document.title = to.meta.title || '👁️梦幻灵瞳'
   next()
 })
 
