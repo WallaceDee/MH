@@ -11,6 +11,9 @@ openpyxl>=3.0.7
 
 # 数据库相关
 # sqlite3 - Python内置模块，不需要安装
+SQLAlchemy>=1.4.0
+Flask-SQLAlchemy>=2.5.0
+PyMySQL>=1.0.2  # MySQL数据库驱动
 
 # Web界面依赖
 Flask>=2.0.1

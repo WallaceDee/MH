@@ -11,17 +11,30 @@ __description__ = "梦幻西游藏宝阁智能爬虫系统"
 # from .cbg_spider import CBGSpider
 # from .spider.equip import CBGEquipSpider
 from .utils.smart_db_helper import CBGSmartDB, SmartDBHelper
-from .proxy_rotation_system import ProxyRotationManager
-from .proxy_source_manager import ProxySourceManager
+
+# 可选导入，避免模块不存在时出错
+try:
+    from .proxy_rotation_system import ProxyRotationManager
+except ImportError:
+    ProxyRotationManager = None
+
+try:
+    from .proxy_source_manager import ProxySourceManager
+except ImportError:
+    ProxySourceManager = None
 
 __all__ = [
     # 'CBGEquipSpider',  # 延迟导入
     # 'CBGSpider',       # 延迟导入
     'CBGSmartDB', 
     'SmartDBHelper',
-    'ProxyRotationManager',
-    'ProxySourceManager'
 ]
+
+# 添加可选模块
+if ProxyRotationManager:
+    __all__.append('ProxyRotationManager')
+if ProxySourceManager:
+    __all__.append('ProxySourceManager')
 
 """
 梦幻西游角色评估系统

@@ -34,8 +34,6 @@ def get_roles():
         params = {
             'page': request.args.get('page', 1),
             'page_size': request.args.get('page_size', 10),
-            'year': request.args.get('year'),
-            'month': request.args.get('month'),
             'level_min': request.args.get('level_min'),
             'level_max': request.args.get('level_max'),
             # 其他参数
@@ -67,13 +65,8 @@ def get_role_detail(eid):
     """获取角色详情"""
     try:
         # 获取查询参数
-        params = {
-            'year': request.args.get('year'),
-            'month': request.args.get('month'),
-            'role_type': request.args.get('role_type', 'normal')
-        }
         
-        result = controller.get_role_details(eid, params.get('year'), params.get('month'), params.get('role_type'))
+        result = controller.get_role_details(eid)
         
         if "error" in result:
             return error_response(result["error"])
@@ -92,13 +85,7 @@ def delete_role(eid):
     """删除角色"""
     try:
         # 获取查询参数
-        params = {
-            'year': request.args.get('year'),
-            'month': request.args.get('month'),
-            'role_type': request.args.get('role_type', 'normal')
-        }
-        
-        result = controller.delete_role(eid, params)
+        result = controller.delete_role(eid)
         
         if "error" in result:
             return error_response(result["error"])
@@ -117,8 +104,6 @@ def switch_role_type(eid):
         
         # 获取参数 - 修复参数获取逻辑
         params = {
-            'year': request.args.get('year') or data.get('year'),
-            'month': request.args.get('month') or data.get('month'),
             'current_role_type': data.get('role_type') or request.args.get('role_type', 'normal'),
             'target_role_type': data.get('target_role_type') or request.args.get('target_role_type')
         }
@@ -143,19 +128,13 @@ def switch_role_type(eid):
         return error_response(f"切换角色类型失败: {str(e)}")
 
 
-@role_bp.route('/feature/<string:year>/<string:month>/<string:eid>', methods=['GET'])
-def get_role_feature(year, month, eid):
+@role_bp.route('/feature/<string:eid>', methods=['GET'])
+def get_role_feature(eid):
     """获取角色特征"""
     try:
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
         # 获取角色类型参数
-        role_type = request.args.get('role_type', 'normal')
-        
-        result = controller.get_role_feature(eid, year, month, role_type)
+
+        result = controller.get_role_feature(eid)
         
         if result is None:
             return error_response("未找到指定的角色", code=404, http_code=404)
@@ -170,19 +149,13 @@ def get_role_feature(year, month, eid):
     except Exception as e:
         return error_response(f"获取角色特征失败: {str(e)}")
 
-@role_bp.route('/detail/<string:year>/<string:month>/<string:eid>', methods=['GET'])
-def get_role_detail_by_eid(year, month, eid):
+@role_bp.route('/detail/<string:eid>', methods=['GET'])
+def get_role_detail_by_eid(eid):
     """通过eid查找角色详情"""
     try:
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
         # 获取角色类型参数
-        role_type = request.args.get('role_type', 'normal')
-        
-        result = controller.get_role_details(eid, year, month, role_type)
+
+        result = controller.get_role_details(eid)
         
         if result is None:
             return error_response("未找到指定的角色", code=404, http_code=404)
@@ -216,30 +189,12 @@ def get_role_valuation():
         if not eid:
             return error_response("请提供角色eid")
         
-        year = data.get('year')
-        month = data.get('month')
-        role_type = data.get('role_type', 'normal')
         strategy = data.get('strategy', 'fair_value')
         similarity_threshold = data.get('similarity_threshold', 0.7)
         max_anchors = data.get('max_anchors', 30)
         
-        # 验证年月参数
-        if year:
-            try:
-                year = int(year)
-            except ValueError:
-                return error_response("年份参数格式错误")
-        if month:
-            try:
-                month = int(month)
-            except ValueError:
-                return error_response("月份参数格式错误")
-        
         result = controller.get_role_valuation(
             eid, 
-            year, 
-            month, 
-            role_type,
             strategy, 
             similarity_threshold, 
             max_anchors
@@ -267,29 +222,11 @@ def find_role_anchors():
         if not eid:
             return error_response("请提供角色eid")
         
-        year = data.get('year')
-        month = data.get('month')
-        role_type = data.get('role_type', 'normal')
         similarity_threshold = data.get('similarity_threshold', 0.7)
         max_anchors = data.get('max_anchors', 30)
         
-        # 验证年月参数
-        if year:
-            try:
-                year = int(year)
-            except ValueError:
-                return error_response("年份参数格式错误")
-        if month:
-            try:
-                month = int(month)
-            except ValueError:
-                return error_response("月份参数格式错误")
-        
         result = controller.find_role_anchors(
             eid, 
-            year, 
-            month, 
-            role_type,
             similarity_threshold, 
             max_anchors
         )
@@ -315,31 +252,13 @@ def batch_role_valuation():
         if not eid_list or not isinstance(eid_list, list):
             return error_response("请提供有效的角色eid列表")
         
-        year = data.get('year')
-        month = data.get('month')
-        role_type = data.get('role_type', 'normal')
         strategy = data.get('strategy', 'fair_value')
         similarity_threshold = data.get('similarity_threshold', 0.7)
         max_anchors = data.get('max_anchors', 30)
         verbose = data.get('verbose', False)
         
-        # 验证年月参数
-        if year:
-            try:
-                year = int(year)
-            except ValueError:
-                return error_response("年份参数格式错误")
-        if month:
-            try:
-                month = int(month)
-            except ValueError:
-                return error_response("月份参数格式错误")
-        
         result = controller.batch_role_valuation(
             eid_list, 
-            year, 
-            month, 
-            role_type,
             strategy, 
             similarity_threshold, 
             max_anchors, 
@@ -374,34 +293,15 @@ def update_role_base_price(eid: str):
         except (ValueError, TypeError):
             return error_response("裸号价格格式错误")
         
-        year = data.get('year')
-        month = data.get('month')
-        role_type = data.get('role_type', 'normal')
-        
-        # 验证年月参数
-        if year:
-            try:
-                year = int(year)
-            except ValueError:
-                return error_response("年份参数格式错误")
-        if month:
-            try:
-                month = int(month)
-            except ValueError:
-                return error_response("月份参数格式错误")
-        
         # 调用服务层更新价格
-        success = controller.update_role_base_price(eid, base_price, year, month, role_type)
+        success = controller.update_role_base_price(eid, base_price)
         
         if success:
             return success_response(
                 data={
                     "eid": eid,
                     "base_price": base_price,
-                    "base_price_yuan": round(base_price / 100.0, 2),
-                    "year": year,
-                    "month": month,
-                    "role_type": role_type
+                    "base_price_yuan": round(base_price / 100.0, 2)
                 },
                 message="角色裸号价格更新成功"
             )
@@ -421,16 +321,7 @@ def get_valuation_by_eid(eid):
             return error_response("角色eid不能为空")
         
         # 获取角色详情
-        year = request.args.get('year')
-        month = request.args.get('month')
-        role_type = request.args.get('role_type', 'normal')
-        
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        role_data = controller.get_role_details(eid, year, month, role_type)
+        role_data = controller.get_role_details(eid)
         
         if not role_data or "error" in role_data:
             return error_response("未找到指定的角色")

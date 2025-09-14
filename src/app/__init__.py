@@ -10,6 +10,7 @@ from flask_cors import CORS
 from .blueprints.api.v1 import api_v1_bp
 from .utils.response import register_error_handlers
 from .utils.logger import setup_logging
+from src.database import init_database
 
 
 def create_app(config_name='default'):
@@ -21,6 +22,9 @@ def create_app(config_name='default'):
     
     # 设置日志
     setup_logging(app)
+    
+    # 初始化数据库
+    init_database(app)
     
     # 注册蓝图
     app.register_blueprint(api_v1_bp, url_prefix='/api/v1')

@@ -497,8 +497,8 @@ def batch_pet_valuation():
                     total_pet_price += item.get('equip_estimated_price', 0)
                 
                 # 更新角色数据库中的宠物估价价格
-                from ....services.role_service import roleService
-                role_service = roleService()
+                from ....services.role_service_migrated import RoleServiceMigrated
+                role_service = RoleServiceMigrated()
                 success = role_service.update_role_pet_price(eid, total_pet_price)
                 result["pet_price"] = total_pet_price
                 if success:

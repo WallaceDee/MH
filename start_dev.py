@@ -3,7 +3,7 @@
 
 """
 CBG爬虫后端启动脚本 - 开发模式
-启用自动重载和调试功能
+启用自动重载和调试功能，使用MySQL数据库
 """
 
 import os
@@ -11,6 +11,15 @@ import sys
 
 # 设置开发环境
 os.environ['FLASK_ENV'] = 'development'
+
+# 设置MySQL数据库环境变量
+os.environ['DATABASE_TYPE'] = 'mysql'
+os.environ['MYSQL_HOST'] = '47.86.33.98'
+os.environ['MYSQL_PORT'] = '3306'
+os.environ['MYSQL_USER'] = 'lingtong'
+os.environ['MYSQL_PASSWORD'] = '447363121'
+os.environ['MYSQL_DATABASE'] = 'cbg_spider'
+os.environ['MYSQL_CHARSET'] = 'utf8mb4'
 
 # 添加src目录到Python路径
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +32,9 @@ if __name__ == "__main__":
     print("🔧 CBG爬虫API服务器 - 开发模式")
     print("🌐 API地址: http://localhost:5000")
     print("📱 前端地址: http://localhost:8080 (需要单独启动)")
+    print("🗄️ 数据库: MySQL")
+    print(f"📍 MySQL主机: {os.environ.get('MYSQL_HOST', 'localhost')}")
+    print(f"📊 MySQL数据库: {os.environ.get('MYSQL_DATABASE', 'cbg_spider')}")
     print("💡 修改代码后将自动重启服务器")
     print("🚀 Ctrl+C 停止服务器")
     print("-" * 50)

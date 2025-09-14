@@ -341,8 +341,8 @@ def batch_equipment_valuation():
                     total_equip_price += item.get('estimated_price', 0)
                 
                 # 更新角色数据库中的装备估价价格
-                from ....services.role_service import roleService
-                role_service = roleService()
+                from ....services.role_service_migrated import RoleServiceMigrated
+                role_service = RoleServiceMigrated()
                 success = role_service.update_role_equip_price(eid, total_equip_price)
                 result["equip_price"] = total_equip_price
                 if success:
