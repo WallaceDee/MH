@@ -394,7 +394,7 @@ class CBGSmartDB:
         """智能保存详细装备数据，冲突时保留create_time"""
         # 添加更新时间，使用MySQL标准格式
         equip_data['update_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
+        equip_data['create_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         return self.db_helper.insert_data('large_equip_desc_data', equip_data, on_conflict="UPDATE")
     
     def save_equipment(self, equipment_data: Dict[str, Any]) -> bool:

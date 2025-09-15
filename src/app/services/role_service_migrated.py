@@ -298,7 +298,8 @@ class RoleServiceMigrated:
                     'school': role.school,
                     'price': role.price,
                     'accept_bargain': role.accept_bargain,
-                    'history_price': role.history_price,
+                    # history_price为NULL时候返回'[]'
+                    'history_price': role.history_price if role.history_price else '[]',
                     'dynamic_tags': role.dynamic_tags,
                     'highlight': role.highlight,
                     'create_time': role.create_time.isoformat() if hasattr(role.create_time, 'isoformat') else str(role.create_time) if role.create_time else None,
