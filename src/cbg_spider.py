@@ -15,7 +15,6 @@ sys.path.insert(0, project_root)
 
 import requests
 import json
-import sqlite3
 import time
 import random
 import re
@@ -30,6 +29,8 @@ from src.utils.smart_db_helper import CBGSmartDB
 
 # 导入数据库配置
 from src.cbg_config import DB_SCHEMA_CONFIG
+from sqlalchemy import create_engine, text
+from app import create_app
 
 # 导入解析器类
 from src.parser.common_parser import CommonParser
@@ -50,32 +51,14 @@ class CBGSpider:
         self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
         
-        # 使用按月分割的数据库文件路径
-        from src.utils.project_path import get_data_path
-        current_month = datetime.now().strftime('%Y%m')
-        
-        # 正常角色数据库路径
-        db_filename = f"cbg_roles_{current_month}.db"
-        self.db_path = os.path.join(get_data_path(), current_month, db_filename)
-        
-        # 空号数据库路径（单独的数据库文件）
-        empty_db_filename = f"cbg_empty_roles_{current_month}.db"
-        self.empty_db_path = os.path.join(get_data_path(), current_month, empty_db_filename)
-        
-        # 确保data目录存在
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        
         # 配置专用的日志器，使用统一日志工厂
         self.logger, self.log_file = get_spider_logger('role')
         
-        # 延迟初始化数据库，避免在导入时创建文件
+        # 初始化MySQL数据库连接
         self.init_database()
 
-        # 初始化智能数据库助手（正常角色）
-        self.smart_db = CBGSmartDB(self.db_path)
-        
-        # 初始化空号数据库助手（空号专用）
-        self.empty_smart_db = CBGSmartDB(self.empty_db_path)
+        # 初始化智能数据库助手（使用MySQL）
+        self.smart_db = CBGSmartDB(self.db_url)
         
         # 初始化通用解析器
         self.common_parser = CommonParser(self.logger)
@@ -108,61 +91,38 @@ class CBGSpider:
         )
     
     def init_database(self):
-        """初始化数据库和表结构"""
+        """初始化MySQL数据库连接"""
         try:
-            # 初始化正常角色数据库
-            self.init_normal_database()
+            # 创建Flask应用上下文获取数据库配置
+            app = create_app()
             
-            # 初始化空号数据库
-            self.init_empty_database()
-            
-            log_info(self.logger, "所有数据已初始化完毕")
+            with app.app_context():
+                # 获取数据库配置
+                self.db_url = app.config.get('SQLALCHEMY_DATABASE_URI')
+                if not self.db_url:
+                    raise ValueError("未找到数据库配置")
+                
+                # 创建数据库引擎
+                self.engine = create_engine(
+                    self.db_url, 
+                    pool_pre_ping=True, 
+                    pool_recycle=3600
+                )
+                
+                log_info(self.logger, f"MySQL数据库连接初始化完成: {self.db_url}")
+                
+                # 测试数据库连接
+                try:
+                    with self.engine.connect() as conn:
+                        result = conn.execute(text("SELECT 1 as test"))
+                        test_result = result.fetchone()
+                        log_info(self.logger, f"数据库连接测试成功: {test_result[0]}")
+                except Exception as e:
+                    log_error(self.logger, f"数据库连接测试失败: {e}")
                 
         except Exception as e:
-            log_error(self.logger, f"初始化数据库失败: {e}")
+            log_error(self.logger, f"初始化MySQL数据库失败: {e}")
             raise
-    
-    def init_normal_database(self):
-        """初始化正常角色数据库"""
-        try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            # 创建roles表
-            cursor.execute(DB_SCHEMA_CONFIG['roles'])
-            
-            # 也创建large_equip_desc_data表，以防需要存储详细数据
-            cursor.execute(DB_SCHEMA_CONFIG['large_equip_desc_data'])
-            
-            conn.commit()
-            log_info(self.logger, f"正常角色数据库初始化完成: {os.path.basename(self.db_path)}")
-            
-        except Exception as e:
-            log_error(self.logger, f"初始化正常角色数据库失败: {e}")
-            raise
-        finally:
-            conn.close()
-    
-    def init_empty_database(self):
-        """初始化空号数据库"""
-        try:
-            conn = sqlite3.connect(self.empty_db_path)
-            cursor = conn.cursor()
-            
-            # 创建roles表
-            cursor.execute(DB_SCHEMA_CONFIG['roles'])
-            
-            # 也创建large_equip_desc_data表，以防需要存储详细数据
-            cursor.execute(DB_SCHEMA_CONFIG['large_equip_desc_data'])
-            
-            conn.commit()
-            log_info(self.logger, f"空号数据库初始化完成: {os.path.basename(self.empty_db_path)}")
-            
-        except Exception as e:
-            log_error(self.logger, f"初始化空号数据库失败: {e}")
-            raise
-        finally:
-            conn.close()
 
     def parse_large_equip_desc(self, large_desc):
         """解析large_equip_desc字段，提取详细的角色信息
@@ -493,24 +453,29 @@ class CBGSpider:
                 # 空号识别逻辑
                 is_empty_role = self.is_empty_role(parsed_desc.get('AllEquip', {}), parsed_desc.get('AllSummon', {}), char.get('eid'))
                 
+                # 添加role_type字段区分空号和非空号
                 if is_empty_role:
-                    # 如果是空号，添加空号识别信息并保存到空号数据库
-                    empty_reason = self.get_empty_reason(parsed_desc.get('AllEquip', {}), parsed_desc.get('AllSummon', {}))
-                    # 保存到空号数据库的roles表
-                    try:
-                        self.empty_smart_db.save_role(role_data)
-                        log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}(空号) - {empty_reason}")
-                        saved_count += 1
-                    except Exception as e:
-                        log_error(self.logger, f"保存空号数据失败: ￥{char.get('price_desc')}, 错误: {e}")
+                    role_data['role_type'] = 'empty'
+                    pass
                 else:
-                    # 如果不是空号，保存到正常角色数据库
-                    try:
-                        self.smart_db.save_role(role_data)
-                        log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}")
+                    role_data['role_type'] = 'normal'
+                
+                # 统一保存到roles表
+                try:
+                    self.logger.debug(f"开始保存角色数据: eid={char.get('eid')}, 价格={char.get('price_desc')}")
+                    result = self.smart_db.save_role(role_data)
+                    self.logger.debug(f"角色保存结果: {result}")
+                    
+                    if result:
+                        if is_empty_role:
+                            log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}(空号)")
+                        else:
+                            log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}")
                         saved_count += 1
-                    except Exception as e:
-                        log_error(self.logger, f"保存角色数据失败: ￥{char.get('price_desc')}, 错误: {e}")
+                    else:
+                        log_warning(self.logger, f"角色数据保存失败: ￥{char.get('price_desc')}")
+                except Exception as e:
+                    log_error(self.logger, f"保存角色数据失败: ￥{char.get('price_desc')}, 错误: {e}")
                 
                 # 2. 处理详细装备数据（如果存在）
                 # 注意：即使是空号，也要尝试解析详细数据（如果API返回了的话）
@@ -638,23 +603,13 @@ class CBGSpider:
                             'more_attr_json': json.dumps(parsed_desc.get('more_attr', {}), ensure_ascii=False)
                         }
                         
-                        # 根据是否为空号选择对应的数据库保存详细装备数据
-                        if is_empty_role:
-                            # 空号数据保存到空号数据库
-                            self.logger.debug(f"保存空号详细数据到空号数据库: {char.get('eid')}")
-                            success = self.empty_smart_db.save_large_equip_data(equip_data)
-                            if success:
-                                self.logger.debug(f"空号详细数据保存成功: {char.get('eid')}")
-                            else:
-                                self.logger.error(f"空号详细数据保存失败: {char.get('eid')}")
+                        # 统一保存详细装备数据到large_equip_desc_data表
+                        self.logger.debug(f"保存详细数据: {char.get('eid')} (role_type: {role_data.get('role_type')})")
+                        success = self.smart_db.save_large_equip_data(equip_data)
+                        if success:
+                            self.logger.debug(f"详细数据保存成功: {char.get('eid')}")
                         else:
-                            # 正常角色数据保存到正常数据库
-                            self.logger.debug(f"保存正常角色详细数据到正常数据库: {char.get('eid')}")
-                            success = self.smart_db.save_large_equip_data(equip_data)
-                            if success:
-                                self.logger.debug(f"正常角色详细数据保存成功: {char.get('eid')}")
-                            else:
-                                self.logger.error(f"正常角色详细数据保存失败: {char.get('eid')}")
+                            self.logger.error(f"详细数据保存失败: {char.get('eid')}")
                         
                     except Exception as e:
                         self.logger.error(f"解析装备详细信息时出错: {str(e)}")
@@ -881,13 +836,14 @@ class CBGSpider:
         Args:
             all_equips: 装备数据
             pets: 召唤兽数据
+            eid: 角色ID
             
         Returns:
             bool: True表示是空号，False表示不是空号
         """
         try:
-            # 检查是不是已经人为设置为空号，即eid是否存在在cbg_empty_roles_202509.db的roles表中
-            if self.empty_smart_db.check_role_exists_by_eid(eid):
+            # 检查数据库中是否已标记为空号
+            if self.check_role_type_in_db(eid) == 'empty':
                 return True
             
             # 检查物品个数
@@ -913,6 +869,27 @@ class CBGSpider:
         except Exception as e:
             log_error(self.logger, f"判断空号时出错: {e}")
             return False
+    
+    def check_role_type_in_db(self, eid):
+        """
+        检查数据库中角色的role_type
+        
+        Args:
+            eid: 角色ID
+            
+        Returns:
+            str: 'empty' 或 'normal' 或 None
+        """
+        try:
+            with self.engine.connect() as conn:
+                query = text("SELECT role_type FROM roles WHERE eid = :eid")
+                result = conn.execute(query, {'eid': eid}).fetchone()
+                if result:
+                    return result[0]
+                return None
+        except Exception as e:
+            self.logger.error(f"检查角色类型失败: {e}")
+            return None
     
     def count_high_level_pets(self, pets):
         """
@@ -949,42 +926,3 @@ class CBGSpider:
             log_error(self.logger, f"统计高等级召唤兽时出错: {e}")
             return 0
     
-    def get_empty_reason(self, all_equips, pets):
-        """
-        获取空号识别原因
-        
-        Args:
-            all_equips: 装备数据
-            pets: 召唤兽数据
-            
-        Returns:
-            str: 空号识别原因
-        """
-        try:
-            reasons = []
-            
-            # 检查物品数量
-            equip_count = 0
-            if all_equips and isinstance(all_equips, dict):
-                # 计算装备数量（排除特殊字段）
-                for key, value in all_equips.items():
-                    if key.isdigit() and isinstance(value, dict):
-                        equip_count += 1
-            
-            if equip_count == 0:
-                reasons.append("无物品")
-            
-            # 检查高等级召唤兽
-            high_level_pet_count = self.count_high_level_pets(pets)
-            if high_level_pet_count == 0:
-                total_pets = len(pets) if pets else 0
-                if total_pets == 0:
-                    reasons.append("无召唤兽")
-                else:
-                    reasons.append(f"无高级召唤兽(共{total_pets}只召唤兽)")
-            
-            return " + ".join(reasons) if reasons else "空号"
-            
-        except Exception as e:
-            log_error(self.logger, f"获取空号原因时出错: {e}")
-            return "识别异常"

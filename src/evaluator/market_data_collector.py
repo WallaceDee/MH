@@ -124,10 +124,10 @@ class MarketDataCollector:
         return found_dbs
     
     def refresh_market_data(self, 
-                           filters: Optional[Dict[str, Any]] = None,
-                           max_records: int = 99999) -> pd.DataFrame:
+                       filters: Optional[Dict[str, Any]] = None,
+                       max_records: int = 99) -> pd.DataFrame:
         """
-        刷新市场数据
+        刷新市场数据 - 从MySQL获取role_type为'empty'的数据
         
         Args:
             filters: 筛选条件字典，例如 {'level_min': 109, 'price_max': 10000}
@@ -139,23 +139,29 @@ class MarketDataCollector:
         try:
             print(f"开始刷新市场数据，最大记录数: {max_records}")
             
-            # 检查数据库路径
-            if not self.db_path:
-                raise ValueError("数据库路径未设置或未找到有效的数据库文件")
+            # 导入MySQL连接相关模块
+            from sqlalchemy import create_engine, text
+            from app import create_app
             
-            if not os.path.exists(self.db_path):
-                raise FileNotFoundError(f"数据库文件不存在: {self.db_path}")
+            # 创建Flask应用上下文获取数据库配置
+            app = create_app()
             
-            print(f"使用数据库文件: {self.db_path}")
-            
-            # 连接数据库
-            conn = sqlite3.connect(self.db_path)
-            
-            # 构建SQL查询 - 修复列名：roles表和large_equip_desc_data表都使用eid
-            base_query = """
-                SELECT 
+            with app.app_context():
+                # 获取数据库配置
+                db_config = app.config.get('SQLALCHEMY_DATABASE_URI')
+                if not db_config:
+                    raise ValueError("未找到数据库配置")
+                
+                print(f"连接MySQL数据库: {db_config}")
+                
+                # 创建数据库连接
+                engine = create_engine(db_config)
+                
+                # 构建SQL查询 - 从MySQL获取role_type为'empty'的数据
+                base_query = """
+                    SELECT 
                         c.eid, c.serverid, c.level, c.school,
-                        c.price,c.collect_num,
+                        c.price, c.collect_num,
                         c.other_info,
                         c.large_equip_desc,
                         c.yushoushu_skill, c.school_skills, c.life_skills, c.expire_time,
@@ -166,83 +172,84 @@ class MarketDataCollector:
                         l.beast_ski1, l.beast_ski2, l.beast_ski3, l.beast_ski4,
                         l.changesch_json, l.ex_avt_json, l.huge_horse_json, l.shenqi_json,
                         l.all_equip_json, l.all_summon_json, l.all_rider_json
-                FROM roles c
-                LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
-                WHERE c.price > 0
-            """
-            
-            # 添加筛选条件
-            conditions = []
-            if filters:
-                if 'level_min' in filters:
-                    conditions.append(f"c.level >= {filters['level_min']}")
-                if 'level_max' in filters:
-                    conditions.append(f"c.level <= {filters['level_max']}")
-                if 'price_min' in filters:
-                    conditions.append(f"c.price >= {filters['price_min']}")
-                if 'price_max' in filters:
-                    conditions.append(f"c.price <= {filters['price_max']}")
-                if 'server_name' in filters:
-                    conditions.append(f"c.server_name = '{filters['server_name']}'")
-                if 'school' in filters:
-                    conditions.append(f"c.school = '{filters['school']}'")
-            
-            if conditions:
-                base_query += " AND " + " AND ".join(conditions)
-            
-            base_query += f" ORDER BY c.price ASC LIMIT {max_records}"
-            
-            print(f"执行SQL查询...")
-            
-            # 执行查询
-            cursor = conn.cursor()
-            cursor.execute(base_query)
-            columns = [description[0] for description in cursor.description]
-            rows = cursor.fetchall()
-            
-            print(f"查询完成，获取到 {len(rows)} 条原始数据")
-            
-            # 处理数据
-            market_data = []
-            for i, row in enumerate(rows):
-                try:
-                    role_data = dict(zip(columns, row))
-                    
-                    # 提取特征
-                    features = self.feature_extractor.extract_features(role_data)
-                    
-                    # 添加基本信息 - 使用eid而不是eid
-                    features.update({
-                        'eid': role_data.get('eid', ''),  # 修复：使用eid
-                        'price': role_data.get('price', 0)
-                    })
-                    
-                    # 计算派生特征
-                    # features = self._calculate_derived_features(features)
-                    
-                    market_data.append(features)
-                    
-                    if (i + 1) % 100 == 0 or i == len(rows) - 1:
-                        print(f"已处理 {i + 1}/{len(rows)} 条数据")
+                    FROM roles c
+                    LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
+                    WHERE c.role_type = 'empty' AND c.price > 0
+                """
+                
+                # 添加筛选条件
+                conditions = []
+                if filters:
+                    if 'level_min' in filters:
+                        conditions.append(f"c.level >= {filters['level_min']}")
+                    if 'level_max' in filters:
+                        conditions.append(f"c.level <= {filters['level_max']}")
+                    if 'price_min' in filters:
+                        conditions.append(f"c.price >= {filters['price_min']}")
+                    if 'price_max' in filters:
+                        conditions.append(f"c.price <= {filters['price_max']}")
+                    if 'server_name' in filters:
+                        conditions.append(f"c.server_name = '{filters['server_name']}'")
+                    if 'school' in filters:
+                        conditions.append(f"c.school = {filters['school']}")
+                    if 'serverid' in filters:
+                        conditions.append(f"c.serverid = {filters['serverid']}")
+                
+                if conditions:
+                    base_query += " AND " + " AND ".join(conditions)
+                
+                base_query += f" ORDER BY c.price ASC LIMIT {max_records}"
+                
+                print(f"执行SQL查询...")
+                print(f"查询语句: {base_query}")
+                
+                # 执行查询
+                with engine.connect() as conn:
+                    result = conn.execute(text(base_query))
+                    columns = result.keys()
+                    rows = result.fetchall()
+                
+                print(f"查询完成，获取到 {len(rows)} 条原始数据")
+                
+                # 处理数据
+                market_data = []
+                for i, row in enumerate(rows):
+                    try:
+                        role_data = dict(zip(columns, row))
                         
-                except Exception as e:
-                    self.logger.warning(f"处理第 {i+1} 条数据时出错: {e}")
-                    continue
-            
-            # 转换为DataFrame
-            self.market_data = pd.DataFrame(market_data)
-            
-            if not self.market_data.empty:
-                self.market_data.set_index('eid', inplace=True)
-                print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据")
-                print(f"数据特征维度: {len(self.market_data.columns)}")
-                print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
-            else:
-                print("警告：未获取到有效的市场数据")
-            
-            conn.close()
-            return self.market_data
-            
+                        # 提取特征
+                        features = self.feature_extractor.extract_features(role_data)
+                        
+                        # 添加基本信息
+                        features.update({
+                            'eid': role_data.get('eid', ''),
+                            'price': role_data.get('price', 0),
+                            'role_type': role_data.get('role_type', 'empty')
+                        })
+                        
+                        market_data.append(features)
+                        
+                        if (i + 1) % 100 == 0 or i == len(rows) - 1:
+                            print(f"已处理 {i + 1}/{len(rows)} 条数据")
+                            
+                    except Exception as e:
+                        self.logger.warning(f"处理第 {i+1} 条数据时出错: {e}")
+                        continue
+                
+                # 转换为DataFrame
+                self.market_data = pd.DataFrame(market_data)
+                
+                if not self.market_data.empty:
+                    self.market_data.set_index('eid', inplace=True)
+                    print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据")
+                    print(f"数据特征维度: {len(self.market_data.columns)}")
+                    print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
+                    print(f"角色类型: {self.market_data['role_type'].unique()}")
+                else:
+                    print("警告：未获取到有效的市场数据")
+                
+                return self.market_data
+                
         except Exception as e:
             self.logger.error(f"刷新市场数据失败: {e}")
             raise

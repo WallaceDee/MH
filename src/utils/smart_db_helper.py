@@ -4,6 +4,7 @@
 """
 智能数据库操作助手
 专门解决 "values跟columns不一致" 的问题
+支持MySQL数据库
 
 冲突处理模式说明：
 - REPLACE: 完全替换记录（删除旧记录，插入新记录）
@@ -11,17 +12,26 @@
 - UPDATE: 更新现有记录，但保留create_time字段
 """
 
-import sqlite3
 import json
 import logging
 from typing import Dict, List, Any, Optional, Union
 from datetime import datetime
+from sqlalchemy import create_engine, text, MetaData, Table, Column, String, Integer, Text, DateTime, Float
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 
 class SmartDBHelper:
-    """智能数据库操作助手"""
+    """智能数据库操作助手 - MySQL版本"""
     
-    def __init__(self, db_path: str):
-        self.db_path = db_path
+    def __init__(self, db_url: str):
+        self.db_url = db_url
+        self.engine = create_engine(
+            db_url, 
+            pool_pre_ping=True, 
+            pool_recycle=3600, 
+            echo=False
+        )
+        self.Session = sessionmaker(bind=self.engine)
         self.logger = self._setup_logger()
         
     def _setup_logger(self):
@@ -39,17 +49,26 @@ class SmartDBHelper:
     
     def get_connection(self):
         """获取数据库连接"""
-        return sqlite3.connect(self.db_path)
+        return self.engine.connect()
+    
+    def get_session(self):
+        """获取数据库会话"""
+        return self.Session()
     
     def get_table_columns(self, table_name: str) -> List[str]:
         """获取表的所有列名"""
         try:
             with self.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute(f"PRAGMA table_info({table_name})")
-                columns_info = cursor.fetchall()
-                # 返回列名列表，排除主键自增列
-                columns = [col[1] for col in columns_info if not (col[5] == 1 and col[2].upper() == 'INTEGER')]
+                # 使用MySQL的INFORMATION_SCHEMA查询列信息，包含主键
+                query = text("""
+                    SELECT COLUMN_NAME 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = :table_name 
+                    ORDER BY ORDINAL_POSITION
+                """)
+                result = conn.execute(query, {'table_name': table_name})
+                columns = [row[0] for row in result.fetchall()]
                 return columns
         except Exception as e:
             self.logger.error(f"获取表{table_name}列名失败: {e}")
@@ -59,13 +78,20 @@ class SmartDBHelper:
         """从数据库schema中获取字段类型"""
         try:
             with self.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute(f"PRAGMA table_info({table_name})")
-                columns_info = cursor.fetchall()
-                # 查找匹配的字段
-                for col in columns_info:
-                    if col[1] == field_name:  # col[1] 是字段名
-                        return col[2].upper()  # col[2] 是字段类型
+                query = text("""
+                    SELECT DATA_TYPE 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = :table_name 
+                    AND COLUMN_NAME = :field_name
+                """)
+                result = conn.execute(query, {
+                    'table_name': table_name,
+                    'field_name': field_name
+                })
+                row = result.fetchone()
+                if row:
+                    return row[0].upper()
                 return 'TEXT'  # 如果找不到字段，默认返回TEXT类型
         except Exception as e:
             self.logger.error(f"获取字段 {field_name} 类型失败: {e}")
@@ -83,12 +109,12 @@ class SmartDBHelper:
             field_type = self.get_field_type(key, table_name)
             
             # 根据字段类型进行转换
-            if field_type == 'INTEGER':
+            if field_type in ['INT', 'INTEGER', 'BIGINT', 'TINYINT', 'SMALLINT', 'MEDIUMINT']:
                 try:
                     validated_data[key] = int(float(value))
                 except (ValueError, TypeError):
                     validated_data[key] = 0
-            elif field_type == 'REAL':
+            elif field_type in ['FLOAT', 'DOUBLE', 'DECIMAL', 'NUMERIC']:
                 try:
                     validated_data[key] = float(value)
                 except (ValueError, TypeError):
@@ -100,7 +126,7 @@ class SmartDBHelper:
     
     def build_insert_sql(self, table_name: str, data: Dict[str, Any], 
                         on_conflict: str = "REPLACE") -> tuple:
-        """构建INSERT SQL语句"""
+        """构建INSERT SQL语句 - MySQL版本"""
         # 验证数据类型，传递正确的表名
         validated_data = self.validate_data_types(data, table_name)
         
@@ -131,21 +157,48 @@ class SmartDBHelper:
             
             raise ValueError(f"没有有效的列数据可插入到表 {table_name}")
         
-        # 构建SQL语句
+        # 构建SQL语句，对保留关键字使用反引号
         columns = list(filtered_data.keys())
-        placeholders = ['?' for _ in columns]  # 自动生成占位符
-        values = tuple(filtered_data.values())
+        # 对MySQL保留关键字使用反引号包围
+        mysql_reserved_words = {
+            'desc', 'order', 'group', 'select', 'from', 'where', 'insert', 'update', 'delete',
+            'create', 'drop', 'alter', 'table', 'index', 'database', 'schema', 'user', 'password',
+            'primary', 'key', 'foreign', 'references', 'constraint', 'check', 'default', 'null',
+            'not', 'and', 'or', 'in', 'like', 'between', 'is', 'as', 'distinct', 'union', 'join',
+            'inner', 'left', 'right', 'outer', 'on', 'having', 'limit', 'offset', 'asc', 'desc'
+        }
+        
+        # 对列名进行转义处理
+        escaped_columns = []
+        for col in columns:
+            if col.lower() in mysql_reserved_words:
+                escaped_columns.append(f'`{col}`')
+            else:
+                escaped_columns.append(col)
+        
+        placeholders = [f':{col}' for col in columns]  # MySQL使用命名占位符
+        values = filtered_data
         
         # 根据冲突处理方式选择INSERT语句类型
         if on_conflict == "REPLACE":
-            sql = f"INSERT OR REPLACE INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
+            # MySQL使用REPLACE INTO
+            sql = f"REPLACE INTO {table_name} ({', '.join(escaped_columns)}) VALUES ({', '.join(placeholders)})"
         elif on_conflict == "IGNORE":
-            sql = f"INSERT OR IGNORE INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
+            # MySQL使用INSERT IGNORE
+            sql = f"INSERT IGNORE INTO {table_name} ({', '.join(escaped_columns)}) VALUES ({', '.join(placeholders)})"
         elif on_conflict == "UPDATE":
             # 构建UPDATE冲突处理，保留create_time
             update_columns = [col for col in columns if col != 'create_time']
             if update_columns:
-                set_clause = ', '.join([f"{col} = excluded.{col}" for col in update_columns])
+                # 对更新字段也进行转义处理
+                escaped_update_columns = []
+                for col in update_columns:
+                    if col.lower() in mysql_reserved_words:
+                        escaped_update_columns.append(f"`{col}` = VALUES(`{col}`)")
+                    else:
+                        escaped_update_columns.append(f"{col} = VALUES({col})")
+                
+                set_clause = ', '.join(escaped_update_columns)
                 
                 # 根据表名确定主键列名
                 if table_name == 'roles':
@@ -160,36 +213,32 @@ class SmartDBHelper:
                     # 默认使用第一个字段作为主键
                     conflict_column = columns[0] if columns else 'id'
                 
-                sql = f"""
-                INSERT INTO {table_name} ({', '.join(columns)}) 
-                VALUES ({', '.join(placeholders)})
-                ON CONFLICT({conflict_column}) DO UPDATE SET {set_clause}
-                """
+                sql = f"INSERT INTO {table_name} ({', '.join(escaped_columns)}) VALUES ({', '.join(placeholders)}) ON DUPLICATE KEY UPDATE {set_clause}"
             else:
                 # 如果没有可更新的字段，使用IGNORE
-                sql = f"INSERT OR IGNORE INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
+                sql = f"INSERT IGNORE INTO {table_name} ({', '.join(escaped_columns)}) VALUES ({', '.join(placeholders)})"
         else:
-            sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(placeholders)})"
+            sql = f"INSERT INTO {table_name} ({', '.join(escaped_columns)}) VALUES ({', '.join(placeholders)})"
         
         return sql, values
     
     def insert_data(self, table_name: str, data: Union[Dict[str, Any], List[Dict[str, Any]]], 
                    on_conflict: str = "REPLACE") -> bool:
-        """插入数据"""
+        """插入数据 - MySQL版本"""
         try:
             with self.get_connection() as conn:
-                cursor = conn.cursor()
-                
                 if isinstance(data, dict):
                     # 单条数据
                     sql, params = self.build_insert_sql(table_name, data, on_conflict)
-                    cursor.execute(sql, params)
+                    result = conn.execute(text(sql), params)
+                    conn.commit()  # 直接提交
                     
                     # 检查是否实际插入了数据
-                    if on_conflict == "IGNORE" and cursor.rowcount == 0:
+                    if on_conflict == "IGNORE" and result.rowcount == 0:
                         self.logger.debug(f"数据已存在，跳过插入到表 {table_name}")
                         return False  # 返回False表示没有插入新数据
                     else:
+                        self.logger.debug(f"单条数据已提交到表 {table_name}")
                         return True
                     
                 elif isinstance(data, list):
@@ -211,43 +260,48 @@ class SmartDBHelper:
                     for item in data:
                         validated_item = self.validate_data_types(item, table_name)
                         # 按照相同的列顺序提取值
-                        params = tuple(validated_item.get(col) for col in columns)
+                        params = {col: validated_item.get(col) for col in columns}
                         all_params.append(params)
                     
                     # 批量执行
-                    cursor.executemany(sql_template, all_params)
-                    inserted_count = cursor.rowcount
+                    result = conn.execute(text(sql_template), all_params)
+                    conn.commit()  # 直接提交
+                    inserted_count = result.rowcount
                     
                     if on_conflict == "IGNORE" and inserted_count < len(data):
                         self.logger.info(f"批量插入{inserted_count}/{len(data)}条数据到表 {table_name} (部分数据已存在)")
                     else:
                         self.logger.info(f"成功批量插入{inserted_count}条数据到表 {table_name}")
+                    
+                    self.logger.debug(f"批量数据已提交到表 {table_name}")
+                    return True
                 
-                conn.commit()
-                return True
-                
-        except Exception as e:
+        except SQLAlchemyError as e:
             self.logger.error(f"插入数据到表 {table_name} 失败: {e}")
             return False
 
 class CBGSmartDB:
-    """CBG爬虫专用智能数据库管理器"""
+    """CBG爬虫专用智能数据库管理器 - MySQL版本"""
     
-    def __init__(self, db_path: str):
-        self.db_helper = SmartDBHelper(db_path)
+    def __init__(self, db_url: str):
+        self.db_helper = SmartDBHelper(db_url)
         self.logger = logging.getLogger('CBGSmartDB')
     
     def save_role(self, role_data: Dict[str, Any]) -> bool:
         """智能保存角色数据，冲突时保留create_time并记录价格变化"""
-        # 添加更新时间，使用SQLite标准格式
+        # 添加更新时间，使用MySQL标准格式
         role_data['update_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # 确保有create_time字段
+        if 'create_time' not in role_data:
+            role_data['create_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         # 检查是否存在冲突，如果存在则处理价格历史
         if self._should_update_price_history(role_data):
             return self._save_role_with_price_history(role_data)
         else:
-            # 使用UPDATE冲突处理，保留create_time
-            return self.db_helper.insert_data('roles', role_data, on_conflict="UPDATE")
+            # 使用REPLACE冲突处理，简单有效
+            return self.db_helper.insert_data('roles', role_data, on_conflict="REPLACE")
     
     def _should_update_price_history(self, role_data: Dict[str, Any]) -> bool:
         """检查是否需要更新价格历史"""
@@ -259,9 +313,8 @@ class CBGSmartDB:
         
         try:
             with self.db_helper.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT price, history_price FROM roles WHERE eid = ?", (eid,))
-                result = cursor.fetchone()
+                query = text("SELECT price, history_price FROM roles WHERE eid = :eid")
+                result = conn.execute(query, {'eid': eid}).fetchone()
                 
                 if result:
                     old_price, history_price_json = result
@@ -284,11 +337,9 @@ class CBGSmartDB:
         
         try:
             with self.db_helper.get_connection() as conn:
-                cursor = conn.cursor()
-                
                 # 获取现有数据
-                cursor.execute("SELECT price, history_price FROM roles WHERE eid = ?", (eid,))
-                result = cursor.fetchone()
+                query = text("SELECT price, history_price FROM roles WHERE eid = :eid")
+                result = conn.execute(query, {'eid': eid}).fetchone()
                 
                 if result:
                     old_price, history_price_json = result
@@ -332,7 +383,7 @@ class CBGSmartDB:
         if not roles_list:
             return True
         
-        # 为所有记录添加时间戳，使用SQLite标准格式
+        # 为所有记录添加时间戳，使用MySQL标准格式
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         for char in roles_list:
             char['update_time'] = timestamp
@@ -341,14 +392,14 @@ class CBGSmartDB:
     
     def save_large_equip_data(self, equip_data: Dict[str, Any]) -> bool:
         """智能保存详细装备数据，冲突时保留create_time"""
-        # 添加更新时间，使用SQLite标准格式
+        # 添加更新时间，使用MySQL标准格式
         equip_data['update_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         return self.db_helper.insert_data('large_equip_desc_data', equip_data, on_conflict="UPDATE")
     
     def save_equipment(self, equipment_data: Dict[str, Any]) -> bool:
         """智能保存装备数据，冲突时保留create_time"""
-        # 添加更新时间，使用SQLite标准格式
+        # 添加更新时间，使用MySQL标准格式
         equipment_data['update_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         # 使用UPDATE冲突处理，保留create_time
@@ -359,7 +410,7 @@ class CBGSmartDB:
         if not equipments_list:
             return True
         
-        # 为所有记录添加时间戳，使用SQLite标准格式
+        # 为所有记录添加时间戳，使用MySQL标准格式
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         for equip in equipments_list:
             equip['update_time'] = timestamp
@@ -368,7 +419,7 @@ class CBGSmartDB:
     
     def save_pet_data(self, pet_data: Dict[str, Any]) -> bool:
         """智能保存召唤兽数据，冲突时保留create_time"""
-        # 添加更新时间，使用SQLite标准格式
+        # 添加更新时间，使用MySQL标准格式
         pet_data['update_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         return self.db_helper.insert_data('pets', pet_data, on_conflict="UPDATE")
@@ -378,7 +429,7 @@ class CBGSmartDB:
         if not pets_list:
             return True
         
-        # 为所有记录添加时间戳，使用SQLite标准格式
+        # 为所有记录添加时间戳，使用MySQL标准格式
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         for pet in pets_list:
             pet['update_time'] = timestamp
@@ -387,9 +438,11 @@ class CBGSmartDB:
 
     def check_role_exists_by_eid(self, eid: str) -> bool:
         """检查角色是否存在"""
-        with self.db_helper.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM roles WHERE eid = ?", (eid,))
-            result = cursor.fetchone()
-            return result[0] > 0
-        
+        try:
+            with self.db_helper.get_connection() as conn:
+                query = text("SELECT COUNT(*) FROM roles WHERE eid = :eid")
+                result = conn.execute(query, {'eid': eid}).fetchone()
+                return result[0] > 0
+        except Exception as e:
+            self.logger.error(f"检查角色是否存在失败: {e}")
+            return False

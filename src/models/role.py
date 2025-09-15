@@ -44,7 +44,7 @@ class Role(Base):
     role_grade_limit = Column(Integer, comment='角色等级限制')
     min_buyer_level = Column(Integer, comment='最低购买者等级')
     equip_count = Column(Integer, comment='角色数量')
-    
+
     # 价格和交易信息
     history_price = Column(Text, comment='历史价格')
     split_price_desc = Column(Text, comment='装备和召唤兽估价价格描述')
@@ -56,9 +56,9 @@ class Role(Base):
     unit_price_desc = Column(Text, comment='单价描述')
     min_unit_price = Column(Float, comment='最低单价')
     price_explanation = Column(Text, comment='价格说明')
-    accept_bargain = Column(Boolean, default=False, comment='接受还价')
+    accept_bargain = Column(Integer, default=0, comment='接受还价')  # 修复：Boolean -> Integer
     bargain_info = Column(Text, comment='还价信息')
-    
+
     # 状态和时间信息
     equip_status = Column(Integer, comment='角色状态')
     equip_status_desc = Column(Text, comment='角色状态描述')
@@ -69,69 +69,69 @@ class Role(Base):
     selling_time = Column(Text, comment='销售时间')
     selling_time_ago_desc = Column(Text, comment='销售时间前描述')
     first_onsale_time = Column(Text, comment='首次上架时间')
-    
+
     # 公示相关
-    pass_fair_show = Column(Boolean, default=False, comment='是否通过公示')
+    pass_fair_show = Column(Integer, default=0, comment='是否通过公示')  # 修复：Boolean -> Integer
     fair_show_time = Column(Integer, default=0, comment='公示时间')
     fair_show_end_time = Column(Text, comment='公示结束时间')
     fair_show_end_time_left = Column(Text, comment='公示结束剩余时间')
     fair_show_poundage = Column(Integer, default=0, comment='公示手续费')
-    
+
     # 其他信息
     collect_num = Column(Integer, default=0, comment='收藏数')
-    has_collect = Column(Boolean, default=False, comment='是否收藏')
+    has_collect = Column(Integer, default=0, comment='是否收藏')  # 修复：Boolean -> Integer
     score = Column(Integer, default=0, comment='评分')
     icon_index = Column(Integer, default=0, comment='图标索引')
     icon = Column(Integer, default=0, comment='图标')
     equip_face_img = Column(String(500), comment='角色头像图片')
     kindid = Column(Integer, comment='种类ID')
     game_channel = Column(Text, comment='游戏渠道')
-    
+
     # 订单相关
     game_ordersn = Column(Text, comment='游戏订单号')
     whole_game_ordersn = Column(Text, comment='完整游戏订单号')
-    
+
     # 跨服相关
-    allow_cross_buy = Column(Boolean, default=False, comment='允许跨服购买')
+    allow_cross_buy = Column(Integer, default=0, comment='允许跨服购买')  # 修复：Boolean -> Integer
     cross_server_poundage = Column(Integer, default=0, comment='跨服手续费')
     cross_server_poundage_origin = Column(Integer, default=0, comment='原始跨服手续费')
     cross_server_poundage_discount = Column(Float, default=0, comment='跨服手续费折扣')
     cross_server_poundage_discount_label = Column(Text, comment='跨服手续费折扣标签')
     cross_server_poundage_display_mode = Column(Integer, default=0, comment='跨服手续费显示模式')
     cross_server_activity_conf_discount = Column(Float, default=0, comment='跨服活动配置折扣')
-    
+
     # 活动相关
     activity_type = Column(Integer, default=0, comment='活动类型')
-    joined_seller_activity = Column(Boolean, default=False, comment='参与卖家活动')
-    
+    joined_seller_activity = Column(Integer, default=0, comment='参与卖家活动')  # 修复：Boolean -> Integer
+
     # 拆分相关
-    is_split_sale = Column(Boolean, default=False, comment='是否拆分销售')
-    is_split_main_role = Column(Boolean, default=False, comment='是否拆分主角')
-    is_split_independent_role = Column(Boolean, default=False, comment='是否独立角色拆分')
-    is_split_independent_equip = Column(Boolean, default=False, comment='是否独立角色拆分')
-    split_equip_sold_happen = Column(Boolean, default=False, comment='拆分角色销售发生')
-    show_split_equip_sold_remind = Column(Boolean, default=False, comment='显示拆分角色销售提醒')
-    
+    is_split_sale = Column(Integer, default=0, comment='是否拆分销售')  # 修复：Boolean -> Integer
+    is_split_main_role = Column(Integer, default=0, comment='是否拆分主角')  # 修复：Boolean -> Integer
+    is_split_independent_role = Column(Integer, default=0, comment='是否独立角色拆分')  # 修复：Boolean -> Integer
+    is_split_independent_equip = Column(Integer, default=0, comment='是否独立角色拆分')  # 修复：Boolean -> Integer
+    split_equip_sold_happen = Column(Integer, default=0, comment='拆分角色销售发生')  # 修复：Boolean -> Integer
+    show_split_equip_sold_remind = Column(Integer, default=0, comment='显示拆分角色销售提醒')  # 修复：Boolean -> Integer
+
     # 保护相关
-    is_onsale_protection_period = Column(Boolean, default=False, comment='是否在售保护期')
+    is_onsale_protection_period = Column(Integer, default=0, comment='是否在售保护期')  # 修复：Boolean -> Integer
     onsale_protection_end_time = Column(Text, comment='在售保护结束时间')
-    is_vip_protection = Column(Boolean, default=False, comment='是否VIP保护')
-    is_time_lock = Column(Boolean, default=False, comment='是否时间锁定')
+    is_vip_protection = Column(Integer, default=0, comment='是否VIP保护')  # 修复：Boolean -> Integer
+    is_time_lock = Column(Integer, default=0, comment='是否时间锁定')  # 修复：Boolean -> Integer
     time_lock_days = Column(Integer, default=0, comment='时间锁定天数')
-    
+
     # 测试服相关
-    equip_in_test_server = Column(Boolean, default=False, comment='角色在测试服')
-    buyer_in_test_server = Column(Boolean, default=False, comment='买家在测试服')
-    equip_in_allow_take_away_server = Column(Boolean, default=False, comment='角色在允许带走服务器')
-    
+    equip_in_test_server = Column(Integer, default=0, comment='角色在测试服')  # 修复：Boolean -> Integer
+    buyer_in_test_server = Column(Integer, default=0, comment='买家在测试服')  # 修复：Boolean -> Integer
+    equip_in_allow_take_away_server = Column(Integer, default=0, comment='角色在允许带走服务器')  # 修复：Boolean -> Integer
+
     # 其他标识
-    is_weijianding = Column(Boolean, default=False, comment='是否未鉴定')
-    is_show_alipay_privilege = Column(Boolean, default=False, comment='是否显示支付宝特权')
-    is_seller_redpacket_flag = Column(Boolean, default=False, comment='是否卖家红包标志')
-    is_show_expert_desc = Column(Boolean, default=False, comment='是否显示专家描述')
-    is_show_special_highlight = Column(Boolean, default=False, comment='是否显示特殊高亮')
-    is_xyq_game_role_kunpeng_reach_limit = Column(Boolean, default=False, comment='是否达到鲲鹏限制')
-    
+    is_weijianding = Column(Integer, default=0, comment='是否未鉴定')  # 修复：Boolean -> Integer
+    is_show_alipay_privilege = Column(Integer, default=0, comment='是否显示支付宝特权')  # 修复：Boolean -> Integer
+    is_seller_redpacket_flag = Column(Integer, default=0, comment='是否卖家红包标志')  # 修复：Boolean -> Integer
+    is_show_expert_desc = Column(Integer, default=0, comment='是否显示专家描述')  # 修复：Boolean -> Integer
+    is_show_special_highlight = Column(Integer, default=0, comment='是否显示特殊高亮')  # 修复：Boolean -> Integer
+    is_xyq_game_role_kunpeng_reach_limit = Column(Integer, default=0, comment='是否达到鲲鹏限制')  # 修复：Boolean -> Integer
+
     # 版本和存储相关
     equip_onsale_version = Column(Integer, default=0, comment='角色上架版本')
     storage_type = Column(Integer, default=0, comment='存储类型')
