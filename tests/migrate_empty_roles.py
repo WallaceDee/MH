@@ -37,7 +37,7 @@ class EmptyRolesMigrator:
     """空角色数据迁移器"""
     
     def __init__(self):
-        self.sqlite_path = 'data/202506/cbg_roles_202509.db'
+        self.sqlite_path = 'data/cbg_roles.db'
         self.mysql_engine = None
         self.mysql_session = None
         self.batch_size = 100  # 批量处理大小
@@ -209,26 +209,6 @@ class EmptyRolesMigrator:
                     # 逐条插入数据
                     for role_data in batch:
                         try:
-                            # 处理Boolean字段的-1值问题
-                            boolean_fields = [
-                                'accept_bargain', 'pass_fair_show', 'has_collect', 'allow_cross_buy',
-                                'joined_seller_activity', 'is_split_sale', 'is_split_main_role',
-                                'is_split_independent_role', 'is_split_independent_equip',
-                                'split_equip_sold_happen', 'show_split_equip_sold_remind',
-                                'is_onsale_protection_period', 'is_vip_protection', 'is_time_lock',
-                                'equip_in_test_server', 'buyer_in_test_server',
-                                'equip_in_allow_take_away_server', 'is_weijianding',
-                                'is_show_alipay_privilege', 'is_seller_redpacket_flag',
-                                'is_show_expert_desc', 'is_show_special_highlight',
-                                'is_xyq_game_role_kunpeng_reach_limit'
-                            ]
-                            
-                            for field in boolean_fields:
-                                if field in role_data and role_data[field] == -1:
-                                    role_data[field] = None
-                                elif field in role_data and role_data[field] not in [0, 1, None, True, False]:
-                                    role_data[field] = bool(role_data[field]) if role_data[field] is not None else None
-                            
                             # 使用ORM方式插入
                             role_obj = Role(**role_data)
                             self.mysql_session.add(role_obj)
@@ -331,10 +311,10 @@ class EmptyRolesMigrator:
             return False
         
         try:
-            # # 迁移roles数据
-            # if not self.migrate_roles_data():
-            #     logger.error("迁移roles数据失败")
-            #     return False
+            # 迁移roles数据
+            if not self.migrate_roles_data():
+                logger.error("迁移roles数据失败")
+                return False
             
             # 迁移large_equip_desc_data数据
             if not self.migrate_large_equip_desc_data():

@@ -1,0 +1,59 @@
+# 生产环境Docker Compose配置 - 仅后端API
+# 连接到现有的MariaDB数据库
+
+services:
+  # CBG爬虫后端API服务
+  cbg-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cbg-spider-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # Flask配置
+      - FLASK_APP=src/app.py
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+      
+      # 数据库连接配置（连接到宿主机MariaDB）
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_NAME=cbg_spider
+      - DB_USER=cbg_user
+      
+      # 应用配置
+      - LOG_LEVEL=INFO
+      - MAX_WORKERS=4
+      - SPIDER_DELAY_MIN=5
+      - SPIDER_DELAY_MAX=8
+      
+    volumes:
+      # 数据持久化
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./output:/app/output
+      - ./config:/app/config
+      
+      # 数据库密码文件
+      - /root/cbg_mariadb_password.txt:/app/secrets/db_password.txt:ro
+      
+    extra_hosts:
+      # 允许容器访问宿主机服务
+      - "host.docker.internal:host-gateway"
+      
+    networks:
+      - cbg-network
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  cbg-network:
+    driver: bridge

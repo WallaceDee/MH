@@ -1,0 +1,340 @@
+2025-09-16 23:04:24,115 - INFO - 开始执行空角色数据迁移...
+2025-09-16 23:04:24,190 - INFO - 数据库连接成功
+2025-09-16 23:04:24,190 - INFO - 开始迁移roles表数据...
+2025-09-16 23:04:47,655 - INFO - 从SQLite roles 表获取了 14165 条数据
+2025-09-16 23:05:09,146 - INFO - 已迁移 100/14165 条roles数据
+2025-09-16 23:05:30,769 - INFO - 已迁移 200/14165 条roles数据
+2025-09-16 23:05:50,886 - INFO - 已迁移 300/14165 条roles数据
+2025-09-16 23:06:12,830 - INFO - 已迁移 400/14165 条roles数据
+2025-09-16 23:06:36,824 - INFO - 已迁移 500/14165 条roles数据
+2025-09-16 23:06:56,872 - INFO - 已迁移 600/14165 条roles数据
+2025-09-16 23:07:15,788 - INFO - 已迁移 700/14165 条roles数据
+2025-09-16 23:07:36,941 - INFO - 已迁移 800/14165 条roles数据
+2025-09-16 23:07:56,918 - INFO - 已迁移 900/14165 条roles数据
+2025-09-16 23:08:18,638 - INFO - 已迁移 1000/14165 条roles数据
+2025-09-16 23:08:39,394 - INFO - 已迁移 1100/14165 条roles数据
+2025-09-16 23:09:01,345 - INFO - 已迁移 1200/14165 条roles数据
+2025-09-16 23:09:21,849 - INFO - 已迁移 1300/14165 条roles数据
+2025-09-16 23:09:43,999 - INFO - 已迁移 1400/14165 条roles数据
+2025-09-16 23:10:05,836 - INFO - 已迁移 1500/14165 条roles数据
+2025-09-16 23:10:23,802 - INFO - 已迁移 1600/14165 条roles数据
+2025-09-16 23:10:48,158 - INFO - 已迁移 1700/14165 条roles数据
+2025-09-16 23:11:08,887 - INFO - 已迁移 1800/14165 条roles数据
+2025-09-16 23:11:28,864 - INFO - 已迁移 1900/14165 条roles数据
+2025-09-16 23:11:50,986 - INFO - 已迁移 2000/14165 条roles数据
+2025-09-16 23:12:13,817 - INFO - 已迁移 2100/14165 条roles数据
+2025-09-16 23:12:38,386 - INFO - 已迁移 2200/14165 条roles数据
+2025-09-16 23:12:58,550 - INFO - 已迁移 2300/14165 条roles数据
+2025-09-16 23:13:07,361 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+[SQL: INSERT INTO roles (eid, equipid, equip_sn, server_name, serverid, equip_server_sn, seller_nickname, seller_roleid, area_name, role_type, equip_name, equip_type, equip_type_name, equip_type_desc, level, equip_level, equip_level_desc, level_desc, subtitle, equip_pos, `position`, school, role_grade_limit, min_buyer_level, equip_count, history_price, split_price_desc, base_price, equip_price, pet_price, price, price_desc, unit_price_desc, min_unit_price, price_explanation, accept_bargain, bargain_info, equip_status, equip_status_desc, status_desc, onsale_expire_time_desc, time_left, expire_time, selling_time, selling_time_ago_desc, first_onsale_time, pass_fair_show, fair_show_time, fair_show_end_time, fair_show_end_time_left, fair_show_poundage, collect_num, has_collect, score, icon_index, icon, equip_face_img, kindid, game_channel, game_ordersn, whole_game_ordersn, allow_cross_buy, cross_server_poundage, cross_server_poundage_origin, cross_server_poundage_discount, cross_server_poundage_discount_label, cross_server_poundage_display_mode, cross_server_activity_conf_discount, activity_type, joined_seller_activity, is_split_sale, is_split_main_role, is_split_independent_role, is_split_independent_equip, split_equip_sold_happen, show_split_equip_sold_remind, is_onsale_protection_period, onsale_protection_end_time, is_vip_protection, is_time_lock, time_lock_days, equip_in_test_server, buyer_in_test_server, equip_in_allow_take_away_server, is_weijianding, is_show_alipay_privilege, is_seller_redpacket_flag, is_show_expert_desc, is_show_special_highlight, is_xyq_game_role_kunpeng_reach_limit, equip_onsale_version, storage_type, agent_trans_time, kol_article_id, kol_share_id, kol_share_time, kol_share_status, reco_request_id, appointed_roleid, play_team_cnt, random_draw_finish_time, `desc`, large_equip_desc, desc_sumup, desc_sumup_short, diy_desc, rec_desc, diy_desc_pay_info, other_info, video_info, agg_added_attrs, dynamic_tags, highlight, tag_key, tag, search_type, life_skills, school_skills, ju_qing_skills, yushoushu_skill, raw_data_json, create_time, update_time) VALUES (%(eid)s, %(equipid)s, %(equip_sn)s, %(server_name)s, %(serverid)s, %(equip_server_sn)s, %(seller_nickname)s, %(seller_roleid)s, %(area_name)s, %(role_type)s, %(equip_name)s, %(equip_type)s, %(equip_type_name)s, %(equip_type_desc)s, %(level)s, %(equip_level)s, %(equip_level_desc)s, %(level_desc)s, %(subtitle)s, %(equip_pos)s, %(position)s, %(school)s, %(role_grade_limit)s, %(min_buyer_level)s, %(equip_count)s, %(history_price)s, %(split_price_desc)s, %(base_price)s, %(equip_price)s, %(pet_price)s, %(price)s, %(price_desc)s, %(unit_price_desc)s, %(min_unit_price)s, %(price_explanation)s, %(accept_bargain)s, %(bargain_info)s, %(equip_status)s, %(equip_status_desc)s, %(status_desc)s, %(onsale_expire_time_desc)s, %(time_left)s, %(expire_time)s, %(selling_time)s, %(selling_time_ago_desc)s, %(first_onsale_time)s, %(pass_fair_show)s, %(fair_show_time)s, %(fair_show_end_time)s, %(fair_show_end_time_left)s, %(fair_show_poundage)s, %(collect_num)s, %(has_collect)s, %(score)s, %(icon_index)s, %(icon)s, %(equip_face_img)s, %(kindid)s, %(game_channel)s, %(game_ordersn)s, %(whole_game_ordersn)s, %(allow_cross_buy)s, %(cross_server_poundage)s, %(cross_server_poundage_origin)s, %(cross_server_poundage_discount)s, %(cross_server_poundage_discount_label)s, %(cross_server_poundage_display_mode)s, %(cross_server_activity_conf_discount)s, %(activity_type)s, %(joined_seller_activity)s, %(is_split_sale)s, %(is_split_main_role)s, %(is_split_independent_role)s, %(is_split_independent_equip)s, %(split_equip_sold_happen)s, %(show_split_equip_sold_remind)s, %(is_onsale_protection_period)s, %(onsale_protection_end_time)s, %(is_vip_protection)s, %(is_time_lock)s, %(time_lock_days)s, %(equip_in_test_server)s, %(buyer_in_test_server)s, %(equip_in_allow_take_away_server)s, %(is_weijianding)s, %(is_show_alipay_privilege)s, %(is_seller_redpacket_flag)s, %(is_show_expert_desc)s, %(is_show_special_highlight)s, %(is_xyq_game_role_kunpeng_reach_limit)s, %(equip_onsale_version)s, %(storage_type)s, %(agent_trans_time)s, %(kol_article_id)s, %(kol_share_id)s, %(kol_share_time)s, %(kol_share_status)s, %(reco_request_id)s, %(appointed_roleid)s, %(play_team_cnt)s, %(random_draw_finish_time)s, %(desc)s, %(large_equip_desc)s, %(desc_sumup)s, %(desc_sumup_short)s, %(diy_desc)s, %(rec_desc)s, %(diy_desc_pay_info)s, %(other_info)s, %(video_info)s, %(agg_added_attrs)s, %(dynamic_tags)s, %(highlight)s, %(tag_key)s, %(tag)s, %(search_type)s, %(life_skills)s, %(school_skills)s, %(ju_qing_skills)s, %(yushoushu_skill)s, %(raw_data_json)s, %(create_time)s, %(update_time)s)]
+[parameters: {'eid': '202412222300113-928-MKJUDTVDKJZQ', 'equipid': 1278003, 'equip_sn': '38077407', 'server_name': '彩云归', 'serverid': 928, 'equip_server_sn': '1464', 'seller_nickname': '况况的烟叔！', 'seller_roleid': '38077407', 'area_name': '福建1区', 'role_type': 'empty', 'equip_name': '38077407', 'equip_type': '998', 'equip_type_name': '凌波城', 'equip_type_desc': '', 'level': 109, 'equip_level': 109, 'equip_level_desc': '109级', 'level_desc': '109级', 'subtitle': '109级', 'equip_pos': 0, 'position': 3, 'school': 14, 'role_grade_limit': 0, 'min_buyer_level': 0, 'equip_count': 1, 'history_price': '[]', 'split_price_desc': '[]', 'base_price': 0.0, 'equip_price': 0.0, 'pet_price': 0.0, 'price': 540000.0, 'price_desc': '5400.00', 'unit_price_desc': '', 'min_unit_price': 6100.0, 'price_explanation': '{"chose_price": 540000, "chose_price_diff": 0, "chose_type": "origin", "choice_list": [{"price": 540000, "type": "origin", "label": "原价"}]}', 'accept_bargain': 1, 'bargain_info': '', 'equip_status': 2, 'equip_status_desc': '上架中', 'status_desc': '上架中', 'onsale_expire_time_desc': '1天9时', 'time_left': '2025-09-05 08:22:24', 'expire_time': '2025-09-05 08:22:24', 'selling_time': '2025-08-22 08:22:24', 'selling_time_ago_desc': '12天前', 'first_onsale_time': '2024-12-22 23:43:50.495881', 'pass_fair_show': 1, 'fair_show_time': 0, 'fair_show_end_time': '2024-12-22 23:43:50', 'fair_show_end_time_left': '5分钟' ... 23 parameters truncated ... 'is_split_independent_equip': 0, 'split_equip_sold_happen': 0, 'show_split_equip_sold_remind': 0, 'is_onsale_protection_period': 0, 'onsale_protection_end_time': '2024-12-23 00:13:50', 'is_vip_protection': 0, 'is_time_lock': 0, 'time_lock_days': 0, 'equip_in_test_server': 0, 'buyer_in_test_server': 0, 'equip_in_allow_take_away_server': 0, 'is_weijianding': 0, 'is_show_alipay_privilege': 0, 'is_seller_redpacket_flag': 0, 'is_show_expert_desc': -1, 'is_show_special_highlight': 0, 'is_xyq_game_role_kunpeng_reach_limit': 0, 'equip_onsale_version': 14, 'storage_type': 4, 'agent_trans_time': 0, 'kol_article_id': '', 'kol_share_id': '', 'kol_share_time': '', 'kol_share_status': '', 'reco_request_id': '1756909510601UKIXb', 'appointed_roleid': '', 'play_team_cnt': 0, 'random_draw_finish_time': '2025-08-22 08:37:24', 'desc': '@95ReprT4YNtR1p8n@Ilx1MDAxMW5wXGYkXHUwMDFkIFU1XHUwMDAzXHUwMDE1NXVcdTAwMTVeMVhZPkdKR2JcdTAwMDR1bFx1MDAxYidFXHUwMDE0V1x1MDAwMUtqPlx1MDAwMFx1MDAwNlx1MDA ... (94325 characters truncated) ... MDEzSlxuV1xyXHUwMDE5cFxmPVx1MDAxMzNcdTAwMTZjXHUwMDdmRWZcdTAwMWQtXHUwMDExQmRcdTAwMWN+RzhcdTAwMTcmW1xuLVx1MDAxYiBUUlx1MDAwMl1cdTAwMGZcdTAwMDRlSS1bIg==@', 'large_equip_desc': '(["outdoor_level":0,"AllRider":([1:(["all_skills":([611:2,]),"iType":502,"exgrow":12672,"ExtraGrow":0,"iGrade":84,"mattrib":"",]),2:(["all_skills":([ ... (24620 characters truncated) ... ),(["lv":0,"idx":3,]),(["lv":0,"idx":12,]),(["lv":0,"idx":1,]),(["lv":129,"idx":13,]),(["lv":560,"idx":14,]),}),]),"commu_name":0,"HeroScore":3617,])', 'desc_sumup': '成就:2823 总修:60 总宠修:68', 'desc_sumup_short': '成就:2823 总修:60 总宠修:68', 'diy_desc': '', 'rec_desc': None, 'diy_desc_pay_info': '{"is_show_agreement": true, "is_need_pay": false, "diy_desc_fee": 0, "is_pay_service": false, "is_show_pay_agreement": false}', 'other_info': '@95ReprT4YNtR1p8n@IkJcdTAwMTcnXHUwMDE2XHUwMDE1XHUwMDAwOkE0bE5yXHUwMDAySFxiWVx1MDAwZVx1MDAwMWJSXFxSdlU9Kis/VFx1MDAxY0wxWEEmXHUwMDE3XHUwMDAzUG5cdTAwMTR ... (4413 characters truncated) ... MDAxODJMXHUwMDAzYlZcdTAwMTIuIVx1MDAwMD8rXHUwMDExaFx1MDAwN0BcdTAwMTgyTFx1MDAwM2JWXHUwMDEyLiFcdTAwMDE7L0RcdTAwMGVERF5cdTAwMGJcXFx1MDAwZmRdUlx1MDAwZiI=@', 'video_info': '{"video_desc": "109级凌波城上新啦~总修60，总宠修68，师门技能7个满，辅助技能3个满，潜能全满，赶紧入手吧！", "video_type_desc": "亮点解析", "video_cover_url": "http://cc.fp.ps.netease.com/file/6 ... (332 characters truncated) ... 80, "video_version": "MDJS_3.0", "duration": "29.67", "has_video": true, "height": 1440, "video_type_short_desc": "亮点", "video_title": "小阁推荐109级凌波城"}', 'agg_added_attrs': '', 'dynamic_tags': '', 'highlight': '[["锦衣67件", 80, {"key": "clothes_num", "value": 67}], ["神器五行12水", 70, {"key": "shenqi_wuxing_12_id", "value": 8}], ["潮汐帆板", 70, {"key": "shenqi_wuxing_12_id", "value": 8}]]', 'tag_key': '{"discover_tag": null, "is_from_ad_reco": 0, "suggestion_tag": null, "tag": "user", "nlp_desc_tag": ""}', 'tag': 'user', 'search_type': 'overall_role_search', 'life_skills': '{"熔炼技巧": 51, "健身术": 116, "逃离技巧": 63, "养生之道": 111, "灵石技巧": 18, "巧匠之术": 100, "神速": 36, "强壮": 36, "淬灵之术": 21, "强身术": 129, "暗器技巧": 80, "冥想": 140, "裁缝技巧": 15, "打造技巧": 24, "炼金术": 15, "中药医理": 160, "追捕技巧": 40, "烹饪技巧": 72, "雪之感应": 2, "雨之感应": 1}', 'school_skills': '{"九转玄功": 119, "天地无极": 119, "气吞山河": 119, "诛魔": 119, "武神显圣": 119, "啸傲": 119, "法天象地": 119}', 'ju_qing_skills': '{"翰墨之道": 1, "丹元济会": 5, "变化之术": 6, "丹青之道": 1}', 'yushoushu_skill': 0, 'raw_data_json': '{"is_show_alipay_privilege": false, "qixue": 0, "equip_status_desc": "上架中", "lingli": 0, "kol_article_id": "", "fair_show_end_time_left": "5分钟", "spe ... (130348 characters truncated) ... 13,]),([\\"lv\\":560,\\"idx\\":14,]),}),]),\\"commu_name\\":0,\\"HeroScore\\":3617,])", "joined_seller_activity": false, "seller_roleid": "38077407"}', 'create_time': '2025-08-15 02:40:45', 'update_time': '2025-09-03 22:25:13'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:13:12,370 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:13:32,943 - INFO - 已迁移 2400/14165 条roles数据
+2025-09-16 23:13:58,953 - INFO - 已迁移 2500/14165 条roles数据
+2025-09-16 23:14:23,518 - INFO - 已迁移 2600/14165 条roles数据
+2025-09-16 23:14:44,935 - INFO - 已迁移 2700/14165 条roles数据
+2025-09-16 23:15:07,532 - INFO - 已迁移 2800/14165 条roles数据
+2025-09-16 23:15:28,796 - INFO - 已迁移 2900/14165 条roles数据
+2025-09-16 23:15:43,178 - INFO - 已迁移 3000/14165 条roles数据
+2025-09-16 23:15:57,564 - INFO - 已迁移 3100/14165 条roles数据
+2025-09-16 23:16:12,510 - INFO - 已迁移 3200/14165 条roles数据
+2025-09-16 23:16:24,208 - INFO - 已迁移 3300/14165 条roles数据
+2025-09-16 23:16:38,405 - INFO - 已迁移 3400/14165 条roles数据
+2025-09-16 23:16:51,192 - INFO - 已迁移 3500/14165 条roles数据
+2025-09-16 23:17:02,586 - INFO - 已迁移 3600/14165 条roles数据
+2025-09-16 23:17:15,072 - INFO - 已迁移 3700/14165 条roles数据
+2025-09-16 23:17:30,001 - INFO - 已迁移 3800/14165 条roles数据
+2025-09-16 23:17:43,601 - INFO - 已迁移 3900/14165 条roles数据
+2025-09-16 23:17:58,121 - INFO - 已迁移 4000/14165 条roles数据
+2025-09-16 23:18:13,166 - INFO - 已迁移 4100/14165 条roles数据
+2025-09-16 23:18:30,106 - INFO - 已迁移 4200/14165 条roles数据
+2025-09-16 23:18:44,936 - INFO - 已迁移 4300/14165 条roles数据
+2025-09-16 23:18:59,762 - INFO - 已迁移 4400/14165 条roles数据
+2025-09-16 23:19:16,739 - INFO - 已迁移 4500/14165 条roles数据
+2025-09-16 23:19:30,733 - INFO - 已迁移 4600/14165 条roles数据
+2025-09-16 23:19:42,999 - INFO - 已迁移 4700/14165 条roles数据
+2025-09-16 23:19:56,261 - INFO - 已迁移 4800/14165 条roles数据
+2025-09-16 23:20:07,442 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+[SQL: INSERT INTO roles (eid, equipid, equip_sn, server_name, serverid, equip_server_sn, seller_nickname, seller_roleid, area_name, role_type, equip_name, equip_type, equip_type_name, equip_type_desc, level, equip_level, equip_level_desc, level_desc, subtitle, equip_pos, `position`, school, role_grade_limit, min_buyer_level, equip_count, history_price, split_price_desc, base_price, equip_price, pet_price, price, price_desc, unit_price_desc, min_unit_price, price_explanation, accept_bargain, bargain_info, equip_status, equip_status_desc, status_desc, onsale_expire_time_desc, time_left, expire_time, selling_time, selling_time_ago_desc, first_onsale_time, pass_fair_show, fair_show_time, fair_show_end_time, fair_show_end_time_left, fair_show_poundage, collect_num, has_collect, score, icon_index, icon, equip_face_img, kindid, game_channel, game_ordersn, whole_game_ordersn, allow_cross_buy, cross_server_poundage, cross_server_poundage_origin, cross_server_poundage_discount, cross_server_poundage_discount_label, cross_server_poundage_display_mode, cross_server_activity_conf_discount, activity_type, joined_seller_activity, is_split_sale, is_split_main_role, is_split_independent_role, is_split_independent_equip, split_equip_sold_happen, show_split_equip_sold_remind, is_onsale_protection_period, onsale_protection_end_time, is_vip_protection, is_time_lock, time_lock_days, equip_in_test_server, buyer_in_test_server, equip_in_allow_take_away_server, is_weijianding, is_show_alipay_privilege, is_seller_redpacket_flag, is_show_expert_desc, is_show_special_highlight, is_xyq_game_role_kunpeng_reach_limit, equip_onsale_version, storage_type, agent_trans_time, kol_article_id, kol_share_id, kol_share_time, kol_share_status, reco_request_id, appointed_roleid, play_team_cnt, random_draw_finish_time, `desc`, large_equip_desc, desc_sumup, desc_sumup_short, diy_desc, rec_desc, diy_desc_pay_info, other_info, video_info, agg_added_attrs, dynamic_tags, highlight, tag_key, tag, search_type, life_skills, school_skills, ju_qing_skills, yushoushu_skill, raw_data_json, create_time, update_time) VALUES (%(eid)s, %(equipid)s, %(equip_sn)s, %(server_name)s, %(serverid)s, %(equip_server_sn)s, %(seller_nickname)s, %(seller_roleid)s, %(area_name)s, %(role_type)s, %(equip_name)s, %(equip_type)s, %(equip_type_name)s, %(equip_type_desc)s, %(level)s, %(equip_level)s, %(equip_level_desc)s, %(level_desc)s, %(subtitle)s, %(equip_pos)s, %(position)s, %(school)s, %(role_grade_limit)s, %(min_buyer_level)s, %(equip_count)s, %(history_price)s, %(split_price_desc)s, %(base_price)s, %(equip_price)s, %(pet_price)s, %(price)s, %(price_desc)s, %(unit_price_desc)s, %(min_unit_price)s, %(price_explanation)s, %(accept_bargain)s, %(bargain_info)s, %(equip_status)s, %(equip_status_desc)s, %(status_desc)s, %(onsale_expire_time_desc)s, %(time_left)s, %(expire_time)s, %(selling_time)s, %(selling_time_ago_desc)s, %(first_onsale_time)s, %(pass_fair_show)s, %(fair_show_time)s, %(fair_show_end_time)s, %(fair_show_end_time_left)s, %(fair_show_poundage)s, %(collect_num)s, %(has_collect)s, %(score)s, %(icon_index)s, %(icon)s, %(equip_face_img)s, %(kindid)s, %(game_channel)s, %(game_ordersn)s, %(whole_game_ordersn)s, %(allow_cross_buy)s, %(cross_server_poundage)s, %(cross_server_poundage_origin)s, %(cross_server_poundage_discount)s, %(cross_server_poundage_discount_label)s, %(cross_server_poundage_display_mode)s, %(cross_server_activity_conf_discount)s, %(activity_type)s, %(joined_seller_activity)s, %(is_split_sale)s, %(is_split_main_role)s, %(is_split_independent_role)s, %(is_split_independent_equip)s, %(split_equip_sold_happen)s, %(show_split_equip_sold_remind)s, %(is_onsale_protection_period)s, %(onsale_protection_end_time)s, %(is_vip_protection)s, %(is_time_lock)s, %(time_lock_days)s, %(equip_in_test_server)s, %(buyer_in_test_server)s, %(equip_in_allow_take_away_server)s, %(is_weijianding)s, %(is_show_alipay_privilege)s, %(is_seller_redpacket_flag)s, %(is_show_expert_desc)s, %(is_show_special_highlight)s, %(is_xyq_game_role_kunpeng_reach_limit)s, %(equip_onsale_version)s, %(storage_type)s, %(agent_trans_time)s, %(kol_article_id)s, %(kol_share_id)s, %(kol_share_time)s, %(kol_share_status)s, %(reco_request_id)s, %(appointed_roleid)s, %(play_team_cnt)s, %(random_draw_finish_time)s, %(desc)s, %(large_equip_desc)s, %(desc_sumup)s, %(desc_sumup_short)s, %(diy_desc)s, %(rec_desc)s, %(diy_desc_pay_info)s, %(other_info)s, %(video_info)s, %(agg_added_attrs)s, %(dynamic_tags)s, %(highlight)s, %(tag_key)s, %(tag)s, %(search_type)s, %(life_skills)s, %(school_skills)s, %(ju_qing_skills)s, %(yushoushu_skill)s, %(raw_data_json)s, %(create_time)s, %(update_time)s)]
+[parameters: {'eid': '202508150000113-723-YIEBLLWOO7ZU', 'equipid': 8231634, 'equip_sn': '55555352', 'server_name': '群星璀璨', 'serverid': 723, 'equip_server_sn': '1259', 'seller_nickname': '许桂麒', 'seller_roleid': '55555352', 'area_name': '天下无双', 'role_type': 'empty', 'equip_name': '55555352', 'equip_type': '997', 'equip_type_name': '神木林', 'equip_type_desc': '', 'level': 109, 'equip_level': 109, 'equip_level_desc': '109级', 'level_desc': '109级', 'subtitle': '109级', 'equip_pos': 0, 'position': 7, 'school': 13, 'role_grade_limit': 0, 'min_buyer_level': 0, 'equip_count': 1, 'history_price': '[{"price": 780000.0, "timestamp": "2025-08-23 10:53:00", "action": "price_change"}]', 'split_price_desc': '[]', 'base_price': 0.0, 'equip_price': 0.0, 'pet_price': 0.0, 'price': 720000.0, 'price_desc': '7200.0', 'unit_price_desc': '', 'min_unit_price': 6100.0, 'price_explanation': '{"chose_price": 720000, "chose_price_diff": 0, "chose_type": "origin", "choice_list": [{"price": 720000, "type": "origin", "label": "原价"}]}', 'accept_bargain': 1, 'bargain_info': '', 'equip_status': 2, 'equip_status_desc': '上架中', 'status_desc': '上架中', 'onsale_expire_time_desc': '5天13时', 'time_left': '2025-08-29 00:33:24', 'expire_time': '2025-08-29 00:33:24', 'selling_time': '2025-08-15 00:33:24', 'selling_time_ago_desc': '8天前', 'first_onsale_time': '2025-08-15 00:33:27.554569', 'pass_fair_show': 1, 'fair_show_time': 0, 'fair_show_end_time': '2025-08-15 00:33:24', 'fair_show_end_time_left': '5分钟' ... 23 parameters truncated ... 'is_split_independent_equip': 0, 'split_equip_sold_happen': 0, 'show_split_equip_sold_remind': 0, 'is_onsale_protection_period': 0, 'onsale_protection_end_time': '2025-08-15 01:03:27', 'is_vip_protection': 0, 'is_time_lock': 0, 'time_lock_days': 0, 'equip_in_test_server': 0, 'buyer_in_test_server': 0, 'equip_in_allow_take_away_server': 0, 'is_weijianding': 0, 'is_show_alipay_privilege': 0, 'is_seller_redpacket_flag': 0, 'is_show_expert_desc': -1, 'is_show_special_highlight': 0, 'is_xyq_game_role_kunpeng_reach_limit': 0, 'equip_onsale_version': 1, 'storage_type': 4, 'agent_trans_time': 0, 'kol_article_id': '', 'kol_share_id': '', 'kol_share_time': '', 'kol_share_status': '', 'reco_request_id': '1755917713902Qr2f0', 'appointed_roleid': '', 'play_team_cnt': 0, 'random_draw_finish_time': '2025-08-15 01:18:27', 'desc': '@yF0hJQaMztEMhthZ@IlFcdTAwMWRcdTAwMTJcdTAwMDc/JVx1MDAwNVwiXHUwMDE1XHUwMDA2XHUwMDFhIVxyXHUwMDAyXHI2W3xcdTAwMDZEaFx1MDAxMFxyIShcdTAwMWQhKFx1MDAxYVZSclw ... (99481 characters truncated) ... bll9fTxkVlx0bGE1XUR4XHUwMDFhKV1cdTAwMDU/XHUwMDBlXHUwMDBmLFx1MDAxN1x1MDAxMWd3SlZEeDEjQlx1MDAwN1x1MDAxOTJcdTAwMGU/XHUwMDFmVlx1MDA3Zlx1MDA3ZltBWnYkbyI=@', 'large_equip_desc': '(["iExptSki3":17,"AchPointTotal":4569,"iPoint":0,"changesch":({1,13,4,13,10,}),"iCor_All":121,"HeroScore":2352,"iHp":3080,"qicai_score":106,"more_att ... (29064 characters truncated) ... ({(["desc":"21278256号豪宅 规格12303 紫气东来 庭园规模大型",]),}),"iMarry2":0,"icolor_ex":0,"dup_score":201,"sum_exp":293,"iCGTotalAmount":150,"iCGBodyAmount":30,])', 'desc_sumup': '成就:4569 总修:64 总宠修:68', 'desc_sumup_short': '成就:4569 总修:64 总宠修:68', 'diy_desc': '', 'rec_desc': None, 'diy_desc_pay_info': '{"is_show_agreement": false, "is_need_pay": false, "diy_desc_fee": 0, "is_pay_service": false, "is_show_pay_agreement": false}', 'other_info': '@yF0hJQaMztEMhthZ@Ilx1MDAwMmRFXHUwMDFiLyNcdTAwMGY4XHUwMDE3Vlx1MDA3Zm1dQV1vTHVcdTAwMDVaZnFDLFx1MDAxZVx1MDAxMFx1MDAxYSBcclx1MDAxOFx1MDAxY1x1MDAwNVx1MDA ... (3213 characters truncated) ... MTR4XHUwMDE5R3R3XFxBXmNZXHUwMDFhRV56Ylx1MDAwM1x1MDAxMVx1MDAwZkAjKFxyTl5uWVx1MDAxYUVeemJcdTAwMDNcdTAwMTFcdTAwMGZBJyxYKFx1MDAxZG5cdTAwMWYjVVJ8aUMwIg==@', 'video_info': '{"video_desc": "109级神木林上新啦~总修64，总宠修68，师门技能7个满，辅助技能4个满，潜能全满，赶紧入手吧！", "video_type_desc": "亮点解析", "video_cover_url": "http://cc.fp.ps.netease.com/file/6 ... (332 characters truncated) ... 80, "video_version": "MDJS_3.0", "duration": "28.35", "has_video": true, "height": 1440, "video_type_short_desc": "亮点", "video_title": "小阁推荐109级神木林"}', 'agg_added_attrs': '', 'dynamic_tags': '', 'highlight': '[["神器五行12水", 70, {"key": "shenqi_wuxing_12_id", "value": 8}], ["绮梦泳圈", 70, {"key": "shenqi_wuxing_12_id", "value": 8}], ["机缘属性优秀", 60, {"key": "full_jiyuan", "value": "机缘属性优秀"}]]', 'tag_key': '{"discover_tag": null, "is_from_ad_reco": 0, "suggestion_tag": null, "tag": "user", "nlp_desc_tag": ""}', 'tag': 'user', 'search_type': 'overall_role_search', 'life_skills': '{"暗器技巧": 50, "逃离技巧": 40, "冥想": 140, "巧匠之术": 45, "雨之感应": 1, "养生之道": 107, "中药医理": 140, "雪之感应": 1, "强壮": 43, "炼金术": 100, "熔炼技巧": 21, "强身术": 129, "追捕技巧": 40, "风之感应": 1, "健身术": 140, "淬灵之术": 22, "烹饪技巧": 140, "打造技巧": 103, "裁缝技巧": 104, "神速": 42, "灵石技巧": 55}', 'school_skills': '{"驭灵咒": 119, "神木恩泽": 119, "万灵诸念": 119, "万物轮转": 119, "天人庇护": 119, "瞬息万变": 123, "巫咒": 119}', 'ju_qing_skills': '{"翰墨之道": 3, "妙手空空": 1, "变化之术": 6, "仙灵店铺": 5, "宝石工艺": 3, "丹青之道": 2, "丹元济会": 1}', 'yushoushu_skill': 0, 'raw_data_json': None, 'create_time': '2025-08-15 03:25:46', 'update_time': '2025-08-23 10:55:17'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:20:12,453 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:20:24,544 - INFO - 已迁移 4900/14165 条roles数据
+2025-09-16 23:20:37,263 - INFO - 已迁移 5000/14165 条roles数据
+2025-09-16 23:20:49,678 - INFO - 已迁移 5100/14165 条roles数据
+2025-09-16 23:21:03,383 - INFO - 已迁移 5200/14165 条roles数据
+2025-09-16 23:21:14,580 - INFO - 已迁移 5300/14165 条roles数据
+2025-09-16 23:21:29,088 - INFO - 已迁移 5400/14165 条roles数据
+2025-09-16 23:21:41,725 - INFO - 已迁移 5500/14165 条roles数据
+2025-09-16 23:21:55,626 - INFO - 已迁移 5600/14165 条roles数据
+2025-09-16 23:22:09,240 - INFO - 已迁移 5700/14165 条roles数据
+2025-09-16 23:22:21,610 - INFO - 已迁移 5800/14165 条roles数据
+2025-09-16 23:22:34,850 - INFO - 已迁移 5900/14165 条roles数据
+2025-09-16 23:22:47,245 - INFO - 已迁移 6000/14165 条roles数据
+2025-09-16 23:23:01,044 - INFO - 已迁移 6100/14165 条roles数据
+2025-09-16 23:23:15,439 - INFO - 已迁移 6200/14165 条roles数据
+2025-09-16 23:23:29,117 - INFO - 已迁移 6300/14165 条roles数据
+2025-09-16 23:23:44,462 - INFO - 已迁移 6400/14165 条roles数据
+2025-09-16 23:23:55,534 - INFO - 已迁移 6500/14165 条roles数据
+2025-09-16 23:24:06,796 - INFO - 已迁移 6600/14165 条roles数据
+2025-09-16 23:24:13,987 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:24:19,016 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:24:41,200 - INFO - 已迁移 6700/14165 条roles数据
+2025-09-16 23:24:54,838 - INFO - 已迁移 6800/14165 条roles数据
+2025-09-16 23:25:11,483 - INFO - 已迁移 6900/14165 条roles数据
+2025-09-16 23:25:25,740 - INFO - 已迁移 7000/14165 条roles数据
+2025-09-16 23:25:39,706 - INFO - 已迁移 7100/14165 条roles数据
+2025-09-16 23:25:55,523 - INFO - 已迁移 7200/14165 条roles数据
+2025-09-16 23:26:10,071 - INFO - 已迁移 7300/14165 条roles数据
+2025-09-16 23:26:23,944 - INFO - 已迁移 7400/14165 条roles数据
+2025-09-16 23:26:38,137 - INFO - 已迁移 7500/14165 条roles数据
+2025-09-16 23:26:51,068 - INFO - 已迁移 7600/14165 条roles数据
+2025-09-16 23:27:05,590 - INFO - 已迁移 7700/14165 条roles数据
+2025-09-16 23:27:19,109 - INFO - 已迁移 7800/14165 条roles数据
+2025-09-16 23:27:34,696 - INFO - 已迁移 7900/14165 条roles数据
+2025-09-16 23:27:48,810 - INFO - 已迁移 8000/14165 条roles数据
+2025-09-16 23:28:05,709 - INFO - 已迁移 8100/14165 条roles数据
+2025-09-16 23:28:20,684 - INFO - 已迁移 8200/14165 条roles数据
+2025-09-16 23:28:37,441 - INFO - 已迁移 8300/14165 条roles数据
+2025-09-16 23:28:54,884 - INFO - 已迁移 8400/14165 条roles数据
+2025-09-16 23:29:10,504 - INFO - 已迁移 8500/14165 条roles数据
+2025-09-16 23:29:24,315 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+[SQL: INSERT INTO roles (eid, equipid, equip_sn, server_name, serverid, equip_server_sn, seller_nickname, seller_roleid, area_name, role_type, equip_name, equip_type, equip_type_name, equip_type_desc, level, equip_level, equip_level_desc, level_desc, subtitle, equip_pos, `position`, school, role_grade_limit, min_buyer_level, equip_count, history_price, split_price_desc, base_price, equip_price, pet_price, price, price_desc, unit_price_desc, min_unit_price, price_explanation, accept_bargain, bargain_info, equip_status, equip_status_desc, status_desc, onsale_expire_time_desc, time_left, expire_time, selling_time, selling_time_ago_desc, first_onsale_time, pass_fair_show, fair_show_time, fair_show_end_time, fair_show_end_time_left, fair_show_poundage, collect_num, has_collect, score, icon_index, icon, equip_face_img, kindid, game_channel, game_ordersn, whole_game_ordersn, allow_cross_buy, cross_server_poundage, cross_server_poundage_origin, cross_server_poundage_discount, cross_server_poundage_discount_label, cross_server_poundage_display_mode, cross_server_activity_conf_discount, activity_type, joined_seller_activity, is_split_sale, is_split_main_role, is_split_independent_role, is_split_independent_equip, split_equip_sold_happen, show_split_equip_sold_remind, is_onsale_protection_period, onsale_protection_end_time, is_vip_protection, is_time_lock, time_lock_days, equip_in_test_server, buyer_in_test_server, equip_in_allow_take_away_server, is_weijianding, is_show_alipay_privilege, is_seller_redpacket_flag, is_show_expert_desc, is_show_special_highlight, is_xyq_game_role_kunpeng_reach_limit, equip_onsale_version, storage_type, agent_trans_time, kol_article_id, kol_share_id, kol_share_time, kol_share_status, reco_request_id, appointed_roleid, play_team_cnt, random_draw_finish_time, `desc`, large_equip_desc, desc_sumup, desc_sumup_short, diy_desc, rec_desc, diy_desc_pay_info, other_info, video_info, agg_added_attrs, dynamic_tags, highlight, tag_key, tag, search_type, life_skills, school_skills, ju_qing_skills, yushoushu_skill, raw_data_json, create_time, update_time) VALUES (%(eid)s, %(equipid)s, %(equip_sn)s, %(server_name)s, %(serverid)s, %(equip_server_sn)s, %(seller_nickname)s, %(seller_roleid)s, %(area_name)s, %(role_type)s, %(equip_name)s, %(equip_type)s, %(equip_type_name)s, %(equip_type_desc)s, %(level)s, %(equip_level)s, %(equip_level_desc)s, %(level_desc)s, %(subtitle)s, %(equip_pos)s, %(position)s, %(school)s, %(role_grade_limit)s, %(min_buyer_level)s, %(equip_count)s, %(history_price)s, %(split_price_desc)s, %(base_price)s, %(equip_price)s, %(pet_price)s, %(price)s, %(price_desc)s, %(unit_price_desc)s, %(min_unit_price)s, %(price_explanation)s, %(accept_bargain)s, %(bargain_info)s, %(equip_status)s, %(equip_status_desc)s, %(status_desc)s, %(onsale_expire_time_desc)s, %(time_left)s, %(expire_time)s, %(selling_time)s, %(selling_time_ago_desc)s, %(first_onsale_time)s, %(pass_fair_show)s, %(fair_show_time)s, %(fair_show_end_time)s, %(fair_show_end_time_left)s, %(fair_show_poundage)s, %(collect_num)s, %(has_collect)s, %(score)s, %(icon_index)s, %(icon)s, %(equip_face_img)s, %(kindid)s, %(game_channel)s, %(game_ordersn)s, %(whole_game_ordersn)s, %(allow_cross_buy)s, %(cross_server_poundage)s, %(cross_server_poundage_origin)s, %(cross_server_poundage_discount)s, %(cross_server_poundage_discount_label)s, %(cross_server_poundage_display_mode)s, %(cross_server_activity_conf_discount)s, %(activity_type)s, %(joined_seller_activity)s, %(is_split_sale)s, %(is_split_main_role)s, %(is_split_independent_role)s, %(is_split_independent_equip)s, %(split_equip_sold_happen)s, %(show_split_equip_sold_remind)s, %(is_onsale_protection_period)s, %(onsale_protection_end_time)s, %(is_vip_protection)s, %(is_time_lock)s, %(time_lock_days)s, %(equip_in_test_server)s, %(buyer_in_test_server)s, %(equip_in_allow_take_away_server)s, %(is_weijianding)s, %(is_show_alipay_privilege)s, %(is_seller_redpacket_flag)s, %(is_show_expert_desc)s, %(is_show_special_highlight)s, %(is_xyq_game_role_kunpeng_reach_limit)s, %(equip_onsale_version)s, %(storage_type)s, %(agent_trans_time)s, %(kol_article_id)s, %(kol_share_id)s, %(kol_share_time)s, %(kol_share_status)s, %(reco_request_id)s, %(appointed_roleid)s, %(play_team_cnt)s, %(random_draw_finish_time)s, %(desc)s, %(large_equip_desc)s, %(desc_sumup)s, %(desc_sumup_short)s, %(diy_desc)s, %(rec_desc)s, %(diy_desc_pay_info)s, %(other_info)s, %(video_info)s, %(agg_added_attrs)s, %(dynamic_tags)s, %(highlight)s, %(tag_key)s, %(tag)s, %(search_type)s, %(life_skills)s, %(school_skills)s, %(ju_qing_skills)s, %(yushoushu_skill)s, %(raw_data_json)s, %(create_time)s, %(update_time)s)]
+[parameters: {'eid': '202508042000113-791-AUNLU0EPN99R', 'equipid': 5922005, 'equip_sn': '13536931', 'server_name': '诗情画意', 'serverid': 791, 'equip_server_sn': '1327', 'seller_nickname': '追忆星辰', 'seller_roleid': '13536931', 'area_name': '天下无双', 'role_type': 'empty', 'equip_name': '13536931', 'equip_type': '3744', 'equip_type_name': '天宫', 'equip_type_desc': '', 'level': 109, 'equip_level': 109, 'equip_level_desc': '109级', 'level_desc': '109级', 'subtitle': '109级', 'equip_pos': 0, 'position': 13, 'school': 5, 'role_grade_limit': 0, 'min_buyer_level': 0, 'equip_count': 1, 'history_price': '[{"price": 1299900.0, "timestamp": "2025-08-23 16:25:10", "action": "price_change"}]', 'split_price_desc': '[]', 'base_price': 0.0, 'equip_price': 0.0, 'pet_price': 0.0, 'price': 1269900.0, 'price_desc': '12699.0', 'unit_price_desc': '', 'min_unit_price': 6100.0, 'price_explanation': '{"chose_price": 1269900, "chose_price_diff": 0, "chose_type": "origin", "choice_list": [{"price": 1269900, "type": "origin", "label": "原价"}]}', 'accept_bargain': 0, 'bargain_info': '', 'equip_status': 2, 'equip_status_desc': '上架中', 'status_desc': '上架中', 'onsale_expire_time_desc': '8天6时', 'time_left': '2025-08-31 22:35:28', 'expire_time': '2025-08-31 22:35:28', 'selling_time': '2025-08-17 22:35:28', 'selling_time_ago_desc': '5天前', 'first_onsale_time': '2025-08-04 20:20:26.640910', 'pass_fair_show': 1, 'fair_show_time': 0, 'fair_show_end_time': '2025-08-04 20:20:26', 'fair_show_end_time_left': '5分钟' ... 23 parameters truncated ... 'is_split_independent_equip': 0, 'split_equip_sold_happen': 0, 'show_split_equip_sold_remind': 0, 'is_onsale_protection_period': 0, 'onsale_protection_end_time': '2025-08-04 20:50:26', 'is_vip_protection': 0, 'is_time_lock': 0, 'time_lock_days': 0, 'equip_in_test_server': 0, 'buyer_in_test_server': 0, 'equip_in_allow_take_away_server': 0, 'is_weijianding': 0, 'is_show_alipay_privilege': 0, 'is_seller_redpacket_flag': 0, 'is_show_expert_desc': -1, 'is_show_special_highlight': 0, 'is_xyq_game_role_kunpeng_reach_limit': 0, 'equip_onsale_version': 3, 'storage_type': 4, 'agent_trans_time': 0, 'kol_article_id': '', 'kol_share_id': '', 'kol_share_time': '', 'kol_share_status': '', 'reco_request_id': '1755937501488HBtZM', 'appointed_roleid': '', 'play_team_cnt': 0, 'random_draw_finish_time': '2025-08-17 22:50:28', 'desc': '@ceDSULBbVu21n1AD@Iks+ZjwgOCZccjlcdTAwMDdtXVx1MDAwYkckKEFfdVx1MDA3Zndcci5cdTAwMGVcdTAwMDRcdTAwMWNWVFx1MDAxY1x1MDAxM3tsOFR+e1x1MDAwZW4jXHUwMDBlOipBWlx ... (165489 characters truncated) ... MDA3ZnclJlx1MDAxYXRPXHUwMDAzXHUwMDA2QmxoaFx1MDAxZUxoXHUwMDBlfGBgXHUwMDAxOVx1MDAxOF9EMV8gKVx1MDAwNkd+cXdgYCozXHUwMDA3XWJccl4zIUFfdWBmenFOXHUwMDBiXFwi@', 'large_equip_desc': '(["chat_effect":({(["id":26227,"name":"财源滚滚",]),(["id":26244,"name":"九霄龙吟",]),(["id":26367,"name":"霓彩幻想",]),}),"iZhuanZhi":0,"iPoint":0,"iBeastSki1": ... (48208 characters truncated) ... id":61011,"name":"钟灵",]),(["id":61060,"name":"聚财",]),}),"house_indoor_packet_cnt":70,"iCGBoxAmount":9,"iDex_All":516,"iExptSki2":17,"iMaxExpt1":20,])', 'desc_sumup': '成就:6499 总修:68 总宠修:68', 'desc_sumup_short': '成就:6499 总修:68 总宠修:68', 'diy_desc': '', 'rec_desc': None, 'diy_desc_pay_info': '{"is_show_agreement": false, "is_need_pay": false, "diy_desc_fee": 0, "is_pay_service": false, "is_show_pay_agreement": false}', 'other_info': '@ceDSULBbVu21n1AD@Ilx1MDAxOEcxIDA+LFx1MDAxNztXXGJcdTAwMTFfXHUwMDAydHdVXFx3YnlsYFx1MDAwMzJcdTAwMTFtXFxcdTAwMGJdNVx1MDAxYlx1MDAwMlx1MDAxMTAhJm54QlxyKFx ... (3809 characters truncated) ... RHd2UlVcdTAwMTgmYC9xU2xDXHUwMDA2XGJXXHUwMDExXHUwMDFkMVVVdzFcdDl2XHUwMDA0M1x1MDAxMFxiXHUwMDA3Vlx1MDAxMVx1MDAxZDFVVXcxXHQ5d1x1MDAwMDdFbkRaVyQhWVN8cSgi@', 'video_info': '{"video_desc": "109级天宫上新啦~总修68，总宠修68，师门技能7个满，辅助技能11个满，装备平均6锻，潜能全满，赶紧入手吧！", "video_type_desc": "亮点解析", "video_cover_url": "http://cc.fp.ps.netease.com ... (339 characters truncated) ... 080, "video_version": "MDJS_3.0", "duration": "39.49", "has_video": true, "height": 1440, "video_type_short_desc": "亮点", "video_title": "小阁推荐109级天宫"}', 'agg_added_attrs': '', 'dynamic_tags': '', 'highlight': '[["锦衣130件", 80, {"key": "clothes_num", "value": 130}], ["成就6499", 75, {"key": "clothes_num", "value": 130}], ["神器五行12金", 70, {"key": "shenqi_wuxing_12_id", "value": 1}]]', 'tag_key': '{"discover_tag": null, "is_from_ad_reco": 0, "suggestion_tag": null, "tag": "user", "nlp_desc_tag": ""}', 'tag': 'user', 'search_type': 'overall_role_search', 'life_skills': '{"暗器技巧": 140, "雪之感应": 10, "打造技巧": 50, "巧匠之术": 129, "冥想": 140, "炼金术": 51, "风之感应": 20, "逃离技巧": 40, "养生之道": 140, "熔炼技巧": 129, "淬灵之术": 10, "灵石技巧": 120, "烹饪技巧": 140, "健身术": 140, "强身术": 129, "雨之感应": 10, "强壮": 37, "中药医理": 160, "裁缝技巧": 55, "追捕技巧": 100, "神速": 38}', 'school_skills': '{"乾坤塔": 119, "傲世诀": 119, "宁气诀": 119, "云霄步": 119, "天罡气": 119, "混天术": 119, "清明自在": 119}', 'ju_qing_skills': '{"变化之术": 6, "奇门遁甲": 3, "翰墨之道": 2, "丹青之道": 2, "仙灵店铺": 5}', 'yushoushu_skill': 0, 'raw_data_json': None, 'create_time': '2025-08-15 04:20:46', 'update_time': '2025-08-23 16:25:10'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:29:29,341 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:29:41,576 - INFO - 已迁移 8600/14165 条roles数据
+2025-09-16 23:29:57,012 - INFO - 已迁移 8700/14165 条roles数据
+2025-09-16 23:30:11,762 - INFO - 已迁移 8800/14165 条roles数据
+2025-09-16 23:30:26,523 - INFO - 已迁移 8900/14165 条roles数据
+2025-09-16 23:30:44,570 - INFO - 已迁移 9000/14165 条roles数据
+2025-09-16 23:31:00,534 - INFO - 已迁移 9100/14165 条roles数据
+2025-09-16 23:31:16,532 - INFO - 已迁移 9200/14165 条roles数据
+2025-09-16 23:31:32,116 - INFO - 已迁移 9300/14165 条roles数据
+2025-09-16 23:31:48,791 - INFO - 已迁移 9400/14165 条roles数据
+2025-09-16 23:32:06,220 - INFO - 已迁移 9500/14165 条roles数据
+2025-09-16 23:32:23,627 - INFO - 已迁移 9600/14165 条roles数据
+2025-09-16 23:32:41,379 - INFO - 已迁移 9700/14165 条roles数据
+2025-09-16 23:32:57,139 - INFO - 已迁移 9800/14165 条roles数据
+2025-09-16 23:33:14,488 - INFO - 已迁移 9900/14165 条roles数据
+2025-09-16 23:33:28,553 - INFO - 已迁移 10000/14165 条roles数据
+2025-09-16 23:33:42,716 - INFO - 已迁移 10100/14165 条roles数据
+2025-09-16 23:33:56,282 - INFO - 已迁移 10200/14165 条roles数据
+2025-09-16 23:34:11,178 - INFO - 已迁移 10300/14165 条roles数据
+2025-09-16 23:34:25,793 - INFO - 已迁移 10400/14165 条roles数据
+2025-09-16 23:34:41,267 - INFO - 已迁移 10500/14165 条roles数据
+2025-09-16 23:34:59,264 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+[SQL: INSERT INTO roles (eid, equipid, equip_sn, server_name, serverid, equip_server_sn, seller_nickname, seller_roleid, area_name, role_type, equip_name, equip_type, equip_type_name, equip_type_desc, level, equip_level, equip_level_desc, level_desc, subtitle, equip_pos, `position`, school, role_grade_limit, min_buyer_level, equip_count, history_price, split_price_desc, base_price, equip_price, pet_price, price, price_desc, unit_price_desc, min_unit_price, price_explanation, accept_bargain, bargain_info, equip_status, equip_status_desc, status_desc, onsale_expire_time_desc, time_left, expire_time, selling_time, selling_time_ago_desc, first_onsale_time, pass_fair_show, fair_show_time, fair_show_end_time, fair_show_end_time_left, fair_show_poundage, collect_num, has_collect, score, icon_index, icon, equip_face_img, kindid, game_channel, game_ordersn, whole_game_ordersn, allow_cross_buy, cross_server_poundage, cross_server_poundage_origin, cross_server_poundage_discount, cross_server_poundage_discount_label, cross_server_poundage_display_mode, cross_server_activity_conf_discount, activity_type, joined_seller_activity, is_split_sale, is_split_main_role, is_split_independent_role, is_split_independent_equip, split_equip_sold_happen, show_split_equip_sold_remind, is_onsale_protection_period, onsale_protection_end_time, is_vip_protection, is_time_lock, time_lock_days, equip_in_test_server, buyer_in_test_server, equip_in_allow_take_away_server, is_weijianding, is_show_alipay_privilege, is_seller_redpacket_flag, is_show_expert_desc, is_show_special_highlight, is_xyq_game_role_kunpeng_reach_limit, equip_onsale_version, storage_type, agent_trans_time, kol_article_id, kol_share_id, kol_share_time, kol_share_status, reco_request_id, appointed_roleid, play_team_cnt, random_draw_finish_time, `desc`, large_equip_desc, desc_sumup, desc_sumup_short, diy_desc, rec_desc, diy_desc_pay_info, other_info, video_info, agg_added_attrs, dynamic_tags, highlight, tag_key, tag, search_type, life_skills, school_skills, ju_qing_skills, yushoushu_skill, raw_data_json, create_time, update_time) VALUES (%(eid)s, %(equipid)s, %(equip_sn)s, %(server_name)s, %(serverid)s, %(equip_server_sn)s, %(seller_nickname)s, %(seller_roleid)s, %(area_name)s, %(role_type)s, %(equip_name)s, %(equip_type)s, %(equip_type_name)s, %(equip_type_desc)s, %(level)s, %(equip_level)s, %(equip_level_desc)s, %(level_desc)s, %(subtitle)s, %(equip_pos)s, %(position)s, %(school)s, %(role_grade_limit)s, %(min_buyer_level)s, %(equip_count)s, %(history_price)s, %(split_price_desc)s, %(base_price)s, %(equip_price)s, %(pet_price)s, %(price)s, %(price_desc)s, %(unit_price_desc)s, %(min_unit_price)s, %(price_explanation)s, %(accept_bargain)s, %(bargain_info)s, %(equip_status)s, %(equip_status_desc)s, %(status_desc)s, %(onsale_expire_time_desc)s, %(time_left)s, %(expire_time)s, %(selling_time)s, %(selling_time_ago_desc)s, %(first_onsale_time)s, %(pass_fair_show)s, %(fair_show_time)s, %(fair_show_end_time)s, %(fair_show_end_time_left)s, %(fair_show_poundage)s, %(collect_num)s, %(has_collect)s, %(score)s, %(icon_index)s, %(icon)s, %(equip_face_img)s, %(kindid)s, %(game_channel)s, %(game_ordersn)s, %(whole_game_ordersn)s, %(allow_cross_buy)s, %(cross_server_poundage)s, %(cross_server_poundage_origin)s, %(cross_server_poundage_discount)s, %(cross_server_poundage_discount_label)s, %(cross_server_poundage_display_mode)s, %(cross_server_activity_conf_discount)s, %(activity_type)s, %(joined_seller_activity)s, %(is_split_sale)s, %(is_split_main_role)s, %(is_split_independent_role)s, %(is_split_independent_equip)s, %(split_equip_sold_happen)s, %(show_split_equip_sold_remind)s, %(is_onsale_protection_period)s, %(onsale_protection_end_time)s, %(is_vip_protection)s, %(is_time_lock)s, %(time_lock_days)s, %(equip_in_test_server)s, %(buyer_in_test_server)s, %(equip_in_allow_take_away_server)s, %(is_weijianding)s, %(is_show_alipay_privilege)s, %(is_seller_redpacket_flag)s, %(is_show_expert_desc)s, %(is_show_special_highlight)s, %(is_xyq_game_role_kunpeng_reach_limit)s, %(equip_onsale_version)s, %(storage_type)s, %(agent_trans_time)s, %(kol_article_id)s, %(kol_share_id)s, %(kol_share_time)s, %(kol_share_status)s, %(reco_request_id)s, %(appointed_roleid)s, %(play_team_cnt)s, %(random_draw_finish_time)s, %(desc)s, %(large_equip_desc)s, %(desc_sumup)s, %(desc_sumup_short)s, %(diy_desc)s, %(rec_desc)s, %(diy_desc_pay_info)s, %(other_info)s, %(video_info)s, %(agg_added_attrs)s, %(dynamic_tags)s, %(highlight)s, %(tag_key)s, %(tag)s, %(search_type)s, %(life_skills)s, %(school_skills)s, %(ju_qing_skills)s, %(yushoushu_skill)s, %(raw_data_json)s, %(create_time)s, %(update_time)s)]
+[parameters: {'eid': '202508101100113-795-AZCINKAOXZJS', 'equipid': 6108759, 'equip_sn': '15623606', 'server_name': '超凡入圣', 'serverid': 795, 'equip_server_sn': '1331', 'seller_nickname': '有点酸溜溜．', 'seller_roleid': '15623606', 'area_name': '天下无双', 'role_type': 'empty', 'equip_name': '15623606', 'equip_type': '55970', 'equip_type_name': '九黎城', 'equip_type_desc': '', 'level': 109, 'equip_level': 109, 'equip_level_desc': '109级', 'level_desc': '109级', 'subtitle': '109级', 'equip_pos': 0, 'position': 3, 'school': 20, 'role_grade_limit': 0, 'min_buyer_level': 0, 'equip_count': 1, 'history_price': '[]', 'split_price_desc': '[]', 'base_price': 0.0, 'equip_price': 0.0, 'pet_price': 0.0, 'price': 1860000.0, 'price_desc': '18600.0', 'unit_price_desc': '', 'min_unit_price': 6100.0, 'price_explanation': '{"chose_price": 1860000, "chose_price_diff": 0, "chose_type": "origin", "choice_list": [{"price": 1860000, "type": "origin", "label": "原价"}]}', 'accept_bargain': 1, 'bargain_info': '', 'equip_status': 2, 'equip_status_desc': '上架中', 'status_desc': '上架中', 'onsale_expire_time_desc': '13天6时', 'time_left': '2025-08-28 19:40:26', 'expire_time': '2025-08-28 19:40:26', 'selling_time': '2025-08-14 19:40:26', 'selling_time_ago_desc': '17小时前', 'first_onsale_time': '2025-08-10 11:19:00.558448', 'pass_fair_show': 1, 'fair_show_time': 0, 'fair_show_end_time': '2025-08-10 11:14:01', 'fair_show_end_time_left': '5分钟' ... 23 parameters truncated ... 'is_split_independent_equip': 0, 'split_equip_sold_happen': 1, 'show_split_equip_sold_remind': 0, 'is_onsale_protection_period': 0, 'onsale_protection_end_time': '2025-08-10 19:18:50', 'is_vip_protection': 0, 'is_time_lock': 0, 'time_lock_days': 0, 'equip_in_test_server': 0, 'buyer_in_test_server': 0, 'equip_in_allow_take_away_server': 0, 'is_weijianding': 0, 'is_show_alipay_privilege': 0, 'is_seller_redpacket_flag': 0, 'is_show_expert_desc': -1, 'is_show_special_highlight': 0, 'is_xyq_game_role_kunpeng_reach_limit': 0, 'equip_onsale_version': 3, 'storage_type': 4, 'agent_trans_time': 0, 'kol_article_id': '', 'kol_share_id': '', 'kol_share_time': '', 'kol_share_status': '', 'reco_request_id': '17552329245622faVb', 'appointed_roleid': '', 'play_team_cnt': 0, 'random_draw_finish_time': '2025-08-14 19:55:26', 'desc': '@C362PRjDh1NRuqag@ImtoXHUwMDE0XSUmXHUwMDBlK1x1MDAwN0NcdTAwMTE+XHUwMDEwXHUwMDA3XHUwMDA0XHUwMDBiYVx0XHUwMDA3XHUwMDFlclx1MDAxM1x1MDAwNig6WCo3XHUwMDA3U1t ... (91281 characters truncated) ... dTAwMWFcdTAwMWFcdTAwMTAzPVx1MDAwNylcdTAwMWRuIDNcdTAwMThcdTAwMTRDXWFcdTAwMTFcdTAwMWFcdTAwMTBcdTAwMTg3XHUwMDE4KztSISBcdTAwMTBTW1Z1XHUwMDAzXHUwMDFhb3ki@', 'large_equip_desc': '(["iTotalMagDef_all":730,"outdoor_level":1,"AllRider":([3:(["all_skills":([600:3,601:2,]),"iType":507,"exgrow":23433,"ExtraGrow":100,"iGrade":125,"ma ... (24571 characters truncated) ... ,]),(["lv":8,"idx":16,]),(["lv":31,"idx":17,]),}),]),"propKept":([0:(["iSpe":118,"iMag":122,"iCor":121,"iStr":670,"iRes":117,]),]),"HeroScore":160,])', 'desc_sumup': '成就:1691 总修:57 总宠修:68', 'desc_sumup_short': '成就:1691 总修:57 总宠修:68', 'diy_desc': '', 'rec_desc': None, 'diy_desc_pay_info': '{"is_show_agreement": false, "is_need_pay": false, "diy_desc_fee": 0, "is_pay_service": false, "is_show_pay_agreement": false}', 'other_info': '@C362PRjDh1NRuqag@IjhcdTAwMTFDQTUgXHUwMDA0MVx1MDAwNVx1MDAxM3RyRERXVXBcdTAwMDVcdTAwMDZcdTAwMDR8ckglXGZVXHUwMDExP1x1MDAxMFx1MDAxZFx1MDAxNThcIkdCQCNwUGQ ... (4273 characters truncated) ... MDJcdTAwMDBcdTAwMGJhcjYxXlx1MDAwMX0wKVx1MDAwNFVcdTAwMDEmVlxmXHUwMDA3Z3I2MV5cdTAwMDF9MClcdTAwMDRUXHUwMDA1XCJcdTAwMDNqR2Q0XHUwMDBmIVJcdTAwMDd2cFxiIg==@', 'video_info': '{"video_desc": "109级九黎城上新啦~总修57，总宠修68，辅助技能1个满，装备平均7锻，灵饰平均5锻，潜能全满，赶紧入手吧！", "video_type_desc": "亮点解析", "video_cover_url": "http://cc.fp.ps.netease.com/ ... (337 characters truncated) ... 80, "video_version": "MDJS_3.0", "duration": "48.05", "has_video": true, "height": 1440, "video_type_short_desc": "亮点", "video_title": "小阁推荐109级九黎城"}', 'agg_added_attrs': '', 'dynamic_tags': '', 'highlight': '[["武器锦衣2件", 80, {}], ["锦衣59件", 60, {"key": "clothes_num", "value": 59}], ["机缘属性优秀", 60, {"key": "full_jiyuan", "value": "机缘属性优秀"}]]', 'tag_key': '{"discover_tag": null, "is_from_ad_reco": 0, "suggestion_tag": null, "tag": "user", "nlp_desc_tag": ""}', 'tag': 'user', 'search_type': 'overall_role_search', 'life_skills': '{"巧匠之术": 1, "熔炼技巧": 1, "健身术": 89, "逃离技巧": 1, "养生之道": 42, "灵石技巧": 1, "冥想": 101, "风之感应": 1, "神速": 21, "强壮": 30, "淬灵之术": 1, "炼金术": 1, "中药医理": 25, "暗器技巧": 1, "裁缝技巧": 1, "打造技巧": 1, "追捕技巧": 1, "烹饪技巧": 1, "雪之感应": 1, "雨之感应": 1, "强身术": 129}', 'school_skills': '{"战火雄魂": 119, "兵铸乾坤": 119, "燃铁飞花": 119, "风行九黎": 119, "魔神降世": 119, "九黎战歌": 119, "魂枫战舞": 119}', 'ju_qing_skills': '{"丹元济会": 2, "变化之术": 6, "仙灵店铺": 5, "丹青之道": 1, "翰墨之道": 1}', 'yushoushu_skill': 0, 'raw_data_json': None, 'create_time': '2025-08-15 04:42:08', 'update_time': '2025-08-15 12:42:07'}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:35:04,475 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:35:13,277 - INFO - 已迁移 10600/14165 条roles数据
+2025-09-16 23:35:28,852 - INFO - 已迁移 10700/14165 条roles数据
+2025-09-16 23:35:42,668 - INFO - 已迁移 10800/14165 条roles数据
+2025-09-16 23:35:57,238 - INFO - 已迁移 10900/14165 条roles数据
+2025-09-16 23:36:11,943 - INFO - 已迁移 11000/14165 条roles数据
+2025-09-16 23:36:28,636 - INFO - 已迁移 11100/14165 条roles数据
+2025-09-16 23:36:32,614 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:36:37,616 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:36:42,619 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:36:47,626 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:36:52,633 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:36:57,637 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:37:02,640 - WARNING - 插入单条数据失败: (pymysql.err.OperationalError) (2013, 'Lost connection to MySQL server during query')
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-16 23:37:24,327 - INFO - 已迁移 11200/14165 条roles数据
+2025-09-16 23:37:45,639 - INFO - 已迁移 11300/14165 条roles数据
+2025-09-16 23:38:02,988 - INFO - 已迁移 11400/14165 条roles数据
+2025-09-16 23:38:18,780 - INFO - 已迁移 11500/14165 条roles数据
+2025-09-16 23:38:32,388 - INFO - 已迁移 11600/14165 条roles数据
+2025-09-16 23:38:46,435 - INFO - 已迁移 11700/14165 条roles数据
+2025-09-16 23:39:01,856 - INFO - 已迁移 11800/14165 条roles数据
+2025-09-16 23:39:14,694 - INFO - 已迁移 11900/14165 条roles数据
+2025-09-16 23:39:28,121 - INFO - 已迁移 12000/14165 条roles数据
+2025-09-16 23:39:41,473 - INFO - 已迁移 12100/14165 条roles数据
+2025-09-16 23:39:55,316 - INFO - 已迁移 12200/14165 条roles数据
+2025-09-16 23:40:11,565 - INFO - 已迁移 12300/14165 条roles数据
+2025-09-16 23:40:25,060 - INFO - 已迁移 12400/14165 条roles数据
+2025-09-16 23:40:38,991 - INFO - 已迁移 12500/14165 条roles数据
+2025-09-16 23:40:53,242 - INFO - 已迁移 12600/14165 条roles数据
+2025-09-16 23:41:07,430 - INFO - 已迁移 12700/14165 条roles数据
+2025-09-16 23:41:22,577 - INFO - 已迁移 12800/14165 条roles数据
+2025-09-16 23:41:37,258 - INFO - 已迁移 12900/14165 条roles数据
+2025-09-16 23:41:53,369 - INFO - 已迁移 13000/14165 条roles数据
+2025-09-16 23:42:08,580 - INFO - 已迁移 13100/14165 条roles数据
+2025-09-16 23:42:23,712 - INFO - 已迁移 13200/14165 条roles数据
+2025-09-16 23:42:38,178 - INFO - 已迁移 13300/14165 条roles数据
+2025-09-16 23:42:56,163 - INFO - 已迁移 13400/14165 条roles数据
+2025-09-16 23:43:12,645 - INFO - 已迁移 13500/14165 条roles数据
+2025-09-16 23:43:27,183 - INFO - 已迁移 13600/14165 条roles数据
+2025-09-16 23:43:40,883 - INFO - 已迁移 13700/14165 条roles数据
+2025-09-16 23:43:55,979 - INFO - 已迁移 13800/14165 条roles数据
+2025-09-16 23:44:11,389 - INFO - 已迁移 13900/14165 条roles数据
+2025-09-16 23:44:27,271 - INFO - 已迁移 14000/14165 条roles数据
+2025-09-16 23:44:44,802 - INFO - 已迁移 14100/14165 条roles数据
+2025-09-16 23:44:55,015 - INFO - 已迁移 14165/14165 条roles数据
+2025-09-16 23:44:55,016 - INFO - roles表迁移完成: 成功 14165 条, 失败 0 条
+2025-09-16 23:44:55,016 - INFO - 开始迁移large_equip_desc_data表数据...
+2025-09-16 23:45:00,198 - INFO - 从SQLite large_equip_desc_data 表获取了 14217 条数据
+2025-09-16 23:45:12,140 - INFO - 已迁移 100/14217 条large_equip_desc_data数据
+2025-09-16 23:45:26,540 - INFO - 已迁移 200/14217 条large_equip_desc_data数据
+2025-09-16 23:45:39,819 - INFO - 已迁移 300/14217 条large_equip_desc_data数据
+2025-09-16 23:45:53,433 - INFO - 已迁移 400/14217 条large_equip_desc_data数据
+2025-09-16 23:46:06,373 - INFO - 已迁移 500/14217 条large_equip_desc_data数据
+2025-09-16 23:46:15,758 - INFO - 已迁移 600/14217 条large_equip_desc_data数据
+2025-09-16 23:46:30,591 - INFO - 已迁移 700/14217 条large_equip_desc_data数据
+2025-09-16 23:46:45,551 - INFO - 已迁移 800/14217 条large_equip_desc_data数据
+2025-09-16 23:47:00,554 - INFO - 已迁移 900/14217 条large_equip_desc_data数据
+2025-09-16 23:47:11,955 - INFO - 已迁移 1000/14217 条large_equip_desc_data数据
+2025-09-16 23:47:26,757 - INFO - 已迁移 1100/14217 条large_equip_desc_data数据
+2025-09-16 23:47:38,261 - INFO - 已迁移 1200/14217 条large_equip_desc_data数据
+2025-09-16 23:47:51,386 - INFO - 已迁移 1300/14217 条large_equip_desc_data数据
+2025-09-16 23:48:03,126 - INFO - 已迁移 1400/14217 条large_equip_desc_data数据
+2025-09-16 23:48:15,427 - INFO - 已迁移 1500/14217 条large_equip_desc_data数据
+2025-09-16 23:48:30,054 - INFO - 已迁移 1600/14217 条large_equip_desc_data数据
+2025-09-16 23:48:41,763 - INFO - 已迁移 1700/14217 条large_equip_desc_data数据
+2025-09-16 23:48:54,994 - INFO - 已迁移 1800/14217 条large_equip_desc_data数据
+2025-09-16 23:49:05,181 - INFO - 已迁移 1900/14217 条large_equip_desc_data数据
+2025-09-16 23:49:18,407 - INFO - 已迁移 2000/14217 条large_equip_desc_data数据
+2025-09-16 23:49:30,273 - INFO - 已迁移 2100/14217 条large_equip_desc_data数据
+2025-09-16 23:49:42,783 - INFO - 已迁移 2200/14217 条large_equip_desc_data数据
+2025-09-16 23:49:54,128 - INFO - 已迁移 2300/14217 条large_equip_desc_data数据
+2025-09-16 23:50:03,568 - INFO - 已迁移 2400/14217 条large_equip_desc_data数据
+2025-09-16 23:50:14,186 - INFO - 已迁移 2500/14217 条large_equip_desc_data数据
+2025-09-16 23:50:23,433 - INFO - 已迁移 2600/14217 条large_equip_desc_data数据
+2025-09-16 23:50:30,946 - INFO - 已迁移 2700/14217 条large_equip_desc_data数据
+2025-09-16 23:50:41,175 - INFO - 已迁移 2800/14217 条large_equip_desc_data数据
+2025-09-16 23:50:51,203 - INFO - 已迁移 2900/14217 条large_equip_desc_data数据
+2025-09-16 23:51:05,071 - INFO - 已迁移 3000/14217 条large_equip_desc_data数据
+2025-09-16 23:51:16,036 - INFO - 已迁移 3100/14217 条large_equip_desc_data数据
+2025-09-16 23:51:30,984 - INFO - 已迁移 3200/14217 条large_equip_desc_data数据
+2025-09-16 23:51:44,804 - INFO - 已迁移 3300/14217 条large_equip_desc_data数据
+2025-09-16 23:51:56,356 - INFO - 已迁移 3400/14217 条large_equip_desc_data数据
+2025-09-16 23:52:10,039 - INFO - 已迁移 3500/14217 条large_equip_desc_data数据
+2025-09-16 23:52:23,529 - INFO - 已迁移 3600/14217 条large_equip_desc_data数据
+2025-09-16 23:52:37,859 - INFO - 已迁移 3700/14217 条large_equip_desc_data数据
+2025-09-16 23:52:53,330 - INFO - 已迁移 3800/14217 条large_equip_desc_data数据
+2025-09-16 23:53:06,096 - INFO - 已迁移 3900/14217 条large_equip_desc_data数据
+2025-09-16 23:53:18,861 - INFO - 已迁移 4000/14217 条large_equip_desc_data数据
+2025-09-16 23:53:33,088 - INFO - 已迁移 4100/14217 条large_equip_desc_data数据
+2025-09-16 23:53:46,423 - INFO - 已迁移 4200/14217 条large_equip_desc_data数据
+2025-09-16 23:54:02,680 - INFO - 已迁移 4300/14217 条large_equip_desc_data数据
+2025-09-16 23:54:15,121 - INFO - 已迁移 4400/14217 条large_equip_desc_data数据
+2025-09-16 23:54:28,412 - INFO - 已迁移 4500/14217 条large_equip_desc_data数据
+2025-09-16 23:54:42,036 - INFO - 已迁移 4600/14217 条large_equip_desc_data数据
+2025-09-16 23:54:56,500 - INFO - 已迁移 4700/14217 条large_equip_desc_data数据
+2025-09-16 23:55:08,781 - INFO - 已迁移 4800/14217 条large_equip_desc_data数据
+2025-09-16 23:55:24,065 - INFO - 已迁移 4900/14217 条large_equip_desc_data数据
+2025-09-16 23:55:37,011 - INFO - 已迁移 5000/14217 条large_equip_desc_data数据
+2025-09-16 23:55:49,195 - INFO - 已迁移 5100/14217 条large_equip_desc_data数据
+2025-09-16 23:56:02,045 - INFO - 已迁移 5200/14217 条large_equip_desc_data数据
+2025-09-16 23:56:14,992 - INFO - 已迁移 5300/14217 条large_equip_desc_data数据
+2025-09-16 23:56:28,729 - INFO - 已迁移 5400/14217 条large_equip_desc_data数据
+2025-09-16 23:56:42,555 - INFO - 已迁移 5500/14217 条large_equip_desc_data数据
+2025-09-16 23:56:59,455 - INFO - 已迁移 5600/14217 条large_equip_desc_data数据
+2025-09-16 23:57:12,993 - INFO - 已迁移 5700/14217 条large_equip_desc_data数据
+2025-09-16 23:57:25,992 - INFO - 已迁移 5800/14217 条large_equip_desc_data数据
+2025-09-16 23:57:39,375 - INFO - 已迁移 5900/14217 条large_equip_desc_data数据
+2025-09-16 23:57:51,285 - INFO - 已迁移 6000/14217 条large_equip_desc_data数据
+2025-09-16 23:58:09,425 - INFO - 已迁移 6100/14217 条large_equip_desc_data数据
+2025-09-16 23:58:24,784 - INFO - 已迁移 6200/14217 条large_equip_desc_data数据
+2025-09-16 23:58:38,349 - INFO - 已迁移 6300/14217 条large_equip_desc_data数据
+2025-09-16 23:58:49,120 - INFO - 已迁移 6400/14217 条large_equip_desc_data数据
+2025-09-16 23:59:01,474 - INFO - 已迁移 6500/14217 条large_equip_desc_data数据
+2025-09-16 23:59:12,995 - INFO - 已迁移 6600/14217 条large_equip_desc_data数据
+2025-09-16 23:59:26,254 - INFO - 已迁移 6700/14217 条large_equip_desc_data数据
+2025-09-16 23:59:45,366 - INFO - 已迁移 6800/14217 条large_equip_desc_data数据
+2025-09-17 00:00:09,981 - INFO - 已迁移 6900/14217 条large_equip_desc_data数据
+2025-09-17 00:00:35,362 - INFO - 已迁移 7000/14217 条large_equip_desc_data数据
+2025-09-17 00:00:46,768 - INFO - 已迁移 7100/14217 条large_equip_desc_data数据
+2025-09-17 00:00:58,617 - INFO - 已迁移 7200/14217 条large_equip_desc_data数据
+2025-09-17 00:01:12,029 - INFO - 已迁移 7300/14217 条large_equip_desc_data数据
+2025-09-17 00:01:25,091 - INFO - 已迁移 7400/14217 条large_equip_desc_data数据
+2025-09-17 00:01:36,779 - INFO - 已迁移 7500/14217 条large_equip_desc_data数据
+2025-09-17 00:01:50,093 - INFO - 已迁移 7600/14217 条large_equip_desc_data数据
+2025-09-17 00:02:02,330 - INFO - 已迁移 7700/14217 条large_equip_desc_data数据
+2025-09-17 00:02:17,230 - INFO - 已迁移 7800/14217 条large_equip_desc_data数据
+2025-09-17 00:02:31,334 - INFO - 已迁移 7900/14217 条large_equip_desc_data数据
+2025-09-17 00:02:43,467 - INFO - 已迁移 8000/14217 条large_equip_desc_data数据
+2025-09-17 00:02:55,194 - INFO - 已迁移 8100/14217 条large_equip_desc_data数据
+2025-09-17 00:03:09,098 - INFO - 已迁移 8200/14217 条large_equip_desc_data数据
+2025-09-17 00:03:21,690 - INFO - 已迁移 8300/14217 条large_equip_desc_data数据
+2025-09-17 00:03:33,591 - INFO - 已迁移 8400/14217 条large_equip_desc_data数据
+2025-09-17 00:03:48,105 - INFO - 已迁移 8500/14217 条large_equip_desc_data数据
+2025-09-17 00:04:01,674 - INFO - 已迁移 8600/14217 条large_equip_desc_data数据
+2025-09-17 00:04:14,553 - INFO - 已迁移 8700/14217 条large_equip_desc_data数据
+2025-09-17 00:04:25,589 - INFO - 已迁移 8800/14217 条large_equip_desc_data数据
+2025-09-17 00:04:34,884 - INFO - 已迁移 8900/14217 条large_equip_desc_data数据
+2025-09-17 00:04:44,615 - INFO - 已迁移 9000/14217 条large_equip_desc_data数据
+2025-09-17 00:04:54,186 - INFO - 已迁移 9100/14217 条large_equip_desc_data数据
+2025-09-17 00:05:04,263 - INFO - 已迁移 9200/14217 条large_equip_desc_data数据
+2025-09-17 00:05:16,641 - INFO - 已迁移 9300/14217 条large_equip_desc_data数据
+2025-09-17 00:05:26,451 - INFO - 已迁移 9400/14217 条large_equip_desc_data数据
+2025-09-17 00:05:37,916 - INFO - 已迁移 9500/14217 条large_equip_desc_data数据
+2025-09-17 00:05:52,378 - INFO - 已迁移 9600/14217 条large_equip_desc_data数据
+2025-09-17 00:06:03,867 - INFO - 已迁移 9700/14217 条large_equip_desc_data数据
+2025-09-17 00:06:18,048 - INFO - 已迁移 9800/14217 条large_equip_desc_data数据
+2025-09-17 00:06:30,105 - INFO - 已迁移 9900/14217 条large_equip_desc_data数据
+2025-09-17 00:06:46,793 - INFO - 已迁移 10000/14217 条large_equip_desc_data数据
+2025-09-17 00:06:56,287 - INFO - 已迁移 10100/14217 条large_equip_desc_data数据
+2025-09-17 00:07:06,354 - INFO - 已迁移 10200/14217 条large_equip_desc_data数据
+2025-09-17 00:07:17,545 - INFO - 已迁移 10300/14217 条large_equip_desc_data数据
+2025-09-17 00:07:37,254 - INFO - 已迁移 10400/14217 条large_equip_desc_data数据
+2025-09-17 00:08:14,445 - INFO - 已迁移 10500/14217 条large_equip_desc_data数据
+2025-09-17 00:08:29,911 - INFO - 已迁移 10600/14217 条large_equip_desc_data数据
+2025-09-17 00:08:41,997 - INFO - 已迁移 10700/14217 条large_equip_desc_data数据
+2025-09-17 00:08:56,598 - INFO - 已迁移 10800/14217 条large_equip_desc_data数据
+2025-09-17 00:09:10,408 - INFO - 已迁移 10900/14217 条large_equip_desc_data数据
+2025-09-17 00:09:22,832 - INFO - 已迁移 11000/14217 条large_equip_desc_data数据
+2025-09-17 00:09:34,715 - INFO - 已迁移 11100/14217 条large_equip_desc_data数据
+2025-09-17 00:09:50,355 - INFO - 已迁移 11200/14217 条large_equip_desc_data数据
+2025-09-17 00:10:02,954 - INFO - 已迁移 11300/14217 条large_equip_desc_data数据
+2025-09-17 00:10:14,037 - INFO - 已迁移 11400/14217 条large_equip_desc_data数据
+2025-09-17 00:10:25,390 - INFO - 已迁移 11500/14217 条large_equip_desc_data数据
+2025-09-17 00:10:36,959 - INFO - 已迁移 11600/14217 条large_equip_desc_data数据
+2025-09-17 00:10:50,538 - INFO - 已迁移 11700/14217 条large_equip_desc_data数据
+2025-09-17 00:11:02,986 - INFO - 已迁移 11800/14217 条large_equip_desc_data数据
+2025-09-17 00:11:20,227 - INFO - 已迁移 11900/14217 条large_equip_desc_data数据
+2025-09-17 00:11:28,893 - INFO - 已迁移 12000/14217 条large_equip_desc_data数据
+2025-09-17 00:11:37,851 - INFO - 已迁移 12100/14217 条large_equip_desc_data数据
+2025-09-17 00:11:47,941 - INFO - 已迁移 12200/14217 条large_equip_desc_data数据
+2025-09-17 00:11:57,770 - INFO - 已迁移 12300/14217 条large_equip_desc_data数据
+2025-09-17 00:12:09,225 - INFO - 已迁移 12400/14217 条large_equip_desc_data数据
+2025-09-17 00:12:19,716 - INFO - 已迁移 12500/14217 条large_equip_desc_data数据
+2025-09-17 00:12:31,995 - INFO - 已迁移 12600/14217 条large_equip_desc_data数据
+2025-09-17 00:12:41,619 - INFO - 已迁移 12700/14217 条large_equip_desc_data数据
+2025-09-17 00:12:52,533 - INFO - 已迁移 12800/14217 条large_equip_desc_data数据
+2025-09-17 00:13:03,691 - INFO - 已迁移 12900/14217 条large_equip_desc_data数据
+2025-09-17 00:13:17,153 - INFO - 已迁移 13000/14217 条large_equip_desc_data数据
+2025-09-17 00:13:28,523 - INFO - 已迁移 13100/14217 条large_equip_desc_data数据
+2025-09-17 00:13:43,312 - INFO - 已迁移 13200/14217 条large_equip_desc_data数据
+2025-09-17 00:13:54,168 - INFO - 已迁移 13300/14217 条large_equip_desc_data数据
+2025-09-17 00:14:07,701 - INFO - 已迁移 13400/14217 条large_equip_desc_data数据
+2025-09-17 00:14:18,405 - INFO - 已迁移 13500/14217 条large_equip_desc_data数据
+2025-09-17 00:14:28,011 - INFO - 已迁移 13600/14217 条large_equip_desc_data数据
+2025-09-17 00:14:38,040 - INFO - 已迁移 13700/14217 条large_equip_desc_data数据
+2025-09-17 00:14:47,857 - INFO - 已迁移 13800/14217 条large_equip_desc_data数据
+2025-09-17 00:14:59,772 - INFO - 已迁移 13900/14217 条large_equip_desc_data数据
+2025-09-17 00:15:10,740 - INFO - 已迁移 14000/14217 条large_equip_desc_data数据
+2025-09-17 00:15:22,157 - INFO - 已迁移 14100/14217 条large_equip_desc_data数据
+2025-09-17 00:15:32,965 - INFO - 已迁移 14200/14217 条large_equip_desc_data数据
+2025-09-17 00:15:34,051 - INFO - 已迁移 14217/14217 条large_equip_desc_data数据
+2025-09-17 00:15:34,052 - INFO - large_equip_desc_data表迁移完成: 成功 14217 条, 失败 0 条
+2025-09-17 00:15:35,141 - INFO - 开始验证迁移结果...
+2025-09-17 00:15:42,252 - INFO - MySQL中role_type为'empty'的角色数量: 14148
+2025-09-17 00:15:43,791 - INFO - MySQL中large_equip_desc_data表数据数量: 14217
+2025-09-17 00:16:10,778 - INFO - MySQL中large_equip_desc长度大于50000的记录数量: 743
+2025-09-17 00:16:10,778 - INFO - 空角色数据迁移完成!
