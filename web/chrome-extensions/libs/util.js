@@ -508,7 +508,7 @@ function parseSimpleObject(str) {
                         }
                     }
                     
-                    console.warn('parseSimpleObject: All parsing attempts failed, returning null:', cleaned.substring(0, 100) + '...');
+                    console.error('parseSimpleObject: All parsing attempts failed, returning null:', cleaned );
                     return null;
                 }
             }

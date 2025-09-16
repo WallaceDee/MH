@@ -266,360 +266,300 @@ class CBGSpider:
             return None
         
         
+    def _build_role_basic_data(self, char, life_skills, school_skills, ju_qing_skills, yushoushu_skill, is_empty_role):
+        """构建角色基础数据"""
+        # 预定义字段映射，减少重复的字典访问
+        BASIC_FIELDS = [
+            'eid', 'equipid', 'equip_sn', 'server_name', 'serverid', 'equip_server_sn',
+            'seller_nickname', 'seller_roleid', 'area_name', 'equip_name', 'equip_type',
+            'equip_type_name', 'equip_type_desc', 'level', 'equip_level', 'equip_level_desc',
+            'level_desc', 'subtitle', 'equip_pos', 'position', 'school', 'role_grade_limit',
+            'min_buyer_level', 'equip_count', 'price', 'price_desc', 'unit_price_desc',
+            'min_unit_price', 'equip_status', 'equip_status_desc', 'status_desc',
+            'onsale_expire_time_desc', 'time_left', 'expire_time', 'selling_time',
+            'selling_time_ago_desc', 'first_onsale_time', 'pass_fair_show', 'fair_show_time',
+            'fair_show_end_time', 'fair_show_end_time_left', 'fair_show_poundage',
+            'collect_num', 'score', 'icon_index', 'icon', 'equip_face_img', 'kindid',
+            'game_channel', 'game_ordersn', 'whole_game_ordersn', 'allow_cross_buy',
+            'cross_server_poundage', 'cross_server_poundage_origin', 'cross_server_poundage_discount',
+            'cross_server_poundage_discount_label', 'cross_server_poundage_display_mode',
+            'cross_server_activity_conf_discount', 'activity_type', 'onsale_protection_end_time',
+            'is_show_expert_desc', 'equip_onsale_version', 'storage_type', 'agent_trans_time',
+            'kol_article_id', 'kol_share_id', 'kol_share_time', 'kol_share_status',
+            'reco_request_id', 'appointed_roleid', 'play_team_cnt', 'random_draw_finish_time',
+            'desc', 'large_equip_desc', 'desc_sumup', 'desc_sumup_short', 'diy_desc',
+            'rec_desc', 'search_type', 'tag', 'other_info', 'tag_key'
+        ]
+        
+        BOOLEAN_FIELDS = [
+            'accept_bargain', 'has_collect', 'joined_seller_activity', 'is_split_sale',
+            'is_split_main_role', 'is_split_independent_role', 'is_split_independent_equip',
+            'split_equip_sold_happen', 'show_split_equip_sold_remind', 'is_onsale_protection_period',
+            'is_vip_protection', 'is_time_lock', 'equip_in_test_server', 'buyer_in_test_server',
+            'equip_in_allow_take_away_server', 'is_weijianding', 'is_show_alipay_privilege',
+            'is_seller_redpacket_flag', 'is_show_special_highlight', 'is_xyq_game_role_kunpeng_reach_limit'
+        ]
+        
+        JSON_FIELDS = [
+            'price_explanation', 'bargain_info', 'diy_desc_pay_info', 'video_info',
+            'agg_added_attrs', 'dynamic_tags', 'highlight'
+        ]
+        
+        role_data = {}
+        
+        # 基本字段映射
+        for field in BASIC_FIELDS:
+            if field == 'create_time_equip':
+                role_data[field] = char.get('create_time')
+            else:
+                role_data[field] = char.get(field, '')
+        
+        # Boolean字段转换
+        for field in BOOLEAN_FIELDS:
+            role_data[field] = 1 if char.get(field) else 0
+        
+        # JSON字段序列化
+        for field in JSON_FIELDS:
+            value = char.get(field)
+            if value:
+                try:
+                    role_data[field] = json.dumps(value, ensure_ascii=False)
+                except (TypeError, ValueError):
+                    role_data[field] = ''
+            else:
+                role_data[field] = ''
+        
+        # 技能信息
+        role_data.update({
+            'life_skills': life_skills,
+            'school_skills': school_skills,
+            'ju_qing_skills': ju_qing_skills,
+            'yushoushu_skill': yushoushu_skill,
+            'role_type': 'empty' if is_empty_role else 'normal',
+            'create_time_equip': char.get('create_time')
+        })
+        
+        return role_data
+    
+    def _build_large_equip_data(self, char, parsed_desc):
+        """构建详细装备数据"""
+        def safe_int(value, default=0):
+            if value is None:
+                return default
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return default
+        
+        def safe_str(value, default=''):
+            if value is None:
+                return default
+            return str(value)
+        
+        def safe_json_dumps(data):
+            if not data:
+                return ''
+            try:
+                return json.dumps(data, ensure_ascii=False)
+            except (TypeError, ValueError):
+                return ''
+        
+        # 构建数据字典
+        equip_data = {
+            'eid': char.get('eid'),
+            'time_lock_days': safe_int(char.get('time_lock_days')),
+            'role_name': safe_str(parsed_desc.get('cName')),
+            'role_level': safe_int(parsed_desc.get('iGrade')),
+            'role_school': safe_int(parsed_desc.get('iSchool')),
+            'role_icon': safe_int(parsed_desc.get('iIcon')),
+            'user_num': safe_str(parsed_desc.get('usernum')),
+            'hp_max': safe_int(parsed_desc.get('iHp_Max')),
+            'mp_max': safe_int(parsed_desc.get('iMp_Max')),
+            'att_all': safe_int(parsed_desc.get('iAtt_All')),
+            'def_all': safe_int(parsed_desc.get('iDef_All')),
+            'spe_all': safe_int(parsed_desc.get('iSpe_All')),
+            'mag_all': safe_int(parsed_desc.get('iMag_All')),
+            'damage_all': safe_int(parsed_desc.get('iDamage_All')),
+            'mag_dam_all': safe_int(parsed_desc.get('iTotalMagDam_all')),
+            'mag_def_all': safe_int(parsed_desc.get('iTotalMagDef_all')),
+            'dod_all': safe_int(parsed_desc.get('iDod_All')),
+            'cor_all': safe_int(parsed_desc.get('iCor_All')),
+            'str_all': safe_int(parsed_desc.get('iStr_All')),
+            'res_all': safe_int(parsed_desc.get('iRes_All')),
+            'dex_all': safe_int(parsed_desc.get('iDex_All')),
+            'up_exp': safe_int(parsed_desc.get('iUpExp')),
+            'sum_exp': safe_int(parsed_desc.get('sum_exp')),
+            'all_new_point': safe_int(parsed_desc.get('TA_iAllNewPoint')),
+            'skill_point': safe_int(parsed_desc.get('iSkiPoint')),
+            'attribute_point': safe_int(parsed_desc.get('iPoint')),
+            'potential': safe_int(parsed_desc.get('potential')),
+            'max_potential': safe_int(parsed_desc.get('max_potential')),
+            'cash': safe_int(parsed_desc.get('iCash')),
+            'saving': safe_int(parsed_desc.get('iSaving')),
+            'learn_cash': safe_int(parsed_desc.get('iLearnCash')),
+            'zhuan_zhi': safe_int(parsed_desc.get('iZhuanZhi')),
+            'three_fly_lv': safe_int(parsed_desc.get('i3FlyLv')),
+            'nine_fight_level': safe_int(parsed_desc.get('nine_fight_level')),
+            'goodness': safe_int(parsed_desc.get('iGoodness')),
+            'badness': safe_int(parsed_desc.get('iBadness')),
+            'goodness_sav': safe_int(parsed_desc.get('igoodness_sav')),
+            'role_title': safe_str(parsed_desc.get('title')),
+            'org_name': safe_str(parsed_desc.get('cOrg')),
+            'org_offer': safe_int(parsed_desc.get('iOrgOffer')),
+            'org_position': safe_str(parsed_desc.get('org_position')),
+            'marry_id': safe_str(parsed_desc.get('iMarry')),
+            'marry2_id': safe_str(parsed_desc.get('iMarry2')),
+            'marry_name': safe_str(parsed_desc.get('marry_name')),
+            'community_name': safe_str(parsed_desc.get('commu_name')),
+            'community_gid': safe_str(parsed_desc.get('commu_gid')),
+            'achievement_total': safe_int(parsed_desc.get('AchPointTotal')),
+            'hero_score': safe_int(parsed_desc.get('HeroScore')),
+            'datang_feat': safe_int(parsed_desc.get('datang_feat')),
+            'sword_score': safe_int(parsed_desc.get('sword_score')),
+            'dup_score': safe_int(parsed_desc.get('dup_score')),
+            'shenqi_score': safe_int(parsed_desc.get('shenqi_score')),
+            'qicai_score': safe_int(parsed_desc.get('qicai_score')),
+            'xianyu_score': safe_int(parsed_desc.get('xianyu_score')),
+            'nuts_num': safe_int(parsed_desc.get('iNutsNum')),
+            'cg_total_amount': safe_int(parsed_desc.get('iCGTotalAmount')),
+            'cg_body_amount': safe_int(parsed_desc.get('iCGBodyAmount')),
+            'cg_box_amount': safe_int(parsed_desc.get('iCGBoxAmount')),
+            'xianyu_amount': safe_int(parsed_desc.get('xianyu')),
+            'energy_amount': safe_int(parsed_desc.get('energy')),
+            'jiyuan_amount': safe_int(parsed_desc.get('jiyuan')),
+            'add_point': safe_int(parsed_desc.get('addPoint')),
+            'packet_page': safe_int(parsed_desc.get('iPcktPage')),
+            'rent_level': safe_int(parsed_desc.get('rent_level')),
+            'outdoor_level': safe_int(parsed_desc.get('outdoor_level')),
+            'farm_level': safe_int(parsed_desc.get('farm_level')),
+            'house_real_owner': safe_int(parsed_desc.get('house_real_owner')),
+            'pride': safe_int(parsed_desc.get('iPride')),
+            'bid_status': safe_int(parsed_desc.get('bid')),
+            'ori_race': safe_int(parsed_desc.get('ori_race')),
+            'current_race': safe_int(parsed_desc.get('iRace')),
+            'sum_amount': safe_int(parsed_desc.get('iSumAmount')),
+            'version_code': safe_str(parsed_desc.get('equip_desc_version_code')),
+            # JSON字段
+            'pet': safe_json_dumps(parsed_desc.get('pet', {})),
+            'all_skills_json': safe_json_dumps(parsed_desc.get('all_skills', {})),
+            'all_equip_json': safe_json_dumps(parsed_desc.get('AllEquip', {})),
+            'all_summon_json': safe_json_dumps(parsed_desc.get('AllSummon', {})),
+            'child_json': safe_json_dumps(parsed_desc.get('child', {})),
+            'child2_json': safe_json_dumps(parsed_desc.get('child2', {})),
+            'all_rider_json': safe_json_dumps(parsed_desc.get('AllRider', {})),
+            'ex_avt_json': safe_json_dumps(parsed_desc.get('ExAvt', {})),
+            'huge_horse_json': safe_json_dumps(parsed_desc.get('HugeHorse', {})),
+            'fabao_json': safe_json_dumps(parsed_desc.get('fabao', {})),
+            'lingbao_json': safe_json_dumps(parsed_desc.get('lingbao', {})),
+            'shenqi_json': safe_json_dumps(parsed_desc.get('shenqi', {})),
+            'idbid_desc_json': safe_json_dumps(parsed_desc.get('idbid_desc', {})),
+            'changesch_json': safe_json_dumps(parsed_desc.get('changesch', {})),
+            'prop_kept_json': safe_json_dumps(parsed_desc.get('propKept', {})),
+            'more_attr_json': safe_json_dumps(parsed_desc.get('more_attr', {}))
+        }
+        
+        # 技能字段
+        for i in range(1, 6):
+            equip_data[f'expt_ski{i}'] = safe_int(parsed_desc.get(f'iExptSki{i}'))
+        for i in range(1, 5):
+            equip_data[f'max_expt{i}'] = safe_int(parsed_desc.get(f'iMaxExpt{i}'))
+            equip_data[f'beast_ski{i}'] = safe_int(parsed_desc.get(f'iBeastSki{i}'))
+        
+        return equip_data
+    
     def save_role_data(self, roles):
-        """保存角色数据到数据库"""
+        """批量保存角色数据到数据库，使用统一事务"""
         if not roles:
             log_warning(self.logger, "没有要保存的角色数据")
             return 0
         
-        # 确保数据库已初始化
-        # self._ensure_database_initialized()
-            
-        saved_count = 0
+        # 准备批量数据
+        roles_batch = []
+        large_equip_batch = []
+        
         for char in roles:
             try:
-                # 解析技能信息（如果有large_equip_desc数据）
-                life_skills = ''
-                school_skills = ''
-                ju_qing_skills = ''
-                yushoushu_skill = 0
-
-                large_equip_desc = char.get('large_equip_desc', '')
+                # 跳过花样年华服务器
                 server_name = char.get('serverName')
-                if(server_name == '花样年华'):
+                if server_name == '花样年华':
                     log_info(self.logger, f"{char.get('seller_nickname')} 服务器为花样年华,不予记录。")
                     continue
-              
-                # 解析large_equip_desc字段
-                parsed_desc = self.parse_large_equip_desc(large_equip_desc)
+                
+                # 解析技能和装备信息
+                large_equip_desc = char.get('large_equip_desc', '')
+                parsed_desc = self.parse_large_equip_desc(large_equip_desc) if large_equip_desc else {}
                 all_skills = parsed_desc.get('all_skills', {})
-                # 解析各种技能
+                
+                # 提取技能信息
                 life_skills = self.parse_life_skills(all_skills)
                 school_skills = self.parse_school_skills(all_skills)
                 ju_qing_skills = self.parse_ju_qing_skills(all_skills)
                 yushoushu_skill = self.parse_yushoushu_skill(all_skills)
-
-                # 1. 保存角色基础信息
-                role_data = {
-                    # 基本字段直接映射
-                    'eid': char.get('eid'),
-                    'equipid': char.get('equipid'),
-                    'equip_sn': char.get('equip_sn'),
-                    'server_name': char.get('server_name'),
-                    'serverid': char.get('serverid'),
-                    'equip_server_sn': char.get('equip_server_sn'),
-                    'seller_nickname': char.get('seller_nickname'),
-                    'seller_roleid': char.get('seller_roleid'),
-                    'area_name': char.get('area_name'),
-                    'equip_name': char.get('equip_name'),
-                    'equip_type': char.get('equip_type'),
-                    'equip_type_name': char.get('equip_type_name'),
-                    'equip_type_desc': char.get('equip_type_desc'),
-                    'level': char.get('level'),
-                    'equip_level': char.get('equip_level'),
-                    'equip_level_desc': char.get('equip_level_desc'),
-                    'level_desc': char.get('level_desc'),
-                    'subtitle': char.get('subtitle'),
-                    'equip_pos': char.get('equip_pos'),
-                    'position': char.get('position'),
-                    'school': char.get('school'),
-                    'role_grade_limit': char.get('role_grade_limit'),
-                    'min_buyer_level': char.get('min_buyer_level'),
-                    'equip_count': char.get('equip_count'),
-                    'price': char.get('price'),
-                    'price_desc': char.get('price_desc'),
-                    'unit_price_desc': char.get('unit_price_desc'),
-                    'min_unit_price': char.get('min_unit_price'),
-                    'accept_bargain': 1 if char.get('accept_bargain') else 0,
-                    'equip_status': char.get('equip_status'),
-                    'equip_status_desc': char.get('equip_status_desc'),
-                    'status_desc': char.get('status_desc'),
-                    'onsale_expire_time_desc': char.get('onsale_expire_time_desc'),
-                    'time_left': char.get('time_left'),
-                    'expire_time': char.get('expire_time'),
-                    'create_time_equip': char.get('create_time'),
-                    'selling_time': char.get('selling_time'),
-                    'selling_time_ago_desc': char.get('selling_time_ago_desc'),
-                    'first_onsale_time': char.get('first_onsale_time'),
-                    'pass_fair_show': char.get('pass_fair_show'),
-                    'fair_show_time': char.get('fair_show_time'),
-                    'fair_show_end_time': char.get('fair_show_end_time'),
-                    'fair_show_end_time_left': char.get('fair_show_end_time_left'),
-                    'fair_show_poundage': char.get('fair_show_poundage'),
                 
-                    # 其他信息
-                    'collect_num': char.get('collect_num'),
-                    'has_collect': 1 if char.get('has_collect') else 0,
-                    'score': char.get('score'),
-                    'icon_index': char.get('icon_index'),
-                    'icon': char.get('icon'),
-                    'equip_face_img': char.get('equip_face_img'),
-                    'kindid': char.get('kindid'),
-                    'game_channel': char.get('game_channel'),
-                    
-                    # 订单相关
-                    'game_ordersn': char.get('game_ordersn'),
-                    'whole_game_ordersn': char.get('whole_game_ordersn'),
-                    
-                    # 跨服相关
-                    'allow_cross_buy': char.get('allow_cross_buy'),
-                    'cross_server_poundage': char.get('cross_server_poundage'),
-                    'cross_server_poundage_origin': char.get('cross_server_poundage_origin'),
-                    'cross_server_poundage_discount': char.get('cross_server_poundage_discount'),
-                    'cross_server_poundage_discount_label': char.get('cross_server_poundage_discount_label'),
-                    'cross_server_poundage_display_mode': char.get('cross_server_poundage_display_mode'),
-                    'cross_server_activity_conf_discount': char.get('cross_server_activity_conf_discount'),
-                    
-                    # 活动相关
-                    'activity_type': char.get('activity_type'),
-                    'joined_seller_activity': 1 if char.get('joined_seller_activity') else 0,
-                    
-                    # 拆分相关
-                    'is_split_sale': 1 if char.get('is_split_sale') else 0,
-                    'is_split_main_role': 1 if char.get('is_split_main_role') else 0,
-                    'is_split_independent_role': 1 if char.get('is_split_independent_role') else 0,
-                    'is_split_independent_equip': 1 if char.get('is_split_independent_equip') else 0,
-                    'split_equip_sold_happen': 1 if char.get('split_equip_sold_happen') else 0,
-                    'show_split_equip_sold_remind': 1 if char.get('show_split_equip_sold_remind') else 0,
-                    
-                    # 保护相关
-                    'is_onsale_protection_period': 1 if char.get('is_onsale_protection_period') else 0,
-                    'onsale_protection_end_time': char.get('onsale_protection_end_time'),
-                    'is_vip_protection': 1 if char.get('is_vip_protection') else 0,
-                    'is_time_lock': 1 if char.get('is_time_lock') else 0,
-                    
-                    # 测试服相关
-                    'equip_in_test_server': 1 if char.get('equip_in_test_server') else 0,
-                    'buyer_in_test_server': 1 if char.get('buyer_in_test_server') else 0,
-                    'equip_in_allow_take_away_server': 1 if char.get('equip_in_allow_take_away_server') else 0,
-                    
-                    # 其他标识
-                    'is_weijianding': 1 if char.get('is_weijianding') else 0,
-                    'is_show_alipay_privilege': 1 if char.get('is_show_alipay_privilege') else 0,
-                    'is_seller_redpacket_flag': 1 if char.get('is_seller_redpacket_flag') else 0,
-                    'is_show_expert_desc': char.get('is_show_expert_desc'),
-                    'is_show_special_highlight': 1 if char.get('is_show_special_highlight') else 0,
-                    'is_xyq_game_role_kunpeng_reach_limit': 1 if char.get('is_xyq_game_role_kunpeng_reach_limit') else 0,
-                    
-                    # 版本和存储相关
-                    'equip_onsale_version': char.get('equip_onsale_version'),
-                    'storage_type': char.get('storage_type'),
-                    'agent_trans_time': char.get('agent_trans_time'),
-                    
-                    # KOL相关
-                    'kol_article_id': char.get('kol_article_id'),
-                    'kol_share_id': char.get('kol_share_id'),
-                    'kol_share_time': char.get('kol_share_time'),
-                    'kol_share_status': char.get('kol_share_status'),
-                    
-                    # 推荐相关
-                    'reco_request_id': char.get('reco_request_id'),
-                    'appointed_roleid': char.get('appointed_roleid'),
-                    
-                    # 团队相关
-                    'play_team_cnt': char.get('play_team_cnt'),
-                    
-                    # 随机抽奖相关
-                    'random_draw_finish_time': char.get('random_draw_finish_time'),
-                    
-                    # 详细描述
-                    'desc': char.get('desc'), # 使用解析获取的原始desc字段
-                    'large_equip_desc': char.get('large_equip_desc'),
-                    'desc_sumup': char.get('desc_sumup'),
-                    'desc_sumup_short': char.get('desc_sumup_short'),
-                    'diy_desc': char.get('diy_desc'),
-                    'rec_desc': char.get('rec_desc'),
-                    
-                    # 搜索相关
-                    'search_type': char.get('search_type'),
-                    'tag': char.get('tag'),
-                    
-                    # JSON格式字段
-                    'price_explanation': json.dumps(char.get('price_explanation'), ensure_ascii=False) if char.get('price_explanation') else '',
-                    'bargain_info': json.dumps(char.get('bargain_info'), ensure_ascii=False) if char.get('bargain_info') else '',
-                    'diy_desc_pay_info': json.dumps(char.get('diy_desc_pay_info'), ensure_ascii=False) if char.get('diy_desc_pay_info') else '',
-                    'other_info': char.get('other_info', ''),
-                    'video_info': json.dumps(char.get('video_info'), ensure_ascii=False) if char.get('video_info') else '',
-                    'agg_added_attrs': json.dumps(char.get('agg_added_attrs'), ensure_ascii=False) if char.get('agg_added_attrs') else '',
-                    'dynamic_tags': json.dumps(char.get('dynamic_tags'), ensure_ascii=False) if char.get('dynamic_tags') else '',
-                    'highlight': json.dumps(char.get('highlight'), ensure_ascii=False) if char.get('highlight') else '',
-                    'tag_key': char.get('tag_key', ''),
-                    'life_skills': life_skills,
-                    'school_skills': school_skills,
-                    'ju_qing_skills': ju_qing_skills,
-                    'yushoushu_skill': yushoushu_skill
-                }
-               
-                # 空号识别逻辑
-                is_empty_role = self.is_empty_role(parsed_desc.get('AllEquip', {}), parsed_desc.get('AllSummon', {}), char.get('eid'))
+                # 空号识别
+                is_empty_role = self.is_empty_role(
+                    parsed_desc.get('AllEquip', {}), 
+                    parsed_desc.get('AllSummon', {}), 
+                    char.get('eid')
+                )
                 
-                # 添加role_type字段区分空号和非空号
-                if is_empty_role:
-                    role_data['role_type'] = 'empty'
-                    pass
-                else:
-                    role_data['role_type'] = 'normal'
+                # 构建角色基础数据
+                role_data = self._build_role_basic_data(
+                    char, life_skills, school_skills, ju_qing_skills, yushoushu_skill, is_empty_role
+                )
+                roles_batch.append(role_data)
                 
-                # 统一保存到roles表
-                try:
-                    self.logger.debug(f"开始保存角色数据: eid={char.get('eid')}, 价格={char.get('price_desc')}")
-                    result = self.smart_db.save_role(role_data)
-                    self.logger.debug(f"角色保存结果: {result}")
-                    
-                    if result:
-                        if is_empty_role:
-                            log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}(空号)")
-                        else:
-                            log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}")
-                        saved_count += 1
-                    else:
-                        log_warning(self.logger, f"角色数据保存失败: ￥{char.get('price_desc')}")
-                except Exception as e:
-                    log_error(self.logger, f"保存角色数据失败: ￥{char.get('price_desc')}, 错误: {e}")
+                # 记录日志
+                role_type_desc = "(空号)" if is_empty_role else ""
+                log_info(self.logger, f"￥{char.get('price_desc')} - {char.get('seller_nickname')}{role_type_desc}")
                 
-                # 2. 处理详细装备数据（如果存在）
-                # 注意：即使是空号，也要尝试解析详细数据（如果API返回了的话）
-                if large_equip_desc:
+                # 处理详细装备数据
+                if large_equip_desc and parsed_desc:
                     try:
-                        # 创建详细装备数据字典
-                        def safe_int(value, default=0):
-                            """安全转换为整数"""
-                            if value is None:
-                                return default
-                            try:
-                                return int(value)
-                            except (ValueError, TypeError):
-                                return default
-                        
-                        def safe_str(value, default=''):
-                            """安全转换为字符串"""
-                            if value is None:
-                                return default
-                            return str(value)
-                        
-                        # 构建详细角色数据
-                        equip_data = {
-                            'eid': char.get('eid'),
-                            'time_lock_days': safe_int(char.get('time_lock_days')),
-                            'role_name': safe_str(parsed_desc.get('cName')),
-                            'role_level': safe_int(parsed_desc.get('iGrade')),
-                            'role_school': safe_int(parsed_desc.get('iSchool')),
-                            'role_icon': safe_int(parsed_desc.get('iIcon')),
-                            'user_num': safe_str(parsed_desc.get('usernum')),
-                            'hp_max': safe_int(parsed_desc.get('iHp_Max')),
-                            'mp_max': safe_int(parsed_desc.get('iMp_Max')),
-                            'att_all': safe_int(parsed_desc.get('iAtt_All')),
-                            'def_all': safe_int(parsed_desc.get('iDef_All')),
-                            'spe_all': safe_int(parsed_desc.get('iSpe_All')),
-                            'mag_all': safe_int(parsed_desc.get('iMag_All')),
-                            'damage_all': safe_int(parsed_desc.get('iDamage_All')),
-                            'mag_dam_all': safe_int(parsed_desc.get('iTotalMagDam_all')),
-                            'mag_def_all': safe_int(parsed_desc.get('iTotalMagDef_all')),
-                            'dod_all': safe_int(parsed_desc.get('iDod_All')),
-                            'cor_all': safe_int(parsed_desc.get('iCor_All')),
-                            'str_all': safe_int(parsed_desc.get('iStr_All')),
-                            'res_all': safe_int(parsed_desc.get('iRes_All')),
-                            'dex_all': safe_int(parsed_desc.get('iDex_All')),
-                            'up_exp': safe_int(parsed_desc.get('iUpExp')),
-                            'sum_exp': safe_int(parsed_desc.get('sum_exp')),
-                            'expt_ski1': safe_int(parsed_desc.get('iExptSki1')),
-                            'expt_ski2': safe_int(parsed_desc.get('iExptSki2')),
-                            'expt_ski3': safe_int(parsed_desc.get('iExptSki3')),
-                            'expt_ski4': safe_int(parsed_desc.get('iExptSki4')),
-                            'expt_ski5': safe_int(parsed_desc.get('iExptSki5')),
-                            'max_expt1': safe_int(parsed_desc.get('iMaxExpt1')),
-                            'max_expt2': safe_int(parsed_desc.get('iMaxExpt2')),
-                            'max_expt3': safe_int(parsed_desc.get('iMaxExpt3')),
-                            'max_expt4': safe_int(parsed_desc.get('iMaxExpt4')),
-                            'beast_ski1': safe_int(parsed_desc.get('iBeastSki1')),
-                            'beast_ski2': safe_int(parsed_desc.get('iBeastSki2')),
-                            'beast_ski3': safe_int(parsed_desc.get('iBeastSki3')),
-                            'beast_ski4': safe_int(parsed_desc.get('iBeastSki4')),
-                            'all_new_point':safe_int(parsed_desc.get('TA_iAllNewPoint')),
-                            'skill_point': safe_int(parsed_desc.get('iSkiPoint')),
-                            'attribute_point': safe_int(parsed_desc.get('iPoint')),
-                            'potential': safe_int(parsed_desc.get('potential')),
-                            'max_potential': safe_int(parsed_desc.get('max_potential')),
-                            'cash': safe_int(parsed_desc.get('iCash')),
-                            'saving': safe_int(parsed_desc.get('iSaving')),
-                            'learn_cash': safe_int(parsed_desc.get('iLearnCash')),
-                            'zhuan_zhi': safe_int(parsed_desc.get('iZhuanZhi')),
-                            'three_fly_lv': safe_int(parsed_desc.get('i3FlyLv')),
-                            'nine_fight_level': safe_int(parsed_desc.get('nine_fight_level')),
-                            'goodness': safe_int(parsed_desc.get('iGoodness')),
-                            'badness': safe_int(parsed_desc.get('iBadness')),
-                            'goodness_sav': safe_int(parsed_desc.get('igoodness_sav')),
-                            'role_title': safe_str(parsed_desc.get('title')),
-                            'org_name': safe_str(parsed_desc.get('cOrg')),
-                            'org_offer': safe_int(parsed_desc.get('iOrgOffer')),
-                            'org_position': safe_str(parsed_desc.get('org_position')),
-                            'marry_id': safe_str(parsed_desc.get('iMarry')),
-                            'marry2_id': safe_str(parsed_desc.get('iMarry2')),
-                            'marry_name': safe_str(parsed_desc.get('marry_name')),
-                            'community_name': safe_str(parsed_desc.get('commu_name')),
-                            'community_gid': safe_str(parsed_desc.get('commu_gid')),
-                            'achievement_total': safe_int(parsed_desc.get('AchPointTotal')),
-                            'hero_score': safe_int(parsed_desc.get('HeroScore')),
-                            'datang_feat': safe_int(parsed_desc.get('datang_feat')),
-                            'sword_score': safe_int(parsed_desc.get('sword_score')),
-                            'dup_score': safe_int(parsed_desc.get('dup_score')),
-                            'shenqi_score': safe_int(parsed_desc.get('shenqi_score')),
-                            'qicai_score': safe_int(parsed_desc.get('qicai_score')),
-                            'xianyu_score': safe_int(parsed_desc.get('xianyu_score')),
-                            'nuts_num': safe_int(parsed_desc.get('iNutsNum')),
-                            'cg_total_amount': safe_int(parsed_desc.get('iCGTotalAmount')),
-                            'cg_body_amount': safe_int(parsed_desc.get('iCGBodyAmount')),
-                            'cg_box_amount': safe_int(parsed_desc.get('iCGBoxAmount')),
-                            'xianyu_amount': safe_int(parsed_desc.get('xianyu')),
-                            'energy_amount': safe_int(parsed_desc.get('energy')),
-                            'jiyuan_amount': safe_int(parsed_desc.get('jiyuan')),
-                            'add_point': safe_int(parsed_desc.get('addPoint')),
-                            'packet_page': safe_int(parsed_desc.get('iPcktPage')),
-                            'rent_level': safe_int(parsed_desc.get('rent_level')),
-                            'outdoor_level': safe_int(parsed_desc.get('outdoor_level')),
-                            'farm_level': safe_int(parsed_desc.get('farm_level')),
-                            'house_real_owner': safe_int(parsed_desc.get('house_real_owner')),
-                            'pride': safe_int(parsed_desc.get('iPride')),
-                            'bid_status': safe_int(parsed_desc.get('bid')),
-                            'ori_race': safe_int(parsed_desc.get('ori_race')),
-                            'current_race': safe_int(parsed_desc.get('iRace')),
-                            'sum_amount': safe_int(parsed_desc.get('iSumAmount')),
-                            'version_code': safe_str(parsed_desc.get('equip_desc_version_code')),
-                            'pet': json.dumps(parsed_desc.get('pet', {}), ensure_ascii=False),
-                            'all_skills_json': json.dumps(parsed_desc.get('all_skills', {}), ensure_ascii=False),
-                            'all_equip_json': json.dumps(parsed_desc.get('AllEquip', {}), ensure_ascii=False),
-                            'all_summon_json': json.dumps(parsed_desc.get('AllSummon', {}), ensure_ascii=False),
-                            'child_json': json.dumps(parsed_desc.get('child', {}), ensure_ascii=False),
-                            'child2_json': json.dumps(parsed_desc.get('child2', {}), ensure_ascii=False),
-                            'all_rider_json': json.dumps(parsed_desc.get('AllRider', {}), ensure_ascii=False),
-                            'ex_avt_json': json.dumps(parsed_desc.get('ExAvt', {}), ensure_ascii=False),
-                            'huge_horse_json': json.dumps(parsed_desc.get('HugeHorse', {}), ensure_ascii=False),
-                            'fabao_json': json.dumps(parsed_desc.get('fabao', {}), ensure_ascii=False),
-                            'lingbao_json': json.dumps(parsed_desc.get('lingbao', {}), ensure_ascii=False),
-                            'shenqi_json': json.dumps(parsed_desc.get('shenqi', {}), ensure_ascii=False),
-                            'idbid_desc_json': json.dumps(parsed_desc.get('idbid_desc', {}), ensure_ascii=False),
-                            'changesch_json': json.dumps(parsed_desc.get('changesch', {}), ensure_ascii=False),
-                            'prop_kept_json': json.dumps(parsed_desc.get('propKept', {}), ensure_ascii=False),
-                            'more_attr_json': json.dumps(parsed_desc.get('more_attr', {}), ensure_ascii=False)
-                        }
-                        
-                        # 统一保存详细装备数据到large_equip_desc_data表
-                        self.logger.debug(f"保存详细数据: {char.get('eid')} (role_type: {role_data.get('role_type')})")
-                        success = self.smart_db.save_large_equip_data(equip_data)
-                        if success:
-                            self.logger.debug(f"详细数据保存成功: {char.get('eid')}")
-                        else:
-                            self.logger.error(f"详细数据保存失败: {char.get('eid')}")
-                        
+                        equip_data = self._build_large_equip_data(char, parsed_desc)
+                        large_equip_batch.append(equip_data)
+                        self.logger.debug(f"准备详细数据: {char.get('eid')} (role_type: {role_data.get('role_type')})")
                     except Exception as e:
                         self.logger.error(f"解析装备详细信息时出错: {str(e)}")
                 
             except Exception as e:
-                self.logger.error(f"保存角色 {char.get('eid')} 时出错: {str(e)}")
+                self.logger.error(f"处理角色 {char.get('eid')} 时出错: {str(e)}")
                 continue
-                
-        # if saved_count > 0:
-        #     self.logger.info(f"🗂️ 每个角色的单独JSON文件已保存到 {self.output_dir}/role_json/ 文件夹")
+        
+        # 批量保存数据
+        return self._save_batch_data(roles_batch, large_equip_batch)
+    
+    def _save_batch_data(self, roles_batch, large_equip_batch):
+        """批量保存数据"""
+        saved_count = 0
+        
+        # 保存角色数据
+        if roles_batch:
+            try:
+                self.logger.info(f"开始批量保存 {len(roles_batch)} 条角色数据...")
+                result = self.smart_db.save_roles_batch(roles_batch)
+                if result:
+                    saved_count = len(roles_batch)
+                    self.logger.info(f"批量保存角色数据成功: {saved_count} 条")
+                else:
+                    self.logger.error("批量保存角色数据失败")
+                    return 0
+            except Exception as e:
+                self.logger.error(f"批量保存角色数据时出错: {str(e)}")
+                return 0
+        
+        # 保存详细装备数据
+        if large_equip_batch:
+            try:
+                self.logger.info(f"开始批量保存 {len(large_equip_batch)} 条详细装备数据...")
+                result = self.smart_db.save_large_equip_batch(large_equip_batch)
+                if result:
+                    self.logger.info(f"批量保存详细装备数据成功: {len(large_equip_batch)} 条")
+                else:
+                    self.logger.error("批量保存详细装备数据失败")
+            except Exception as e:
+                self.logger.error(f"批量保存详细装备数据时出错: {str(e)}")
+        
         return saved_count
     
     def crawl_all_pages(self, max_pages=10, delay_range=None, search_params=None, use_browser=False):

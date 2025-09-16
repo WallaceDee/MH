@@ -1,34 +1,79 @@
 // 自动生成的登录信息文件
-// 生成时间: 1757951814.654026
+// 生成时间: 1757998342.2452767
 
 window.LoginInfo = {
-  "area_id": 54,
-  "uid": 2934348,
-  "server_name": "西栅老街",
+  "area_id": 43,
+  "uid": 1643981,
+  "server_name": "进贤门",
   "server_type": 3,
-  "roleid": "46171057",
-  "area_name": "浙江1区",
-  "block_urs": "ch****10@163.com",
+  "roleid": "23387585",
+  "area_name": "广东2区",
+  "block_urs": "ch****01@163.com",
   "user_icon": "2",
-  "user_msg_num": 3,
-  "safe_code": "xMRfpcLR",
+  "user_msg_num": 2,
+  "safe_code": "LqdRZY_7",
   "user_level": "0",
   "user_roles": {
-    "46171057": {
+    "23157594": {
       "color": "0",
-      "roleid": "46171057",
+      "roleid": "23157594",
+      "racename": "人",
+      "grade": 35,
+      "race": "1",
+      "nickname": "热血青年_辉",
+      "icon": 1
+    },
+    "23157818": {
+      "color": "0",
+      "roleid": "23157818",
+      "racename": "人",
+      "grade": 50,
+      "race": "1",
+      "nickname": "废青华",
+      "icon": 2
+    },
+    "23387570": {
+      "color": "0",
+      "roleid": "23387570",
       "racename": "人",
       "grade": 0,
       "race": "1",
-      "nickname": "玄英ㄝ飒飒",
+      "nickname": "☆柏μ纬灏3",
+      "icon": 2
+    },
+    "23387585": {
+      "color": "0",
+      "roleid": "23387585",
+      "racename": "人",
+      "grade": 0,
+      "race": "1",
+      "nickname": "Ⅱ商〓奔3",
+      "icon": 2
+    },
+    "23388090": {
+      "color": "0",
+      "roleid": "23388090",
+      "racename": "人",
+      "grade": 0,
+      "race": "1",
+      "nickname": "℃敖四红≈3",
+      "icon": 2
+    },
+    "23388209": {
+      "color": "0",
+      "roleid": "23388209",
+      "racename": "人",
+      "grade": 0,
+      "race": "1",
+      "nickname": "ǚ阚冰彤∫3",
       "icon": 2
     }
   },
   "is_server_open_wallet": true,
-  "urs": "chenguohuacgh010@163.com",
+  "urs": "chenguohuacgh001@163.com",
   "login": true,
-  "nickname": "玄英ㄝ飒飒",
-  "serverid": 132,
-  "serversn": 544,
+  "nickname": "Ⅱ商〓奔3",
+  "serverid": 77,
+  "serversn": 420,
   "pass_mb_check": 1
 };

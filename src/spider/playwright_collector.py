@@ -10,7 +10,6 @@ import os
 import sys
 import json
 import time
-import sqlite3
 import asyncio
 import re
 from datetime import datetime
@@ -71,21 +70,9 @@ class PlaywrightAutoCollector:
         if self.project_root not in sys.path:
             sys.path.insert(0, self.project_root)
         
-        # 使用按月分割的数据库文件路径
-        current_month = datetime.now().strftime('%Y%m')
-
-        os.makedirs(os.path.join(self.project_root, 'data',
-                    current_month), exist_ok=True)
-
-        self.db_paths = {
-            'role': os.path.join(self.project_root, 'data', current_month, f'cbg_roles_{current_month}.db'),
-            'pet': os.path.join(self.project_root, 'data', current_month, f'cbg_pets_{current_month}.db'),
-            'equipment': os.path.join(self.project_root, 'data', current_month, f'cbg_equip_{current_month}.db')
-        }
-
+        # MySQL数据库不需要按月分割的文件路径
+        # 项目已迁移到MySQL，移除SQLite相关配置
         os.makedirs('logs', exist_ok=True)
-        # 不在初始化时创建数据库，在需要时再创建
-        # self._init_databases()
         
         # 初始化spider实例，避免重复创建
         self._init_spiders()
@@ -155,74 +142,8 @@ class PlaywrightAutoCollector:
         return self.equip_spider
 
     def _ensure_database(self, db_type: str):
-        """确保指定类型的数据库存在，如果不存在则创建"""
-        logger.info(f"检查数据库类型: {db_type}")
-        if db_type in self.db_paths:
-            db_path = self.db_paths[db_type]
-            logger.info(f"数据库路径: {db_path}")
-            logger.info(f"数据库文件是否存在: {os.path.exists(db_path)}")
-            if not os.path.exists(db_path):
-                logger.info(f"数据库文件不存在，开始创建...")
-                self._create_database(db_type, db_path)
-                logger.info(f"按需创建数据库: {db_path}")
-        else:
-            logger.error(f"未知的数据库类型: {db_type}")
-
-    def _init_databases(self):
-        """初始化所有数据库（如果不存在则创建）"""
-        for db_type, db_path in self.db_paths.items():
-            self._create_database(db_type, db_path)
-
-    def _create_database(self, db_type: str, db_path: str):
-        """创建数据库和表结构（如果不存在）"""
-        try:
-            logger.info(f"开始创建数据库: {db_path}")
-            logger.info(f"数据库类型: {db_type}")
-            
-            db_exists = os.path.exists(db_path)
-            logger.info(f"数据库文件是否已存在: {db_exists}")
-
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-
-            if db_exists:
-                cursor.execute(
-                    "SELECT name FROM sqlite_master WHERE type='table';")
-                existing_tables = [row[0] for row in cursor.fetchall()]
-
-                if existing_tables:
-                    logger.info(f"数据库 {db_path} 已存在，包含表: {existing_tables}")
-                    conn.close()
-                    return
-                else:
-                    logger.info(f"数据库 {db_path} 存在但无表，将创建表结构")
-
-            logger.info(f"导入数据库配置...")
-            from src.cbg_config import DB_SCHEMA_CONFIG
-
-            if db_type == 'role':
-                logger.info(f"创建角色数据库表结构...")
-                cursor.execute(DB_SCHEMA_CONFIG['roles'])
-                logger.info(f"角色数据库 {db_path} 表结构创建完成")
-
-            elif db_type == 'equipment':
-                logger.info(f"创建装备数据库表结构...")
-                cursor.execute(DB_SCHEMA_CONFIG['equipments'])
-                logger.info(f"装备数据库 {db_path} 表结构创建完成")
-
-            elif db_type == 'pet':
-                logger.info(f"创建召唤兽数据库表结构...")
-                cursor.execute(DB_SCHEMA_CONFIG['pets'])
-                logger.info(f"召唤兽数据库 {db_path} 表结构创建完成")
-
-            conn.commit()
-            conn.close()
-            logger.info(f"数据库创建完成: {db_path}")
-
-        except Exception as e:
-            logger.error(f"初始化数据库 {db_path} 失败: {e}")
-            import traceback
-            logger.error(f"详细错误信息: {traceback.format_exc()}")
+        """MySQL数据库不需要文件检查，由ORM自动管理表结构"""
+        logger.info(f"使用MySQL数据库，{db_type}类型数据将直接保存到对应表中")
 
     def _load_cookies(self):
         """加载Cookie文件"""
@@ -506,8 +427,7 @@ class PlaywrightAutoCollector:
         """保存角色数据"""
         try:
             logger.info(f"开始保存角色数据，数量: {len(roles)}")
-            # 确保数据库存在
-            logger.info("检查角色数据库...")
+            # MySQL数据库由ORM自动管理，无需预先检查
             self._ensure_database('role')
             
             logger.info("获取角色spider实例...")
@@ -527,7 +447,7 @@ class PlaywrightAutoCollector:
     async def _save_pet_data(self, pets, request_info: Dict):
         """保存召唤兽数据"""
         try:
-            # 确保数据库存在
+            # MySQL数据库由ORM自动管理，无需预先检查
             self._ensure_database('pet')
             
             pet_spider = self._get_pet_spider()
@@ -542,7 +462,7 @@ class PlaywrightAutoCollector:
     async def _save_equipment_data(self, equipments, request_info: Dict):
         """保存装备数据（包括灵饰、召唤兽装备等）"""
         try:
-            # 确保数据库存在
+            # MySQL数据库由ORM自动管理，无需预先检查
             self._ensure_database('equipment')
             
             equip_spider = self._get_equip_spider()

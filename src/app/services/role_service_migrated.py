@@ -331,7 +331,6 @@ class RoleServiceMigrated:
                 "page_size": page_size,
                 "total_pages": total_pages,
                 "data": roles_data,
-                "items": roles_data,  # 兼容性字段
                 "message": "成功获取角色数据"
             }
 

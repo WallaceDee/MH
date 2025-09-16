@@ -1132,7 +1132,7 @@
                   :class="'module module-jinyi module-jinyi—' + index">
                   <p class="jinyi-sub-title">{{ item.title }}</p>
                   <ul v-if="item.list.length > 0" class="jinyi-attr-list">
-                    <li v-for="(clothesItem, clothesIndex) in item.list" :key="clothesIndex" class="item" :style="limitedSkinList.includes(clothesItem.name)? 'background:rgba(255, 102, 0, 0.5);color:rgb(0,255,0);' : ''" >
+                    <li v-for="(clothesItem, clothesIndex) in item.list" :key="clothesIndex" class="item" :style="limitedSkinList.includes(clothesItem.name.split('·')[0])? 'background:rgba(255, 102, 0, 0.5);color:rgb(0,255,0);' : ''" >
                       {{ clothesItem.name }}
                     </li>
                   </ul>
