@@ -8,7 +8,6 @@
 import os
 import sys
 import json
-import sqlite3
 import time
 import random
 import logging
@@ -24,8 +23,8 @@ project_root = get_project_root()
 sys.path.insert(0, project_root)
 
 from src.tools.setup_requests_session import setup_session
-from src.utils.smart_db_helper import CBGSmartDB
-from src.cbg_config import DB_SCHEMA_CONFIG
+from src.database import db
+from src.models.equipment import Equipment
 from src.tools.search_form_helper import (
     get_equip_search_params_sync,
     get_lingshi_search_params_sync,
@@ -54,20 +53,6 @@ class CBGEquipSpider:
         self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
         
-        # 使用按月分割的数据库文件路径
-        from src.utils.project_path import get_data_path
-        current_month = datetime.now().strftime('%Y%m')
-        
-        # 装备数据库路径
-        db_filename = f"cbg_equip_{current_month}.db"
-        self.db_path = os.path.join(get_data_path(), current_month, db_filename)
-        
-        # 确保data目录存在
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        
-        # 初始化智能数据库助手
-        self.smart_db = CBGSmartDB(self.db_path)
-        
         # 初始化特征提取器
         self.lingshi_feature_extractor = LingshiFeatureExtractor()
         self.pet_equip_feature_extractor = PetEquipFeatureExtractor()
@@ -77,8 +62,6 @@ class CBGEquipSpider:
         
         # 初始化其他组件
         self.setup_session()
-        # 延迟初始化数据库，避免在导入时创建文件
-        # self.init_database()
         self.retry_attempts = 1
 
     def _setup_logger(self):
@@ -136,53 +119,6 @@ class CBGEquipSpider:
             logger=self.logger
         )
     
-    def init_database(self):
-        """初始化数据库和表结构"""
-        try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            # 只创建装备相关的表
-            cursor.execute(DB_SCHEMA_CONFIG['equipments'])
-            self.logger.debug("装备数据库创建表: equipments")
-            
-            conn.commit()
-            self.logger.info(f"装备数据库初始化完成: {os.path.basename(self.db_path)}")
-            
-        except Exception as e:
-            self.logger.error(f"初始化装备数据库失败: {e}")
-            raise
-        finally:
-            conn.close()
-    
-    def _ensure_database_initialized(self):
-        """确保数据库已初始化，如果未初始化则进行初始化"""
-        try:
-            # 检查数据库文件是否存在
-            if not os.path.exists(self.db_path):
-                self.logger.info("检测到数据库文件不存在，开始初始化...")
-                self.init_database()
-            else:
-                # 检查表结构是否完整
-                try:
-                    conn = sqlite3.connect(self.db_path)
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-                    tables = [row[0] for row in cursor.fetchall()]
-                    conn.close()
-                    
-                    # 检查是否包含必要的表
-                    if 'equipments' not in tables:
-                        self.logger.info("检测到缺失的表: equipments，重新初始化数据库...")
-                        self.init_database()
-                        
-                except Exception as e:
-                    self.logger.warning(f"检查数据库表结构失败: {e}，重新初始化...")
-                    self.init_database()
-                    
-        except Exception as e:
-            self.logger.error(f"确保数据库初始化失败: {e}")
-            raise
 
     def parse_jsonp_response(self, text):
         """解析JSONP响应，提取装备数据"""
@@ -550,25 +486,53 @@ class CBGEquipSpider:
             return None
 
     def save_equipment_data(self, equipments):
-        """保存装备数据到数据库"""
+        """保存装备数据到MySQL数据库"""
         if not equipments:
             self.logger.info("没有装备数据需要保存")
             return 0
         
-        # 确保数据库已初始化
-        self._ensure_database_initialized()
-        
         try:
-            # 使用正确的方法名：save_equipments_batch
-            success = self.smart_db.save_equipments_batch(equipments)
-            if success:
-                self.logger.info(f"成功保存 {len(equipments)} 条装备数据到数据库")
-                return len(equipments)
-            else:
-                self.logger.error("保存装备数据到数据库失败")
-                return 0
+            saved_count = 0
+            skipped_count = 0
+            
+            for equipment_data in equipments:
+                try:
+                    # 检查是否已存在相同的装备（根据equip_sn判断）
+                    equip_sn = equipment_data.get('equip_sn')
+                    if equip_sn:
+                        existing = db.session.query(Equipment).filter_by(equip_sn=equip_sn).first()
+                        if existing:
+                            # 更新现有记录
+                            for key, value in equipment_data.items():
+                                if hasattr(existing, key):
+                                    setattr(existing, key, value)
+                            # 更新时间戳
+                            existing.update_time = datetime.now()
+                            skipped_count += 1
+                            continue
+                    
+                    # 创建新记录
+                    equipment = Equipment(**equipment_data)
+                    db.session.add(equipment)
+                    saved_count += 1
+                    
+                except Exception as e:
+                    self.logger.error(f"保存单个装备数据失败: {e}")
+                    continue
+            
+            # 提交事务
+            db.session.commit()
+            
+            if saved_count > 0:
+                self.logger.info(f"成功保存 {saved_count} 条新装备数据到MySQL数据库")
+            if skipped_count > 0:
+                self.logger.info(f"跳过 {skipped_count} 条已存在的装备数据")
+                
+            return saved_count
+            
         except Exception as e:
-            self.logger.error(f"保存装备数据到数据库失败: {e}")
+            db.session.rollback()
+            self.logger.error(f"保存装备数据到MySQL数据库失败: {e}")
             return 0
 
     async def fetch_page(self, page=1, search_params=None, search_type='overall_search_equip'):

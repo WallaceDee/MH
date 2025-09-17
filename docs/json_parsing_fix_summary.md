@@ -113,7 +113,7 @@ def test_role_feature_extraction():
     """测试角色特征提取"""
     app = create_app()
     with app.app_context():
-        role_service = RoleServiceMigrated()
+        role_service = RoleService()
         result = role_service.get_role_list(page=1, page_size=5)
         # 测试特征提取
         if result.get('data') and len(result['data']) > 0:

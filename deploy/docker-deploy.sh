@@ -50,7 +50,6 @@ check_docker() {
     
     print_info "Docker环境检查通过"
     print_info "Docker版本: $(docker --version)"
-    print_info "Docker Compose版本: $(docker-compose --version)"
 }
 
 # 检查MariaDB连接
@@ -184,17 +183,10 @@ check_deployment() {
     sleep 20
     
     # 测试API服务
-    if curl -f http://localhost:5000/api/v1/health &> /dev/null; then
+    if curl -f http://localhost:5000/api/v1/system/health &> /dev/null; then
         print_info "✅ API服务健康检查通过"
     else
         print_warning "⚠️  API服务健康检查失败，请检查日志"
-    fi
-    
-    # 测试前端服务
-    if curl -f http://localhost/health &> /dev/null; then
-        print_info "✅ 前端服务健康检查通过"
-    else
-        print_warning "⚠️  前端服务健康检查失败，请检查日志"
     fi
     
     print_info "部署状态检查完成"
@@ -208,9 +200,8 @@ show_deployment_info() {
     echo "CBG爬虫项目Docker部署完成！"
     echo "========================================="
     echo "服务访问地址:"
-    echo "  前端应用: http://localhost"
-    echo "  API接口:  http://localhost/api/v1"
-    echo "  健康检查: http://localhost/health"
+    echo "  API接口:  http://localhost:5000/api/v1"
+    echo "  健康检查: http://localhost:5000/api/v1/system/health"
     echo ""
     echo "容器管理命令:"
     echo "  查看状态: $COMPOSE_CMD -f docker-compose.prod.yml ps"
@@ -220,12 +211,11 @@ show_deployment_info() {
     echo ""
     echo "数据库连接:"
     echo "  容器连接宿主机MariaDB: host.docker.internal:3306"
-    echo "  数据库名: lingtomg"
-    echo "  用户名: cbg_user"
+    echo "  数据库名: cbg_spider"
+    echo "  用户名: lingtong"
     echo ""
     echo "日志文件位置:"
     echo "  应用日志: ./logs/"
-    echo "  Nginx日志: ./logs/nginx/"
     echo "  容器日志: docker-compose logs"
     echo "========================================="
 }

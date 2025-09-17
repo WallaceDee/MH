@@ -101,12 +101,12 @@ except RuntimeError as e:
 
 ```python
 from src.app import create_app
-from src.app.services.role_service_migrated import RoleServiceMigrated
+from src.app.services.role_service_migrated import RoleService
 
 app = create_app()
 
 with app.app_context():
-    role_service = RoleServiceMigrated()
+    role_service = RoleService()
     result = role_service.get_role_list(page=1, page_size=10)
 ```
 

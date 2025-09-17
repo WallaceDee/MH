@@ -24,8 +24,8 @@ def get_equipments():
         params = {
             'page': request.args.get('page', 1),
             'page_size': request.args.get('page_size', 10),
-            'year': request.args.get('year'),
-            'month': request.args.get('month'),
+            'start_date': request.args.get('start_date'),
+            'end_date': request.args.get('end_date'),
             'level_min': request.args.get('level_min'),
             'level_max': request.args.get('level_max'),
             'price_min': request.args.get('price_min'),
@@ -60,16 +60,11 @@ def get_equipments():
         return error_response(f"获取装备列表失败: {str(e)}")
 
 
-@equipment_bp.route('/<string:year>/<string:month>/<string:equip_sn>', methods=['GET'])
-def get_equipment_details(year, month, equip_sn):
+@equipment_bp.route('/<string:equip_sn>', methods=['GET'])
+def get_equipment_details(equip_sn):
     """获取装备详情"""
     try:
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        result = controller.get_equipment_details(equip_sn, year, month)
+        result = controller.get_equipment_details(equip_sn)
         
         if result is None:
             return error_response("未找到指定的装备", code=404, http_code=404)
@@ -79,8 +74,6 @@ def get_equipment_details(year, month, equip_sn):
         
         return success_response(data=result, message="获取装备详情成功")
         
-    except ValueError:
-        return error_response("年月参数格式错误")
     except Exception as e:
         return error_response(f"获取装备详情失败: {str(e)}")
 
@@ -154,15 +147,7 @@ def find_anchors_by_sn(equip_sn):
             return error_response("装备序列号不能为空")
         
         # 获取装备详情
-        year = request.args.get('year')
-        month = request.args.get('month')
-        
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        equipment_data = controller.get_equipment_details(equip_sn, year, month)
+        equipment_data = controller.get_equipment_details(equip_sn)
         
         if not equipment_data or "error" in equipment_data:
             return error_response("未找到指定的装备")
@@ -194,15 +179,7 @@ def get_valuation_by_sn(equip_sn):
             return error_response("装备序列号不能为空")
         
         # 获取装备详情
-        year = request.args.get('year')
-        month = request.args.get('month')
-        
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        equipment_data = controller.get_equipment_details(equip_sn, year, month)
+        equipment_data = controller.get_equipment_details(equip_sn)
         
         if not equipment_data or "error" in equipment_data:
             return error_response("未找到指定的装备")
@@ -341,8 +318,8 @@ def batch_equipment_valuation():
                     total_equip_price += item.get('estimated_price', 0)
                 
                 # 更新角色数据库中的装备估价价格
-                from ....services.role_service_migrated import RoleServiceMigrated
-                role_service = RoleServiceMigrated()
+                from ....services.role_service import RoleService
+                role_service = RoleService()
                 success = role_service.update_role_equip_price(eid, total_equip_price)
                 result["equip_price"] = total_equip_price
                 if success:
@@ -369,16 +346,7 @@ def delete_equipment(equip_sn):
         if not equip_sn:
             return error_response("装备序列号不能为空")
         
-        # 获取年月参数
-        year = request.args.get('year')
-        month = request.args.get('month')
-        
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        result = controller.delete_equipment(equip_sn, year, month)
+        result = controller.delete_equipment(equip_sn)
         
         if "error" in result:
             return error_response(result["error"])
@@ -388,8 +356,6 @@ def delete_equipment(equip_sn):
         else:
             return error_response(result.get("error", "删除失败"))
         
-    except ValueError:
-        return error_response("参数格式错误")
     except Exception as e:
         return error_response(f"删除装备失败: {str(e)}") 
 

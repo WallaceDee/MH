@@ -61,7 +61,7 @@ class MarketDataCollector:
     
     def refresh_market_data(self, 
                        filters: Optional[Dict[str, Any]] = None,
-                       max_records: int = 200) -> pd.DataFrame:
+                       max_records: int = 9999) -> pd.DataFrame:
         """
         刷新市场数据 - 从MySQL获取role_type为'empty'的数据
         

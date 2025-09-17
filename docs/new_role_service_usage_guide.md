@@ -3,7 +3,7 @@
 ## 当前状态
 
 ✅ **已完成的更新**：
-1. 角色控制器已成功更新使用新的ORM服务 (`RoleServiceMigrated`)
+1. 角色控制器已成功更新使用新的ORM服务 (`RoleService`)
 2. 装备和宠物API中的角色服务调用已更新
 3. 新的ORM服务包含所有原有功能
 4. 服务导入和初始化正常
@@ -15,7 +15,7 @@
 ## 已更新的文件
 
 ### 1. 控制器层
-- `src/app/controllers/role_controller.py` - 已更新使用 `RoleServiceMigrated`
+- `src/app/controllers/role_controller.py` - 已更新使用 `RoleService`
 
 ### 2. API层
 - `src/app/blueprints/api/v1/equipment.py` - 装备估价更新使用新服务
@@ -38,11 +38,11 @@ result = controller.get_roles(params)
 ### 2. 直接使用服务
 ```python
 from src.app import create_app
-from src.app.services.role_service_migrated import RoleServiceMigrated
+from src.app.services.role_service_migrated import RoleService
 
 app = create_app()
 with app.app_context():
-    service = RoleServiceMigrated()
+    service = RoleService()
     
     # 获取角色列表
     result = service.get_roles_list(page=1, page_size=20)
@@ -128,7 +128,7 @@ export MYSQL_DATABASE=cbg_spider
 from src.app.controllers.role_controller import roleController
 
 controller = roleController()
-print(type(controller.service).__name__)  # 应该输出: RoleServiceMigrated
+print(type(controller.service).__name__)  # 应该输出: RoleService
 ```
 
 ### 2. 测试API端点

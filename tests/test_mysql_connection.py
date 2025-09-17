@@ -48,8 +48,8 @@ def test_mysql_connection():
             print("✓ 数据库表创建成功")
             
             # 测试角色服务
-            from src.app.services.role_service_migrated import RoleServiceMigrated
-            role_service = RoleServiceMigrated()
+            from app.services.role_service import RoleService
+            role_service = RoleService()
             
             # 测试获取角色列表
             result = role_service.get_role_list(page=1, page_size=5)

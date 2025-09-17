@@ -10,7 +10,6 @@ import json
 import sys
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
-import sqlite3
 import logging
 
 # 添加src目录到Python路径
@@ -23,6 +22,12 @@ if src_path not in sys.path:
 
 try:
     from src.utils.project_path import get_project_root, get_data_path
+    from src.database_config import db_config
+    from src.database import db
+    from src.models.equipment import Equipment
+    from src.models.pet import Pet
+    from sqlalchemy import and_, or_, func, text
+    from sqlalchemy.orm import sessionmaker
 except ImportError:
     # 如果无法导入，直接使用相对路径计算
     def get_project_root():
@@ -57,7 +62,8 @@ class EquipmentService:
         self.project_root = get_project_root()
         self.data_dir = get_data_path()
         
-
+        # 初始化数据库连接
+        self.db_config = db_config
         
         # 初始化特征提取器
         self.equip_feature_extractor = None
@@ -103,32 +109,10 @@ class EquipmentService:
             except Exception as e:
                 logger.error(f"统一特征提取器初始化失败: {e}")
         
-        # 初始化异常装备数据库
-        self._init_abnormal_equipment_db()
+        # MySQL模式下不需要初始化SQLite数据库
     
 
     
-    def _init_abnormal_equipment_db(self):
-        """初始化异常装备数据库"""
-        try:
-            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
-            with sqlite3.connect(abnormal_db_path) as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS abnormal_equipment (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        equip_sn TEXT NOT NULL UNIQUE,
-                        equipment_data TEXT NOT NULL,
-                        mark_reason TEXT DEFAULT '标记异常',
-                        mark_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        status TEXT DEFAULT 'pending',
-                        notes TEXT
-                    )
-                ''')
-                conn.commit()
-                logger.info("异常装备数据库初始化成功")
-        except Exception as e:
-            logger.error(f"异常装备数据库初始化失败: {e}")
     
     def mark_equipment_as_abnormal(self, equipment_data: Dict, reason: str = "标记异常", notes: str = None) -> Dict:
         """标记装备为异常"""
@@ -141,43 +125,39 @@ class EquipmentService:
             if not equip_sn:
                 return {"error": "装备序列号不能为空"}
             
-            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
-            with sqlite3.connect(abnormal_db_path) as conn:
-                cursor = conn.cursor()
-                
-                # 检查是否已存在
-                cursor.execute('''
-                    SELECT id FROM abnormal_equipment 
-                    WHERE equip_sn = ?
-                ''', (equip_sn,))
-                
-                existing = cursor.fetchone()
-                
-                if existing:
-                    # 更新现有记录
-                    cursor.execute('''
-                        UPDATE abnormal_equipment 
-                        SET equipment_data = ?, mark_reason = ?, mark_time = CURRENT_TIMESTAMP, 
-                            notes = ?, status = 'pending'
-                        WHERE equip_sn = ?
-                    ''', (json.dumps(equipment_data, ensure_ascii=False), reason, notes, equip_sn))
-                    message = "异常装备记录已更新"
-                else:
-                    # 插入新记录
-                    cursor.execute('''
-                        INSERT INTO abnormal_equipment 
-                        (equip_sn, equipment_data, mark_reason, notes)
-                        VALUES (?, ?, ?, ?)
-                    ''', (equip_sn, json.dumps(equipment_data, ensure_ascii=False), reason, notes))
-                    message = "装备已标记为异常"
-                
-                conn.commit()
-                
-                return {
-                    "success": True,
-                    "message": message,
-                    "equip_sn": equip_sn
-                }
+            # 使用SQLAlchemy ORM
+            from src.models.abnormal_equipment import AbnormalEquipment
+            
+            # 检查是否已存在
+            existing = db.session.query(AbnormalEquipment).filter_by(equip_sn=equip_sn).first()
+            
+            if existing:
+                # 更新现有记录
+                existing.equipment_data = json.dumps(equipment_data, ensure_ascii=False)
+                existing.mark_reason = reason
+                existing.notes = notes
+                existing.mark_time = datetime.utcnow()
+                existing.status = 'pending'
+                message = "异常装备记录已更新"
+            else:
+                # 插入新记录
+                abnormal_equipment = AbnormalEquipment(
+                    equip_sn=equip_sn,
+                    equipment_data=json.dumps(equipment_data, ensure_ascii=False),
+                    mark_reason=reason,
+                    notes=notes,
+                    status='pending'
+                )
+                db.session.add(abnormal_equipment)
+                message = "装备已标记为异常"
+            
+            db.session.commit()
+            
+            return {
+                "success": True,
+                "message": message,
+                "equip_sn": equip_sn
+            }
                 
         except Exception as e:
             logger.error(f"标记装备异常失败: {e}")
@@ -186,60 +166,45 @@ class EquipmentService:
     def get_abnormal_equipment_list(self, page: int = 1, page_size: int = 20, status: str = None) -> Dict:
         """获取异常装备列表"""
         try:
-            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
-            with sqlite3.connect(abnormal_db_path) as conn:
-                cursor = conn.cursor()
-                
-                # 构建查询条件
-                where_clause = ""
-                params = []
-                
-                if status:
-                    where_clause = "WHERE status = ?"
-                    params.append(status)
-                
-                # 获取总数
-                count_sql = f"SELECT COUNT(*) FROM abnormal_equipment {where_clause}"
-                cursor.execute(count_sql, params)
-                total = cursor.fetchone()[0]
-                
-                # 获取分页数据
-                offset = (page - 1) * page_size
-                data_sql = f'''
-                    SELECT id, equip_sn, equipment_data, mark_reason, 
-                           mark_time, status, notes
-                    FROM abnormal_equipment {where_clause}
-                    ORDER BY mark_time DESC
-                    LIMIT ? OFFSET ?
-                '''
-                params.extend([page_size, offset])
-                cursor.execute(data_sql, params)
-                
-                rows = cursor.fetchall()
-                items = []
-                
-                for row in rows:
-                    try:
-                        equipment_data = json.loads(row[2]) if row[2] else {}
-                        items.append({
-                            "id": row[0],
-                            "equip_sn": row[1],
-                            "equipment_data": equipment_data,
-                            "mark_reason": row[3],
-                            "mark_time": row[4],
-                            "status": row[5],
-                            "notes": row[6]
-                        })
-                    except json.JSONDecodeError:
-                        logger.warning(f"解析装备数据失败: {row[2]}")
-                        continue
-                
-                return {
-                    "items": items,
-                    "total": total,
-                    "page": page,
-                    "page_size": page_size
-                }
+            # 使用SQLAlchemy ORM
+            from src.models.abnormal_equipment import AbnormalEquipment
+            
+            # 构建查询
+            query = db.session.query(AbnormalEquipment)
+            
+            if status:
+                query = query.filter(AbnormalEquipment.status == status)
+            
+            # 获取总数
+            total = query.count()
+            
+            # 分页查询
+            offset = (page - 1) * page_size
+            abnormal_equipments = query.order_by(AbnormalEquipment.mark_time.desc()).offset(offset).limit(page_size).all()
+            
+            items = []
+            for abnormal_equipment in abnormal_equipments:
+                try:
+                    equipment_data = json.loads(abnormal_equipment.equipment_data) if abnormal_equipment.equipment_data else {}
+                    items.append({
+                        "id": abnormal_equipment.id,
+                        "equip_sn": abnormal_equipment.equip_sn,
+                        "equipment_data": equipment_data,
+                        "mark_reason": abnormal_equipment.mark_reason,
+                        "mark_time": abnormal_equipment.mark_time.isoformat() if abnormal_equipment.mark_time else None,
+                        "status": abnormal_equipment.status,
+                        "notes": abnormal_equipment.notes
+                    })
+                except json.JSONDecodeError:
+                    logger.warning(f"解析装备数据失败: {abnormal_equipment.equipment_data}")
+                    continue
+            
+            return {
+                "items": items,
+                "total": total,
+                "page": page,
+                "page_size": page_size
+            }
                 
         except Exception as e:
             logger.error(f"获取异常装备列表失败: {e}")
@@ -248,24 +213,23 @@ class EquipmentService:
     def update_abnormal_equipment_status(self, equip_sn: str, status: str, notes: str = None) -> Dict:
         """更新异常装备状态"""
         try:
-            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
-            with sqlite3.connect(abnormal_db_path) as conn:
-                cursor = conn.cursor()
+            # 使用SQLAlchemy ORM
+            from src.models.abnormal_equipment import AbnormalEquipment
+            
+            abnormal_equipment = db.session.query(AbnormalEquipment).filter_by(equip_sn=equip_sn).first()
+            
+            if abnormal_equipment:
+                abnormal_equipment.status = status
+                abnormal_equipment.notes = notes
+                abnormal_equipment.mark_time = datetime.utcnow()
+                db.session.commit()
                 
-                cursor.execute('''
-                    UPDATE abnormal_equipment 
-                    SET status = ?, notes = ?, mark_time = CURRENT_TIMESTAMP
-                    WHERE equip_sn = ?
-                ''', (status, notes, equip_sn))
-                
-                if cursor.rowcount > 0:
-                    conn.commit()
-                    return {
-                        "success": True,
-                        "message": "异常装备状态更新成功"
-                    }
-                else:
-                    return {"error": "未找到指定的异常装备记录"}
+                return {
+                    "success": True,
+                    "message": "异常装备状态更新成功"
+                }
+            else:
+                return {"error": "未找到指定的异常装备记录"}
                     
         except Exception as e:
             logger.error(f"更新异常装备状态失败: {e}")
@@ -274,23 +238,21 @@ class EquipmentService:
     def delete_abnormal_equipment(self, equip_sn: str) -> Dict:
         """删除异常装备记录"""
         try:
-            abnormal_db_path = os.path.join(self.data_dir, 'abnormal_equipment.db')
-            with sqlite3.connect(abnormal_db_path) as conn:
-                cursor = conn.cursor()
+            # 使用SQLAlchemy ORM
+            from src.models.abnormal_equipment import AbnormalEquipment
+            
+            abnormal_equipment = db.session.query(AbnormalEquipment).filter_by(equip_sn=equip_sn).first()
+            
+            if abnormal_equipment:
+                db.session.delete(abnormal_equipment)
+                db.session.commit()
                 
-                cursor.execute('''
-                    DELETE FROM abnormal_equipment 
-                    WHERE equip_sn = ?
-                ''', (equip_sn,))
-                
-                if cursor.rowcount > 0:
-                    conn.commit()
-                    return {
-                        "success": True,
-                        "message": "异常装备记录删除成功"
-                    }
-                else:
-                    return {"error": "未找到指定的异常装备记录"}
+                return {
+                    "success": True,
+                    "message": "异常装备记录删除成功"
+                }
+            else:
+                return {"error": "未找到指定的异常装备记录"}
                     
         except Exception as e:
             logger.error(f"删除异常装备记录失败: {e}")
@@ -346,26 +308,33 @@ class EquipmentService:
     
 
     
-    def _validate_year_month(self, year: Optional[int], month: Optional[int]) -> Tuple[int, int]:
-        """验证并获取有效的年月"""
-        now = datetime.now()
-        current_year = now.year
-        current_month = now.month
+    def _validate_date_range(self, start_date: Optional[str] = None, end_date: Optional[str] = None) -> Tuple[Optional[str], Optional[str]]:
+        """验证日期范围参数
         
-        if year is None or month is None:
-            return current_year, current_month
+        Args:
+            start_date: 开始日期，格式：YYYY-MM-DD
+            end_date: 结束日期，格式：YYYY-MM-DD
             
-        if not 1 <= month <= 12:
-            raise ValueError(f"无效的月份: {month}，月份必须在1-12之间")
-            
-        return year, month
+        Returns:
+            验证后的日期范围元组
+        """
+        if start_date:
+            try:
+                datetime.strptime(start_date, '%Y-%m-%d')
+            except ValueError:
+                raise ValueError(f"无效的开始日期格式: {start_date}，请使用YYYY-MM-DD格式")
+                
+        if end_date:
+            try:
+                datetime.strptime(end_date, '%Y-%m-%d')
+            except ValueError:
+                raise ValueError(f"无效的结束日期格式: {end_date}，请使用YYYY-MM-DD格式")
+                
+        return start_date, end_date
     
-    def _get_db_file(self, year: Optional[int] = None, month: Optional[int] = None) -> str:
-        """获取指定年月的装备数据库文件路径"""
-        year, month = self._validate_year_month(year, month)
-        return os.path.join(self.data_dir, f'{year}{month:02d}', f'cbg_equip_{year}{month:02d}.db')
     
-    def get_equipments(self, page: int = 1, page_size: int = 10, year: Optional[int] = None, month: Optional[int] = None,
+    def get_equipments(self, page: int = 1, page_size: int = 10, 
+                      start_date: Optional[str] = None, end_date: Optional[str] = None,
                       equip_sn: Optional[str] = None,
                       level_min: Optional[int] = None, level_max: Optional[int] = None,
                       price_min: Optional[int] = None, price_max: Optional[int] = None,
@@ -432,180 +401,167 @@ class EquipmentService:
         31. `large_equip_desc` - 装备描述
         """
         try:
-            year, month = self._validate_year_month(year, month)
-            db_file = self._get_db_file(year, month)
+            start_date, end_date = self._validate_date_range(start_date, end_date)
             
-            if not os.path.exists(db_file):
-                return {
-                    "total": 0, "page": page, "page_size": page_size, "total_pages": 0, "data": [],
-                    "year": year, "month": month, "message": f"未找到 {year}年{month}月 的装备数据文件"
-                }
+            # 使用SQLAlchemy ORM
+            query = db.session.query(Equipment)
             
-            with sqlite3.connect(db_file) as conn:
-                conn.row_factory = sqlite3.Row
-                cursor = conn.cursor()
+            # 添加调试日志
+            logger.info(f"开始处理筛选条件，参数: level_min={level_min}, level_max={level_max}, price_min={price_min}, price_max={price_max}")
+            logger.info(f"多选参数: kindid={kindid}, equip_special_skills={equip_special_skills}, equip_special_effect={equip_special_effect}")
+            
+            # 构建查询条件
+            if equip_sn:
+                query = query.filter(Equipment.equip_sn == equip_sn)
+            
+            # 时间范围筛选
+            if start_date:
+                query = query.filter(func.date(Equipment.selling_time) >= start_date)
+                logger.info(f"添加开始日期筛选: selling_time >= {start_date}")
+            if end_date:
+                query = query.filter(func.date(Equipment.selling_time) <= end_date)
+                logger.info(f"添加结束日期筛选: selling_time <= {end_date}")
                 
-                # 添加调试日志
-                logger.info(f"开始处理筛选条件，参数: level_min={level_min}, level_max={level_max}, price_min={price_min}, price_max={price_max}")
-                logger.info(f"多选参数: kindid={kindid}, equip_special_skills={equip_special_skills}, equip_special_effect={equip_special_effect}")
+            # 基础筛选条件
+            if level_min is not None:
+                query = query.filter(or_(Equipment.level >= level_min, Equipment.equip_level >= level_min))
+            if level_max is not None:
+                query = query.filter(or_(Equipment.level <= level_max, Equipment.equip_level <= level_max))
+            if price_min is not None:
+                query = query.filter(Equipment.price >= price_min * 100)  # 前端传元，后端存分
+            if price_max is not None:
+                query = query.filter(Equipment.price <= price_max * 100)
+            
+            # 装备类型筛选（多选）
+            if kindid and len(kindid) > 0:
+                query = query.filter(Equipment.kindid.in_(kindid))
+                logger.info(f"添加装备类型筛选: kindid IN {kindid}")
+            
+            # 宠物装备类型筛选（多选）
+            if equip_type and len(equip_type) > 0:
+                query = query.filter(Equipment.equip_type.in_(equip_type))
+                logger.info(f"添加宠物装备类型筛选: equip_type IN {equip_type}")
+            
+            # 特技筛选（多选）
+            if equip_special_skills and len(equip_special_skills) > 0:
+                query = query.filter(Equipment.special_skill.in_(equip_special_skills))
+                logger.info(f"添加特技筛选: special_skill IN {equip_special_skills}")
+            
+            # 特效筛选（多选，JSON数组格式）
+            if equip_special_effect and len(equip_special_effect) > 0:
+                effect_conditions = []
+                for effect in equip_special_effect:
+                    effect_conditions.append(
+                        or_(
+                            Equipment.special_effect.like(f'[{effect}]'),
+                            Equipment.special_effect.like(f'[{effect},%'),
+                            Equipment.special_effect.like(f'%,{effect},%'),
+                            Equipment.special_effect.like(f'%,{effect}]')
+                        )
+                    )
+                query = query.filter(or_(*effect_conditions))
+                logger.info(f"添加特效筛选: {equip_special_effect}")
+            
+            # 套装筛选
+            if suit_effect:
+                query = query.filter(Equipment.suit_effect == suit_effect)
+                logger.info(f"添加套装筛选: suit_effect = {suit_effect}")
                 
-                conditions = []
-                params = []
+            if suit_added_status:
+                query = query.filter(Equipment.suit_effect == suit_added_status)
+                logger.info(f"添加套装附加状态筛选: suit_effect = {suit_added_status}")
                 
-                if equip_sn:
-                    conditions.append("equip_sn = ?")
-                    params.append(equip_sn)
-                    
-                # 基础筛选条件 - 修复字段名
-                if level_min is not None:
-                    # 数据库字段可能是 level 或 equip_level
-                    conditions.append("(level >= ? OR equip_level >= ?)")
-                    params.extend([level_min, level_min])
-                if level_max is not None:
-                    conditions.append("(level <= ? OR equip_level <= ?)")
-                    params.extend([level_max, level_max])
-                if price_min is not None:
-                    conditions.append("price >= ?")
-                    params.append(price_min * 100) # 前端传元，后端存分
-                if price_max is not None:
-                    conditions.append("price <= ?")
-                    params.append(price_max * 100)
+            if suit_transform_skills:
+                query = query.filter(Equipment.suit_effect == suit_transform_skills)
+                logger.info(f"添加套装变身术筛选: suit_effect = {suit_transform_skills}")
                 
-                # 装备类型筛选（多选）
-                if kindid and len(kindid) > 0:
-                    type_placeholders = ','.join(['?' for _ in kindid])
-                    conditions.append(f"kindid IN ({type_placeholders})")
-                    params.extend(kindid)
-                    logger.info(f"添加装备类型筛选: kindid IN ({type_placeholders}), 值: {kindid}")
+            if suit_transform_charms:
+                query = query.filter(Equipment.suit_effect == suit_transform_charms)
+                logger.info(f"添加套装变化咒筛选: suit_effect = {suit_transform_charms}")
+            
+            # 宝石筛选
+            if gem_value:
+                gem_conditions = or_(
+                    Equipment.gem_value.like(f'[{gem_value}]'),
+                    Equipment.gem_value.like(f'[{gem_value},%'),
+                    Equipment.gem_value.like(f'%,{gem_value},%'),
+                    Equipment.gem_value.like(f'%,{gem_value}]')
+                )
+                query = query.filter(gem_conditions)
+                logger.info(f"添加宝石筛选: gem_value = {gem_value}")
                 
-                # 宠物装备类型筛选（多选）
-                if equip_type and len(equip_type) > 0:
-                    type_placeholders = ','.join(['?' for _ in equip_type])
-                    conditions.append(f"equip_type IN ({type_placeholders})")
-                    params.extend(equip_type)
-                    logger.info(f"添加宠物装备类型筛选: equip_type IN ({type_placeholders}), 值: {equip_type}")
-                
-                # 特技筛选（多选）
-                if equip_special_skills and len(equip_special_skills) > 0:
-                    skill_placeholders = ','.join(['?' for _ in equip_special_skills])
-                    conditions.append(f"special_skill IN ({skill_placeholders})")
-                    params.extend(equip_special_skills)
-                    logger.info(f"添加特技筛选: special_skill IN ({skill_placeholders}), 值: {equip_special_skills}")
-                
-                # 特效筛选（多选，JSON数组格式）
-                if equip_special_effect and len(equip_special_effect) > 0:
-                    effect_conditions = []
-                    for effect in equip_special_effect:
-                        effect_conditions.append("(special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)")
-                        params.extend([
-                            f'[{effect}]',        # 只有这一个特效：[6]
-                            f'[{effect},%',       # 在开头：[6,x,...]
-                            f'%,{effect},%',      # 在中间：[x,6,y,...]  
-                            f'%,{effect}]'        # 在结尾：[x,y,6]
-                        ])
-                    conditions.append(f"({' OR '.join(effect_conditions)})")
-                    logger.info(f"添加特效筛选: {equip_special_effect}")
-                
-                # 套装筛选
-                if suit_effect:
-                    conditions.append("suit_effect = ?")
-                    params.append(suit_effect)
-                    logger.info(f"添加套装筛选: suit_effect = {suit_effect}")
-                    
-                if suit_added_status:
-                    conditions.append("suit_effect = ?")
-                    params.append(suit_added_status)
-                    logger.info(f"添加套装附加状态筛选: suit_effect = {suit_added_status}")
-                    
-                if suit_transform_skills:
-                    conditions.append("suit_effect = ?")
-                    params.append(suit_transform_skills)
-                    logger.info(f"添加套装变身术筛选: suit_effect = {suit_transform_skills}")
-                    
-                if suit_transform_charms:
-                    conditions.append("suit_effect = ?")
-                    params.append(suit_transform_charms)
-                    logger.info(f"添加套装变化咒筛选: suit_effect = {suit_transform_charms}")
-                
-                # 宝石筛选
-                if gem_value:
-                    conditions.append("(gem_value LIKE ? OR gem_value LIKE ? OR gem_value LIKE ? OR gem_value LIKE ?)")
-                    params.extend([
-                        f'[{gem_value}]',        # 只有这一个宝石：[6]
-                        f'[{gem_value},%',       # 在开头：[6,x,...]
-                        f'%,{gem_value},%',      # 在中间：[x,6,y,...]  
-                        f'%,{gem_value}]'        # 在结尾：[x,y,6]
-                    ])
-                    logger.info(f"添加宝石筛选: gem_value = {gem_value}")
-                    
-                if gem_level is not None:
-                    conditions.append("gem_level >= ?")
-                    params.append(gem_level)
-                    logger.info(f"添加宝石等级筛选: gem_level >= {gem_level}")
-              
-                where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+            if gem_level is not None:
+                query = query.filter(Equipment.gem_level >= gem_level)
+                logger.info(f"添加宝石等级筛选: gem_level >= {gem_level}")
 
-                # 获取总数
-                count_sql = f"SELECT COUNT(*) FROM equipments {where_clause}"
-                total = cursor.execute(count_sql, params).fetchone()[0]
-                logger.info(f"查询到的总数: {total}")
-                
-                total_pages = (total + page_size - 1) // page_size
-                
-                # 排序
-                order_by_clause = "ORDER BY update_time DESC"  # 默认按更新时间倒序，最近更新的在最前
-                if sort_by and sort_order:
-                    allowed_sort_by = [
-                        'price', 'highlight', 'dynamic_tags', 'gem_level', 'jinglian_level', 'xiang_qian_level',
-                        'special_effect', 'suit_effect', 'agg_added_attrs', 'equip_level', 'all_damage', 
-                        'init_damage', 'init_wakan', 'init_defense', 'init_hp', 'init_dex', 'create_time_equip', 
-                        'selling_time', 'special_skill', 'server_name', 'equip_name', 'seller_nickname', 'zongshang'
-                    ]
-                    if sort_by in allowed_sort_by and sort_order.lower() in ['asc', 'desc']:
-                        order_by_clause = f"ORDER BY {sort_by} {sort_order.upper()}"
+            # 获取总数
+            total = query.count()
+            logger.info(f"查询到的总数: {total}")
+            
+            total_pages = (total + page_size - 1) // page_size
+            
+            # 排序
+            order_by = Equipment.update_time.desc()  # 默认按更新时间倒序
+            if sort_by and sort_order:
+                allowed_sort_by = [
+                    'price', 'highlight', 'dynamic_tags', 'gem_level', 'jinglian_level', 'xiang_qian_level',
+                    'special_effect', 'suit_effect', 'agg_added_attrs', 'equip_level', 'all_damage', 
+                    'init_damage', 'init_wakan', 'init_defense', 'init_hp', 'init_dex', 'create_time_equip', 
+                    'selling_time', 'special_skill', 'server_name', 'equip_name', 'seller_nickname', 'zongshang'
+                ]
+                if sort_by in allowed_sort_by and sort_order.lower() in ['asc', 'desc']:
+                    sort_column = getattr(Equipment, sort_by)
+                    order_by = sort_column.asc() if sort_order.lower() == 'asc' else sort_column.desc()
 
-                # 分页查询
-                offset = (page - 1) * page_size
-                query_sql = f"SELECT * FROM equipments {where_clause} {order_by_clause} LIMIT ? OFFSET ?"
-                
-                logger.info(f"完整查询SQL: {query_sql}")
-                logger.info(f"查询参数: {params + [page_size, offset]}")
-                
-                equipments = cursor.execute(query_sql, params + [page_size, offset]).fetchall()
-                
-                logger.info(f"查询到的装备数量: {len(equipments)}")
-                
-                return {
-                    "total": total,
-                    "page": page,
-                    "page_size": page_size,
-                    "total_pages": total_pages,
-                    "data": [dict(row) for row in equipments],
-                    "year": year,
-                    "month": month,
-                }
+            # 分页查询
+            offset = (page - 1) * page_size
+            equipments = query.order_by(order_by).offset(offset).limit(page_size).all()
+            
+            logger.info(f"查询到的装备数量: {len(equipments)}")
+            
+            # 转换为字典格式
+            equipment_list = []
+            for equipment in equipments:
+                equipment_dict = {}
+                for column in equipment.__table__.columns:
+                    value = getattr(equipment, column.name)
+                    if isinstance(value, datetime):
+                        equipment_dict[column.name] = value.isoformat()
+                    else:
+                        equipment_dict[column.name] = value
+                equipment_list.append(equipment_dict)
+            
+            return {
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "data": equipment_list,
+                "start_date": start_date,
+                "end_date": end_date,
+            }
 
         except Exception as e:
             logger.error(f"获取装备列表时出错: {e}")
             return {"error": str(e)}
 
-    def get_equipment_details(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
+    def get_equipment_details(self, equip_sn: str) -> Optional[Dict]:
         """获取单个装备的详细信息"""
         try:
-            year, month = self._validate_year_month(year, month)
-            db_file = self._get_db_file(year, month)
-
-            if not os.path.exists(db_file):
-                return None
             
-            with sqlite3.connect(db_file) as conn:
-                conn.row_factory = sqlite3.Row
-                cursor = conn.cursor()
-                
-                sql = "SELECT * FROM equipments WHERE equip_sn = ?"
-                equipment = cursor.execute(sql, (equip_sn,)).fetchone()
-                
-                return dict(equipment) if equipment else None
+            # 使用SQLAlchemy ORM
+            equipment = db.session.query(Equipment).filter_by(equip_sn=equip_sn).first()
+            
+            if equipment:
+                equipment_dict = {}
+                for column in equipment.__table__.columns:
+                    value = getattr(equipment, column.name)
+                    if isinstance(value, datetime):
+                        equipment_dict[column.name] = value.isoformat()
+                    else:
+                        equipment_dict[column.name] = value
+                return equipment_dict
+            return None
 
         except Exception as e:
             logger.error(f"获取装备详情时出错: {e}")
@@ -614,33 +570,18 @@ class EquipmentService:
     def _get_equipment_by_eid(self, eid: str) -> Optional[Dict]:
         """通过eid查询完整的装备信息"""
         try:
-            current_time = datetime.now()
+            # 使用SQLAlchemy ORM
+            equipment = db.session.query(Equipment).filter_by(eid=eid).first()
             
-            # 尝试当前月份和前几个月份的数据库
-            for month_offset in range(3):
-                target_month = current_time.month - month_offset
-                target_year = current_time.year
-                
-                # 处理跨年情况
-                while target_month <= 0:
-                    target_month += 12
-                    target_year -= 1
-                
-                db_file = self._get_db_file(target_year, target_month)
-                
-                if not os.path.exists(db_file):
-                    continue
-                
-                with sqlite3.connect(db_file) as conn:
-                    conn.row_factory = sqlite3.Row
-                    cursor = conn.cursor()
-                    
-                    sql = "SELECT * FROM equipments WHERE eid = ?"
-                    equipment = cursor.execute(sql, (eid,)).fetchone()
-                    
-                    if equipment:
-                        return dict(equipment)
-            
+            if equipment:
+                equipment_dict = {}
+                for column in equipment.__table__.columns:
+                    value = getattr(equipment, column.name)
+                    if isinstance(value, datetime):
+                        equipment_dict[column.name] = value.isoformat()
+                    else:
+                        equipment_dict[column.name] = value
+                return equipment_dict
             return None
             
         except Exception as e:
@@ -650,33 +591,18 @@ class EquipmentService:
     def _get_equipment_by_equip_sn(self, equip_sn: str) -> Optional[Dict]:
         """通过equip_sn查询完整的装备信息"""
         try:
-            current_time = datetime.now()
+            # 使用SQLAlchemy ORM
+            equipment = db.session.query(Equipment).filter_by(equip_sn=equip_sn).first()
             
-            # 尝试当前月份和前几个月份的数据库
-            for month_offset in range(3):
-                target_month = current_time.month - month_offset
-                target_year = current_time.year
-                
-                # 处理跨年情况
-                while target_month <= 0:
-                    target_month += 12
-                    target_year -= 1
-                
-                db_file = self._get_db_file(target_year, target_month)
-                
-                if not os.path.exists(db_file):
-                    continue
-                
-                with sqlite3.connect(db_file) as conn:
-                    conn.row_factory = sqlite3.Row
-                    cursor = conn.cursor()
-                    
-                    sql = "SELECT * FROM equipments WHERE equip_sn = ?"
-                    equipment = cursor.execute(sql, (equip_sn,)).fetchone()
-                    
-                    if equipment:
-                        return dict(equipment)
-            
+            if equipment:
+                equipment_dict = {}
+                for column in equipment.__table__.columns:
+                    value = getattr(equipment, column.name)
+                    if isinstance(value, datetime):
+                        equipment_dict[column.name] = value.isoformat()
+                    else:
+                        equipment_dict[column.name] = value
+                return equipment_dict
             return None
             
         except Exception as e:
@@ -1201,55 +1127,28 @@ class EquipmentService:
                 "error": f"获取支持的kindid列表时发生错误: {str(e)}"
             }
 
-    def delete_equipment(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+    def delete_equipment(self, equip_sn: str) -> Dict:
         """删除指定装备"""
         try:
-            year, month = self._validate_year_month(year, month)
-            db_file = self._get_db_file(year, month)
             
-            if not os.path.exists(db_file):
+            # 使用SQLAlchemy ORM
+            equipment = db.session.query(Equipment).filter_by(equip_sn=equip_sn).first()
+            
+            if not equipment:
                 return {
-                    "error": f"未找到 {year}年{month}月 的装备数据文件",
+                    "error": f"未找到装备序列号为 {equip_sn} 的装备",
                     "deleted": False
                 }
             
-            with sqlite3.connect(db_file) as conn:
-                cursor = conn.cursor()
-                
-                # 先检查装备是否存在
-                check_sql = "SELECT COUNT(*) FROM equipments WHERE equip_sn = ?"
-                count = cursor.execute(check_sql, (equip_sn,)).fetchone()[0]
-                
-                if count == 0:
-                    return {
-                        "error": f"未找到装备序列号为 {equip_sn} 的装备",
-                        "deleted": False
-                    }
-                
-                # 执行删除操作
-                delete_sql = "DELETE FROM equipments WHERE equip_sn = ?"
-                cursor.execute(delete_sql, (equip_sn,))
-                
-                # 提交事务
-                conn.commit()
-                
-                # 验证删除结果
-                remaining_count = cursor.execute(check_sql, (equip_sn,)).fetchone()[0]
-                
-                if remaining_count == 0:
-                    logger.info(f"成功删除装备: {equip_sn}")
-                    return {
-                        "deleted": True,
-                        "equip_sn": equip_sn,
-                        "year": year,
-                        "month": month,
-                        "message": "装备删除成功"
-                    }
-                else:
-                    return {
-                        "error": "删除操作失败，装备仍然存在",
-                        "deleted": False
-                    }
+            db.session.delete(equipment)
+            db.session.commit()
+            
+            logger.info(f"成功删除装备: {equip_sn}")
+            return {
+                "deleted": True,
+                "equip_sn": equip_sn,
+                "message": "装备删除成功"
+            }
                     
         except Exception as e:
             logger.error(f"删除装备时发生错误: {e}")

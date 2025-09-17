@@ -10,7 +10,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.app import create_app
-from src.app.services.role_service_migrated import RoleServiceMigrated
+from app.services.role_service import RoleService
 
 def test_role_service_with_app_context():
     """测试在Flask应用上下文中使用角色服务"""
@@ -22,7 +22,7 @@ def test_role_service_with_app_context():
     with app.app_context():
         try:
             # 创建角色服务实例
-            role_service = RoleServiceMigrated()
+            role_service = RoleService()
             print("✓ 角色服务实例创建成功")
             
             # 测试获取角色列表
@@ -55,7 +55,7 @@ def test_role_service_without_app_context():
     
     try:
         # 直接创建角色服务实例（没有应用上下文）
-        role_service = RoleServiceMigrated()
+        role_service = RoleService()
         result = role_service.get_role_list(page=1, page_size=5)
         print("✗ 意外成功：应该失败但没有失败")
         return False

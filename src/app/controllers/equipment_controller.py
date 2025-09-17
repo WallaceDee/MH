@@ -27,8 +27,8 @@ class EquipmentController:
             # 从请求参数中提取筛选条件
             page = int(params.get('page', 1))
             page_size = int(params.get('page_size', 10))
-            year = params.get('year')
-            month = params.get('month')
+            start_date = params.get('start_date')
+            end_date = params.get('end_date')
             equip_sn = params.get('equip_sn')
             # 验证分页参数
             if page < 1:
@@ -36,11 +36,7 @@ class EquipmentController:
             if page_size < 1 or page_size > 100:
                 page_size = 10
             
-            # 类型转换
-            if year:
-                year = int(year)
-            if month:
-                month = int(month)
+            # 日期参数验证在service层进行
             
             # 筛选条件
             level_min = params.get('level_min')
@@ -144,8 +140,8 @@ class EquipmentController:
             result = self.service.get_equipments(
                 page=page,
                 page_size=page_size,
-                year=year,
-                month=month,
+                start_date=start_date,
+                end_date=end_date,
                 equip_sn=equip_sn,
                 level_min=level_min,
                 level_max=level_max,
@@ -174,13 +170,13 @@ class EquipmentController:
             logger.error(f"获取装备列表时出错: {e}")
             return {"error": f"获取装备列表时出错: {str(e)}"}
     
-    def get_equipment_details(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
+    def get_equipment_details(self, equip_sn: str) -> Optional[Dict]:
         """获取装备详情"""
         try:
             if not equip_sn:
                 return {"error": "装备序列号不能为空"}
             
-            result = self.service.get_equipment_details(equip_sn, year, month)
+            result = self.service.get_equipment_details(equip_sn)
             
             if result is None:
                 return {"error": "未找到指定的装备"}
@@ -329,20 +325,14 @@ class EquipmentController:
             logger.error(f"获取支持的kindid列表时出错: {e}")
             return {"error": f"获取支持的kindid列表时出错: {str(e)}"}
     
-    def delete_equipment(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+    def delete_equipment(self, equip_sn: str) -> Dict:
         """删除指定装备"""
         try:
             if not equip_sn:
                 return {"error": "装备序列号不能为空", "deleted": False}
             
-            # 类型转换
-            if year:
-                year = int(year)
-            if month:
-                month = int(month)
-            
             # 调用服务层
-            result = self.service.delete_equipment(equip_sn, year, month)
+            result = self.service.delete_equipment(equip_sn)
             return result
             
         except ValueError as e:

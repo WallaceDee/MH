@@ -27,8 +27,8 @@ class PetController:
             # 从请求参数中提取筛选条件
             page = int(params.get('page', 1))
             page_size = int(params.get('page_size', 10))
-            year = params.get('year')
-            month = params.get('month')
+            start_date = params.get('start_date')
+            end_date = params.get('end_date')
             
             # 验证分页参数
             if page < 1:
@@ -36,11 +36,7 @@ class PetController:
             if page_size < 1 or page_size > 100:
                 page_size = 10
             
-            # 类型转换
-            if year:
-                year = int(year)
-            if month:
-                month = int(month)
+            # 日期参数验证在service层进行
             
             # 筛选条件
             level_min = params.get('level_min')
@@ -151,8 +147,8 @@ class PetController:
             result = self.service.get_pets(
                 page=page,
                 page_size=page_size,
-                year=year,
-                month=month,
+                start_date=start_date,
+                end_date=end_date,
                 level_min=level_min,
                 level_max=level_max,
                 price_min=price_min,
@@ -178,13 +174,13 @@ class PetController:
             logger.error(f"获取宠物列表时出错: {e}")
             return {"error": f"获取宠物列表时出错: {str(e)}"}
     
-    def get_pet_details(self, pet_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
+    def get_pet_details(self, pet_sn: str) -> Optional[Dict]:
         """获取宠物详情"""
         try:
             if not pet_sn:
                 return {"error": "宠物序列号不能为空"}
             
-            result = self.service.get_pet_details(pet_sn, year, month)
+            result = self.service.get_pet_details(pet_sn)
             
             if result is None:
                 return {"error": "未找到指定的宠物"}
@@ -287,11 +283,11 @@ class PetController:
                 "results": []
             }
 
-    def update_pet_equipments_price(self, equip_sn: str, price: float, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+    def update_pet_equipments_price(self, equip_sn: str, price: float) -> Dict:
         """更新召唤兽装备价格"""
         try:
             # 修复参数传递：price作为equip_list_amount，equip_list_amount_warning设为0
-            success = self.service.update_pet_equip_amount(equip_sn, int(price), 0, year, month)
+            success = self.service.update_pet_equip_amount(equip_sn, int(price), 0)
             if success:
                 return {"message": "更新召唤兽装备价格成功"}
             else:
@@ -300,19 +296,19 @@ class PetController:
             logger.error(f"更新召唤兽装备价格失败: {e}")
             return {"error": f"更新召唤兽装备价格失败: {str(e)}"}
     
-    def get_unvalued_pets_count(self, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+    def get_unvalued_pets_count(self) -> Dict:
         """获取当前年月携带装备但未估价的召唤兽数量"""
         try:
-            result = self.service.get_unvalued_pets_count(year, month)
+            result = self.service.get_unvalued_pets_count()
             return result
         except Exception as e:
             logger.error(f"获取未估价召唤兽数量失败: {e}")
             return {"error": f"获取未估价召唤兽数量失败: {str(e)}"}
     
-    def batch_update_unvalued_pets_equipment(self, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+    def batch_update_unvalued_pets_equipment(self) -> Dict:
         """批量更新未估价召唤兽的装备价格"""
         try:
-            result = self.service.batch_update_unvalued_pets_equipment(year, month)
+            result = self.service.batch_update_unvalued_pets_equipment()
             return result
         except Exception as e:
             logger.error(f"批量更新未估价召唤兽装备失败: {e}")
@@ -348,19 +344,19 @@ class PetController:
             logger.error(f"停止任务失败: {e}")
             return {"error": f"停止任务失败: {str(e)}"}
 
-    def delete_pet(self, pet_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Dict:
+    def delete_pet(self, pet_sn: str) -> Dict:
         """删除宠物"""
         try:
-            result = self.service.delete_pet(pet_sn, year, month)
+            result = self.service.delete_pet(pet_sn)
             return result
         except Exception as e:
             logger.error(f"删除宠物失败: {e}")
             return {"error": f"删除宠物失败: {str(e)}"}
         
-    def get_pet_by_equip_sn(self, equip_sn: str, year: Optional[int] = None, month: Optional[int] = None) -> Optional[Dict]:
+    def get_pet_by_equip_sn(self, equip_sn: str) -> Optional[Dict]:
         """通过equip_sn获取召唤兽详情"""
         try:
-            result = self.service.get_pet_by_equip_sn(equip_sn, year, month)
+            result = self.service.get_pet_by_equip_sn(equip_sn)
             return result
         except Exception as e:
             logger.error(f"通过equip_sn获取召唤兽详情失败: {e}")

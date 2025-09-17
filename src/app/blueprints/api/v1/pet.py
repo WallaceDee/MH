@@ -24,8 +24,8 @@ def get_pets():
         params = {
             'page': request.args.get('page', 1),
             'page_size': request.args.get('page_size', 10),
-            'year': request.args.get('year'),
-            'month': request.args.get('month'),
+            'start_date': request.args.get('start_date'),
+            'end_date': request.args.get('end_date'),
             'level_min': request.args.get('level_min'),
             'level_max': request.args.get('level_max'),
             'price_min': request.args.get('price_min'),
@@ -57,16 +57,11 @@ def get_pets():
         return error_response(f"获取宠物列表失败: {str(e)}")
 
 
-@pet_bp.route('/<string:year>/<string:month>/<string:equip_sn>', methods=['GET'])
-def get_pet_by_equip_sn(year, month, equip_sn):
+@pet_bp.route('/<string:equip_sn>', methods=['GET'])
+def get_pet_by_equip_sn(equip_sn):
     """通过equip_sn查找召唤兽详情"""
     try:
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        result = controller.get_pet_by_equip_sn(equip_sn, year, month)
+        result = controller.get_pet_by_equip_sn(equip_sn)
         
         if result is None:
             return error_response("未找到指定的召唤兽", code=404, http_code=404)
@@ -76,8 +71,6 @@ def get_pet_by_equip_sn(year, month, equip_sn):
         
         return success_response(data=result, message="获取召唤兽详情成功")
         
-    except ValueError:
-        return error_response("年月参数格式错误")
     except Exception as e:
         return error_response(f"获取召唤兽详情失败: {str(e)}")
 
@@ -229,23 +222,13 @@ def health_check():
 def get_unvalued_pets_count():
     """获取当前年月携带装备但未估价的召唤兽数量"""
     try:
-        year = request.args.get('year')
-        month = request.args.get('month')
-        
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        result = controller.get_unvalued_pets_count(year, month)
+        result = controller.get_unvalued_pets_count()
         
         if "error" in result:
             return error_response(result["error"])
         
         return success_response(data=result, message="获取未估价召唤兽数量成功")
         
-    except ValueError:
-        return error_response("年月参数格式错误")
     except Exception as e:
         return error_response(f"获取未估价召唤兽数量失败: {str(e)}")
 
@@ -254,24 +237,13 @@ def get_unvalued_pets_count():
 def batch_update_unvalued_pets_equipment():
     """批量更新未估价召唤兽的装备价格"""
     try:
-        data = request.get_json() or {}
-        year = data.get('year')
-        month = data.get('month')
-        
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        result = controller.batch_update_unvalued_pets_equipment(year, month)
+        result = controller.batch_update_unvalued_pets_equipment()
         
         if "error" in result:
             return error_response(result["error"])
         
         return success_response(data=result, message="批量更新未估价召唤兽装备成功")
         
-    except ValueError:
-        return error_response("年月参数格式错误")
     except Exception as e:
         return error_response(f"批量更新未估价召唤兽装备失败: {str(e)}")
 
@@ -497,8 +469,8 @@ def batch_pet_valuation():
                     total_pet_price += item.get('equip_estimated_price', 0)
                 
                 # 更新角色数据库中的宠物估价价格
-                from ....services.role_service_migrated import RoleServiceMigrated
-                role_service = RoleServiceMigrated()
+                from ....services.role_service import RoleService
+                role_service = RoleService()
                 success = role_service.update_role_pet_price(eid, total_pet_price)
                 result["pet_price"] = total_pet_price
                 if success:
@@ -522,22 +494,12 @@ def batch_pet_valuation():
 def delete_pet(pet_sn):
     """删除宠物"""
     try:
-        year = request.args.get('year')
-        month = request.args.get('month')
-        
-        if year:
-            year = int(year)
-        if month:
-            month = int(month)
-        
-        result = controller.delete_pet(pet_sn, year, month)
+        result = controller.delete_pet(pet_sn)
         
         if "error" in result:
             return error_response(result["error"])
         
         return success_response(message="宠物删除成功")
         
-    except ValueError:
-        return error_response("年月参数格式错误")
     except Exception as e:
         return error_response(f"删除宠物失败: {str(e)}") 

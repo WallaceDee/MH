@@ -8,7 +8,6 @@
 import os
 import sys
 import json
-import sqlite3
 import time
 import random
 import logging
@@ -23,8 +22,8 @@ project_root = get_project_root()
 sys.path.insert(0, project_root)
 
 from src.tools.setup_requests_session import setup_session
-from src.utils.smart_db_helper import CBGSmartDB
-from src.cbg_config import DB_SCHEMA_CONFIG
+from src.database import db
+from src.models.pet import Pet
 from src.tools.search_form_helper import (
     get_pet_search_params_sync,
     get_pet_search_params_async
@@ -45,29 +44,11 @@ class CBGPetSpider:
         self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
         
-        # 不需要初始化解析器，直接使用parse_pet_info函数
-        
-        # 使用按月分割的数据库文件路径
-        from src.utils.project_path import get_data_path
-        current_month = datetime.now().strftime('%Y%m')
-        
-        # 召唤兽数据库路径
-        db_filename = f"cbg_pets_{current_month}.db"
-        self.db_path = os.path.join(get_data_path(), current_month, db_filename)
-
-        # 确保data目录存在
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        
-        # 初始化智能数据库助手
-        self.smart_db = CBGSmartDB(self.db_path)
-        
         # 配置专用的日志器，避免与其他模块冲突
         self.logger = self._setup_logger()
         
         # 初始化其他组件
         self.setup_session()
-        # 延迟初始化数据库，避免在导入时创建文件
-        # self.init_database()
         self.retry_attempts = 1
 
     def _setup_logger(self):
@@ -125,53 +106,6 @@ class CBGPetSpider:
             logger=self.logger
         )
     
-    def init_database(self):
-        """初始化数据库和表结构"""
-        try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            # 只创建召唤兽相关的表
-            cursor.execute(DB_SCHEMA_CONFIG['pets'])
-            self.logger.debug("召唤兽数据库创建表: pets")
-            
-            conn.commit()
-            self.logger.info(f"召唤兽数据库初始化完成: {os.path.basename(self.db_path)}")
-            
-        except Exception as e:
-            self.logger.error(f"初始化召唤兽数据库失败: {e}")
-            raise
-        finally:
-            conn.close()
-    
-    def _ensure_database_initialized(self):
-        """确保数据库已初始化，如果未初始化则进行初始化"""
-        try:
-            # 检查数据库文件是否存在
-            if not os.path.exists(self.db_path):
-                self.logger.info("检测到数据库文件不存在，开始初始化...")
-                self.init_database()
-            else:
-                # 检查表结构是否完整
-                try:
-                    conn = sqlite3.connect(self.db_path)
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-                    tables = [row[0] for row in cursor.fetchall()]
-                    conn.close()
-                    
-                    # 检查是否包含必要的表
-                    if 'pets' not in tables:
-                        self.logger.info("检测到缺失的表: pets，重新初始化数据库...")
-                        self.init_database()
-                        
-                except Exception as e:
-                    self.logger.warning(f"检查数据库表结构失败: {e}，重新初始化...")
-                    self.init_database()
-                    
-        except Exception as e:
-            self.logger.error(f"确保数据库初始化失败: {e}")
-            raise
 
     def parse_jsonp_response(self, text):
         """解析JSONP响应，提取召唤兽数据"""
@@ -436,26 +370,55 @@ class CBGPetSpider:
             return None
 
     def save_pet_data(self, pets):
-        """保存召唤兽数据到数据库"""
+        """保存召唤兽数据到MySQL数据库"""
         if not pets:
             self.logger.info("没有召唤兽数据需要保存")
             return 0
         
-        # 确保数据库已初始化
-        self._ensure_database_initialized()
-        
         try:
-            self.logger.info(f"开始保存 {len(pets)} 条召唤兽数据到数据库")
-            # 使用正确的方法名：save_pets_batch
-            success = self.smart_db.save_pets_batch(pets)
-            if success:
-                self.logger.info(f"成功保存 {len(pets)} 条召唤兽数据到数据库")
-                return len(pets)
-            else:
-                self.logger.error("保存召唤兽数据到数据库失败")
-                return 0
+            self.logger.info(f"开始保存 {len(pets)} 条召唤兽数据到MySQL数据库")
+            
+            saved_count = 0
+            skipped_count = 0
+            
+            for pet_data in pets:
+                try:
+                    # 检查是否已存在相同的宠物记录
+                    existing_pet = db.session.query(Pet).filter_by(eid=pet_data['eid']).first()
+                    
+                    if existing_pet:
+                        # 更新现有记录
+                        for key, value in pet_data.items():
+                            if hasattr(existing_pet, key):
+                                setattr(existing_pet, key, value)
+                        existing_pet.update_time = datetime.utcnow()
+                        skipped_count += 1
+                        self.logger.debug(f"更新现有宠物记录: {pet_data.get('equip_name', '未知')} - {pet_data.get('eid')}")
+                    else:
+                        # 创建新记录
+                        new_pet = Pet(**pet_data)
+                        new_pet.update_time = datetime.utcnow()
+                        db.session.add(new_pet)
+                        saved_count += 1
+                        self.logger.debug(f"添加新宠物记录: {pet_data.get('equip_name', '未知')} - {pet_data.get('eid')}")
+                        
+                except Exception as e:
+                    self.logger.error(f"保存单个宠物数据失败: {e}")
+                    continue
+            
+            # 提交事务
+            db.session.commit()
+            
+            self.logger.info(f"成功保存宠物数据到MySQL数据库:")
+            self.logger.info(f"   新保存: {saved_count} 条")
+            self.logger.info(f"   更新现有: {skipped_count} 条")
+            self.logger.info(f"   总计处理: {saved_count + skipped_count} 条")
+            
+            return saved_count + skipped_count
+            
         except Exception as e:
-            self.logger.error(f"保存召唤兽数据到数据库失败: {e}")
+            self.logger.error(f"保存召唤兽数据到MySQL数据库失败: {e}")
+            db.session.rollback()
             return 0
 
     async def fetch_page(self, page=1, search_params=None, search_type='overall_search_pet'):

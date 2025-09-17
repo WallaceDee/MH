@@ -8,7 +8,7 @@
 
 ### 1. 创建迁移版本服务
 - **文件**: `src/app/services/role_service_migrated.py`
-- **类名**: `RoleServiceMigrated`
+- **类名**: `RoleService`
 - **功能**: 包含所有原版服务的功能，使用SQLAlchemy ORM
 
 ### 2. 迁移的方法
@@ -69,11 +69,11 @@
 ### 1. 基本使用
 ```python
 from src.app import create_app
-from src.app.services.role_service_migrated import RoleServiceMigrated
+from src.app.services.role_service_migrated import RoleService
 
 app = create_app()
 with app.app_context():
-    service = RoleServiceMigrated()
+    service = RoleService()
     
     # 获取角色列表
     result = service.get_roles_list(page=1, page_size=20)

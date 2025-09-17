@@ -21,7 +21,7 @@ def test_service_creation():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         
         # 创建Flask应用
         app = create_app()
@@ -29,7 +29,7 @@ def test_service_creation():
         
         with app.app_context():
             # 创建服务实例
-            service = RoleServiceMigrated()
+            service = RoleService()
             print("✅ 迁移版本角色服务创建成功")
             
             # 检查服务属性
@@ -51,13 +51,13 @@ def test_database_operations():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         from src.database import db
         
         app = create_app()
         
         with app.app_context():
-            service = RoleServiceMigrated()
+            service = RoleService()
             
             # 测试数据库连接
             print("1. 测试数据库连接...")
@@ -103,12 +103,12 @@ def test_service_methods():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         
         app = create_app()
         
         with app.app_context():
-            service = RoleServiceMigrated()
+            service = RoleService()
             
             # 测试获取角色列表
             print("1. 测试获取角色列表...")
@@ -157,12 +157,12 @@ def test_compatibility_methods():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         
         app = create_app()
         
         with app.app_context():
-            service = RoleServiceMigrated()
+            service = RoleService()
             
             # 检查兼容性方法是否存在
             print("1. 检查兼容性方法...")

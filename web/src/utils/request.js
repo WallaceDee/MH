@@ -5,7 +5,7 @@ import { Notification } from 'element-ui'
 const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
 
 // 根据环境设置不同的baseURL
-const baseURL = isChromeExtension ? 'http://localhost:5000/api/v1' : '/api/v1'
+const baseURL = isChromeExtension ? 'http://xyq.lingtong.xyz/cbg/api/v1' : '/api/v1'
 
 // 创建axios实例
 const request = axios.create({

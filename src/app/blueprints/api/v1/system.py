@@ -308,3 +308,8 @@ def update_search_param(param_type: str):
     except Exception as e:
         logger.error(f"更新{param_type}参数配置失败: {e}")
         return error_response(f"更新{param_type}参数配置失败: {str(e)}") 
+    
+@system_bp.route('/health', methods=['GET'])
+def health_check():
+    """健康检查"""
+    return success_response(data={"status": "healthy"}, message="角色API服务正常运行")

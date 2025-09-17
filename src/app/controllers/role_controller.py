@@ -7,7 +7,7 @@
 
 import logging
 from typing import Dict, List, Optional
-from ..services.role_service_migrated import RoleServiceMigrated
+from ..services.role_service import RoleService
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class roleController:
     """角色控制器"""
     
     def __init__(self):
-        self.service = RoleServiceMigrated()
+        self.service = RoleService()
     
     def get_roles(self, params: Dict) -> Dict:
         """获取角色列表"""

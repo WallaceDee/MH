@@ -10,7 +10,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.app import create_app
-from src.app.services.role_service_migrated import RoleServiceMigrated
+from app.services.role_service import RoleService
 
 def test_role_feature_extraction():
     """测试角色特征提取"""
@@ -22,7 +22,7 @@ def test_role_feature_extraction():
     with app.app_context():
         try:
             # 创建角色服务实例
-            role_service = RoleServiceMigrated()
+            role_service = RoleService()
             print("✓ 角色服务实例创建成功")
             
             # 测试获取角色列表

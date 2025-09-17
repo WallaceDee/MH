@@ -29,7 +29,7 @@ except ImportError as e:
     logger.warning(f"无法导入角色估价器相关模块: {e}")
 
 
-class RoleServiceMigrated:
+class RoleService:
     """角色服务完整迁移版本"""
     
     def __init__(self):

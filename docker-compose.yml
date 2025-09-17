@@ -50,7 +50,7 @@ services:
       - cbg-web
       
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/v1/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/v1/system/health"]
       interval: 30s
       timeout: 10s
       retries: 3

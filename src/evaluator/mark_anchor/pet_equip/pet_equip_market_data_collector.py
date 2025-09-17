@@ -1,6 +1,5 @@
 import os
 import sys
-import sqlite3
 import pandas as pd
 import logging
 from typing import Dict, Any, List, Optional, Tuple
@@ -18,86 +17,37 @@ from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
 # 导入特征提取器
 try:
     from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
+    from src.database import db
+    from src.models.equipment import Equipment
+    from sqlalchemy import and_, or_, func, text
 except ImportError:
-    # 如果导入失败，创建一个简单的占位符类
-    class PetEquipFeatureExtractor:
-        def __init__(self):
-            pass
-        
-        def extract_features(self, lingshi_data):
-            return {}
+    try:
+        from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
+        from src.database import db
+        from src.models.equipment import Equipment
+        from sqlalchemy import and_, or_, func, text
+    except ImportError:
+        # 如果都导入失败，创建一个简单的占位符类
+        class PetEquipFeatureExtractor:
+            def __init__(self):
+                pass
+            
+            def extract_features(self, pet_equip_data):
+                return {}
 
 
 class PetEquipMarketDataCollector:
     """召唤兽装备市场数据采集器 - 从数据库中获取和处理召唤兽装备市场数据"""
 
-    def __init__(self, db_paths: Optional[List[str]] = None):
+    def __init__(self):
         """
-        初始化灵饰市场数据采集器
-
-        Args:
-            db_paths: 数据库文件路径列表，如果为None则自动查找当月和上月的数据库
+        初始化召唤兽装备市场数据采集器
         """
-        self.db_paths = db_paths or self._find_recent_dbs()
         self.feature_extractor = PetEquipFeatureExtractor()
         self.logger = logging.getLogger(__name__)
 
-        print(f"召唤兽装备数据采集器初始化，加载数据库: {self.db_paths}")
+        print(f"召唤兽装备数据采集器初始化，使用MySQL数据库")
 
-    def _find_recent_dbs(self) -> List[str]:
-        """查找所有可用的召唤兽装备数据库文件"""
-        import glob
-        from datetime import datetime, timedelta
-
-        # 获取当前月份和上个月份
-        now = datetime.now()
-        current_month = now.strftime("%Y%m")
-
-        # 计算上个月
-        last_month_date = now.replace(day=1) - timedelta(days=1)
-        last_month = last_month_date.strftime("%Y%m")
-
-        # 优先查找当月和上月的数据库
-        target_months = [current_month, last_month]
-        print(f"优先查找数据库文件，目标月份: {target_months}")
-
-        # 数据库文件固定存放在根目录的data文件夹中
-        from src.utils.project_path import get_data_path
-        data_path = get_data_path()
-        found_dbs = []
-
-        # 首先查找指定月份的数据库文件
-        for month in target_months:
-            db_file = os.path.join(data_path, month, f"cbg_equip_{month}.db")
-            if os.path.exists(db_file):
-                found_dbs.append(db_file)
-                print(f"找到指定月份数据库文件: {db_file}")
-
-        # 如果没找到指定月份的，则查找所有可用的召唤兽装备数据库文件
-        if not found_dbs:
-            print("未找到指定月份的数据库文件，查找所有可用的召唤兽装备数据库文件")
-            # 查找所有年月文件夹下的数据库文件
-            pattern = os.path.join(data_path, "*", "cbg_equip_*.db")
-            all_dbs = glob.glob(pattern)
-            
-            # 按文件名排序，最新的在前
-            all_dbs.sort(reverse=True)
-            
-            # 取最新的2个数据库文件
-            found_dbs = all_dbs[:2]
-            print(f"找到所有数据库文件: {all_dbs}")
-            print(f"使用最新的数据库文件: {found_dbs}")
-
-        return found_dbs
-
-    def connect_database(self, db_path: str) -> sqlite3.Connection:
-        """连接到指定的灵饰数据库"""
-        try:
-            conn = sqlite3.connect(db_path)
-            return conn
-        except Exception as e:
-            self.logger.error(f"数据库连接失败 ({db_path}): {e}")
-            raise
 
     def get_market_data(self,
                         kindid: Optional[int] = None,
@@ -109,15 +59,11 @@ class PetEquipMarketDataCollector:
                         shanghai: Optional[int] = 0,
                         limit: int = 1000) -> pd.DataFrame:
         """
-        获取市场灵饰数据，从多个数据库中合并数据
+        获取市场召唤兽装备数据，从MySQL数据库中获取数据
         TODO: 分类，物理、法术、 套装？目前根据shanghai 20 区分
 
         Args:
-            main_attr: 主属性(damage、deface、magic_damage、magic_deface、fengyin、anti_fengyin、speed)
-            attrs: 附加属性 List[Dict] - 附加属性对象列表，最多3个
-                每个对象包含:
-                - attr_type: str - 属性类型，如"伤害"、"法术伤害"
-                - attr_value: int - 属性数值
+            kindid: 装备类型ID，默认为宠物装备类型
             level_range: 等级范围 (min_level, max_level)
             price_range: 价格范围 (min_price, max_price)
             server: 服务器筛选
@@ -130,69 +76,76 @@ class PetEquipMarketDataCollector:
             limit: 返回数据条数限制
 
         Returns:
-            灵饰市场数据DataFrame
+            召唤兽装备市场数据DataFrame
         """
-        all_data = []
+        try:
+            # 构建SQLAlchemy查询，筛选宠物装备
+            query = db.session.query(Equipment).filter(Equipment.kindid == PET_EQUIP_KINDID)
 
-        for db_path in self.db_paths:
-            try:
-                # 检查数据库文件是否存在
-                if not os.path.exists(db_path):
-                    print(f"数据库文件不存在: {db_path}")
-                    continue
+            # 基础筛选条件
+            if level_range is not None:
+                min_level, max_level = level_range
+                query = query.filter(Equipment.equip_level.between(min_level, max_level))
 
-                with self.connect_database(db_path) as conn:
-                    # 构建SQL查询
-                    query = f"SELECT * FROM equipments WHERE 1=1 AND kindid = {PET_EQUIP_KINDID}"
-                    params = []
+            if price_range is not None:
+                min_price, max_price = price_range
+                query = query.filter(Equipment.price.between(min_price, max_price))
 
-                    if level_range is not None:
-                        min_level, max_level = level_range
-                        query += " AND equip_level BETWEEN ? AND ?"
-                        params.extend([min_level, max_level])
+            if server is not None:
+                query = query.filter(Equipment.server_name == server)
 
-                    if price_range is not None:
-                        min_price, max_price = price_range
-                        query += " AND price BETWEEN ? AND ?"
-                        params.extend([min_price, max_price])
+            if shanghai == 0:
+                query = query.filter(Equipment.shanghai < 20)
 
-                    if server is not None:
-                        query += " AND server = ?"
-                        params.append(server)
+            # 根据属性值区分装备类型后进行过滤
+            if fangyu > 0:
+                # 铠甲类型：要求有防御值
+                query = query.filter(Equipment.fangyu > 0)
+            elif speed > 0:
+                # 项圈类型：要求有速度值
+                query = query.filter(Equipment.speed > 0)
+            else:
+                # 护腕类型：既没有防御也没有速度
+                query = query.filter(
+                    and_(
+                        Equipment.fangyu == 0,
+                        Equipment.speed == 0
+                    )
+                )
 
-                    if shanghai == 0:
-                        query += " AND shanghai < 20"
+            # 排序和限制
+            query = query.order_by(Equipment.update_time.desc()).limit(limit)
 
-                    # 根据属性值区分装备类型后进行过滤
-                    if fangyu > 0:
-                        # 铠甲类型：要求有防御值
-                        query += " AND fangyu > 0"
-                    elif speed > 0:
-                        # 项圈类型：要求有速度值
-                        query += " AND speed > 0"
-                    else:
-                        # 护腕类型：既没有防御也没有速度
-                        query += " AND fangyu = 0 AND speed = 0"
-                    # 添加限制
-                    query += f" LIMIT {limit}"
-
-                    # 执行查询
-                    df = pd.read_sql_query(query, conn, params=params)
-                    if not df.empty:
-                        all_data.append(df)
-
-            except Exception as e:
-                self.logger.error(f"查询数据库失败 ({db_path}): {e}")
-                continue
-
-        # 合并所有数据
-        if all_data:
-            result_df = pd.concat(all_data, ignore_index=True)
-            # 去重
-            result_df = result_df.drop_duplicates(subset=['equip_sn'], keep='first')
+            # 执行查询
+            equipments = query.all()
             
-            return result_df
-        else:
+            if equipments:
+                # 转换为字典列表
+                data_list = []
+                for equipment in equipments:
+                    equipment_dict = {}
+                    for column in equipment.__table__.columns:
+                        value = getattr(equipment, column.name)
+                        if hasattr(value, 'isoformat'):  # datetime对象
+                            equipment_dict[column.name] = value.isoformat()
+                        else:
+                            equipment_dict[column.name] = value
+                    data_list.append(equipment_dict)
+                
+                result_df = pd.DataFrame(data_list)
+                
+                # 去重
+                result_df = result_df.drop_duplicates(subset=['equip_sn'], keep='first')
+                
+                print(f"从MySQL数据库加载了 {len(result_df)} 条召唤兽装备市场数据")
+                return result_df
+            else:
+                print(f"从MySQL数据库查询到0条召唤兽装备市场数据")
+                return pd.DataFrame()
+
+        except Exception as e:
+            self.logger.error(f"查询召唤兽装备市场数据失败: {e}")
+            print(f"SQL执行异常: {e}")
             return pd.DataFrame()
 
     def get_market_data_for_similarity(self, target_features: Dict[str, Any]) -> pd.DataFrame:

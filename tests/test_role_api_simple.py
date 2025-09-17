@@ -70,7 +70,7 @@ def test_controller_service_type():
         service_type = type(controller.service).__name__
         print(f"   控制器使用的服务类型: {service_type}")
         
-        if service_type == 'RoleServiceMigrated':
+        if service_type == 'RoleService':
             print("✅ 控制器已成功使用新的ORM服务")
             return True
         else:
@@ -88,7 +88,7 @@ def test_service_import():
     print("\n测试服务导入...")
     
     try:
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         print("✅ 新角色服务导入成功")
         
         from src.app.services.role_service import roleService

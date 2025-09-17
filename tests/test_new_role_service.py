@@ -28,7 +28,7 @@ def test_controller_import():
         service_type = type(controller.service).__name__
         print(f"   使用的服务类型: {service_type}")
         
-        if service_type == 'RoleServiceMigrated':
+        if service_type == 'RoleService':
             print("✅ 控制器已使用新的ORM服务")
         else:
             print(f"❌ 控制器仍在使用旧服务: {service_type}")
@@ -109,12 +109,12 @@ def test_service_functionality():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         
         app = create_app()
         
         with app.app_context():
-            service = RoleServiceMigrated()
+            service = RoleService()
             print("✅ 服务创建成功")
             
             # 测试获取角色列表

@@ -20,7 +20,7 @@ def test_service_import():
     print("测试服务导入...")
     
     try:
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         print("✅ 迁移版本角色服务导入成功")
         
         from src.app.services.role_service import roleService
@@ -40,14 +40,14 @@ def test_service_initialization():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         
         # 创建Flask应用
         app = create_app()
         
         with app.app_context():
             # 创建服务实例
-            service = RoleServiceMigrated()
+            service = RoleService()
             print("✅ 迁移版本角色服务初始化成功")
             
             # 检查服务属性
@@ -69,12 +69,12 @@ def test_basic_crud_operations():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         
         app = create_app()
         
         with app.app_context():
-            service = RoleServiceMigrated()
+            service = RoleService()
             
             # 测试创建角色
             print("1. 测试创建角色...")
@@ -161,12 +161,12 @@ def test_advanced_features():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         
         app = create_app()
         
         with app.app_context():
-            service = RoleServiceMigrated()
+            service = RoleService()
             
             # 测试获取角色特征
             print("1. 测试获取角色特征...")
@@ -251,14 +251,14 @@ def test_compatibility():
     
     try:
         from src.app import create_app
-        from src.app.services.role_service_migrated import RoleServiceMigrated
+        from app.services.role_service import RoleService
         from src.app.services.role_service import roleService
         
         app = create_app()
         
         with app.app_context():
             # 测试迁移版本服务
-            migrated_service = RoleServiceMigrated()
+            migrated_service = RoleService()
             print("✅ 迁移版本服务创建成功")
             
             # 测试原版服务

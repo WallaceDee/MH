@@ -1,10 +1,7 @@
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Union, Tuple
 import logging
-import numpy as np
 import pandas as pd
-import sqlite3
-import sys
 import os
 
 # 从配置文件加载常量
@@ -42,9 +39,15 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 try:
     from ...feature_extractor.equip_feature_extractor import EquipFeatureExtractor
+    from src.database import db
+    from src.models.equipment import Equipment
+    from sqlalchemy import and_, or_, func, text
 except ImportError:
     try:
         from src.evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
+        from src.database import db
+        from src.models.equipment import Equipment
+        from sqlalchemy import and_, or_, func, text
     except ImportError:
         # 如果都导入失败，创建一个简单的占位符
         class EquipFeatureExtractor:
@@ -58,73 +61,15 @@ except ImportError:
 class EquipMarketDataCollector:
     """装备市场数据采集器 - 从数据库中获取和处理装备市场数据"""
 
-    def __init__(self, db_paths: Optional[List[str]] = None):
+    def __init__(self):
         """
         初始化装备市场数据采集器
-
-        Args:
-            db_paths: 数据库文件路径列表，如果为None则自动查找当月和上月的数据库
         """
-        self.db_paths = db_paths or self._find_recent_dbs()
         self.feature_extractor = EquipFeatureExtractor()
         self.logger = logging.getLogger(__name__)
 
-        print(f"装备数据采集器初始化，加载数据库: {self.db_paths}")
+        print(f"装备数据采集器初始化，使用MySQL数据库")
 
-    def _find_recent_dbs(self) -> List[str]:
-        """查找当月和上月的装备数据库文件"""
-        import glob
-        from datetime import datetime, timedelta
-
-        # 获取当前月份和上个月份
-        now = datetime.now()
-        current_month = now.strftime("%Y%m")
-
-        # 计算上个月
-        last_month_date = now.replace(day=1) - timedelta(days=1)
-        last_month = last_month_date.strftime("%Y%m")
-
-        # 优先查找当月和上月的数据库
-        target_months = [current_month, last_month]
-        print(f"优先查找数据库文件，目标月份: {target_months}")
-
-        # 数据库文件固定存放在根目录的data文件夹中
-        from src.utils.project_path import get_data_path
-        data_path = get_data_path()
-        found_dbs = []
-
-        # 首先查找指定月份的数据库文件
-        for month in target_months:
-            db_file = os.path.join(data_path, month, f"cbg_equip_{month}.db")
-            if os.path.exists(db_file):
-                found_dbs.append(db_file)
-                print(f"找到指定月份数据库文件: {db_file}")
-
-        # 如果没找到指定月份的，则查找所有可用的装备数据库文件
-        if not found_dbs:
-            print("未找到指定月份的数据库文件，查找所有可用的装备数据库文件")
-            # 查找所有年月文件夹下的数据库文件
-            pattern = os.path.join(data_path, "*", "cbg_equip_*.db")
-            all_dbs = glob.glob(pattern)
-
-            # 按文件名排序，最新的在前
-            all_dbs.sort(reverse=True)
-
-            # 取最新的2个数据库文件
-            found_dbs = all_dbs[:2]
-            print(f"找到所有数据库文件: {all_dbs}")
-            print(f"使用最新的数据库文件: {found_dbs}")
-
-        return found_dbs
-
-    def connect_database(self, db_path: str) -> sqlite3.Connection:
-        """连接到指定的装备数据库"""
-        try:
-            conn = sqlite3.connect(db_path)
-            return conn
-        except Exception as e:
-            self.logger.error(f"数据库连接失败 ({db_path}): {e}")
-            raise
 
     def get_market_data(self,
                         kindid: Optional[int] = None,
@@ -141,7 +86,7 @@ class EquipMarketDataCollector:
                         exclude_high_value_special_skills: bool = False,
                         limit: int = 1000) -> pd.DataFrame:
         """
-        获取市场装备数据，从多个数据库中合并数据
+        获取市场装备数据，从MySQL数据库中获取数据
 
         Args:
             kindid: 装备类型ID筛选
@@ -162,203 +107,149 @@ class EquipMarketDataCollector:
             装备市场数据DataFrame
             
         """
-        all_data = []
+        try:
+            # 构建SQLAlchemy查询
+            query = db.session.query(Equipment)
 
-        for db_path in self.db_paths:
-            try:
-                # 检查数据库文件是否存在
-                if not os.path.exists(db_path):
-                    print(f"数据库文件不存在: {db_path}")
-                    continue
+            if kindid is not None:
+                query = query.filter(Equipment.kindid == kindid)
 
-                with self.connect_database(db_path) as conn:
-                    # 构建SQL查询
-                    query = f"SELECT * FROM equipments WHERE 1=1"
-                    params = []
+            if special_skill is not None:
+                # 只有当不需要排除高价值特技时，才添加具体的特技筛选条件
+                if not (exclude_high_value_special_skills or not require_high_value_suits):
+                    query = query.filter(Equipment.special_skill == special_skill)
+                else:
+                    print(f"跳过具体特技筛选，因为需要排除高价值特技")
 
-                    if kindid is not None:
-                        # 直接使用kindid字段
-                        query += " AND kindid = ?"
-                        params.append(kindid)
+            # 特技筛选逻辑：如果目标装备是低价值特技，则排除高价值特技装备
+            if exclude_high_value_special_skills:
+                # 只能搜索无特技或低价值特技的装备
+                query = query.filter(
+                    or_(
+                        Equipment.special_skill == 0,
+                        Equipment.special_skill.is_(None),
+                        Equipment.special_skill.in_(LOW_VALUE_SPECIAL_SKILLS)
+                    )
+                )
+                print(f"特技筛选：只搜索无特技或低价值特技装备")
 
-                    if special_skill is not None:
-                        # 只有当不需要排除高价值特技时，才添加具体的特技筛选条件
-                        if not ( exclude_high_value_special_skills or not require_high_value_suits):
-                            query += " AND special_skill = ?"
-                            params.append(special_skill)
+            if suit_effect is not None:
+                # 将字符串转换为数字后再比较（pet_equip除外，其他都是数字字符串）
+                try:
+                    suit_effect_num = int(suit_effect) if suit_effect is not None else 0
+                    if suit_effect_num > 0:
+                        query = query.filter(Equipment.suit_effect == suit_effect_num)
+                except (ValueError, TypeError):
+                    # 如果转换失败（可能是pet_equip的字符串套装），直接使用原值
+                    if suit_effect and str(suit_effect).strip():
+                        query = query.filter(Equipment.suit_effect == suit_effect)
+
+            if require_high_value_suits:
+                # 强制包含高价值套装：只搜索魔力套和敏捷套装备
+                high_value_suits = HIGH_VALUE_SUITS
+                if high_value_suits:
+                    query = query.filter(Equipment.suit_effect.in_(high_value_suits))
+                    print(f"强制包含高价值套装：只搜索魔力套和敏捷套装备")
+
+            if special_effect is not None:
+                # 特效筛选（多选，JSON数组格式）
+                if special_effect and len(special_effect) > 0:
+                    effect_conditions = []
+                    for effect in special_effect:
+                        if effect not in LOW_VALUE_EFFECTS:  # 排除低价值特效
+                            effect_conditions.append(
+                                or_(
+                                    Equipment.special_effect.like(f'[{effect}]'),
+                                    Equipment.special_effect.like(f'[{effect},%'),
+                                    Equipment.special_effect.like(f'%,{effect},%'),
+                                    Equipment.special_effect.like(f'%,{effect}]')
+                                )
+                            )
+                    
+                    if effect_conditions:
+                        query = query.filter(or_(*effect_conditions))
+
+            if exclude_special_effect is not None:
+                # 排除特效筛选：排除具有指定特效的装备
+                if exclude_special_effect and len(exclude_special_effect) > 0:
+                    exclude_conditions = []
+                    for effect in exclude_special_effect:
+                        exclude_conditions.append(
+                            ~or_(
+                                Equipment.special_effect.like(f'[{effect}]'),
+                                Equipment.special_effect.like(f'[{effect},%'),
+                                Equipment.special_effect.like(f'%,{effect},%'),
+                                Equipment.special_effect.like(f'%,{effect}]')
+                            )
+                        )
+                    
+                    if exclude_conditions:
+                        query = query.filter(and_(*exclude_conditions))
+
+            if exclude_suit_effect is not None:
+                # 排除套装效果筛选：排除具有指定套装效果的装备
+                if exclude_suit_effect and len(exclude_suit_effect) > 0:
+                    query = query.filter(~Equipment.suit_effect.in_(exclude_suit_effect))
+
+            if exclude_high_value_simple_equips:
+                # 排除高价值简易装备：排除70级/90级/110级/130级且有简易特效(2)的装备
+                high_value_levels = HIGH_VALUE_EQUIP_LEVELS
+                simple_effect_conditions = []
+                
+                for level in high_value_levels:
+                    # 对于每个高价值等级，排除该等级且有简易特效的装备
+                    simple_conditions = or_(
+                        Equipment.special_effect.like(f'[{SIMPLE_EFFECT_ID}]'),
+                        Equipment.special_effect.like(f'[{SIMPLE_EFFECT_ID},%'),
+                        Equipment.special_effect.like(f'%,{SIMPLE_EFFECT_ID},%'),
+                        Equipment.special_effect.like(f'%,{SIMPLE_EFFECT_ID}]')
+                    )
+                    simple_effect_conditions.append(
+                        ~(Equipment.equip_level == level) | ~simple_conditions
+                    )
+                
+                if simple_effect_conditions:
+                    query = query.filter(and_(*simple_effect_conditions))
+                    print(f"排除高价值简易装备：70级/90级/110级/130级且有简易特效的装备")
+
+            if level_range:
+                query = query.filter(Equipment.equip_level.between(level_range[0], level_range[1]))
+
+            if price_range:
+                query = query.filter(Equipment.price.between(price_range[0], price_range[1]))
+
+            if server:
+                query = query.filter(Equipment.server_name == server)
+
+            # 排序和限制
+            query = query.order_by(Equipment.update_time.desc()).limit(limit)
+
+            # 执行查询并转换为DataFrame
+            equipments = query.all()
+            
+            if equipments:
+                # 转换为字典列表
+                data_list = []
+                for equipment in equipments:
+                    equipment_dict = {}
+                    for column in equipment.__table__.columns:
+                        value = getattr(equipment, column.name)
+                        if hasattr(value, 'isoformat'):  # datetime对象
+                            equipment_dict[column.name] = value.isoformat()
                         else:
-                            print(f"跳过具体特技筛选，因为需要排除高价值特技")
+                            equipment_dict[column.name] = value
+                    data_list.append(equipment_dict)
+                
+                df = pd.DataFrame(data_list)
+                print(f"从MySQL数据库加载了 {len(df)} 条装备数据")
+                return df
+            else:
+                print(f"从MySQL数据库查询到0条数据")
+                return pd.DataFrame()
 
-                    # 特技筛选逻辑：如果目标装备是低价值特技，则排除高价值特技装备
-                    if exclude_high_value_special_skills:
-                        # 只能搜索无特技或低价值特技的装备
-                        # 无特技：special_skill = 0 或 special_skill IS NULL
-                        # 低价值特技：special_skill IN (低价值特技列表)
-                        query += " AND (special_skill = 0 OR special_skill IS NULL OR special_skill IN ("
-                        placeholders = ','.join(['?' for _ in LOW_VALUE_SPECIAL_SKILLS])
-                        query += f"{placeholders}))"
-                        params.extend(LOW_VALUE_SPECIAL_SKILLS)
-                        print(f"特技筛选：只搜索无特技或低价值特技装备")
-
-                    if suit_effect is not None:
-                        # 将字符串转换为数字后再比较（pet_equip除外，其他都是数字字符串）
-                        try:
-                            suit_effect_num = int(
-                                suit_effect) if suit_effect is not None else 0
-                            if suit_effect_num > 0:
-                                query += " AND suit_effect = ?"
-                                params.append(suit_effect_num)
-                        except (ValueError, TypeError):
-                            # 如果转换失败（可能是pet_equip的字符串套装），直接使用原值
-                            if suit_effect and str(suit_effect).strip():
-                                query += " AND suit_effect = ?"
-                                params.append(suit_effect)
-
-                    if require_high_value_suits:
-                        # 强制包含高价值套装：只搜索魔力套和敏捷套装备
-                        high_value_suits = HIGH_VALUE_SUITS
-
-                        if high_value_suits:
-                            # 创建IN条件：suit_effect IN (1040, 1041, ...)
-                            placeholders = ','.join(
-                                ['?' for _ in high_value_suits])
-                            query += f" AND suit_effect IN ({placeholders})"
-                            params.extend(high_value_suits)
-                            print(f"强制包含高价值套装：只搜索魔力套和敏捷套装备")
-
-                    if special_effect is not None:
-                        # 特效筛选（多选，JSON数组格式）
-                        if special_effect and len(special_effect) > 0:
-                            effect_conditions = []
-                            for effect in special_effect:
-                                if effect not in LOW_VALUE_EFFECTS:  # 排除低价值特效
-                                    # 使用精确的JSON数组匹配，避免数字包含关系的误匹配
-                                    # 匹配模式：[6], [6,x], [x,6], [x,6,y] 等，但不匹配16, 26等包含6的数字
-                                    effect_conditions.append(
-                                        "(special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)")
-                                    # 四种匹配模式：单独存在、开头、中间、结尾
-                                    params.extend([
-                                        f'[{effect}]',        # 只有这一个特效：[6]
-                                        f'[{effect},%',       # 在开头：[6,x,...]
-                                        f'%,{effect},%',      # 在中间：[x,6,y,...]
-                                        f'%,{effect}]'        # 在结尾：[x,y,6]
-                                    ])
-
-                            # 将特效条件添加到查询中
-                            if effect_conditions:
-                                query += f" AND ({' OR '.join(effect_conditions)})"
-
-                    if exclude_special_effect is not None:
-                        # 排除特效筛选：排除具有指定特效的装备
-                        if exclude_special_effect and len(exclude_special_effect) > 0:
-                            exclude_conditions = []
-                            for effect in exclude_special_effect:
-                                # 使用NOT操作排除包含指定特效的装备
-                                exclude_conditions.append(
-                                    "NOT (special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ? OR special_effect LIKE ?)")
-                                # 四种匹配模式：单独存在、开头、中间、结尾
-                                params.extend([
-                                    f'[{effect}]',        # 只有这一个特效：[1]
-                                    f'[{effect},%',       # 在开头：[1,x,...]
-                                    f'%,{effect},%',      # 在中间：[x,1,y,...]
-                                    f'%,{effect}]'        # 在结尾：[x,y,1]
-                                ])
-
-                            # 将排除条件添加到查询中
-                            if exclude_conditions:
-                                query += f" AND ({' AND '.join(exclude_conditions)})"
-
-                    if exclude_suit_effect is not None:
-                        # 排除套装效果筛选：排除具有指定套装效果的装备
-                        if exclude_suit_effect and len(exclude_suit_effect) > 0:
-                            exclude_suit_conditions = []
-                            for suit_id in exclude_suit_effect:
-                                # 排除具有指定套装效果的装备
-                                exclude_suit_conditions.append(
-                                    "suit_effect != ?")
-                                params.append(suit_id)
-
-                            # 将排除套装条件添加到查询中
-                            if exclude_suit_conditions:
-                                query += f" AND ({' AND '.join(exclude_suit_conditions)})"
-
-                    if exclude_high_value_simple_equips:
-                        # 排除高价值简易装备：排除70级/90级/110级/130级且有简易特效(2)的装备
-                        high_value_levels = HIGH_VALUE_EQUIP_LEVELS
-                        simple_effect_patterns = [
-                            f'[{SIMPLE_EFFECT_ID}]', f'[{SIMPLE_EFFECT_ID},%', f'%,{SIMPLE_EFFECT_ID},%', f'%,{SIMPLE_EFFECT_ID}]']  # 简易特效的匹配模式
-
-                        exclude_high_value_simple_conditions = []
-                        for level in high_value_levels:
-                            # 对于每个高价值等级，排除该等级且有简易特效的装备
-                            level_condition_parts = []
-                            for pattern in simple_effect_patterns:
-                                level_condition_parts.append(
-                                    "special_effect LIKE ?")
-                                params.append(pattern)
-
-                            # 组合等级和简易特效条件：NOT (equip_level = ? AND (简易特效条件))
-                            level_and_simple_condition = f"NOT (equip_level = ? AND ({' OR '.join(level_condition_parts)}))"
-                            # 在简易特效参数前插入等级参数
-                            params.insert(-len(simple_effect_patterns), level)
-                            exclude_high_value_simple_conditions.append(
-                                level_and_simple_condition)
-
-                        # 将所有高价值简易装备排除条件添加到查询中
-                        if exclude_high_value_simple_conditions:
-                            query += f" AND ({' AND '.join(exclude_high_value_simple_conditions)})"
-                            print(f"排除高价值简易装备：70级/90级/110级/130级且有简易特效的装备")
-
-                    if level_range:
-                        # 直接使用equip_level字段
-                        query += " AND equip_level BETWEEN ? AND ?"
-                        params.extend(level_range)
-
-                    if price_range:
-                        query += " AND price BETWEEN ? AND ?"
-                        params.extend(price_range)
-
-                    if server:
-                        query += " AND server = ?"
-                        params.append(server)
-
-                    # 每个数据库限制一定数量，总体控制在limit内
-                    db_limit = min(limit // len(self.db_paths) + 100, limit)
-                    query += f" ORDER BY update_time DESC LIMIT {db_limit}"
-
-                    try:
-                        df = pd.read_sql_query(query, conn, params=params)
-                        if not df.empty:
-                            df['source_db'] = db_path  # 标记数据来源
-                            all_data.append(df)
-                            print(f"从 {db_path} 加载了 {len(df)} 条装备数据")
-                        else:
-                            print(f"从 {db_path} 查询到0条数据")
-                    except Exception as e:
-                        self.logger.error(f"查询装备数据失败 ({db_path}): {e}")
-                        print(f"SQL执行异常: {e}")
-                        continue
-
-            except Exception as e:
-                self.logger.error(f"处理数据库失败 ({db_path}): {e}")
-                continue
-
-        # 合并所有数据
-        if all_data:
-            combined_df = pd.concat(all_data, ignore_index=True)
-
-            # 按时间排序并限制总数量
-            if 'update_time' in combined_df.columns:
-                combined_df = combined_df.sort_values(
-                    'update_time', ascending=False)
-
-            combined_df = combined_df.head(limit)
-
-            print(f"总共加载了 {len(combined_df)} 条装备数据")
-            return combined_df
-        else:
-            print(f"未从任何数据库加载到装备数据")
-            print(f"请检查数据库文件是否存在，以及筛选条件是否过于严格")
+        except Exception as e:
+            self.logger.error(f"查询装备数据失败: {e}")
+            print(f"SQL执行异常: {e}")
             return pd.DataFrame()
 
     def get_market_data_for_similarity(self,

@@ -6,7 +6,7 @@
 """
 
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, Float, Text, DateTime, Boolean
+from sqlalchemy import Column, Integer, Float, Text, DateTime, String
 from .base import Base
 
 class Equipment(Base):
@@ -49,7 +49,7 @@ class Equipment(Base):
     unit_price_desc = Column(Text, comment='单价描述')
     min_unit_price = Column(Float, comment='最低单价')
     price_explanation = Column(Text, comment='价格说明')
-    accept_bargain = Column(Boolean, default=False, comment='接受还价')
+    accept_bargain = Column(Integer, default=0, comment='接受还价')
     bargain_info = Column(Text, comment='还价信息')
     
     # 状态和时间信息
@@ -65,7 +65,7 @@ class Equipment(Base):
     first_onsale_time = Column(Text, comment='首次上架时间')
     
     # 公示相关
-    pass_fair_show = Column(Boolean, default=False, comment='是否通过公示')
+    pass_fair_show = Column(Integer, default=0, comment='是否通过公示')
     fair_show_time = Column(Integer, default=0, comment='公示时间')
     fair_show_end_time = Column(Text, comment='公示结束时间')
     fair_show_end_time_left = Column(Text, comment='公示结束剩余时间')
@@ -142,11 +142,11 @@ class Equipment(Base):
     
     # 其他信息
     collect_num = Column(Integer, default=0, comment='收藏数')
-    has_collect = Column(Boolean, default=False, comment='是否已收藏')
+    has_collect = Column(Integer, default=0, comment='是否已收藏')
     score = Column(Integer, default=0, comment='评分')
     icon_index = Column(Integer, comment='图标索引')
     icon = Column(Text, comment='图标')
-    equip_face_img = Column(String(500), comment='装备头像图片')
+    equip_face_img = Column(Text, comment='装备头像图片')
     kindid = Column(Integer, comment='种类ID')
     game_channel = Column(Text, comment='游戏渠道')
     
@@ -155,7 +155,7 @@ class Equipment(Base):
     whole_game_ordersn = Column(Text, comment='完整游戏订单号')
     
     # 跨服相关
-    allow_cross_buy = Column(Boolean, default=False, comment='允许跨服购买')
+    allow_cross_buy = Column(Integer, default=0, comment='允许跨服购买')
     cross_server_poundage = Column(Integer, default=0, comment='跨服手续费')
     cross_server_poundage_origin = Column(Integer, default=0, comment='原始跨服手续费')
     cross_server_poundage_discount = Column(Integer, default=0, comment='跨服手续费折扣')
@@ -165,34 +165,34 @@ class Equipment(Base):
     
     # 活动相关
     activity_type = Column(Text, comment='活动类型')
-    joined_seller_activity = Column(Boolean, default=False, comment='参与卖家活动')
+    joined_seller_activity = Column(Integer, default=0, comment='参与卖家活动')
     
     # 拆分相关
-    is_split_sale = Column(Boolean, default=False, comment='是否拆分销售')
-    is_split_main_role = Column(Boolean, default=False, comment='是否拆分主角色')
-    is_split_independent_role = Column(Boolean, default=False, comment='是否拆分独立角色')
-    is_split_independent_equip = Column(Boolean, default=False, comment='是否拆分独立装备')
-    split_equip_sold_happen = Column(Boolean, default=False, comment='拆分装备售出发生')
-    show_split_equip_sold_remind = Column(Boolean, default=False, comment='显示拆分装备售出提醒')
+    is_split_sale = Column(Integer, default=0, comment='是否拆分销售')
+    is_split_main_role = Column(Integer, default=0, comment='是否拆分主角色')
+    is_split_independent_role = Column(Integer, default=0, comment='是否拆分独立角色')
+    is_split_independent_equip = Column(Integer, default=0, comment='是否拆分独立装备')
+    split_equip_sold_happen = Column(Integer, default=0, comment='拆分装备售出发生')
+    show_split_equip_sold_remind = Column(Integer, default=0, comment='显示拆分装备售出提醒')
     
     # 保护相关
-    is_onsale_protection_period = Column(Boolean, default=False, comment='是否在售保护期')
+    is_onsale_protection_period = Column(Integer, default=0, comment='是否在售保护期')
     onsale_protection_end_time = Column(Text, comment='在售保护结束时间')
-    is_vip_protection = Column(Boolean, default=False, comment='是否VIP保护')
-    is_time_lock = Column(Boolean, default=False, comment='是否时间锁定')
+    is_vip_protection = Column(Integer, default=0, comment='是否VIP保护')
+    is_time_lock = Column(Integer, default=0, comment='是否时间锁定')
     
     # 测试服相关
-    equip_in_test_server = Column(Boolean, default=False, comment='装备在测试服')
-    buyer_in_test_server = Column(Boolean, default=False, comment='购买者在测试服')
-    equip_in_allow_take_away_server = Column(Boolean, default=False, comment='装备在允许带走服务器')
+    equip_in_test_server = Column(Integer, default=0, comment='装备在测试服')
+    buyer_in_test_server = Column(Integer, default=0, comment='购买者在测试服')
+    equip_in_allow_take_away_server = Column(Integer, default=0, comment='装备在允许带走服务器')
     
     # 其他标识
-    is_weijianding = Column(Boolean, default=False, comment='是否未鉴定')
-    is_show_alipay_privilege = Column(Boolean, default=False, comment='是否显示支付宝特权')
-    is_seller_redpacket_flag = Column(Boolean, default=False, comment='卖家红包标志')
+    is_weijianding = Column(Integer, default=0, comment='是否未鉴定')
+    is_show_alipay_privilege = Column(Integer, default=0, comment='是否显示支付宝特权')
+    is_seller_redpacket_flag = Column(Integer, default=0, comment='卖家红包标志')
     is_show_expert_desc = Column(Integer, default=-1, comment='是否显示专家描述')
-    is_show_special_highlight = Column(Boolean, default=False, comment='是否显示特殊高亮')
-    is_xyq_game_role_kunpeng_reach_limit = Column(Boolean, default=False, comment='是否鲲鹏达到限制')
+    is_show_special_highlight = Column(Integer, default=0, comment='是否显示特殊高亮')
+    is_xyq_game_role_kunpeng_reach_limit = Column(Integer, default=0, comment='是否鲲鹏达到限制')
     
     # 版本和存储相关
     equip_onsale_version = Column(Integer, default=0, comment='装备在售版本')
