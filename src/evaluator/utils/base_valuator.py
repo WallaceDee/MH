@@ -121,6 +121,7 @@ class BaseValuator(ABC):
             result = {
                 'estimated_price': round(estimated_price, 1),
                 'anchor_count': len(anchors),
+                'anchors':anchors,
                 'price_range': {
                     'min': float(min(anchor_prices)),
                     'max': float(max(anchor_prices)),

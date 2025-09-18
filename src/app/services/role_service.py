@@ -159,7 +159,8 @@ class RoleService:
                   level_max: Optional[int] = None, sort_by: Optional[str] = None, 
                   sort_order: Optional[str] = None, role_type: str = 'normal',
                   equip_num: Optional[int] = None, pet_num: Optional[int] = None, 
-                  pet_num_level: Optional[int] = None, accept_bargain: Optional[int] = None) -> Dict:
+                  pet_num_level: Optional[int] = None, accept_bargain: Optional[int] = None,
+                  eid_list: Optional[List[str]] = None) -> Dict:
         """获取角色列表
         
         Args:
@@ -174,6 +175,7 @@ class RoleService:
             pet_num: 召唤兽数量上限（小于等于）
             pet_num_level: 召唤兽等级下限（大于）
             accept_bargain: 是否接受还价，1表示接受还价
+            eid_list: 角色eid列表，如果提供则只查询指定的角色
         """
         try:
             self._ensure_app_context()
@@ -199,6 +201,10 @@ class RoleService:
             # 角色类型过滤 - 暂时注释掉，因为数据库字段还未添加
             if role_type:
                 query = query.filter(Role.role_type == role_type)
+            
+            # eid列表过滤 - 如果提供了eid_list，只查询指定的角色
+            if eid_list is not None and len(eid_list) > 0:
+                query = query.filter(Role.eid.in_(eid_list))
             
             # 对于装备数量和宠物数量的过滤，需要特殊处理
             # 这些字段在LargeEquipDescData表中，需要JOIN查询
@@ -614,6 +620,8 @@ class RoleService:
                     "anchor_count": result.get('anchor_count', 0),
                     "feature": role_features,
                     "eid": eid,
+                    "anchors": result.get('anchors', []),
+                    "anchor_eids": result.get('anchor_eids', []),
                     "strategy": strategy,
                     "similarity_threshold": similarity_threshold,
                     "max_anchors": max_anchors

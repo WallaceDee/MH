@@ -234,11 +234,11 @@ export default {
         console.log('角色估价和加载相似数据:', this.role.eid)
         
         // 调用角色估价接口
-        const [year, month] = this.searchParams.selectedDate.split('-')
+        // const [year, month] = this.searchParams.selectedDate.split('-')
         const response = await this.$api.role.getRoleValuation({
           eid: this.role.eid,
-          year: parseInt(year),
-          month: parseInt(month),
+          // year: parseInt(year),
+          // month: parseInt(month),
           role_type: this.searchParams.roleType,
           strategy: 'fair_value',
           similarity_threshold: 0.7,
@@ -255,37 +255,46 @@ export default {
             basePrice: result.estimated_price
           })
 
-          // 查询相似角色锚点数据
-          if (result?.anchor_count > 0) {
+          // 查询相似角色锚点数据 - 优化：直接使用估价结果中的anchor_eids
+          if (result?.anchor_count > 0 && result?.anchors?.length > 0) {
             try {
-              // 调用专门的锚点查询接口
-              const anchorsResponse = await this.$api.role.findRoleAnchors({
-                eid: this.role.eid,
-                year: parseInt(year),
-                month: parseInt(month),
-                role_type: this.searchParams.roleType,
-                similarity_threshold: 0.7,
-                max_anchors: 30
+              // 使用估价结果中的anchor_eids直接获取角色详细信息，避免重复计算
+              const anchorsResponse = await this.$api.role.getRoleApi({
+                page_size: 1000,
+                eid_list: result.anchors.map(item=>item.eid),
+                role_type: 'empty'
               })
 
-              if (anchorsResponse.code === 200 && anchorsResponse.data.anchors) {
-                const anchorsData = anchorsResponse.data
-                const parsedAnchors = anchorsData.anchors.map((item) => {
+              if (anchorsResponse.code === 200 && anchorsResponse.data?.data) {
+                const anchorsData = anchorsResponse.data.data
+                const parsedAnchors = anchorsData.map((item,index) => {
                   const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
                   item.RoleInfoParser = roleInfo
                   if (roleInfo.result) {
                     item.roleInfo = roleInfo.result
                   }
+                  item.similarity = result.anchors[index].similarity
                   return item
                 })
 
                 // 保存相似角色数据
                 this.similarData = {
-                  anchor_count: anchorsData.anchors.length,
-                  similarity_threshold: 0.7,
-                  max_anchors: 30,
+                  anchor_count: result.anchor_count,
+                  similarity_threshold: result.similarity_threshold || 0.7,
+                  max_anchors: result.max_anchors || 30,
                   anchors: parsedAnchors,
-                  statistics: anchorsData.statistics,
+                  statistics: {
+                    price_range: {
+                        min: Math.min(...result.anchors.map((a) => a.price || 0)),
+                        max: Math.max(...result.anchors.map((a) => a.price || 0)),
+                        avg: result.anchors.reduce((sum, a) => sum + (a.price || 0), 0) / result.anchors.length
+                    },
+                    similarity_range: {
+                        min: Math.min(...result.anchors.map((a) => a.similarity || 0)),
+                        max: Math.max(...result.anchors.map((a) => a.similarity || 0)),
+                        avg: result.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / result.anchors.length
+                    }
+                  },
                   valuation: {
                     estimated_price_yuan: estimatedPrice,
                     confidence: result.confidence,

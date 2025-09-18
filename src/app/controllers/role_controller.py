@@ -62,6 +62,12 @@ class roleController:
             # 角色类型参数
             role_type = params.get('role_type', 'normal')
             
+            # eid列表参数处理
+            eid_list = params.get('eid_list')
+            # 确保eid_list是有效的列表
+            if eid_list is not None and (not isinstance(eid_list, list) or len(eid_list) == 0):
+                eid_list = None
+            
             # 调用服务层
             result = self.service.get_roles(
                 page=page,
@@ -74,7 +80,8 @@ class roleController:
                 accept_bargain=accept_bargain,
                 sort_by=sort_by,
                 sort_order=sort_order,
-                role_type=role_type
+                role_type=role_type,
+                eid_list=eid_list
             )
             
             return result
