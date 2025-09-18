@@ -1,5 +1,6 @@
 <template>
   <el-table
+    v-loading="loading"
     :data="anchors"
     stripe
     max-height="300"
@@ -68,6 +69,10 @@ export default {
     anchors: {
       type: Array,
       default: () => []
+    },
+    loading: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {

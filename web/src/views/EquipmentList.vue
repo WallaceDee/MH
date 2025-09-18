@@ -6,10 +6,10 @@
       </div>
       <!-- 筛选和搜索表单 -->
       <el-form :inline="true" :model="filters" @submit.native.prevent="fetchEquipments" size="mini">
-        <el-form-item label="选择月份">
+        <!-- <el-form-item label="选择月份">
           <el-date-picker v-model="filters.selectedDate" :clearable="false" type="month" placeholder="选择月份"
             format="yyyy-MM" value-format="yyyy-MM" />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="装备序列号">
           <el-input v-model="filters.equip_sn" placeholder="装备序列号"></el-input>
         </el-form-item>
@@ -84,7 +84,7 @@
         <template #default="scope">
           <el-link :href="getCBGLinkByType(scope.row.eid, 'equip')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <SimilarEquipmentModal :equipment="{...equipmentValuation,...scope.row}" :similar-data="similarEquipments" @show="loadSimilarEquipments" />
+          <SimilarEquipmentModal :equipment="scope.row" :key="scope.row.equip_sn" />
         </template>
       </el-table-column>
       <el-table-column fixed label="装备" width=" 70">
@@ -199,7 +199,7 @@
 <script>
 import SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'
 import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
-import dayjs from 'dayjs'
+// import dayjs from 'dayjs'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 //CBG_GAME_CONFIG.pet_equip_class0
@@ -280,7 +280,7 @@ export default {
       equipments: [],
       filters: {
         equip_sn: '',
-        selectedDate: dayjs().format('YYYY-MM'),
+        //selectedDate: dayjs().format('YYYY-MM'),
         level_range: [60, 160],
         price_min: undefined,
         price_max: undefined,
@@ -324,9 +324,6 @@ export default {
         '756_4037': '756_4037',
         '757_4038': '757_4038'
       },
-      // 相似装备相关数据（实时计算，不缓存）
-      similarEquipments: null, // 当前显示的相似装备数据
-      equipmentValuation: {}, // 当前装备估价信息
 
       // 召唤兽装备类型配置
       petEquipTypes: window.petEquipTypes,
@@ -387,13 +384,10 @@ export default {
         )
 
         // 获取当前年月
-        const [year, month] = this.filters.selectedDate.split('-')
+        //const [year, month] = this.filters.selectedDate.split('-')
 
         // 调用删除API
-        const response = await this.$api.equipment.deleteEquipment(row.equip_sn, {
-          year,
-          month
-        })
+        const response = await this.$api.equipment.deleteEquipment(row.equip_sn)
 
         if (response.code === 200) {
           this.$notify.success({
@@ -419,13 +413,13 @@ export default {
       }
     },
     async fetchEquipments() {
-      const [year, month] = this.filters.selectedDate.split('-')
+      // const [year, month] = this.filters.selectedDate.split('-')
       try {
         this.tableLoading = true // 开始加载，显示加载状态
         const params = {
           ...this.filters,
-          year,
-          month,
+          // year,
+          // month,
           page: this.pagination.page,
           page_size: this.pagination.page_size
         }
@@ -626,74 +620,6 @@ export default {
     },
    
 
-    // 加载相似装备
-    async loadSimilarEquipments(equipment) {
-      // 每次都重新计算，不使用缓存
-      this.equipmentValuation = {}
-      this.similarEquipments= null
-      await this.loadEquipmentValuation(equipment, 0.8)
-    },
-
-    // 统一的装备估价加载方法
-    async loadEquipmentValuation(equipment, similarityThreshold) {
-      try {
-
-        // 获取估价信息（包含相似装备）
-        const valuationResponse = await this.$api.equipment.getEquipmentValuation({
-          equipment_data: equipment,
-          strategy: 'fair_value',
-          similarity_threshold: similarityThreshold,
-          max_anchors: 30
-        })
-
-        // 处理估价响应
-        if (valuationResponse.code === 200) {
-          const data = valuationResponse.data
-          this.equipmentValuation = data
-
-          const { data: { anchors:allAnchors } } = await this.$api.equipment.findEquipmentAnchors({
-            equipment_data: equipment,
-            similarity_threshold: similarityThreshold,
-            max_anchors: 30
-          })
-          // 从估价结果中提取相似装备信息
-          if (data.anchor_count && data.anchor_count > 0) {
-            this.similarEquipments = {
-              anchor_count: data.anchor_count,
-              similarity_threshold: data.similarity_threshold,
-              anchors: allAnchors,
-              max_anchors: data.max_anchors,
-              statistics: {
-                price_range: {
-                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.price || 0))
-                },
-                similarity_range: {
-                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
-                  avg:
-                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    allAnchors.length
-                }
-              }
-            }
-            return
-          }
-        }
-        this.similarEquipments = {
-            anchor_count: 0,
-            similarity_threshold: similarityThreshold,
-            anchors: [],
-            statistics: {
-              price_range: { min: 0, max: 0 },
-              similarity_range: { min: 0, max: 0, avg: 0 }
-            }
-          }
-        console.log('估价和相似装备数据:', valuationResponse.data)
-      } catch (error) {
-        console.error('加载相似装备或估价失败:', error)
-      }
-    },
   },
   mounted() {
     this.initSuitOptions()

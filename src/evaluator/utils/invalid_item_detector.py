@@ -48,7 +48,6 @@ class InvalidItemDetector:
                 - 跳过估价时的建议价值
         """
         try:
-            print(f"检测无效物品--------------------------------: {item_data}")
             # 自动判断物品类型
             item_type = self._detect_item_type(item_data)
             # 根据物品类型进行相应的无效检测

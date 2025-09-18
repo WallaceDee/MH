@@ -71,5 +71,32 @@ export const systemApi = {
    */
   updateSearchParam(paramType, data) {
     return api.post(`/system/config/search-params/${paramType}`, data)
+  },
+
+  /**
+   * 获取市场数据状态
+   * @returns {Promise}
+   */
+  getMarketDataStatus() {
+    return api.get('/system/market-data/status')
+  },
+
+  /**
+   * 刷新市场数据
+   * @param {Object} params - 刷新参数
+   * @param {Object} params.filters - 筛选条件
+   * @param {number} params.max_records - 最大记录数
+   * @returns {Promise}
+   */
+  refreshMarketData(params = {}) {
+    return api.post('/system/market-data/refresh', params)
+  },
+
+  /**
+   * 获取市场数据详细分析
+   * @returns {Promise}
+   */
+  getMarketDataAnalysis() {
+    return api.get('/system/market-data/analysis')
   }
 } 

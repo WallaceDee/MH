@@ -53,7 +53,17 @@ class MarketDataCollector:
         # 数据缓存相关属性
         self._data_loaded = False
         self._last_refresh_time = None
-        self._cache_expiry_hours = 2  # 缓存过期时间（小时）
+        self._cache_expiry_hours = 24  # 缓存过期时间（小时）
+        
+        # 进度跟踪相关属性
+        self._refresh_status = "idle"  # idle, running, completed, error
+        self._refresh_progress = 0  # 0-100
+        self._refresh_message = ""
+        self._refresh_start_time = None
+        self._refresh_total_records = 0
+        self._refresh_processed_records = 0
+        self._refresh_current_batch = 0
+        self._refresh_total_batches = 0
         
         self._initialized = True
         print("市场数据采集器单例初始化完成，默认获取空角色数据作为锚点")
@@ -158,7 +168,8 @@ class MarketDataCollector:
                         features.update({
                             'eid': role_data.get('eid', ''),
                             'price': role_data.get('price', 0),
-                            'role_type': role_data.get('role_type', 'empty')
+                            'school': role_data.get('school', 0),
+                            'serverid': role_data.get('serverid', 0)
                         })
                         
                         market_data.append(features)
@@ -178,7 +189,11 @@ class MarketDataCollector:
                     print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据")
                     print(f"数据特征维度: {len(self.market_data.columns)}")
                     print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
-                    print(f"角色类型: {self.market_data['role_type'].unique()}")
+                    
+                    # 更新缓存状态
+                    self._data_loaded = True
+                    self._last_refresh_time = datetime.now()
+                    
                 else:
                     print("警告：未获取到有效的市场数据")
                 
@@ -188,7 +203,229 @@ class MarketDataCollector:
             self.logger.error(f"刷新市场数据失败: {e}")
             raise
     
-
+    def refresh_market_data_batch(self, 
+                                 filters: Optional[Dict[str, Any]] = None,
+                                 max_records: int = 999,
+                                 batch_size: int = 200) -> pd.DataFrame:
+        """
+        分批刷新市场数据 - 支持进度跟踪
+        
+        Args:
+            filters: 筛选条件字典
+            max_records: 最大记录数
+            batch_size: 批次大小
+            
+        Returns:
+            pd.DataFrame: 处理后的市场数据
+        """
+        try:
+            # 初始化进度状态
+            self._refresh_status = "running"
+            self._refresh_progress = 0
+            self._refresh_message = "准备开始..."
+            self._refresh_start_time = datetime.now()
+            self._refresh_processed_records = 0
+            self._refresh_current_batch = 0
+            
+            print(f"开始分批刷新市场数据，最大记录数: {max_records}，批次大小: {batch_size}")
+            
+            # 导入MySQL连接相关模块
+            from sqlalchemy import create_engine, text
+            from app import create_app
+            import time
+            
+            # 创建Flask应用上下文获取数据库配置
+            app = create_app()
+            
+            with app.app_context():
+                # 获取数据库配置
+                db_config = app.config.get('SQLALCHEMY_DATABASE_URI')
+                if not db_config:
+                    raise ValueError("未找到数据库配置")
+                
+                self._refresh_message = "连接数据库..."
+                self._refresh_progress = 5
+                print(f"连接MySQL数据库: {db_config}")
+                
+                # 创建数据库连接
+                engine = create_engine(db_config)
+                
+                # 构建基础SQL查询
+                base_query = """
+                    SELECT 
+                        c.eid, c.serverid, c.level, c.school,
+                        c.price, c.collect_num,
+                        c.yushoushu_skill, c.school_skills, c.life_skills, c.expire_time,
+                        l.sum_exp, l.three_fly_lv, l.all_new_point,
+                        l.jiyuan_amount, l.packet_page, l.xianyu_amount, l.learn_cash,
+                        l.sum_amount, l.role_icon,
+                        l.expt_ski1, l.expt_ski2, l.expt_ski3, l.expt_ski4, l.expt_ski5,
+                        l.beast_ski1, l.beast_ski2, l.beast_ski3, l.beast_ski4,
+                        l.changesch_json, l.ex_avt_json, l.huge_horse_json, l.shenqi_json,
+                        l.all_equip_json, l.all_summon_json, l.all_rider_json
+                    FROM roles c
+                    LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
+                    WHERE c.role_type = 'empty' AND c.price > 0
+                """
+                
+                # 添加筛选条件
+                conditions = []
+                if filters:
+                    if 'level_min' in filters:
+                        conditions.append(f"c.level >= {filters['level_min']}")
+                    if 'level_max' in filters:
+                        conditions.append(f"c.level <= {filters['level_max']}")
+                    if 'price_min' in filters:
+                        conditions.append(f"c.price >= {filters['price_min']}")
+                    if 'price_max' in filters:
+                        conditions.append(f"c.price <= {filters['price_max']}")
+                    if 'server_name' in filters:
+                        conditions.append(f"c.server_name = '{filters['server_name']}'")
+                    if 'school' in filters:
+                        conditions.append(f"c.school = {filters['school']}")
+                    if 'serverid' in filters:
+                        conditions.append(f"c.serverid = {filters['serverid']}")
+                
+                if conditions:
+                    base_query += " AND " + " AND ".join(conditions)
+                
+                base_query += " ORDER BY c.price ASC"
+                
+                # 计算总批次数
+                self._refresh_total_batches = (max_records + batch_size - 1) // batch_size
+                self._refresh_total_records = max_records
+                
+                self._refresh_message = f"开始分批处理，共 {self._refresh_total_batches} 批..."
+                self._refresh_progress = 10
+                
+                # 分批处理数据
+                market_data = []
+                
+                with engine.connect() as conn:
+                    for batch_num in range(self._refresh_total_batches):
+                        # 更新当前批次
+                        self._refresh_current_batch = batch_num + 1
+                        
+                        # 计算当前批次的偏移量和大小
+                        offset = batch_num * batch_size
+                        current_batch_size = min(batch_size, max_records - offset)
+                        
+                        if current_batch_size <= 0:
+                            break
+                        
+                        # 构建分页查询
+                        paginated_query = f"{base_query} LIMIT {current_batch_size} OFFSET {offset}"
+                        
+                        self._refresh_message = f"处理第 {batch_num + 1}/{self._refresh_total_batches} 批数据..."
+                        
+                        try:
+                            # 执行查询
+                            result = conn.execute(text(paginated_query))
+                            if batch_num == 0:  # 第一次获取列名
+                                columns = result.keys()
+                            rows = result.fetchall()
+                            
+                            if not rows:
+                                print(f"第 {batch_num + 1} 批查询无数据，停止处理")
+                                break
+                            
+                            print(f"第 {batch_num + 1} 批获取到 {len(rows)} 条原始数据")
+                            
+                            # 处理当前批次数据
+                            batch_data = []
+                            for i, row in enumerate(rows):
+                                try:
+                                    role_data = dict(zip(columns, row))
+                                    
+                                    # 提取特征
+                                    features = self.feature_extractor.extract_features(role_data)
+                                    
+                                    # 添加基本信息
+                                    features.update({
+                                        'eid': role_data.get('eid', ''),
+                                        'price': role_data.get('price', 0),
+                                        'school': role_data.get('school', 0),
+                                        'serverid': role_data.get('serverid', 0)
+                                    })
+                                    
+                                    batch_data.append(features)
+                                    self._refresh_processed_records += 1
+                                    
+                                except Exception as e:
+                                    self.logger.warning(f"批次 {batch_num + 1} 第 {i+1} 条数据处理失败: {e}")
+                                    continue
+                            
+                            market_data.extend(batch_data)
+                            
+                            # 更新进度
+                            batch_progress = 10 + (batch_num + 1) / self._refresh_total_batches * 80
+                            self._refresh_progress = min(90, int(batch_progress))
+                            
+                            print(f"批次 {batch_num + 1} 处理完成，有效数据: {len(batch_data)} 条，总计: {len(market_data)} 条")
+                            
+                            # 批次间短暂休息
+                            if batch_num < self._refresh_total_batches - 1:
+                                time.sleep(0.1)  # 100ms休息
+                                
+                        except Exception as e:
+                            self.logger.error(f"第 {batch_num + 1} 批处理失败: {e}")
+                            break
+                
+                # 构建最终DataFrame
+                self._refresh_message = "构建数据索引..."
+                self._refresh_progress = 95
+                
+                self.market_data = pd.DataFrame(market_data)
+                
+                if not self.market_data.empty:
+                    self.market_data.set_index('eid', inplace=True)
+                    
+                    # 更新缓存状态
+                    self._data_loaded = True
+                    self._last_refresh_time = datetime.now()
+                    
+                    self._refresh_message = "刷新完成！"
+                    self._refresh_progress = 100
+                    self._refresh_status = "completed"
+                    
+                    print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据")
+                    print(f"数据特征维度: {len(self.market_data.columns)}")
+                    print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
+                    
+                else:
+                    self._refresh_message = "未获取到有效数据"
+                    self._refresh_status = "completed"
+                    print("警告：未获取到有效的市场数据")
+                
+                return self.market_data
+                
+        except Exception as e:
+            self._refresh_status = "error"
+            self._refresh_message = f"刷新失败: {str(e)}"
+            self._refresh_progress = 0
+            self.logger.error(f"分批刷新市场数据失败: {e}")
+            raise
+    
+    def get_refresh_status(self) -> Dict[str, Any]:
+        """
+        获取刷新进度状态
+        
+        Returns:
+            Dict: 包含进度信息的字典
+        """
+        status_info = {
+            "status": self._refresh_status,
+            "progress": self._refresh_progress,
+            "message": self._refresh_message,
+            "processed_records": self._refresh_processed_records,
+            "total_records": self._refresh_total_records,
+            "current_batch": self._refresh_current_batch,
+            "total_batches": self._refresh_total_batches,
+            "start_time": self._refresh_start_time.isoformat() if self._refresh_start_time else None,
+            "elapsed_seconds": int((datetime.now() - self._refresh_start_time).total_seconds()) if self._refresh_start_time else 0
+        }
+        
+        return status_info
     
     def get_market_data(self, force_refresh: bool = False) -> pd.DataFrame:
         """

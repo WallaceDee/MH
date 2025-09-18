@@ -8,6 +8,7 @@
                 <el-menu-item index="/equipments">⚔️<span class="menu-item-text">装备</span></el-menu-item>
                 <el-menu-item index="/pets">🐲<span class="menu-item-text">召唤兽</span></el-menu-item>
                 <el-menu-item index="/equipment-desc-creator">🔨<span class="menu-item-text">装备模拟</span></el-menu-item>
+                <el-menu-item index="/market-data-status">📊<span class="menu-item-text">数据状态</span></el-menu-item>
             </el-menu>
             <el-popover placement="bottom" width="400" trigger="click" popper-class="cookie-popover"
                 :visible-arrow="false">
@@ -48,6 +49,8 @@ export default {
                 return '/pets'
             } else if (path.startsWith('/equipment-desc-creator')) {
                 return '/equipment-desc-creator'
+            } else if (path.startsWith('/market-data-status')) {
+                return '/market-data-status'
             }
             
             return '/'

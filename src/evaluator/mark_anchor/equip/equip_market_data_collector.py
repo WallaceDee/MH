@@ -605,7 +605,6 @@ class EquipMarketDataCollector:
         try:
             # 获取基础市场数据
             market_data = self.get_market_data_for_similarity(target_features)
-
             if market_data.empty:
                 return market_data
 

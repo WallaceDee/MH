@@ -58,6 +58,14 @@ const routes = [
     meta: {
       title: '装备模拟'
     }
+  },
+  {
+    path: '/market-data-status',
+    name: 'MarketDataStatus',
+    component: () => import('../views/MarketDataStatus.vue'),
+    meta: {
+      title: '市场数据状态'
+    }
   }
 ]
 

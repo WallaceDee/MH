@@ -309,6 +309,242 @@ def update_search_param(param_type: str):
         logger.error(f"更新{param_type}参数配置失败: {e}")
         return error_response(f"更新{param_type}参数配置失败: {str(e)}") 
     
+@system_bp.route('/market-data/status', methods=['GET'])
+def get_market_data_status():
+    """获取市场数据状态"""
+    try:
+        from src.evaluator.market_data_collector import MarketDataCollector
+        
+        # 获取市场数据收集器实例
+        collector = MarketDataCollector()
+        
+        # 获取基本状态信息
+        status_info = {
+            "data_loaded": collector._data_loaded,
+            "last_refresh_time": collector._last_refresh_time.isoformat() if collector._last_refresh_time else None,
+            "cache_expiry_hours": collector._cache_expiry_hours,
+            "data_count": len(collector.market_data) if not collector.market_data.empty else 0,
+            "data_columns": list(collector.market_data.columns) if not collector.market_data.empty else [],
+            "memory_usage_mb": collector.market_data.memory_usage(deep=True).sum() / 1024 / 1024 if not collector.market_data.empty else 0
+        }
+        
+        # 添加刷新进度信息
+        refresh_status = collector.get_refresh_status()
+        status_info.update({
+            "refresh_status": refresh_status["status"],
+            "refresh_progress": refresh_status["progress"],
+            "refresh_message": refresh_status["message"],
+            "refresh_processed_records": refresh_status["processed_records"],
+            "refresh_total_records": refresh_status["total_records"],
+            "refresh_current_batch": refresh_status["current_batch"],
+            "refresh_total_batches": refresh_status["total_batches"],
+            "refresh_start_time": refresh_status["start_time"],
+            "refresh_elapsed_seconds": refresh_status["elapsed_seconds"]
+        })
+        
+        # 如果有数据，添加数据统计信息
+        if not collector.market_data.empty:
+            try:
+                # 价格统计
+                price_stats = {
+                    "min_price": float(collector.market_data['price'].min()),
+                    "max_price": float(collector.market_data['price'].max()),
+                    "avg_price": float(collector.market_data['price'].mean()),
+                    "median_price": float(collector.market_data['price'].median())
+                }
+                status_info["price_statistics"] = price_stats
+                
+                # 角色类型分布
+                if 'role_type' in collector.market_data.columns:
+                    role_type_counts = collector.market_data['role_type'].value_counts().to_dict()
+                    status_info["role_type_distribution"] = role_type_counts
+                
+                # 等级分布（如果存在level字段）
+                level_fields = [col for col in collector.market_data.columns if 'level' in col.lower()]
+                if level_fields:
+                    level_field = level_fields[0]  # 使用第一个找到的等级字段
+                    level_stats = {
+                        "min_level": int(collector.market_data[level_field].min()),
+                        "max_level": int(collector.market_data[level_field].max()),
+                        "avg_level": float(collector.market_data[level_field].mean())
+                    }
+                    status_info["level_statistics"] = level_stats
+                    
+            except Exception as e:
+                logger.warning(f"获取数据统计信息时出错: {e}")
+                status_info["statistics_error"] = str(e)
+        
+        # 计算缓存是否过期
+        if collector._last_refresh_time:
+            from datetime import datetime, timedelta
+            cache_expiry_time = collector._last_refresh_time + timedelta(hours=collector._cache_expiry_hours)
+            status_info["cache_expired"] = datetime.now() > cache_expiry_time
+            status_info["cache_expiry_time"] = cache_expiry_time.isoformat()
+        else:
+            status_info["cache_expired"] = True
+            status_info["cache_expiry_time"] = None
+        
+        return success_response(data=status_info, message="获取市场数据状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取市场数据状态失败: {e}")
+        return error_response(f"获取市场数据状态失败: {str(e)}")
+
+
+@system_bp.route('/market-data/analysis', methods=['GET'])
+def get_market_data_analysis():
+    """获取市场数据详细分析"""
+    try:
+        from src.evaluator.market_data_collector import MarketDataCollector
+        import pandas as pd
+        import numpy as np
+        
+        # 获取市场数据收集器实例
+        collector = MarketDataCollector()
+        
+        if collector.market_data.empty:
+            return error_response("暂无市场数据，请先刷新数据")
+        
+        df = collector.market_data.copy()
+        
+        analysis_data = {}
+        
+        # 1. 等级分布分析
+        if 'level' in df.columns:
+            level_bins = [109, 120, 130, 140, 150, 160, 175]
+            level_labels = ['109-119', '120-129', '130-139', '140-149', '150-159', '160-175']
+            df['level_range'] = pd.cut(df['level'], bins=level_bins, labels=level_labels, include_lowest=True)
+            level_dist = df['level_range'].value_counts().sort_index()
+            
+            analysis_data['level_distribution'] = {
+                'categories': level_dist.index.tolist(),
+                'values': level_dist.values.tolist()
+            }
+        
+        # 2. 价格分布分析
+        if 'price' in df.columns:
+            price_bins = [0, 1000, 5000, 10000, 20000, 50000, float('inf')]
+            price_labels = ['<1000', '1000-5000', '5000-10000', '10000-20000', '20000-50000', '>50000']
+            df['price_range'] = pd.cut(df['price'], bins=price_bins, labels=price_labels, include_lowest=True)
+            price_dist = df['price_range'].value_counts().sort_index()
+            
+            analysis_data['price_distribution'] = {
+                'categories': price_dist.index.tolist(),
+                'values': price_dist.values.tolist()
+            }
+        
+        # 3. 等级与价格关系（散点数据）
+        if 'level' in df.columns and 'price' in df.columns:
+            # 采样数据，避免返回过多点
+            sample_size = min(500, len(df))
+            sample_df = df.sample(n=sample_size)
+            scatter_data = sample_df[['level', 'price']].values.tolist()
+            
+            analysis_data['level_price_relation'] = {
+                'data': scatter_data
+            }
+            
+            # 计算等级价格趋势
+            level_groups = df.groupby(pd.cut(df['level'], bins=8))['price'].agg(['mean', 'count']).reset_index()
+            level_groups['level_mid'] = level_groups['level'].apply(lambda x: x.mid)
+            
+            analysis_data['price_trend'] = {
+                'levels': level_groups['level_mid'].round().astype(int).tolist(),
+                'avg_prices': level_groups['mean'].round().tolist(),
+                'counts': level_groups['count'].tolist()
+            }
+        
+        # 4. 门派分布分析
+
+        if 'school' in df.columns:
+            school_dist = df['school'].value_counts()
+            school_data = []
+            for school_id, count in school_dist.items():
+                school_data.append({'name': school_id, 'value': int(count)})
+            
+            analysis_data['school_distribution'] = school_data
+        
+        # 5. 服务器分布分析（TOP 10）
+        if 'serverid' in df.columns:
+            server_dist = df['serverid'].value_counts().head(10)
+            analysis_data['server_distribution'] = {
+                'server_ids': server_dist.index.tolist(),
+                'counts': server_dist.values.tolist()
+            }
+        
+        # 6. 基础统计信息
+        analysis_data['basic_stats'] = {
+            'total_count': len(df),
+            'avg_price': float(df['price'].mean()) if 'price' in df.columns else 0,
+            'median_price': float(df['price'].median()) if 'price' in df.columns else 0,
+            'price_std': float(df['price'].std()) if 'price' in df.columns else 0,
+            'avg_level': float(df['level'].mean()) if 'level' in df.columns else 0,
+            'level_std': float(df['level'].std()) if 'level' in df.columns else 0
+        }
+        
+        return success_response(data=analysis_data, message="获取市场数据分析成功")
+        
+    except Exception as e:
+        logger.error(f"获取市场数据分析失败: {e}")
+        return error_response(f"获取市场数据分析失败: {str(e)}")
+
+
+@system_bp.route('/market-data/refresh', methods=['POST'])
+def refresh_market_data():
+    """启动分批刷新市场数据"""
+    try:
+        from src.evaluator.market_data_collector import MarketDataCollector
+        import threading
+        
+        # 获取请求参数
+        data = request.get_json() or {}
+        
+        # 获取市场数据收集器实例
+        collector = MarketDataCollector()
+        
+        # 检查是否正在刷新
+        if collector._refresh_status == "running":
+            return error_response("数据刷新正在进行中，请等待完成后再试")
+        
+        # 设置刷新参数
+        filters = data.get('filters', None)
+        max_records = data.get('max_records', 999)
+        batch_size = data.get('batch_size', 200)
+        
+        logger.info(f"启动分批刷新市场数据，参数: filters={filters}, max_records={max_records}, batch_size={batch_size}")
+        
+        # 在后台线程中执行刷新
+        def background_refresh():
+            try:
+                collector.refresh_market_data_batch(
+                    filters=filters,
+                    max_records=max_records,
+                    batch_size=batch_size
+                )
+            except Exception as e:
+                logger.error(f"后台刷新失败: {e}")
+                collector._refresh_status = "error"
+                collector._refresh_message = f"刷新失败: {str(e)}"
+        
+        # 启动后台线程
+        refresh_thread = threading.Thread(target=background_refresh)
+        refresh_thread.daemon = True
+        refresh_thread.start()
+        
+        # 立即返回启动成功的响应
+        return success_response(data={
+            "refresh_started": True,
+            "message": "数据刷新已启动，请使用状态接口查询进度",
+            "filters_applied": filters,
+            "max_records": max_records,
+            "batch_size": batch_size
+        }, message="数据刷新已启动")
+        
+    except Exception as e:
+        logger.error(f"启动刷新失败: {e}")
+        return error_response(f"启动刷新失败: {str(e)}")
+
+
 @system_bp.route('/health', methods=['GET'])
 def health_check():
     """健康检查"""
