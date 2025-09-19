@@ -220,7 +220,7 @@ class roleController:
                 "results": []
             }
 
-    def delete_role(self, eid: str, params: Dict) -> Dict:
+    def delete_role(self, eid: str) -> Dict:
         """删除角色"""
         try:
             if not eid:

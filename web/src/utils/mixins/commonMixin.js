@@ -5,13 +5,21 @@ export const commonMixin = {
   methods: {
     gen_dynamic_tags(str) {
       if (str) {
-        return window.gen_dynamic_tags(JSON.parse(str))
+        try {
+          return window.gen_dynamic_tags(JSON.parse(str))
+        } catch (error) {
+          return ''
+        }
       }
       return ''
     },
     gen_highlight(str) {
       if (str) {
-        return window.gen_highlight(JSON.parse(str))
+        try {
+          return window.gen_highlight(JSON.parse(str))
+        } catch (error) {
+          return ''
+        }
       }
       return ''
     },

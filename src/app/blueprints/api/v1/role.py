@@ -47,8 +47,10 @@ def get_roles():
             'sort_order': request.args.get('sort_order'),
             # 角色类型参数
             'role_type': request.args.get('role_type', 'normal'),
-            # 具体的 eid_list - 使用getlist处理数组参数
-            'eid_list': request.args.getlist('eid_list') if request.args.get('eid_list') else None
+            # 具体的 eid_list - 使用getlist处理数组参数，支持两种格式
+            'eid_list': (request.args.getlist('eid_list[]') or 
+                        request.args.getlist('eid_list') or 
+                        None)
         }
         
         result = controller.get_roles(params)

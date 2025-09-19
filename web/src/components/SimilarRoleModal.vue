@@ -9,7 +9,11 @@
 
     <!-- 相似角色内容 -->
     <div v-if="visible">
-      <div v-if="similarData">
+      <!-- 加载状态 -->
+      <div v-if="valuationLoading" class="loading-info">
+        <el-skeleton :rows="12" animated />
+      </div>
+      <div v-else-if="similarData">
         <div class="similar-header">
           <h4>相似角色 (共{{ similarData.anchor_count }}个) <el-divider direction="vertical" />
             <el-tag type="info" size="mini">相似度阈值: {{ similarData.similarity_threshold }}</el-tag>
@@ -24,7 +28,9 @@
                 <RoleImage :key="role.eid" :other_info="role.other_info" :roleInfo="role.roleInfo" />
                 <div style="margin-left: 10px">
                   <div class="role-basic-info">
-                    <el-tag type="danger" size="mini">  {{ getServerHeatLabel(role.serverid)||'其他' }}/{{ role.server_name }}</el-tag>
+                    <el-tag type="danger" size="mini"> {{ getServerHeatLabel(role.serverid) || '其他' }}/{{
+                      role.server_name
+                      }}</el-tag>
                     /
                     <el-tag type="primary" size="mini">{{ role.level }}</el-tag>
                     /
@@ -33,24 +39,24 @@
                 </div>
               </el-row>
               <!-- 刷新按钮 -->
-              <div style="width: 60px;flex-shrink: 0;">
+              <div style="width: 100px;flex-shrink: 0;display: flex;justify-content: flex-end;">
                 <el-button type="primary" @click="refresh" size="mini" :loading="loading">刷新</el-button>
               </div>
             </el-row>
 
             <div class="valuation-main">
               <span class="valuation-label">角色估价:</span>
-              <span class="valuation-price">{{ similarData?.valuation?.estimated_price_yuan || '-' }}元</span>
-              <span class="valuation-strategy">({{ getStrategyName(similarData?.valuation?.strategy) }})</span>
+              <span class="valuation-price">{{ similarData.valuation?.estimated_price_yuan || '-' }}元</span>
+              <span class="valuation-strategy">({{ getStrategyName(similarData.valuation?.strategy) }})</span>
             </div>
 
             <div class="valuation-details">
               <span class="confidence-display" :class="confidenceTextClass">
                 <i :class="confidenceIcon"></i>
-                置信度: {{ similarData?.valuation ? (similarData.valuation.confidence * 100).toFixed(1) + '%' : '-' }}
+                置信度: {{ similarData.valuation ? (similarData.valuation.confidence * 100).toFixed(1) + '%' : '-' }}
                 <span class="confidence-level">{{ confidenceLevel }}</span>
               </span>
-              <span>锚点数: {{ similarData?.anchor_count || '-' }}</span>
+              <span>锚点数: {{ similarData.anchor_count || '-' }}</span>
             </div>
           </div>
 
@@ -67,13 +73,8 @@
         </div>
 
         <!-- 相似角色表格 -->
-        <similar-role-table v-if="similarData.anchors?.length" :anchors="similarData.anchors" />
-        <el-empty v-else description="暂无相似角色数据"></el-empty>
-      </div>
-
-      <!-- 加载状态 -->
-      <div v-else class="loading-info">
-        <el-skeleton :rows="12" animated />
+        <el-empty v-if="!anchorsLoading && !similarData.anchors?.length" description="暂无相似角色数据"></el-empty>
+        <similar-role-table v-else :anchors="similarData.anchors" v-loading="anchorsLoading" element-loading-text="正在加载相似角色数据" />
       </div>
     </div>
   </el-popover>
@@ -112,13 +113,18 @@ export default {
   data() {
     return {
       visible: false,
-      loading: false,
+      valuationLoading: false,  // 角色估价接口加载状态
+      anchorsLoading: false,    // 相似角色锚点接口加载状态
+      error: false,
       similarData: null,
       hotServersConfig: window.hotServersConfig || []
     }
   },
   computed: {
-
+    // 整体加载状态
+    loading() {
+      return this.valuationLoading || this.anchorsLoading
+    },
     confidenceClass() {
       if (!this.similarData?.valuation?.confidence) {
         return 'confidence-extremely-low'
@@ -199,7 +205,7 @@ export default {
   watch: {
     visible: {
       handler(newVal) {
-        if(newVal) {
+        if (newVal) {
           this.loadHotServers()
         }
       },
@@ -207,9 +213,9 @@ export default {
     }
   },
   methods: {
-    getServerHeatLabel(serverid){
+    getServerHeatLabel(serverid) {
       const serverHeat = this.hotServersConfig.find(item => item.children.find(child => child.server_id === serverid))
-      return serverHeat?.server_name||''
+      return serverHeat?.server_name || ''
     },
     async loadHotServers() {
       if (!window.hotServersConfig) {
@@ -226,91 +232,33 @@ export default {
     async refresh() {
       await this.loadSimilarRoles()
     },
-    // 内聚的相似角色数据加载方法
+    // 拆分的相似角色数据加载方法
     async loadSimilarRoles() {
+      this.error = false
+      this.similarData = null
+
       try {
-        this.loading = true
-        this.similarData = null
-        console.log('角色估价和加载相似数据:', this.role.eid)
-        
-        // 调用角色估价接口
-        // const [year, month] = this.searchParams.selectedDate.split('-')
+        await this.loadRoleValuation()
+      } catch (error) {
+        console.error('加载相似角色失败:', error)
+        this.error = true
+      }
+    },
+
+    // 统一的角色估价加载方法
+    async loadRoleValuation() {
+      try {
+        // 第一个接口：获取角色估价信息
+        this.valuationLoading = true
         const response = await this.$api.role.getRoleValuation({
           eid: this.role.eid,
-          // year: parseInt(year),
-          // month: parseInt(month),
           role_type: this.searchParams.roleType,
           strategy: 'fair_value',
           similarity_threshold: 0.7,
           max_anchors: 30
         })
-        
-        if (response.code === 200) {
-          const result = response.data
-          const estimatedPrice = result.estimated_price_yuan
-          
-          // 更新角色数据中的估价信息（如果父组件需要的话）
-          this.$emit('update-role-price', {
-            eid: this.role.eid,
-            basePrice: result.estimated_price
-          })
 
-          // 查询相似角色锚点数据 - 优化：直接使用估价结果中的anchor_eids
-          if (result?.anchor_count > 0 && result?.anchors?.length > 0) {
-            try {
-              // 使用估价结果中的anchor_eids直接获取角色详细信息，避免重复计算
-              const anchorsResponse = await this.$api.role.getRoleApi({
-                page_size: 1000,
-                eid_list: result.anchors.map(item=>item.eid),
-                role_type: 'empty'
-              })
-
-              if (anchorsResponse.code === 200 && anchorsResponse.data?.data) {
-                const anchorsData = anchorsResponse.data.data
-                const parsedAnchors = anchorsData.map((item,index) => {
-                  const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
-                  item.RoleInfoParser = roleInfo
-                  if (roleInfo.result) {
-                    item.roleInfo = roleInfo.result
-                  }
-                  item.similarity = result.anchors[index].similarity
-                  return item
-                })
-
-                // 保存相似角色数据
-                this.similarData = {
-                  anchor_count: result.anchor_count,
-                  similarity_threshold: result.similarity_threshold || 0.7,
-                  max_anchors: result.max_anchors || 30,
-                  anchors: parsedAnchors,
-                  statistics: {
-                    price_range: {
-                        min: Math.min(...result.anchors.map((a) => a.price || 0)),
-                        max: Math.max(...result.anchors.map((a) => a.price || 0)),
-                        avg: result.anchors.reduce((sum, a) => sum + (a.price || 0), 0) / result.anchors.length
-                    },
-                    similarity_range: {
-                        min: Math.min(...result.anchors.map((a) => a.similarity || 0)),
-                        max: Math.max(...result.anchors.map((a) => a.similarity || 0)),
-                        avg: result.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / result.anchors.length
-                    }
-                  },
-                  valuation: {
-                    estimated_price_yuan: estimatedPrice,
-                    confidence: result.confidence,
-                    strategy: result.strategy || 'fair_value'
-                  }
-                }
-              } else {
-                console.warn('未获取到相似角色锚点数据:', anchorsResponse.message)
-              }
-            } catch (error) {
-              console.error('查询相似角色锚点失败:', error)
-              // 锚点查询失败不影响估价结果显示
-            }
-          }
-
-        } else {
+        if (response.code !== 200) {
           // 估价失败
           this.$notify.error({
             title: '角色估价失败',
@@ -322,6 +270,82 @@ export default {
           if (response.data && response.data.error) {
             console.error('估价错误详情:', response.data.error)
           }
+          throw new Error(response.message || '估价计算失败')
+        }
+
+        const result = response.data
+        const estimatedPrice = result.estimated_price_yuan
+
+        // 更新角色数据中的估价信息（如果父组件需要的话）
+        this.$emit('update-role-price', {
+          eid: this.role.eid,
+          basePrice: result.estimated_price
+        })
+
+        // 初始化相似角色数据
+        this.similarData = {
+          anchor_count: result.anchor_count,
+          similarity_threshold: result.similarity_threshold || 0.7,
+          max_anchors: result.max_anchors || 30,
+          anchors: [],
+          statistics: {
+            price_range: {
+              min: Math.min(...result.anchors.map((a) => a.price || 0)),
+              max: Math.max(...result.anchors.map((a) => a.price || 0)),
+              avg: result.anchors.reduce((sum, a) => sum + (a.price || 0), 0) / result.anchors.length
+            },
+            similarity_range: {
+              min: Math.min(...result.anchors.map((a) => a.similarity || 0)),
+              max: Math.max(...result.anchors.map((a) => a.similarity || 0)),
+              avg: result.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / result.anchors.length
+            }
+          },
+          valuation: {
+            estimated_price_yuan: estimatedPrice,
+            confidence: result.confidence,
+            strategy: result.strategy || 'fair_value'
+          }
+        }
+
+        this.valuationLoading = false
+
+        // 处理估价响应，如果有锚点数据则加载详细信息
+        if (result?.anchor_count > 0 && result?.anchors?.length > 0) {
+          // 第二个接口：获取相似角色锚点详细数据
+          this.anchorsLoading = true
+
+          try {
+            // 使用估价结果中的anchor_eids直接获取角色详细信息，避免重复计算
+            const anchorsResponse = await this.$api.role.getRoleApi({
+              page_size: 99,
+              eid_list: result.anchors.map(item => item.eid),
+              role_type: 'empty'
+            })
+
+            this.anchorsLoading = false
+            //合并相似度和数据
+            if (anchorsResponse.code === 200 && anchorsResponse.data?.data) {
+              const anchorsData = anchorsResponse.data.data
+              const parsedAnchors = anchorsData.map((item, index) => {
+                const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
+                item.RoleInfoParser = roleInfo
+                if (roleInfo.result) {
+                  item.roleInfo = roleInfo.result
+                }
+                item.similarity = result.anchors[index].similarity
+                item.features = result.anchors[index].features
+                return item
+              })
+
+              // 更新相似角色数据
+              this.$set(this.similarData, 'anchors', parsedAnchors)
+            } else {
+              console.warn('未获取到相似角色锚点数据:', anchorsResponse.message)
+            }
+          } catch (error) {
+            console.error('查询相似角色锚点失败:', error)
+            // 锚点查询失败不影响估价结果显示
+          }
         }
 
       } catch (error) {
@@ -331,8 +355,11 @@ export default {
           message: '网络请求异常，请稍后重试',
           duration: 3000
         })
+        throw error
       } finally {
-        this.loading = false
+        // 确保在出现异常时也重置加载状态
+        this.valuationLoading = false
+        this.anchorsLoading = false
       }
     },
     getStrategyName(strategy) {

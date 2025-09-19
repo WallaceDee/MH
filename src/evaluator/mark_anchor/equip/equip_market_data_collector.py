@@ -3,6 +3,16 @@ from typing import Dict, Any, List, Optional, Union, Tuple
 import logging
 import pandas as pd
 import os
+import time
+import json
+import hashlib
+
+# 导入共享缓存管理器
+try:
+    from src.utils.shared_cache_manager import get_shared_cache_manager
+except ImportError:
+    get_shared_cache_manager = None
+    logging.warning("共享缓存管理器导入失败，将使用内存缓存")
 
 # 从配置文件加载常量
 from .constant import (
@@ -67,8 +77,22 @@ class EquipMarketDataCollector:
         """
         self.feature_extractor = EquipFeatureExtractor()
         self.logger = logging.getLogger(__name__)
+        
+        # 初始化共享缓存管理器
+        self.cache_manager = None
+        if get_shared_cache_manager:
+            try:
+                self.cache_manager = get_shared_cache_manager()
+                if self.cache_manager.is_available():
+                    self.logger.info("CBG共享缓存管理器初始化成功，将使用Redis加速装备数据处理")
+                else:
+                    self.cache_manager = None
+                    self.logger.info("Redis不可用，装备采集器使用内存缓存")
+            except Exception as e:
+                self.cache_manager = None
+                self.logger.warning(f"CBG共享缓存管理器初始化失败: {e}")
 
-        print(f"装备数据采集器初始化，使用MySQL数据库")
+        print(f"装备数据采集器初始化，使用MySQL数据库，Redis缓存: {'启用' if self.cache_manager else '禁用'}")
 
 
     def get_market_data(self,
@@ -84,7 +108,8 @@ class EquipMarketDataCollector:
                         exclude_high_value_simple_equips: bool = False,
                         require_high_value_suits: bool = False,
                         exclude_high_value_special_skills: bool = False,
-                        limit: int = 1000) -> pd.DataFrame:
+                        limit: int = 1000,
+                        use_cache: bool = True) -> pd.DataFrame:
         """
         获取市场装备数据，从MySQL数据库中获取数据
 
@@ -108,6 +133,36 @@ class EquipMarketDataCollector:
             
         """
         try:
+            start_time = time.time()
+            
+            # 构建缓存键参数
+            cache_params = {
+                'kindid': kindid,
+                'level_range': level_range,
+                'price_range': price_range,
+                'server': server,
+                'special_skill': special_skill,
+                'suit_effect': suit_effect,
+                'special_effect': special_effect,
+                'exclude_special_effect': exclude_special_effect,
+                'exclude_suit_effect': exclude_suit_effect,
+                'exclude_high_value_simple_equips': exclude_high_value_simple_equips,
+                'require_high_value_suits': require_high_value_suits,
+                'exclude_high_value_special_skills': exclude_high_value_special_skills,
+                'limit': limit
+            }
+            
+            # 尝试从缓存获取数据
+            if use_cache and self.cache_manager:
+                cached_data = self.cache_manager.get_equip_market_cache(**cache_params)
+                if cached_data is not None and not cached_data.empty:
+                    elapsed_time = time.time() - start_time
+                    print(f"从Redis缓存获取装备市场数据成功，耗时: {elapsed_time:.3f}秒")
+                    print(f"缓存数据量: {len(cached_data)} 条装备")
+                    return cached_data
+            
+            print(f"开始从数据库查询装备市场数据，限制: {limit} 条")
+            
             # 构建SQLAlchemy查询
             query = db.session.query(Equipment)
 
@@ -241,7 +296,18 @@ class EquipMarketDataCollector:
                     data_list.append(equipment_dict)
                 
                 df = pd.DataFrame(data_list)
-                print(f"从MySQL数据库加载了 {len(df)} 条装备数据")
+                elapsed_time = time.time() - start_time
+                print(f"从MySQL数据库加载了 {len(df)} 条装备数据，耗时: {elapsed_time:.3f}秒")
+                
+                # 缓存装备数据到Redis
+                if use_cache and self.cache_manager and not df.empty:
+                    cache_start = time.time()
+                    if self.cache_manager.set_equip_market_cache(df, **cache_params):
+                        cache_time = time.time() - cache_start
+                        print(f"装备数据已缓存到Redis，缓存耗时: {cache_time:.3f}秒")
+                    else:
+                        print("装备数据缓存设置失败，但查询成功")
+                
                 return df
             else:
                 print(f"从MySQL数据库查询到0条数据")
@@ -253,7 +319,8 @@ class EquipMarketDataCollector:
             return pd.DataFrame()
 
     def get_market_data_for_similarity(self,
-                                       target_features: Dict[str, Any]) -> pd.DataFrame:
+                                       target_features: Dict[str, Any],
+                                       use_cache: bool = True) -> pd.DataFrame:
         """
         获取用于相似度计算的市场数据
 
@@ -270,6 +337,29 @@ class EquipMarketDataCollector:
             市场数据DataFrame
         """
         try:
+            start_time = time.time()
+            
+            # 构建缓存键参数（基于目标特征）
+            cache_params = {
+                'method': 'similarity',
+                'target_features': target_features,
+                'kindid': target_features.get('kindid'),
+                'level': target_features.get('level'),
+                'special_skill': target_features.get('special_skill'),
+                'suit_effect': target_features.get('suit_effect')
+            }
+            
+            # 尝试从缓存获取数据
+            if use_cache and self.cache_manager:
+                cached_data = self.cache_manager.get_equip_market_cache(**cache_params)
+                if cached_data is not None and not cached_data.empty:
+                    elapsed_time = time.time() - start_time
+                    print(f"从Redis缓存获取相似度装备数据成功，耗时: {elapsed_time:.3f}秒")
+                    print(f"缓存数据量: {len(cached_data)} 条装备")
+                    return cached_data
+            
+            print(f"开始从数据库查询相似度装备数据...")
+            
             # 提取基础筛选条件
             level_range = target_features.get('equip_level_range', None)
             kindid = target_features.get('kindid', None)
@@ -408,6 +498,16 @@ class EquipMarketDataCollector:
                 limit=2000  # 相似度计算需要更多数据
             )
 
+            # 缓存相似度数据到Redis
+            if use_cache and self.cache_manager and not market_data.empty:
+                cache_start = time.time()
+                if self.cache_manager.set_equip_market_cache(market_data, **cache_params):
+                    cache_time = time.time() - cache_start
+                    elapsed_time = time.time() - start_time
+                    print(f"相似度装备数据已缓存，总耗时: {elapsed_time:.3f}秒，缓存耗时: {cache_time:.3f}秒")
+                else:
+                    print("相似度装备数据缓存设置失败，但查询成功")
+            
             return market_data
 
         except Exception as e:

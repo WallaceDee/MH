@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import json
 import logging
+import time
 from typing import Dict, Any, List, Optional, Union
 from datetime import datetime, timedelta
 
@@ -18,6 +19,13 @@ try:
     from .feature_extractor.feature_extractor import FeatureExtractor
 except ImportError:
     from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
+
+# 导入共享缓存管理器
+try:
+    from src.utils.shared_cache_manager import get_shared_cache_manager
+except ImportError:
+    get_shared_cache_manager = None
+    logging.warning("共享缓存管理器导入失败，将使用内存缓存")
 
 
 class MarketDataCollector:
@@ -55,6 +63,20 @@ class MarketDataCollector:
         self._last_refresh_time = None
         self._cache_expiry_hours = 24  # 缓存过期时间（小时）
         
+        # 共享缓存管理器
+        self.cache_manager = None
+        if get_shared_cache_manager:
+            try:
+                self.cache_manager = get_shared_cache_manager()
+                if self.cache_manager.is_available():
+                    self.logger.info("CBG共享缓存管理器初始化成功，将使用Redis加速数据处理")
+                else:
+                    self.cache_manager = None
+                    self.logger.info("Redis不可用，使用内存缓存")
+            except Exception as e:
+                self.cache_manager = None
+                self.logger.warning(f"CBG共享缓存管理器初始化失败: {e}")
+        
         # 进度跟踪相关属性
         self._refresh_status = "idle"  # idle, running, completed, error
         self._refresh_progress = 0  # 0-100
@@ -68,26 +90,93 @@ class MarketDataCollector:
         self._initialized = True
         print("市场数据采集器单例初始化完成，默认获取空角色数据作为锚点")
     
+    def _generate_cache_key(self, filters: Optional[Dict[str, Any]] = None, max_records: int = 9999) -> str:
+        """生成缓存键"""
+        # 创建唯一的缓存键，基于筛选条件和记录数
+        cache_data = {
+            'filters': filters or {},
+            'max_records': max_records,
+            'version': '1.0'  # 版本号，用于缓存失效
+        }
+        
+        # 生成哈希
+        import hashlib
+        cache_str = json.dumps(cache_data, sort_keys=True, ensure_ascii=False)
+        cache_hash = hashlib.md5(cache_str.encode('utf-8')).hexdigest()[:16]
+        
+        return f"market_data:{cache_hash}"
+    
+    def _get_cached_data(self, filters: Optional[Dict[str, Any]] = None, max_records: int = 9999) -> Optional[pd.DataFrame]:
+        """从共享缓存获取市场数据"""
+        if not self.cache_manager:
+            return None
+        
+        try:
+            cached_data = self.cache_manager.get_market_data_cache(filters, max_records)
+            if cached_data is not None:
+                self.logger.info(f"从共享缓存获取市场数据，数据量: {len(cached_data)}")
+                return cached_data
+        except Exception as e:
+            self.logger.warning(f"从共享缓存获取数据失败: {e}")
+        
+        return None
+    
+    def _set_cached_data(self, filters: Optional[Dict[str, Any]], max_records: int, data: pd.DataFrame) -> bool:
+        """设置共享缓存数据"""
+        if not self.cache_manager or data.empty:
+            return False
+        
+        try:
+            success = self.cache_manager.set_market_data_cache(filters, max_records, data)
+            if success:
+                self.logger.info(f"市场数据已缓存到共享缓存，数据量: {len(data)}")
+            return success
+        except Exception as e:
+            self.logger.warning(f"设置共享缓存失败: {e}")
+            return False
+    
     
     def refresh_market_data(self, 
                        filters: Optional[Dict[str, Any]] = None,
-                       max_records: int = 9999) -> pd.DataFrame:
+                       max_records: int = 9999,
+                       use_cache: bool = True) -> pd.DataFrame:
         """
-        刷新市场数据 - 从MySQL获取role_type为'empty'的数据
+        刷新市场数据 - 从MySQL获取role_type为'empty'的数据，支持Redis缓存加速
         
         Args:
             filters: 筛选条件字典，例如 {'level_min': 109, 'price_max': 10000}
             max_records: 最大记录数
+            use_cache: 是否使用缓存
             
         Returns:
             pd.DataFrame: 处理后的市场数据
         """
         try:
-            print(f"开始刷新市场数据，最大记录数: {max_records}")
+            start_time = time.time()
+            
+            # 生成缓存键
+            cache_key = self._generate_cache_key(filters, max_records)
+            
+            # 尝试从缓存获取数据
+            if use_cache:
+                cached_data = self._get_cached_data(filters, max_records)
+                if cached_data is not None and not cached_data.empty:
+                    self.market_data = cached_data
+                    self._data_loaded = True
+                    self._last_refresh_time = datetime.now()
+                    
+                    elapsed_time = time.time() - start_time
+                    print(f"从Redis缓存获取市场数据成功，耗时: {elapsed_time:.2f}秒")
+                    print(f"缓存数据量: {len(cached_data)} 条，特征维度: {len(cached_data.columns)}")
+                    print(f"价格范围: {cached_data['price'].min():.1f} - {cached_data['price'].max():.1f}")
+                    
+                    return self.market_data
+            
+            print(f"开始从数据库刷新市场数据，最大记录数: {max_records}")
             
             # 导入MySQL连接相关模块
             from sqlalchemy import create_engine, text
-            from app import create_app
+            from src.app import create_app
             
             # 创建Flask应用上下文获取数据库配置
             app = create_app()
@@ -186,13 +275,24 @@ class MarketDataCollector:
                 
                 if not self.market_data.empty:
                     self.market_data.set_index('eid', inplace=True)
-                    print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据")
+                    
+                    elapsed_time = time.time() - start_time
+                    print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据，耗时: {elapsed_time:.2f}秒")
                     print(f"数据特征维度: {len(self.market_data.columns)}")
                     print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
                     
                     # 更新缓存状态
                     self._data_loaded = True
                     self._last_refresh_time = datetime.now()
+                    
+                    # 缓存数据到共享缓存
+                    if use_cache:
+                        cache_start = time.time()
+                        if self._set_cached_data(filters, max_records, self.market_data):
+                            cache_time = time.time() - cache_start
+                            print(f"数据已缓存到共享缓存，缓存耗时: {cache_time:.2f}秒")
+                        else:
+                            print("共享缓存设置失败，但数据获取成功")
                     
                 else:
                     print("警告：未获取到有效的市场数据")
@@ -206,19 +306,52 @@ class MarketDataCollector:
     def refresh_market_data_batch(self, 
                                  filters: Optional[Dict[str, Any]] = None,
                                  max_records: int = 999,
-                                 batch_size: int = 200) -> pd.DataFrame:
+                                 batch_size: int = 200,
+                                 use_cache: bool = True) -> pd.DataFrame:
         """
-        分批刷新市场数据 - 支持进度跟踪
+        分批刷新市场数据 - 支持进度跟踪和Redis缓存加速
         
         Args:
             filters: 筛选条件字典
             max_records: 最大记录数
             batch_size: 批次大小
+            use_cache: 是否使用缓存
             
         Returns:
             pd.DataFrame: 处理后的市场数据
         """
         try:
+            start_time = time.time()
+            
+            # 生成缓存键（只基于筛选条件和记录数，不包含批次大小）
+            cache_key = self._generate_cache_key(filters, max_records)
+            
+            # 尝试从缓存获取完整数据
+            if use_cache:
+                cached_data = self._get_cached_data(filters, max_records)
+                if cached_data is not None and not cached_data.empty:
+                    # 从缓存获取的数据可能超过请求的记录数，需要截取
+                    if len(cached_data) > max_records:
+                        cached_data = cached_data.head(max_records)
+                    
+                    self.market_data = cached_data
+                    self._data_loaded = True
+                    self._last_refresh_time = datetime.now()
+                    
+                    # 更新进度状态
+                    self._refresh_status = "completed"
+                    self._refresh_progress = 100
+                    self._refresh_message = "从缓存获取完成！"
+                    self._refresh_processed_records = len(cached_data)
+                    self._refresh_total_records = len(cached_data)
+                    
+                    elapsed_time = time.time() - start_time
+                    print(f"从共享缓存获取数据成功，耗时: {elapsed_time:.2f}秒")
+                    print(f"缓存数据量: {len(cached_data)} 条，特征维度: {len(cached_data.columns)}")
+                    print(f"✅ 任何批次大小都可以使用此缓存！")
+                    
+                    return self.market_data
+            
             # 初始化进度状态
             self._refresh_status = "running"
             self._refresh_progress = 0
@@ -231,8 +364,7 @@ class MarketDataCollector:
             
             # 导入MySQL连接相关模块
             from sqlalchemy import create_engine, text
-            from app import create_app
-            import time
+            from src.app import create_app
             
             # 创建Flask应用上下文获取数据库配置
             app = create_app()
@@ -313,6 +445,9 @@ class MarketDataCollector:
                         if current_batch_size <= 0:
                             break
                         
+                        # 分批处理不使用批次级缓存，只在最终缓存完整数据
+                        # 这样不同批次大小都可以使用同一个缓存
+                        
                         # 构建分页查询
                         paginated_query = f"{base_query} LIMIT {current_batch_size} OFFSET {offset}"
                         
@@ -357,6 +492,9 @@ class MarketDataCollector:
                             
                             market_data.extend(batch_data)
                             
+                            # 不进行批次级缓存，只在最终缓存完整数据
+                            # 这样任何批次大小都可以使用相同的缓存
+                            
                             # 更新进度
                             batch_progress = 10 + (batch_num + 1) / self._refresh_total_batches * 80
                             self._refresh_progress = min(90, int(batch_progress))
@@ -365,7 +503,7 @@ class MarketDataCollector:
                             
                             # 批次间短暂休息
                             if batch_num < self._refresh_total_batches - 1:
-                                time.sleep(0.1)  # 100ms休息
+                                time.sleep(0.05)  # 50ms休息，减少等待时间
                                 
                         except Exception as e:
                             self.logger.error(f"第 {batch_num + 1} 批处理失败: {e}")
@@ -388,9 +526,20 @@ class MarketDataCollector:
                     self._refresh_progress = 100
                     self._refresh_status = "completed"
                     
-                    print(f"市场数据刷新完成，共 {len(self.market_data)} 条有效数据")
+                    elapsed_time = time.time() - start_time
+                    print(f"市场数据分批刷新完成，共 {len(self.market_data)} 条有效数据，总耗时: {elapsed_time:.2f}秒")
                     print(f"数据特征维度: {len(self.market_data.columns)}")
                     print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
+                    
+                    # 缓存完整数据到共享缓存（基于筛选条件和记录数）
+                    if use_cache:
+                        cache_start = time.time()
+                        if self._set_cached_data(filters, max_records, self.market_data):
+                            cache_time = time.time() - cache_start
+                            print(f"完整数据已缓存到共享缓存，缓存耗时: {cache_time:.2f}秒")
+                            print(f"✅ 此缓存可被任何批次大小复用！")
+                        else:
+                            print("共享缓存设置失败，但数据获取成功")
                     
                 else:
                     self._refresh_message = "未获取到有效数据"
@@ -651,12 +800,27 @@ class MarketDataCollector:
         print(f"缓存过期时间已设置为 {hours} 小时")
     
     def get_cache_info(self) -> Dict[str, Any]:
-        """获取当前实例的缓存信息"""
-        return {
+        """获取当前实例的缓存信息（包括Redis信息）"""
+        info = {
             'data_loaded': self._data_loaded,
             'last_refresh_time': self._last_refresh_time,
             'cache_expired': self._is_cache_expired(),
             'data_size': len(self.market_data) if not self.market_data.empty else 0,
             'cache_expiry_hours': self._cache_expiry_hours,
-            'data_source': 'MySQL (empty roles)'
+            'data_source': 'MySQL (empty roles)',
+            'redis_available': False,
+            'redis_stats': {}
         }
+        
+        # 添加Redis信息
+        if self.redis_cache:
+            info['redis_available'] = self.redis_cache.is_available()
+            if info['redis_available']:
+                try:
+                    info['redis_stats'] = self.redis_cache.get_cache_stats()
+                    info['redis_memory'] = self.redis_cache.get_memory_usage()
+                except Exception as e:
+                    info['redis_stats'] = {'error': str(e)}
+                    info['redis_memory'] = {}
+        
+        return info

@@ -21,6 +21,12 @@ os.environ['MYSQL_PASSWORD'] = '447363121'
 os.environ['MYSQL_DATABASE'] = 'cbg_spider'
 os.environ['MYSQL_CHARSET'] = 'utf8mb4'
 
+# 设置Redis缓存环境变量
+os.environ['REDIS_HOST'] = '47.86.33.98'
+os.environ['REDIS_PORT'] = '6379'
+os.environ['REDIS_PASSWORD'] = '447363121'
+os.environ['REDIS_DB'] = '0'
+
 # 添加src目录到Python路径
 project_root = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.join(project_root, 'src')
@@ -35,6 +41,8 @@ if __name__ == "__main__":
     print("🗄️ 数据库: MySQL")
     print(f"📍 MySQL主机: {os.environ.get('MYSQL_HOST', 'localhost')}")
     print(f"📊 MySQL数据库: {os.environ.get('MYSQL_DATABASE', 'cbg_spider')}")
+    print("⚡ Redis缓存: 已启用")
+    print(f"🔑 Redis服务器: {os.environ.get('MYSQL_HOST', 'localhost')}:{os.environ.get('REDIS_PORT', '6379')}")
     print("💡 修改代码后将自动重启服务器")
     print("🚀 Ctrl+C 停止服务器")
     print("-" * 50)

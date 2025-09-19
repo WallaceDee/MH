@@ -577,12 +577,12 @@ export default {
         )
 
         // 获取当前年月
-        const [year, month] = this.searchForm.selectedDate.split('-')
+        // const [year, month] = this.searchForm.selectedDate.split('-')
 
         // 调用转移API
         const response = await this.$api.role.switchRoleType(row.eid, {
-          year,
-          month,
+          // year,
+          // month,
           role_type: this.roleType,
           target_role_type: this.roleType === 'empty' ? 'normal' : 'empty'
         })
@@ -624,12 +624,12 @@ export default {
         )
 
         // 获取当前年月
-        const [year, month] = this.searchForm.selectedDate.split('-')
+        // const [year, month] = this.searchForm.selectedDate.split('-')
 
         // 调用删除API
         const response = await this.$api.role.deleteRole(row.eid, {
-          year,
-          month,
+          // year,
+          // month,
           role_type: this.roleType
         })
 
@@ -876,10 +876,10 @@ export default {
       return evol_skill_list
     },
     get_pet_num(roleInfo) {
-      return roleInfo.pet_info.length + roleInfo.split_pets.length
+      return roleInfo?.pet_info?.length + roleInfo?.split_pets?.length
     },
     get_equip_num(roleInfo) {
-      return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length
+      return roleInfo?.using_equips?.length + roleInfo?.not_using_equips?.length + roleInfo?.split_equips?.length
     },
     async handleEquipPrice({ roleInfo: { using_equips, not_using_equips, split_equips, basic_info }, serverid, server_name, eid }, rowIndex) {
       console.log({ rowIndex })
@@ -979,12 +979,12 @@ export default {
     async fetchData() {
       this.loading = true
       try {
-        const [year, month] = this.searchForm.selectedDate.split('-')
+        // const [year, month] = this.searchForm.selectedDate.split('-')
         const params = {
           page: this.currentPage,
           page_size: this.pageSize,
-          year,
-          month,
+          // year,
+          // month,
           role_type: this.roleType // 添加角色类型参数
         }
 
@@ -1017,10 +1017,12 @@ export default {
         if (response.code === 200) {
           // 现在直接使用response.data和response.items
           this.tableData = response.data.data.map(item => {
-            const roleInfo = new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level })
+            const roleInfo = item.large_equip_desc? new window.RoleInfoParser(item.large_equip_desc, { equip_level: item.equip_level }):''
             item.RoleInfoParser = roleInfo
             if (roleInfo.result) {
               item.roleInfo = roleInfo.result
+            }else{
+              item.roleInfo = {}
             }
             // 检查当前角色是否在锁定列表中
             item.is_sticky = this.stickyRoleList.some(sticky => sticky.eid === item.eid)
@@ -1033,6 +1035,12 @@ export default {
             message: response.message || '获取数据失败'
           })
         }
+      } catch (error) {
+        console.error('获取数据失败:', error)
+        this.$notify.error({
+          title: '错误',
+          message: '获取数据失败'
+        })
       } finally {
         this.loading = false
       }

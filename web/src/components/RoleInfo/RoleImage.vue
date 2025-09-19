@@ -1359,7 +1359,7 @@ export default {
       return this.rider_plan_list[this.current_rider_plan_index] || null
     },
     imageUrl() {
-      const icon = window.get_role_icon(this.other_info)
+      const icon = this.other_info?window.get_role_icon(this.other_info):''
       return window.ResUrl + '/images/role_icon/small/' + icon + '.gif'
     },
     imageStyle() {
@@ -1644,6 +1644,7 @@ export default {
     }
   },
   mounted() {
+    if(!this.roleInfo.basic_info) return
     this.basic_info = this.roleInfo.basic_info || {}
     this.role_xiulian = this.roleInfo.role_xiulian || []
     this.pet_ctrl_skill = this.roleInfo.pet_ctrl_skill || []

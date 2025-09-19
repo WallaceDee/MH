@@ -9,6 +9,7 @@
 import os
 import json
 import logging
+import time
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 
@@ -16,6 +17,13 @@ from flask import current_app
 from src.database import db
 from src.models.role import Role, LargeEquipDescData
 from src.database_config import IS_MYSQL, IS_SQLITE
+
+# 导入共享缓存管理器
+try:
+    from src.utils.shared_cache_manager import get_shared_cache_manager
+except ImportError:
+    get_shared_cache_manager = None
+    logging.warning("共享缓存管理器导入失败")
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +42,18 @@ class RoleService:
     
     def __init__(self):
         self.db = db
+        
+        # 初始化共享缓存管理器
+        self.cache_manager = None
+        if get_shared_cache_manager:
+            try:
+                self.cache_manager = get_shared_cache_manager()
+                if self.cache_manager.is_available():
+                    logger.info("CBG共享缓存管理器初始化成功")
+                else:
+                    logger.info("Redis不可用，角色服务将不使用缓存")
+            except Exception as e:
+                logger.error(f"CBG共享缓存管理器初始化失败: {e}")
         
         # 初始化特征提取器
         self.feature_extractor = None
@@ -160,7 +180,7 @@ class RoleService:
                   sort_order: Optional[str] = None, role_type: str = 'normal',
                   equip_num: Optional[int] = None, pet_num: Optional[int] = None, 
                   pet_num_level: Optional[int] = None, accept_bargain: Optional[int] = None,
-                  eid_list: Optional[List[str]] = None) -> Dict:
+                  eid_list: Optional[List[str]] = None, use_cache: bool = True) -> Dict:
         """获取角色列表
         
         Args:
@@ -178,14 +198,45 @@ class RoleService:
             eid_list: 角色eid列表，如果提供则只查询指定的角色
         """
         try:
+            start_time = time.time()
             self._ensure_app_context()
+            
             # 验证页码和每页数量
             if page < 1:
                 page = 1
             if page_size < 1 or page_size > 100:
-                page_size = 15
+                page_size = 10
+            
+            # 构建筛选条件字典
+            filters = {
+                'level_min': level_min,
+                'level_max': level_max,
+                'equip_num': equip_num,
+                'pet_num': pet_num,
+                'pet_num_level': pet_num_level,
+                'accept_bargain': accept_bargain,
+                'sort_by': sort_by,
+                'sort_order': sort_order,
+                'eid_list': eid_list
+            }
+            # 移除None值
+            filters = {k: v for k, v in filters.items() if v is not None}
+            
+            # 尝试从缓存获取数据
+            if use_cache and self.cache_manager:
+                cached_result = self.cache_manager.get_raw_roles_cache(
+                    filters=filters,
+                    page=page,
+                    page_size=page_size,
+                    role_type=role_type
+                )
                 
-            logger.info(f"查询角色列表: 角色类型: {role_type}")
+                if cached_result:
+                    elapsed_time = time.time() - start_time
+                    logger.info(f"从Redis缓存获取角色列表成功，耗时: {elapsed_time:.3f}秒")
+                    return cached_result
+                
+            logger.info(f"查询角色列表: 角色类型: {role_type}, 页码: {page}, 每页: {page_size}")
             
             # 构建基础查询
             query = self.db.session.query(Role)
@@ -331,7 +382,8 @@ class RoleService:
                 
                 roles_data.append(role_dict)
 
-            return {
+            # 构建返回结果
+            result = {
                 "total": total,
                 "page": page,
                 "page_size": page_size,
@@ -339,6 +391,27 @@ class RoleService:
                 "data": roles_data,
                 "message": "成功获取角色数据"
             }
+            
+            # 缓存结果到Redis
+            if use_cache and self.cache_manager:
+                try:
+                    cache_success = self.cache_manager.set_raw_roles_cache(
+                        filters=filters,
+                        page=page,
+                        page_size=page_size,
+                        role_type=role_type,
+                        roles_data=roles_data,
+                        total=total
+                    )
+                    
+                    if cache_success:
+                        elapsed_time = time.time() - start_time
+                        logger.info(f"角色列表已缓存到Redis，查询+缓存总耗时: {elapsed_time:.3f}秒")
+                    
+                except Exception as e:
+                    logger.warning(f"缓存角色列表失败: {e}")
+            
+            return result
 
         except ValueError as e:
             logger.error(f"参数验证错误: {e}")

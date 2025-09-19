@@ -53,12 +53,12 @@
         <div class="cultivation-info">
           <div class="cultivation-row">
             <span class="cultivation-values">
-              {{ scope.row.expt_ski1 || 0 }}/{{ scope.row.expt_ski2 || 0 }}/{{ scope.row.expt_ski3 || 0 }}/{{ scope.row.expt_ski4 || 0 }}
+              {{ scope.row.features.expt_ski1 || 0 }}/{{ scope.row.features.expt_ski2 || 0 }}/{{ scope.row.features.expt_ski3 || 0 }}/{{ scope.row.features.expt_ski4 || 0 }}
             </span>
           </div>
           <div class="cultivation-row">
             <span class="cultivation-values">
-              {{ scope.row.beast_ski1 || 0 }}/{{ scope.row.beast_ski2 || 0 }}/{{ scope.row.beast_ski3 || 0 }}/{{ scope.row.beast_ski4 || 0 }}
+              {{ scope.row.features.beast_ski1 || 0 }}/{{ scope.row.features.beast_ski2 || 0 }}/{{ scope.row.features.beast_ski3 || 0 }}/{{ scope.row.features.beast_ski4 || 0 }}
             </span>
           </div>
           <div class="cultivation-row" v-if="scope.row.total_cultivation">

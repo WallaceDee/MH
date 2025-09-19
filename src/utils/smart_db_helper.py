@@ -234,8 +234,9 @@ class SmartDBHelper:
             # MySQL使用INSERT IGNORE
             sql = f"INSERT IGNORE INTO {table_name} ({', '.join(escaped_columns)}) VALUES ({', '.join(placeholders)})"
         elif on_conflict == "UPDATE":
-            # 构建UPDATE冲突处理，保留create_time
-            update_columns = [col for col in columns if col != 'create_time']
+            # 构建UPDATE冲突处理，保留create_time和估价相关字段
+            protected_fields = {'create_time', 'base_price', 'equip_price', 'pet_price', 'split_price_desc'}
+            update_columns = [col for col in columns if col not in protected_fields]
             if update_columns:
                 # 对更新字段也进行转义处理
                 escaped_update_columns = []
@@ -474,75 +475,34 @@ class CBGSmartDB:
             return self.db_helper.insert_data('roles', role_data, on_conflict="UPDATE")
     
     def save_roles_batch(self, roles_list: List[Dict[str, Any]]) -> bool:
-        """批量保存角色数据 - 使用ORM方式"""
+        """智能批量保存角色数据，应用与save_role相同的保护逻辑"""
         if not roles_list:
             self.logger.debug("角色列表为空，跳过保存")
             return True
         
-        self.logger.info(f"开始批量保存 {len(roles_list)} 条角色数据 (ORM方式)...")
+        self.logger.info(f"开始智能批量保存 {len(roles_list)} 条角色数据...")
         
-        try:
-            from src.models.role import Role
-            from sqlalchemy.orm import sessionmaker
-            from sqlalchemy import inspect
-            
-            # 获取Role模型的所有列名
-            inspector = inspect(Role)
-            valid_columns = set(column.key for column in inspector.columns)
-            
-            # 创建Session
-            Session = sessionmaker(bind=self.db_helper.engine)
-            session = Session()
-            
+        success_count = 0
+        error_count = 0
+        
+        # 逐个处理每条角色数据，确保应用相同的智能逻辑
+        for i, role_data in enumerate(roles_list):
             try:
-                # 为所有记录添加时间戳
-                timestamp = datetime.now()
-                
-                # 批量创建ORM对象
-                role_objects = []
-                for role_data in roles_list:
-                    # 过滤掉不存在的字段
-                    filtered_data = {}
-                    invalid_fields = []
+                # 使用单个角色保存的智能逻辑
+                if self.save_role(role_data.copy()):
+                    success_count += 1
+                else:
+                    error_count += 1
+                    self.logger.warning(f"第 {i+1} 条角色数据保存失败: {role_data.get('eid', 'unknown')}")
                     
-                    for key, value in role_data.items():
-                        if key in valid_columns:
-                            filtered_data[key] = value
-                        else:
-                            invalid_fields.append(key)
-                    
-                    if invalid_fields:
-                        self.logger.debug(f"过滤掉无效字段: {invalid_fields}")
-                    
-                    # 添加时间戳
-                    filtered_data['update_time'] = timestamp
-                    if 'create_time' not in filtered_data:
-                        filtered_data['create_time'] = timestamp
-                    
-                    # 创建Role对象，ORM会自动处理数据类型转换
-                    role_obj = Role(**filtered_data)
-                    role_objects.append(role_obj)
-                
-                # 批量插入/更新
-                for role_obj in role_objects:
-                    session.merge(role_obj)  # merge会自动处理插入/更新
-                
-                # 提交事务
-                session.commit()
-                
-                self.logger.info(f"ORM批量保存角色数据成功: {len(roles_list)} 条")
-                return True
-                
             except Exception as e:
-                session.rollback()
-                self.logger.error(f"ORM批量保存失败，已回滚: {e}")
-                raise e
-            finally:
-                session.close()
-                
-        except Exception as e:
-            self.logger.error(f"ORM批量保存角色数据时发生异常: {e}")
-            return False
+                error_count += 1
+                self.logger.error(f"第 {i+1} 条角色数据保存异常: {role_data.get('eid', 'unknown')}, 错误: {e}")
+        
+        self.logger.info(f"智能批量保存完成: 成功 {success_count} 条, 失败 {error_count} 条")
+        
+        # 如果有成功保存的记录，就认为批量操作成功
+        return success_count > 0
     
     def save_large_equip_data(self, equip_data: Dict[str, Any]) -> bool:
         """智能保存详细装备数据，冲突时保留create_time"""
