@@ -36,10 +36,10 @@ def init_database(app):
     app.config['SQLALCHEMY_ECHO'] = False  # 设置为True可以看到SQL语句
     
     # Redis缓存配置
-    app.config['REDIS_HOST'] = os.getenv('REDIS_HOST', 'localhost')
+    app.config['REDIS_HOST'] = os.getenv('REDIS_HOST', '47.86.33.98')
     app.config['REDIS_PORT'] = int(os.getenv('REDIS_PORT', 6379))
     app.config['REDIS_DB'] = int(os.getenv('REDIS_DB', 0))
-    app.config['REDIS_PASSWORD'] = os.getenv('REDIS_PASSWORD', None)
+    app.config['REDIS_PASSWORD'] = os.getenv('REDIS_PASSWORD', '447363121')
     
     # 初始化数据库
     db.init_app(app)

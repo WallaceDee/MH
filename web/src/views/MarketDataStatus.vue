@@ -24,12 +24,21 @@
       >
         刷新市场数据
       </el-button>
+      
+      <el-button 
+        type="warning" 
+        @click="refreshFullCache"
+        icon="el-icon-refresh"
+        :loading="fullCacheRefreshing"
+      >
+        刷新全量缓存
+      </el-button>
     </div>
 
     <!-- 状态卡片 -->
     <el-row :gutter="20" class="status-cards">
       <!-- 基本状态 -->
-      <el-col :span="8">
+      <el-col :span="6">
         <el-card class="status-card">
           <div slot="header" class="card-header">
             <i class="el-icon-data-line"></i>
@@ -57,7 +66,7 @@
       </el-col>
 
       <!-- 缓存状态 -->
-      <el-col :span="8">
+      <el-col :span="6">
         <el-card class="status-card">
           <div slot="header" class="card-header">
             <i class="el-icon-time"></i>
@@ -84,8 +93,40 @@
         </el-card>
       </el-col>
 
+      <!-- Redis缓存状态 -->
+      <el-col :span="6">
+        <el-card class="status-card">
+          <div slot="header" class="card-header">
+            <i class="el-icon-cpu"></i>
+            <span>Redis缓存</span>
+          </div>
+          <div class="status-item">
+            <span class="label">连接状态:</span>
+            <el-tag :type="redisStatus.available ? 'success' : 'danger'">
+              {{ redisStatus.available ? '已连接' : '未连接' }}
+            </el-tag>
+          </div>
+          <div v-if="redisStatus.available" class="status-item">
+            <span class="label">Redis版本:</span>
+            <span class="value">{{ redisStatus.redis_version || '-' }}</span>
+          </div>
+          <div v-if="redisStatus.available" class="status-item">
+            <span class="label">内存使用:</span>
+            <span class="value">{{ redisStatus.used_memory_human || '0B' }}</span>
+          </div>
+          <div v-if="redisStatus.available" class="status-item">
+            <span class="label">缓存键数:</span>
+            <span class="value">{{ redisStatus.cache_keys_count || 0 | numberFormat }}</span>
+          </div>
+          <div v-if="redisStatus.available" class="status-item">
+            <span class="label">连接客户端:</span>
+            <span class="value">{{ redisStatus.connected_clients || 0 }}</span>
+          </div>
+        </el-card>
+      </el-col>
+
       <!-- 数据统计 -->
-      <el-col :span="8">
+      <el-col :span="6">
         <el-card class="status-card">
           <div slot="header" class="card-header">
             <i class="el-icon-s-data"></i>
@@ -117,6 +158,87 @@
                 size="mini"
               >
                 {{ type }}: {{ count }}
+              </el-tag>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- Redis详细信息卡片 -->
+    <el-row :gutter="20" class="redis-details" v-if="redisStatus.available">
+      <!-- Redis性能统计 -->
+      <el-col :span="12">
+        <el-card class="status-card">
+          <div slot="header" class="card-header">
+            <i class="el-icon-monitor"></i>
+            <span>Redis性能统计</span>
+          </div>
+          <div class="status-item">
+            <span class="label">命令执行总数:</span>
+            <span class="value">{{ redisStatus.total_commands_processed | numberFormat }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">缓存命中数:</span>
+            <span class="value">{{ redisStatus.keyspace_hits | numberFormat }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">缓存未命中数:</span>
+            <span class="value">{{ redisStatus.keyspace_misses | numberFormat }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">命中率:</span>
+            <span class="value">{{ getHitRate() }}%</span>
+          </div>
+          <div class="status-item">
+            <span class="label">运行时间:</span>
+            <span class="value">{{ formatUptime(redisStatus.uptime_in_seconds) }}</span>
+          </div>
+        </el-card>
+      </el-col>
+
+      <!-- 缓存类型统计 -->
+      <el-col :span="12">
+        <el-card class="status-card">
+          <div slot="header" class="card-header">
+            <i class="el-icon-collection"></i>
+            <span>缓存类型统计</span>
+          </div>
+          <div v-if="cacheTypeStats && Object.keys(cacheTypeStats).length > 0">
+            <div 
+              v-for="(typeInfo, cacheType) in cacheTypeStats" 
+              :key="cacheType" 
+              class="status-item"
+            >
+              <span class="label">{{ getCacheTypeLabel(cacheType) }}:</span>
+              <div class="cache-type-info">
+                <span class="value">{{ typeInfo.count }} 个键</span>
+                <el-tag size="mini" class="ttl-tag">
+                  TTL: {{ typeInfo.ttl_hours }}h
+                </el-tag>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-cache-data">
+            <span>暂无缓存类型数据</span>
+          </div>
+          
+          <!-- 全量缓存详细信息 -->
+          <div v-if="fullCacheInfo && fullCacheInfo.full_cache_exists" class="full-cache-details">
+            <div class="status-item">
+              <span class="label">缓存类型:</span>
+              <el-tag :type="fullCacheInfo.cache_type === 'chunked' ? 'success' : 'info'" size="mini">
+                {{ fullCacheInfo.cache_type === 'chunked' ? '分块缓存' : '传统缓存' }}
+              </el-tag>
+            </div>
+            <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.total_chunks" class="status-item">
+              <span class="label">分块信息:</span>
+              <span class="value">{{ fullCacheInfo.chunk_info.total_chunks }} 块 × {{ fullCacheInfo.chunk_info.chunk_size }} 行</span>
+            </div>
+            <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.is_complete !== undefined" class="status-item">
+              <span class="label">完整性:</span>
+              <el-tag :type="fullCacheInfo.chunk_info.is_complete ? 'success' : 'danger'" size="mini">
+                {{ fullCacheInfo.chunk_info.is_complete ? '完整' : '不完整' }}
               </el-tag>
             </div>
           </div>
@@ -281,7 +403,37 @@ export default {
       refreshStartTime: null,
       progressTimer: null,
       currentBatch: 0,
-      totalBatches: 0
+      totalBatches: 0,
+      // 全量缓存相关
+      fullCacheRefreshing: false
+    }
+  },
+
+  computed: {
+    // Redis状态信息
+    redisStatus() {
+      if (this.status.redis_cache && this.status.redis_cache.available) {
+        return this.status.redis_cache.redis_stats || {}
+      }
+      return { available: false }
+    },
+
+    // 缓存类型统计
+    cacheTypeStats() {
+      if (this.status.redis_cache && this.status.redis_cache.cache_types) {
+        return this.status.redis_cache.cache_types
+      }
+      return {}
+    },
+
+    // 全量缓存信息
+    fullCacheInfo() {
+      // 从缓存状态API获取详细信息，这里先使用基本信息
+      return {
+        full_cache_exists: this.status.data_loaded || false,
+        cache_type: 'unknown', // 可以通过额外API获取
+        chunk_info: {}
+      }
     }
   },
   
@@ -539,6 +691,77 @@ export default {
       } catch (error) {
         console.error('检查正在进行的刷新任务失败:', error)
       }
+    },
+
+    // Redis相关方法
+    getHitRate() {
+      const hits = this.redisStatus.keyspace_hits || 0
+      const misses = this.redisStatus.keyspace_misses || 0
+      const total = hits + misses
+      
+      if (total === 0) return '0.00'
+      return ((hits / total) * 100).toFixed(2)
+    },
+
+    formatUptime(seconds) {
+      if (!seconds) return '0秒'
+      
+      const days = Math.floor(seconds / 86400)
+      const hours = Math.floor((seconds % 86400) / 3600)
+      const minutes = Math.floor((seconds % 3600) / 60)
+      
+      if (days > 0) {
+        return `${days}天 ${hours}小时`
+      } else if (hours > 0) {
+        return `${hours}小时 ${minutes}分钟`
+      } else {
+        return `${minutes}分钟`
+      }
+    },
+
+    getCacheTypeLabel(cacheType) {
+      const labels = {
+        'role_data': '角色数据',
+        'equipment_data': '装备数据',
+        'search_results': '搜索结果',
+        'market_analysis': '市场分析',
+        'price_trends': '价格趋势'
+      }
+      return labels[cacheType] || cacheType
+    },
+
+    // 全量缓存相关方法
+    async refreshFullCache() {
+      if (this.fullCacheRefreshing) return
+      
+      try {
+        this.$confirm('刷新全量缓存会从MySQL重新加载所有empty角色数据，可能需要较长时间，是否继续？', '确认刷新', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          this.fullCacheRefreshing = true
+          
+          const response = await systemApi.refreshFullCache()
+          if (response.code === 200) {
+            this.$message.success('全量缓存刷新成功！')
+            // 刷新页面状态
+            setTimeout(() => {
+              this.refreshStatus()
+            }, 1000)
+          } else {
+            this.$message.error(response.message || '全量缓存刷新失败')
+          }
+        }).catch(() => {
+          // 用户取消操作
+        }).finally(() => {
+          this.fullCacheRefreshing = false
+        })
+      } catch (error) {
+        console.error('刷新全量缓存失败:', error)
+        this.$message.error('刷新全量缓存失败，请检查网络连接')
+        this.fullCacheRefreshing = false
+      }
     }
   }
 }
@@ -711,5 +934,32 @@ export default {
 .refresh-progress .progress-item .value {
   color: #303133;
   font-weight: 500;
+}
+
+/* Redis详细信息样式 */
+.redis-details {
+  margin-top: 20px;
+}
+
+.cache-type-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ttl-tag {
+  margin: 0;
+}
+
+.no-cache-data {
+  text-align: center;
+  color: #909399;
+  padding: 20px 0;
+}
+
+.full-cache-details {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ebeef5;
 }
 </style>

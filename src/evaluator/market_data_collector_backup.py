@@ -262,10 +262,10 @@ class MarketDataCollector:
         try:
             start_time = time.time()
             
-            # 初始化进度跟踪
+            # 初始化进度状态
             self._refresh_status = "running"
             self._refresh_progress = 0
-            self._refresh_message = "开始刷新数据..."
+            self._refresh_message = "准备开始..."
             self._refresh_start_time = datetime.now()
             self._refresh_processed_records = 0
             self._refresh_current_batch = 0
@@ -274,13 +274,13 @@ class MarketDataCollector:
             
             # 如果使用缓存且不强制刷新，尝试从Redis全量缓存获取
             if use_cache and not force_refresh:
-                self._refresh_message = "检查Redis全量缓存..."
+                self._refresh_message = "检查Redis缓存..."
                 self._refresh_progress = 5
                 
                 cached_data = self._get_full_cached_data()
                 if cached_data is not None and not cached_data.empty:
-                    self._refresh_message = "从缓存应用筛选条件..."
-                    self._refresh_progress = 50
+                    self._refresh_message = "从缓存筛选数据..."
+                    self._refresh_progress = 30
                     
                     # 应用筛选条件
                     filtered_data = self._apply_filters(cached_data, filters, max_records)
@@ -289,7 +289,7 @@ class MarketDataCollector:
                     self._data_loaded = True
                     self._last_refresh_time = datetime.now()
                     
-                    # 更新进度状态
+                    # 更新进度状态 - 缓存命中完成
                     self._refresh_status = "completed"
                     self._refresh_progress = 100
                     self._refresh_message = "从缓存获取完成！"
@@ -309,8 +309,8 @@ class MarketDataCollector:
                     self._refresh_message = "缓存未命中，准备从数据库加载..."
                     self._refresh_progress = 10
             
-            self._refresh_message = "从数据库加载全量数据..."
-            self._refresh_progress = 15
+            self._refresh_message = "开始从数据库加载全量数据..."
+            print(f"开始从数据库加载全量市场数据到Redis缓存")
             
             # 导入MySQL连接相关模块
             from sqlalchemy import create_engine, text
@@ -326,7 +326,7 @@ class MarketDataCollector:
                     raise ValueError("未找到数据库配置")
                 
                 self._refresh_message = "连接数据库..."
-                self._refresh_progress = 20
+                self._refresh_progress = 15
                 print(f"连接MySQL数据库: {db_config}")
                 
                 # 创建优化的数据库连接 - 使用连接池
@@ -336,8 +336,10 @@ class MarketDataCollector:
                 # 输出数据库索引优化建议
                 self._optimize_database_indexes()
                 
+                # 优化的分批查询策略 - 避免一次性加载所有数据
                 self._refresh_message = "分析数据量..."
-                self._refresh_progress = 25
+                self._refresh_progress = 20
+                print(f"开始优化的分批全量查询...")
                 
                 # 首先获取总记录数
                 count_query = """
@@ -352,23 +354,24 @@ class MarketDataCollector:
                 
                 print(f"总记录数: {total_count}")
                 
-                # 动态调整批次大小（优先使用传入的batch_size，但会根据数据量调整）
-                if total_count > 50000:
-                    actual_batch_size = max(batch_size, 3000)  # 大数据集使用较大批次
-                elif total_count > 20000:
-                    actual_batch_size = max(batch_size, 2000)  # 中等数据集
-                else:
-                    actual_batch_size = min(batch_size, 1000)  # 小数据集
+                # 动态调整批次大小（如果没有传入batch_size参数）
+                if batch_size == 2000:  # 使用默认值时才自动调整
+                    if total_count > 50000:
+                        batch_size = 5000  # 大数据集使用较大批次
+                    elif total_count > 20000:
+                        batch_size = 2000  # 中等数据集
+                    else:
+                        batch_size = 1000  # 小数据集
                 
-                total_batches = (total_count + actual_batch_size - 1) // actual_batch_size
+                total_batches = (total_count + batch_size - 1) // batch_size
                 
                 # 更新进度跟踪信息
                 self._refresh_total_records = total_count
                 self._refresh_total_batches = total_batches
-                self._refresh_message = f"准备分批处理: {total_batches} 批，每批 {actual_batch_size} 条"
-                self._refresh_progress = 30
+                self._refresh_message = f"开始分批处理，共 {total_batches} 批..."
+                self._refresh_progress = 25
                 
-                print(f"将分 {total_batches} 批处理，每批 {actual_batch_size} 条")
+                print(f"将分 {total_batches} 批处理，每批 {batch_size} 条")
                 
                 # 优化的SQL查询 - 只选择必要字段，减少数据传输
                 base_query = """
@@ -394,14 +397,17 @@ class MarketDataCollector:
                 
                 with engine.connect() as conn:
                     for batch_num in range(total_batches):
-                        offset = batch_num * actual_batch_size
-                        current_batch_query = base_query.format(batch_size=actual_batch_size, offset=offset)
-                        
-                        # 更新当前批次进度
+                        # 更新当前批次
                         self._refresh_current_batch = batch_num + 1
-                        batch_progress = 30 + int(((batch_num + 1) / total_batches) * 60)  # 30-90%的进度范围
-                        self._refresh_progress = min(batch_progress, 90)
+                        offset = batch_num * batch_size
+                        current_batch_query = base_query.format(batch_size=batch_size, offset=offset)
+                        
+                        # 更新进度消息
                         self._refresh_message = f"处理第 {batch_num + 1}/{total_batches} 批数据..."
+                        
+                        # 计算进度（25% 已用于前期准备，剩余75%用于数据处理）
+                        batch_progress = 25 + (batch_num / total_batches) * 70  # 70%用于数据处理，5%留给最后的缓存
+                        self._refresh_progress = int(batch_progress)
                         
                         print(f"处理第 {batch_num + 1}/{total_batches} 批，偏移量: {offset}")
                         
@@ -422,8 +428,8 @@ class MarketDataCollector:
                             processed_count += len(batch_data)
                             self._refresh_processed_records = processed_count
                             
-                            progress_percentage = (processed_count / total_count) * 100
-                            print(f"已处理 {processed_count}/{total_count} 条数据 ({progress_percentage:.1f}%)")
+                            progress_percent = (processed_count / total_count) * 100
+                            print(f"已处理 {processed_count}/{total_count} 条数据 ({progress_percent:.1f}%)")
                             
                             # 每处理几批就强制垃圾回收，释放内存
                             if batch_num % 5 == 0:
@@ -435,9 +441,8 @@ class MarketDataCollector:
                             continue
                 
                 # 转换为DataFrame
-                self._refresh_message = "构建数据结构..."
-                self._refresh_progress = 92
-                
+                self._refresh_message = "处理数据格式..."
+                self._refresh_progress = 95
                 full_data_df = pd.DataFrame(full_market_data)
                 
                 if not full_data_df.empty:
@@ -451,8 +456,6 @@ class MarketDataCollector:
                     # 缓存全量数据到Redis
                     if use_cache:
                         self._refresh_message = "缓存数据到Redis..."
-                        self._refresh_progress = 95
-                        
                         cache_start = time.time()
                         if self._set_full_cached_data(full_data_df):
                             cache_time = time.time() - cache_start
@@ -462,8 +465,6 @@ class MarketDataCollector:
                     
                     # 应用筛选条件并返回结果
                     self._refresh_message = "应用筛选条件..."
-                    self._refresh_progress = 98
-                    
                     filtered_data = self._apply_filters(full_data_df, filters, max_records)
                     self.market_data = filtered_data
                     
@@ -474,8 +475,9 @@ class MarketDataCollector:
                     # 完成进度跟踪
                     self._refresh_status = "completed"
                     self._refresh_progress = 100
-                    self._refresh_message = "数据刷新完成！"
+                    self._refresh_message = "数据加载完成！"
                     self._refresh_processed_records = len(filtered_data)
+                    self._refresh_total_records = len(filtered_data)
                     
                     print(f"筛选后数据: {len(filtered_data)} 条")
                     
@@ -483,21 +485,287 @@ class MarketDataCollector:
                     print("警告：未获取到有效的市场数据")
                     self.market_data = pd.DataFrame()
                     
-                    # 完成进度跟踪（无数据情况）
-                    self._refresh_status = "completed"
-                    self._refresh_progress = 100
+                    # 设置失败状态
+                    self._refresh_status = "error"
+                    self._refresh_progress = 0
                     self._refresh_message = "未获取到有效数据"
-                    self._refresh_processed_records = 0
                 
                 return self.market_data
                 
         except Exception as e:
-            # 错误处理进度跟踪
+            # 更新错误状态
             self._refresh_status = "error"
             self._refresh_progress = 0
             self._refresh_message = f"刷新失败: {str(e)}"
             
             self.logger.error(f"刷新市场数据失败: {e}")
+            raise
+    def get_refresh_status(self) -> Dict[str, Any]:
+        """
+        获取刷新进度状态
+        
+        Returns:
+            Dict: 包含进度信息的字典
+        """
+        status_info = {
+            "status": self._refresh_status,
+            "progress": self._refresh_progress,
+            "message": self._refresh_message,
+            "processed_records": self._refresh_processed_records,
+            "total_records": self._refresh_total_records,
+            "current_batch": self._refresh_current_batch,
+            "total_batches": self._refresh_total_batches,
+            "start_time": self._refresh_start_time.isoformat() if self._refresh_start_time else None,
+            "elapsed_seconds": (datetime.now() - self._refresh_start_time).total_seconds() if self._refresh_start_time else 0
+        }
+        return status_info
+
+    def get_market_data(self, force_refresh: bool = False) -> pd.DataFrame:
+        """
+        获取当前的市场数据，支持智能缓存和过期检查
+        
+        Args:
+            force_refresh: 是否强制刷新数据
+            
+        Returns:
+            pd.DataFrame: 市场数据
+        """
+        # 检查是否需要刷新数据
+        need_refresh = (
+            force_refresh or 
+            not self._data_loaded or 
+            self.market_data.empty or 
+            self._is_cache_expired()
+        )
+        
+        if need_refresh:
+            print("🔄 数据需要刷新，开始刷新市场数据...")
+            self.refresh_market_data()
+        else:
+            print("✅ 使用现有数据，数据仍在有效期内")
+        
+        return self.market_data
+
+    def _is_cache_expired(self) -> bool:
+        """检查缓存是否过期"""
+        if not self._last_refresh_time:
+            return True
+        
+        expiry_time = self._last_refresh_time + timedelta(hours=self._cache_expiry_hours)
+        return datetime.now() > expiry_time
+                    
+                    elapsed_time = time.time() - start_time
+                    print(f"从Flask-Caching缓存获取数据成功，耗时: {elapsed_time:.2f}秒")
+                    print(f"缓存数据量: {len(cached_data)} 条，特征维度: {len(cached_data.columns)}")
+                    print(f"✅ 智能缓存复用成功！max_records={max_records}")
+                    
+                    # 检查是否进行了智能截取
+                    if 'data' in cached_data.columns and len(cached_data) < max_records:
+                        print(f"💡 缓存数据({len(cached_data)}条) < 请求量({max_records}条)，已返回全部缓存数据")
+                    
+                    return self.market_data
+            
+            # 初始化进度状态
+            self._refresh_status = "running"
+            self._refresh_progress = 0
+            self._refresh_message = "准备开始..."
+            self._refresh_start_time = datetime.now()
+            self._refresh_processed_records = 0
+            self._refresh_current_batch = 0
+            
+            print(f"开始分批刷新市场数据，最大记录数: {max_records}，批次大小: {batch_size}")
+            
+            # 导入MySQL连接相关模块
+            from sqlalchemy import create_engine, text
+            from src.app import create_app
+            
+            # 创建Flask应用上下文获取数据库配置
+            app = create_app()
+            
+            with app.app_context():
+                # 获取数据库配置
+                db_config = app.config.get('SQLALCHEMY_DATABASE_URI')
+                if not db_config:
+                    raise ValueError("未找到数据库配置")
+                
+                self._refresh_message = "连接数据库..."
+                self._refresh_progress = 5
+                print(f"连接MySQL数据库: {db_config}")
+                
+                # 创建数据库连接
+                engine = create_engine(db_config)
+                
+                # 构建基础SQL查询
+                base_query = """
+                    SELECT 
+                        c.eid, c.serverid, c.level, c.school,
+                        c.price, c.collect_num,
+                        c.yushoushu_skill, c.school_skills, c.life_skills, c.expire_time,
+                        l.sum_exp, l.three_fly_lv, l.all_new_point,
+                        l.jiyuan_amount, l.packet_page, l.xianyu_amount, l.learn_cash,
+                        l.sum_amount, l.role_icon,
+                        l.expt_ski1, l.expt_ski2, l.expt_ski3, l.expt_ski4, l.expt_ski5,
+                        l.beast_ski1, l.beast_ski2, l.beast_ski3, l.beast_ski4,
+                        l.changesch_json, l.ex_avt_json, l.huge_horse_json, l.shenqi_json,
+                        l.all_equip_json, l.all_summon_json, l.all_rider_json
+                    FROM roles c
+                    LEFT JOIN large_equip_desc_data l ON c.eid = l.eid
+                    WHERE c.role_type = 'empty' AND c.price > 0
+                """
+                
+                # 添加筛选条件
+                conditions = []
+                if filters:
+                    if 'level_min' in filters:
+                        conditions.append(f"c.level >= {filters['level_min']}")
+                    if 'level_max' in filters:
+                        conditions.append(f"c.level <= {filters['level_max']}")
+                    if 'price_min' in filters:
+                        conditions.append(f"c.price >= {filters['price_min']}")
+                    if 'price_max' in filters:
+                        conditions.append(f"c.price <= {filters['price_max']}")
+                    if 'server_name' in filters:
+                        conditions.append(f"c.server_name = '{filters['server_name']}'")
+                    if 'school' in filters:
+                        conditions.append(f"c.school = {filters['school']}")
+                    if 'serverid' in filters:
+                        conditions.append(f"c.serverid = {filters['serverid']}")
+                
+                if conditions:
+                    base_query += " AND " + " AND ".join(conditions)
+                
+                base_query += " ORDER BY c.price ASC"
+                
+                # 计算总批次数
+                self._refresh_total_batches = (max_records + batch_size - 1) // batch_size
+                self._refresh_total_records = max_records
+                
+                self._refresh_message = f"开始分批处理，共 {self._refresh_total_batches} 批..."
+                self._refresh_progress = 10
+                
+                # 分批处理数据
+                market_data = []
+                
+                with engine.connect() as conn:
+                    for batch_num in range(self._refresh_total_batches):
+                        # 更新当前批次
+                        self._refresh_current_batch = batch_num + 1
+                        
+                        # 计算当前批次的偏移量和大小
+                        offset = batch_num * batch_size
+                        current_batch_size = min(batch_size, max_records - offset)
+                        
+                        if current_batch_size <= 0:
+                            break
+                        
+                        # 分批处理不使用批次级缓存，只在最终缓存完整数据
+                        # 这样不同批次大小都可以使用同一个缓存
+                        
+                        # 构建分页查询
+                        paginated_query = f"{base_query} LIMIT {current_batch_size} OFFSET {offset}"
+                        
+                        self._refresh_message = f"处理第 {batch_num + 1}/{self._refresh_total_batches} 批数据..."
+                        
+                        try:
+                            # 执行查询
+                            result = conn.execute(text(paginated_query))
+                            if batch_num == 0:  # 第一次获取列名
+                                columns = result.keys()
+                            rows = result.fetchall()
+                            
+                            if not rows:
+                                print(f"第 {batch_num + 1} 批查询无数据，停止处理")
+                                break
+                            
+                            print(f"第 {batch_num + 1} 批获取到 {len(rows)} 条原始数据")
+                            
+                            # 处理当前批次数据
+                            batch_data = []
+                            for i, row in enumerate(rows):
+                                try:
+                                    role_data = dict(zip(columns, row))
+                                    
+                                    # 提取特征
+                                    features = self.feature_extractor.extract_features(role_data)
+                                    
+                                    # 添加基本信息
+                                    features.update({
+                                        'eid': role_data.get('eid', ''),
+                                        'price': role_data.get('price', 0),
+                                        'school': role_data.get('school', 0),
+                                        'serverid': role_data.get('serverid', 0)
+                                    })
+                                    
+                                    batch_data.append(features)
+                                    self._refresh_processed_records += 1
+                                    
+                                except Exception as e:
+                                    self.logger.warning(f"批次 {batch_num + 1} 第 {i+1} 条数据处理失败: {e}")
+                                    continue
+                            
+                            market_data.extend(batch_data)
+                            
+                            # 不进行批次级缓存，只在最终缓存完整数据
+                            # 这样任何批次大小都可以使用相同的缓存
+                            
+                            # 更新进度
+                            batch_progress = 10 + (batch_num + 1) / self._refresh_total_batches * 80
+                            self._refresh_progress = min(90, int(batch_progress))
+                            
+                            print(f"批次 {batch_num + 1} 处理完成，有效数据: {len(batch_data)} 条，总计: {len(market_data)} 条")
+                            
+                            # 批次间短暂休息
+                            if batch_num < self._refresh_total_batches - 1:
+                                time.sleep(0.05)  # 50ms休息，减少等待时间
+                                
+                        except Exception as e:
+                            self.logger.error(f"第 {batch_num + 1} 批处理失败: {e}")
+                            break
+                
+                # 构建最终DataFrame
+                self._refresh_message = "构建数据索引..."
+                self._refresh_progress = 95
+                
+                self.market_data = pd.DataFrame(market_data)
+                
+                if not self.market_data.empty:
+                    self.market_data.set_index('eid', inplace=True)
+                    
+                    # 更新缓存状态
+                    self._data_loaded = True
+                    self._last_refresh_time = datetime.now()
+                    
+                    self._refresh_message = "刷新完成！"
+                    self._refresh_progress = 100
+                    self._refresh_status = "completed"
+                    
+                    elapsed_time = time.time() - start_time
+                    print(f"市场数据分批刷新完成，共 {len(self.market_data)} 条有效数据，总耗时: {elapsed_time:.2f}秒")
+                    print(f"数据特征维度: {len(self.market_data.columns)}")
+                    print(f"价格范围: {self.market_data['price'].min():.1f} - {self.market_data['price'].max():.1f}")
+                    
+                    # 缓存完整数据到Flask-Caching（基于筛选条件和记录数）
+                    if use_cache:
+                        cache_start = time.time()
+                        if self._set_cached_data(filters, max_records, self.market_data):
+                            cache_time = time.time() - cache_start
+                            print(f"完整数据已缓存到Flask-Caching，缓存耗时: {cache_time:.2f}秒")
+                            print(f"✅ 此缓存可被任何批次大小复用！")
+                        else:
+                            print("Flask-Caching设置失败，但数据获取成功")
+                    
+                else:
+                    self._refresh_message = "未获取到有效数据"
+                    self._refresh_status = "completed"
+                    print("警告：未获取到有效的市场数据")
+                
+                return self.market_data
+                
+        except Exception as e:
+            self._refresh_status = "error"
+            self._refresh_message = f"刷新失败: {str(e)}"
+            self._refresh_progress = 0
+            self.logger.error(f"分批刷新市场数据失败: {e}")
             raise
     
     def get_refresh_status(self) -> Dict[str, Any]:

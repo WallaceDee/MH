@@ -22,10 +22,10 @@ class RedisCache:
     """Redis缓存管理器"""
     
     def __init__(self, 
-                 host: str = 'localhost',
+                 host: str = '47.86.33.98',
                  port: int = 6379, 
                  db: int = 0,
-                 password: Optional[str] = None,
+                 password: Optional[str] = '447363121',
                  decode_responses: bool = False,
                  socket_timeout: float = 5.0,
                  socket_connect_timeout: float = 5.0,
@@ -362,6 +362,244 @@ class RedisCache:
         except Exception as e:
             self.logger.error(f"获取缓存统计失败: {e}")
             return {'available': False, 'error': str(e)}
+
+    def set_batch(self, data_dict: Dict[str, Any], ttl: Optional[int] = None) -> bool:
+        """
+        批量设置缓存 - 使用Redis Pipeline优化性能
+        
+        Args:
+            data_dict: 键值对字典 {key: value, ...}
+            ttl: 过期时间（秒）
+            
+        Returns:
+            bool: 是否全部设置成功
+        """
+        if not self.is_available() or not data_dict:
+            return False
+        
+        try:
+            pipe = self.client.pipeline()
+            expire_time = ttl or self.default_ttl
+            
+            self.logger.info(f"开始批量设置缓存，共 {len(data_dict)} 个键")
+            
+            for key, value in data_dict.items():
+                try:
+                    full_key = self._make_key(key)
+                    
+                    # 序列化数据
+                    if isinstance(value, pd.DataFrame):
+                        serialized_value = pickle.dumps({
+                            'type': 'dataframe',
+                            'data': value.to_dict('records'),
+                            'index': value.index.tolist() if hasattr(value.index, 'tolist') else list(value.index),
+                            'columns': value.columns.tolist()
+                        })
+                    elif isinstance(value, np.ndarray):
+                        serialized_value = pickle.dumps({
+                            'type': 'numpy',
+                            'data': value.tolist(),
+                            'shape': value.shape,
+                            'dtype': str(value.dtype)
+                        })
+                    else:
+                        serialized_value = pickle.dumps(value)
+                    
+                    # 添加到Pipeline
+                    pipe.setex(full_key, expire_time, serialized_value)
+                    
+                except Exception as e:
+                    self.logger.warning(f"序列化键 {key} 失败: {e}")
+                    continue
+            
+            # 执行Pipeline
+            results = pipe.execute()
+            success_count = sum(1 for r in results if r)
+            
+            self.logger.info(f"批量缓存设置完成: {success_count}/{len(data_dict)} 成功")
+            return success_count == len(data_dict)
+            
+        except Exception as e:
+            self.logger.error(f"批量设置缓存失败: {e}")
+            return False
+
+    def get_batch(self, keys: List[str]) -> Dict[str, Any]:
+        """
+        批量获取缓存 - 使用Redis Pipeline优化性能
+        
+        Args:
+            keys: 键列表
+            
+        Returns:
+            Dict: 键值对字典
+        """
+        if not self.is_available() or not keys:
+            return {}
+        
+        try:
+            pipe = self.client.pipeline()
+            full_keys = [self._make_key(key) for key in keys]
+            
+            # 批量获取
+            for full_key in full_keys:
+                pipe.get(full_key)
+            
+            results = pipe.execute()
+            
+            # 处理结果
+            result_dict = {}
+            for i, (key, result) in enumerate(zip(keys, results)):
+                if result is not None:
+                    try:
+                        deserialized = pickle.loads(result)
+                        
+                        # 特殊处理DataFrame
+                        if isinstance(deserialized, dict) and deserialized.get('type') == 'dataframe':
+                            df_data = deserialized['data']
+                            index = deserialized.get('index', list(range(len(df_data))))
+                            columns = deserialized.get('columns', [])
+                            
+                            df = pd.DataFrame(df_data, columns=columns)
+                            if index:
+                                df.index = index
+                            result_dict[key] = df
+                        # 特殊处理NumPy数组
+                        elif isinstance(deserialized, dict) and deserialized.get('type') == 'numpy':
+                            array_data = np.array(deserialized['data'])
+                            if 'shape' in deserialized:
+                                array_data = array_data.reshape(deserialized['shape'])
+                            result_dict[key] = array_data
+                        else:
+                            result_dict[key] = deserialized
+                            
+                    except Exception as e:
+                        self.logger.warning(f"反序列化键 {key} 失败: {e}")
+                        continue
+            
+            self.logger.debug(f"批量获取缓存: {len(result_dict)}/{len(keys)} 成功")
+            return result_dict
+            
+        except Exception as e:
+            self.logger.error(f"批量获取缓存失败: {e}")
+            return {}
+
+    def set_chunked_data(self, base_key: str, data: pd.DataFrame, chunk_size: int = 1000, ttl: Optional[int] = None) -> bool:
+        """
+        分块存储大型DataFrame - 避免单个Redis键过大
+        
+        Args:
+            base_key: 基础键名
+            data: 要存储的DataFrame
+            chunk_size: 每块的行数
+            ttl: 过期时间（秒）
+            
+        Returns:
+            bool: 是否存储成功
+        """
+        if not self.is_available() or data.empty:
+            return False
+        
+        try:
+            total_rows = len(data)
+            total_chunks = (total_rows + chunk_size - 1) // chunk_size
+            
+            self.logger.info(f"开始分块存储数据: {total_rows} 行，分为 {total_chunks} 块")
+            
+            # 准备批量数据
+            chunk_data = {}
+            
+            # 存储元数据
+            metadata = {
+                'total_rows': total_rows,
+                'total_chunks': total_chunks,
+                'chunk_size': chunk_size,
+                'columns': data.columns.tolist(),
+                'index_name': data.index.name,
+                'created_at': datetime.now().isoformat()
+            }
+            chunk_data[f"{base_key}:meta"] = metadata
+            
+            # 分块存储数据
+            for i in range(total_chunks):
+                start_idx = i * chunk_size
+                end_idx = min(start_idx + chunk_size, total_rows)
+                chunk_df = data.iloc[start_idx:end_idx].copy()
+                
+                chunk_key = f"{base_key}:chunk_{i}"
+                chunk_data[chunk_key] = chunk_df
+            
+            # 使用Pipeline批量设置
+            success = self.set_batch(chunk_data, ttl)
+            
+            if success:
+                self.logger.info(f"分块存储完成: {base_key}，共 {total_chunks} 块")
+            else:
+                self.logger.error(f"分块存储失败: {base_key}")
+                
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"分块存储数据失败 {base_key}: {e}")
+            return False
+
+    def get_chunked_data(self, base_key: str) -> Optional[pd.DataFrame]:
+        """
+        获取分块存储的DataFrame
+        
+        Args:
+            base_key: 基础键名
+            
+        Returns:
+            Optional[pd.DataFrame]: 合并后的DataFrame
+        """
+        if not self.is_available():
+            return None
+        
+        try:
+            # 获取元数据
+            metadata = self.get(f"{base_key}:meta")
+            if not metadata:
+                self.logger.debug(f"未找到分块数据元数据: {base_key}")
+                return None
+            
+            total_chunks = metadata['total_chunks']
+            self.logger.info(f"开始获取分块数据: {base_key}，共 {total_chunks} 块")
+            
+            # 批量获取所有块
+            chunk_keys = [f"{base_key}:chunk_{i}" for i in range(total_chunks)]
+            chunk_data = self.get_batch(chunk_keys)
+            
+            if len(chunk_data) != total_chunks:
+                self.logger.warning(f"分块数据不完整: {len(chunk_data)}/{total_chunks}")
+                return None
+            
+            # 合并数据块
+            chunks = []
+            for i in range(total_chunks):
+                chunk_key = f"{base_key}:chunk_{i}"
+                if chunk_key in chunk_data:
+                    chunks.append(chunk_data[chunk_key])
+                else:
+                    self.logger.error(f"缺失数据块: {chunk_key}")
+                    return None
+            
+            # 合并DataFrame
+            result_df = pd.concat(chunks, ignore_index=False)
+            
+            # 恢复列信息
+            if 'columns' in metadata:
+                result_df.columns = metadata['columns']
+            
+            # 恢复索引信息
+            if 'index_name' in metadata and metadata['index_name']:
+                result_df.index.name = metadata['index_name']
+            
+            self.logger.info(f"分块数据获取完成: {base_key}，共 {len(result_df)} 行")
+            return result_df
+            
+        except Exception as e:
+            self.logger.error(f"获取分块数据失败 {base_key}: {e}")
+            return None
 
 
 # 全局缓存实例

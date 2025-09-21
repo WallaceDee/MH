@@ -98,5 +98,21 @@ export const systemApi = {
    */
   getMarketDataAnalysis() {
     return api.get('/system/market-data/analysis')
+  },
+
+  /**
+   * 刷新全量缓存
+   * @returns {Promise}
+   */
+  refreshFullCache() {
+    return api.post('/system/market-data/refresh-full-cache')
+  },
+
+  /**
+   * 获取缓存状态
+   * @returns {Promise}
+   */
+  getCacheStatus() {
+    return api.get('/system/market-data/cache-status')
   }
 } 

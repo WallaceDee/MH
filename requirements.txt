@@ -52,6 +52,7 @@ lifelines>=0.26.0                   # 生存分析库
 aiohttp>=3.8.0                      # 异步HTTP客户端/服务器
 
 # 缓存系统
+Flask-Caching>=2.0.0                # Flask缓存扩展（新增）
 redis>=4.5.0                        # Redis缓存数据库
 hiredis>=2.2.0                      # Redis高性能解析器
 

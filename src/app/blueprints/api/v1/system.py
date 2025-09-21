@@ -384,11 +384,70 @@ def get_market_data_status():
             status_info["cache_expired"] = True
             status_info["cache_expiry_time"] = None
         
+        # 添加Redis缓存信息
+        try:
+            from src.utils.shared_cache_manager import get_shared_cache_manager
+            cache_manager = get_shared_cache_manager()
+            redis_stats = cache_manager.get_cache_statistics()
+            status_info["redis_cache"] = redis_stats
+        except Exception as e:
+            logger.warning(f"获取Redis缓存信息失败: {e}")
+            status_info["redis_cache"] = {"available": False, "error": str(e)}
+        
+        # 添加Flask缓存信息
+        try:
+            cache_info = collector.get_cache_info()
+            status_info["flask_cache"] = cache_info
+        except Exception as e:
+            logger.warning(f"获取Flask缓存信息失败: {e}")
+            status_info["flask_cache"] = {"available": False, "error": str(e)}
+        
         return success_response(data=status_info, message="获取市场数据状态成功")
         
     except Exception as e:
         logger.error(f"获取市场数据状态失败: {e}")
         return error_response(f"获取市场数据状态失败: {str(e)}")
+
+
+@system_bp.route('/market-data/refresh-full-cache', methods=['POST'])
+def refresh_full_cache():
+    """刷新全量缓存"""
+    try:
+        from src.evaluator.market_data_collector import MarketDataCollector
+        
+        # 获取市场数据收集器实例
+        collector = MarketDataCollector()
+        
+        # 执行全量缓存刷新
+        success = collector.refresh_full_cache()
+        
+        if success:
+            return success_response(message="全量缓存刷新成功")
+        else:
+            return error_response("全量缓存刷新失败")
+        
+    except Exception as e:
+        logger.error(f"刷新全量缓存失败: {e}")
+        return error_response(f"刷新全量缓存失败: {str(e)}")
+
+
+@system_bp.route('/market-data/cache-status', methods=['GET'])
+def get_cache_status():
+    """获取缓存状态"""
+    try:
+        from src.evaluator.market_data_collector import MarketDataCollector
+        
+        # 获取市场数据收集器实例
+        collector = MarketDataCollector()
+        
+        # 获取缓存状态
+        cache_status = collector.get_cache_status()
+        
+        return success_response(data=cache_status, message="获取缓存状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取缓存状态失败: {e}")
+        return error_response(f"获取缓存状态失败: {str(e)}")
 
 
 @system_bp.route('/market-data/analysis', methods=['GET'])
@@ -516,10 +575,12 @@ def refresh_market_data():
         # 在后台线程中执行刷新
         def background_refresh():
             try:
-                collector.refresh_market_data_batch(
+                collector.refresh_market_data(
                     filters=filters,
                     max_records=max_records,
-                    batch_size=batch_size
+                    batch_size=batch_size,
+                    use_cache=True,
+                    force_refresh=True  # API调用时强制刷新
                 )
             except Exception as e:
                 logger.error(f"后台刷新失败: {e}")
