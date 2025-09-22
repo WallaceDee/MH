@@ -5,9 +5,9 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 # 导入市场数据采集器
-from .equip_market_data_collector import EquipMarketDataCollector
-from ..lingshi.lingshi_market_data_collector import LingshiMarketDataCollector
-from ..pet_equip.pet_equip_market_data_collector import PetEquipMarketDataCollector
+from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+from src.evaluator.mark_anchor.lingshi.lingshi_market_data_collector import LingshiMarketDataCollector
+from src.evaluator.mark_anchor.pet_equip.pet_equip_market_data_collector import PetEquipMarketDataCollector
 
 # 导入通用工具
 from ...utils.base_valuator import BaseValuator
@@ -389,8 +389,9 @@ class EquipAnchorEvaluator(BaseValuator):
         """
         self.logger = logging.getLogger(__name__)
 
-        # 初始化装备市场数据采集器
+        # 初始化装备市场数据采集器 - 使用单例模式确保实例一致
         self.market_collector = EquipMarketDataCollector()
+        print(f"EquipAnchorEvaluator 使用市场数据采集器实例ID: {id(self.market_collector)}")
 
         # 初始化灵饰装备市场数据采集器
         self.lingshi_market_collector = LingshiMarketDataCollector()

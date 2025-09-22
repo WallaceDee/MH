@@ -127,7 +127,7 @@ class EquipMarketDataCollector:
         cache_mode = "永不过期模式" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时过期"
         print(f"装备市场数据采集器单例初始化完成，支持Redis全量缓存（{cache_mode}）")
 
-#TODO: 加载完后没有赋值，没有用管道设置redis
+#TODO: 加载完后没有赋值?
     def _load_full_data_to_redis(self, force_refresh: bool = False) -> bool:
         """
         加载全量装备数据到Redis - 参考角色模块的批次处理和进度跟踪
@@ -375,9 +375,10 @@ class EquipMarketDataCollector:
         try:
             # 先检查内存缓存
             if self._full_data_cache is not None and not self._full_data_cache.empty:
-                print(f"从内存缓存获取全量数据: {len(self._full_data_cache)} 条")
+                print(f"从内存缓存获取全量数据: {len(self._full_data_cache)} 条,{self._full_data_cache is not None}---{not self._full_data_cache.empty}")
                 return self._full_data_cache
             
+            print(f"内存缓存未命中，实例ID: {id(self)}, 缓存状态: {self._full_data_cache is not None if self._full_data_cache is not None else 'None'}")
             # 从Redis获取分块数据
             cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
             
@@ -506,17 +507,26 @@ class EquipMarketDataCollector:
             
             # 10. 排除特效筛选
             if exclude_special_effect and len(exclude_special_effect) > 0:
-                exclude_mask = pd.Series([True] * len(filtered_df))
+                # 使用与SQLite版本完全相同的逻辑
+                # SQLite版本：对每个特效创建排除条件，然后用AND连接
+                exclude_conditions = []
                 for effect in exclude_special_effect:
-                    effect_condition = (
-                        filtered_df['special_effect'].str.contains(f'[{effect}]', na=False, regex=False) |
-                        filtered_df['special_effect'].str.contains(f'[{effect},', na=False, regex=False) |
-                        filtered_df['special_effect'].str.contains(f',{effect},', na=False, regex=False) |
-                        filtered_df['special_effect'].str.contains(f',{effect}]', na=False, regex=False)
+                    # 对每个特效，创建排除条件（不包含该特效的装备）
+                    effect_exclude_condition = ~(
+                        filtered_df['special_effect'].str.contains(f'[{effect}]', na=False, regex=False) |  # 只有这一个特效：[1]
+                        filtered_df['special_effect'].str.contains(f'[{effect},', na=False, regex=False) |  # 在开头：[1,x,...]
+                        filtered_df['special_effect'].str.contains(f',{effect},', na=False, regex=False) |  # 在中间：[x,1,y,...]
+                        filtered_df['special_effect'].str.contains(f',{effect}]', na=False, regex=False)    # 在结尾：[x,y,1]
                     )
-                    exclude_mask = exclude_mask & ~effect_condition
+                    exclude_conditions.append(effect_exclude_condition)
                 
-                filtered_df = filtered_df[exclude_mask]
+                # 使用AND连接所有排除条件（与SQLite的and_(*exclude_conditions)相同）
+                if exclude_conditions:
+                    final_exclude_mask = exclude_conditions[0]
+                    for condition in exclude_conditions[1:]:
+                        final_exclude_mask = final_exclude_mask & condition
+                    filtered_df = filtered_df[final_exclude_mask]
+                
                 print(f"排除特效后: {len(filtered_df)} 条")
             
             # 11. 排除套装效果
@@ -1030,7 +1040,10 @@ class EquipMarketDataCollector:
         """手动刷新全量缓存"""
         print("🔄 手动刷新装备全量缓存...")
         self._full_data_cache = None  # 清空内存缓存
-        return self._load_full_data_to_redis(force_refresh=True)
+        success = self._load_full_data_to_redis(force_refresh=True)
+        if success:
+            print(f"缓存刷新成功，内存缓存数据量: {len(self._full_data_cache) if self._full_data_cache is not None else 0} 条")
+        return success
     
     def set_cache_expiry(self, hours: int):
         """
