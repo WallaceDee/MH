@@ -27,8 +27,8 @@ class RedisCache:
                  db: int = 0,
                  password: Optional[str] = '447363121',
                  decode_responses: bool = False,
-                 socket_timeout: float = 5.0,
-                 socket_connect_timeout: float = 5.0,
+                 socket_timeout: float = 30.0,  # 增加到30秒
+                 socket_connect_timeout: float = 10.0,  # 增加到10秒
                  retry_on_timeout: bool = True,
                  health_check_interval: int = 30):
         """
@@ -379,7 +379,7 @@ class RedisCache:
         
         try:
             pipe = self.client.pipeline()
-            expire_time = ttl or self.default_ttl
+            expire_time = ttl if ttl is not None else self.default_ttl
             
             self.logger.info(f"开始批量设置缓存，共 {len(data_dict)} 个键")
             
@@ -406,7 +406,10 @@ class RedisCache:
                         serialized_value = pickle.dumps(value)
                     
                     # 添加到Pipeline
-                    pipe.setex(full_key, expire_time, serialized_value)
+                    if ttl is None:
+                        pipe.set(full_key, serialized_value)  # 永不过期
+                    else:
+                        pipe.setex(full_key, expire_time, serialized_value)  # 有TTL
                     
                 except Exception as e:
                     self.logger.warning(f"序列化键 {key} 失败: {e}")
@@ -600,6 +603,85 @@ class RedisCache:
         except Exception as e:
             self.logger.error(f"获取分块数据失败 {base_key}: {e}")
             return None
+
+    def get_redis_info(self):
+        """获取Redis服务器信息"""
+        try:
+            if not self.is_available():
+                return None
+            
+            info = self.client.info()
+            return info
+        except Exception as e:
+            self.logger.error(f"获取Redis信息失败: {e}")
+            return None
+
+    def get_cache_types(self):
+        """获取缓存类型统计"""
+        try:
+            if not self.is_available():
+                return {}
+            
+            # 获取所有键
+            keys = self.client.keys('*')
+            cache_types = {}
+            
+            for key in keys:
+                key_str = key.decode('utf-8') if isinstance(key, bytes) else key
+                
+                # 根据键名分类
+                if 'role_data' in key_str:
+                    cache_type = 'role_data'
+                elif 'equipment' in key_str:
+                    cache_type = 'equipment_data'
+                elif 'search' in key_str:
+                    cache_type = 'search_results'
+                elif 'analysis' in key_str:
+                    cache_type = 'market_analysis'
+                elif 'trend' in key_str:
+                    cache_type = 'price_trends'
+                else:
+                    cache_type = 'other'
+                
+                if cache_type not in cache_types:
+                    cache_types[cache_type] = {
+                        'count': 0, 
+                        'ttl_hours': 0,
+                        'keys': [],  # 存储具体的键名
+                        'key_details': []  # 存储键的详细信息
+                    }
+                
+                cache_types[cache_type]['count'] += 1
+                
+                # 获取TTL
+                ttl = self.client.ttl(key)
+                ttl_hours = 0
+                if ttl > 0:
+                    ttl_hours = round(ttl / 3600, 1)
+                    cache_types[cache_type]['ttl_hours'] = max(
+                        cache_types[cache_type]['ttl_hours'], 
+                        ttl_hours
+                    )
+                elif ttl == -1:
+                    ttl_hours = -1
+                    cache_types[cache_type]['ttl_hours'] = -1  # 永不过期
+                
+                # 存储键名（去掉前缀）
+                clean_key = key_str.replace('cbg_market:', '') if key_str.startswith('cbg_market:') else key_str
+                cache_types[cache_type]['keys'].append(clean_key)
+                
+                # 存储键的详细信息
+                key_info = {
+                    'key': clean_key,
+                    'ttl_hours': ttl_hours,
+                    'ttl_display': '永不过期' if ttl_hours == -1 else f'{ttl_hours}小时'
+                }
+                cache_types[cache_type]['key_details'].append(key_info)
+            
+            return cache_types
+        except Exception as e:
+            self.logger.error(f"获取缓存类型统计失败: {e}")
+            return {}
 
 
 # 全局缓存实例

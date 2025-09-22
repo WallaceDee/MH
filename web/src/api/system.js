@@ -101,11 +101,14 @@ export const systemApi = {
   },
 
   /**
-   * 刷新全量缓存
+   * 刷新全量缓存（不使用缓存，完全重新加载）
    * @returns {Promise}
    */
   refreshFullCache() {
-    return api.post('/system/market-data/refresh-full-cache')
+    return api.post('/system/market-data/refresh', {
+      force_refresh: true,
+      use_cache: false
+    })
   },
 
   /**
@@ -114,5 +117,56 @@ export const systemApi = {
    */
   getCacheStatus() {
     return api.get('/system/market-data/cache-status')
+  },
+
+  /**
+   * 获取装备缓存状态
+   * @returns {Promise}
+   */
+  getEquipmentCacheStatus() {
+    return api.get('/system/equipment/cache-status')
+  },
+
+  /**
+   * 加载装备数据（使用缓存）
+   * @returns {Promise}
+   */
+  loadEquipmentData() {
+    return api.post('/system/equipment/load-data', {
+      force_refresh: false,
+      use_cache: true
+    })
+  },
+
+  /**
+   * 同步装备数据（跳过缓存，完全重新加载）
+   * @returns {Promise}
+   */
+  refreshEquipmentCache() {
+    return api.post('/system/equipment/refresh-cache', {
+      force_refresh: true,
+      use_cache: false
+    })
+  },
+
+  /**
+   * 获取装备市场数据状态
+   * @returns {Promise}
+   */
+  getEquipmentMarketDataStatus() {
+    return api.get('/system/market-data/equipment/status')
+  },
+
+  getRedisStatus() {
+    return api.get('/system/redis/status')
+  },
+
+
+  /**
+   * 获取装备刷新进度状态
+   * @returns {Promise}
+   */
+  getEquipmentRefreshStatus() {
+    return api.get('/system/equipment/refresh-status')
   }
 } 

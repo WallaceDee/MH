@@ -57,7 +57,7 @@ class MarketDataCollector:
         # 数据缓存相关属性
         self._data_loaded = False
         self._last_refresh_time = None
-        self._cache_expiry_hours = 24  # 缓存过期时间（小时）
+        self._cache_expiry_hours = -1  # 缓存永不过期（-1表示永不过期）
         
         # Flask-Caching 缓存实例（延迟初始化）
         self._cache = None
@@ -74,6 +74,7 @@ class MarketDataCollector:
         
         self._initialized = True
         print("市场数据采集器单例初始化完成，默认获取空角色数据作为锚点")
+        print("💾 缓存策略: 数据永不过期，只能通过force_refresh=True或手动刷新更新")
     
     def _get_cache(self):
         """获取Flask-Caching实例"""
@@ -245,7 +246,7 @@ class MarketDataCollector:
                        max_records: int = 99999,
                        use_cache: bool = True,
                        force_refresh: bool = False,
-                       batch_size: int = 2000) -> pd.DataFrame:
+                       batch_size: int = 100) -> pd.DataFrame:
         """
         刷新市场数据 - 优先从Redis全量缓存获取，支持筛选、分页和详细进度跟踪
         
@@ -254,7 +255,7 @@ class MarketDataCollector:
             max_records: 最大记录数
             use_cache: 是否使用缓存
             force_refresh: 是否强制刷新全量缓存
-            batch_size: 批次大小（仅在从数据库加载时使用）
+            batch_size: 批次大小（仅在从数据库加载时使用，建议100-800之间）
             
         Returns:
             pd.DataFrame: 处理后的市场数据
@@ -352,13 +353,16 @@ class MarketDataCollector:
                 
                 print(f"总记录数: {total_count}")
                 
-                # 动态调整批次大小（优先使用传入的batch_size，但会根据数据量调整）
+                # 动态调整批次大小（优化查询性能，减少单次查询时间）
+                # 考虑复杂SQL查询（LEFT JOIN + 大量字段），使用更小的批次大小
                 if total_count > 50000:
-                    actual_batch_size = max(batch_size, 3000)  # 大数据集使用较大批次
+                    actual_batch_size = min(batch_size, 300)   # 大数据集：小批次避免查询超时和内存溢出
                 elif total_count > 20000:
-                    actual_batch_size = max(batch_size, 2000)  # 中等数据集
+                    actual_batch_size = min(batch_size, 500)   # 中等数据集：适中批次
+                elif total_count > 5000:
+                    actual_batch_size = min(batch_size, 800)   # 中小数据集：较大批次
                 else:
-                    actual_batch_size = min(batch_size, 1000)  # 小数据集
+                    actual_batch_size = min(batch_size, 300)   # 小数据集：小批次保证快速响应
                 
                 total_batches = (total_count + actual_batch_size - 1) // actual_batch_size
                 
@@ -369,6 +373,12 @@ class MarketDataCollector:
                 self._refresh_progress = 30
                 
                 print(f"将分 {total_batches} 批处理，每批 {actual_batch_size} 条")
+                
+                # 性能优化提示
+                if actual_batch_size > 1000:
+                    print(f"⚠️  批次大小较大({actual_batch_size})，如果查询缓慢，建议设置更小的batch_size参数(100-800)")
+                elif actual_batch_size < batch_size:
+                    print(f"💡 已自动调整批次大小: {batch_size} -> {actual_batch_size} (优化查询性能)")
                 
                 # 优化的SQL查询 - 只选择必要字段，减少数据传输
                 base_query = """
@@ -547,22 +557,34 @@ class MarketDataCollector:
             elif self.market_data.empty:
                 print("市场数据为空，正在刷新...")
             elif self._is_cache_expired():
-                print(f"缓存已过期（超过{self._cache_expiry_hours}小时），正在刷新...")
+                if self._cache_expiry_hours == -1:
+                    print("缓存永不过期模式，但因其他原因需要刷新...")
+                else:
+                    print(f"缓存已过期（超过{self._cache_expiry_hours}小时），正在刷新...")
             
             self.refresh_market_data()
             self._data_loaded = True
             self._last_refresh_time = datetime.now()
         else:
-            print(f"使用缓存的市场数据，上次刷新时间: {self._last_refresh_time}, "
-                  f"数据量: {len(self.market_data)}")
+            if self._cache_expiry_hours == -1:
+                print(f"使用永久缓存的市场数据，上次刷新时间: {self._last_refresh_time}, "
+                      f"数据量: {len(self.market_data)} （永不过期模式）")
+            else:
+                print(f"使用缓存的市场数据，上次刷新时间: {self._last_refresh_time}, "
+                      f"数据量: {len(self.market_data)}")
         
         return self.market_data
     
     def _is_cache_expired(self) -> bool:
-        """检查缓存是否过期"""
+        """检查缓存是否过期 - 永不过期模式"""
         if not self._last_refresh_time:
-            return True
+            return True  # 首次加载时需要刷新
         
+        # 如果设置为永不过期（-1），则缓存永远不会过期
+        if self._cache_expiry_hours == -1:
+            return False
+        
+        # 正常的过期检查（向后兼容）
         elapsed_time = datetime.now() - self._last_refresh_time
         return elapsed_time > timedelta(hours=self._cache_expiry_hours)
     
@@ -740,9 +762,17 @@ class MarketDataCollector:
         print("已清空市场数据缓存")
     
     def set_cache_expiry(self, hours: float):
-        """设置缓存过期时间"""
+        """
+        设置缓存过期时间
+        
+        Args:
+            hours: 过期时间（小时），设置为-1表示永不过期
+        """
         self._cache_expiry_hours = hours
-        print(f"缓存过期时间已设置为 {hours} 小时")
+        if hours == -1:
+            print("缓存已设置为永不过期模式，只能手动刷新")
+        else:
+            print(f"缓存过期时间已设置为 {hours} 小时")
     
     def get_cache_info(self) -> Dict[str, Any]:
         """获取当前实例的缓存信息（包括Flask-Caching信息）"""
@@ -752,6 +782,8 @@ class MarketDataCollector:
             'cache_expired': self._is_cache_expired(),
             'data_size': len(self.market_data) if not self.market_data.empty else 0,
             'cache_expiry_hours': self._cache_expiry_hours,
+            'cache_never_expires': self._cache_expiry_hours == -1,
+            'refresh_mode': 'manual_only' if self._cache_expiry_hours == -1 else 'auto_expire',
             'data_source': 'MySQL (empty roles)',
             'cache_available': False,
             'cache_type': None,
@@ -798,8 +830,8 @@ class MarketDataCollector:
             redis_cache = get_redis_cache()
             
             if not redis_cache or not redis_cache.is_available():
-                print("Redis不可用，尝试备用方案")
-                return self._fallback_get_full_cached_data()
+                print("Redis不可用")
+                return None
             
             # 使用固定的全量缓存键
             full_cache_key = "market_data_full_empty_roles"
@@ -813,37 +845,14 @@ class MarketDataCollector:
                 print(f"从Redis分块缓存获取数据成功: {len(cached_data)} 条")
                 return cached_data
             else:
-                print("Redis分块缓存未命中，尝试备用方案")
-                return self._fallback_get_full_cached_data()
+                print("Redis分块缓存未命中")
+                return None
                 
         except Exception as e:
             self.logger.warning(f"获取Redis分块缓存失败: {str(e)}")
-            print("获取分块缓存失败，尝试备用方案")
-            return self._fallback_get_full_cached_data()
-
-    def _fallback_get_full_cached_data(self) -> Optional[pd.DataFrame]:
-        """备用获取缓存方案 - 使用SharedCacheManager"""
-        try:
-            from src.utils.shared_cache_manager import get_shared_cache_manager
-            cache_manager = get_shared_cache_manager()
-            
-            if not cache_manager.is_available():
-                return None
-            
-            # 使用固定的全量缓存键
-            full_cache_key = "market_data_full_empty_roles"
-            cached_data = cache_manager.get_role_cache(full_cache_key)
-            
-            if cached_data is not None:
-                print(f"从Redis全量缓存获取数据（备用方案）: {len(cached_data)} 条")
-                return cached_data
-            else:
-                print("Redis全量缓存未命中")
-                return None
-                
-        except Exception as e:
-            self.logger.warning(f"备用获取缓存方案失败: {str(e)}")
+            print("获取分块缓存失败")
             return None
+
 
     def _set_full_cached_data(self, data: pd.DataFrame) -> bool:
         """将全量数据缓存到Redis - 使用分块存储和Pipeline优化"""
@@ -852,8 +861,8 @@ class MarketDataCollector:
             redis_cache = get_redis_cache()
             
             if not redis_cache or not redis_cache.is_available():
-                print("Redis不可用，尝试使用SharedCacheManager")
-                return self._fallback_set_full_cached_data(data)
+                print("Redis不可用")
+                return False
             
             # 使用固定的全量缓存键
             full_cache_key = "market_data_full_empty_roles"
@@ -884,45 +893,14 @@ class MarketDataCollector:
                 print(f"全量数据已分块缓存到Redis，缓存时间: {cache_hours}小时，块大小: {chunk_size}")
                 return True
             else:
-                print("Redis分块缓存设置失败，尝试备用方案")
-                return self._fallback_set_full_cached_data(data)
+                print("Redis分块缓存设置失败")
+                return False
                 
         except Exception as e:
             self.logger.warning(f"设置Redis全量缓存失败: {str(e)}")
-            print("Redis缓存失败，尝试备用方案")
-            return self._fallback_set_full_cached_data(data)
-
-    def _fallback_set_full_cached_data(self, data: pd.DataFrame) -> bool:
-        """备用缓存方案 - 使用SharedCacheManager"""
-        try:
-            from src.utils.shared_cache_manager import get_shared_cache_manager
-            cache_manager = get_shared_cache_manager()
-            
-            if not cache_manager.is_available():
-                return False
-            
-            # 使用固定的全量缓存键
-            full_cache_key = "market_data_full_empty_roles"
-            
-            # 设置较长的缓存时间（24小时）
-            cache_hours = 24
-            success = cache_manager.set_role_cache(
-                cache_key=full_cache_key,
-                data=data,
-                cache_type='market_analysis',
-                ttl_hours=cache_hours
-            )
-            
-            if success:
-                print(f"全量数据已缓存到Redis（备用方案），缓存时间: {cache_hours}小时")
-                return True
-            else:
-                print("备用Redis缓存设置也失败")
-                return False
-                
-        except Exception as e:
-            self.logger.warning(f"备用缓存方案也失败: {str(e)}")
+            print("Redis缓存失败")
             return False
+
 
     def _apply_filters(self, data: pd.DataFrame, filters: Optional[Dict[str, Any]], max_records: int) -> pd.DataFrame:
         """对数据应用筛选条件"""
@@ -969,12 +947,14 @@ class MarketDataCollector:
     def refresh_full_cache(self) -> bool:
         """
         手动刷新全量缓存 - 从MySQL重新加载所有empty角色数据到Redis
+        这是在永不过期模式下更新数据的主要方法
         
         Returns:
             bool: 是否成功刷新缓存
         """
         try:
-            print("开始手动刷新全量缓存...")
+            print("🔄 开始手动刷新全量缓存（永不过期模式）...")
+            print("📊 这将从MySQL重新加载所有empty角色数据")
             
             # 强制从数据库刷新，不使用现有缓存
             self.refresh_market_data(
@@ -984,11 +964,44 @@ class MarketDataCollector:
                 force_refresh=True
             )
             
-            print("全量缓存刷新完成")
+            print("✅ 全量缓存手动刷新完成")
+            print("💾 数据已更新为最新版本，将永久保持直到下次手动刷新")
             return True
             
         except Exception as e:
             self.logger.error(f"刷新全量缓存失败: {e}")
+            print(f"❌ 手动刷新失败: {e}")
+            return False
+
+    def manual_refresh(self, max_records: int = 999999, filters: Optional[Dict[str, Any]] = None) -> bool:
+        """
+        手动刷新市场数据 - 专为永不过期模式设计的刷新方法
+        
+        Args:
+            max_records: 最大记录数
+            filters: 筛选条件
+            
+        Returns:
+            bool: 是否成功刷新
+        """
+        try:
+            print("🔄 手动刷新市场数据...")
+            print("📊 强制从数据库重新加载数据")
+            
+            self.refresh_market_data(
+                filters=filters,
+                max_records=max_records,
+                use_cache=True,
+                force_refresh=True
+            )
+            
+            print("✅ 手动刷新完成")
+            print("💾 数据已更新，在永不过期模式下将保持最新状态")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"手动刷新失败: {e}")
+            print(f"❌ 手动刷新失败: {e}")
             return False
 
     def get_cache_status(self) -> Dict[str, Any]:
@@ -1044,29 +1057,6 @@ class MarketDataCollector:
                 except Exception as e:
                     self.logger.debug(f"检查分块缓存元数据失败: {e}")
                 
-                # 如果分块缓存不存在，检查备用缓存
-                try:
-                    from src.utils.shared_cache_manager import get_shared_cache_manager
-                    cache_manager = get_shared_cache_manager()
-                    
-                    if cache_manager.is_available():
-                        cached_data = cache_manager.get_role_cache(full_cache_key)
-                        if cached_data is not None and not cached_data.empty:
-                            status['full_cache_exists'] = True
-                            status['cache_type'] = 'legacy'
-                            status['full_cache_size'] = len(cached_data)
-                            
-                            # 尝试获取缓存时间信息
-                            try:
-                                cache_info = cache_manager.redis_cache.client.hgetall(
-                                    cache_manager.redis_cache._make_key(f"role_data:{full_cache_key}:meta")
-                                )
-                                if cache_info and b'timestamp' in cache_info:
-                                    status['full_cache_last_update'] = cache_info[b'timestamp'].decode('utf-8')
-                            except:
-                                pass
-                except Exception as e:
-                    self.logger.debug(f"检查备用缓存失败: {e}")
             
             return status
             

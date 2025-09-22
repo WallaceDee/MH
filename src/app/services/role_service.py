@@ -5,9 +5,8 @@
 角色服务 - 完整迁移版本
 使用SQLAlchemy ORM进行数据库操作，包含所有原有功能
 """
-
-import os
 import json
+import hashlib
 import logging
 import time
 from typing import Dict, List, Optional, Tuple
@@ -16,26 +15,13 @@ from datetime import datetime
 from flask import current_app
 from src.database import db
 from src.models.role import Role, LargeEquipDescData
-from src.database_config import IS_MYSQL, IS_SQLITE
+from src.evaluator.market_anchor_evaluator import MarketAnchorEvaluator
+from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
+# 导入Flask-Caching
+from flask_caching import Cache
 
-# 导入共享缓存管理器
-try:
-    from src.utils.shared_cache_manager import get_shared_cache_manager
-except ImportError:
-    get_shared_cache_manager = None
-    logging.warning("共享缓存管理器导入失败")
 
 logger = logging.getLogger(__name__)
-
-# 尝试导入估价器相关模块
-try:
-    from src.evaluator.market_anchor_evaluator import MarketAnchorEvaluator
-    from src.evaluator.feature_extractor.feature_extractor import FeatureExtractor
-except ImportError as e:
-    MarketAnchorEvaluator = None
-    FeatureExtractor = None
-    logger.warning(f"无法导入角色估价器相关模块: {e}")
-
 
 class RoleService:
     """角色服务完整迁移版本"""
@@ -43,17 +29,8 @@ class RoleService:
     def __init__(self):
         self.db = db
         
-        # 初始化共享缓存管理器
-        self.cache_manager = None
-        if get_shared_cache_manager:
-            try:
-                self.cache_manager = get_shared_cache_manager()
-                if self.cache_manager.is_available():
-                    logger.info("CBG共享缓存管理器初始化成功")
-                else:
-                    logger.info("Redis不可用，角色服务将不使用缓存")
-            except Exception as e:
-                logger.error(f"CBG共享缓存管理器初始化失败: {e}")
+        # Flask-Caching将在使用时动态获取
+        self._cache_instance = None
         
         # 初始化特征提取器
         self.feature_extractor = None
@@ -82,6 +59,78 @@ class RoleService:
         except RuntimeError:
             raise RuntimeError("必须在Flask应用上下文中使用数据库操作")
 
+    def _get_cache(self):
+        """获取Flask-Caching实例 - 动态获取，支持在Flask上下文中使用"""
+        try:
+            # 检查是否在应用上下文中
+            if not current_app:
+                logger.debug("未在Flask应用上下文中，无法获取缓存")
+                return None
+                
+            # 如果已经缓存了实例，直接返回
+            if self._cache_instance is not None:
+                return self._cache_instance
+            
+            # 从应用中获取缓存实例
+            if hasattr(current_app, 'cache'):
+                self._cache_instance = current_app.cache
+                logger.debug("从应用属性获取Flask-Caching实例")
+                return self._cache_instance
+            
+            # 从应用扩展中获取缓存实例
+            extensions = getattr(current_app, 'extensions', {})
+            for ext_name, ext_instance in extensions.items():
+                if isinstance(ext_instance, Cache):
+                    self._cache_instance = ext_instance
+                    logger.debug("从应用扩展获取Flask-Caching实例")
+                    return self._cache_instance
+            
+            logger.debug("未找到Flask-Caching实例")
+            return None
+                
+        except Exception as e:
+            logger.debug(f"获取Flask-Caching实例失败: {e}")
+            return None
+
+    def _generate_roles_cache_key(self, filters: Dict, page: int, page_size: int, role_type: str) -> str:
+        """生成角色列表缓存键"""
+        
+        # 构建缓存键数据
+        cache_data = {
+            'filters': filters,
+            'page': page,
+            'page_size': page_size,
+            'role_type': role_type,
+            'version': '1.0'  # 版本号，用于缓存失效
+        }
+        
+        # 生成哈希
+        cache_str = json.dumps(cache_data, sort_keys=True, ensure_ascii=False)
+        cache_hash = hashlib.md5(cache_str.encode('utf-8')).hexdigest()[:16]
+        
+        return f"roles_list:{cache_hash}"
+
+    def _clear_roles_cache(self, role_type: str = None):
+        """清理角色列表缓存"""
+        cache = self._get_cache()
+        if not cache:
+            logger.debug("Flask-Caching不可用，跳过缓存清理")
+            return
+        
+        try:
+            # Flask-Caching通常不支持通配符删除，所以缓存会自然过期
+            # 这里只是记录清理意图，实际的缓存会在TTL过期后自动清理
+            if role_type:
+                logger.info(f"标记清理角色类型 {role_type} 的缓存（将在过期时自动清理）")
+            else:
+                logger.info("标记清理所有角色列表缓存（将在过期时自动清理）")
+                
+            # 可选：如果需要立即清理，可以记录所有使用过的缓存键然后逐个删除
+            # 但这需要额外的存储机制来跟踪缓存键
+                
+        except Exception as e:
+            logger.warning(f"清理角色列表缓存失败: {e}")
+
 
     def update_role_equip_price(self, eid: str, equip_price: float) -> bool:
         """更新角色的装备估价价格
@@ -108,6 +157,10 @@ class RoleService:
             
             self.db.session.commit()
             logger.info(f"更新角色装备估价价格成功: {eid} = {equip_price}分")
+            
+            # 清理相关缓存
+            self._clear_roles_cache()
+            
             return True
                     
         except Exception as e:
@@ -138,6 +191,10 @@ class RoleService:
             
             self.db.session.commit()
             logger.info(f"更新角色宠物估价价格成功: {eid} = {pet_price}分")
+            
+            # 清理相关缓存
+            self._clear_roles_cache()
+            
             return True
                     
         except Exception as e:
@@ -168,6 +225,10 @@ class RoleService:
             
             self.db.session.commit()
             logger.info(f"更新角色总估价价格成功: {eid} = {base_price}分")
+            
+            # 清理相关缓存
+            self._clear_roles_cache()
+            
             return True
                     
         except Exception as e:
@@ -223,18 +284,20 @@ class RoleService:
             filters = {k: v for k, v in filters.items() if v is not None}
             
             # 尝试从缓存获取数据
-            if use_cache and self.cache_manager:
-                cached_result = self.cache_manager.get_raw_roles_cache(
-                    filters=filters,
-                    page=page,
-                    page_size=page_size,
-                    role_type=role_type
-                )
-                
-                if cached_result:
-                    elapsed_time = time.time() - start_time
-                    logger.info(f"从Redis缓存获取角色列表成功，耗时: {elapsed_time:.3f}秒")
-                    return cached_result
+            if use_cache:
+                cache = self._get_cache()
+                if cache:
+                    cache_key = self._generate_roles_cache_key(filters, page, page_size, role_type)
+                    cached_result = cache.get(cache_key)
+                    
+                    if cached_result:
+                        elapsed_time = time.time() - start_time
+                        logger.info(f"从Flask-Caching获取角色列表成功，耗时: {elapsed_time:.3f}秒")
+                        return cached_result
+                    else:
+                        logger.debug(f"Flask-Caching未命中，缓存键: {cache_key}")
+                else:
+                    logger.debug("Flask-Caching不可用，跳过缓存读取")
                 
             logger.info(f"查询角色列表: 角色类型: {role_type}, 页码: {page}, 每页: {page_size}")
             
@@ -271,28 +334,16 @@ class RoleService:
                             (LargeEquipDescData.all_equip_json == '{}')
                         )
                     else:
-                        # 当equip_num大于0时，使用SQL字符串匹配来统计装备数量
+                        # 当equip_num大于0时，使用MySQL的SQL字符串匹配来统计装备数量
                         # 通过计算JSON中"iType"出现的次数来估算装备数量
-                        if IS_MYSQL:
-                            # MySQL版本
-                            query = query.filter(
-                                LargeEquipDescData.all_equip_json.isnot(None),
-                                LargeEquipDescData.all_equip_json != '',
-                                LargeEquipDescData.all_equip_json != '{}',
-                                db.func.char_length(LargeEquipDescData.all_equip_json) - 
-                                db.func.char_length(db.func.replace(LargeEquipDescData.all_equip_json, 'iType', '')) <= 
-                                db.func.char_length('iType') * equip_num
-                            )
-                        else:
-                            # SQLite版本
-                            query = query.filter(
-                                LargeEquipDescData.all_equip_json.isnot(None),
-                                LargeEquipDescData.all_equip_json != '',
-                                LargeEquipDescData.all_equip_json != '{}',
-                                (db.func.length(LargeEquipDescData.all_equip_json) - 
-                                 db.func.length(db.func.replace(LargeEquipDescData.all_equip_json, 'iType', ''))) / 
-                                db.func.length('iType') <= equip_num
-                            )
+                        query = query.filter(
+                            LargeEquipDescData.all_equip_json.isnot(None),
+                            LargeEquipDescData.all_equip_json != '',
+                            LargeEquipDescData.all_equip_json != '{}',
+                            db.func.char_length(LargeEquipDescData.all_equip_json) - 
+                            db.func.char_length(db.func.replace(LargeEquipDescData.all_equip_json, 'iType', '')) <= 
+                            db.func.char_length('iType') * equip_num
+                        )
 
                 if pet_num is not None and pet_num_level is not None:
                     if pet_num == 0:
@@ -392,24 +443,24 @@ class RoleService:
                 "message": "成功获取角色数据"
             }
             
-            # 缓存结果到Redis
-            if use_cache and self.cache_manager:
-                try:
-                    cache_success = self.cache_manager.set_raw_roles_cache(
-                        filters=filters,
-                        page=page,
-                        page_size=page_size,
-                        role_type=role_type,
-                        roles_data=roles_data,
-                        total=total
-                    )
-                    
-                    if cache_success:
-                        elapsed_time = time.time() - start_time
-                        logger.info(f"角色列表已缓存到Redis，查询+缓存总耗时: {elapsed_time:.3f}秒")
-                    
-                except Exception as e:
-                    logger.warning(f"缓存角色列表失败: {e}")
+            # 缓存结果到Flask-Caching
+            if use_cache:
+                cache = self._get_cache()
+                if cache:
+                    try:
+                        cache_key = self._generate_roles_cache_key(filters, page, page_size, role_type)
+                        cache_success = cache.set(cache_key, result, timeout=3600)  # 缓存1小时
+                        
+                        if cache_success:
+                            elapsed_time = time.time() - start_time
+                            logger.info(f"角色列表已缓存到Flask-Caching，查询+缓存总耗时: {elapsed_time:.3f}秒，缓存键: {cache_key}")
+                        else:
+                            logger.warning(f"Flask-Caching设置失败，缓存键: {cache_key}")
+                        
+                    except Exception as e:
+                        logger.warning(f"缓存角色列表失败: {e}")
+                else:
+                    logger.debug("Flask-Caching不可用，跳过缓存设置")
             
             return result
 
@@ -578,6 +629,9 @@ class RoleService:
             self.db.session.commit()
             
             logger.info(f"成功删除角色 {eid}，删除了 {role_deleted} 条角色记录和 {equip_deleted} 条装备记录")
+            
+            # 清理相关缓存
+            self._clear_roles_cache()
             
             return {
                 "success": True,
@@ -977,6 +1031,9 @@ class RoleService:
             self.db.session.commit()
             
             logger.info(f"成功切换角色 {eid} 的类型: {old_role_type} -> {target_role_type}")
+            
+            # 清理相关缓存
+            self._clear_roles_cache()
             
             return {
                 "success": True,

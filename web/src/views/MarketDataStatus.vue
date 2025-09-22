@@ -2,40 +2,34 @@
   <div class="market-data-status">
     <div class="page-header">
       <h1>市场数据状态监控</h1>
-      <p>实时监控空角色市场数据的加载状态和统计信息</p>
+      <p>实时监控空角色市场数据和装备数据的加载状态和统计信息</p>
     </div>
 
     <!-- 操作栏 -->
     <div class="action-bar">
-      <el-button 
-        type="primary" 
-        @click="refreshStatus" 
-        :loading="loading"
-        icon="el-icon-refresh"
-      >
+      <el-button type="primary" @click="refreshStatus" :loading="loading" icon="el-icon-refresh">
         刷新状态
-      </el-button>
-      
-      <el-button 
-        type="success" 
-        @click="showRefreshDialog = true"
-        icon="el-icon-download"
-        :disabled="refreshing"
-      >
-        刷新市场数据
-      </el-button>
-      
-      <el-button 
-        type="warning" 
-        @click="refreshFullCache"
-        icon="el-icon-refresh"
-        :loading="fullCacheRefreshing"
-      >
-        刷新全量缓存
       </el-button>
     </div>
 
-    <!-- 状态卡片 -->
+    <!-- 标签页 -->
+    <el-card>
+      <el-tabs v-model="activeTab" type="card" class="status-tabs">
+      <!-- 角色数据标签页 -->
+      <el-tab-pane label="角色数据" name="role">
+        <div class="tab-content">
+          <!-- 角色数据操作栏 -->
+          <div class="tab-action-bar">
+            <el-button type="success" @click="refreshMarketData" icon="el-icon-download" :disabled="refreshing">
+              加载市场数据
+      </el-button>
+      
+            <el-button type="warning" @click="refreshFullCache" icon="el-icon-refresh" :loading="fullCacheRefreshing">
+              同步市场数据
+      </el-button>
+    </div>
+
+          <!-- 角色数据状态卡片 -->
     <el-row :gutter="20" class="status-cards">
       <!-- 基本状态 -->
       <el-col :span="6">
@@ -73,9 +67,9 @@
             <span>缓存状态</span>
           </div>
           <div class="status-item">
-            <span class="label">缓存状态:</span>
-            <el-tag :type="status.cache_expired ? 'danger' : 'success'">
-              {{ status.cache_expired ? '已过期' : '有效' }}
+                  <span class="label">缓存模式:</span>
+                  <el-tag type="success">
+                    永不过期
             </el-tag>
           </div>
           <div class="status-item">
@@ -83,47 +77,16 @@
             <span class="value">{{ formatTime(status.last_refresh_time) }}</span>
           </div>
           <div class="status-item">
-            <span class="label">过期时间:</span>
-            <span class="value">{{ formatTime(status.cache_expiry_time) }}</span>
+                  <span class="label">刷新方式:</span>
+                  <span class="value">仅手动刷新</span>
           </div>
           <div class="status-item">
-            <span class="label">缓存时长:</span>
-            <span class="value">{{ status.cache_expiry_hours || 2 }} 小时</span>
+                  <span class="label">数据稳定性:</span>
+                  <el-tag type="success" size="mini">高</el-tag>
           </div>
         </el-card>
       </el-col>
 
-      <!-- Redis缓存状态 -->
-      <el-col :span="6">
-        <el-card class="status-card">
-          <div slot="header" class="card-header">
-            <i class="el-icon-cpu"></i>
-            <span>Redis缓存</span>
-          </div>
-          <div class="status-item">
-            <span class="label">连接状态:</span>
-            <el-tag :type="redisStatus.available ? 'success' : 'danger'">
-              {{ redisStatus.available ? '已连接' : '未连接' }}
-            </el-tag>
-          </div>
-          <div v-if="redisStatus.available" class="status-item">
-            <span class="label">Redis版本:</span>
-            <span class="value">{{ redisStatus.redis_version || '-' }}</span>
-          </div>
-          <div v-if="redisStatus.available" class="status-item">
-            <span class="label">内存使用:</span>
-            <span class="value">{{ redisStatus.used_memory_human || '0B' }}</span>
-          </div>
-          <div v-if="redisStatus.available" class="status-item">
-            <span class="label">缓存键数:</span>
-            <span class="value">{{ redisStatus.cache_keys_count || 0 | numberFormat }}</span>
-          </div>
-          <div v-if="redisStatus.available" class="status-item">
-            <span class="label">连接客户端:</span>
-            <span class="value">{{ redisStatus.connected_clients || 0 }}</span>
-          </div>
-        </el-card>
-      </el-col>
 
       <!-- 数据统计 -->
       <el-col :span="6">
@@ -152,11 +115,7 @@
           <div v-if="status.role_type_distribution" class="status-item">
             <span class="label">角色类型:</span>
             <div class="role-type-tags">
-              <el-tag 
-                v-for="(count, type) in status.role_type_distribution" 
-                :key="type" 
-                size="mini"
-              >
+                    <el-tag v-for="(count, type) in status.role_type_distribution" :key="type" size="mini">
                 {{ type }}: {{ count }}
               </el-tag>
             </div>
@@ -164,38 +123,224 @@
         </el-card>
       </el-col>
     </el-row>
+        </div>
+      </el-tab-pane>
 
-    <!-- Redis详细信息卡片 -->
-    <el-row :gutter="20" class="redis-details" v-if="redisStatus.available">
-      <!-- Redis性能统计 -->
-      <el-col :span="12">
+      <!-- 装备数据标签页 -->
+      <el-tab-pane label="装备数据" name="equipment">
+        <div class="tab-content">
+          <!-- 装备数据操作栏 -->
+          <div class="tab-action-bar">
+            <el-button type="info" @click="loadEquipmentData" icon="el-icon-box" :disabled="refreshing">
+              加载装备数据
+            </el-button>
+
+            <el-button type="danger" @click="refreshEquipmentCache" icon="el-icon-refresh"
+              :loading="equipmentCacheRefreshing">
+              同步装备数据
+            </el-button>
+          </div>
+
+          <!-- 装备数据状态卡片 -->
+          <el-row :gutter="20" class="equipment-status-cards">
+            <!-- 装备缓存状态 -->
+            <el-col :span="8">
         <el-card class="status-card">
           <div slot="header" class="card-header">
-            <i class="el-icon-monitor"></i>
-            <span>Redis性能统计</span>
+                  <i class="el-icon-box"></i>
+                  <span>装备缓存状态</span>
           </div>
           <div class="status-item">
-            <span class="label">命令执行总数:</span>
-            <span class="value">{{ redisStatus.total_commands_processed | numberFormat }}</span>
+                  <span class="label">数据已加载:</span>
+                  <el-tag :type="equipmentMarketDataStatus.data_loaded ? 'success' : 'danger'">
+                    {{ equipmentMarketDataStatus.data_loaded ? '是' : '否' }}
+                  </el-tag>
           </div>
           <div class="status-item">
-            <span class="label">缓存命中数:</span>
-            <span class="value">{{ redisStatus.keyspace_hits | numberFormat }}</span>
+                  <span class="label">数据条数:</span>
+                  <span class="value">{{ equipmentMarketDataStatus.data_count || 0 | numberFormat }} 条</span>
           </div>
           <div class="status-item">
-            <span class="label">缓存未命中数:</span>
-            <span class="value">{{ redisStatus.keyspace_misses | numberFormat }}</span>
+                  <span class="label">内存占用:</span>
+                  <span class="value">{{ (equipmentMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
           </div>
           <div class="status-item">
-            <span class="label">命中率:</span>
-            <span class="value">{{ getHitRate() }}%</span>
+                  <span class="label">特征维度:</span>
+                  <span class="value">{{ (equipmentMarketDataStatus.data_columns || []).length }}</span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.last_refresh_time" class="status-item">
+                  <span class="label">最后刷新:</span>
+                  <span class="value">{{ formatTime(equipmentMarketDataStatus.last_refresh_time) }}</span>
+                </div>
+              </el-card>
+            </el-col>
+
+            <!-- 装备数据统计 -->
+            <el-col :span="8">
+              <el-card class="status-card">
+                <div slot="header" class="card-header">
+                  <i class="el-icon-data-analysis"></i>
+                  <span>装备数据统计</span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.data_count" class="status-item">
+                  <span class="label">总装备数:</span>
+                  <span class="value">{{ equipmentMarketDataStatus.data_count | numberFormat }}</span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.kindid_distribution" class="status-item">
+                  <span class="label">装备类型:</span>
+                  <div class="equipment-type-tags">
+                    <el-tag v-for="(count, kindid) in equipmentMarketDataStatus.kindid_distribution" :key="kindid"
+                      size="mini" :type="getEquipmentTypeColor(kindid)">
+                      {{ getEquipmentTypeName(kindid) }}: {{ count }}
+                    </el-tag>
+                  </div>
+                </div>
+                <div v-if="equipmentMarketDataStatus.level_statistics" class="status-item">
+                  <span class="label">等级范围:</span>
+                  <span class="value">
+                    {{ equipmentMarketDataStatus.level_statistics.min_level }} -
+                    {{ equipmentMarketDataStatus.level_statistics.max_level }}
+                  </span>
+                </div>
+              </el-card>
+            </el-col>
+
+            <!-- 装备价格统计 -->
+            <el-col :span="8">
+              <el-card class="status-card">
+                <div slot="header" class="card-header">
+                  <i class="el-icon-coin"></i>
+                  <span>装备价格统计</span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                  <span class="label">价格范围:</span>
+                  <span class="value">
+                    {{ equipmentMarketDataStatus.price_statistics.min_price | numberFormat }} -
+                    {{ equipmentMarketDataStatus.price_statistics.max_price | numberFormat }}
+                  </span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                  <span class="label">平均价格:</span>
+                  <span class="value">{{ equipmentMarketDataStatus.price_statistics.avg_price.toFixed(0) | numberFormat
+                    }}</span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                  <span class="label">中位数价格:</span>
+                  <span class="value">{{ equipmentMarketDataStatus.price_statistics.median_price.toFixed(0) |
+                    numberFormat }}</span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.high_value_count" class="status-item">
+                  <span class="label">高价值装备:</span>
+                  <span class="value">{{ equipmentMarketDataStatus.high_value_count | numberFormat }} 条</span>
+                </div>
+                <div v-if="equipmentMarketDataStatus.special_skill_count" class="status-item">
+                  <span class="label">特技装备:</span>
+                  <span class="value">{{ equipmentMarketDataStatus.special_skill_count | numberFormat }} 条</span>
+                </div>
+              </el-card>
+            </el-col>
+
+          </el-row>
+        </div>
+      </el-tab-pane>
+
+      <!-- Redis详细信息标签页 -->
+      <el-tab-pane label="Redis详情" name="redis">
+        <div class="tab-content">
+          <!-- Redis基本状态卡片 -->
+          <el-row :gutter="20" class="redis-basic-status">
+            <el-col :span="8">
+              <el-card class="status-card">
+                <div slot="header" class="card-header">
+                  <i class="el-icon-cpu"></i>
+                  <span>Redis连接状态</span>
           </div>
           <div class="status-item">
+                  <span class="label">连接状态:</span>
+                  <el-tag :type="redisStatusComputed.available ? 'success' : 'danger'">
+                    {{ redisStatusComputed.available ? '已连接' : '未连接' }}
+                  </el-tag>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">Redis主机:</span>
+                  <span class="value">{{ redisStatusComputed.host || '-' }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">Redis端口:</span>
+                  <span class="value">{{ redisStatusComputed.port || '-' }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">Redis数据库:</span>
+                  <span class="value">{{ redisStatusComputed.db || 0 }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">连接池大小:</span>
+                  <span class="value">{{ redisStatusComputed.connection_pool_size || 0 }}</span>
+                </div>
+              </el-card>
+            </el-col>
+
+            <el-col :span="8">
+              <el-card class="status-card">
+                <div slot="header" class="card-header">
+                  <i class="el-icon-monitor"></i>
+                  <span>Redis服务器信息</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">Redis版本:</span>
+                  <span class="value">{{ redisStatusComputed.redis_version || '-' }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">内存使用:</span>
+                  <span class="value">{{ redisStatusComputed.used_memory_human || '0B' }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">峰值内存:</span>
+                  <span class="value">{{ redisStatusComputed.used_memory_peak_human || '0B' }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">缓存键数:</span>
+                  <span class="value">{{ redisStatusComputed.cache_keys_count || 0 | numberFormat }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">连接客户端:</span>
+                  <span class="value">{{ redisStatusComputed.connected_clients || 0 }}</span>
+                </div>
+              </el-card>
+            </el-col>
+
+            <el-col :span="8">
+              <el-card class="status-card">
+                <div slot="header" class="card-header">
+                  <i class="el-icon-time"></i>
+                  <span>Redis运行状态</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
             <span class="label">运行时间:</span>
-            <span class="value">{{ formatUptime(redisStatus.uptime_in_seconds) }}</span>
+                  <span class="value">{{ formatUptime(redisStatusComputed.uptime_in_seconds) }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">命令执行总数:</span>
+                  <span class="value">{{ redisStatusComputed.total_commands_processed | numberFormat }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">缓存命中数:</span>
+                  <span class="value">{{ redisStatusComputed.keyspace_hits | numberFormat }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">缓存未命中数:</span>
+                  <span class="value">{{ redisStatusComputed.keyspace_misses | numberFormat }}</span>
+                </div>
+                <div v-if="redisStatusComputed.available" class="status-item">
+                  <span class="label">命中率:</span>
+                  <span class="value">{{ redisStatusComputed.hit_rate || getHitRate() }}%</span>
           </div>
         </el-card>
       </el-col>
+          </el-row>
+
+          <!-- Redis详细信息卡片 -->
+          <el-row :gutter="20" class="redis-details" v-if="redisStatusComputed.available">
 
       <!-- 缓存类型统计 -->
       <el-col :span="12">
@@ -204,21 +349,27 @@
             <i class="el-icon-collection"></i>
             <span>缓存类型统计</span>
           </div>
-          <div v-if="cacheTypeStats && Object.keys(cacheTypeStats).length > 0">
-            <div 
-              v-for="(typeInfo, cacheType) in cacheTypeStats" 
-              :key="cacheType" 
-              class="status-item"
-            >
-              <span class="label">{{ getCacheTypeLabel(cacheType) }}:</span>
-              <div class="cache-type-info">
-                <span class="value">{{ typeInfo.count }} 个键</span>
-                <el-tag size="mini" class="ttl-tag">
-                  TTL: {{ typeInfo.ttl_hours }}h
-                </el-tag>
-              </div>
-            </div>
-          </div>
+                <div v-if="cacheTypeStats && Object.keys(cacheTypeStats).length > 0">
+                  <div v-for="(typeInfo, cacheType) in cacheTypeStats" :key="cacheType" class="cache-type-group">
+                    <div class="cache-type-header">
+                      <span class="label">{{ getCacheTypeLabel(cacheType) }}:</span>
+                      <div class="cache-type-summary">
+                        <span class="value">{{ typeInfo.count }} 个键</span>
+                        <el-tag size="mini" class="ttl-tag" :type="typeInfo.ttl_hours === -1 ? 'success' : 'info'">
+                          TTL: {{ typeInfo.ttl_hours === -1 ? '永不过期' : typeInfo.ttl_hours + 'h' }}
+                        </el-tag>
+                      </div>
+                    </div>
+                    <div v-if="typeInfo.key_details && typeInfo.key_details.length > 0" class="key-details">
+                      <div v-for="keyInfo in typeInfo.key_details" :key="keyInfo.key" class="key-item">
+                        <span class="key-name">{{ keyInfo.key }}</span>
+                        <el-tag size="mini" :type="keyInfo.ttl_hours === -1 ? 'success' : 'info'" class="key-ttl">
+                          {{ keyInfo.ttl_display }}
+                        </el-tag>
+                      </div>
+                    </div>
+                  </div>
+                </div>
           <div v-else class="no-cache-data">
             <span>暂无缓存类型数据</span>
           </div>
@@ -233,9 +384,11 @@
             </div>
             <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.total_chunks" class="status-item">
               <span class="label">分块信息:</span>
-              <span class="value">{{ fullCacheInfo.chunk_info.total_chunks }} 块 × {{ fullCacheInfo.chunk_info.chunk_size }} 行</span>
+                    <span class="value">{{ fullCacheInfo.chunk_info.total_chunks }} 块 × {{
+                      fullCacheInfo.chunk_info.chunk_size }} 行</span>
             </div>
-            <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.is_complete !== undefined" class="status-item">
+                  <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.is_complete !== undefined"
+                    class="status-item">
               <span class="label">完整性:</span>
               <el-tag :type="fullCacheInfo.chunk_info.is_complete ? 'success' : 'danger'" size="mini">
                 {{ fullCacheInfo.chunk_info.is_complete ? '完整' : '不完整' }}
@@ -245,7 +398,12 @@
         </el-card>
       </el-col>
     </el-row>
+        </div>
+      </el-tab-pane>
 
+      <!-- 数据分析标签页 -->
+      <el-tab-pane label="数据分析" name="analysis">
+        <div class="tab-content">
     <!-- 详细信息 -->
     <el-card class="details-card" v-if="status.data_columns && status.data_columns.length > 0">
       <div slot="header" class="card-header">
@@ -253,12 +411,7 @@
         <span>数据字段 ({{ status.data_columns.length }})</span>
       </div>
       <div class="columns-grid">
-        <el-tag 
-          v-for="column in status.data_columns" 
-          :key="column"
-          size="small"
-          class="column-tag"
-        >
+              <el-tag v-for="column in status.data_columns" :key="column" size="small" class="column-tag">
           {{ column }}
         </el-tag>
       </div>
@@ -272,29 +425,24 @@
       </div>
       <MarketDataCharts :market-data="status" />
     </div>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
 
-    <!-- 刷新数据对话框 -->
-    <el-dialog
-      title="刷新市场数据"
-      :visible.sync="showRefreshDialog"
-      width="600px"
-      @close="resetRefreshForm"
-      :close-on-click-modal="false"
-      :close-on-press-escape="!refreshing"
-    >
+    </el-card>
+    <!-- 刷新进度对话框 -->
+    <el-dialog :title="progressDialogTitle" :visible.sync="showRefreshDialog" width="500px"
+      :close-on-click-modal="false" :close-on-press-escape="!refreshing">
       <!-- 刷新进度显示 -->
-      <div v-if="refreshing" class="refresh-progress">
+      <div class="refresh-progress">
         <div class="progress-header">
           <i class="el-icon-loading"></i>
-          <span>正在刷新市场数据...</span>
+          <span>{{ progressMessage }}</span>
         </div>
         
         <!-- 进度条 -->
-        <el-progress 
-          :percentage="refreshProgress" 
-          :status="refreshProgress === 100 ? 'success' : null"
-          :stroke-width="8"
-        />
+        <el-progress :percentage="refreshProgress" :status="refreshProgress === 100 ? 'success' : null"
+          :stroke-width="8" />
         
         <!-- 进度详情 -->
         <div class="progress-details">
@@ -317,57 +465,9 @@
         </div>
       </div>
 
-      <!-- 刷新表单 -->
-      <el-form v-else :model="refreshForm" label-width="120px">
-        <el-form-item label="最大记录数">
-          <el-input-number 
-            v-model="refreshForm.max_records" 
-            :min="100" 
-            :max="10000" 
-            :step="100"
-          />
-          <div class="form-tip">建议值: 500-2000，过大可能导致超时</div>
-        </el-form-item>
-        
-        <el-form-item label="等级范围">
-          <el-col :span="11">
-            <el-input-number v-model="refreshForm.level_min" placeholder="最小等级" :min="1" :max="200" />
-          </el-col>
-          <el-col :span="2" class="text-center">-</el-col>
-          <el-col :span="11">
-            <el-input-number v-model="refreshForm.level_max" placeholder="最大等级" :min="1" :max="200" />
-          </el-col>
-        </el-form-item>
-
-        <el-form-item label="批次大小">
-          <el-input-number 
-            v-model="refreshForm.batch_size" 
-            :min="50" 
-            :max="1000" 
-            :step="50"
-          />
-          <div class="form-tip">每批处理的数据条数，建议值: 100-500，过大可能影响响应速度</div>
-        </el-form-item>
-
-      </el-form>
-
       <div slot="footer" class="dialog-footer">
-        <el-button @click="showRefreshDialog = false" :disabled="refreshing">
-          {{ refreshing ? '刷新中...' : '取消' }}
-        </el-button>
-        <el-button 
-          v-if="!refreshing"
-          type="primary" 
-          @click="refreshMarketData"
-        >
-          开始刷新
-        </el-button>
-        <el-button 
-          v-else
-          type="danger" 
-          @click="cancelRefresh"
-        >
-          取消刷新
+        <el-button @click="cancelRefresh" :disabled="refreshProgress === 100">
+          {{ refreshProgress === 100 ? '完成' : '取消' }}
         </el-button>
       </div>
     </el-dialog>
@@ -389,12 +489,6 @@ export default {
       refreshing: false,
       showRefreshDialog: false,
       status: {},
-      refreshForm: {
-        max_records: 999,
-        level_min: 0,
-        level_max: 175,
-        batch_size: 200
-      },
       autoRefreshTimer: null,
       // 进度相关
       refreshProgress: 0,
@@ -405,23 +499,27 @@ export default {
       currentBatch: 0,
       totalBatches: 0,
       // 全量缓存相关
-      fullCacheRefreshing: false
+      fullCacheRefreshing: false,
+      // 装备数据相关
+      equipmentCacheRefreshing: false,
+      equipmentLoading: false,  // 区分装备加载和装备同步
+      equipmentMarketDataStatus: {},  // 装备市场数据状态
+      redisStatus: {},  // Redis状态信息
+      // 标签页相关
+      activeTab: 'role'  // 默认显示角色数据标签页
     }
   },
 
   computed: {
     // Redis状态信息
-    redisStatus() {
-      if (this.status.redis_cache && this.status.redis_cache.available) {
-        return this.status.redis_cache.redis_stats || {}
-      }
-      return { available: false }
+    redisStatusComputed() {
+      return this.redisStatus || { available: false }
     },
 
     // 缓存类型统计
     cacheTypeStats() {
-      if (this.status.redis_cache && this.status.redis_cache.cache_types) {
-        return this.status.redis_cache.cache_types
+      if (this.redisStatus && this.redisStatus.cache_types) {
+        return this.redisStatus.cache_types
       }
       return {}
     },
@@ -433,6 +531,37 @@ export default {
         full_cache_exists: this.status.data_loaded || false,
         cache_type: 'unknown', // 可以通过额外API获取
         chunk_info: {}
+      }
+    },
+
+    // 装备Redis状态信息
+    equipmentRedisStatus() {
+      return this.redisStatus || { available: false }
+    },
+
+    // 进度对话框标题
+    progressDialogTitle() {
+      if (this.equipmentCacheRefreshing) {
+        return '同步装备数据'
+      } else if (this.equipmentLoading) {
+        return '加载装备数据'
+      } else if (this.fullCacheRefreshing) {
+        return '同步市场数据'
+      } else {
+        return '加载市场数据'
+      }
+    },
+
+    // 进度提示文本
+    progressMessage() {
+      if (this.equipmentCacheRefreshing) {
+        return '正在同步装备数据...'
+      } else if (this.equipmentLoading) {
+        return '正在加载装备数据...'
+      } else if (this.fullCacheRefreshing) {
+        return '正在同步市场数据...'
+      } else {
+        return '正在加载市场数据...'
       }
     }
   },
@@ -446,8 +575,6 @@ export default {
 
   mounted() {
     this.refreshStatus()
-    // 检查是否有正在进行的刷新任务
-    this.checkOngoingRefresh()
     // 设置自动刷新状态
     this.autoRefreshTimer = setInterval(() => {
       this.refreshStatus()
@@ -469,26 +596,41 @@ export default {
       
       this.loading = true
       try {
-        const response = await systemApi.getMarketDataStatus()
-        if (response.code === 200) {
-          this.status = response.data || {}
+        // 并行获取角色数据状态、装备数据状态和Redis状态
+        const [roleResponse, equipmentMarketDataStatusResponse, redisResponse] = await Promise.all([
+          systemApi.getMarketDataStatus(),
+          systemApi.getEquipmentMarketDataStatus().catch(() => ({ code: 500, data: {} })),
+          systemApi.getRedisStatus().catch(() => ({ code: 500, data: {} }))
+        ])
+
+        if (roleResponse.code === 200) {
+          this.status = roleResponse.data || {}
+        }
+
+        if (equipmentMarketDataStatusResponse.code === 200) {
+          this.equipmentMarketDataStatus = equipmentMarketDataStatusResponse.data || {}
+        }
+
+        if (redisResponse.code === 200) {
+          this.redisStatus = redisResponse.data || {}
+        }
           
           // 如果发现正在刷新但前端没有显示进度，恢复进度弹框
-          if (response.data.refresh_status === 'running' && !this.refreshing) {
+        if (roleResponse.data && roleResponse.data.refresh_status === 'running' && !this.refreshing) {
             this.refreshing = true
             this.showRefreshDialog = true
             this.initializeProgress()
             
             // 从后端恢复进度信息
-            this.refreshProgress = response.data.refresh_progress || 0
-            this.refreshMessage = response.data.refresh_message || '正在处理...'
-            this.refreshedCount = response.data.refresh_processed_records || 0
-            this.currentBatch = response.data.refresh_current_batch || 0
-            this.totalBatches = response.data.refresh_total_batches || 0
+          this.refreshProgress = roleResponse.data.refresh_progress || 0
+          this.refreshMessage = roleResponse.data.refresh_message || '正在处理...'
+          this.refreshedCount = roleResponse.data.refresh_processed_records || 0
+          this.currentBatch = roleResponse.data.refresh_current_batch || 0
+          this.totalBatches = roleResponse.data.refresh_total_batches || 0
             
             // 如果有开始时间，使用它
-            if (response.data.refresh_start_time) {
-              this.refreshStartTime = new Date(response.data.refresh_start_time).getTime()
+          if (roleResponse.data.refresh_start_time) {
+            this.refreshStartTime = new Date(roleResponse.data.refresh_start_time).getTime()
             }
             
             // 开始轮询进度
@@ -496,9 +638,7 @@ export default {
             
             this.$message.info('检测到正在进行的数据刷新任务，已恢复进度显示')
           }
-        } else {
-          this.$message.error(response.message || '获取状态失败')
-        }
+
       } catch (error) {
         console.error('获取市场数据状态失败:', error)
         this.$message.error('获取状态失败，请检查网络连接')
@@ -508,19 +648,20 @@ export default {
     },
 
     async refreshMarketData() {
+      try {
+        this.$confirm('刷新市场数据将优先使用缓存快速更新，如需完全重新加载请使用"刷新全量缓存"，是否继续？', '确认刷新', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
       this.refreshing = true
+          this.showRefreshDialog = true
       this.initializeProgress()
       
-      try {
-        // 构建筛选条件
-        const filters = {}
-        if (this.refreshForm.level_min) filters.level_min = this.refreshForm.level_min
-        if (this.refreshForm.level_max) filters.level_max = this.refreshForm.level_max
-
+          // 刷新市场数据：使用缓存，不强制刷新
         const params = {
-          max_records: this.refreshForm.max_records,
-          filters: Object.keys(filters).length > 0 ? filters : null,
-          batch_size: this.refreshForm.batch_size
+            force_refresh: false,
+            use_cache: true
         }
 
         // 启动后台刷新
@@ -534,23 +675,19 @@ export default {
         } else {
           this.$message.error(response.message || '启动刷新失败')
           this.refreshing = false
+            this.showRefreshDialog = false
         }
+        }).catch(() => {
+          // 用户取消操作
+        })
       } catch (error) {
         console.error('启动刷新失败:', error)
-        this.refreshMessage = '启动失败'
         this.$message.error('启动刷新失败，请检查网络连接')
         this.refreshing = false
+        this.showRefreshDialog = false
       }
     },
 
-    resetRefreshForm() {
-      this.refreshForm = {
-        max_records: 999,
-        level_min: 0,
-        level_max: 175,
-        batch_size: 200
-      }
-    },
 
     formatTime(timeStr) {
       if (!timeStr) return '-'
@@ -575,7 +712,11 @@ export default {
     startProgressPolling() {
       // 开始轮询后端进度
       this.progressTimer = setInterval(async () => {
+        if (this.equipmentCacheRefreshing || this.equipmentLoading) {
+          await this.updateEquipmentProgressFromBackend()
+        } else {
         await this.updateProgressFromBackend()
+        }
       }, 3000) // 每3秒查询一次进度
     },
 
@@ -614,6 +755,9 @@ export default {
             this.$message.error('数据刷新失败')
             this.stopProgressTimer()
             this.refreshing = false
+            this.fullCacheRefreshing = false
+            this.equipmentCacheRefreshing = false
+            this.equipmentLoading = false
           }
           // 如果是 'running' 状态，继续轮询
         }
@@ -628,6 +772,9 @@ export default {
       this.stopProgressTimer()
       setTimeout(() => {
         this.refreshing = false
+        this.fullCacheRefreshing = false
+        this.equipmentCacheRefreshing = false
+        this.equipmentLoading = false
       }, 2000)
     },
 
@@ -650,9 +797,14 @@ export default {
     cancelRefresh() {
       this.stopProgressTimer()
       this.refreshing = false
+      this.fullCacheRefreshing = false
+      this.equipmentCacheRefreshing = false
+      this.equipmentLoading = false
       this.resetProgress()
       this.showRefreshDialog = false
+      if (this.refreshProgress < 100) {
       this.$message.info('已取消刷新操作')
+      }
       // TODO: 可以添加取消后台任务的API调用
     },
 
@@ -661,42 +813,11 @@ export default {
       return Math.floor((Date.now() - this.refreshStartTime) / 1000)
     },
 
-    async checkOngoingRefresh() {
-      // 检查是否有正在进行的刷新任务
-      try {
-        const response = await systemApi.getMarketDataStatus()
-        if (response.code === 200 && response.data.refresh_status === 'running') {
-          // 发现正在进行的刷新任务，恢复进度弹框
-          this.refreshing = true
-          this.showRefreshDialog = true
-          this.initializeProgress()
-          
-          // 从后端恢复进度信息
-          this.refreshProgress = response.data.refresh_progress || 0
-          this.refreshMessage = response.data.refresh_message || '正在处理...'
-          this.refreshedCount = response.data.refresh_processed_records || 0
-          this.currentBatch = response.data.refresh_current_batch || 0
-          this.totalBatches = response.data.refresh_total_batches || 0
-          
-          // 如果有开始时间，使用它
-          if (response.data.refresh_start_time) {
-            this.refreshStartTime = new Date(response.data.refresh_start_time).getTime()
-          }
-          
-          // 开始轮询进度
-          this.startProgressPolling()
-          
-          this.$message.info('检测到正在进行的数据刷新任务，已恢复进度显示')
-        }
-      } catch (error) {
-        console.error('检查正在进行的刷新任务失败:', error)
-      }
-    },
 
     // Redis相关方法
     getHitRate() {
-      const hits = this.redisStatus.keyspace_hits || 0
-      const misses = this.redisStatus.keyspace_misses || 0
+      const hits = this.redisStatusComputed.keyspace_hits || 0
+      const misses = this.redisStatusComputed.keyspace_misses || 0
       const total = hits + misses
       
       if (total === 0) return '0.00'
@@ -732,35 +853,210 @@ export default {
 
     // 全量缓存相关方法
     async refreshFullCache() {
-      if (this.fullCacheRefreshing) return
+      if (this.fullCacheRefreshing || this.refreshing) return
       
       try {
-        this.$confirm('刷新全量缓存会从MySQL重新加载所有empty角色数据，可能需要较长时间，是否继续？', '确认刷新', {
+        this.$confirm('刷新全量缓存将跳过所有缓存，直接从MySQL重新加载所有empty角色数据，耗时较长但数据最新，是否继续？', '确认刷新', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(async () => {
+          // 使用相同的进度显示机制
+          this.refreshing = true
           this.fullCacheRefreshing = true
+          this.showRefreshDialog = true
+          this.initializeProgress()
           
           const response = await systemApi.refreshFullCache()
           if (response.code === 200) {
-            this.$message.success('全量缓存刷新成功！')
-            // 刷新页面状态
-            setTimeout(() => {
-              this.refreshStatus()
-            }, 1000)
+            this.$message.success('全量缓存刷新已启动，正在后台处理...')
+
+            // 开始轮询进度
+            this.startProgressPolling()
           } else {
-            this.$message.error(response.message || '全量缓存刷新失败')
+            this.$message.error(response.message || '启动全量缓存刷新失败')
+            this.refreshing = false
+            this.fullCacheRefreshing = false
+            this.showRefreshDialog = false
           }
         }).catch(() => {
           // 用户取消操作
-        }).finally(() => {
-          this.fullCacheRefreshing = false
         })
       } catch (error) {
-        console.error('刷新全量缓存失败:', error)
-        this.$message.error('刷新全量缓存失败，请检查网络连接')
+        console.error('启动全量缓存刷新失败:', error)
+        this.$message.error('启动全量缓存刷新失败，请检查网络连接')
+        this.refreshing = false
         this.fullCacheRefreshing = false
+        this.showRefreshDialog = false
+      }
+    },
+
+    // 装备数据相关方法
+    async loadEquipmentData() {
+      if (this.refreshing || this.equipmentCacheRefreshing) return
+
+      try {
+        this.$confirm('加载装备数据将优先使用现有缓存，如缓存不存在则自动从数据库加载，是否继续？', '确认加载', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(async () => {
+          // 使用相同的进度显示机制
+          this.refreshing = true
+          this.equipmentLoading = true
+          this.showRefreshDialog = true
+          this.initializeProgress()
+
+          const response = await systemApi.loadEquipmentData()
+          if (response.code === 200) {
+            this.$message.success('装备数据加载已启动，正在后台处理...')
+
+            // 开始轮询装备刷新进度
+            this.startProgressPolling()
+          } else {
+            this.$message.error(response.message || '启动装备数据加载失败')
+            this.refreshing = false
+            this.equipmentLoading = false
+            this.showRefreshDialog = false
+          }
+        }).catch(() => {
+          // 用户取消操作
+        })
+      } catch (error) {
+        console.error('启动装备数据加载失败:', error)
+        this.$message.error('启动装备数据加载失败，请检查网络连接')
+        this.refreshing = false
+        this.equipmentLoading = false
+        this.showRefreshDialog = false
+      }
+    },
+    async refreshEquipmentCache() {
+      if (this.equipmentCacheRefreshing || this.refreshing) return
+
+      try {
+        this.$confirm('刷新装备缓存将从MySQL重新加载全量装备数据到Redis，耗时较长，是否继续？', '确认刷新', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          // 使用相同的进度显示机制
+          this.refreshing = true
+          this.equipmentCacheRefreshing = true
+          this.showRefreshDialog = true
+          this.initializeProgress()
+
+          const response = await systemApi.refreshEquipmentCache()
+          if (response.code === 200) {
+            this.$message.success('装备缓存刷新已启动，正在后台处理...')
+
+            // 开始轮询装备刷新进度
+            this.startProgressPolling()
+          } else {
+            this.$message.error(response.message || '启动装备缓存刷新失败')
+            this.refreshing = false
+            this.equipmentCacheRefreshing = false
+            this.showRefreshDialog = false
+          }
+        }).catch(() => {
+          // 用户取消操作
+        })
+      } catch (error) {
+        console.error('启动装备缓存刷新失败:', error)
+        this.$message.error('启动装备缓存刷新失败，请检查网络连接')
+        this.refreshing = false
+        this.equipmentCacheRefreshing = false
+        this.showRefreshDialog = false
+      }
+    },
+
+
+    async updateEquipmentProgressFromBackend() {
+      try {
+        const response = await systemApi.getEquipmentRefreshStatus()
+        if (response.code === 200) {
+          const data = response.data
+
+          // 更新进度信息
+          this.refreshProgress = data.progress || 0
+          this.refreshMessage = data.message || ''
+          this.refreshedCount = data.processed_records || 0
+          this.currentBatch = data.current_batch || 0
+          this.totalBatches = data.total_batches || 0
+
+          // 检查刷新状态
+          if (data.status === 'completed') {
+            this.completeProgress()
+            this.$message.success(`装备缓存刷新完成！处理了 ${this.refreshedCount} 条数据`)
+
+            // 延迟关闭对话框
+            setTimeout(() => {
+              this.showRefreshDialog = false
+              this.resetProgress()
+            }, 2000)
+
+            // 刷新装备状态
+            setTimeout(() => {
+              this.refreshEquipmentStatus()
+            }, 500)
+
+          } else if (data.status === 'error') {
+            this.refreshMessage = data.message || '装备数据处理失败'
+            this.refreshProgress = 0
+            this.$message.error('装备数据处理失败')
+            this.stopProgressTimer()
+            this.refreshing = false
+            this.equipmentCacheRefreshing = false
+            this.equipmentLoading = false
+          }
+          // 如果是 'running' 状态，继续轮询
+        }
+      } catch (error) {
+        console.error('获取装备刷新进度失败:', error)
+      }
+    },
+
+    async refreshEquipmentStatus() {
+      try {
+        const statusResponse = await systemApi.getEquipmentMarketDataStatus()
+
+        if (statusResponse.code === 200) {
+          this.equipmentMarketDataStatus = statusResponse.data || {}
+        }
+      } catch (error) {
+        console.error('获取装备状态失败:', error)
+      }
+    },
+
+    getEquipmentTypeName(kindid) {
+      const typeNames = {
+        14: '武器', 10: '武器', 6: '武器', 5: '武器', 15: '武器',
+        4: '武器', 13: '武器', 7: '武器', 12: '武器', 9: '武器',
+        11: '武器', 8: '武器', 52: '武器', 53: '武器', 54: '武器',
+        17: '头盔', 58: '发钗',
+        18: '衣服', 59: '衣服',
+        19: '鞋子',
+        20: '腰带',
+        21: '项链',
+        61: '灵饰', 62: '灵饰', 63: '灵饰', 64: '灵饰',
+        29: '召唤兽装备'
+      }
+      return typeNames[kindid] || `类型${kindid}`
+    },
+
+    getEquipmentTypeColor(kindid) {
+      // 根据装备类型返回不同颜色
+      if ([14, 10, 6, 5, 15, 4, 13, 7, 12, 9, 11, 8, 52, 53, 54].includes(parseInt(kindid))) {
+        return 'danger' // 武器红色
+      } else if ([17, 58].includes(parseInt(kindid))) {
+        return 'warning' // 头盔橙色
+      } else if ([18, 59].includes(parseInt(kindid))) {
+        return 'success' // 衣服绿色
+      } else if ([19, 20, 21].includes(parseInt(kindid))) {
+        return 'info' // 鞋子腰带项链蓝色
+      } else if ([61, 62, 63, 64].includes(parseInt(kindid))) {
+        return 'primary' // 灵饰紫色
+      } else {
+        return '' // 默认
       }
     }
   }
@@ -791,6 +1087,27 @@ export default {
 }
 
 .market-data-status .action-bar .el-button {
+  margin-right: 10px;
+}
+
+/* 标签页样式 */
+.market-data-status .status-tabs {
+  margin-bottom: 20px;
+}
+
+.market-data-status .status-tabs .el-tabs__content {
+  padding: 0;
+}
+
+.market-data-status .tab-content {
+  padding: 20px 0;
+}
+
+.market-data-status .tab-action-bar {
+  margin-bottom: 20px;
+}
+
+.market-data-status .tab-action-bar .el-button {
   margin-right: 10px;
 }
 
@@ -857,16 +1174,6 @@ export default {
   margin: 0;
 }
 
-.market-data-status .form-tip {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.market-data-status .text-center {
-  text-align: center;
-  line-height: 32px;
-}
 
 /* 图表区域样式 */
 .charts-section {
@@ -937,6 +1244,10 @@ export default {
 }
 
 /* Redis详细信息样式 */
+  .redis-basic-status {
+    margin-bottom: 20px;
+  }
+
 .redis-details {
   margin-top: 20px;
 }
@@ -945,6 +1256,58 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 缓存类型组样式 */
+.cache-type-group {
+  margin-bottom: 16px;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  padding: 12px;
+  background-color: #fafafa;
+}
+
+.cache-type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cache-type-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.key-details {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e4e7ed;
+}
+
+.key-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  margin: 2px 0;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #e4e7ed;
+}
+
+.key-name {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #606266;
+  flex: 1;
+  margin-right: 8px;
+  word-break: break-all;
+}
+
+.key-ttl {
+  flex-shrink: 0;
 }
 
 .ttl-tag {
@@ -961,5 +1324,27 @@ export default {
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #ebeef5;
+}
+
+/* 装备数据状态样式 */
+.equipment-status-cards {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.equipment-type-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.level-distribution {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-height: 60px;
+  overflow-y: auto;
 }
 </style>

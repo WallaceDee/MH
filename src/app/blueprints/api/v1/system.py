@@ -5,7 +5,7 @@
 系统API蓝图
 """
 
-from flask import Blueprint, send_file, request, jsonify, Response
+from flask import Blueprint, send_file, request, jsonify, Response, current_app
 from ....controllers.system_controller import SystemController
 from ....utils.response import success_response, error_response
 import os
@@ -384,16 +384,6 @@ def get_market_data_status():
             status_info["cache_expired"] = True
             status_info["cache_expiry_time"] = None
         
-        # 添加Redis缓存信息
-        try:
-            from src.utils.shared_cache_manager import get_shared_cache_manager
-            cache_manager = get_shared_cache_manager()
-            redis_stats = cache_manager.get_cache_statistics()
-            status_info["redis_cache"] = redis_stats
-        except Exception as e:
-            logger.warning(f"获取Redis缓存信息失败: {e}")
-            status_info["redis_cache"] = {"available": False, "error": str(e)}
-        
         # 添加Flask缓存信息
         try:
             cache_info = collector.get_cache_info()
@@ -407,28 +397,6 @@ def get_market_data_status():
     except Exception as e:
         logger.error(f"获取市场数据状态失败: {e}")
         return error_response(f"获取市场数据状态失败: {str(e)}")
-
-
-@system_bp.route('/market-data/refresh-full-cache', methods=['POST'])
-def refresh_full_cache():
-    """刷新全量缓存"""
-    try:
-        from src.evaluator.market_data_collector import MarketDataCollector
-        
-        # 获取市场数据收集器实例
-        collector = MarketDataCollector()
-        
-        # 执行全量缓存刷新
-        success = collector.refresh_full_cache()
-        
-        if success:
-            return success_response(message="全量缓存刷新成功")
-        else:
-            return error_response("全量缓存刷新失败")
-        
-    except Exception as e:
-        logger.error(f"刷新全量缓存失败: {e}")
-        return error_response(f"刷新全量缓存失败: {str(e)}")
 
 
 @system_bp.route('/market-data/cache-status', methods=['GET'])
@@ -448,6 +416,302 @@ def get_cache_status():
     except Exception as e:
         logger.error(f"获取缓存状态失败: {e}")
         return error_response(f"获取缓存状态失败: {str(e)}")
+
+
+@system_bp.route('/equipment/cache-status', methods=['GET'])
+def get_equipment_cache_status():
+    """获取装备缓存状态"""
+    try:
+        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        
+        # 使用类方法获取单例实例的缓存状态
+        cache_status = EquipMarketDataCollector.get_cache_status_static()
+        
+        return success_response(data=cache_status, message="获取装备缓存状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取装备缓存状态失败: {e}")
+        return error_response(f"获取装备缓存状态失败: {str(e)}")
+
+
+@system_bp.route('/equipment/load-data', methods=['POST'])
+def load_equipment_data():
+    """加载装备数据（使用缓存）"""
+    try:
+        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        import threading
+        
+        # 获取装备数据采集器实例
+        collector = EquipMarketDataCollector()
+        
+        # 检查是否正在刷新
+        if collector._refresh_status == "running":
+            return error_response("装备数据加载正在进行中，请等待完成后再试")
+        
+        # 获取当前应用实例，用于后台线程
+        app = current_app._get_current_object()
+        
+        # 在后台线程中执行加载（使用缓存）
+        def background_load():
+            try:
+                with app.app_context():
+                    # 在后台线程中重新获取单例实例，确保是同一个实例
+                    from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+                    background_collector = EquipMarketDataCollector()
+                    # 优先使用缓存，如果缓存不存在则加载
+                    background_collector._load_full_data_to_redis(force_refresh=False)
+            except Exception as e:
+                logger.error(f"后台加载装备数据失败: {e}")
+                # 重新获取单例实例来更新状态
+                from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+                error_collector = EquipMarketDataCollector()
+                error_collector._refresh_status = "error"
+                error_collector._refresh_message = f"加载失败: {str(e)}"
+        
+        # 启动后台线程
+        load_thread = threading.Thread(target=background_load)
+        load_thread.daemon = True
+        load_thread.start()
+        
+        return success_response(data={
+            "load_started": True,
+            "message": "装备数据加载已启动，请使用进度接口查询进度"
+        }, message="装备数据加载已启动")
+        
+    except Exception as e:
+        logger.error(f"启动装备数据加载失败: {e}")
+        return error_response(f"启动装备数据加载失败: {str(e)}")
+
+
+@system_bp.route('/equipment/refresh-cache', methods=['POST'])
+def refresh_equipment_cache():
+    """同步装备数据（跳过缓存，完全重新加载）"""
+    try:
+        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        import threading
+        
+        # 获取装备数据采集器实例
+        collector = EquipMarketDataCollector()
+        
+        # 检查是否正在刷新
+        if collector._refresh_status == "running":
+            return error_response("装备数据同步正在进行中，请等待完成后再试")
+        
+        # 获取当前应用实例，用于后台线程
+        app = current_app._get_current_object()
+        
+        # 在后台线程中执行刷新（强制刷新）
+        def background_refresh():
+            try:
+                # 确保在Flask应用上下文中执行
+                with app.app_context():
+                    # 在后台线程中重新获取单例实例，确保是同一个实例
+                    from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+                    background_collector = EquipMarketDataCollector()
+                    background_collector.refresh_full_cache()
+            except Exception as e:
+                logger.error(f"后台同步装备数据失败: {e}")
+                # 重新获取单例实例来更新状态
+                from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+                error_collector = EquipMarketDataCollector()
+                error_collector._refresh_status = "error"
+                error_collector._refresh_message = f"同步失败: {str(e)}"
+        
+        # 启动后台线程
+        refresh_thread = threading.Thread(target=background_refresh)
+        refresh_thread.daemon = True
+        refresh_thread.start()
+        
+        # 立即返回启动成功的响应
+        return success_response(data={
+            "refresh_started": True,
+            "message": "装备数据同步已启动，请使用进度接口查询进度"
+        }, message="装备数据同步已启动")
+        
+    except Exception as e:
+        logger.error(f"启动装备数据同步失败: {e}")
+        return error_response(f"启动装备数据同步失败: {str(e)}")
+
+ 
+@system_bp.route('/market-data/equipment/status', methods=['GET'])
+def get_equipment_market_data_status():
+    """获取装备市场数据状态"""
+    try:
+        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        
+        # 获取装备数据采集器实例
+        collector = EquipMarketDataCollector()
+        
+        # 添加调试信息
+        print(f"🔍 装备市场数据状态 - 实例ID: {id(collector)}")
+        print(f"🔍 内存缓存状态: {collector._full_data_cache is not None and not collector._full_data_cache.empty if collector._full_data_cache is not None else False}")
+        print(f"🔍 刷新状态: {collector._refresh_status}")
+        
+        # 获取基本状态信息
+        status_info = {
+            "data_loaded": collector._full_data_cache is not None and not collector._full_data_cache.empty,
+            "last_refresh_time": collector._refresh_start_time.isoformat() if collector._refresh_start_time else None,
+            "cache_ttl_hours": collector._cache_ttl_hours,
+            "data_count": len(collector._full_data_cache) if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
+            "data_columns": list(collector._full_data_cache.columns) if collector._full_data_cache is not None and not collector._full_data_cache.empty else [],
+            "memory_usage_mb": collector._full_data_cache.memory_usage(deep=True).sum() / 1024 / 1024 if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0
+        }
+        
+        # 添加刷新进度信息
+        refresh_status = collector.get_refresh_status()
+        status_info.update({
+            "refresh_status": refresh_status["status"],
+            "refresh_progress": refresh_status["progress"],
+            "refresh_message": refresh_status["message"],
+            "refresh_processed_records": refresh_status["processed_records"],
+            "refresh_total_records": refresh_status["total_records"],
+            "refresh_current_batch": refresh_status["current_batch"],
+            "refresh_total_batches": refresh_status["total_batches"],
+            "refresh_start_time": refresh_status["start_time"],
+            "refresh_elapsed_seconds": refresh_status["elapsed_seconds"]
+        })
+        
+        # 如果有数据，添加数据统计信息
+        if collector._full_data_cache is not None and not collector._full_data_cache.empty:
+            try:
+                # 价格统计
+                if 'price' in collector._full_data_cache.columns:
+                    price_stats = {
+                        "min_price": float(collector._full_data_cache['price'].min()),
+                        "max_price": float(collector._full_data_cache['price'].max()),
+                        "avg_price": float(collector._full_data_cache['price'].mean()),
+                        "median_price": float(collector._full_data_cache['price'].median())
+                    }
+                    status_info["price_statistics"] = price_stats
+                
+                # 装备类型分布
+                if 'kindid' in collector._full_data_cache.columns:
+                    kindid_counts = collector._full_data_cache['kindid'].value_counts().to_dict()
+                    status_info["kindid_distribution"] = kindid_counts
+                
+                # 等级分布
+                if 'equip_level' in collector._full_data_cache.columns:
+                    level_stats = {
+                        "min_level": int(collector._full_data_cache['equip_level'].min()),
+                        "max_level": int(collector._full_data_cache['equip_level'].max()),
+                        "avg_level": float(collector._full_data_cache['equip_level'].mean())
+                    }
+                    status_info["level_statistics"] = level_stats
+                    
+            except Exception as e:
+                logger.warning(f"获取装备数据统计信息时出错: {e}")
+                status_info["statistics_error"] = str(e)
+        
+        # 计算缓存是否过期
+        if collector._refresh_start_time:
+            from datetime import datetime, timedelta
+            if collector._cache_ttl_hours == -1:
+                status_info["cache_expired"] = False
+                status_info["cache_expiry_time"] = None
+            else:
+                cache_expiry_time = collector._refresh_start_time + timedelta(hours=collector._cache_ttl_hours)
+                status_info["cache_expired"] = datetime.now() > cache_expiry_time
+                status_info["cache_expiry_time"] = cache_expiry_time.isoformat()
+        else:
+            status_info["cache_expired"] = True
+            status_info["cache_expiry_time"] = None
+        
+        # 添加Redis全量缓存状态信息
+        try:
+            redis_cache_status = collector.get_cache_status()
+            status_info["redis_full_cache"] = redis_cache_status
+        except Exception as e:
+            logger.warning(f"获取Redis全量缓存状态失败: {e}")
+            status_info["redis_full_cache"] = {"available": False, "error": str(e)}
+        
+        return success_response(data=status_info, message="获取装备市场数据状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取装备市场数据状态失败: {e}")
+        return error_response(f"获取装备市场数据状态失败: {str(e)}")
+
+
+@system_bp.route('/redis/status', methods=['GET'])
+def get_redis_status():
+    """获取Redis状态信息"""
+    try:
+        from src.utils.redis_cache import get_redis_cache
+        
+        redis_cache = get_redis_cache()
+        if not redis_cache:
+            return error_response("Redis缓存未初始化")
+        
+        # 基本连接信息
+        status_info = {
+            "available": redis_cache.is_available(),
+            "host": redis_cache.host,
+            "port": redis_cache.port,
+            "db": redis_cache.db,
+            "connection_pool_size": redis_cache.pool.max_connections if hasattr(redis_cache, 'pool') else 0
+        }
+        
+        if not status_info["available"]:
+            status_info["error"] = "Redis连接不可用"
+            return success_response(data=status_info, message="Redis状态获取成功")
+        
+        try:
+            # 获取Redis服务器信息
+            redis_info = redis_cache.get_redis_info()
+            if redis_info:
+                status_info.update({
+                    "redis_version": redis_info.get('redis_version'),
+                    "used_memory_human": redis_info.get('used_memory_human'),
+                    "used_memory_peak_human": redis_info.get('used_memory_peak_human'),
+                    "connected_clients": redis_info.get('connected_clients'),
+                    "total_commands_processed": redis_info.get('total_commands_processed'),
+                    "keyspace_hits": redis_info.get('keyspace_hits'),
+                    "keyspace_misses": redis_info.get('keyspace_misses'),
+                    "uptime_in_seconds": redis_info.get('uptime_in_seconds'),
+                    "cache_keys_count": redis_info.get('db0', {}).get('keys', 0)
+                })
+                
+                # 计算命中率
+                hits = redis_info.get('keyspace_hits', 0)
+                misses = redis_info.get('keyspace_misses', 0)
+                total = hits + misses
+                if total > 0:
+                    status_info["hit_rate"] = round((hits / total) * 100, 2)
+                else:
+                    status_info["hit_rate"] = 0
+        except Exception as e:
+            logger.warning(f"获取Redis详细信息失败: {e}")
+            status_info["info_error"] = str(e)
+        
+        # 获取缓存类型统计
+        try:
+            cache_types = redis_cache.get_cache_types()
+            if cache_types:
+                status_info["cache_types"] = cache_types
+        except Exception as e:
+            logger.warning(f"获取缓存类型统计失败: {e}")
+            status_info["cache_types_error"] = str(e)
+        
+        return success_response(data=status_info, message="Redis状态获取成功")
+        
+    except Exception as e:
+        logger.error(f"获取Redis状态失败: {e}")
+        return error_response(f"获取Redis状态失败: {str(e)}")
+
+
+@system_bp.route('/equipment/refresh-status', methods=['GET'])
+def get_equipment_refresh_status():
+    """获取装备数据刷新进度状态"""
+    try:
+        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        
+        # 使用类方法获取单例实例的刷新状态
+        refresh_status = EquipMarketDataCollector.get_refresh_status_static()
+        
+        return success_response(data=refresh_status, message="获取装备刷新状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取装备刷新状态失败: {e}")
+        return error_response(f"获取装备刷新状态失败: {str(e)}")
 
 
 @system_bp.route('/market-data/analysis', methods=['GET'])
@@ -567,20 +831,15 @@ def refresh_market_data():
         
         # 设置刷新参数
         filters = data.get('filters', None)
-        max_records = data.get('max_records', 999)
-        batch_size = data.get('batch_size', 200)
-        
-        logger.info(f"启动分批刷新市场数据，参数: filters={filters}, max_records={max_records}, batch_size={batch_size}")
-        
+        use_cache = data.get('use_cache', True)
+        force_refresh = data.get('force_refresh', False)
         # 在后台线程中执行刷新
         def background_refresh():
             try:
                 collector.refresh_market_data(
                     filters=filters,
-                    max_records=max_records,
-                    batch_size=batch_size,
-                    use_cache=True,
-                    force_refresh=True  # API调用时强制刷新
+                    use_cache=use_cache,
+                    force_refresh=force_refresh,
                 )
             except Exception as e:
                 logger.error(f"后台刷新失败: {e}")
@@ -596,9 +855,7 @@ def refresh_market_data():
         return success_response(data={
             "refresh_started": True,
             "message": "数据刷新已启动，请使用状态接口查询进度",
-            "filters_applied": filters,
-            "max_records": max_records,
-            "batch_size": batch_size
+            "filters_applied": filters
         }, message="数据刷新已启动")
         
     except Exception as e:
