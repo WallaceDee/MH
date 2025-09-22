@@ -5,19 +5,19 @@
         <EquipmentImage :equipment="targetEquipment" width="50px" height="50px" placement="left" />
         <span v-if="targetEquipment.price" v-html="formatFullPrice(targetEquipment)" style="margin-left: 10px"></span>
         <div v-if="isWeapon" style="margin-left: 10px">
-          <div style="margin-bottom: 5px"> <el-tag type="success">属性：+{{ targetEquipment.feature.addon_total }}点{{
-            addon_total_standards?.[targetEquipment.feature.equip_level] }}</el-tag>
+          <div style="margin-bottom: 5px"> <el-tag type="success">属性：+{{ valuation.feature.addon_total }}点{{
+            addon_total_standards?.[valuation.feature.equip_level] }}</el-tag>
             <el-divider direction="vertical" />
-            <el-tag type="primary">总伤：{{ targetEquipment.feature.all_damage }}/{{
-              parseInt(all_damage_standards?.[targetEquipment.feature.equip_level][1]
-                + (25 * targetEquipment.feature.equip_level / 30)) }}</el-tag>
+            <el-tag type="primary">总伤：{{ valuation.feature.all_damage }}/{{
+              parseInt(all_damage_standards?.[valuation.feature.equip_level][1]
+                + (25 * valuation.feature.equip_level / 30)) }}</el-tag>
           </div>
           <div>
-            <el-tag type="danger">初伤：{{ targetEquipment.feature.init_damage_raw }}点{{
-              init_damage_raw_standards?.[targetEquipment.feature.equip_level] }}</el-tag>
+            <el-tag type="danger">初伤：{{ valuation.feature.init_damage_raw }}点{{
+              init_damage_raw_standards?.[valuation.feature.equip_level] }}</el-tag>
             <el-divider direction="vertical" />
-            <el-tag type="danger">初总伤：{{ targetEquipment.feature.init_damage }}点{{
-              all_damage_standards?.[targetEquipment.feature.equip_level] }}</el-tag>
+            <el-tag type="danger">初总伤：{{ valuation.feature.init_damage }}点{{
+              all_damage_standards?.[valuation.feature.equip_level] }}</el-tag>
           </div>
         </div>
       </el-row>
@@ -85,7 +85,7 @@ export default {
   },
   computed: {
     isWeapon() {
-      return window.is_weapon_equip(this.targetEquipment?.feature?.kindid)
+      return window.is_weapon_equip(this.valuation?.feature?.kindid)
     },
     // 计算估价与售价的比率
     priceRatio() {
