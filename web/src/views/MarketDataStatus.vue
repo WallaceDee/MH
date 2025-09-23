@@ -15,419 +15,424 @@
     <!-- 标签页 -->
     <el-card>
       <el-tabs v-model="activeTab" type="card" class="status-tabs">
-      <!-- 角色数据标签页 -->
-      <el-tab-pane label="角色数据" name="role">
-        <div class="tab-content">
-          <!-- 角色数据操作栏 -->
-          <div class="tab-action-bar">
-            <el-button type="success" @click="refreshMarketData" icon="el-icon-download" :disabled="refreshing">
-              加载市场数据
-      </el-button>
-      
-            <el-button type="warning" @click="refreshFullCache" icon="el-icon-refresh" :loading="fullCacheRefreshing">
-              同步市场数据
-      </el-button>
-    </div>
+        <!-- 角色数据标签页 -->
+        <el-tab-pane label="角色数据" name="role">
+          <div class="tab-content">
+            <!-- 角色数据操作栏 -->
+            <div class="tab-action-bar">
+              <el-button type="success" @click="refreshMarketData" icon="el-icon-download" :disabled="refreshing">
+                加载市场数据
+              </el-button>
 
-          <!-- 角色数据状态卡片 -->
-    <el-row :gutter="20" class="status-cards">
-      <!-- 基本状态 -->
-      <el-col :span="6">
-        <el-card class="status-card">
-          <div slot="header" class="card-header">
-            <i class="el-icon-data-line"></i>
-            <span>数据状态</span>
-          </div>
-          <div class="status-item">
-            <span class="label">数据已加载:</span>
-            <el-tag :type="status.data_loaded ? 'success' : 'danger'">
-              {{ status.data_loaded ? '是' : '否' }}
-            </el-tag>
-          </div>
-          <div class="status-item">
-            <span class="label">数据条数:</span>
-            <span class="value">{{ status.data_count || 0 | numberFormat }}</span>
-          </div>
-          <div class="status-item">
-            <span class="label">内存占用:</span>
-            <span class="value">{{ (status.memory_usage_mb || 0).toFixed(2) }} MB</span>
-          </div>
-          <div class="status-item">
-            <span class="label">特征维度:</span>
-            <span class="value">{{ (status.data_columns || []).length }}</span>
-          </div>
-        </el-card>
-      </el-col>
-
-      <!-- 缓存状态 -->
-      <el-col :span="6">
-        <el-card class="status-card">
-          <div slot="header" class="card-header">
-            <i class="el-icon-time"></i>
-            <span>缓存状态</span>
-          </div>
-          <div class="status-item">
-                  <span class="label">缓存模式:</span>
-                  <el-tag type="success">
-                    永不过期
-            </el-tag>
-          </div>
-          <div class="status-item">
-            <span class="label">最后刷新:</span>
-            <span class="value">{{ formatTime(status.last_refresh_time) }}</span>
-          </div>
-          <div class="status-item">
-                  <span class="label">刷新方式:</span>
-                  <span class="value">仅手动刷新</span>
-          </div>
-          <div class="status-item">
-                  <span class="label">数据稳定性:</span>
-                  <el-tag type="success" size="mini">高</el-tag>
-          </div>
-        </el-card>
-      </el-col>
-
-
-      <!-- 数据统计 -->
-      <el-col :span="6">
-        <el-card class="status-card">
-          <div slot="header" class="card-header">
-            <i class="el-icon-s-data"></i>
-            <span>数据统计</span>
-          </div>
-          <div v-if="status.price_statistics" class="status-item">
-            <span class="label">价格范围:</span>
-            <span class="value">
-              {{ status.price_statistics.min_price | numberFormat }} - 
-              {{ status.price_statistics.max_price | numberFormat }}
-            </span>
-          </div>
-          <div v-if="status.price_statistics" class="status-item">
-            <span class="label">平均价格:</span>
-            <span class="value">{{ status.price_statistics.avg_price.toFixed(0) | numberFormat }}</span>
-          </div>
-          <div v-if="status.level_statistics" class="status-item">
-            <span class="label">等级范围:</span>
-            <span class="value">
-              {{ status.level_statistics.min_level }} - {{ status.level_statistics.max_level }}
-            </span>
-          </div>
-          <div v-if="status.role_type_distribution" class="status-item">
-            <span class="label">角色类型:</span>
-            <div class="role-type-tags">
-                    <el-tag v-for="(count, type) in status.role_type_distribution" :key="type" size="mini">
-                {{ type }}: {{ count }}
-              </el-tag>
+              <el-button type="warning" @click="refreshFullCache" icon="el-icon-refresh" :loading="fullCacheRefreshing">
+                同步市场数据
+              </el-button>
             </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-        </div>
-      </el-tab-pane>
 
-      <!-- 装备数据标签页 -->
-      <el-tab-pane label="装备数据" name="equipment">
-        <div class="tab-content">
-          <!-- 装备数据操作栏 -->
-          <div class="tab-action-bar">
-            <el-button type="info" @click="loadEquipmentData" icon="el-icon-box" :disabled="refreshing">
-              加载装备数据
-            </el-button>
-
-            <el-button type="danger" @click="refreshEquipmentCache" icon="el-icon-refresh"
-              :loading="equipmentCacheRefreshing">
-              同步装备数据
-            </el-button>
-          </div>
-
-          <!-- 装备数据状态卡片 -->
-          <el-row :gutter="20" class="equipment-status-cards">
-            <!-- 装备缓存状态 -->
-            <el-col :span="8">
-        <el-card class="status-card">
-          <div slot="header" class="card-header">
-                  <i class="el-icon-box"></i>
-                  <span>装备缓存状态</span>
-          </div>
-          <div class="status-item">
-                  <span class="label">数据已加载:</span>
-                  <el-tag :type="equipmentMarketDataStatus.data_loaded ? 'success' : 'danger'">
-                    {{ equipmentMarketDataStatus.data_loaded ? '是' : '否' }}
-                  </el-tag>
-          </div>
-          <div class="status-item">
-                  <span class="label">数据条数:</span>
-                  <span class="value">{{ equipmentMarketDataStatus.data_count || 0 | numberFormat }} 条</span>
-          </div>
-          <div class="status-item">
-                  <span class="label">内存占用:</span>
-                  <span class="value">{{ (equipmentMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
-          </div>
-          <div class="status-item">
-                  <span class="label">特征维度:</span>
-                  <span class="value">{{ (equipmentMarketDataStatus.data_columns || []).length }}</span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.last_refresh_time" class="status-item">
-                  <span class="label">最后刷新:</span>
-                  <span class="value">{{ formatTime(equipmentMarketDataStatus.last_refresh_time) }}</span>
-                </div>
-              </el-card>
-            </el-col>
-
-            <!-- 装备数据统计 -->
-            <el-col :span="8">
-              <el-card class="status-card">
-                <div slot="header" class="card-header">
-                  <i class="el-icon-data-analysis"></i>
-                  <span>装备数据统计</span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.data_count" class="status-item">
-                  <span class="label">总装备数:</span>
-                  <span class="value">{{ equipmentMarketDataStatus.data_count | numberFormat }}</span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.kindid_distribution" class="status-item">
-                  <span class="label">装备类型:</span>
-                  <div class="equipment-type-tags">
-                    <el-tag v-for="(count, kindid) in equipmentMarketDataStatus.kindid_distribution" :key="kindid"
-                      size="mini" :type="getEquipmentTypeColor(kindid)">
-                      {{ getEquipmentTypeName(kindid) }}: {{ count }}
+            <!-- 角色数据状态卡片 -->
+            <el-row :gutter="20" class="status-cards">
+              <!-- 基本状态 -->
+              <el-col :span="6">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-data-line"></i>
+                    <span>数据状态</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">数据已加载:</span>
+                    <el-tag :type="status.data_loaded ? 'success' : 'danger'">
+                      {{ status.data_loaded ? '是' : '否' }}
                     </el-tag>
                   </div>
-                </div>
-                <div v-if="equipmentMarketDataStatus.level_statistics" class="status-item">
-                  <span class="label">等级范围:</span>
-                  <span class="value">
-                    {{ equipmentMarketDataStatus.level_statistics.min_level }} -
-                    {{ equipmentMarketDataStatus.level_statistics.max_level }}
-                  </span>
-                </div>
-              </el-card>
-            </el-col>
+                  <div class="status-item">
+                    <span class="label">数据条数:</span>
+                    <span class="value">{{ status.data_count || 0 | numberFormat }}</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">MySQL总数:</span>
+                    <span class="value">{{ status.mysql_data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">内存占用:</span>
+                    <span class="value">{{ (status.memory_usage_mb || 0).toFixed(2) }} MB</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">特征维度:</span>
+                    <span class="value">{{ (status.data_columns || []).length }}</span>
+                  </div>
+                </el-card>
+              </el-col>
 
-            <!-- 装备价格统计 -->
-            <el-col :span="8">
-              <el-card class="status-card">
-                <div slot="header" class="card-header">
-                  <i class="el-icon-coin"></i>
-                  <span>装备价格统计</span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
-                  <span class="label">价格范围:</span>
-                  <span class="value">
-                    {{ equipmentMarketDataStatus.price_statistics.min_price | numberFormat }} -
-                    {{ equipmentMarketDataStatus.price_statistics.max_price | numberFormat }}
-                  </span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
-                  <span class="label">平均价格:</span>
-                  <span class="value">{{ equipmentMarketDataStatus.price_statistics.avg_price.toFixed(0) | numberFormat
-                    }}</span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
-                  <span class="label">中位数价格:</span>
-                  <span class="value">{{ equipmentMarketDataStatus.price_statistics.median_price.toFixed(0) |
-                    numberFormat }}</span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.high_value_count" class="status-item">
-                  <span class="label">高价值装备:</span>
-                  <span class="value">{{ equipmentMarketDataStatus.high_value_count | numberFormat }} 条</span>
-                </div>
-                <div v-if="equipmentMarketDataStatus.special_skill_count" class="status-item">
-                  <span class="label">特技装备:</span>
-                  <span class="value">{{ equipmentMarketDataStatus.special_skill_count | numberFormat }} 条</span>
-                </div>
-              </el-card>
-            </el-col>
+              <!-- 缓存状态 -->
+              <el-col :span="6">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-time"></i>
+                    <span>缓存状态</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">缓存模式:</span>
+                    <el-tag type="success">
+                      永不过期
+                    </el-tag>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">最后刷新:</span>
+                    <span class="value">{{ formatTime(status.last_refresh_time) }}</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">刷新方式:</span>
+                    <span class="value">仅手动刷新</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">数据稳定性:</span>
+                    <el-tag type="success" size="mini">高</el-tag>
+                  </div>
+                </el-card>
+              </el-col>
 
-          </el-row>
-        </div>
-      </el-tab-pane>
 
-      <!-- Redis详细信息标签页 -->
-      <el-tab-pane label="Redis详情" name="redis">
-        <div class="tab-content">
-          <!-- Redis基本状态卡片 -->
-          <el-row :gutter="20" class="redis-basic-status">
-            <el-col :span="8">
-              <el-card class="status-card">
-                <div slot="header" class="card-header">
-                  <i class="el-icon-cpu"></i>
-                  <span>Redis连接状态</span>
-          </div>
-          <div class="status-item">
-                  <span class="label">连接状态:</span>
-                  <el-tag :type="redisStatusComputed.available ? 'success' : 'danger'">
-                    {{ redisStatusComputed.available ? '已连接' : '未连接' }}
-                  </el-tag>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">Redis主机:</span>
-                  <span class="value">{{ redisStatusComputed.host || '-' }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">Redis端口:</span>
-                  <span class="value">{{ redisStatusComputed.port || '-' }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">Redis数据库:</span>
-                  <span class="value">{{ redisStatusComputed.db || 0 }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">连接池大小:</span>
-                  <span class="value">{{ redisStatusComputed.connection_pool_size || 0 }}</span>
-                </div>
-              </el-card>
-            </el-col>
-
-            <el-col :span="8">
-              <el-card class="status-card">
-                <div slot="header" class="card-header">
-                  <i class="el-icon-monitor"></i>
-                  <span>Redis服务器信息</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">Redis版本:</span>
-                  <span class="value">{{ redisStatusComputed.redis_version || '-' }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">内存使用:</span>
-                  <span class="value">{{ redisStatusComputed.used_memory_human || '0B' }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">峰值内存:</span>
-                  <span class="value">{{ redisStatusComputed.used_memory_peak_human || '0B' }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">缓存键数:</span>
-                  <span class="value">{{ redisStatusComputed.cache_keys_count || 0 | numberFormat }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">连接客户端:</span>
-                  <span class="value">{{ redisStatusComputed.connected_clients || 0 }}</span>
-                </div>
-              </el-card>
-            </el-col>
-
-            <el-col :span="8">
-              <el-card class="status-card">
-                <div slot="header" class="card-header">
-                  <i class="el-icon-time"></i>
-                  <span>Redis运行状态</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-            <span class="label">运行时间:</span>
-                  <span class="value">{{ formatUptime(redisStatusComputed.uptime_in_seconds) }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">命令执行总数:</span>
-                  <span class="value">{{ redisStatusComputed.total_commands_processed | numberFormat }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">缓存命中数:</span>
-                  <span class="value">{{ redisStatusComputed.keyspace_hits | numberFormat }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">缓存未命中数:</span>
-                  <span class="value">{{ redisStatusComputed.keyspace_misses | numberFormat }}</span>
-                </div>
-                <div v-if="redisStatusComputed.available" class="status-item">
-                  <span class="label">命中率:</span>
-                  <span class="value">{{ redisStatusComputed.hit_rate || getHitRate() }}%</span>
-          </div>
-        </el-card>
-      </el-col>
-          </el-row>
-
-          <!-- Redis详细信息卡片 -->
-          <el-row :gutter="20" class="redis-details" v-if="redisStatusComputed.available">
-
-      <!-- 缓存类型统计 -->
-      <el-col :span="12">
-        <el-card class="status-card">
-          <div slot="header" class="card-header">
-            <i class="el-icon-collection"></i>
-            <span>缓存类型统计</span>
-          </div>
-                <div v-if="cacheTypeStats && Object.keys(cacheTypeStats).length > 0">
-                  <div v-for="(typeInfo, cacheType) in cacheTypeStats" :key="cacheType" class="cache-type-group">
-                    <div class="cache-type-header">
-                      <span class="label">{{ getCacheTypeLabel(cacheType) }}:</span>
-                      <div class="cache-type-summary">
-                        <span class="value">{{ typeInfo.count }} 个键</span>
-                        <el-tag size="mini" class="ttl-tag" :type="typeInfo.ttl_hours === -1 ? 'success' : 'info'">
-                          TTL: {{ typeInfo.ttl_hours === -1 ? '永不过期' : typeInfo.ttl_hours + 'h' }}
-                        </el-tag>
-                      </div>
+              <!-- 数据统计 -->
+              <el-col :span="6">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-s-data"></i>
+                    <span>数据统计</span>
+                  </div>
+                  <div v-if="status.price_statistics" class="status-item">
+                    <span class="label">价格范围:</span>
+                    <span class="value">
+                      {{ status.price_statistics.min_price | numberFormat }} -
+                      {{ status.price_statistics.max_price | numberFormat }}
+                    </span>
+                  </div>
+                  <div v-if="status.price_statistics" class="status-item">
+                    <span class="label">平均价格:</span>
+                    <span class="value">{{ status.price_statistics.avg_price.toFixed(0) | numberFormat }}</span>
+                  </div>
+                  <div v-if="status.level_statistics" class="status-item">
+                    <span class="label">等级范围:</span>
+                    <span class="value">
+                      {{ status.level_statistics.min_level }} - {{ status.level_statistics.max_level }}
+                    </span>
+                  </div>
+                  <div v-if="status.role_type_distribution" class="status-item">
+                    <span class="label">角色类型:</span>
+                    <div class="role-type-tags">
+                      <el-tag v-for="(count, type) in status.role_type_distribution" :key="type" size="mini">
+                        {{ type }}: {{ count }}
+                      </el-tag>
                     </div>
-                    <div v-if="typeInfo.key_details && typeInfo.key_details.length > 0" class="key-details">
-                      <div v-for="keyInfo in typeInfo.key_details" :key="keyInfo.key" class="key-item">
-                        <span class="key-name">{{ keyInfo.key }}</span>
-                        <el-tag size="mini" :type="keyInfo.ttl_hours === -1 ? 'success' : 'info'" class="key-ttl">
-                          {{ keyInfo.ttl_display }}
-                        </el-tag>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+
+            <!-- 数据字段详情卡片 -->
+            <el-card class="details-card" v-if="status.data_columns && status.data_columns.length > 0">
+              <div slot="header" class="card-header">
+                <i class="el-icon-menu"></i>
+                <span>数据字段 ({{ status.data_columns.length }})</span>
+              </div>
+              <div class="columns-grid">
+                <el-tag v-for="column in status.data_columns" :key="column" size="small" class="column-tag">
+                  {{ column }}
+                </el-tag>
+              </div>
+            </el-card>
+
+            <!-- 数据分析图表 -->
+            <div v-if="status.data_count > 0" class="charts-section">
+              <div class="section-header">
+                <h2>数据分析</h2>
+                <p>基于当前市场数据的统计分析和可视化展示</p>
+              </div>
+              <MarketDataCharts :market-data="status" />
+            </div>
+          </div>
+        </el-tab-pane>
+
+        <!-- 装备数据标签页 -->
+        <el-tab-pane label="装备数据" name="equipment">
+          <div class="tab-content">
+            <!-- 装备数据操作栏 -->
+            <div class="tab-action-bar">
+              <el-button type="info" @click="refreshEquipmentData" icon="el-icon-box" :disabled="refreshing">
+                加载装备数据
+              </el-button>
+
+              <el-button type="danger" @click="refreshEquipmentFullCache" icon="el-icon-refresh"
+                :loading="equipmentCacheRefreshing">
+                同步装备数据
+              </el-button>
+            </div>
+
+            <!-- 装备数据状态卡片 -->
+            <el-row :gutter="20" class="equipment-status-cards">
+              <!-- 装备缓存状态 -->
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-box"></i>
+                    <span>装备缓存状态</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">数据已加载:</span>
+                    <el-tag :type="equipmentMarketDataStatus.data_loaded ? 'success' : 'danger'">
+                      {{ equipmentMarketDataStatus.data_loaded ? '是' : '否' }}
+                    </el-tag>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">数据条数:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">MySQL总数:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.mysql_data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">内存占用:</span>
+                    <span class="value">{{ (equipmentMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">特征维度:</span>
+                    <span class="value">{{ (equipmentMarketDataStatus.data_columns || []).length }}</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.last_refresh_time" class="status-item">
+                    <span class="label">最后刷新:</span>
+                    <span class="value">{{ formatTime(equipmentMarketDataStatus.last_refresh_time) }}</span>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <!-- 装备数据统计 -->
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-data-analysis"></i>
+                    <span>装备数据统计</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.data_count" class="status-item">
+                    <span class="label">总装备数:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.data_count | numberFormat }}</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.kindid_distribution" class="status-item">
+                    <span class="label">装备类型:</span>
+                    <div class="equipment-type-tags">
+                      <el-tag v-for="(count, kindid) in equipmentMarketDataStatus.kindid_distribution" :key="kindid"
+                        size="mini" :type="getEquipmentTypeColor(kindid)">
+                        {{ getEquipmentTypeName(kindid) }}: {{ count }}
+                      </el-tag>
+                    </div>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.level_statistics" class="status-item">
+                    <span class="label">等级范围:</span>
+                    <span class="value">
+                      {{ equipmentMarketDataStatus.level_statistics.min_level }} -
+                      {{ equipmentMarketDataStatus.level_statistics.max_level }}
+                    </span>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <!-- 装备价格统计 -->
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-coin"></i>
+                    <span>装备价格统计</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">价格范围:</span>
+                    <span class="value">
+                      {{ equipmentMarketDataStatus.price_statistics.min_price | numberFormat }} -
+                      {{ equipmentMarketDataStatus.price_statistics.max_price | numberFormat }}
+                    </span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">平均价格:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.price_statistics.avg_price.toFixed(0) |
+                      numberFormat
+                      }}</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">中位数价格:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.price_statistics.median_price.toFixed(0) |
+                      numberFormat }}</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.high_value_count" class="status-item">
+                    <span class="label">高价值装备:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.high_value_count | numberFormat }} 条</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.special_skill_count" class="status-item">
+                    <span class="label">特技装备:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.special_skill_count | numberFormat }} 条</span>
+                  </div>
+                </el-card>
+              </el-col>
+
+            </el-row>
+          </div>
+        </el-tab-pane>
+
+        <!-- Redis详细信息标签页 -->
+        <el-tab-pane label="Redis详情" name="redis">
+          <div class="tab-content">
+            <!-- Redis基本状态卡片 -->
+            <el-row :gutter="20" class="redis-basic-status">
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-cpu"></i>
+                    <span>Redis连接状态</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">连接状态:</span>
+                    <el-tag :type="redisStatusComputed.available ? 'success' : 'danger'">
+                      {{ redisStatusComputed.available ? '已连接' : '未连接' }}
+                    </el-tag>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">Redis主机:</span>
+                    <span class="value">{{ redisStatusComputed.host || '-' }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">Redis端口:</span>
+                    <span class="value">{{ redisStatusComputed.port || '-' }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">Redis数据库:</span>
+                    <span class="value">{{ redisStatusComputed.db || 0 }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">连接池大小:</span>
+                    <span class="value">{{ redisStatusComputed.connection_pool_size || 0 }}</span>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-monitor"></i>
+                    <span>Redis服务器信息</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">Redis版本:</span>
+                    <span class="value">{{ redisStatusComputed.redis_version || '-' }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">内存使用:</span>
+                    <span class="value">{{ redisStatusComputed.used_memory_human || '0B' }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">峰值内存:</span>
+                    <span class="value">{{ redisStatusComputed.used_memory_peak_human || '0B' }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">缓存键数:</span>
+                    <span class="value">{{ redisStatusComputed.cache_keys_count || 0 | numberFormat }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">连接客户端:</span>
+                    <span class="value">{{ redisStatusComputed.connected_clients || 0 }}</span>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-time"></i>
+                    <span>Redis运行状态</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">运行时间:</span>
+                    <span class="value">{{ formatUptime(redisStatusComputed.uptime_in_seconds) }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">命令执行总数:</span>
+                    <span class="value">{{ redisStatusComputed.total_commands_processed | numberFormat }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">缓存命中数:</span>
+                    <span class="value">{{ redisStatusComputed.keyspace_hits | numberFormat }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">缓存未命中数:</span>
+                    <span class="value">{{ redisStatusComputed.keyspace_misses | numberFormat }}</span>
+                  </div>
+                  <div v-if="redisStatusComputed.available" class="status-item">
+                    <span class="label">命中率:</span>
+                    <span class="value">{{ redisStatusComputed.hit_rate || getHitRate() }}%</span>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+
+            <!-- Redis详细信息卡片 -->
+            <el-row :gutter="20" class="redis-details" v-if="redisStatusComputed.available">
+
+              <!-- 缓存类型统计 -->
+              <el-col :span="12">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-collection"></i>
+                    <span>缓存类型统计</span>
+                  </div>
+                  <div v-if="cacheTypeStats && Object.keys(cacheTypeStats).length > 0">
+                    <div v-for="(typeInfo, cacheType) in cacheTypeStats" :key="cacheType" class="cache-type-group">
+                      <div class="cache-type-header">
+                        <span class="label">{{ getCacheTypeLabel(cacheType) }}:</span>
+                        <div class="cache-type-summary">
+                          <span class="value">{{ typeInfo.count }} 个键</span>
+                          <el-tag size="mini" class="ttl-tag" :type="typeInfo.ttl_hours === -1 ? 'success' : 'info'">
+                            TTL: {{ typeInfo.ttl_hours === -1 ? '永不过期' : typeInfo.ttl_hours + 'h' }}
+                          </el-tag>
+                        </div>
+                      </div>
+                      <div v-if="typeInfo.key_details && typeInfo.key_details.length > 0" class="key-details">
+                        <div v-for="keyInfo in typeInfo.key_details" :key="keyInfo.key" class="key-item">
+                          <span class="key-name">{{ keyInfo.key }}</span>
+                          <el-tag size="mini" :type="keyInfo.ttl_hours === -1 ? 'success' : 'info'" class="key-ttl">
+                            {{ keyInfo.ttl_display }}
+                          </el-tag>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-          <div v-else class="no-cache-data">
-            <span>暂无缓存类型数据</span>
-          </div>
-          
-          <!-- 全量缓存详细信息 -->
-          <div v-if="fullCacheInfo && fullCacheInfo.full_cache_exists" class="full-cache-details">
-            <div class="status-item">
-              <span class="label">缓存类型:</span>
-              <el-tag :type="fullCacheInfo.cache_type === 'chunked' ? 'success' : 'info'" size="mini">
-                {{ fullCacheInfo.cache_type === 'chunked' ? '分块缓存' : '传统缓存' }}
-              </el-tag>
-            </div>
-            <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.total_chunks" class="status-item">
-              <span class="label">分块信息:</span>
-                    <span class="value">{{ fullCacheInfo.chunk_info.total_chunks }} 块 × {{
-                      fullCacheInfo.chunk_info.chunk_size }} 行</span>
-            </div>
-                  <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.is_complete !== undefined"
-                    class="status-item">
-              <span class="label">完整性:</span>
-              <el-tag :type="fullCacheInfo.chunk_info.is_complete ? 'success' : 'danger'" size="mini">
-                {{ fullCacheInfo.chunk_info.is_complete ? '完整' : '不完整' }}
-              </el-tag>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-        </div>
-      </el-tab-pane>
+                  <div v-else class="no-cache-data">
+                    <span>暂无缓存类型数据</span>
+                  </div>
 
-      <!-- 数据分析标签页 -->
-      <el-tab-pane label="数据分析" name="analysis">
-        <div class="tab-content">
-    <!-- 详细信息 -->
-    <el-card class="details-card" v-if="status.data_columns && status.data_columns.length > 0">
-      <div slot="header" class="card-header">
-        <i class="el-icon-menu"></i>
-        <span>数据字段 ({{ status.data_columns.length }})</span>
-      </div>
-      <div class="columns-grid">
-              <el-tag v-for="column in status.data_columns" :key="column" size="small" class="column-tag">
-          {{ column }}
-        </el-tag>
-      </div>
-    </el-card>
+                  <!-- 全量缓存详细信息 -->
+                  <div v-if="fullCacheInfo && fullCacheInfo.full_cache_exists" class="full-cache-details">
+                    <div class="status-item">
+                      <span class="label">缓存类型:</span>
+                      <el-tag :type="fullCacheInfo.cache_type === 'chunked' ? 'success' : 'info'" size="mini">
+                        {{ fullCacheInfo.cache_type === 'chunked' ? '分块缓存' : '传统缓存' }}
+                      </el-tag>
+                    </div>
+                    <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.total_chunks" class="status-item">
+                      <span class="label">分块信息:</span>
+                      <span class="value">{{ fullCacheInfo.chunk_info.total_chunks }} 块 × {{
+                        fullCacheInfo.chunk_info.chunk_size }} 行</span>
+                    </div>
+                    <div v-if="fullCacheInfo.chunk_info && fullCacheInfo.chunk_info.is_complete !== undefined"
+                      class="status-item">
+                      <span class="label">完整性:</span>
+                      <el-tag :type="fullCacheInfo.chunk_info.is_complete ? 'success' : 'danger'" size="mini">
+                        {{ fullCacheInfo.chunk_info.is_complete ? '完整' : '不完整' }}
+                      </el-tag>
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </div>
+        </el-tab-pane>
 
-    <!-- 数据分析图表 -->
-    <div v-if="status.data_count > 0" class="charts-section">
-      <div class="section-header">
-        <h2>数据分析</h2>
-        <p>基于当前市场数据的统计分析和可视化展示</p>
-      </div>
-      <MarketDataCharts :market-data="status" />
-    </div>
-        </div>
-      </el-tab-pane>
-    </el-tabs>
+      </el-tabs>
 
     </el-card>
     <!-- 刷新进度对话框 -->
@@ -439,11 +444,11 @@
           <i class="el-icon-loading"></i>
           <span>{{ progressMessage }}</span>
         </div>
-        
+
         <!-- 进度条 -->
         <el-progress :percentage="refreshProgress" :status="refreshProgress === 100 ? 'success' : null"
           :stroke-width="8" />
-        
+
         <!-- 进度详情 -->
         <div class="progress-details">
           <div class="progress-item">
@@ -565,7 +570,7 @@ export default {
       }
     }
   },
-  
+
   filters: {
     numberFormat(value) {
       if (!value && value !== 0) return '-'
@@ -576,24 +581,84 @@ export default {
   mounted() {
     this.refreshStatus()
     // 设置自动刷新状态
-    this.autoRefreshTimer = setInterval(() => {
-      this.refreshStatus()
-    }, 60000) // 每60秒刷新一次状态
+    this.startAutoRefresh()
+
+    // 监听页面可见性变化
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   },
 
   beforeDestroy() {
-    if (this.autoRefreshTimer) {
-      clearInterval(this.autoRefreshTimer)
-    }
-    if (this.progressTimer) {
-      clearInterval(this.progressTimer)
-    }
+    // 清理所有定时器
+    this.clearAllTimers()
+
+    // 移除页面可见性监听器
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
+  },
+
+  // 添加 beforeUnmount 钩子（Vue 3兼容）
+  beforeUnmount() {
+    this.clearAllTimers()
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
   },
 
   methods: {
+    // 清理所有定时器
+    clearAllTimers() {
+      if (this.autoRefreshTimer) {
+        clearInterval(this.autoRefreshTimer)
+        this.autoRefreshTimer = null
+        console.log('已清理自动刷新定时器')
+      }
+      if (this.progressTimer) {
+        clearInterval(this.progressTimer)
+        this.progressTimer = null
+        console.log('已清理进度轮询定时器')
+      }
+    },
+
+    // 启动自动刷新
+    startAutoRefresh() {
+      // 清理可能存在的旧定时器
+      if (this.autoRefreshTimer) {
+        clearInterval(this.autoRefreshTimer)
+        this.autoRefreshTimer = null
+      }
+
+      // 设置自动刷新状态
+      this.autoRefreshTimer = setInterval(() => {
+        this.refreshStatus()
+      }, 60 * 1000) // 每60秒刷新一次状态
+
+      console.log('自动刷新定时器已启动')
+    },
+
+    // 停止自动刷新
+    stopAutoRefresh() {
+      if (this.autoRefreshTimer) {
+        clearInterval(this.autoRefreshTimer)
+        this.autoRefreshTimer = null
+        console.log('自动刷新定时器已停止')
+      }
+    },
+
+    // 处理页面可见性变化
+    handleVisibilityChange() {
+      if (document.hidden) {
+        // 页面不可见时停止自动刷新
+        console.log('页面不可见，停止自动刷新')
+        this.stopAutoRefresh()
+      } else {
+        // 页面可见时恢复自动刷新
+        console.log('页面可见，恢复自动刷新')
+        this.startAutoRefresh()
+        // 立即刷新一次状态
+        this.refreshStatus()
+      }
+    },
+
     async refreshStatus() {
       if (this.loading) return
-      
+
       this.loading = true
       try {
         // 并行获取角色数据状态、装备数据状态和Redis状态
@@ -614,30 +679,30 @@ export default {
         if (redisResponse.code === 200) {
           this.redisStatus = redisResponse.data || {}
         }
-          
-          // 如果发现正在刷新但前端没有显示进度，恢复进度弹框
+
+        // 如果发现正在刷新但前端没有显示进度，恢复进度弹框
         if (roleResponse.data && roleResponse.data.refresh_status === 'running' && !this.refreshing) {
-            this.refreshing = true
-            this.showRefreshDialog = true
-            this.initializeProgress()
-            
-            // 从后端恢复进度信息
+          this.refreshing = true
+          this.showRefreshDialog = true
+          this.initializeProgress()
+
+          // 从后端恢复进度信息
           this.refreshProgress = roleResponse.data.refresh_progress || 0
           this.refreshMessage = roleResponse.data.refresh_message || '正在处理...'
           this.refreshedCount = roleResponse.data.refresh_processed_records || 0
           this.currentBatch = roleResponse.data.refresh_current_batch || 0
           this.totalBatches = roleResponse.data.refresh_total_batches || 0
-            
-            // 如果有开始时间，使用它
+
+          // 如果有开始时间，使用它
           if (roleResponse.data.refresh_start_time) {
             this.refreshStartTime = new Date(roleResponse.data.refresh_start_time).getTime()
-            }
-            
-            // 开始轮询进度
-            this.startProgressPolling()
-            
-            this.$message.info('检测到正在进行的数据刷新任务，已恢复进度显示')
           }
+
+          // 开始轮询进度
+          this.startProgressPolling()
+
+          this.$message.info('检测到正在进行的数据刷新任务，已恢复进度显示')
+        }
 
       } catch (error) {
         console.error('获取市场数据状态失败:', error)
@@ -654,29 +719,22 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(async () => {
-      this.refreshing = true
+          this.refreshing = true
           this.showRefreshDialog = true
-      this.initializeProgress()
-      
-          // 刷新市场数据：使用缓存，不强制刷新
-        const params = {
-            force_refresh: false,
-            use_cache: true
-        }
+          this.initializeProgress()
+          // 启动后台刷新
+          const response = await systemApi.refreshMarketData()
 
-        // 启动后台刷新
-        const response = await systemApi.refreshMarketData(params)
-        
-        if (response.code === 200) {
-          this.$message.success('数据刷新已启动，正在后台处理...')
-          
-          // 开始轮询进度
-          this.startProgressPolling()
-        } else {
-          this.$message.error(response.message || '启动刷新失败')
-          this.refreshing = false
+          if (response.code === 200) {
+            this.$message.success('数据刷新已启动，正在后台处理...')
+
+            // 开始轮询进度
+            this.startProgressPolling()
+          } else {
+            this.$message.error(response.message || '启动刷新失败')
+            this.refreshing = false
             this.showRefreshDialog = false
-        }
+          }
         }).catch(() => {
           // 用户取消操作
         })
@@ -710,14 +768,22 @@ export default {
     },
 
     startProgressPolling() {
+      // 清理可能存在的旧定时器
+      if (this.progressTimer) {
+        clearInterval(this.progressTimer)
+        this.progressTimer = null
+      }
+
       // 开始轮询后端进度
       this.progressTimer = setInterval(async () => {
         if (this.equipmentCacheRefreshing || this.equipmentLoading) {
           await this.updateEquipmentProgressFromBackend()
         } else {
-        await this.updateProgressFromBackend()
+          await this.updateProgressFromBackend()
         }
-      }, 3000) // 每3秒查询一次进度
+      }, 10 * 1000) // 每3秒查询一次进度
+
+      console.log('进度轮询定时器已启动')
     },
 
     async updateProgressFromBackend() {
@@ -725,30 +791,30 @@ export default {
         const response = await systemApi.getMarketDataStatus()
         if (response.code === 200) {
           const data = response.data
-          
+
           // 更新进度信息
           this.refreshProgress = data.refresh_progress || 0
           this.refreshMessage = data.refresh_message || ''
           this.refreshedCount = data.refresh_processed_records || 0
           this.currentBatch = data.refresh_current_batch || 0
           this.totalBatches = data.refresh_total_batches || 0
-          
+
           // 检查刷新状态
           if (data.refresh_status === 'completed') {
             this.completeProgress()
             this.$message.success(`数据刷新完成！处理了 ${this.refreshedCount} 条数据`)
-            
+
             // 延迟关闭对话框
             setTimeout(() => {
               this.showRefreshDialog = false
               this.resetProgress()
             }, 2000)
-            
+
             // 刷新主状态
             setTimeout(() => {
               this.refreshStatus()
             }, 500)
-            
+
           } else if (data.refresh_status === 'error') {
             this.refreshMessage = data.refresh_message || '刷新失败'
             this.refreshProgress = 0
@@ -782,6 +848,7 @@ export default {
       if (this.progressTimer) {
         clearInterval(this.progressTimer)
         this.progressTimer = null
+        console.log('进度轮询定时器已停止')
       }
     },
 
@@ -795,16 +862,26 @@ export default {
     },
 
     cancelRefresh() {
+      // 停止进度轮询
       this.stopProgressTimer()
+
+      // 重置所有刷新状态
       this.refreshing = false
       this.fullCacheRefreshing = false
       this.equipmentCacheRefreshing = false
       this.equipmentLoading = false
+
+      // 重置进度信息
       this.resetProgress()
+
+      // 关闭对话框
       this.showRefreshDialog = false
+
       if (this.refreshProgress < 100) {
-      this.$message.info('已取消刷新操作')
+        this.$message.info('已取消刷新操作')
       }
+
+      console.log('刷新操作已取消，所有定时器已清理')
       // TODO: 可以添加取消后台任务的API调用
     },
 
@@ -819,18 +896,18 @@ export default {
       const hits = this.redisStatusComputed.keyspace_hits || 0
       const misses = this.redisStatusComputed.keyspace_misses || 0
       const total = hits + misses
-      
+
       if (total === 0) return '0.00'
       return ((hits / total) * 100).toFixed(2)
     },
 
     formatUptime(seconds) {
       if (!seconds) return '0秒'
-      
+
       const days = Math.floor(seconds / 86400)
       const hours = Math.floor((seconds % 86400) / 3600)
       const minutes = Math.floor((seconds % 3600) / 60)
-      
+
       if (days > 0) {
         return `${days}天 ${hours}小时`
       } else if (hours > 0) {
@@ -854,7 +931,7 @@ export default {
     // 全量缓存相关方法
     async refreshFullCache() {
       if (this.fullCacheRefreshing || this.refreshing) return
-      
+
       try {
         this.$confirm('刷新全量缓存将跳过所有缓存，直接从MySQL重新加载所有empty角色数据，耗时较长但数据最新，是否继续？', '确认刷新', {
           confirmButtonText: '确定',
@@ -866,7 +943,7 @@ export default {
           this.fullCacheRefreshing = true
           this.showRefreshDialog = true
           this.initializeProgress()
-          
+
           const response = await systemApi.refreshFullCache()
           if (response.code === 200) {
             this.$message.success('全量缓存刷新已启动，正在后台处理...')
@@ -892,7 +969,7 @@ export default {
     },
 
     // 装备数据相关方法
-    async loadEquipmentData() {
+    async refreshEquipmentData() {
       if (this.refreshing || this.equipmentCacheRefreshing) return
 
       try {
@@ -907,7 +984,7 @@ export default {
           this.showRefreshDialog = true
           this.initializeProgress()
 
-          const response = await systemApi.loadEquipmentData()
+          const response = await systemApi.refreshEquipmentData()
           if (response.code === 200) {
             this.$message.success('装备数据加载已启动，正在后台处理...')
 
@@ -930,7 +1007,7 @@ export default {
         this.showRefreshDialog = false
       }
     },
-    async refreshEquipmentCache() {
+    async refreshEquipmentFullCache() {
       if (this.equipmentCacheRefreshing || this.refreshing) return
 
       try {
@@ -945,7 +1022,7 @@ export default {
           this.showRefreshDialog = true
           this.initializeProgress()
 
-          const response = await systemApi.refreshEquipmentCache()
+          const response = await systemApi.refreshEquipmentFullCache()
           if (response.code === 200) {
             this.$message.success('装备缓存刷新已启动，正在后台处理...')
 
@@ -1244,9 +1321,9 @@ export default {
 }
 
 /* Redis详细信息样式 */
-  .redis-basic-status {
-    margin-bottom: 20px;
-  }
+.redis-basic-status {
+  margin-bottom: 20px;
+}
 
 .redis-details {
   margin-top: 20px;

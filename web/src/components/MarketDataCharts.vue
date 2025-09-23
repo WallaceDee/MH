@@ -311,6 +311,7 @@ export default {
     updateSchoolDistributionChart(schoolData) {
       // 门派分布饼图
       const data = schoolData 
+      console.log('data', {schoolData})
       const option = {
         title: {
           text: '门派分布',

@@ -38,9 +38,9 @@ class MarketDataCollector:
                 cls._instance = instance
                 # 标记实例是否已初始化，避免重复初始化
                 instance._initialized = False
-                print("创建新的 MarketDataCollector 单例实例")
-            else:
-                print("使用现有的 MarketDataCollector 单例实例")
+            #     print("创建新的 MarketDataCollector 单例实例")
+            # else:
+            #     print("使用现有的 MarketDataCollector 单例实例")
             
             return cls._instance
     
@@ -72,10 +72,39 @@ class MarketDataCollector:
         self._refresh_current_batch = 0
         self._refresh_total_batches = 0
         
+        # MySQL数据统计
+        self.mysql_data_count = 0  # MySQL中roles表的总记录数
+        
         self._initialized = True
         print("市场数据采集器单例初始化完成，默认获取空角色数据作为锚点")
         print("💾 缓存策略: 数据永不过期，只能通过force_refresh=True或手动刷新更新")
     
+    def _get_empty_roles_count(self) -> int:
+        """
+        获取MySQL中roles表的总记录数
+        
+        Returns:
+            int: roles表总记录数
+        """
+        try:
+            from src.database import db
+            from src.models.role import Role
+            
+            # 确保在Flask应用上下文中
+            if not current_app:
+                self.logger.warning("不在Flask应用上下文中，无法查询MySQL数据总数")
+                return 0
+            
+            # 查询roles表总数，role_type为empty
+            count = db.session.query(Role).filter(Role.role_type == 'empty').count()
+            self.mysql_data_count = count
+            self.logger.info(f"MySQL roles表role_type为empty的总记录数: {count:,}")
+            return count
+            
+        except Exception as e:
+            self.logger.error(f"获取MySQL数据总数失败: {e}")
+            return 0
+
     def _get_cache(self):
         """获取Flask-Caching实例"""
         if self._cache is None:
@@ -246,7 +275,7 @@ class MarketDataCollector:
                        max_records: int = 99999,
                        use_cache: bool = True,
                        force_refresh: bool = False,
-                       batch_size: int = 100) -> pd.DataFrame:
+                       batch_size: int = 200) -> pd.DataFrame:
         """
         刷新市场数据 - 优先从Redis全量缓存获取，支持筛选、分页和详细进度跟踪
         
@@ -459,16 +488,20 @@ class MarketDataCollector:
                     print(f"价格范围: {full_data_df['price'].min():.1f} - {full_data_df['price'].max():.1f}")
                     
                     # 缓存全量数据到Redis
+                    print(f"🔍 检查缓存设置: use_cache={use_cache}, force_refresh={force_refresh}")
                     if use_cache:
+                        print("✅ 进入Redis缓存存储分支")
                         self._refresh_message = "缓存数据到Redis..."
                         self._refresh_progress = 95
                         
                         cache_start = time.time()
                         if self._set_full_cached_data(full_data_df):
                             cache_time = time.time() - cache_start
-                            print(f"全量数据已缓存到Redis，缓存耗时: {cache_time:.2f}秒")
+                            print(f"✅ 全量数据已缓存到Redis，缓存耗时: {cache_time:.2f}秒")
                         else:
-                            print("Redis全量缓存设置失败，但数据获取成功")
+                            print("❌ Redis全量缓存设置失败，但数据获取成功")
+                    else:
+                        print("❌ 跳过Redis缓存存储，use_cache=False")
                     
                     # 应用筛选条件并返回结果
                     self._refresh_message = "应用筛选条件..."
@@ -857,21 +890,33 @@ class MarketDataCollector:
     def _set_full_cached_data(self, data: pd.DataFrame) -> bool:
         """将全量数据缓存到Redis - 使用分块存储和Pipeline优化"""
         try:
+            print(f"🔄 开始缓存数据到Redis，数据量: {len(data)} 条")
             from src.utils.redis_cache import get_redis_cache
             redis_cache = get_redis_cache()
             
             if not redis_cache or not redis_cache.is_available():
-                print("Redis不可用")
+                print("❌ Redis不可用")
                 return False
+            
+            print("✅ Redis连接正常，开始存储数据")
             
             # 使用固定的全量缓存键
             full_cache_key = "market_data_full_empty_roles"
             
-            # 设置较长的缓存时间（24小时）
-            cache_hours = 24
-            ttl_seconds = cache_hours * 3600
+            # 设置永不过期缓存时间（使用实例变量）
+            cache_hours = self._cache_expiry_hours  # 使用实例变量
+            # 永不过期模式：ttl_seconds = None，否则转换为秒
+            ttl_seconds = None if cache_hours == -1 else int(cache_hours * 3600)
             
             print(f"开始使用分块存储全量数据: {len(data)} 条记录")
+            
+            # 先清理旧的缓存数据，确保覆盖
+            print("清理旧的缓存数据...")
+            cleared_count = redis_cache.clear_pattern(f"{full_cache_key}:*")
+            if cleared_count > 0:
+                print(f"已清理 {cleared_count} 个旧缓存键")
+            else:
+                print("没有找到旧的缓存数据")
             
             # 根据数据大小动态调整块大小
             if len(data) > 10000:
@@ -890,7 +935,10 @@ class MarketDataCollector:
             )
             
             if success:
-                print(f"全量数据已分块缓存到Redis，缓存时间: {cache_hours}小时，块大小: {chunk_size}")
+                if cache_hours == -1:
+                    print(f"全量数据已分块缓存到Redis，缓存时间: 永不过期，块大小: {chunk_size}")
+                else:
+                    print(f"全量数据已分块缓存到Redis，缓存时间: {cache_hours}小时，块大小: {chunk_size}")
                 return True
             else:
                 print("Redis分块缓存设置失败")
@@ -1015,13 +1063,17 @@ class MarketDataCollector:
             from src.utils.redis_cache import get_redis_cache
             redis_cache = get_redis_cache()
             
+            # 获取MySQL数据总数
+            mysql_count = self._get_empty_roles_count()
+            
             status = {
                 'redis_available': False,
                 'full_cache_exists': False,
                 'full_cache_size': 0,
                 'full_cache_last_update': None,
                 'cache_type': 'unknown',
-                'chunk_info': {}
+                'chunk_info': {},
+                'mysql_data_count': mysql_count
             }
             
             # 检查Redis连接
@@ -1260,9 +1312,15 @@ class MarketDataCollector:
             Dict: 性能统计数据
         """
         try:
+            # 确保MySQL数据总数是最新的
+            if self.mysql_data_count == 0:
+                self._get_empty_roles_count()
+            
             stats = {
                 'data_loaded': self._data_loaded,
                 'last_refresh_time': self._last_refresh_time.isoformat() if self._last_refresh_time else None,
+                # MySQL数据总数
+                'mysql_data_count': self.mysql_data_count,
                 'data_count': len(self.market_data) if not self.market_data.empty else 0,
                 'memory_usage_mb': self.market_data.memory_usage(deep=True).sum() / 1024 / 1024 if not self.market_data.empty else 0,
                 'cache_expiry_hours': self._cache_expiry_hours,

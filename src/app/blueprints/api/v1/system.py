@@ -318,6 +318,9 @@ def get_market_data_status():
         # 获取市场数据收集器实例
         collector = MarketDataCollector()
         
+        # 获取MySQL数据总数
+        mysql_count = collector._get_empty_roles_count()
+        
         # 获取基本状态信息
         status_info = {
             "data_loaded": collector._data_loaded,
@@ -325,7 +328,8 @@ def get_market_data_status():
             "cache_expiry_hours": collector._cache_expiry_hours,
             "data_count": len(collector.market_data) if not collector.market_data.empty else 0,
             "data_columns": list(collector.market_data.columns) if not collector.market_data.empty else [],
-            "memory_usage_mb": collector.market_data.memory_usage(deep=True).sum() / 1024 / 1024 if not collector.market_data.empty else 0
+            "memory_usage_mb": collector.market_data.memory_usage(deep=True).sum() / 1024 / 1024 if not collector.market_data.empty else 0,
+            "mysql_data_count": mysql_count
         }
         
         # 添加刷新进度信息
@@ -434,88 +438,40 @@ def get_equipment_cache_status():
         return error_response(f"获取装备缓存状态失败: {str(e)}")
 
 
-@system_bp.route('/equipment/load-data', methods=['POST'])
-def load_equipment_data():
-    """加载装备数据（使用缓存）"""
+@system_bp.route('/equipment/refresh', methods=['POST'])
+def refresh_equipment_data():
+    """启动装备数据刷新"""
     try:
         from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
         import threading
+        
+        # 获取请求参数
+        data = request.get_json() or {}
         
         # 获取装备数据采集器实例
         collector = EquipMarketDataCollector()
         
         # 检查是否正在刷新
         if collector._refresh_status == "running":
-            return error_response("装备数据加载正在进行中，请等待完成后再试")
+            return error_response("装备数据刷新正在进行中，请等待完成后再试")
         
-        # 获取当前应用实例，用于后台线程
-        app = current_app._get_current_object()
+        # 设置刷新参数
+        use_cache = data.get('use_cache', True)
+        force_refresh = data.get('force_refresh', False)
         
-        # 在后台线程中执行加载（使用缓存）
-        def background_load():
-            try:
-                with app.app_context():
-                    # 在后台线程中重新获取单例实例，确保是同一个实例
-                    from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-                    background_collector = EquipMarketDataCollector()
-                    # 优先使用缓存，如果缓存不存在则加载
-                    background_collector._load_full_data_to_redis(force_refresh=False)
-            except Exception as e:
-                logger.error(f"后台加载装备数据失败: {e}")
-                # 重新获取单例实例来更新状态
-                from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-                error_collector = EquipMarketDataCollector()
-                error_collector._refresh_status = "error"
-                error_collector._refresh_message = f"加载失败: {str(e)}"
-        
-        # 启动后台线程
-        load_thread = threading.Thread(target=background_load)
-        load_thread.daemon = True
-        load_thread.start()
-        
-        return success_response(data={
-            "load_started": True,
-            "message": "装备数据加载已启动，请使用进度接口查询进度"
-        }, message="装备数据加载已启动")
-        
-    except Exception as e:
-        logger.error(f"启动装备数据加载失败: {e}")
-        return error_response(f"启动装备数据加载失败: {str(e)}")
-
-
-@system_bp.route('/equipment/refresh-cache', methods=['POST'])
-def refresh_equipment_cache():
-    """同步装备数据（跳过缓存，完全重新加载）"""
-    try:
-        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-        import threading
-        
-        # 获取装备数据采集器实例
-        collector = EquipMarketDataCollector()
-        
-        # 检查是否正在刷新
-        if collector._refresh_status == "running":
-            return error_response("装备数据同步正在进行中，请等待完成后再试")
-        
-        # 获取当前应用实例，用于后台线程
-        app = current_app._get_current_object()
-        
-        # 在后台线程中执行刷新（强制刷新）
+        # 在后台线程中执行刷新
         def background_refresh():
             try:
-                # 确保在Flask应用上下文中执行
-                with app.app_context():
-                    # 在后台线程中重新获取单例实例，确保是同一个实例
-                    from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-                    background_collector = EquipMarketDataCollector()
-                    background_collector.refresh_full_cache()
+                if force_refresh:
+                    # 强制刷新，完全重新加载
+                    collector.refresh_full_cache()
+                else:
+                    # 使用缓存，如果缓存不存在则加载
+                    collector._load_full_data_to_redis(force_refresh=False)
             except Exception as e:
-                logger.error(f"后台同步装备数据失败: {e}")
-                # 重新获取单例实例来更新状态
-                from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-                error_collector = EquipMarketDataCollector()
-                error_collector._refresh_status = "error"
-                error_collector._refresh_message = f"同步失败: {str(e)}"
+                logger.error(f"后台刷新装备数据失败: {e}")
+                collector._refresh_status = "error"
+                collector._refresh_message = f"刷新失败: {str(e)}"
         
         # 启动后台线程
         refresh_thread = threading.Thread(target=background_refresh)
@@ -525,12 +481,14 @@ def refresh_equipment_cache():
         # 立即返回启动成功的响应
         return success_response(data={
             "refresh_started": True,
-            "message": "装备数据同步已启动，请使用进度接口查询进度"
-        }, message="装备数据同步已启动")
+            "message": "装备数据刷新已启动，请使用状态接口查询进度",
+            "force_refresh": force_refresh,
+            "use_cache": use_cache
+        }, message="装备数据刷新已启动")
         
     except Exception as e:
-        logger.error(f"启动装备数据同步失败: {e}")
-        return error_response(f"启动装备数据同步失败: {str(e)}")
+        logger.error(f"启动装备数据刷新失败: {e}")
+        return error_response(f"启动装备数据刷新失败: {str(e)}")
 
  
 @system_bp.route('/market-data/equipment/status', methods=['GET'])
@@ -547,6 +505,9 @@ def get_equipment_market_data_status():
         print(f"🔍 内存缓存状态: {collector._full_data_cache is not None and not collector._full_data_cache.empty if collector._full_data_cache is not None else False}")
         print(f"🔍 刷新状态: {collector._refresh_status}")
         
+        # 获取MySQL装备数据总数
+        mysql_count = collector._get_mysql_equipments_count()
+        
         # 获取基本状态信息
         status_info = {
             "data_loaded": collector._full_data_cache is not None and not collector._full_data_cache.empty,
@@ -554,7 +515,8 @@ def get_equipment_market_data_status():
             "cache_ttl_hours": collector._cache_ttl_hours,
             "data_count": len(collector._full_data_cache) if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
             "data_columns": list(collector._full_data_cache.columns) if collector._full_data_cache is not None and not collector._full_data_cache.empty else [],
-            "memory_usage_mb": collector._full_data_cache.memory_usage(deep=True).sum() / 1024 / 1024 if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0
+            "memory_usage_mb": collector._full_data_cache.memory_usage(deep=True).sum() / 1024 / 1024 if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
+            "mysql_data_count": mysql_count
         }
         
         # 添加刷新进度信息

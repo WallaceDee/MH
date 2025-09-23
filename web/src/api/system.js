@@ -82,22 +82,21 @@ export const systemApi = {
   },
 
   /**
-   * 刷新市场数据
-   * @param {Object} params - 刷新参数
-   * @param {Object} params.filters - 筛选条件
-   * @param {number} params.max_records - 最大记录数
-   * @returns {Promise}
-   */
-  refreshMarketData(params = {}) {
-    return api.post('/system/market-data/refresh', params)
-  },
-
-  /**
    * 获取市场数据详细分析
    * @returns {Promise}
    */
   getMarketDataAnalysis() {
     return api.get('/system/market-data/analysis')
+  },
+  /**
+   * 刷新市场数据
+   * @returns {Promise}
+   */
+  refreshMarketData() {
+    return api.post('/system/market-data/refresh', {
+      force_refresh: false,
+      use_cache: true
+    })
   },
 
   /**
@@ -107,7 +106,7 @@ export const systemApi = {
   refreshFullCache() {
     return api.post('/system/market-data/refresh', {
       force_refresh: true,
-      use_cache: false
+      use_cache: true
     })
   },
 
@@ -128,24 +127,24 @@ export const systemApi = {
   },
 
   /**
-   * 加载装备数据（使用缓存）
+   * 刷新装备数据（使用缓存）
    * @returns {Promise}
    */
-  loadEquipmentData() {
-    return api.post('/system/equipment/load-data', {
+  refreshEquipmentData() {
+    return api.post('/system/equipment/refresh', {
       force_refresh: false,
       use_cache: true
     })
   },
 
   /**
-   * 同步装备数据（跳过缓存，完全重新加载）
+   * 刷新装备全量缓存（不使用缓存，完全重新加载）
    * @returns {Promise}
    */
-  refreshEquipmentCache() {
-    return api.post('/system/equipment/refresh-cache', {
+  refreshEquipmentFullCache() {
+    return api.post('/system/equipment/refresh', {
       force_refresh: true,
-      use_cache: false
+      use_cache: true
     })
   },
 

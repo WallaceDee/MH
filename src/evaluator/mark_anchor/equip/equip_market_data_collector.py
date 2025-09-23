@@ -123,11 +123,43 @@ class EquipMarketDataCollector:
         self._refresh_current_batch = 0
         self._refresh_total_batches = 0
         
+        # MySQL数据统计
+        self.mysql_data_count = 0  # MySQL中equipments表的总记录数
+        
         self._initialized = True
         cache_mode = "永不过期模式" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时过期"
         print(f"装备市场数据采集器单例初始化完成，支持Redis全量缓存（{cache_mode}）")
 
-#TODO: 加载完后没有赋值?
+    def _get_mysql_equipments_count(self) -> int:
+        """
+        获取MySQL中equipments表的总记录数
+        
+        Returns:
+            int: equipments表总记录数
+        """
+        try:
+            from src.database import db
+            from src.models.equipment import Equipment
+            from flask import current_app
+            from src.app import create_app
+            
+            # 确保在Flask应用上下文中
+            if not current_app:
+                # 创建应用上下文
+                app = create_app()
+                with app.app_context():
+                    return self._get_mysql_equipments_count()
+            
+            # 查询equipments表总数
+            count = db.session.query(Equipment).count()
+            self.mysql_data_count = count
+            self.logger.info(f"MySQL equipments表总记录数: {count:,}")
+            return count
+            
+        except Exception as e:
+            self.logger.error(f"获取MySQL装备数据总数失败: {e}")
+            return 0
+
     def _load_full_data_to_redis(self, force_refresh: bool = False) -> bool:
         """
         加载全量装备数据到Redis - 参考角色模块的批次处理和进度跟踪
@@ -191,19 +223,26 @@ class EquipMarketDataCollector:
             from src.database import db
             from src.models.equipment import Equipment
             from flask import current_app
+            from src.app import create_app
             
             # 确保在Flask应用上下文中
             if not current_app:
-                raise RuntimeError("必须在Flask应用上下文中执行数据库操作")
+                # 创建应用上下文
+                app = create_app()
+                with app.app_context():
+                    return self._load_full_data_to_redis(force_refresh)
             
             # 获取总记录数
             self._refresh_message = "统计数据总量..."
             self._refresh_progress = 10
             
-            # 临时测试：限制加载1000条数据
+            # 获取MySQL装备数据总数
             full_count = db.session.query(Equipment).count()
-            total_count = full_count  # 临时限制为1000条
-            print(f"装备总记录数: {full_count}，本次测试加载: {total_count} 条")
+            self.mysql_data_count = full_count
+            total_count = full_count  # 加载全部数据
+            # total_count = 500  # 临时测试：加载500条数据
+
+            print(f"装备总记录数: {full_count}，本次加载: {total_count} 条")
             
             # 动态调整批次大小（参考角色模块）
             if total_count > 50000:
@@ -317,20 +356,25 @@ class EquipMarketDataCollector:
             
             print(f"准备存储到Redis，数据量: {len(df)} 条，块大小: {chunk_size}")
             
-            # 重试机制
+            # 无缝更新策略：先存储新数据，再清理旧数据
+            # 使用临时键名存储新数据，避免覆盖现有数据
+            temp_cache_key = f"{self._full_cache_key}_temp_{int(time.time())}"
+            print(f"使用临时键名存储新数据: {temp_cache_key}")
+            
+            # 重试机制 - 先存储到临时键
             success = False
             max_retries = 3
             for attempt in range(max_retries):
                 try:
-                    print(f"第 {attempt + 1} 次尝试存储到Redis...")
+                    print(f"第 {attempt + 1} 次尝试存储新数据到临时键...")
                     success = self.redis_cache.set_chunked_data(
-                        base_key=self._full_cache_key,
+                        base_key=temp_cache_key,
                         data=df,
                         chunk_size=chunk_size,
                         ttl=ttl_seconds
                     )
                     if success:
-                        print("Redis存储成功！")
+                        print("新数据存储到临时键成功！")
                         break
                     else:
                         print(f"第 {attempt + 1} 次存储失败，准备重试...")
@@ -343,21 +387,49 @@ class EquipMarketDataCollector:
                         print("所有重试都失败了")
             
             if success:
-                elapsed_time = time.time() - start_time
-                cache_info = "永不过期（仅手动刷新）" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时"
-                print(f"全量装备数据已缓存到Redis，缓存策略: {cache_info}，总耗时: {elapsed_time:.2f}秒")
-                self._full_data_cache = df  # 同时缓存到内存
+                # 新数据存储成功，开始无缝切换
+                print("🔄 开始无缝切换：将临时数据切换为正式数据...")
                 
-                # 完成进度跟踪
-                self._refresh_status = "completed"
-                self._refresh_progress = 100
-                self._refresh_message = "装备数据加载完成！"
+                # 1. 先清理旧的正式缓存数据
+                print("清理旧的正式缓存数据...")
+                old_cleared_count = self.redis_cache.clear_pattern(f"{self._full_cache_key}:*")
+                if old_cleared_count > 0:
+                    print(f"已清理 {old_cleared_count} 个旧正式缓存键")
+                else:
+                    print("没有找到旧的正式缓存数据")
                 
-                return True
+                # 2. 直接重新存储到正式键（更简单可靠的方式）
+                print("将临时数据复制到正式键...")
+                copy_success = self._copy_temp_cache_to_official(temp_cache_key, self._full_cache_key, df, chunk_size, ttl_seconds)
+                
+                if copy_success:
+                    print("✅ 无缝切换完成！新数据已生效")
+                    elapsed_time = time.time() - start_time
+                    cache_info = "永不过期（仅手动刷新）" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时"
+                    print(f"全量装备数据已缓存到Redis，缓存策略: {cache_info}，总耗时: {elapsed_time:.2f}秒")
+                    self._full_data_cache = df  # 同时缓存到内存
+                    
+                    # 完成进度跟踪
+                    self._refresh_status = "completed"
+                    self._refresh_progress = 100
+                    self._refresh_message = "装备数据加载完成！"
+                    
+                    # 清理临时数据
+                    print("清理临时数据...")
+                    self.redis_cache.clear_pattern(f"{temp_cache_key}:*")
+                    
+                    return True
+                else:
+                    print("❌ 无缝切换失败，清理临时数据...")
+                    self.redis_cache.clear_pattern(f"{temp_cache_key}:*")
+                    self._refresh_status = "error"
+                    self._refresh_message = "无缝切换失败"
+                    return False
             else:
-                print("Redis缓存失败")
+                print("❌ 新数据存储失败，清理临时数据...")
+                self.redis_cache.clear_pattern(f"{temp_cache_key}:*")
                 self._refresh_status = "error"
-                self._refresh_message = "Redis缓存失败"
+                self._refresh_message = "新数据存储失败"
                 return False
                 
         except Exception as e:
@@ -375,10 +447,9 @@ class EquipMarketDataCollector:
         try:
             # 先检查内存缓存
             if self._full_data_cache is not None and not self._full_data_cache.empty:
-                print(f"从内存缓存获取全量数据: {len(self._full_data_cache)} 条,{self._full_data_cache is not None}---{not self._full_data_cache.empty}")
+                print(f"从内存缓存获取全量数据: {len(self._full_data_cache)} 条")
                 return self._full_data_cache
             
-            print(f"内存缓存未命中，实例ID: {id(self)}, 缓存状态: {self._full_data_cache is not None if self._full_data_cache is not None else 'None'}")
             # 从Redis获取分块数据
             cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
             
@@ -406,6 +477,15 @@ class EquipMarketDataCollector:
             筛选后的DataFrame
         """
         try:
+            # 定义安全的字符串包含检查函数，避免正则表达式错误
+            def safe_contains(series, pattern):
+                """安全的字符串包含检查，避免正则表达式错误"""
+                try:
+                    return series.str.contains(pattern, na=False, regex=False)
+                except Exception:
+                    # 如果str.contains失败，使用纯字符串匹配
+                    return series.astype(str).str.find(pattern) >= 0
+            
             filtered_df = full_data.copy()
             
             # 基础筛选条件
@@ -489,16 +569,17 @@ class EquipMarketDataCollector:
                     print(f"强制包含高价值套装后: {len(filtered_df)} 条")
             
             # 9. 特效筛选（JSON数组格式）
-            if special_effect and len(special_effect) > 0:
+            if special_effect is not None and special_effect and len(special_effect) > 0:
                 effect_mask = pd.Series([False] * len(filtered_df))
                 for effect in special_effect:
                     if effect not in LOW_VALUE_EFFECTS:
-                        # 使用字符串包含检查（禁用正则表达式）
+                        # 使用精确的JSON数组匹配，避免数字包含关系的误匹配
+                        # 比如effect为6，匹配模式：[6], [6,x], [x,6], [x,6,y] 等，但不匹配16, 26等包含6的数字
                         effect_condition = (
-                            filtered_df['special_effect'].str.contains(f'[{effect}]', na=False, regex=False) |
-                            filtered_df['special_effect'].str.contains(f'[{effect},', na=False, regex=False) |
-                            filtered_df['special_effect'].str.contains(f',{effect},', na=False, regex=False) |
-                            filtered_df['special_effect'].str.contains(f',{effect}]', na=False, regex=False)
+                            safe_contains(filtered_df['special_effect'], f'[{effect}]') |
+                            safe_contains(filtered_df['special_effect'], f'[{effect},') |
+                            safe_contains(filtered_df['special_effect'], f',{effect},') |
+                            safe_contains(filtered_df['special_effect'], f',{effect}]')
                         )
                         effect_mask = effect_mask | effect_condition
                 
@@ -506,17 +587,17 @@ class EquipMarketDataCollector:
                 print(f"按特效筛选后: {len(filtered_df)} 条")
             
             # 10. 排除特效筛选
-            if exclude_special_effect and len(exclude_special_effect) > 0:
+            if exclude_special_effect is not None and exclude_special_effect and len(exclude_special_effect) > 0:
                 # 使用与SQLite版本完全相同的逻辑
                 # SQLite版本：对每个特效创建排除条件，然后用AND连接
                 exclude_conditions = []
                 for effect in exclude_special_effect:
                     # 对每个特效，创建排除条件（不包含该特效的装备）
                     effect_exclude_condition = ~(
-                        filtered_df['special_effect'].str.contains(f'[{effect}]', na=False, regex=False) |  # 只有这一个特效：[1]
-                        filtered_df['special_effect'].str.contains(f'[{effect},', na=False, regex=False) |  # 在开头：[1,x,...]
-                        filtered_df['special_effect'].str.contains(f',{effect},', na=False, regex=False) |  # 在中间：[x,1,y,...]
-                        filtered_df['special_effect'].str.contains(f',{effect}]', na=False, regex=False)    # 在结尾：[x,y,1]
+                        safe_contains(filtered_df['special_effect'], f'[{effect}]') |  # 只有这一个特效：[1]
+                        safe_contains(filtered_df['special_effect'], f'[{effect},') |  # 在开头：[1,x,...]
+                        safe_contains(filtered_df['special_effect'], f',{effect},') |  # 在中间：[x,1,y,...]
+                        safe_contains(filtered_df['special_effect'], f',{effect}]')    # 在结尾：[x,y,1]
                     )
                     exclude_conditions.append(effect_exclude_condition)
                 
@@ -530,7 +611,7 @@ class EquipMarketDataCollector:
                 print(f"排除特效后: {len(filtered_df)} 条")
             
             # 11. 排除套装效果
-            if exclude_suit_effect and len(exclude_suit_effect) > 0:
+            if exclude_suit_effect is not None and exclude_suit_effect and len(exclude_suit_effect) > 0:
                 filtered_df = filtered_df[~filtered_df['suit_effect'].isin(exclude_suit_effect)]
                 print(f"排除套装效果后: {len(filtered_df)} 条")
             
@@ -544,10 +625,10 @@ class EquipMarketDataCollector:
                 for level in high_value_levels:
                     level_condition = (filtered_df['equip_level'] == level)
                     simple_condition = (
-                        filtered_df['special_effect'].str.contains(f'[{simple_effect_id}]', na=False, regex=False) |
-                        filtered_df['special_effect'].str.contains(f'[{simple_effect_id},', na=False, regex=False) |
-                        filtered_df['special_effect'].str.contains(f',{simple_effect_id},', na=False, regex=False) |
-                        filtered_df['special_effect'].str.contains(f',{simple_effect_id}]', na=False, regex=False)
+                        safe_contains(filtered_df['special_effect'], f'[{simple_effect_id}]') |
+                        safe_contains(filtered_df['special_effect'], f'[{simple_effect_id},') |
+                        safe_contains(filtered_df['special_effect'], f',{simple_effect_id},') |
+                        safe_contains(filtered_df['special_effect'], f',{simple_effect_id}]')
                     )
                     exclude_condition = exclude_condition | (level_condition & simple_condition)
                 
@@ -690,6 +771,32 @@ class EquipMarketDataCollector:
         从MySQL数据库获取装备数据（原始查询逻辑）
         """
         try:
+            from src.database import db
+            from src.models.equipment import Equipment
+            from flask import current_app
+            from src.app import create_app
+            
+            # 确保在Flask应用上下文中
+            if not current_app:
+                # 创建应用上下文
+                app = create_app()
+                with app.app_context():
+                    return self._get_market_data_from_mysql(
+                        kindid=kindid,
+                        level_range=level_range,
+                        price_range=price_range,
+                        server=server,
+                        special_skill=special_skill,
+                        suit_effect=suit_effect,
+                        special_effect=special_effect,
+                        exclude_special_effect=exclude_special_effect,
+                        exclude_suit_effect=exclude_suit_effect,
+                        exclude_high_value_simple_equips=exclude_high_value_simple_equips,
+                        require_high_value_suits=require_high_value_suits,
+                        exclude_high_value_special_skills=exclude_high_value_special_skills,
+                        limit=limit
+                    )
+            
             # 构建SQLAlchemy查询 - 只查询特征提取器需要的字段
             # 根据特征提取器统计，需要以下字段（排除iType和cDesc）：
             required_fields = [
@@ -770,15 +877,14 @@ class EquipMarketDataCollector:
                 if special_effect and len(special_effect) > 0:
                     effect_conditions = []
                     for effect in special_effect:
-                        if effect not in LOW_VALUE_EFFECTS:  # 排除低价值特效
-                            effect_conditions.append(
-                                or_(
-                                    Equipment.special_effect.like(f'[{effect}]'),
-                                    Equipment.special_effect.like(f'[{effect},%'),
-                                    Equipment.special_effect.like(f'%,{effect},%'),
-                                    Equipment.special_effect.like(f'%,{effect}]')
-                                )
+                        effect_conditions.append(
+                            or_(
+                                Equipment.special_effect.like(f'[{effect}]'),
+                                Equipment.special_effect.like(f'[{effect},%'),
+                                Equipment.special_effect.like(f'%,{effect},%'),
+                                Equipment.special_effect.like(f'%,{effect}]')
                             )
+                        )
                     
                     if effect_conditions:
                         query = query.filter(or_(*effect_conditions))
@@ -1040,10 +1146,7 @@ class EquipMarketDataCollector:
         """手动刷新全量缓存"""
         print("🔄 手动刷新装备全量缓存...")
         self._full_data_cache = None  # 清空内存缓存
-        success = self._load_full_data_to_redis(force_refresh=True)
-        if success:
-            print(f"缓存刷新成功，内存缓存数据量: {len(self._full_data_cache) if self._full_data_cache is not None else 0} 条")
-        return success
+        return self._load_full_data_to_redis(force_refresh=True)
     
     def set_cache_expiry(self, hours: int):
         """
@@ -1068,6 +1171,9 @@ class EquipMarketDataCollector:
     def get_cache_status(self) -> Dict[str, Any]:
         """获取缓存状态信息"""
         try:
+            # 获取MySQL装备数据总数
+            mysql_count = self._get_mysql_equipments_count()
+            
             status = {
                 'redis_available': False,
                 'full_cache_exists': False,
@@ -1076,7 +1182,8 @@ class EquipMarketDataCollector:
                 'cache_key': self._full_cache_key,
                 'cache_ttl_hours': self._cache_ttl_hours,
                 'cache_never_expires': self._cache_ttl_hours == -1,
-                'refresh_mode': 'manual_only' if self._cache_ttl_hours == -1 else 'auto_expire'
+                'refresh_mode': 'manual_only' if self._cache_ttl_hours == -1 else 'auto_expire',
+                'mysql_data_count': mysql_count
             }
             
             if self.redis_cache and self.redis_cache.is_available():
@@ -1328,6 +1435,98 @@ class EquipMarketDataCollector:
             return main_attr
 
         return "无属性"
+
+    def _copy_temp_cache_to_official(self, temp_key: str, official_key: str, df: pd.DataFrame, chunk_size: int, ttl_seconds: Optional[int]) -> bool:
+        """
+        将临时缓存复制到正式缓存（无缝切换）
+        
+        Args:
+            temp_key: 临时缓存键名
+            official_key: 正式缓存键名
+            df: 数据DataFrame
+            chunk_size: 块大小
+            ttl_seconds: TTL秒数
+            
+        Returns:
+            bool: 是否复制成功
+        """
+        try:
+            print(f"开始复制临时缓存 {temp_key} 到正式缓存 {official_key}...")
+            
+            # 直接使用set_chunked_data重新存储到正式键
+            success = self.redis_cache.set_chunked_data(
+                base_key=official_key,
+                data=df,
+                chunk_size=chunk_size,
+                ttl=ttl_seconds
+            )
+            
+            if success:
+                print("✅ 临时缓存复制到正式缓存成功")
+                return True
+            else:
+                print("❌ 临时缓存复制到正式缓存失败")
+                return False
+                
+        except Exception as e:
+            print(f"❌ 复制临时缓存失败: {e}")
+            return False
+
+    def _rename_temp_cache_to_official(self, temp_key: str, official_key: str) -> bool:
+        """
+        将临时缓存重命名为正式缓存（无缝切换）
+        
+        Args:
+            temp_key: 临时缓存键名
+            official_key: 正式缓存键名
+            
+        Returns:
+            bool: 是否重命名成功
+        """
+        try:
+            # 获取临时缓存的所有键
+            temp_keys = self.redis_cache.client.keys(f"{temp_key}:*")
+            if not temp_keys:
+                print(f"❌ 临时缓存键不存在: {temp_key}")
+                return False
+            
+            print(f"找到 {len(temp_keys)} 个临时缓存键，开始重命名...")
+            
+            # 使用Redis管道批量重命名
+            pipe = self.redis_cache.client.pipeline()
+            
+            for temp_key_full in temp_keys:
+                # 将临时键名替换为正式键名
+                official_key_full = temp_key_full.decode('utf-8').replace(temp_key, official_key)
+                
+                # 获取临时键的值
+                value = self.redis_cache.client.get(temp_key_full)
+                if value is not None:
+                    # 设置到正式键
+                    pipe.set(official_key_full, value)
+                    # 删除临时键
+                    pipe.delete(temp_key_full)
+                    print(f"重命名: {temp_key_full.decode('utf-8')} -> {official_key_full}")
+            
+            # 执行管道操作
+            results = pipe.execute()
+            
+            # 检查结果
+            success_count = sum(1 for result in results if result is True)
+            total_operations = len(results) // 2  # 每个键有set和delete两个操作
+            
+            print(f"重命名完成: {success_count}/{total_operations} 个键操作成功")
+            
+            if success_count == total_operations:
+                print("✅ 所有临时缓存键重命名成功")
+                return True
+            else:
+                print(f"⚠️ 部分重命名失败: {success_count}/{total_operations}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ 重命名临时缓存失败: {e}")
+            return False
 
     def _get_target_addon_classification(self, target_features: Dict[str, Any]) -> str:
         """

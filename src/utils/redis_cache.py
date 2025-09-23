@@ -150,11 +150,19 @@ class RedisCache:
                 serialized_value = pickle.dumps(value)
             
             # 设置缓存
-            expire_time = ttl or self.default_ttl
-            result = self.client.setex(full_key, expire_time, serialized_value)
+            if ttl is None:
+                # None表示永不过期，使用set而不是setex
+                result = self.client.set(full_key, serialized_value)
+            else:
+                # 有TTL值，使用setex
+                expire_time = ttl
+                result = self.client.setex(full_key, expire_time, serialized_value)
             
             if result:
-                self.logger.debug(f"缓存设置成功: {key}, TTL: {expire_time}秒")
+                if ttl is None:
+                    self.logger.debug(f"缓存设置成功: {key}, TTL: 永不过期")
+                else:
+                    self.logger.debug(f"缓存设置成功: {key}, TTL: {ttl}秒")
             else:
                 self.logger.warning(f"缓存设置失败: {key}")
                 
@@ -379,9 +387,8 @@ class RedisCache:
         
         try:
             pipe = self.client.pipeline()
-            expire_time = ttl if ttl is not None else self.default_ttl
             
-            self.logger.info(f"开始批量设置缓存，共 {len(data_dict)} 个键")
+            self.logger.info(f"开始批量设置缓存，共 {len(data_dict)} 个键，TTL: {'永不过期' if ttl is None else f'{ttl}秒'}")
             
             for key, value in data_dict.items():
                 try:
@@ -409,7 +416,7 @@ class RedisCache:
                     if ttl is None:
                         pipe.set(full_key, serialized_value)  # 永不过期
                     else:
-                        pipe.setex(full_key, expire_time, serialized_value)  # 有TTL
+                        pipe.setex(full_key, ttl, serialized_value)  # 有TTL
                     
                 except Exception as e:
                     self.logger.warning(f"序列化键 {key} 失败: {e}")
