@@ -216,14 +216,32 @@
                     <span class="label">总装备数:</span>
                     <span class="value">{{ equipmentMarketDataStatus.data_count | numberFormat }}</span>
                   </div>
-                  <div v-if="equipmentMarketDataStatus.kindid_distribution" class="status-item">
-                    <span class="label">装备类型:</span>
-                    <div class="equipment-type-tags">
-                      <el-tag v-for="(count, kindid) in equipmentMarketDataStatus.kindid_distribution" :key="kindid"
-                        size="mini" :type="getEquipmentTypeColor(kindid)">
-                        {{ getEquipmentTypeName(kindid) }}: {{ count }}
-                      </el-tag>
-                    </div>
+
+                    <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">价格范围:</span>
+                    <span class="value">
+                      {{ equipmentMarketDataStatus.price_statistics.min_price | numberFormat }} -
+                      {{ equipmentMarketDataStatus.price_statistics.max_price | numberFormat }}
+                    </span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">平均价格:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.price_statistics.avg_price.toFixed(0) |
+                      numberFormat
+                    }}</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">中位数价格:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.price_statistics.median_price.toFixed(0) |
+                      numberFormat }}</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.high_value_count" class="status-item">
+                    <span class="label">高价值装备:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.high_value_count | numberFormat }} 条</span>
+                  </div>
+                  <div v-if="equipmentMarketDataStatus.special_skill_count" class="status-item">
+                    <span class="label">特技装备:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.special_skill_count | numberFormat }} 条</span>
                   </div>
                   <div v-if="equipmentMarketDataStatus.level_statistics" class="status-item">
                     <span class="label">等级范围:</span>
@@ -242,36 +260,32 @@
                     <i class="el-icon-coin"></i>
                     <span>装备价格统计</span>
                   </div>
-                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
-                    <span class="label">价格范围:</span>
-                    <span class="value">
-                      {{ equipmentMarketDataStatus.price_statistics.min_price | numberFormat }} -
-                      {{ equipmentMarketDataStatus.price_statistics.max_price | numberFormat }}
-                    </span>
-                  </div>
-                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
-                    <span class="label">平均价格:</span>
-                    <span class="value">{{ equipmentMarketDataStatus.price_statistics.avg_price.toFixed(0) |
-                      numberFormat
-                      }}</span>
-                  </div>
-                  <div v-if="equipmentMarketDataStatus.price_statistics" class="status-item">
-                    <span class="label">中位数价格:</span>
-                    <span class="value">{{ equipmentMarketDataStatus.price_statistics.median_price.toFixed(0) |
-                      numberFormat }}</span>
-                  </div>
-                  <div v-if="equipmentMarketDataStatus.high_value_count" class="status-item">
-                    <span class="label">高价值装备:</span>
-                    <span class="value">{{ equipmentMarketDataStatus.high_value_count | numberFormat }} 条</span>
-                  </div>
-                  <div v-if="equipmentMarketDataStatus.special_skill_count" class="status-item">
-                    <span class="label">特技装备:</span>
-                    <span class="value">{{ equipmentMarketDataStatus.special_skill_count | numberFormat }} 条</span>
-                  </div>
+                  <div class="equipment-type-tags">
+                      <el-tag v-for="(count, kindid) in equipmentMarketDataStatus.kindid_distribution" :key="kindid"
+                        size="mini" :type="getEquipmentTypeColor(kindid)">
+                        {{ getEquipmentTypeName(kindid) }}: {{ count }}
+                      </el-tag>
+                    </div>
+                 
                 </el-card>
               </el-col>
 
             </el-row>
+
+            <!-- 装备数据字段详情卡片 -->
+            <el-card class="details-card"
+              v-if="equipmentMarketDataStatus.data_columns && equipmentMarketDataStatus.data_columns.length > 0">
+              <div slot="header" class="card-header">
+                <i class="el-icon-menu"></i>
+                <span>装备数据字段 ({{ equipmentMarketDataStatus.data_columns.length }})</span>
+              </div>
+              <div class="columns-grid">
+                <el-tag v-for="column in equipmentMarketDataStatus.data_columns" :key="column" size="small"
+                  class="column-tag">
+                  {{ column }}
+                </el-tag>
+              </div>
+            </el-card>
           </div>
         </el-tab-pane>
 
@@ -1105,32 +1119,25 @@ export default {
     },
 
     getEquipmentTypeName(kindid) {
-      const typeNames = {
-        14: '武器', 10: '武器', 6: '武器', 5: '武器', 15: '武器',
-        4: '武器', 13: '武器', 7: '武器', 12: '武器', 9: '武器',
-        11: '武器', 8: '武器', 52: '武器', 53: '武器', 54: '武器',
-        17: '头盔', 58: '发钗',
-        18: '衣服', 59: '衣服',
-        19: '鞋子',
-        20: '腰带',
-        21: '项链',
-        61: '灵饰', 62: '灵饰', 63: '灵饰', 64: '灵饰',
-        29: '召唤兽装备'
-      }
-      return typeNames[kindid] || `类型${kindid}`
+      const kindidOptions = [...window.AUTO_SEARCH_CONFIG.weapon_armors.map(([value, label]) => ({ value, label })), ...window.lingshiKinds.map(([value, label]) => ({ value, label })), {
+        value: 29,
+        label: '召唤兽装备'
+      }]
+      const currnt = kindidOptions.find(item => item.value == kindid)
+      return currnt?.label || `类型${kindid}`
     },
 
     getEquipmentTypeColor(kindid) {
       // 根据装备类型返回不同颜色
-      if ([14, 10, 6, 5, 15, 4, 13, 7, 12, 9, 11, 8, 52, 53, 54].includes(parseInt(kindid))) {
+      if (window.is_weapon_equip(kindid)) {
         return 'danger' // 武器红色
-      } else if ([17, 58].includes(parseInt(kindid))) {
+      } else if (window.is_helmet_equip(kindid)) {
         return 'warning' // 头盔橙色
-      } else if ([18, 59].includes(parseInt(kindid))) {
+      } else if (window.is_cloth_equip(kindid)) {
         return 'success' // 衣服绿色
-      } else if ([19, 20, 21].includes(parseInt(kindid))) {
+      } else if (window.is_shoes_equip(kindid) || window.is_belt_equip(kindid) || window.is_necklace_equip(kindid)) {
         return 'info' // 鞋子腰带项链蓝色
-      } else if ([61, 62, 63, 64].includes(parseInt(kindid))) {
+      } else if (window.is_lingshi_equip(kindid)) {
         return 'primary' // 灵饰紫色
       } else {
         return '' // 默认
@@ -1413,8 +1420,6 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  max-height: 80px;
-  overflow-y: auto;
 }
 
 .level-distribution {

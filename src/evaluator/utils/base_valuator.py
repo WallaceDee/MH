@@ -20,7 +20,6 @@ class BaseValuator(ABC):
         from .extreme_value_filter import ExtremeValueFilter
         self.extreme_value_filter = ExtremeValueFilter()
     
-    print
     @abstractmethod
     def find_market_anchors(self,
                            target_features: Dict[str, Any],

@@ -45,9 +45,132 @@ class PetEquipMarketDataCollector:
         """
         self.feature_extractor = PetEquipFeatureExtractor()
         self.logger = logging.getLogger(__name__)
+        
+        # 获取装备数据采集器实例，共享缓存
+        self.equip_collector = None
+        self._init_equip_collector()
+        
+        # 缓存过滤后的宠物装备数据，避免重复读取和过滤
+        self._cached_pet_equip_data = None
+        self._cache_timestamp = None
 
         print(f"召唤兽装备数据采集器初始化，使用MySQL数据库")
 
+    def _init_equip_collector(self):
+        """初始化装备数据采集器实例"""
+        try:
+            from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+            self.equip_collector = EquipMarketDataCollector()
+            print("✅ 成功获取装备数据采集器实例，可共享缓存")
+        except Exception as e:
+            self.logger.warning(f"获取装备数据采集器实例失败: {e}")
+            print(f"⚠️ 无法共享装备数据采集器缓存: {e}")
+
+    def _get_shared_cache_data(self, fangyu: int = 0, speed: int = 0, shanghai: int = 0) -> Optional[pd.DataFrame]:
+        """
+        从装备数据采集器获取共享缓存数据，优先使用实例缓存
+        
+        Args:
+            fangyu: 防御值筛选 >0 即铠甲
+            speed: 速度值筛选 >0 即项圈
+            shanghai: 伤害值筛选，==0 则只能匹配shanghai小于20的
+            
+        Returns:
+            过滤后的宠物装备数据DataFrame，如果缓存不可用则返回None
+        """
+        if not self.equip_collector:
+            return None
+            
+        try:
+            # 检查实例缓存是否有效
+            if self._cached_pet_equip_data is not None:
+                print(f"✅ 使用实例缓存的宠物装备数据，共 {len(self._cached_pet_equip_data)} 条")
+                
+                # 根据属性值进一步过滤
+                filtered_data = self._filter_cached_data_by_attrs(
+                    self._cached_pet_equip_data, fangyu, speed, shanghai
+                )
+                if not filtered_data.empty:
+                    print(f"✅ 按属性过滤后得到 {len(filtered_data)} 条宠物装备数据")
+                    return filtered_data
+                else:
+                    print(f"实例缓存中没有找到符合条件的宠物装备数据")
+                    return None
+            
+            # 实例缓存为空，从装备数据采集器获取全量缓存
+            full_data = self.equip_collector._get_full_data_from_redis()
+            
+            if full_data is None or full_data.empty:
+                print("装备数据采集器缓存为空，无法共享")
+                return None
+            
+            # 过滤出宠物装备数据 (kindid: PET_EQUIP_KINDID) 并保存到实例缓存
+            self._cached_pet_equip_data = full_data[full_data['kindid'] == PET_EQUIP_KINDID].copy()
+            self._cache_timestamp = datetime.now()
+            
+            if not self._cached_pet_equip_data.empty:
+                print(f"✅ 从装备数据采集器获取并缓存 {len(self._cached_pet_equip_data)} 条宠物装备数据")
+                
+                # 根据属性值进一步过滤
+                filtered_data = self._filter_cached_data_by_attrs(
+                    self._cached_pet_equip_data, fangyu, speed, shanghai
+                )
+                if not filtered_data.empty:
+                    print(f"✅ 按属性过滤后得到 {len(filtered_data)} 条宠物装备数据")
+                    return filtered_data
+                else:
+                    print(f"缓存中没有找到符合条件的宠物装备数据")
+                    return None
+            else:
+                print("装备数据采集器缓存中没有找到宠物装备数据")
+                return None
+                
+        except Exception as e:
+            self.logger.warning(f"获取共享缓存数据失败: {e}")
+            print(f"⚠️ 共享缓存获取失败: {e}")
+            return None
+
+    def _filter_cached_data_by_attrs(self, cached_data: pd.DataFrame, 
+                                   fangyu: int = 0, speed: int = 0, shanghai: int = 0) -> pd.DataFrame:
+        """
+        根据属性值过滤缓存数据
+        
+        Args:
+            cached_data: 缓存的数据
+            fangyu: 防御值筛选 >0 即铠甲
+            speed: 速度值筛选 >0 即项圈
+            shanghai: 伤害值筛选，==0 则只能匹配shanghai小于20的
+            
+        Returns:
+            筛选后的DataFrame
+        """
+        filtered_data = cached_data.copy()
+        
+        # 伤害值筛选
+        if shanghai == 0:
+            filtered_data = filtered_data[filtered_data['shanghai'] < 20]
+        
+        # 根据属性值区分装备类型后进行过滤
+        if fangyu > 0:
+            # 铠甲类型：要求有防御值
+            filtered_data = filtered_data[filtered_data['fangyu'] > 0]
+        elif speed > 0:
+            # 项圈类型：要求有速度值
+            filtered_data = filtered_data[filtered_data['speed'] > 0]
+        else:
+            # 护腕类型：既没有防御也没有速度
+            filtered_data = filtered_data[
+                (filtered_data['fangyu'] == 0) & 
+                (filtered_data['speed'] == 0)
+            ]
+        
+        return filtered_data
+
+    def clear_cache(self):
+        """清除实例缓存，强制下次重新从装备数据采集器获取数据"""
+        self._cached_pet_equip_data = None
+        self._cache_timestamp = None
+        print("✅ 已清除宠物装备数据实例缓存")
 
     def get_market_data(self,
                         kindid: Optional[int] = None,
@@ -57,10 +180,10 @@ class PetEquipMarketDataCollector:
                         fangyu: Optional[int] = 0,
                         speed: Optional[int] = 0,
                         shanghai: Optional[int] = 0,
-                        limit: int = 1000) -> pd.DataFrame:
+                        limit: int = 1000,
+                        use_shared_cache: bool = True) -> pd.DataFrame:
         """
-        获取市场召唤兽装备数据，从MySQL数据库中获取数据
-        TODO: 分类，物理、法术、 套装？目前根据shanghai 20 区分
+        获取市场召唤兽装备数据，优先从装备数据采集器的共享缓存获取数据
 
         Args:
             kindid: 装备类型ID，默认为宠物装备类型
@@ -74,9 +197,113 @@ class PetEquipMarketDataCollector:
             -- 属性过滤
                 shanghai==0 则 只能匹配shanghai小于20的    
             limit: 返回数据条数限制
+            use_shared_cache: 是否使用共享缓存
 
         Returns:
             召唤兽装备市场数据DataFrame
+        """
+        try:
+            import time
+            start_time = time.time()
+            
+            # 优先从共享缓存获取数据
+            if use_shared_cache:
+                cached_data = self._get_shared_cache_data(fangyu, speed, shanghai)
+                
+                if cached_data is not None and not cached_data.empty:
+                    # 对缓存数据进行进一步筛选
+                    filtered_data = self._filter_cached_data(
+                        cached_data,
+                        level_range=level_range,
+                        price_range=price_range,
+                        server=server,
+                        limit=limit
+                    )
+                    
+                    elapsed_time = time.time() - start_time
+                    print(f"✅ 从共享缓存获取宠物装备数据完成，耗时: {elapsed_time:.3f}秒，返回: {len(filtered_data)} 条数据")
+                    return filtered_data
+            
+            # 降级到MySQL查询
+            print("使用MySQL数据库查询宠物装备数据（降级模式）...")
+            return self._get_market_data_from_mysql(
+                kindid=kindid,
+                level_range=level_range,
+                price_range=price_range,
+                server=server,
+                fangyu=fangyu,
+                speed=speed,
+                shanghai=shanghai,
+                limit=limit
+            )
+            
+        except Exception as e:
+            self.logger.error(f"获取宠物装备市场数据失败: {e}")
+            print(f"获取宠物装备市场数据异常: {e}")
+            return pd.DataFrame()
+
+    def _filter_cached_data(self, cached_data: pd.DataFrame, 
+                           level_range: Optional[Tuple[int, int]] = None,
+                           price_range: Optional[Tuple[float, float]] = None,
+                           server: Optional[str] = None,
+                           limit: int = 1000) -> pd.DataFrame:
+        """
+        对缓存数据进行筛选
+        
+        Args:
+            cached_data: 缓存的数据
+            level_range: 等级范围筛选
+            price_range: 价格范围筛选
+            server: 服务器筛选
+            limit: 数据条数限制
+            
+        Returns:
+            筛选后的DataFrame
+        """
+        filtered_data = cached_data.copy()
+        
+        # 等级范围筛选
+        if level_range is not None:
+            min_level, max_level = level_range
+            filtered_data = filtered_data[
+                (filtered_data['equip_level'] >= min_level) & 
+                (filtered_data['equip_level'] <= max_level)
+            ]
+        
+        # 价格范围筛选
+        if price_range is not None:
+            min_price, max_price = price_range
+            filtered_data = filtered_data[
+                (filtered_data['price'] >= min_price) & 
+                (filtered_data['price'] <= max_price)
+            ]
+        
+        # 服务器筛选
+        if server is not None:
+            filtered_data = filtered_data[filtered_data['server_name'] == server]
+        
+        # 按更新时间排序并限制条数
+        filtered_data = filtered_data.sort_values('update_time', ascending=False).head(limit)
+        
+        return filtered_data
+
+    def _get_market_data_from_mysql(self,
+                                   kindid: Optional[int] = None,
+                                   level_range: Optional[Tuple[int, int]] = None,
+                                   price_range: Optional[Tuple[float, float]] = None,
+                                   server: Optional[str] = None,
+                                   fangyu: Optional[int] = 0,
+                                   speed: Optional[int] = 0,
+                                   shanghai: Optional[int] = 0,
+                                   limit: int = 1000) -> pd.DataFrame:
+        """
+        从MySQL数据库获取市场宠物装备数据
+        
+        Args:
+            参数同get_market_data方法
+            
+        Returns:
+            宠物装备市场数据DataFrame
         """
         try:
             # 构建SQLAlchemy查询，筛选宠物装备

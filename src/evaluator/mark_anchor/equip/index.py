@@ -551,7 +551,7 @@ class EquipAnchorEvaluator(BaseValuator):
                         anchor_candidates.append({
                             # 优先使用真实的equip_sn，如果没有则使用索引
                             'equip_sn': current_equip_sn,
-                            'similarity': float(similarity),
+                            'similarity': round(float(similarity), 3),  # 保留三位小数
                             'price': float(market_row.get('price', 0)),
                             'features': self._convert_pandas_row_to_dict(market_row)
                         })

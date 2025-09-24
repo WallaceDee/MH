@@ -1,5 +1,5 @@
 <template>
-  <el-popover :data-equip-sn="equipment.equip_sn" :placement="placement" width="640" trigger="click"
+  <el-popover :data-equip-sn="equipment.equip_sn" :placement="placement" width="720" trigger="click"
     popper-class="similar-equip-popper" v-model="visible" @show="handleShow">
     <template #reference>
       <slot>
@@ -14,7 +14,7 @@
         <el-skeleton :rows="12" animated />
       </div>
       <div v-else>
-        <div class="similar-header">
+        <div class="similar-header" v-if="similarData">
           <h4>相似装备 (共{{ similarData.anchor_count }}个) <el-divider direction="vertical" />
             <el-tag type="info" size="mini">相似度阈值: {{ similarData.similarity_threshold }}</el-tag>
             <el-divider direction="vertical" />
@@ -35,8 +35,8 @@
         </div>
 
         <!-- 相似装备表格 -->
-        <el-empty v-if="!anchorsLoading && !similarData.anchors?.length" description="暂无数据"></el-empty>
-        <similar-equipment-table v-else :anchors="similarData.anchors" :loading="anchorsLoading" />
+        <el-empty v-if="!anchorsLoading && !similarData?.anchors?.length" description="暂无数据"></el-empty>
+        <similar-equipment-table v-else :anchors="similarData.anchors" v-loading="anchorsLoading" element-loading-text="正在加载相似装备数据"/>
       </div>
       <!-- 错误状态 -->
       <div v-if="error" class="error-info">
@@ -123,58 +123,96 @@ export default {
     // 统一的装备估价加载方法
     async loadEquipmentValuation(equipment, similarityThreshold) {
       try {
-        // 第一个接口：获取估价信息
+        // 第一个接口：获取装备估价信息
         this.valuationLoading = true
-        const valuationResponse = await this.$api.equipment.getEquipmentValuation({
+        const response = await this.$api.equipment.getEquipmentValuation({
           equipment_data: equipment,
           strategy: 'fair_value',
           similarity_threshold: similarityThreshold,
           max_anchors: this.maxAnchors
         })
-        const data = valuationResponse.data
-        this.equipmentValuation = data
+
+        if (response.code !== 200) {
+          // 估价失败
+          this.$notify.error({
+            title: '装备估价失败',
+            message: response.message || '估价计算失败',
+            duration: 3000
+          })
+
+          // 显示详细错误信息
+          if (response.data && response.data.error) {
+            console.error('估价错误详情:', response.data.error)
+          }
+          throw new Error(response.message || '估价计算失败')
+        }
+
+        const result = response.data
+        this.equipmentValuation = result
+
+        // 初始化相似装备数据
         this.similarData = {
-          anchor_count: data.anchor_count,
-          similarity_threshold: data.similarity_threshold,
-          max_anchors: data.max_anchors,
+          anchor_count: result.anchor_count,
+          similarity_threshold: result.similarity_threshold || similarityThreshold,
+          max_anchors: result.max_anchors || this.maxAnchors,
           anchors: [],
           statistics: {
-            price_range: data.price_range,
-            similarity_range: { min: 0, max: 0, avg: 0 }
-          }
-        }
-        this.valuationLoading = false
-
-        // 处理估价响应
-        if (valuationResponse.code === 200 && data.anchor_count && data.anchor_count > 0) {
-          // 第二个接口：获取相似装备锚点数据
-          this.anchorsLoading = true
-          const { data: { anchors: allAnchors } } = await this.$api.equipment.findEquipmentAnchors({
-            equipment_data: equipment,
-            similarity_threshold: similarityThreshold,
-            max_anchors: this.maxAnchors
-          })
-
-          this.anchorsLoading = false
-
-          // 从估价结果中提取相似装备信息
-          this.$set(this.similarData, 'anchors', allAnchors)
-          this.$set(this.similarData, 'statistics', {
             price_range: {
-              min: Math.min(...allAnchors.map((a) => a.price || 0)),
-              max: Math.max(...allAnchors.map((a) => a.price || 0))
+              min: Math.min(...(result.anchors || []).map((a) => a.price || 0)),
+              max: Math.max(...(result.anchors || []).map((a) => a.price || 0)),
+              avg: (result.anchors || []).reduce((sum, a) => sum + (a.price || 0), 0) / (result.anchors || []).length
             },
             similarity_range: {
-              min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
-              max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
-              avg:
-                allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                allAnchors.length
+              min: Math.min(...(result.anchors || []).map((a) => a.similarity || 0)),
+              max: Math.max(...(result.anchors || []).map((a) => a.similarity || 0)),
+              avg: (result.anchors || []).reduce((sum, a) => sum + (a.similarity || 0), 0) / (result.anchors || []).length
             }
-          })
+          }
         }
+
+        this.valuationLoading = false
+
+        // 处理估价响应，如果有锚点数据则加载详细信息
+        if (result?.anchor_count > 0 && result?.anchors?.length > 0) {
+          // 第二个接口：获取相似装备锚点详细数据
+          this.anchorsLoading = true
+
+          try {
+            // 使用估价结果中的equip_sn_list直接获取相似装备列表，避免重复计算
+            const anchorsResponse = await this.$api.equipment.getEquipmentList({
+              page_size: 99,
+              equip_sn_list: result.anchors.map(item => item.equip_sn)
+            })
+
+            this.anchorsLoading = false
+            // 合并相似度和数据
+            if (anchorsResponse.code === 200 && anchorsResponse.data?.data) {
+              const anchorsData = anchorsResponse.data.data
+              const parsedAnchors = anchorsData.map((item, index) => {
+                // 添加相似度信息
+                item.similarity = result.anchors[index].similarity
+                item.features = result.anchors[index].features
+                return item
+              })
+
+              // 更新相似装备数据
+              this.$set(this.similarData, 'anchors', parsedAnchors)
+            } else {
+              console.warn('未获取到相似装备锚点数据:', anchorsResponse.message)
+            }
+          } catch (error) {
+            console.error('查询相似装备锚点失败:', error)
+            // 锚点查询失败不影响估价结果显示
+          }
+        }
+
       } catch (error) {
-        console.error('获取装备估价失败:', error)
+        console.error('装备估价失败:', error)
+        this.$notify.error({
+          title: '估价请求失败',
+          message: '网络请求异常，请稍后重试',
+          duration: 3000
+        })
         throw error
       } finally {
         // 确保在出现异常时也重置加载状态

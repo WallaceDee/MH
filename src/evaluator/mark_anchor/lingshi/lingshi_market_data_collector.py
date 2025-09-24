@@ -3,48 +3,18 @@ from typing import Dict, Any, List, Optional, Union, Tuple
 import logging
 import numpy as np
 import pandas as pd
-import sys
-import os
-
-# 添加项目根目录到Python路径，解决模块导入问题
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.dirname(current_dir))))  # 向上四级到项目根目录
-sys.path.insert(0, project_root)
 
 # 导入灵饰优先级配置
-try:
-    from src.evaluator.constants.lingshi_priorities import (
-        RING_EARRING_PRIORITY, BRACELET_ACCESSORY_PRIORITY,
-        get_priority_by_attr_name
-    )
-except ImportError:
-    # 如果导入失败，定义默认配置
-    RING_EARRING_PRIORITY = {}
-    BRACELET_ACCESSORY_PRIORITY = {}
-    def get_priority_by_attr_name(attr_name: str, equipment_type: str = None) -> int:
-        return 999
+from src.evaluator.constants.lingshi_priorities import (
+    RING_EARRING_PRIORITY, BRACELET_ACCESSORY_PRIORITY,
+    get_priority_by_attr_name
+)
 
+from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
+from src.database import db
+from src.models.equipment import Equipment
+from sqlalchemy import and_, or_, func, text
 
-try:
-    from ...feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
-    from src.database import db
-    from src.models.equipment import Equipment
-    from sqlalchemy import and_, or_, func, text
-except ImportError:
-    try:
-        from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
-        from src.database import db
-        from src.models.equipment import Equipment
-        from sqlalchemy import and_, or_, func, text
-    except ImportError:
-        # 如果都导入失败，创建一个简单的占位符
-        class LingshiFeatureExtractor:
-            def __init__(self):
-                pass
-
-            def extract_features(self, lingshi_data):
-                return {}
 
 
 class LingshiMarketDataCollector:
@@ -57,9 +27,96 @@ class LingshiMarketDataCollector:
         self.feature_extractor = LingshiFeatureExtractor()
         self.logger = logging.getLogger(__name__)
         self.target_features = None  # 保存目标特征，用于传递target_match_attrs
+        
+        # 获取装备数据采集器实例，共享缓存
+        self.equip_collector = None
+        self._init_equip_collector()
+        
+        # 缓存过滤后的灵饰数据，避免重复读取和过滤
+        self._cached_lingshi_data = None
+        self._cache_timestamp = None
 
         print(f"灵饰数据采集器初始化，使用MySQL数据库")
+    
+    def _init_equip_collector(self):
+        """初始化装备数据采集器实例"""
+        try:
+            from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+            self.equip_collector = EquipMarketDataCollector()
+            print("✅ 成功获取装备数据采集器实例，可共享缓存")
+        except Exception as e:
+            self.logger.warning(f"获取装备数据采集器实例失败: {e}")
+            print(f"⚠️ 无法共享装备数据采集器缓存: {e}")
+    
+    def _get_shared_cache_data(self, kindid: Optional[int] = None) -> Optional[pd.DataFrame]:
+        """
+        从装备数据采集器获取共享缓存数据，优先使用实例缓存
+        
+        Args:
+            kindid: 灵饰类型ID筛选 (61:戒指, 62:耳饰, 63:手镯, 64:佩饰)
+            
+        Returns:
+            过滤后的灵饰数据DataFrame，如果缓存不可用则返回None
+        """
+        if not self.equip_collector:
+            return None
+            
+        try:
+            # 检查实例缓存是否有效
+            if self._cached_lingshi_data is not None:
+                print(f"✅ 使用实例缓存的灵饰数据，共 {len(self._cached_lingshi_data)} 条")
+                
+                # 如果指定了kindid，进一步过滤
+                if kindid is not None:
+                    filtered_data = self._cached_lingshi_data[self._cached_lingshi_data['kindid'] == kindid]
+                    if not filtered_data.empty:
+                        print(f"✅ 按kindid={kindid}过滤后得到 {len(filtered_data)} 条灵饰数据")
+                        return filtered_data
+                    else:
+                        print(f"实例缓存中没有找到kindid={kindid}的灵饰数据")
+                        return None
+                else:
+                    return self._cached_lingshi_data
+            
+            # 实例缓存为空，从装备数据采集器获取全量缓存
+            full_data = self.equip_collector._get_full_data_from_redis()
+            
+            if full_data is None or full_data.empty:
+                print("装备数据采集器缓存为空，无法共享")
+                return None
+            
+            # 过滤出灵饰数据 (kindid: 61-64) 并保存到实例缓存
+            self._cached_lingshi_data = full_data[full_data['kindid'].isin([61, 62, 63, 64])].copy()
+            self._cache_timestamp = datetime.now()
+            
+            if not self._cached_lingshi_data.empty:
+                print(f"✅ 从装备数据采集器获取并缓存 {len(self._cached_lingshi_data)} 条灵饰数据")
+                
+                # 如果指定了kindid，进一步过滤
+                if kindid is not None:
+                    filtered_data = self._cached_lingshi_data[self._cached_lingshi_data['kindid'] == kindid]
+                    if not filtered_data.empty:
+                        print(f"✅ 按kindid={kindid}过滤后得到 {len(filtered_data)} 条灵饰数据")
+                        return filtered_data
+                    else:
+                        print(f"缓存中没有找到kindid={kindid}的灵饰数据")
+                        return None
+                else:
+                    return self._cached_lingshi_data
+            else:
+                print("装备数据采集器缓存中没有找到灵饰数据")
+                return None
+                
+        except Exception as e:
+            self.logger.warning(f"获取共享缓存数据失败: {e}")
+            print(f"⚠️ 共享缓存获取失败: {e}")
+            return None
 
+    def clear_cache(self):
+        """清除实例缓存，强制下次重新从装备数据采集器获取数据"""
+        self._cached_lingshi_data = None
+        self._cache_timestamp = None
+        print("✅ 已清除灵饰数据实例缓存")
 
     def get_market_data(self,
                         kindid: Optional[int] = None,
@@ -69,9 +126,10 @@ class LingshiMarketDataCollector:
                         is_super_simple: Optional[bool] = None,
                         price_range: Optional[Tuple[float, float]] = None,
                         server: Optional[str] = None,
-                        limit: int = 1000) -> pd.DataFrame:
+                        limit: int = 1000,
+                        use_shared_cache: bool = True) -> pd.DataFrame:
         """
-        获取市场灵饰数据，从MySQL数据库中获取数据
+        获取市场灵饰数据，优先从装备数据采集器的共享缓存获取数据
 
         Args:
             kindid: 灵饰类型ID筛选 (61:戒指, 62:耳饰, 63:手镯, 64:佩饰)
@@ -85,7 +143,139 @@ class LingshiMarketDataCollector:
             server: 服务器筛选
             is_super_simple: 是否超级简易筛选 (基于special_effect=="[1]"判断)
             limit: 返回数据条数限制
+            use_shared_cache: 是否使用共享缓存
 
+        Returns:
+            灵饰市场数据DataFrame
+        """
+        try:
+            import time
+            start_time = time.time()
+            
+            # 优先从共享缓存获取数据
+            if use_shared_cache:
+                cached_data = self._get_shared_cache_data(kindid)
+                
+                if cached_data is not None and not cached_data.empty:
+                    # 对缓存数据进行进一步筛选
+                    filtered_data = self._filter_cached_data(
+                        cached_data,
+                        level_range=level_range,
+                        main_attr=main_attr,
+                        is_super_simple=is_super_simple,
+                        price_range=price_range,
+                        server=server,
+                        limit=limit
+                    )
+                    
+                    # 附加属性筛选：根据attr_type进行筛选
+                    if attrs is not None and len(attrs) > 0:
+                        filtered_data = self._filter_by_attrs(filtered_data, attrs)
+                    
+                    elapsed_time = time.time() - start_time
+                    print(f"✅ 从共享缓存获取灵饰数据完成，耗时: {elapsed_time:.3f}秒，返回: {len(filtered_data)} 条数据")
+                    return filtered_data
+            
+            # 降级到MySQL查询
+            print("使用MySQL数据库查询灵饰数据（降级模式）...")
+            return self._get_market_data_from_mysql(
+                kindid=kindid,
+                level_range=level_range,
+                main_attr=main_attr,
+                is_super_simple=is_super_simple,
+                price_range=price_range,
+                server=server,
+                limit=limit,
+                attrs=attrs
+            )
+            
+        except Exception as e:
+            self.logger.error(f"获取灵饰市场数据失败: {e}")
+            print(f"获取灵饰市场数据异常: {e}")
+            return pd.DataFrame()
+    
+    def _filter_cached_data(self, cached_data: pd.DataFrame, 
+                           level_range: Optional[Tuple[int, int]] = None,
+                           main_attr: Optional[str] = None,
+                           is_super_simple: Optional[bool] = None,
+                           price_range: Optional[Tuple[float, float]] = None,
+                           server: Optional[str] = None,
+                           limit: int = 1000) -> pd.DataFrame:
+        """
+        对缓存数据进行筛选
+        
+        Args:
+            cached_data: 缓存的数据
+            level_range: 等级范围筛选
+            main_attr: 主属性筛选
+            is_super_simple: 超级简易筛选
+            price_range: 价格范围筛选
+            server: 服务器筛选
+            limit: 数据条数限制
+            
+        Returns:
+            筛选后的DataFrame
+        """
+        filtered_data = cached_data.copy()
+        
+        # 等级范围筛选
+        if level_range is not None:
+            min_level, max_level = level_range
+            filtered_data = filtered_data[
+                (filtered_data['equip_level'] >= min_level) & 
+                (filtered_data['equip_level'] <= max_level)
+            ]
+        
+        # 价格范围筛选
+        if price_range is not None:
+            min_price, max_price = price_range
+            filtered_data = filtered_data[
+                (filtered_data['price'] >= min_price) & 
+                (filtered_data['price'] <= max_price)
+            ]
+        
+        # 服务器筛选
+        if server is not None:
+            filtered_data = filtered_data[filtered_data['server_name'] == server]
+        
+        # 超级简易筛选
+        if is_super_simple is not None:
+            if is_super_simple:
+                filtered_data = filtered_data[filtered_data['special_effect'] == "[1]"]
+            else:
+                filtered_data = filtered_data[
+                    (filtered_data['special_effect'] != "[1]") | 
+                    (filtered_data['special_effect'].isna())
+                ]
+        
+        # 主属性筛选
+        if main_attr is not None:
+            valid_main_attrs = ['damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed']
+            if main_attr in valid_main_attrs:
+                filtered_data = filtered_data[filtered_data[main_attr] > 0]
+            else:
+                self.logger.warning(f"无效的主属性字段: {main_attr}, 支持的字段: {valid_main_attrs}")
+        
+        # 按更新时间排序并限制条数
+        filtered_data = filtered_data.sort_values('update_time', ascending=False).head(limit)
+        
+        return filtered_data
+    
+    def _get_market_data_from_mysql(self,
+                                   kindid: Optional[int] = None,
+                                   level_range: Optional[Tuple[int, int]] = None,
+                                   main_attr: Optional[str] = None,
+                                   is_super_simple: Optional[bool] = None,
+                                   price_range: Optional[Tuple[float, float]] = None,
+                                   server: Optional[str] = None,
+                                   limit: int = 1000,
+                                   attrs: Optional[List[Dict[str, Any]]] = None) -> pd.DataFrame:
+        """
+        从MySQL数据库获取市场灵饰数据
+        
+        Args:
+            参数同get_market_data方法
+            
         Returns:
             灵饰市场数据DataFrame
         """

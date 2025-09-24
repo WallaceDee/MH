@@ -748,7 +748,6 @@ class RoleService:
                     "feature": role_features,
                     "eid": eid,
                     "anchors": result.get('anchors', []),
-                    "anchor_eids": result.get('anchor_eids', []),
                     "strategy": strategy,
                     "similarity_threshold": similarity_threshold,
                     "max_anchors": max_anchors

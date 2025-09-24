@@ -315,7 +315,7 @@ export default {
           this.anchorsLoading = true
 
           try {
-            // 使用估价结果中的anchor_eids直接获取角色详细信息，避免重复计算
+            // 使用估价结果中的anchor_eids直接获取相似角色列表，避免重复计算
             const anchorsResponse = await this.$api.role.getRoleApi({
               page_size: 99,
               eid_list: result.anchors.map(item => item.eid),

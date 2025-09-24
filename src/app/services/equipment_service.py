@@ -7,54 +7,24 @@
 
 import os
 import json
-import sys
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 import logging
-
-# 添加src目录到Python路径
-import sys
-import os
-current_dir = os.path.dirname(os.path.abspath(__file__))
-src_path = os.path.dirname(os.path.dirname(current_dir))  # 向上两级到src目录
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
-try:
-    from src.utils.project_path import get_project_root, get_data_path
-    from src.database_config import db_config
-    from src.database import db
-    from src.models.equipment import Equipment
-    from src.models.pet import Pet
-    from sqlalchemy import and_, or_, func, text
-    from sqlalchemy.orm import sessionmaker
-except ImportError:
-    # 如果无法导入，直接使用相对路径计算
-    def get_project_root():
-        return os.path.dirname(src_path)
-    
-    def get_data_path():
-        return os.path.join(os.path.dirname(src_path), 'data')
+from src.utils.project_path import get_project_root, get_data_path
+from src.database_config import db_config
+from src.database import db
+from src.models.equipment import Equipment
+from src.models.pet import Pet
+from sqlalchemy import and_, or_, func, text
+from sqlalchemy.orm import sessionmaker
+from src.evaluator.mark_anchor.equip.index import EquipAnchorEvaluator
+from src.evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
+from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
+from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
+from src.evaluator.feature_extractor.unified_feature_extractor import UnifiedFeatureExtractor
+from src.evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_KINDID, is_lingshi, is_pet_equip
 
 logger = logging.getLogger(__name__)
-
-# 动态导入评估器，避免循环导入
-try:
-    from evaluator.mark_anchor.equip.index import EquipAnchorEvaluator
-    from evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
-    from evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
-    from evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
-    from evaluator.feature_extractor.unified_feature_extractor import UnifiedFeatureExtractor
-    from evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_KINDID, is_lingshi, is_pet_equip
-    logger.info("装备锚点估价器和特征提取器导入成功")
-except ImportError as e:
-    EquipAnchorEvaluator = None
-    EquipFeatureExtractor = None
-    LingshiFeatureExtractor = None
-    PetEquipFeatureExtractor = None
-    UnifiedFeatureExtractor = None
-    logger.warning(f"无法导入装备锚点估价器或特征提取器: {e}")
-
 
 class EquipmentService:
     def __init__(self):
@@ -348,8 +318,37 @@ class EquipmentService:
                       suit_transform_charms: Optional[str] = None,
                       gem_value: Optional[str] = None,
                       gem_level: Optional[int] = None,
+                      equip_sn_list: Optional[List[str]] = None,  # 装备序列号列表，如果提供则只查询指定的装备
                       sort_by: Optional[str] = '', sort_order: Optional[str] = '') -> Dict:
         """获取分页的装备列表
+        
+        Args:
+            page: 页码
+            page_size: 每页数量
+            start_date: 开始日期
+            end_date: 结束日期
+            equip_sn: 单个装备序列号
+            level_min: 等级下限
+            level_max: 等级上限
+            price_min: 价格下限
+            price_max: 价格上限
+            kindid: 装备类型列表
+            equip_type: 宠物装备类型列表
+            equip_special_skills: 特技列表
+            equip_special_effect: 特效列表
+            suit_effect: 套装效果
+            suit_added_status: 套装附加状态
+            suit_transform_skills: 套装变身术
+            suit_transform_charms: 套装变化咒
+            gem_value: 宝石值
+            gem_level: 宝石等级
+            equip_sn_list: 装备序列号列表，如果提供则只查询指定的装备
+            sort_by: 排序字段
+            sort_order: 排序顺序
+            
+        Returns:
+            包含装备列表和分页信息的字典
+            
         ### 基础信息字段
         1. `eid` - 装备ID（用于操作链接和相似装备功能）
         2. `server_name` - 服务器名称
@@ -414,91 +413,98 @@ class EquipmentService:
             if equip_sn:
                 query = query.filter(Equipment.equip_sn == equip_sn)
             
-            # 时间范围筛选
-            if start_date:
-                query = query.filter(func.date(Equipment.selling_time) >= start_date)
-                logger.info(f"添加开始日期筛选: selling_time >= {start_date}")
-            if end_date:
-                query = query.filter(func.date(Equipment.selling_time) <= end_date)
-                logger.info(f"添加结束日期筛选: selling_time <= {end_date}")
+            # 装备序列号列表筛选 - 如果提供了equip_sn_list，只查询指定的装备
+            if equip_sn_list is not None and len(equip_sn_list) > 0:
+                query = query.filter(Equipment.equip_sn.in_(equip_sn_list))
+                logger.info(f"添加装备序列号列表筛选: equip_sn IN {equip_sn_list}")
+                # 当使用equip_sn_list时，跳过其他筛选条件，直接返回指定装备
+                logger.info(f"使用equip_sn_list模式，跳过其他筛选条件")
+                # 打印SQL查询用于调试
+                logger.info(f"SQL查询: {str(query)}")
+            else:
+                # 时间范围筛选
+                if start_date:
+                    query = query.filter(func.date(Equipment.selling_time) >= start_date)
+                    logger.info(f"添加开始日期筛选: selling_time >= {start_date}")
+                if end_date:
+                    query = query.filter(func.date(Equipment.selling_time) <= end_date)
+                    logger.info(f"添加结束日期筛选: selling_time <= {end_date}")
+                    
+                # 基础筛选条件
+                if level_min is not None:
+                    query = query.filter(or_(Equipment.level >= level_min, Equipment.equip_level >= level_min))
+                if level_max is not None:
+                    query = query.filter(or_(Equipment.level <= level_max, Equipment.equip_level <= level_max))
+                if price_min is not None:
+                    query = query.filter(Equipment.price >= price_min * 100)  # 前端传元，后端存分
+                if price_max is not None:
+                    query = query.filter(Equipment.price <= price_max * 100)
                 
-            # 基础筛选条件
-            if level_min is not None:
-                query = query.filter(or_(Equipment.level >= level_min, Equipment.equip_level >= level_min))
-            if level_max is not None:
-                query = query.filter(or_(Equipment.level <= level_max, Equipment.equip_level <= level_max))
-            if price_min is not None:
-                query = query.filter(Equipment.price >= price_min * 100)  # 前端传元，后端存分
-            if price_max is not None:
-                query = query.filter(Equipment.price <= price_max * 100)
-            
-            # 装备类型筛选（多选）
-            if kindid and len(kindid) > 0:
-                query = query.filter(Equipment.kindid.in_(kindid))
-                logger.info(f"添加装备类型筛选: kindid IN {kindid}")
-            
-            # 宠物装备类型筛选（多选）
-            if equip_type and len(equip_type) > 0:
-                query = query.filter(Equipment.equip_type.in_(equip_type))
-                logger.info(f"添加宠物装备类型筛选: equip_type IN {equip_type}")
-            
-            # 特技筛选（多选）
-            if equip_special_skills and len(equip_special_skills) > 0:
-                query = query.filter(Equipment.special_skill.in_(equip_special_skills))
-                logger.info(f"添加特技筛选: special_skill IN {equip_special_skills}")
-            
-            # 特效筛选（多选，JSON数组格式）
-            if equip_special_effect and len(equip_special_effect) > 0:
-                effect_conditions = []
-                for effect in equip_special_effect:
-                    effect_conditions.append(
-                        or_(
-                            Equipment.special_effect.like(f'[{effect}]'),
-                            Equipment.special_effect.like(f'[{effect},%'),
-                            Equipment.special_effect.like(f'%,{effect},%'),
-                            Equipment.special_effect.like(f'%,{effect}]')
+                # 装备类型筛选（多选）
+                if kindid and len(kindid) > 0:
+                    query = query.filter(Equipment.kindid.in_(kindid))
+                    logger.info(f"添加装备类型筛选: kindid IN {kindid}")
+                
+                # 宠物装备类型筛选（多选）
+                if equip_type and len(equip_type) > 0:
+                    query = query.filter(Equipment.equip_type.in_(equip_type))
+                    logger.info(f"添加宠物装备类型筛选: equip_type IN {equip_type}")
+                
+                # 特技筛选（多选）
+                if equip_special_skills and len(equip_special_skills) > 0:
+                    query = query.filter(Equipment.special_skill.in_(equip_special_skills))
+                    logger.info(f"添加特技筛选: special_skill IN {equip_special_skills}")
+                
+                # 特效筛选（多选，JSON数组格式）
+                if equip_special_effect and len(equip_special_effect) > 0:
+                    effect_conditions = []
+                    for effect in equip_special_effect:
+                        effect_conditions.append(
+                            or_(
+                                Equipment.special_effect.like(f'[{effect}]'),
+                                Equipment.special_effect.like(f'[{effect},%'),
+                                Equipment.special_effect.like(f'%,{effect},%'),
+                                Equipment.special_effect.like(f'%,{effect}]')
+                            )
                         )
+                    query = query.filter(or_(*effect_conditions))
+                    logger.info(f"添加特效筛选: {equip_special_effect}")
+                
+                # 套装筛选
+                if suit_effect:
+                    query = query.filter(Equipment.suit_effect == suit_effect)
+                    logger.info(f"添加套装筛选: suit_effect = {suit_effect}")
+                    
+                if suit_added_status:
+                    query = query.filter(Equipment.suit_effect == suit_added_status)
+                    logger.info(f"添加套装附加状态筛选: suit_effect = {suit_added_status}")
+                    
+                if suit_transform_skills:
+                    query = query.filter(Equipment.suit_effect == suit_transform_skills)
+                    logger.info(f"添加套装变身术筛选: suit_effect = {suit_transform_skills}")
+                    
+                if suit_transform_charms:
+                    query = query.filter(Equipment.suit_effect == suit_transform_charms)
+                    logger.info(f"添加套装变化咒筛选: suit_effect = {suit_transform_charms}")
+                
+                # 宝石筛选
+                if gem_value:
+                    gem_conditions = or_(
+                        Equipment.gem_value.like(f'[{gem_value}]'),
+                        Equipment.gem_value.like(f'[{gem_value},%'),
+                        Equipment.gem_value.like(f'%,{gem_value},%'),
+                        Equipment.gem_value.like(f'%,{gem_value}]')
                     )
-                query = query.filter(or_(*effect_conditions))
-                logger.info(f"添加特效筛选: {equip_special_effect}")
-            
-            # 套装筛选
-            if suit_effect:
-                query = query.filter(Equipment.suit_effect == suit_effect)
-                logger.info(f"添加套装筛选: suit_effect = {suit_effect}")
-                
-            if suit_added_status:
-                query = query.filter(Equipment.suit_effect == suit_added_status)
-                logger.info(f"添加套装附加状态筛选: suit_effect = {suit_added_status}")
-                
-            if suit_transform_skills:
-                query = query.filter(Equipment.suit_effect == suit_transform_skills)
-                logger.info(f"添加套装变身术筛选: suit_effect = {suit_transform_skills}")
-                
-            if suit_transform_charms:
-                query = query.filter(Equipment.suit_effect == suit_transform_charms)
-                logger.info(f"添加套装变化咒筛选: suit_effect = {suit_transform_charms}")
-            
-            # 宝石筛选
-            if gem_value:
-                gem_conditions = or_(
-                    Equipment.gem_value.like(f'[{gem_value}]'),
-                    Equipment.gem_value.like(f'[{gem_value},%'),
-                    Equipment.gem_value.like(f'%,{gem_value},%'),
-                    Equipment.gem_value.like(f'%,{gem_value}]')
-                )
-                query = query.filter(gem_conditions)
-                logger.info(f"添加宝石筛选: gem_value = {gem_value}")
-                
-            if gem_level is not None:
-                query = query.filter(Equipment.gem_level >= gem_level)
-                logger.info(f"添加宝石等级筛选: gem_level >= {gem_level}")
+                    query = query.filter(gem_conditions)
+                    logger.info(f"添加宝石筛选: gem_value = {gem_value}")
+                    
+                if gem_level is not None:
+                    query = query.filter(Equipment.gem_level >= gem_level)
+                    logger.info(f"添加宝石等级筛选: gem_level >= {gem_level}")
 
             # 获取总数
             total = query.count()
             logger.info(f"查询到的总数: {total}")
-            
-            total_pages = (total + page_size - 1) // page_size
             
             # 排序
             order_by = Equipment.update_time.desc()  # 默认按更新时间倒序
@@ -513,11 +519,18 @@ class EquipmentService:
                     sort_column = getattr(Equipment, sort_by)
                     order_by = sort_column.asc() if sort_order.lower() == 'asc' else sort_column.desc()
 
-            # 分页查询
-            offset = (page - 1) * page_size
-            equipments = query.order_by(order_by).offset(offset).limit(page_size).all()
+            # 分页查询 - 当使用equip_sn_list时，限制返回数量
+            if equip_sn_list is not None and len(equip_sn_list) > 0:
+                # 使用equip_sn_list时，直接返回所有匹配的装备，但限制在page_size内
+                equipments = query.order_by(order_by).limit(page_size).all()
+                logger.info(f"equip_sn_list模式：查询到的装备数量: {len(equipments)}")
+            else:
+                # 正常分页查询
+                offset = (page - 1) * page_size
+                equipments = query.order_by(order_by).offset(offset).limit(page_size).all()
+                logger.info(f"正常分页模式：查询到的装备数量: {len(equipments)}")
             
-            logger.info(f"查询到的装备数量: {len(equipments)}")
+            total_pages = (total + page_size - 1) // page_size
             
             # 转换为字典格式
             equipment_list = []
@@ -835,6 +848,7 @@ class EquipmentService:
                 return {
                     "error": result.get("error", "估价失败"),  # 保留错误信息
                     "anchor_count": 0,
+                    "anchors": [],
                     "confidence": 0.0,
                     "equip_sn": equipment_features.get("equip_sn", ""),
                     "estimated_price": 0,
@@ -861,6 +875,7 @@ class EquipmentService:
                 "estimated_price_yuan": round(estimated_price / 100, 2),
                 "strategy": strategy,
                 "anchor_count": anchor_count,
+                "anchors": result.get('anchors', []),
                 "confidence": result.get("confidence", 0),
                 "similarity_threshold": similarity_threshold,
                 "max_anchors": max_anchors,
@@ -974,6 +989,7 @@ class EquipmentService:
                     processed_result = {
                         "index": result.get("equip_index", 0),
                         "anchor_count": 0,
+                        "anchors": [],
                         "confidence": 0.0,
                         "equip_sn": result.get("equip_sn", ""),
                         "estimated_price": 0,
@@ -998,6 +1014,7 @@ class EquipmentService:
                     processed_result = {
                         "index": result.get("equip_index", 0),
                         "anchor_count": result.get("anchor_count", 0),
+                        "anchors": result.get("anchors", []),
                         "confidence": result.get("confidence", 0),
                         "equip_sn": result.get("equip_sn", ""),
                         "estimated_price": estimated_price,

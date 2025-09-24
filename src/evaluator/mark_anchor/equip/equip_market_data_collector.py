@@ -240,7 +240,7 @@ class EquipMarketDataCollector:
             full_count = db.session.query(Equipment).count()
             self.mysql_data_count = full_count
             total_count = full_count  # 加载全部数据
-            # total_count = 500  # 临时测试：加载500条数据
+            # total_count = 1500  # 临时测试：加载500条数据
 
             print(f"装备总记录数: {full_count}，本次加载: {total_count} 条")
             
@@ -281,6 +281,7 @@ class EquipMarketDataCollector:
                         break
                         
                     # 只查询特征提取器需要的字段（排除iType和cDesc）
+                    # 增加灵饰特征提取器需要的字段：'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed'
                     required_fields = [
                         Equipment.equip_level, Equipment.kindid, Equipment.init_damage, Equipment.init_damage_raw,
                         Equipment.all_damage, Equipment.init_wakan, Equipment.init_defense, Equipment.init_hp,
@@ -288,6 +289,12 @@ class EquipMarketDataCollector:
                         Equipment.addon_liliang, Equipment.addon_naili, Equipment.addon_minjie, Equipment.addon_lingli,
                         Equipment.addon_moli, Equipment.agg_added_attrs, Equipment.gem_value, Equipment.gem_level,
                         Equipment.special_skill, Equipment.special_effect, Equipment.suit_effect, Equipment.large_equip_desc,
+                        # 灵饰特征提取器需要的字段
+                        Equipment.damage, Equipment.defense, Equipment.magic_damage, Equipment.magic_defense,
+                        Equipment.fengyin, Equipment.anti_fengyin, Equipment.speed,
+                        # 召唤兽装备特征提取器需要的字段
+                        Equipment.fangyu, Equipment.qixue, Equipment.addon_fali, Equipment.xiang_qian_level, Equipment.addon_status,
+                        # 基础字段
                         Equipment.equip_sn, Equipment.price, Equipment.server_name, Equipment.update_time
                     ]
                     query = db.session.query(*required_fields).offset(offset).limit(actual_limit)
@@ -304,7 +311,13 @@ class EquipMarketDataCollector:
                         'init_wakan', 'init_defense', 'init_hp', 'init_dex', 'mingzhong', 'shanghai',
                         'addon_tizhi', 'addon_liliang', 'addon_naili', 'addon_minjie', 'addon_lingli', 'addon_moli',
                         'agg_added_attrs', 'gem_value', 'gem_level', 'special_skill', 'special_effect', 'suit_effect',
-                        'large_equip_desc', 'equip_sn', 'price', 'server_name', 'update_time'
+                        'large_equip_desc',
+                        # 灵饰特征提取器需要的字段
+                        'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed',
+                        # 召唤兽装备特征提取器需要的字段
+                        'fangyu', 'qixue', 'addon_fali', 'xiang_qian_level', 'addon_status',
+                        # 基础字段
+                        'equip_sn', 'price', 'server_name', 'update_time'
                     ]
                     
                     for equipment_tuple in equipments:
@@ -799,6 +812,7 @@ class EquipMarketDataCollector:
             
             # 构建SQLAlchemy查询 - 只查询特征提取器需要的字段
             # 根据特征提取器统计，需要以下字段（排除iType和cDesc）：
+            # 增加灵饰特征提取器需要的字段：'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed'
             required_fields = [
                 Equipment.equip_level,
                 Equipment.kindid,
@@ -824,6 +838,14 @@ class EquipMarketDataCollector:
                 Equipment.special_effect,
                 Equipment.suit_effect,
                 Equipment.large_equip_desc,
+                # 灵饰特征提取器需要的字段
+                Equipment.damage,
+                Equipment.defense,
+                Equipment.magic_damage,
+                Equipment.magic_defense,
+                Equipment.fengyin,
+                Equipment.anti_fengyin,
+                Equipment.speed,
                 # 保留一些必要的元数据字段
                 Equipment.equip_sn,
                 Equipment.price,
@@ -955,7 +977,11 @@ class EquipMarketDataCollector:
                     'init_wakan', 'init_defense', 'init_hp', 'init_dex', 'mingzhong', 'shanghai',
                     'addon_tizhi', 'addon_liliang', 'addon_naili', 'addon_minjie', 'addon_lingli', 'addon_moli',
                     'agg_added_attrs', 'gem_value', 'gem_level', 'special_skill', 'special_effect', 'suit_effect',
-                    'large_equip_desc', 'equip_sn', 'price', 'server_name', 'update_time'
+                    'large_equip_desc',
+                    # 灵饰特征提取器需要的字段
+                    'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed',
+                    # 基础字段
+                    'equip_sn', 'price', 'server_name', 'update_time'
                 ]
                 
                 for equipment_tuple in equipments:

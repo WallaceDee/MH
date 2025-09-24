@@ -25,7 +25,7 @@
           <el-input-number v-model="filters.price_max" placeholder="最高价格" :min="0" :controls="false"></el-input-number>
         </el-form-item>
         <el-form-item label="类型">
-          <el-cascader v-model="filters.kindid" :options="kindidOptions" placeholder="请选择召唤兽装备类型" multiple clearable
+          <el-cascader v-model="filters.kindid" :options="kindidOptions" placeholder="请选择装备类型" multiple clearable
             filterable collapse-tags collapse-tags-tooltip :props="{
               multiple: true,
               emitPath: false

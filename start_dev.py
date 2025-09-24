@@ -12,6 +12,9 @@ import sys
 # 设置开发环境
 os.environ['FLASK_ENV'] = 'development'
 
+# 配置 Flask 自动重载排除目录
+os.environ['WERKZEUG_IGNORED_DIRECTORIES'] = 'web,node_modules,logs,output,data,__pycache__,.git,tests'
+
 # 设置MySQL数据库环境变量
 os.environ['DATABASE_TYPE'] = 'mysql'
 os.environ['MYSQL_HOST'] = '47.86.33.98'
@@ -48,6 +51,9 @@ if __name__ == "__main__":
     print("-" * 50)
     
     app = create_app()
+    
+    print("✅ 已配置排除目录：web, node_modules, logs, output, data, __pycache__, .git, tests")
+    
     app.run(
         host='0.0.0.0', 
         port=5000, 

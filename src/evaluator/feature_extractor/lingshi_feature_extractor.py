@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from typing import Dict, Any, Union, List
 import os
-from utils.jsonc_loader import load_js_config_relative_to_file
+from src.utils.jsonc_loader import load_js_config_relative_to_file
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
