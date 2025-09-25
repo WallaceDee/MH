@@ -4,7 +4,7 @@
 专门处理召唤兽装备的估价逻辑，重点主属性和附加属性
 """
 
-from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
+from src.evaluator.market_anchor.equip.index import EquipmentTypePlugin
 import sys
 import os
 from typing import Dict, Any, List, Optional, Tuple
@@ -64,7 +64,7 @@ class PetEquipPlugin(EquipmentTypePlugin):
     def _load_pet_equip_config(self) -> Dict[str, Any]:
         """加载召唤兽装备配置数据"""
         try:
-            from src.evaluator.mark_anchor.equip.constant import get_pet_equip_config
+            from src.evaluator.market_anchor.equip.constant import get_pet_equip_config
             return get_pet_equip_config()
         except Exception as e:
             print(f"加载召唤兽装备配置失败: {e}")

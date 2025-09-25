@@ -5,9 +5,9 @@ import numpy as np
 from abc import ABC, abstractmethod
 
 # 导入市场数据采集器
-from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-from src.evaluator.mark_anchor.lingshi.lingshi_market_data_collector import LingshiMarketDataCollector
-from src.evaluator.mark_anchor.pet_equip.pet_equip_market_data_collector import PetEquipMarketDataCollector
+from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+from src.evaluator.market_anchor.lingshi.lingshi_market_data_collector import LingshiMarketDataCollector
+from src.evaluator.market_anchor.pet_equip.pet_equip_market_data_collector import PetEquipMarketDataCollector
 
 # 导入通用工具
 from ...utils.base_valuator import BaseValuator

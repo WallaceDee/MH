@@ -42,6 +42,7 @@ def get_equipments():
             'suit_transform_charms': request.args.get('suit_transform_charms'),
             'gem_value': request.args.get('gem_value'),
             'gem_level': request.args.get('gem_level'),
+            'equip_sn_list': request.args.getlist('equip_sn_list[]') or request.args.getlist('equip_sn_list') or None,
             'sort_by': request.args.get('sort_by', ''),
             'sort_order': request.args.get('sort_order', '')
         }

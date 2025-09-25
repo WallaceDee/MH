@@ -289,6 +289,141 @@
           </div>
         </el-tab-pane>
 
+        <!-- 召唤兽数据标签页 -->
+        <el-tab-pane label="召唤兽数据" name="pet">
+          <div class="tab-content">
+            <!-- 召唤兽数据操作栏 -->
+            <div class="tab-action-bar">
+              <el-button type="success" @click="refreshPetData" icon="el-icon-star-off" :disabled="refreshing">
+                加载召唤兽数据
+              </el-button>
+
+              <el-button type="warning" @click="refreshPetFullCache" icon="el-icon-refresh"
+                :loading="petCacheRefreshing">
+                同步召唤兽数据
+              </el-button>
+            </div>
+
+            <!-- 召唤兽数据状态卡片 -->
+            <el-row :gutter="20" class="pet-status-cards">
+              <!-- 召唤兽缓存状态 -->
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-star-off"></i>
+                    <span>召唤兽缓存状态</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">数据已加载:</span>
+                    <el-tag :type="petMarketDataStatus.data_loaded ? 'success' : 'danger'">
+                      {{ petMarketDataStatus.data_loaded ? '是' : '否' }}
+                    </el-tag>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">数据条数:</span>
+                    <span class="value">{{ petMarketDataStatus.data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">MySQL总数:</span>
+                    <span class="value">{{ petMarketDataStatus.mysql_data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">内存占用:</span>
+                    <span class="value">{{ (petMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">特征维度:</span>
+                    <span class="value">{{ (petMarketDataStatus.data_columns || []).length }}</span>
+                  </div>
+                  <div v-if="petMarketDataStatus.last_refresh_time" class="status-item">
+                    <span class="label">最后刷新:</span>
+                    <span class="value">{{ formatTime(petMarketDataStatus.last_refresh_time) }}</span>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <!-- 召唤兽数据统计 -->
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-data-analysis"></i>
+                    <span>召唤兽数据统计</span>
+                  </div>
+                  <div v-if="petMarketDataStatus.data_count" class="status-item">
+                    <span class="label">总召唤兽数:</span>
+                    <span class="value">{{ petMarketDataStatus.data_count | numberFormat }}</span>
+                  </div>
+
+                  <div v-if="petMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">价格范围:</span>
+                    <span class="value">
+                      {{ petMarketDataStatus.price_statistics.min_price | numberFormat }} -
+                      {{ petMarketDataStatus.price_statistics.max_price | numberFormat }}
+                    </span>
+                  </div>
+                  <div v-if="petMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">平均价格:</span>
+                    <span class="value">{{ petMarketDataStatus.price_statistics.avg_price.toFixed(0) |
+                      numberFormat
+                    }}</span>
+                  </div>
+                  <div v-if="petMarketDataStatus.price_statistics" class="status-item">
+                    <span class="label">中位数价格:</span>
+                    <span class="value">{{ petMarketDataStatus.price_statistics.median_price.toFixed(0) |
+                      numberFormat }}</span>
+                  </div>
+                  <div v-if="petMarketDataStatus.level_statistics" class="status-item">
+                    <span class="label">等级范围:</span>
+                    <span class="value">
+                      {{ petMarketDataStatus.level_statistics.min_level }} -
+                      {{ petMarketDataStatus.level_statistics.max_level }}
+                    </span>
+                  </div>
+                  <div v-if="petMarketDataStatus.role_grade_limit_statistics" class="status-item">
+                    <span class="label">携带等级范围:</span>
+                    <span class="value">
+                      {{ petMarketDataStatus.role_grade_limit_statistics.min_role_grade_limit }} -
+                      {{ petMarketDataStatus.role_grade_limit_statistics.max_role_grade_limit }}
+                    </span>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <!-- 召唤兽技能统计 -->
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-magic-stick"></i>
+                    <span>召唤兽技能统计</span>
+                  </div>
+                  <div class="pet-skill-tags">
+                    <el-tag v-for="(count, skill) in petMarketDataStatus.skill_distribution" :key="skill"
+                      size="mini" type="primary">
+                      {{ skill }}: {{ count }}
+                    </el-tag>
+                  </div>
+                </el-card>
+              </el-col>
+
+            </el-row>
+
+            <!-- 召唤兽数据字段详情卡片 -->
+            <el-card class="details-card"
+              v-if="petMarketDataStatus.data_columns && petMarketDataStatus.data_columns.length > 0">
+              <div slot="header" class="card-header">
+                <i class="el-icon-menu"></i>
+                <span>召唤兽数据字段 ({{ petMarketDataStatus.data_columns.length }})</span>
+              </div>
+              <div class="columns-grid">
+                <el-tag v-for="column in petMarketDataStatus.data_columns" :key="column" size="small"
+                  class="column-tag">
+                  {{ column }}
+                </el-tag>
+              </div>
+            </el-card>
+          </div>
+        </el-tab-pane>
+
         <!-- Redis详细信息标签页 -->
         <el-tab-pane label="Redis详情" name="redis">
           <div class="tab-content">
@@ -523,6 +658,10 @@ export default {
       equipmentCacheRefreshing: false,
       equipmentLoading: false,  // 区分装备加载和装备同步
       equipmentMarketDataStatus: {},  // 装备市场数据状态
+      // 召唤兽数据相关
+      petCacheRefreshing: false,
+      petLoading: false,  // 区分召唤兽加载和召唤兽同步
+      petMarketDataStatus: {},  // 召唤兽市场数据状态
       redisStatus: {},  // Redis状态信息
       // 标签页相关
       activeTab: 'role'  // 默认显示角色数据标签页
@@ -558,9 +697,18 @@ export default {
       return this.redisStatus || { available: false }
     },
 
+    // 召唤兽Redis状态信息
+    petRedisStatus() {
+      return this.redisStatus || { available: false }
+    },
+
     // 进度对话框标题
     progressDialogTitle() {
-      if (this.equipmentCacheRefreshing) {
+      if (this.petCacheRefreshing) {
+        return '同步召唤兽数据'
+      } else if (this.petLoading) {
+        return '加载召唤兽数据'
+      } else if (this.equipmentCacheRefreshing) {
         return '同步装备数据'
       } else if (this.equipmentLoading) {
         return '加载装备数据'
@@ -573,7 +721,11 @@ export default {
 
     // 进度提示文本
     progressMessage() {
-      if (this.equipmentCacheRefreshing) {
+      if (this.petCacheRefreshing) {
+        return '正在同步召唤兽数据...'
+      } else if (this.petLoading) {
+        return '正在加载召唤兽数据...'
+      } else if (this.equipmentCacheRefreshing) {
         return '正在同步装备数据...'
       } else if (this.equipmentLoading) {
         return '正在加载装备数据...'
@@ -675,10 +827,11 @@ export default {
 
       this.loading = true
       try {
-        // 并行获取角色数据状态、装备数据状态和Redis状态
-        const [roleResponse, equipmentMarketDataStatusResponse, redisResponse] = await Promise.all([
+        // 并行获取角色数据状态、装备数据状态、召唤兽数据状态和Redis状态
+        const [roleResponse, equipmentMarketDataStatusResponse, petMarketDataStatusResponse, redisResponse] = await Promise.all([
           systemApi.getMarketDataStatus(),
           systemApi.getEquipmentMarketDataStatus().catch(() => ({ code: 500, data: {} })),
+          systemApi.getPetMarketDataStatus().catch(() => ({ code: 500, data: {} })),
           systemApi.getRedisStatus().catch(() => ({ code: 500, data: {} }))
         ])
 
@@ -688,6 +841,10 @@ export default {
 
         if (equipmentMarketDataStatusResponse.code === 200) {
           this.equipmentMarketDataStatus = equipmentMarketDataStatusResponse.data || {}
+        }
+
+        if (petMarketDataStatusResponse.code === 200) {
+          this.petMarketDataStatus = petMarketDataStatusResponse.data || {}
         }
 
         if (redisResponse.code === 200) {
@@ -790,12 +947,14 @@ export default {
 
       // 开始轮询后端进度
       this.progressTimer = setInterval(async () => {
-        if (this.equipmentCacheRefreshing || this.equipmentLoading) {
+        if (this.petCacheRefreshing || this.petLoading) {
+          await this.updatePetProgressFromBackend()
+        } else if (this.equipmentCacheRefreshing || this.equipmentLoading) {
           await this.updateEquipmentProgressFromBackend()
         } else {
           await this.updateProgressFromBackend()
         }
-      }, 10 * 1000) // 每3秒查询一次进度
+      }, 10 * 1000) // 每10秒查询一次进度
 
       console.log('进度轮询定时器已启动')
     },
@@ -838,6 +997,8 @@ export default {
             this.fullCacheRefreshing = false
             this.equipmentCacheRefreshing = false
             this.equipmentLoading = false
+            this.petCacheRefreshing = false
+            this.petLoading = false
           }
           // 如果是 'running' 状态，继续轮询
         }
@@ -855,6 +1016,8 @@ export default {
         this.fullCacheRefreshing = false
         this.equipmentCacheRefreshing = false
         this.equipmentLoading = false
+        this.petCacheRefreshing = false
+        this.petLoading = false
       }, 2000)
     },
 
@@ -884,6 +1047,8 @@ export default {
       this.fullCacheRefreshing = false
       this.equipmentCacheRefreshing = false
       this.equipmentLoading = false
+      this.petCacheRefreshing = false
+      this.petLoading = false
 
       // 重置进度信息
       this.resetProgress()
@@ -1060,6 +1225,141 @@ export default {
       }
     },
 
+    // 召唤兽数据相关方法
+    async refreshPetData() {
+      if (this.refreshing || this.petCacheRefreshing) return
+
+      try {
+        this.$confirm('加载召唤兽数据将优先使用现有缓存，如缓存不存在则自动从数据库加载，是否继续？', '确认加载', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(async () => {
+          // 使用相同的进度显示机制
+          this.refreshing = true
+          this.petLoading = true
+          this.showRefreshDialog = true
+          this.initializeProgress()
+
+          const response = await systemApi.refreshPetData()
+          if (response.code === 200) {
+            this.$message.success('召唤兽数据加载已启动，正在后台处理...')
+
+            // 开始轮询召唤兽刷新进度
+            this.startProgressPolling()
+          } else {
+            this.$message.error(response.message || '启动召唤兽数据加载失败')
+            this.refreshing = false
+            this.petLoading = false
+            this.showRefreshDialog = false
+          }
+        }).catch(() => {
+          // 用户取消操作
+        })
+      } catch (error) {
+        console.error('启动召唤兽数据加载失败:', error)
+        this.$message.error('启动召唤兽数据加载失败，请检查网络连接')
+        this.refreshing = false
+        this.petLoading = false
+        this.showRefreshDialog = false
+      }
+    },
+
+    async refreshPetFullCache() {
+      if (this.petCacheRefreshing || this.refreshing) return
+
+      try {
+        this.$confirm('刷新召唤兽缓存将从MySQL重新加载全量召唤兽数据到Redis，耗时较长，是否继续？', '确认刷新', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          // 使用相同的进度显示机制
+          this.refreshing = true
+          this.petCacheRefreshing = true
+          this.showRefreshDialog = true
+          this.initializeProgress()
+
+          const response = await systemApi.refreshPetFullCache()
+          if (response.code === 200) {
+            this.$message.success('召唤兽缓存刷新已启动，正在后台处理...')
+
+            // 开始轮询召唤兽刷新进度
+            this.startProgressPolling()
+          } else {
+            this.$message.error(response.message || '启动召唤兽缓存刷新失败')
+            this.refreshing = false
+            this.petCacheRefreshing = false
+            this.showRefreshDialog = false
+          }
+        }).catch(() => {
+          // 用户取消操作
+        })
+      } catch (error) {
+        console.error('启动召唤兽缓存刷新失败:', error)
+        this.$message.error('启动召唤兽缓存刷新失败，请检查网络连接')
+        this.refreshing = false
+        this.petCacheRefreshing = false
+        this.showRefreshDialog = false
+      }
+    },
+
+    async updatePetProgressFromBackend() {
+      try {
+        const response = await systemApi.getPetRefreshStatus()
+        if (response.code === 200) {
+          const data = response.data
+
+          // 更新进度信息
+          this.refreshProgress = data.progress || 0
+          this.refreshMessage = data.message || ''
+          this.refreshedCount = data.processed_records || 0
+          this.currentBatch = data.current_batch || 0
+          this.totalBatches = data.total_batches || 0
+
+          // 检查刷新状态
+          if (data.status === 'completed') {
+            this.completeProgress()
+            this.$message.success(`召唤兽缓存刷新完成！处理了 ${this.refreshedCount} 条数据`)
+
+            // 延迟关闭对话框
+            setTimeout(() => {
+              this.showRefreshDialog = false
+              this.resetProgress()
+            }, 2000)
+
+            // 刷新召唤兽状态
+            setTimeout(() => {
+              this.refreshPetStatus()
+            }, 500)
+
+          } else if (data.status === 'error') {
+            this.refreshMessage = data.message || '召唤兽数据处理失败'
+            this.refreshProgress = 0
+            this.$message.error('召唤兽数据处理失败')
+            this.stopProgressTimer()
+            this.refreshing = false
+            this.petCacheRefreshing = false
+            this.petLoading = false
+          }
+          // 如果是 'running' 状态，继续轮询
+        }
+      } catch (error) {
+        console.error('获取召唤兽刷新进度失败:', error)
+      }
+    },
+
+    async refreshPetStatus() {
+      try {
+        const statusResponse = await systemApi.getPetMarketDataStatus()
+
+        if (statusResponse.code === 200) {
+          this.petMarketDataStatus = statusResponse.data || {}
+        }
+      } catch (error) {
+        console.error('获取召唤兽状态失败:', error)
+      }
+    },
 
     async updateEquipmentProgressFromBackend() {
       try {
@@ -1417,6 +1717,18 @@ export default {
 }
 
 .equipment-type-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* 召唤兽数据状态样式 */
+.pet-status-cards {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.pet-skill-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;

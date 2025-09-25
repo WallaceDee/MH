@@ -46,8 +46,10 @@
                 <el-col style="width: 50px;">
                   <PetImage placement="top" :pet="petList[index].pet_detail" size="small"
                     :equip_sn="petList[index].equip_sn" :equipFaceImg="petList[index].pet_detail.icon" />
-                  <SimilarPetModal :pet="genPetData(petList[index])" :similar-data="similarData" :valuation="result"
-                    @show="(e) => loadSimilarPets(e, index)"  />
+                  <SimilarPetModal :pet="genPetData(petList[index])" 
+                    @valuation-updated="(data) => handlePetValuationUpdated(data, index)">
+                    <el-link href="javascript:void(0)" type="primary" style="font-weight: bold;">{{ petList[index].pet_detail?.name || `召唤兽 ${index + 1}` }}</el-link>
+                  </SimilarPetModal>
                 </el-col>
                 <el-col class="price-info" :span="12">
                   <el-statistic group-separator="," :precision="2"
@@ -165,8 +167,7 @@ export default {
       valuationTotalValue: 0,
       valuationEquipmentList: [],
       valuationLoading: false,
-      valuationDialogTitle: '',
-      similarData: null
+      valuationDialogTitle: ''
     }
   },
   watch: {
@@ -285,83 +286,19 @@ export default {
     genPetData(pet) {
       return { ...pet, petData: pet.pet_detail, equip_face_img: pet.pet_detail.icon }
     },
-    // 加载相似宠物
-    async loadSimilarPets(pet,resultIndex) {
-      this.similarData = null
-      await this.loadPetValuation(pet,resultIndex)
-    },
-    // 统一的宠物估价加载方法
-    async loadPetValuation(pet,resultIndex) {
-      try {
-        // 获取估价信息（包含相似宠物）
-        const valuationResponse = await this.$api.pet.getPetValuation({
-          pet_data: pet,
-          strategy: 'fair_value',
-          similarity_threshold: this.valuateParams.similarity_threshold,
-          max_anchors: this.valuateParams.max_anchors
-        })
-
-        // 处理估价响应
-        if (valuationResponse.code === 200) {
-          const data = valuationResponse.data
-          // 从估价结果中提取相似宠物信息
-          if (data.anchor_count > 0) {
-            //注意还需要处理召唤兽装备价格
-            this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price - this.results[resultIndex].equip_estimated_price + data.estimated_price + data.equip_estimated_price
-            this.$set(this.results, resultIndex, data)
-            const { data: { anchors: allAnchors } } = await this.$api.pet.findPetAnchors({
-              pet_data: pet,
-              similarity_threshold: this.valuateParams.similarity_threshold,
-              max_anchors: this.valuateParams.max_anchors
-            })
-            this.similarData = {
-              anchor_count: data.anchor_count,
-              similarity_threshold: data.similarity_threshold,
-              anchors: allAnchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
-              statistics: {
-                price_range: {
-                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.price || 0))
-                },
-                similarity_range: {
-                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
-                  avg:
-                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    allAnchors.length
-                }
-              }
-            }
-          } else {
-            this.similarData = {
-              anchor_count: 0,
-              similarity_threshold: data.similarity_threshold || this.valuateParams.similarity_threshold,
-              anchors: [],
-              statistics: {
-                price_range: { min: 0, max: 0 },
-                similarity_range: { min: 0, max: 0, avg: 0 }
-              },
-              pet: pet
-            }
-          }
-        } else if (valuationResponse.code === 400) {
-          // 400错误也要显示界面，只是没有锚点数据
-          this.similarData = {
-            anchor_count: 0,
-            similarity_threshold: this.valuateParams.similarity_threshold,
-            anchors: [],
-            statistics: {
-              price_range: { min: 0, max: 0 },
-              similarity_range: { min: 0, max: 0, avg: 0 }
-            },
-            pet: pet
-          }
-        }
-
-        console.log('估价和相似宠物数据:', valuationResponse.data)
-      } catch (error) {
-        console.error('加载相似宠物或估价失败:', error)
+    // 处理宠物估价结果更新
+    handlePetValuationUpdated(data, resultIndex) {
+      // 更新总价值
+      if (this.results[resultIndex]) {
+        const oldTotal = this.results[resultIndex].estimated_price + (this.results[resultIndex].equip_estimated_price || 0)
+        const newTotal = data.estimated_price + (data.equip_estimated_price || 0)
+        this.currentTotalValue = this.currentTotalValue - oldTotal + newTotal
       }
+      
+      // 更新结果数据 - 这是必须保留的操作
+      this.$set(this.results, resultIndex, data)
+      
+      console.log('宠物估价数据更新完成:', data)
     },
     // 获取概览卡片的颜色类
     getOverviewClass() {

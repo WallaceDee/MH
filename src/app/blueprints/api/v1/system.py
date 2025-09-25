@@ -422,11 +422,11 @@ def get_cache_status():
         return error_response(f"获取缓存状态失败: {str(e)}")
 
 
-@system_bp.route('/equipment/cache-status', methods=['GET'])
+@system_bp.route('/market-data/equipment/cache-status', methods=['GET'])
 def get_equipment_cache_status():
     """获取装备缓存状态"""
     try:
-        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
         
         # 使用类方法获取单例实例的缓存状态
         cache_status = EquipMarketDataCollector.get_cache_status_static()
@@ -438,11 +438,11 @@ def get_equipment_cache_status():
         return error_response(f"获取装备缓存状态失败: {str(e)}")
 
 
-@system_bp.route('/equipment/refresh', methods=['POST'])
+@system_bp.route('/market-data/equipment/refresh', methods=['POST'])
 def refresh_equipment_data():
     """启动装备数据刷新"""
     try:
-        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
         import threading
         
         # 获取请求参数
@@ -495,7 +495,7 @@ def refresh_equipment_data():
 def get_equipment_market_data_status():
     """获取装备市场数据状态"""
     try:
-        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
         
         # 获取装备数据采集器实例
         collector = EquipMarketDataCollector()
@@ -593,6 +593,206 @@ def get_equipment_market_data_status():
         return error_response(f"获取装备市场数据状态失败: {str(e)}")
 
 
+@system_bp.route('/market-data/pet/status', methods=['GET'])
+def get_pet_market_data_status():
+    """获取召唤兽市场数据状态"""
+    try:
+        from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+        
+        # 获取召唤兽数据采集器实例
+        collector = PetMarketDataCollector()
+        
+        # 添加调试信息
+        print(f"🔍 召唤兽市场数据状态 - 实例ID: {id(collector)}")
+        print(f"🔍 内存缓存状态: {collector._full_data_cache is not None and not collector._full_data_cache.empty if collector._full_data_cache is not None else False}")
+        print(f"🔍 刷新状态: {collector._refresh_status}")
+        
+        # 获取MySQL召唤兽数据总数
+        mysql_count = collector._get_mysql_pets_count()
+        
+        # 获取基本状态信息
+        status_info = {
+            "data_loaded": collector._full_data_cache is not None and not collector._full_data_cache.empty,
+            "last_refresh_time": collector._refresh_start_time.isoformat() if collector._refresh_start_time else None,
+            "cache_ttl_hours": collector._cache_ttl_hours,
+            "data_count": len(collector._full_data_cache) if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
+            "data_columns": list(collector._full_data_cache.columns) if collector._full_data_cache is not None and not collector._full_data_cache.empty else [],
+            "memory_usage_mb": collector._full_data_cache.memory_usage(deep=True).sum() / 1024 / 1024 if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
+            "mysql_data_count": mysql_count
+        }
+        
+        # 添加刷新进度信息
+        refresh_status = collector.get_refresh_status()
+        status_info.update({
+            "refresh_status": refresh_status["status"],
+            "refresh_progress": refresh_status["progress"],
+            "refresh_message": refresh_status["message"],
+            "refresh_processed_records": refresh_status["processed_records"],
+            "refresh_total_records": refresh_status["total_records"],
+            "refresh_current_batch": refresh_status["current_batch"],
+            "refresh_total_batches": refresh_status["total_batches"],
+            "refresh_start_time": refresh_status["start_time"],
+            "refresh_elapsed_seconds": refresh_status["elapsed_seconds"]
+        })
+        
+        # 如果有数据，添加数据统计信息
+        if collector._full_data_cache is not None and not collector._full_data_cache.empty:
+            try:
+                df = collector._full_data_cache
+                
+                # 价格统计
+                if 'price' in df.columns:
+                    price_stats = {
+                        "min_price": float(df['price'].min()),
+                        "max_price": float(df['price'].max()),
+                        "avg_price": float(df['price'].mean()),
+                        "median_price": float(df['price'].median())
+                    }
+                    status_info["price_statistics"] = price_stats
+                
+                # 等级统计
+                if 'equip_level' in df.columns:
+                    level_stats = {
+                        "min_level": int(df['equip_level'].min()),
+                        "max_level": int(df['equip_level'].max())
+                    }
+                    status_info["level_statistics"] = level_stats
+                
+                # 携带等级统计
+                if 'role_grade_limit' in df.columns:
+                    role_grade_limit_stats = {
+                        "min_role_grade_limit": int(df['role_grade_limit'].min()),
+                        "max_role_grade_limit": int(df['role_grade_limit'].max())
+                    }
+                    status_info["role_grade_limit_statistics"] = role_grade_limit_stats
+                
+                # 技能分布统计
+                if 'all_skill' in df.columns:
+                    # 统计所有技能的出现次数
+                    all_skills = []
+                    for skills_str in df['all_skill'].dropna():
+                        if skills_str and str(skills_str).strip():
+                            skills = str(skills_str).split('|')
+                            all_skills.extend([s.strip() for s in skills if s.strip()])
+                    
+                    from collections import Counter
+                    skill_counts = Counter(all_skills)
+                    status_info["skill_distribution"] = dict(skill_counts.most_common(20))  # 取前20个最常见的技能
+                
+            except Exception as e:
+                logger.warning(f"计算召唤兽数据统计信息失败: {e}")
+                status_info["statistics_error"] = str(e)
+        
+        # 计算缓存是否过期
+        if collector._refresh_start_time:
+            from datetime import datetime, timedelta
+            if collector._cache_ttl_hours == -1:
+                status_info["cache_expired"] = False
+                status_info["cache_expiry_time"] = None
+            else:
+                cache_expiry_time = collector._refresh_start_time + timedelta(hours=collector._cache_ttl_hours)
+                status_info["cache_expired"] = datetime.now() > cache_expiry_time
+                status_info["cache_expiry_time"] = cache_expiry_time.isoformat()
+        else:
+            status_info["cache_expired"] = True
+            status_info["cache_expiry_time"] = None
+        
+        # 添加Redis全量缓存状态信息
+        try:
+            redis_cache_status = collector.get_cache_status()
+            status_info["redis_full_cache"] = redis_cache_status
+        except Exception as e:
+            logger.warning(f"获取Redis全量缓存状态失败: {e}")
+            status_info["redis_full_cache"] = {"available": False, "error": str(e)}
+        
+        return success_response(data=status_info, message="获取召唤兽市场数据状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取召唤兽市场数据状态失败: {e}")
+        return error_response(f"获取召唤兽市场数据状态失败: {str(e)}")
+
+
+@system_bp.route('/market-data/pet/refresh', methods=['POST'])
+def refresh_pet_data():
+    """刷新召唤兽数据"""
+    try:
+        from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+        
+        # 获取召唤兽数据采集器实例
+        collector = PetMarketDataCollector()
+        
+        # 启动后台数据刷新
+        import threading
+        
+        def refresh_task():
+            try:
+                # 加载召唤兽数据到Redis缓存
+                collector._load_full_data_to_redis()
+            except Exception as e:
+                logger.error(f"召唤兽数据刷新任务失败: {e}")
+        
+        # 在后台线程中执行刷新任务
+        thread = threading.Thread(target=refresh_task)
+        thread.daemon = True
+        thread.start()
+        
+        return success_response(message="召唤兽数据刷新已启动，正在后台处理...")
+        
+    except Exception as e:
+        logger.error(f"启动召唤兽数据刷新失败: {e}")
+        return error_response(f"启动召唤兽数据刷新失败: {str(e)}")
+
+
+@system_bp.route('/market-data/pet/refresh-full-cache', methods=['POST'])
+def refresh_pet_full_cache():
+    """刷新召唤兽全量缓存"""
+    try:
+        from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+        
+        # 获取召唤兽数据采集器实例
+        collector = PetMarketDataCollector()
+        
+        # 启动后台全量缓存刷新
+        import threading
+        
+        def refresh_task():
+            try:
+                # 强制刷新全量缓存
+                collector.refresh_full_cache()
+            except Exception as e:
+                logger.error(f"召唤兽全量缓存刷新任务失败: {e}")
+        
+        # 在后台线程中执行刷新任务
+        thread = threading.Thread(target=refresh_task)
+        thread.daemon = True
+        thread.start()
+        
+        return success_response(message="召唤兽全量缓存刷新已启动，正在后台处理...")
+        
+    except Exception as e:
+        logger.error(f"启动召唤兽全量缓存刷新失败: {e}")
+        return error_response(f"启动召唤兽全量缓存刷新失败: {str(e)}")
+
+
+@system_bp.route('/market-data/pet/refresh-status', methods=['GET'])
+def get_pet_refresh_status():
+    """获取召唤兽数据刷新状态"""
+    try:
+        from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+        
+        # 获取召唤兽数据采集器实例
+        collector = PetMarketDataCollector()
+        
+        # 获取刷新状态
+        refresh_status = collector.get_refresh_status()
+        
+        return success_response(data=refresh_status, message="获取召唤兽刷新状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取召唤兽刷新状态失败: {e}")
+        return error_response(f"获取召唤兽刷新状态失败: {str(e)}")
+
+
 @system_bp.route('/redis/status', methods=['GET'])
 def get_redis_status():
     """获取Redis状态信息"""
@@ -660,11 +860,11 @@ def get_redis_status():
         return error_response(f"获取Redis状态失败: {str(e)}")
 
 
-@system_bp.route('/equipment/refresh-status', methods=['GET'])
+@system_bp.route('/market-data/equipment/refresh-status', methods=['GET'])
 def get_equipment_refresh_status():
     """获取装备数据刷新进度状态"""
     try:
-        from src.evaluator.mark_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+        from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
         
         # 使用类方法获取单例实例的刷新状态
         refresh_status = EquipMarketDataCollector.get_refresh_status_static()

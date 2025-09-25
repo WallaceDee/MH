@@ -98,17 +98,17 @@
           <div v-html="formatFullPrice(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="highlight" label="亮点"  width="100"  align="center" sortable="custom">
+      <el-table-column prop="highlight" label="亮点" width="100" align="center" sortable="custom">
         <template slot-scope="scope">
           <span v-html="gen_highlight(scope.row.highlight)"></span>
         </template>
       </el-table-column>
-      <el-table-column prop="dynamic_tags" label="动态"  width="100"  align="center" sortable="custom">
+      <el-table-column prop="dynamic_tags" label="动态" width="100" align="center" sortable="custom">
         <template slot-scope="scope">
           <span v-html="gen_dynamic_tags(scope.row.dynamic_tags)"></span>
         </template>
       </el-table-column>
-      <el-table-column prop="gem_level" label="宝石" width="100"  sortable="custom">
+      <el-table-column prop="gem_level" label="宝石" width="100" sortable="custom">
         <template #default="scope">
           <div class="gem-container">
             <el-badge v-if="scope.row.gem_level || scope.row.jinglian_level || scope.row.xiang_qian_level"
@@ -130,7 +130,7 @@
             :data-special-skill="scope.row.special_skill" v-html="formatSpecialSkillsAndEffects(scope.row)"></div>
         </template>
       </el-table-column>
-      <el-table-column prop="suit_effect" label="套装" width="160"  sortable="custom">
+      <el-table-column prop="suit_effect" label="套装" width="160" sortable="custom">
         <template #default="scope">
           <div class="equip_desc_blue" v-html="formatSuitEffect(scope.row)"></div>
         </template>
@@ -255,7 +255,15 @@ for (var keyIndex in window.CBG_GAME_CONFIG.equip_info) {
 const kindidOptions = [{
   value: -1,
   label: '人物装备',
-  children: window.AUTO_SEARCH_CONFIG.weapon_armors.map(([value, label]) => ({ value, label }))
+  children: [{
+    value: -3,
+    label: '武器',
+    children: window.AUTO_SEARCH_CONFIG.weapon_armors.filter(([value]) => window.is_weapon_equip(value)).map(([value, label]) => ({ value, label }))
+  }, {
+    value: -4,
+    label: '防具',
+    children: window.AUTO_SEARCH_CONFIG.weapon_armors.filter(([value]) => !window.is_weapon_equip(value)).map(([value, label]) => ({ value, label }))
+  },]
 }, {
   value: -2,
   label: '灵饰',
@@ -618,7 +626,7 @@ export default {
         this.filters.equip_type = []
       }
     },
-   
+
 
   },
   mounted() {

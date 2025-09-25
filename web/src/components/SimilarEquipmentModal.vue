@@ -13,8 +13,8 @@
       <div v-if="valuationLoading" class="loading-info">
         <el-skeleton :rows="12" animated />
       </div>
-      <div v-else>
-        <div class="similar-header" v-if="similarData">
+      <div v-else-if="similarData">
+        <div class="similar-header">
           <h4>相似装备 (共{{ similarData.anchor_count }}个) <el-divider direction="vertical" />
             <el-tag type="info" size="mini">相似度阈值: {{ similarData.similarity_threshold }}</el-tag>
             <el-divider direction="vertical" />
@@ -36,13 +36,7 @@
 
         <!-- 相似装备表格 -->
         <el-empty v-if="!anchorsLoading && !similarData?.anchors?.length" description="暂无数据"></el-empty>
-        <similar-equipment-table v-else :anchors="similarData.anchors" v-loading="anchorsLoading" element-loading-text="正在加载相似装备数据"/>
-      </div>
-      <!-- 错误状态 -->
-      <div v-if="error" class="error-info">
-        <el-empty description="加载失败">
-          <el-button type="primary" @click="loadSimilarEquipments">重试</el-button>
-        </el-empty>
+        <SimilarEquipmentTable v-else :anchors="similarData.anchors" v-loading="anchorsLoading" element-loading-text="正在加载相似装备"/>
       </div>
     </div>
   </el-popover>
@@ -77,7 +71,7 @@ export default {
     maxAnchors: {
       type: Number,
       default: 30
-    }
+    },
   },
   data() {
     return {
@@ -132,23 +126,11 @@ export default {
           max_anchors: this.maxAnchors
         })
 
-        if (response.code !== 200) {
-          // 估价失败
-          this.$notify.error({
-            title: '装备估价失败',
-            message: response.message || '估价计算失败',
-            duration: 3000
-          })
-
-          // 显示详细错误信息
-          if (response.data && response.data.error) {
-            console.error('估价错误详情:', response.data.error)
-          }
-          throw new Error(response.message || '估价计算失败')
-        }
-
         const result = response.data
         this.equipmentValuation = result
+
+        // 向父组件发出估价结果更新事件
+        this.$emit('valuation-updated', result)
 
         // 初始化相似装备数据
         this.similarData = {
@@ -157,15 +139,23 @@ export default {
           max_anchors: result.max_anchors || this.maxAnchors,
           anchors: [],
           statistics: {
-            price_range: {
-              min: Math.min(...(result.anchors || []).map((a) => a.price || 0)),
-              max: Math.max(...(result.anchors || []).map((a) => a.price || 0)),
-              avg: (result.anchors || []).reduce((sum, a) => sum + (a.price || 0), 0) / (result.anchors || []).length
+            price_range: result.anchor_count?{
+              min: Math.min(...result.anchors.map((a) => a.price || 0)),
+              max: Math.max(...result.anchors.map((a) => a.price || 0)),
+              avg: result.anchors.reduce((sum, a) => sum + (a.price || 0), 0) / result.anchors.length
+            }:{
+              min:0,
+              max:0,
+              avg:0
             },
-            similarity_range: {
-              min: Math.min(...(result.anchors || []).map((a) => a.similarity || 0)),
-              max: Math.max(...(result.anchors || []).map((a) => a.similarity || 0)),
-              avg: (result.anchors || []).reduce((sum, a) => sum + (a.similarity || 0), 0) / (result.anchors || []).length
+            similarity_range: result.anchor_count?{
+              min: Math.min(...result.anchors.map((a) => a.similarity || 0)),
+              max: Math.max(...result.anchors.map((a) => a.similarity || 0)),
+              avg: result.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / result.anchors.length
+            }:{
+              min:0,
+              max:0,
+              avg:0
             }
           }
         }

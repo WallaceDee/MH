@@ -17,7 +17,7 @@ from src.models.equipment import Equipment
 from src.models.pet import Pet
 from sqlalchemy import and_, or_, func, text
 from sqlalchemy.orm import sessionmaker
-from src.evaluator.mark_anchor.equip.index import EquipAnchorEvaluator
+from src.evaluator.market_anchor.equip.index import EquipAnchorEvaluator
 from src.evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
 from src.evaluator.feature_extractor.lingshi_feature_extractor import LingshiFeatureExtractor
 from src.evaluator.feature_extractor.pet_equip_feature_extractor import PetEquipFeatureExtractor
@@ -402,6 +402,13 @@ class EquipmentService:
         try:
             start_date, end_date = self._validate_date_range(start_date, end_date)
             
+            # 装备序列号列表参数处理 - 过滤空值
+            if equip_sn_list is not None:
+                equip_sn_list = [item.strip() for item in equip_sn_list if item and item.strip()]
+                if not equip_sn_list:
+                    equip_sn_list = None
+                logger.info(f"处理后的equip_sn_list: {equip_sn_list}, 长度: {len(equip_sn_list) if equip_sn_list else 0}")
+            
             # 使用SQLAlchemy ORM
             query = db.session.query(Equipment)
             
@@ -417,10 +424,6 @@ class EquipmentService:
             if equip_sn_list is not None and len(equip_sn_list) > 0:
                 query = query.filter(Equipment.equip_sn.in_(equip_sn_list))
                 logger.info(f"添加装备序列号列表筛选: equip_sn IN {equip_sn_list}")
-                # 当使用equip_sn_list时，跳过其他筛选条件，直接返回指定装备
-                logger.info(f"使用equip_sn_list模式，跳过其他筛选条件")
-                # 打印SQL查询用于调试
-                logger.info(f"SQL查询: {str(query)}")
             else:
                 # 时间范围筛选
                 if start_date:
@@ -1177,7 +1180,7 @@ class EquipmentService:
     def get_lingshi_config(self) -> Dict:
         """获取灵饰数据"""
         try:
-            from src.evaluator.mark_anchor.equip.constant import get_lingshi_config
+            from src.evaluator.market_anchor.equip.constant import get_lingshi_config
             
             # 从constant模块获取灵饰数据
             lingshi_data = get_lingshi_config()
@@ -1190,7 +1193,7 @@ class EquipmentService:
     def get_weapon_config(self) -> Dict:
         """获取武器数据"""
         try:
-            from src.evaluator.mark_anchor.equip.constant import get_weapon_config
+            from src.evaluator.market_anchor.equip.constant import get_weapon_config
             
             # 从constant模块获取武器数据
             weapon_data = get_weapon_config()
@@ -1203,7 +1206,7 @@ class EquipmentService:
     def get_pet_equip_config(self) -> Dict:
         """获取宠物装备数据"""
         try:
-            from src.evaluator.mark_anchor.equip.constant import get_pet_equip_config
+            from src.evaluator.market_anchor.equip.constant import get_pet_equip_config
             
             # 从constant模块获取宠物装备数据
             pet_equip_data = get_pet_equip_config()
@@ -1216,7 +1219,7 @@ class EquipmentService:
     def get_equip_config(self) -> Dict:
         """获取装备数据"""
         try:
-            from src.evaluator.mark_anchor.equip.constant import get_config
+            from src.evaluator.market_anchor.equip.constant import get_config
             
             # 从constant模块获取装备数据
             equip_data = get_config()

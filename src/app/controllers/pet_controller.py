@@ -46,6 +46,9 @@ class PetController:
             pet_lx = params.get('pet_lx')
             equip_sn = params.get('equip_sn')
             warning_rate = params.get('warning_rate')
+            
+            # 召唤兽序列号列表参数 - 直接传递给服务层处理
+            equip_sn_list = params.get('equip_sn_list')
             if level_min is not None:
                 level_min = int(level_min)
             if level_max is not None:
@@ -161,6 +164,7 @@ class PetController:
                 equip_list_amount_warning=equip_list_amount_warning,
                 warning_rate=warning_rate,
                 equip_sn=equip_sn,
+                equip_sn_list=equip_sn_list,
                 sort_by=sort_by,
                 sort_order=sort_order
             )
@@ -222,16 +226,76 @@ class PetController:
         """获取宠物估价"""
         try:
             if not pet_data:
-                return {"error": "宠物数据不能为空"}
+                return {
+                    "error": "宠物数据不能为空",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
             
             if strategy not in ['fair_value', 'market_price', 'weighted_average']:
-                return {"error": "不支持的估价策略"}
+                return {
+                    "error": "不支持的估价策略",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
             
             if not 0.0 <= similarity_threshold <= 1.0:
-                return {"error": "相似度阈值必须在0.0到1.0之间"}
+                return {
+                    "error": "相似度阈值必须在0.0到1.0之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
             
             if max_anchors < 1 or max_anchors > 100:
-                return {"error": "最大锚点数量必须在1到100之间"}
+                return {
+                    "error": "最大锚点数量必须在1到100之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
             
             # 调用服务层
             result = self.service.get_pet_valuation(pet_data, strategy, similarity_threshold, max_anchors)
@@ -240,7 +304,22 @@ class PetController:
             
         except Exception as e:
             logger.error(f"获取宠物估价时出错: {e}")
-            return {"error": f"获取宠物估价时出错: {str(e)}"}
+            return {
+                "error": f"获取宠物估价时出错: {str(e)}",
+                "estimated_price": 0,
+                "estimated_price_yuan": 0.0,
+                "strategy": strategy,
+                "anchor_count": 0,
+                "anchors": [],
+                "confidence": 0.0,
+                "similarity_threshold": similarity_threshold,
+                "max_anchors": max_anchors,
+                "price_range": {},
+                "equip_valuations": [],
+                "equip_estimated_price": 0,
+                "skip_reason": "",
+                "invalid_item": False
+            }
 
     def batch_pet_valuation(self, pet_list: List[Dict], strategy: str = 'fair_value',
                            similarity_threshold: float = 0.7, max_anchors: int = 30, verbose: bool = False) -> Dict:

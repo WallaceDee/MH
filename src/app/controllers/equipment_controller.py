@@ -115,17 +115,8 @@ class EquipmentController:
             sort_by = params.get('sort_by', '')
             sort_order = params.get('sort_order', '')
             
-            # 装备序列号列表参数处理 - 处理Flask的数组参数
-            # 支持两种格式：equip_sn_list[] 和 equip_sn_list
-            equip_sn_list = request.args.getlist('equip_sn_list[]') or request.args.getlist('equip_sn_list')
-            logger.info(f"原始equip_sn_list参数: {equip_sn_list}, 类型: {type(equip_sn_list)}")
-            if equip_sn_list and len(equip_sn_list) > 0:
-                # 过滤空值
-                equip_sn_list = [item.strip() for item in equip_sn_list if item and item.strip()]
-                logger.info(f"处理后的equip_sn_list: {equip_sn_list}, 长度: {len(equip_sn_list)}")
-            else:
-                equip_sn_list = None
-                logger.info("equip_sn_list为空，设置为None")
+            # 装备序列号列表参数
+            equip_sn_list = params.get('equip_sn_list')
             
             # 添加处理后的参数日志
             filter_params = {

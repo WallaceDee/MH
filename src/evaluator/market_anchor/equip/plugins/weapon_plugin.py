@@ -4,7 +4,7 @@
 专门处理武器装备的估价逻辑，重点关注伤害、总伤害和属性加成
 """
 
-from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
+from src.evaluator.market_anchor.equip.index import EquipmentTypePlugin
 from typing import Dict, Any, List, Optional
 
 class WeaponPlugin(EquipmentTypePlugin):
@@ -30,7 +30,7 @@ class WeaponPlugin(EquipmentTypePlugin):
         """加载武器标准数据"""
         try:
             # 使用绝对导入调用get_weapon_config
-            from src.evaluator.mark_anchor.equip.constant import get_weapon_config
+            from src.evaluator.market_anchor.equip.constant import get_weapon_config
             
             raw_standards = get_weapon_config()
                 

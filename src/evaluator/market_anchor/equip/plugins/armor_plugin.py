@@ -4,7 +4,7 @@
 专门处理衣服装备的估价逻辑，重点关注防御和属性加成
 """
 
-from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
+from src.evaluator.market_anchor.equip.index import EquipmentTypePlugin
 import sys
 import os
 from typing import Dict, Any, List, Optional, Tuple

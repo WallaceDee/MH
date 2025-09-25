@@ -44,8 +44,8 @@
             </el-col>
           </el-row>
           <div class="result-footer">
-            <SimilarEquipmentModal :equipment="item" :similar-data="similarData"
-              @show="(e) => loadSimilarEquipments(e, item.resultIndex)">
+            <SimilarEquipmentModal :equipment="item" :similar-data="similarData" 
+              @valuation-updated="(data) => handleValuationUpdated(data, index)">
               <el-link href="javascript:void(0)" type="primary" style="font-weight: bold;">{{ item.name || `装备 ${index +
                 1}`
               }}</el-link>
@@ -153,80 +153,17 @@ export default {
     this.currentTotalValue = this.totalValue
   },
   methods: {
-    // 加载相似装备
-    async loadSimilarEquipments(equipment, resultIndex) {
-      // 使用默认相似度阈值0.8加载
-      this.similarData = null
-      await this.loadEquipmentValuation(equipment, resultIndex)
-    },
-    // 统一的装备估价加载方法
-    async loadEquipmentValuation(equipment, resultIndex) {
-      try {
-        // similarity_threshold:0.8,
-        // max_anchors:30
-        // 获取估价信息（包含相似装备）
-        if (window.is_pet_equip(equipment.kindid)) {
-          equipment = {
-            kindid: 29,
-            desc: equipment.desc
-          }
-        }
-        const valuationResponse = await this.$api.equipment.getEquipmentValuation({
-          equipment_data: equipment,
-          strategy: 'fair_value',
-          similarity_threshold: this.valuateParams.similarity_threshold,
-          max_anchors: this.valuateParams.max_anchors
-        })
-        const data = valuationResponse.data
-
-        // 从估价结果中提取相似装备信息
-        if (valuationResponse.code === 200 && data?.anchor_count > 0) {
-          this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price + data.estimated_price
-          this.$set(this.results, resultIndex, data)
-          // 处理估价响应
-          const { data: { anchors: allAnchors } } = await this.$api.equipment.findEquipmentAnchors({
-            equipment_data: equipment,
-            similarity_threshold: this.valuateParams.similarity_threshold,
-            max_anchors: this.valuateParams.max_anchors
-          })
-          this.similarData = {
-            anchor_count: data.anchor_count,
-            similarity_threshold: data.similarity_threshold,
-            max_anchors: data.max_anchors,
-            anchors: allAnchors,
-            statistics: {
-              price_range: {
-                min: Math.min(...allAnchors.map((a) => a.price || 0)),
-                max: Math.max(...allAnchors.map((a) => a.price || 0))
-              },
-              similarity_range: {
-                min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
-                max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
-                avg:
-                  allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                  allAnchors.length
-              }
-            }
-          }
-        } else if (valuationResponse.code === 400) {
-          this.$set(this.results, resultIndex, data)
-          // 400错误也要显示界面，只是没有锚点数据
-          this.similarData = {
-            anchor_count: 0,
-            similarity_threshold: this.valuateParams.similarity_threshold,
-            max_anchors: this.valuateParams.max_anchors,
-            anchors: [],
-            statistics: {
-              price_range: { min: 0, max: 0 },
-              similarity_range: { min: 0, max: 0, avg: 0 }
-            }
-          }
-        }
-
-        console.log('估价和相似装备数据:', valuationResponse.data)
-      } catch (error) {
-        console.error('加载相似装备或估价失败:', error)
+    // 处理估价结果更新
+    handleValuationUpdated(data, resultIndex) {
+      // 更新总价值
+      if (this.results[resultIndex]) {
+        this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price + data.estimated_price
       }
+      
+      // 更新结果数据 - 这是必须保留的操作
+      this.$set(this.results, resultIndex, data)
+      
+      console.log('估价数据更新完成:', data)
     },
 
     // 根据置信度获取标签类型

@@ -56,7 +56,7 @@
                 置信度: {{ similarData.valuation ? (similarData.valuation.confidence * 100).toFixed(1) + '%' : '-' }}
                 <span class="confidence-level">{{ confidenceLevel }}</span>
               </span>
-              <span>锚点数: {{ similarData.anchor_count || '-' }}</span>
+              <span>基于{{ similarData.anchor_count}}个锚点</span>
             </div>
           </div>
 
@@ -74,7 +74,7 @@
 
         <!-- 相似角色表格 -->
         <el-empty v-if="!anchorsLoading && !similarData.anchors?.length" description="暂无相似角色数据"></el-empty>
-        <similar-role-table v-else :anchors="similarData.anchors" v-loading="anchorsLoading" element-loading-text="正在加载相似角色数据" />
+        <SimilarRoleTable v-else :anchors="similarData.anchors" v-loading="anchorsLoading" element-loading-text="正在加载相似角色" />
       </div>
     </div>
   </el-popover>
@@ -258,22 +258,9 @@ export default {
           max_anchors: 30
         })
 
-        if (response.code !== 200) {
-          // 估价失败
-          this.$notify.error({
-            title: '角色估价失败',
-            message: response.message || '估价计算失败',
-            duration: 3000
-          })
-
-          // 显示详细错误信息
-          if (response.data && response.data.error) {
-            console.error('估价错误详情:', response.data.error)
-          }
-          throw new Error(response.message || '估价计算失败')
-        }
 
         const result = response.data
+        const currentAchors = result.anchors
         const estimatedPrice = result.estimated_price_yuan
 
         // 更新角色数据中的估价信息（如果父组件需要的话）
@@ -289,15 +276,23 @@ export default {
           max_anchors: result.max_anchors || 30,
           anchors: [],
           statistics: {
-            price_range: {
-              min: Math.min(...result.anchors.map((a) => a.price || 0)),
-              max: Math.max(...result.anchors.map((a) => a.price || 0)),
-              avg: result.anchors.reduce((sum, a) => sum + (a.price || 0), 0) / result.anchors.length
+            price_range:result.anchor_count? {
+              min: Math.min(...currentAchors.map((a) => a.price || 0)),
+              max: Math.max(...currentAchors.map((a) => a.price || 0)),
+              avg: currentAchors.reduce((sum, a) => sum + (a.price || 0), 0) / currentAchors.length
+            }:{
+              min:0,
+              max:0,
+              avg:0
             },
-            similarity_range: {
-              min: Math.min(...result.anchors.map((a) => a.similarity || 0)),
-              max: Math.max(...result.anchors.map((a) => a.similarity || 0)),
-              avg: result.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / result.anchors.length
+            similarity_range:result.anchor_count? {
+              min: Math.min(...currentAchors.map((a) => a.similarity || 0)),
+              max: Math.max(...currentAchors.map((a) => a.similarity || 0)),
+              avg: currentAchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / currentAchors.length
+            }:{
+              min:0,
+              max:0,
+              avg:0
             }
           },
           valuation: {
@@ -318,7 +313,7 @@ export default {
             // 使用估价结果中的anchor_eids直接获取相似角色列表，避免重复计算
             const anchorsResponse = await this.$api.role.getRoleApi({
               page_size: 99,
-              eid_list: result.anchors.map(item => item.eid),
+              eid_list: currentAchors.map(item => item.eid),
               role_type: 'empty'
             })
 
@@ -332,8 +327,8 @@ export default {
                 if (roleInfo.result) {
                   item.roleInfo = roleInfo.result
                 }
-                item.similarity = result.anchors[index].similarity
-                item.features = result.anchors[index].features
+                item.similarity = currentAchors[index].similarity
+                item.features = currentAchors[index].features
                 return item
               })
 

@@ -189,7 +189,7 @@ class EquipMarketDataCollector:
             
             # 检查是否已有缓存且不需要强制刷新
             if not force_refresh:
-                self._refresh_message = "检查现有缓存..."
+                self._refresh_message = "检查Redis全量缓存..."
                 self._refresh_progress = 5
                 
                 try:

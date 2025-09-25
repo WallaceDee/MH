@@ -29,7 +29,7 @@
     </el-row>
     <div class="valuation-main">
       <span class="valuation-label">装备估价:</span>
-      <span class="valuation-price">{{ valuation ? valuation.estimated_price_yuan + '元' : '-' }}</span>
+      <span class="valuation-price">{{ valuation?.estimated_price_yuan || '-' }}元</span>
       <span class="valuation-strategy">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>
       <el-link type="danger" @click.native="markAsAbnormal" size="mini">标记为异常</el-link>
 
@@ -46,7 +46,7 @@
         置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}
         <span class="confidence-level">{{ confidenceLevel }}</span>
       </span>
-      <span>基于{{ valuation ? valuation.anchor_count + '个锚点' : '-' }}</span>
+      <span>基于{{ valuation.anchor_count }}个锚点</span>
       <span v-if="priceRatio">估价比率: {{ (priceRatio * 100).toFixed(1) }}%</span>
     </div>
   </div>

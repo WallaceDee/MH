@@ -4,7 +4,7 @@
 专门处理灵饰装备的估价逻辑，重点主属性和附加属性
 """
 
-from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
+from src.evaluator.market_anchor.equip.index import EquipmentTypePlugin
 from src.evaluator.constants.lingshi_priorities import is_same_priority
 import sys
 import os
@@ -80,7 +80,7 @@ class LingshiPlugin(EquipmentTypePlugin):
         """加载灵饰配置数据"""
         try:
             # 使用绝对导入
-            from src.evaluator.mark_anchor.equip.constant import get_lingshi_config
+            from src.evaluator.market_anchor.equip.constant import get_lingshi_config
             return get_lingshi_config()
         except Exception as e:
             print(f"加载灵饰配置失败: {e}")

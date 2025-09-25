@@ -123,7 +123,7 @@ export const systemApi = {
    * @returns {Promise}
    */
   getEquipmentCacheStatus() {
-    return api.get('/system/equipment/cache-status')
+    return api.get('/system/market-data/equipment/cache-status')
   },
 
   /**
@@ -131,7 +131,7 @@ export const systemApi = {
    * @returns {Promise}
    */
   refreshEquipmentData() {
-    return api.post('/system/equipment/refresh', {
+    return api.post('/system/market-data/equipment/refresh', {
       force_refresh: false,
       use_cache: true
     })
@@ -142,7 +142,7 @@ export const systemApi = {
    * @returns {Promise}
    */
   refreshEquipmentFullCache() {
-    return api.post('/system/equipment/refresh', {
+    return api.post('/system/market-data/equipment/refresh', {
       force_refresh: true,
       use_cache: true
     })
@@ -166,6 +166,38 @@ export const systemApi = {
    * @returns {Promise}
    */
   getEquipmentRefreshStatus() {
-    return api.get('/system/equipment/refresh-status')
+    return api.get('/system/market-data/equipment/refresh-status')
+  },
+
+  /**
+   * 获取召唤兽市场数据状态
+   * @returns {Promise}
+   */
+  getPetMarketDataStatus() {
+    return api.get('/system/market-data/pet/status')
+  },
+
+  /**
+   * 刷新召唤兽数据（使用缓存）
+   * @returns {Promise}
+   */
+  refreshPetData() {
+    return api.post('/system/market-data/pet/refresh')
+  },
+
+  /**
+   * 刷新召唤兽全量缓存（不使用缓存，完全重新加载）
+   * @returns {Promise}
+   */
+  refreshPetFullCache() {
+    return api.post('/system/market-data/pet/refresh-full-cache')
+  },
+
+  /**
+   * 获取召唤兽刷新进度状态
+   * @returns {Promise}
+   */
+  getPetRefreshStatus() {
+    return api.get('/system/market-data/pet/refresh-status')
   }
 } 

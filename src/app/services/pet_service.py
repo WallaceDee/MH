@@ -27,7 +27,7 @@ from .task_manager import task_manager
 
 logger = logging.getLogger(__name__)
 
-from evaluator.mark_anchor.pet.index import PetMarketAnchorEvaluator
+from evaluator.market_anchor.pet.index import PetMarketAnchorEvaluator
 from evaluator.feature_extractor.pet_feature_extractor import PetFeatureExtractor
 from evaluator.constants.equipment_types import PET_EQUIP_KINDID
 
@@ -179,6 +179,7 @@ class PetService:
                  pet_texing: Optional[List[str]] = None,
                  equip_list_amount_warning: Optional[int] = None,
                  equip_sn: Optional[str] = None,
+                 equip_sn_list: Optional[List[str]] = None,  # 召唤兽序列号列表，如果提供则只查询指定的召唤兽
                  warning_rate: Optional[float] = 0.4,
                  sort_by: Optional[str] = 'price', sort_order: Optional[str] = 'asc') -> Dict:
         """获取分页的宠物列表
@@ -213,6 +214,13 @@ class PetService:
         try:
             start_date, end_date = self._validate_date_range(start_date, end_date)
             
+            # 召唤兽序列号列表参数处理 - 过滤空值
+            if equip_sn_list is not None:
+                equip_sn_list = [item.strip() for item in equip_sn_list if item and item.strip()]
+                if not equip_sn_list:
+                    equip_sn_list = None
+                logger.info(f"处理后的equip_sn_list: {equip_sn_list}, 长度: {len(equip_sn_list) if equip_sn_list else 0}")
+            
             # 构建SQLAlchemy查询
             query = db.session.query(Pet)
 
@@ -220,91 +228,97 @@ class PetService:
             logger.info(
                 f"开始处理筛选条件，参数: level_min={level_min}, level_max={level_max}, price_min={price_min}, price_max={price_max}")
             
-            # 时间范围筛选
-            if start_date:
-                query = query.filter(func.date(Pet.selling_time) >= start_date)
-                logger.info(f"添加开始日期筛选: selling_time >= {start_date}")
-            if end_date:
-                query = query.filter(func.date(Pet.selling_time) <= end_date)
-                logger.info(f"添加结束日期筛选: selling_time <= {end_date}")
+            # 召唤兽序列号列表筛选 - 如果提供了equip_sn_list，只查询指定的召唤兽
+            if equip_sn_list is not None and len(equip_sn_list) > 0:
+                query = query.filter(Pet.equip_sn.in_(equip_sn_list))
+                logger.info(f"添加召唤兽序列号列表筛选: equip_sn IN {equip_sn_list}")
+            else:
+                # 时间范围筛选
+                if start_date:
+                    query = query.filter(func.date(Pet.selling_time) >= start_date)
+                    logger.info(f"添加开始日期筛选: selling_time >= {start_date}")
+                if end_date:
+                    query = query.filter(func.date(Pet.selling_time) <= end_date)
+                    logger.info(f"添加结束日期筛选: selling_time <= {end_date}")
 
-            # 基础筛选条件
-            if level_min is not None:
-                query = query.filter(Pet.level >= level_min)
-            if level_max is not None:
-                query = query.filter(Pet.level <= level_max)
-            if price_min is not None:
-                query = query.filter(Pet.price >= price_min * 100)  # 前端传元，后端存分
-            if price_max is not None:
-                query = query.filter(Pet.price <= price_max * 100)
+                # 基础筛选条件
+                if level_min is not None:
+                    query = query.filter(Pet.level >= level_min)
+                if level_max is not None:
+                    query = query.filter(Pet.level <= level_max)
+                if price_min is not None:
+                    query = query.filter(Pet.price >= price_min * 100)  # 前端传元，后端存分
+                if price_max is not None:
+                    query = query.filter(Pet.price <= price_max * 100)
 
-            # 宠物技能筛选（多选）
-            if pet_skills and len(pet_skills) > 0:
-                skill_conditions = []
-                for skill in pet_skills:
-                    # 使用all_skill字段进行搜索，处理管道符分隔格式 "305|316|304|301"
-                    skill_conditions.append(
-                        or_(
-                            Pet.all_skill == skill,              # 只有这一个技能："305"
-                            Pet.all_skill.like(f'{skill}|%'),    # 在开头："305|x|..."
-                            Pet.all_skill.like(f'%|{skill}|%'),  # 在中间："|x|305|y|"
-                            Pet.all_skill.like(f'%|{skill}')     # 在结尾："|x|y|305"
-                        )
-                    )
-                query = query.filter(and_(*skill_conditions))
-                logger.info(f"添加宠物技能筛选: {pet_skills}")
-
-            # 其他筛选条件
-            if pet_growth:
-                query = query.filter(Pet.growth >= pet_growth)
-                logger.info(f"添加成长筛选: growth >= {pet_growth}")
-            # 灵性值
-            if pet_lx:
-                query = query.filter(Pet.lx >= pet_lx)
-                logger.info(f"添加灵性筛选: lx >= {pet_lx}")
-
-            # 特性筛选（多选）
-            if pet_texing and len(pet_texing) > 0:
-                texing_conditions = []
-                for texing_id in pet_texing:
-                    # 使用texing字段进行搜索，处理JSON格式 {"id": 723, "name": "洞察", ...}
-                    texing_conditions.append(Pet.texing.like(f'%"id": {texing_id}%'))
-                query = query.filter(or_(*texing_conditions))
-                logger.info(f"添加特性筛选: {pet_texing}")
-
-            if pet_skill_count is not None:
-                # 根据all_skills字段的长度过滤，计算管道符分隔的技能数量
-                query = query.filter(
-                    func.length(Pet.all_skill) - func.length(func.replace(Pet.all_skill, '|', '')) + 1 >= pet_skill_count
-                )
-                logger.info(f"添加技能数量筛选: 技能数量 >= {pet_skill_count}")
-
-            # 估价异常筛选
-            if equip_list_amount_warning is not None:
-                if equip_list_amount_warning == 1:
-                    # 筛选估价异常的宠物：
-                    # 1. equip_list_amount_warning = 1 (手动标记的异常)
-                    # 2. equip_list_amount > 0 且 equip_list_amount/price > 40% (装备估价占比过高)
-                    query = query.filter(
-                        or_(
-                            Pet.equip_list_amount_warning == 1,
-                            and_(
-                                Pet.equip_list_amount > 0,
-                                Pet.price > 0,
-                                func.cast(Pet.equip_list_amount, func.FLOAT) / func.cast(Pet.price, func.FLOAT) > warning_rate
+                # 宠物技能筛选（多选）
+                if pet_skills and len(pet_skills) > 0:
+                    skill_conditions = []
+                    for skill in pet_skills:
+                        # 使用all_skill字段进行搜索，处理管道符分隔格式 "305|316|304|301"
+                        skill_conditions.append(
+                            or_(
+                                Pet.all_skill == skill,              # 只有这一个技能："305"
+                                Pet.all_skill.like(f'{skill}|%'),    # 在开头："305|x|..."
+                                Pet.all_skill.like(f'%|{skill}|%'),  # 在中间："|x|305|y|"
+                                Pet.all_skill.like(f'%|{skill}')     # 在结尾："|x|y|305"
                             )
                         )
-                    )
-                    logger.info(
-                        f"添加估价异常筛选: equip_list_amount_warning = 1 或装备估价占比>{warning_rate*100}%")
+                    query = query.filter(and_(*skill_conditions))
+                    logger.info(f"添加宠物技能筛选: {pet_skills}")
 
-            # equip_sn筛选
-            if equip_sn:
-                query = query.filter(Pet.equip_sn == equip_sn)
-                logger.info(f"添加equip_sn筛选: {equip_sn}")
+                # 其他筛选条件
+                if pet_growth:
+                    query = query.filter(Pet.growth >= pet_growth)
+                    logger.info(f"添加成长筛选: growth >= {pet_growth}")
+                # 灵性值
+                if pet_lx:
+                    query = query.filter(Pet.lx >= pet_lx)
+                    logger.info(f"添加灵性筛选: lx >= {pet_lx}")
+
+                # 特性筛选（多选）
+                if pet_texing and len(pet_texing) > 0:
+                    texing_conditions = []
+                    for texing_id in pet_texing:
+                        # 使用texing字段进行搜索，处理JSON格式 {"id": 723, "name": "洞察", ...}
+                        texing_conditions.append(Pet.texing.like(f'%"id": {texing_id}%'))
+                    query = query.filter(or_(*texing_conditions))
+                    logger.info(f"添加特性筛选: {pet_texing}")
+
+                if pet_skill_count is not None:
+                    # 根据all_skills字段的长度过滤，计算管道符分隔的技能数量
+                    query = query.filter(
+                        func.length(Pet.all_skill) - func.length(func.replace(Pet.all_skill, '|', '')) + 1 >= pet_skill_count
+                    )
+                    logger.info(f"添加技能数量筛选: 技能数量 >= {pet_skill_count}")
+
+                # 估价异常筛选
+                if equip_list_amount_warning is not None:
+                    if equip_list_amount_warning == 1:
+                        # 筛选估价异常的宠物：
+                        # 1. equip_list_amount_warning = 1 (手动标记的异常)
+                        # 2. equip_list_amount > 0 且 equip_list_amount/price > 40% (装备估价占比过高)
+                        query = query.filter(
+                            or_(
+                                Pet.equip_list_amount_warning == 1,
+                                and_(
+                                    Pet.equip_list_amount > 0,
+                                    Pet.price > 0,
+                                    func.cast(Pet.equip_list_amount, func.FLOAT) / func.cast(Pet.price, func.FLOAT) > warning_rate
+                                )
+                            )
+                        )
+                        logger.info(
+                            f"添加估价异常筛选: equip_list_amount_warning = 1 或装备估价占比>{warning_rate*100}%")
+
+                # equip_sn筛选
+                if equip_sn:
+                    query = query.filter(Pet.equip_sn == equip_sn)
+                    logger.info(f"添加equip_sn筛选: {equip_sn}")
 
             # 计算总数
             total = query.count()
+            logger.info(f"查询到的总数: {total}")
 
             # 计算分页
             total_pages = (total + page_size - 1) // page_size
@@ -331,8 +345,15 @@ class PetService:
             else:
                 query = query.order_by(Pet.update_time.desc())  # 默认按更新时间倒序
 
-            # 应用分页
-            query = query.offset(offset).limit(page_size)
+            # 应用分页 - 当使用equip_sn_list时，限制返回数量
+            if equip_sn_list is not None and len(equip_sn_list) > 0:
+                # 使用equip_sn_list时，直接返回所有匹配的召唤兽，但限制在page_size内
+                query = query.limit(page_size)
+                logger.info(f"equip_sn_list模式：查询到的召唤兽数量: {min(len(equip_sn_list), page_size)}")
+            else:
+                # 正常分页查询
+                query = query.offset(offset).limit(page_size)
+                logger.info(f"正常分页模式：查询到的召唤兽数量: {page_size}")
 
             # 执行查询
             pets = query.all()
@@ -627,21 +648,94 @@ class PetService:
         """获取宠物估价"""
         try:
             if not self.evaluator:
-                return {"error": "宠物锚点估价器未初始化"}
+                return {
+                    "error": "宠物锚点估价器未初始化",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
             if not self.pet_feature_extractor:
-                return {"error": "宠物特征提取器未初始化"}
+                return {
+                    "error": "宠物特征提取器未初始化",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
 
             # 策略校验
             valid_strategies = ['fair_value',
                                 'market_price', 'weighted_average']
             if strategy not in valid_strategies:
                 return {
-                    "error": f"无效的估价策略: {strategy}，有效策略: {', '.join(valid_strategies)}"
+                    "error": f"无效的估价策略: {strategy}，有效策略: {', '.join(valid_strategies)}",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
                 }
             if not 0.0 <= similarity_threshold <= 1.0:
-                return {"error": "相似度阈值必须在0.0-1.0之间"}
+                return {
+                    "error": "相似度阈值必须在0.0-1.0之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
             if not 1 <= max_anchors <= 100:
-                return {"error": "最大锚点数量必须在1-100之间"}
+                return {
+                    "error": "最大锚点数量必须在1-100之间",
+                    "estimated_price": 0,
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": [],
+                    "equip_estimated_price": 0,
+                    "skip_reason": "",
+                    "invalid_item": False
+                }
 
             # 特征提取
             pet_features = self.pet_feature_extractor.extract_features(
@@ -701,8 +795,18 @@ class PetService:
                 return {
                     "error": result["error"],
                     "estimated_price": 0,
-                    "estimated_price_yuan": 0,
-                    "skip_reason": result.get("skip_reason", "")
+                    "estimated_price_yuan": 0.0,
+                    "strategy": strategy,
+                    "anchor_count": 0,
+                    "anchors": [],
+                    "confidence": 0.0,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors,
+                    "price_range": {},
+                    "equip_valuations": equip_valuations,
+                    "equip_estimated_price": sum(equip_val.get("estimated_price", 0) for equip_val in equip_valuations if isinstance(equip_val, dict)),
+                    "skip_reason": result.get("skip_reason", ""),
+                    "invalid_item": False
                 }
             
             # 检查是否是无效物品（被跳过估价）
@@ -714,6 +818,7 @@ class PetService:
                     "estimated_price_yuan": round(estimated_price / 100, 2),
                     "strategy": strategy,
                     "anchor_count": 0,
+                    "anchors":[],
                     "confidence": result.get("confidence", 0),
                     "similarity_threshold": similarity_threshold,
                     "max_anchors": max_anchors,
@@ -734,6 +839,7 @@ class PetService:
                 "estimated_price_yuan": round(estimated_price / 100, 2),
                 "strategy": strategy,
                 "anchor_count": anchor_count,
+                "anchors": result.get("anchors",[]),
                 "confidence": result.get("confidence", 0),
                 "similarity_threshold": similarity_threshold,
                 "max_anchors": max_anchors,
@@ -745,7 +851,22 @@ class PetService:
             }
         except Exception as e:
             logger.error(f"获取宠物估价时出错: {e}")
-            return {"error": f"获取宠物估价时出错: {str(e)}"}
+            return {
+                "error": f"获取宠物估价时出错: {str(e)}",
+                "estimated_price": 0,
+                "estimated_price_yuan": 0.0,
+                "strategy": strategy,
+                "anchor_count": 0,
+                "anchors": [],
+                "confidence": 0.0,
+                "similarity_threshold": similarity_threshold,
+                "max_anchors": max_anchors,
+                "price_range": {},
+                "equip_valuations": [],
+                "equip_estimated_price": 0,
+                "skip_reason": "",
+                "invalid_item": False
+            }
 
     def update_pet_equip_valuation(self, equip_sn: str = None) -> Dict:
         """手动更新宠物装备估价
@@ -1362,6 +1483,7 @@ class PetService:
                         "estimated_price_yuan": 0,
                         "confidence": 0,
                         "anchor_count": 0,
+                        "anchors":[],
                         "equip_estimated_price": 0,
                         "equip_valuations": [],
                         "skip_reason": result.get("skip_reason", "")
@@ -1424,6 +1546,7 @@ class PetService:
                         "estimated_price_yuan": round(estimated_price / 100, 2),
                         "confidence": result.get("confidence", 0),
                         "anchor_count": result.get("anchor_count", 0),
+                        "anchors": result.get("anchors",[]),
                         "price_range": result.get("price_range", {}),
                         "strategy": strategy,
                         "equip_estimated_price": equip_estimated_price,

@@ -3,18 +3,12 @@ from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl import Workbook
 import warnings
 from datetime import datetime
-import json
 import logging
 from typing import Dict, Any, List, Optional, Union, Tuple
-import pandas as pd
-import numpy as np
-import sys
-import os
 
-
-from .pet_market_data_collector import PetMarketDataCollector
-from ...utils.extreme_value_filter import ExtremeValueFilter
-from ...utils.base_valuator import BaseValuator
+from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+from src.evaluator.utils.extreme_value_filter import ExtremeValueFilter
+from src.evaluator.utils.base_valuator import BaseValuator
 
 warnings.filterwarnings('ignore')
 
@@ -144,7 +138,7 @@ class PetMarketAnchorEvaluator(BaseValuator):
                         
                         anchor_candidates.append({
                             'equip_sn': current_equip_sn,
-                            'similarity': similarity,
+                            'similarity': round(float(similarity), 3),
                             'price': pet_price,  # 使用纯召唤兽价格
                             'total_price': total_price,  # 保留总价格用于参考
                             'equip_list_amount': equip_list_amount,  # 保留装备估价用于参考

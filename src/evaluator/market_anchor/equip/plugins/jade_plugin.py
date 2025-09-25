@@ -4,7 +4,7 @@
 专门处理上古玉魄装备的估价逻辑，重点主属性和附加属性
 """
 
-from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
+from src.evaluator.market_anchor.equip.index import EquipmentTypePlugin
 
 from typing import Dict, Any, List, Optional, Tuple
 
@@ -77,7 +77,7 @@ class jadePlugin(EquipmentTypePlugin):
     def _load_jade_config(self) -> Dict[str, Any]:
         """加载上古玉魄配置数据"""
         try:
-            from src.evaluator.mark_anchor.equip.constant import get_jade_config
+            from src.evaluator.market_anchor.equip.constant import get_jade_config
             return get_jade_config()
         except Exception as e:
             print(f"加载上古玉魄配置失败: {e}")

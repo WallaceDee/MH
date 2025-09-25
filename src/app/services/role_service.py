@@ -723,6 +723,23 @@ class RoleService:
                     verbose=True
                 )
                 
+                # 检查是否有错误（如未找到anchor）
+                if "error" in result:
+                    return {
+                        "error": result["error"],
+                        "estimated_price": 0,
+                        "estimated_price_yuan": 0.0,
+                        "confidence": 0.0,
+                        "market_value": 0,
+                        "anchor_count": 0,
+                        "feature": role_features,
+                        "eid": eid,
+                        "anchors": [],
+                        "strategy": strategy,
+                        "similarity_threshold": similarity_threshold,
+                        "max_anchors": max_anchors
+                    }
+                
                 # 格式化返回结果
                 estimated_price = result.get('estimated_price', 0)
                 estimated_price_yuan = estimated_price / 100.0  # 转换为元
@@ -757,9 +774,16 @@ class RoleService:
                 return {
                     "error": f"估价计算失败: {str(e)}",
                     "estimated_price": 0,
-                    "estimated_price_yuan": 0,
+                    "estimated_price_yuan": 0.0,
+                    "confidence": 0.0,
+                    "market_value": 0,
+                    "anchor_count": 0,
                     "feature": role_features,
-                    "eid": eid
+                    "eid": eid,
+                    "anchors": [],
+                    "strategy": strategy,
+                    "similarity_threshold": similarity_threshold,
+                    "max_anchors": max_anchors
                 }
             
         except Exception as e:
@@ -767,7 +791,16 @@ class RoleService:
             return {
                 "error": f"获取角色估价时出错: {str(e)}",
                 "estimated_price": 0,
-                "estimated_price_yuan": 0
+                "estimated_price_yuan": 0.0,
+                "confidence": 0.0,
+                "market_value": 0,
+                "anchor_count": 0,
+                "feature": {},
+                "eid": eid,
+                "anchors": [],
+                "strategy": strategy,
+                "similarity_threshold": similarity_threshold,
+                "max_anchors": max_anchors
             }
 
     def find_role_anchors(self, eid: str, similarity_threshold: float = 0.7, max_anchors: int = 30) -> Dict:

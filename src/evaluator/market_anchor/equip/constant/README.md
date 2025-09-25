@@ -137,7 +137,7 @@ lingshi_config = get_lingshi_config()
 运行测试文件验证配置是否正确加载：
 
 ```bash
-cd src/evaluator/mark_anchor/equip/constant
+cd src/evaluator/market_anchor/equip/constant
 python test_config.py
 ```
 

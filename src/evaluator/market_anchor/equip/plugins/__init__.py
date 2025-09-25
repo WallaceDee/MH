@@ -12,8 +12,8 @@
 
 使用方法：
 ```python
-from src.evaluator.mark_anchor.equip.plugins import get_all_plugins
-from src.evaluator.mark_anchor.equip.index import EquipAnchorEvaluator
+from src.evaluator.market_anchor.equip.plugins import get_all_plugins
+from src.evaluator.market_anchor.equip.index import EquipAnchorEvaluator
 
 # 获取所有插件
 plugins = get_all_plugins()
@@ -36,7 +36,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_dir)))))
 sys.path.insert(0, project_root)
 
-from src.evaluator.mark_anchor.equip.index import EquipmentTypePlugin
+from src.evaluator.market_anchor.equip.index import EquipmentTypePlugin
 
 
 def get_all_plugins() -> List[EquipmentTypePlugin]:

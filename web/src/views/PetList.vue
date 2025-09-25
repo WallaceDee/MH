@@ -77,8 +77,7 @@
         <template #default="scope">
           <el-link :href="getCBGLinkByType(scope.row.eid, 'pet')" type="danger" target="_blank">藏宝阁</el-link>
           <el-divider direction="vertical"></el-divider>
-          <SimilarPetModal :pet="scope.row" :similar-data="similarPets" :valuation="petValuation"
-            @show="loadSimilarPets" />
+          <SimilarPetModal :pet="scope.row" :key="scope.row.equip_sn" @valuation-updated="(data) => handlePetValuationUpdated(data, scope.$index)" />
         </template>
       </el-table-column>
       <el-table-column fixed label="召唤兽" width="70" align="center">
@@ -275,9 +274,6 @@ export default {
         150: '150'
       },
       tableKey: 0,
-      // 相似召唤兽相关数据（实时计算，不缓存）
-      similarPets: null, // 当前显示的相似召唤兽数据
-      petValuation: null, // 当前召唤兽估价信息
       equipmentValuationLoading: false, // 装备批量估价加载状态
       // 装备估价结果对话框相关数据
       valuationDialogVisible: false,
@@ -437,66 +433,6 @@ export default {
     handleLevelRangeChange(value) {
       this.filters.level_range = value
     },
-    // 加载相似召唤兽
-    async loadSimilarPets(pet) {
-      this.similarPets = null
-      this.petValuation = null
-      await this.loadPetValuation(pet, 0.8)
-    },
-    async loadPetValuation({ petData, ...pet }, similarityThreshold = 0.8) {
-      try {
-        // 获取估价信息（包含相似召唤兽）
-        const valuationResponse = await this.$api.pet.getPetValuation({
-          pet_data: pet,
-          strategy: 'fair_value',
-          similarity_threshold: similarityThreshold,
-          max_anchors: 30
-        })
-
-        // 处理估价响应
-        if (valuationResponse.code === 200) {
-          const data = valuationResponse.data
-          this.petValuation = data
-          const { data: { anchors:allAnchors } } = await this.$api.pet.findPetAnchors({
-            pet_data: pet,
-            similarity_threshold: similarityThreshold,
-            max_anchors: 30
-          })
-          // 从估价结果中提取相似召唤兽信息
-          if (data?.anchor_count  > 0) {
-            this.similarPets = {
-              anchor_count: data.anchor_count,
-              similarity_threshold: data.similarity_threshold,
-              anchors: allAnchors.map((item) => ({ ...item, petData: this.parsePetInfo(item.desc) })),
-              statistics: {
-                price_range: {
-                  min: Math.min(...allAnchors.map((a) => a.price || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.price || 0))
-                },
-                similarity_range: {
-                  min: Math.min(...allAnchors.map((a) => a.similarity || 0)),
-                  max: Math.max(...allAnchors.map((a) => a.similarity || 0)),
-                  avg:
-                    allAnchors.reduce((sum, a) => sum + (a.similarity || 0), 0) /
-                    allAnchors.length
-                }
-              }
-            }
-            return
-          }
-        }
-        this.similarPets = {
-          anchor_count: 0,
-          similarity_threshold: similarityThreshold,
-          statistics: {
-            price_range: { min: 0, max: 0 },
-            similarity_range: { min: 0, max: 0, avg: 0 }
-          }
-        }
-      } catch (error) {
-        console.error('加载相似召唤兽或估价失败:', error)
-      }
-    },
     // 关闭装备估价结果对话框
     closeValuationDialog() {
       this.valuationDialogVisible = false
@@ -505,6 +441,13 @@ export default {
       this.valuationEquipmentList = []
       this.valuationLoading = false
       this.valuationDialogTitle = ''
+    },
+
+    // 处理召唤兽估价结果更新
+    handlePetValuationUpdated(data, index) {
+      // 这里可以处理估价结果更新，比如更新表格中的估价信息
+      console.log('召唤兽估价结果更新:', data, '索引:', index)
+      // 如果需要更新表格中的特定行数据，可以在这里处理
     },
 
     // 获取未估价召唤兽数量

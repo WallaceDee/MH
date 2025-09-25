@@ -38,6 +38,7 @@ def get_pets():
             'pet_skill_count': request.args.get('pet_skill_count'),
             'equip_list_amount_warning': request.args.get('equip_list_amount_warning'),
             'equip_sn': request.args.get('equip_sn'),
+            'equip_sn_list': request.args.getlist('equip_sn_list[]') or request.args.getlist('equip_sn_list') or None,
             'warning_rate': request.args.get('warning_rate'),
             'sort_by': request.args.get('sort_by', 'price'),
             'sort_order': request.args.get('sort_order', 'asc')
@@ -127,7 +128,8 @@ def get_pet_valuation():
         )
         
         if "error" in result:
-            return error_response(result["error"])
+            # 估价失败时，返回400状态码，但将完整结果放在data字段中
+            return error_response(result["error"], code=400, http_code=400, data=result)
         
         return success_response(data=result, message="获取宠物估价成功")
         
