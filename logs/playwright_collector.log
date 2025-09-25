@@ -1268,3 +1268,353 @@ playwright._impl._errors.TargetClosedError: Target page, context or browser has 
 2025-09-25 18:12:19,238 - INFO - 宠物锚点估价器初始化成功
 2025-09-25 18:12:19,251 - INFO - CBGSpider模块导入成功，开始实例化...
 2025-09-25 18:12:19,251 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 21:59:48,222 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 21:59:50,127 - INFO - 成功加载 41 个Cookie
+2025-09-25 21:59:50,318 - INFO - 已注入 41 个Cookie到浏览器上下文
+2025-09-25 21:59:50,660 - INFO - Playwright浏览器设置完成
+2025-09-25 21:59:50,666 - INFO - Playwright网络监听已设置
+2025-09-25 21:59:50,667 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 21:59:51,663 - INFO - 页面初始加载完成
+2025-09-25 21:59:53,147 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758808791649&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 21:59:53,147 - INFO - 开始创建角色spider实例...
+2025-09-25 21:59:55,280 - INFO - 装备特征提取器初始化成功
+2025-09-25 21:59:55,293 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 21:59:55,293 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 21:59:55,303 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 21:59:55,399 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 21:59:55,636 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 21:59:55,646 - WARNING - 获取装备数据采集器实例失败: 'gbk' codec can't encode character '\u2705' in position 0: illegal multibyte sequence
+2025-09-25 21:59:55,646 - ERROR - 装备锚点估价器初始化失败: 'gbk' codec can't encode character '\u26a0' in position 0: illegal multibyte sequence
+2025-09-25 21:59:55,664 - INFO - 统一特征提取器初始化成功
+2025-09-25 21:59:55,673 - INFO - 装备特征提取器初始化成功
+2025-09-25 21:59:55,684 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 21:59:55,684 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 21:59:55,694 - WARNING - 获取装备数据采集器实例失败: 'gbk' codec can't encode character '\u2705' in position 0: illegal multibyte sequence
+2025-09-25 21:59:55,694 - ERROR - 装备锚点估价器初始化失败: 'gbk' codec can't encode character '\u26a0' in position 0: illegal multibyte sequence
+2025-09-25 21:59:55,716 - INFO - 统一特征提取器初始化成功
+2025-09-25 21:59:56,177 - INFO - 角色特征提取器初始化成功
+2025-09-25 21:59:56,183 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 21:59:56,200 - INFO - 宠物特征提取器初始化成功
+2025-09-25 21:59:56,218 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 21:59:56,218 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 21:59:56,223 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 21:59:56,224 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 22:19:43,225 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 22:19:44,794 - INFO - 成功加载 45 个Cookie
+2025-09-25 22:19:46,388 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 22:19:46,808 - INFO - Playwright浏览器设置完成
+2025-09-25 22:19:46,812 - INFO - Playwright网络监听已设置
+2025-09-25 22:19:46,812 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 22:19:48,183 - INFO - 页面初始加载完成
+2025-09-25 22:19:50,142 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758809988126&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 22:19:50,143 - INFO - 开始创建角色spider实例...
+2025-09-25 22:19:51,939 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:19:51,955 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:19:51,955 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:19:51,964 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 22:19:52,091 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 22:19:52,111 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:19:52,147 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:19:52,170 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:19:52,178 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:19:52,190 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:19:52,190 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:19:52,221 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:19:52,310 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:19:52,668 - INFO - 角色特征提取器初始化成功
+2025-09-25 22:19:52,671 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 22:19:52,686 - INFO - 宠物特征提取器初始化成功
+2025-09-25 22:19:52,712 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:19:52,712 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 22:19:52,720 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 22:19:52,720 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 22:31:48,093 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 22:31:49,711 - INFO - 成功加载 45 个Cookie
+2025-09-25 22:31:49,897 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 22:31:50,316 - INFO - Playwright浏览器设置完成
+2025-09-25 22:31:50,321 - INFO - Playwright网络监听已设置
+2025-09-25 22:31:50,321 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 22:31:51,348 - INFO - 页面初始加载完成
+2025-09-25 22:31:52,702 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758810711324&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 22:31:52,702 - INFO - 开始创建角色spider实例...
+2025-09-25 22:31:54,341 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:31:54,370 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:31:54,370 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:31:54,382 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 22:31:55,025 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 22:31:55,051 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:31:55,088 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:31:55,106 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:31:55,114 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:31:55,125 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:31:55,126 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:31:55,155 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:31:55,239 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:31:55,550 - INFO - 角色特征提取器初始化成功
+2025-09-25 22:31:55,555 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 22:31:55,566 - INFO - 宠物特征提取器初始化成功
+2025-09-25 22:31:55,839 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:31:55,839 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 22:31:55,844 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 22:31:55,844 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 22:35:59,861 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 22:36:01,564 - INFO - 成功加载 45 个Cookie
+2025-09-25 22:36:01,741 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 22:36:02,160 - INFO - Playwright浏览器设置完成
+2025-09-25 22:36:02,164 - INFO - Playwright网络监听已设置
+2025-09-25 22:36:02,164 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 22:36:03,324 - INFO - 页面初始加载完成
+2025-09-25 22:36:04,611 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758810963229&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 22:36:04,611 - INFO - 开始创建角色spider实例...
+2025-09-25 22:36:06,795 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:36:06,812 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:36:06,812 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:36:06,823 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 22:36:06,908 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 22:36:06,924 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:36:06,960 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:36:06,980 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:36:06,990 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:36:06,999 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:36:06,999 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:36:07,030 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:36:07,109 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:36:07,416 - INFO - 角色特征提取器初始化成功
+2025-09-25 22:36:07,419 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 22:36:07,431 - INFO - 宠物特征提取器初始化成功
+2025-09-25 22:36:07,449 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:36:07,449 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 22:36:07,455 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 22:36:07,455 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 22:38:34,987 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 22:38:36,590 - INFO - 成功加载 45 个Cookie
+2025-09-25 22:38:36,723 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 22:38:37,268 - INFO - Playwright浏览器设置完成
+2025-09-25 22:38:37,272 - INFO - Playwright网络监听已设置
+2025-09-25 22:38:37,272 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 22:38:38,259 - INFO - 页面初始加载完成
+2025-09-25 22:38:39,654 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758811118249&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 22:38:39,654 - INFO - 开始创建角色spider实例...
+2025-09-25 22:38:41,143 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:38:41,157 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:38:41,157 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:38:41,167 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 22:38:42,266 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 22:38:42,284 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:38:42,318 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:38:42,336 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:38:42,344 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:38:42,355 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:38:42,355 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:38:42,384 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:38:42,463 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:38:42,803 - INFO - 角色特征提取器初始化成功
+2025-09-25 22:38:42,806 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 22:38:42,818 - INFO - 宠物特征提取器初始化成功
+2025-09-25 22:38:42,835 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:38:42,835 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 22:38:42,840 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 22:38:42,840 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 22:41:36,385 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 22:41:38,065 - INFO - 成功加载 45 个Cookie
+2025-09-25 22:41:38,247 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 22:41:38,633 - INFO - Playwright浏览器设置完成
+2025-09-25 22:41:38,636 - INFO - Playwright网络监听已设置
+2025-09-25 22:41:38,637 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 22:41:39,591 - INFO - 页面初始加载完成
+2025-09-25 22:41:41,549 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758811299583&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 22:41:41,550 - INFO - 开始创建角色spider实例...
+2025-09-25 22:41:43,143 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:41:43,158 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:41:43,158 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:41:43,171 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 22:41:43,271 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 22:41:43,291 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:41:43,329 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:41:43,347 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:41:43,355 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:41:43,365 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:41:43,365 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:41:43,391 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:41:43,488 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:41:43,790 - INFO - 角色特征提取器初始化成功
+2025-09-25 22:41:43,792 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 22:41:43,805 - INFO - 宠物特征提取器初始化成功
+2025-09-25 22:41:43,824 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:41:43,824 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 22:41:43,831 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 22:41:43,831 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 22:43:17,353 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 22:43:18,931 - INFO - 成功加载 45 个Cookie
+2025-09-25 22:43:19,328 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 22:43:20,022 - INFO - Playwright浏览器设置完成
+2025-09-25 22:43:20,027 - INFO - Playwright网络监听已设置
+2025-09-25 22:43:20,027 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 22:43:21,278 - INFO - 页面初始加载完成
+2025-09-25 22:43:22,602 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758811401214&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 22:43:22,602 - INFO - 开始创建角色spider实例...
+2025-09-25 22:43:24,416 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:43:24,428 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:43:24,428 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:43:24,439 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 22:43:24,526 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 22:43:24,543 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:43:24,579 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:43:24,598 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:43:24,608 - INFO - 装备特征提取器初始化成功
+2025-09-25 22:43:24,617 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 22:43:24,617 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 22:43:24,647 - INFO - 装备锚点估价器初始化成功
+2025-09-25 22:43:24,727 - INFO - 统一特征提取器初始化成功
+2025-09-25 22:43:25,063 - INFO - 角色特征提取器初始化成功
+2025-09-25 22:43:25,066 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 22:43:25,078 - INFO - 宠物特征提取器初始化成功
+2025-09-25 22:43:25,096 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 22:43:25,096 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 22:43:25,100 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 22:43:25,100 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 23:08:44,901 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 23:08:46,602 - INFO - 成功加载 45 个Cookie
+2025-09-25 23:08:46,778 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 23:08:47,298 - INFO - Playwright浏览器设置完成
+2025-09-25 23:08:47,303 - INFO - Playwright网络监听已设置
+2025-09-25 23:08:47,303 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 23:08:48,658 - INFO - 页面初始加载完成
+2025-09-25 23:08:50,320 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758812928559&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 23:08:50,320 - INFO - 开始创建角色spider实例...
+2025-09-25 23:08:52,923 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:08:52,943 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:08:52,943 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:08:52,959 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 23:08:53,111 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 23:08:53,143 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:08:53,183 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:08:53,204 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:08:53,216 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:08:53,226 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:08:53,226 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:08:53,259 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:08:53,357 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:08:53,724 - INFO - 角色特征提取器初始化成功
+2025-09-25 23:08:53,727 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 23:08:53,742 - INFO - 宠物特征提取器初始化成功
+2025-09-25 23:08:53,769 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:08:53,769 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 23:08:53,773 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 23:08:53,774 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 23:11:37,049 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 23:11:38,687 - INFO - 成功加载 45 个Cookie
+2025-09-25 23:11:38,843 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 23:11:39,152 - INFO - Playwright浏览器设置完成
+2025-09-25 23:11:39,156 - INFO - Playwright网络监听已设置
+2025-09-25 23:11:39,156 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 23:11:40,305 - INFO - 页面初始加载完成
+2025-09-25 23:11:41,715 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758813100245&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 23:11:41,715 - INFO - 开始创建角色spider实例...
+2025-09-25 23:11:43,450 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:11:43,465 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:11:43,465 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:11:43,474 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 23:11:43,628 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 23:11:43,654 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:11:43,689 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:11:43,711 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:11:43,719 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:11:43,733 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:11:43,733 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:11:43,765 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:11:43,847 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:11:44,187 - INFO - 角色特征提取器初始化成功
+2025-09-25 23:11:44,204 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 23:11:44,224 - INFO - 宠物特征提取器初始化成功
+2025-09-25 23:11:44,257 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:11:44,257 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 23:11:44,262 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 23:11:44,262 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 23:14:03,482 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 23:14:05,042 - INFO - 成功加载 45 个Cookie
+2025-09-25 23:14:05,205 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 23:14:05,632 - INFO - Playwright浏览器设置完成
+2025-09-25 23:14:05,636 - INFO - Playwright网络监听已设置
+2025-09-25 23:14:05,637 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 23:14:06,643 - INFO - 页面初始加载完成
+2025-09-25 23:14:09,032 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758813246629&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 23:14:09,032 - INFO - 开始创建角色spider实例...
+2025-09-25 23:14:10,722 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:14:10,737 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:14:10,738 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:14:10,746 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 23:14:11,393 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 23:14:11,428 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:14:11,461 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:14:11,480 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:14:11,490 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:14:11,498 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:14:11,498 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:14:11,526 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:14:11,605 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:14:11,909 - INFO - 角色特征提取器初始化成功
+2025-09-25 23:14:11,911 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 23:14:11,924 - INFO - 宠物特征提取器初始化成功
+2025-09-25 23:14:11,951 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:14:11,952 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 23:14:11,957 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 23:14:11,958 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 23:18:13,395 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 23:18:15,209 - INFO - 成功加载 45 个Cookie
+2025-09-25 23:18:15,343 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 23:18:15,794 - INFO - Playwright浏览器设置完成
+2025-09-25 23:18:15,798 - INFO - Playwright网络监听已设置
+2025-09-25 23:18:15,798 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 23:18:17,169 - INFO - 页面初始加载完成
+2025-09-25 23:18:18,671 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758813497076&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 23:18:18,671 - INFO - 开始创建角色spider实例...
+2025-09-25 23:18:20,502 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:18:20,522 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:18:20,522 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:18:20,531 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 23:18:20,924 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 23:18:20,962 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:18:20,996 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:18:21,015 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:18:21,025 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:18:21,033 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:18:21,033 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:18:21,062 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:18:21,144 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:18:21,448 - INFO - 角色特征提取器初始化成功
+2025-09-25 23:18:21,451 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 23:18:21,463 - INFO - 宠物特征提取器初始化成功
+2025-09-25 23:18:21,492 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:18:21,492 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 23:18:21,497 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 23:18:21,497 - INFO - 成功从config/cookies.txt加载Cookie
+2025-09-25 23:22:57,204 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 23:22:58,660 - INFO - 成功加载 45 个Cookie
+2025-09-25 23:22:58,844 - INFO - 已注入 45 个Cookie到浏览器上下文
+2025-09-25 23:22:59,240 - INFO - Playwright浏览器设置完成
+2025-09-25 23:22:59,245 - INFO - Playwright网络监听已设置
+2025-09-25 23:22:59,245 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 23:23:00,529 - INFO - 页面初始加载完成
+2025-09-25 23:23:02,044 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758813780516&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 23:23:02,044 - INFO - 开始创建角色spider实例...
+2025-09-25 23:23:03,852 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:23:03,865 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:23:03,865 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:23:03,873 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 23:23:04,006 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 23:23:04,027 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:23:04,062 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:23:04,080 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:23:04,088 - INFO - 装备特征提取器初始化成功
+2025-09-25 23:23:04,098 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 23:23:04,098 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 23:23:04,128 - INFO - 装备锚点估价器初始化成功
+2025-09-25 23:23:04,227 - INFO - 统一特征提取器初始化成功
+2025-09-25 23:23:04,656 - INFO - 角色特征提取器初始化成功
+2025-09-25 23:23:04,663 - INFO - 角色市场锚定估价器初始化成功
+2025-09-25 23:23:04,674 - INFO - 宠物特征提取器初始化成功
+2025-09-25 23:23:04,707 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 23:23:04,707 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 23:23:04,713 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 23:23:04,713 - INFO - 成功从config/cookies.txt加载Cookie

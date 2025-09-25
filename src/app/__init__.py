@@ -39,13 +39,13 @@ def init_cache(app):
             cache.set('test_key', 'test_value', timeout=10)
             test_result = cache.get('test_key')
             if test_result == 'test_value':
-                print("✅ Flask-Caching 初始化成功，Redis连接正常")
+                print(" Flask-Caching 初始化成功，Redis连接正常")
                 cache.delete('test_key')  # 清理测试键
             else:
-                print("⚠️ Flask-Caching 初始化成功，但Redis连接可能有问题")
+                print(" Flask-Caching 初始化成功，但Redis连接可能有问题")
     except Exception as e:
-        print(f"⚠️ Flask-Caching 初始化警告: {e}")
-        print("💡 将使用内存缓存作为降级方案")
+        print(f" Flask-Caching 初始化警告: {e}")
+        print(" 将使用内存缓存作为降级方案")
         
         # 降级到内存缓存
         app.config['CACHE_TYPE'] = 'SimpleCache'

@@ -43,10 +43,10 @@ class LingshiMarketDataCollector:
         try:
             from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
             self.equip_collector = EquipMarketDataCollector()
-            print("✅ 成功获取装备数据采集器实例，可共享缓存")
+            print(" 成功获取装备数据采集器实例，可共享缓存")
         except Exception as e:
             self.logger.warning(f"获取装备数据采集器实例失败: {e}")
-            print(f"⚠️ 无法共享装备数据采集器缓存: {e}")
+            print(f" 无法共享装备数据采集器缓存: {e}")
     
     def _get_shared_cache_data(self, kindid: Optional[int] = None) -> Optional[pd.DataFrame]:
         """
@@ -64,13 +64,13 @@ class LingshiMarketDataCollector:
         try:
             # 检查实例缓存是否有效
             if self._cached_lingshi_data is not None:
-                print(f"✅ 使用实例缓存的灵饰数据，共 {len(self._cached_lingshi_data)} 条")
+                print(f" 使用实例缓存的灵饰数据，共 {len(self._cached_lingshi_data)} 条")
                 
                 # 如果指定了kindid，进一步过滤
                 if kindid is not None:
                     filtered_data = self._cached_lingshi_data[self._cached_lingshi_data['kindid'] == kindid]
                     if not filtered_data.empty:
-                        print(f"✅ 按kindid={kindid}过滤后得到 {len(filtered_data)} 条灵饰数据")
+                        print(f" 按kindid={kindid}过滤后得到 {len(filtered_data)} 条灵饰数据")
                         return filtered_data
                     else:
                         print(f"实例缓存中没有找到kindid={kindid}的灵饰数据")
@@ -90,13 +90,13 @@ class LingshiMarketDataCollector:
             self._cache_timestamp = datetime.now()
             
             if not self._cached_lingshi_data.empty:
-                print(f"✅ 从装备数据采集器获取并缓存 {len(self._cached_lingshi_data)} 条灵饰数据")
+                print(f" 从装备数据采集器获取并缓存 {len(self._cached_lingshi_data)} 条灵饰数据")
                 
                 # 如果指定了kindid，进一步过滤
                 if kindid is not None:
                     filtered_data = self._cached_lingshi_data[self._cached_lingshi_data['kindid'] == kindid]
                     if not filtered_data.empty:
-                        print(f"✅ 按kindid={kindid}过滤后得到 {len(filtered_data)} 条灵饰数据")
+                        print(f" 按kindid={kindid}过滤后得到 {len(filtered_data)} 条灵饰数据")
                         return filtered_data
                     else:
                         print(f"缓存中没有找到kindid={kindid}的灵饰数据")
@@ -109,14 +109,14 @@ class LingshiMarketDataCollector:
                 
         except Exception as e:
             self.logger.warning(f"获取共享缓存数据失败: {e}")
-            print(f"⚠️ 共享缓存获取失败: {e}")
+            print(f" 共享缓存获取失败: {e}")
             return None
 
     def clear_cache(self):
         """清除实例缓存，强制下次重新从装备数据采集器获取数据"""
         self._cached_lingshi_data = None
         self._cache_timestamp = None
-        print("✅ 已清除灵饰数据实例缓存")
+        print(" 已清除灵饰数据实例缓存")
 
     def get_market_data(self,
                         kindid: Optional[int] = None,
@@ -173,7 +173,7 @@ class LingshiMarketDataCollector:
                         filtered_data = self._filter_by_attrs(filtered_data, attrs)
                     
                     elapsed_time = time.time() - start_time
-                    print(f"✅ 从共享缓存获取灵饰数据完成，耗时: {elapsed_time:.3f}秒，返回: {len(filtered_data)} 条数据")
+                    print(f" 从共享缓存获取灵饰数据完成，耗时: {elapsed_time:.3f}秒，返回: {len(filtered_data)} 条数据")
                     return filtered_data
             
             # 降级到MySQL查询

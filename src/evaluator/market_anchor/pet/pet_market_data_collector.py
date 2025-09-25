@@ -655,7 +655,7 @@ class PetMarketDataCollector:
                 copy_success = self._copy_temp_cache_to_official(temp_cache_key, self._full_cache_key, df, chunk_size, ttl_seconds)
                 
                 if copy_success:
-                    print("✅ 无缝切换完成！新数据已生效")
+                    print(" 无缝切换完成！新数据已生效")
                     elapsed_time = time.time() - start_time
                     cache_info = "永不过期（仅手动刷新）" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时"
                     print(f"全量宠物数据已缓存到Redis，缓存策略: {cache_info}，总耗时: {elapsed_time:.2f}秒")
@@ -672,13 +672,13 @@ class PetMarketDataCollector:
                     
                     return True
                 else:
-                    print("❌ 无缝切换失败，清理临时数据...")
+                    print(" 无缝切换失败，清理临时数据...")
                     self.redis_cache.clear_pattern(f"{temp_cache_key}:*")
                     self._refresh_status = "error"
                     self._refresh_message = "无缝切换失败"
                     return False
             else:
-                print("❌ 新数据存储失败，清理临时数据...")
+                print(" 新数据存储失败，清理临时数据...")
                 self.redis_cache.clear_pattern(f"{temp_cache_key}:*")
                 self._refresh_status = "error"
                 self._refresh_message = "新数据存储失败"
@@ -836,14 +836,14 @@ class PetMarketDataCollector:
             )
             
             if success:
-                print("✅ 临时缓存复制到正式缓存成功")
+                print(" 临时缓存复制到正式缓存成功")
                 return True
             else:
-                print("❌ 临时缓存复制到正式缓存失败")
+                print(" 临时缓存复制到正式缓存失败")
                 return False
                 
         except Exception as e:
-            print(f"❌ 复制临时缓存失败: {e}")
+            print(f" 复制临时缓存失败: {e}")
             return False
 
     def refresh_full_cache(self) -> bool:
@@ -869,7 +869,7 @@ class PetMarketDataCollector:
         """
         手动刷新缓存（显式调用）
         """
-        print("📱 用户手动刷新宠物缓存")
+        print(" 用户手动刷新宠物缓存")
         return self.refresh_full_cache()
 
     def get_cache_status(self) -> Dict[str, Any]:

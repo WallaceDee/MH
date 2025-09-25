@@ -332,9 +332,9 @@ def update_cookies_from_command_line():
     logging.basicConfig(level=logging.INFO)
     success = update_cookies_with_playwright()
     if success:
-        print("✅ Cookie更新成功！")
+        print(" Cookie更新成功！")
     else:
-        print("❌ Cookie更新失败！")
+        print(" Cookie更新失败！")
     return success
 
 

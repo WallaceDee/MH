@@ -49,10 +49,6 @@ from src.evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_K
 
 class CBGEquipSpider:
     def __init__(self):
-        # 修复编码问题
-        from src.spider.encoding_fix import fix_encoding
-        fix_encoding()
-        
         self.session = setup_session()
         self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
@@ -107,8 +103,8 @@ class CBGEquipSpider:
         logger.propagate = False
         
         # 测试日志写入
-        logger.info("🎉 CBG装备爬虫日志系统初始化完成")
-        logger.info(f"📁 日志文件路径: {log_file}")
+        logger.info("CBG装备爬虫日志系统初始化完成")
+        logger.info(f"日志文件路径: {log_file}")
         
         return logger
 
@@ -664,7 +660,7 @@ class CBGEquipSpider:
             self.logger.error(f"未知的装备类型: {equip_type}")
             return
 
-        self.logger.info(f"🚀 开始 {equip_type} 装备爬取，最大页数: {max_pages}")
+        self.logger.info(f"开始 {equip_type} 装备爬取，最大页数: {max_pages}")
 
         # 获取参数
         params_getter_async_map = {
@@ -688,11 +684,11 @@ class CBGEquipSpider:
                 else:
                     search_type = search_type.replace('overall_', '')
             search_params = cached_params
-            self.logger.info(f"📊 使用传入的缓存参数: {len(search_params)} 个")
+            self.logger.info(f"使用传入的缓存参数: {len(search_params)} 个")
         else:
             search_params = await params_getter_async_map[equip_type](use_browser=use_browser)
             if search_params:
-                self.logger.info(f"📊 使用搜索参数: {len(search_params)} 个")
+                self.logger.info(f"使用搜索参数: {len(search_params)} 个")
 
         if not search_params:
             self.logger.error(f"无法获取 {equip_type} 装备的搜索参数，爬取中止")
@@ -712,7 +708,7 @@ class CBGEquipSpider:
                 equipments = await self.fetch_page(page_num, search_params, search_type)
                 
                 if equipments is None:
-                    self.logger.warning(f"❌ 第 {page_num} 页数据获取失败，尝试重试...")
+                    self.logger.warning(f"第 {page_num} 页数据获取失败，尝试重试...")
                     await asyncio.sleep(5) # 等待5秒重试
                     equipments = await self.fetch_page(page_num, search_params, search_type)
 
@@ -730,14 +726,14 @@ class CBGEquipSpider:
                         seller_nickname = equipment.get('seller_nickname', '未知卖家')
                         self.logger.info(f"￥{price} - {equip_name}({level}级) - {server_name} - {seller_nickname}")
                     
-                    self.logger.info(f"✅ 第 {page_num} 页完成，获取 {len(equipments)} 条装备，保存 {saved_count} 条")
+                    self.logger.info(f"第 {page_num} 页完成，获取 {len(equipments)} 条装备，保存 {saved_count} 条")
                     
                     # 判断数据条数是否不足10条，如果不足则说明没有下一页
                     if len(equipments) < 10:
-                        self.logger.info(f"📄 第 {page_num} 页数据条数({len(equipments)})不足10条，判断为最后一页，爬取结束")
+                        self.logger.info(f"第 {page_num} 页数据条数({len(equipments)})不足10条，判断为最后一页，爬取结束")
                         break
                 else:
-                    self.logger.info(f"📄 第 {page_num} 页没有数据，爬取结束")
+                    self.logger.info(f"第 {page_num} 页没有数据，爬取结束")
                     break 
 
                 # 添加延迟
@@ -752,7 +748,7 @@ class CBGEquipSpider:
                 traceback.print_exc()
                 break
 
-        self.logger.info(f"🎉 {equip_type} 装备爬取完成！成功页数: {successful_pages}/{max_pages}, 总装备数: {total_saved_count}")
+        self.logger.info(f"{equip_type} 装备爬取完成！成功页数: {successful_pages}/{max_pages}, 总装备数: {total_saved_count}")
         
         # 强制刷新所有日志缓冲区，确保日志被完整写入文件
         import sys
@@ -803,9 +799,9 @@ def main():
                 use_browser=use_browser_for_test, 
                 equip_type=equip_type_to_test
             )
-            print(f"--- ✅ {equip_type_to_test} 装备爬虫测试完成 ---")
+            print(f"--- {equip_type_to_test} 装备爬虫测试完成 ---")
         except Exception as e:
-            print(f"--- ❌ {equip_type_to_test} 装备爬虫测试失败: {e} ---")
+            print(f"--- {equip_type_to_test} 装备爬虫测试失败: {e} ---")
             import traceback
             traceback.print_exc()
     

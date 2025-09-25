@@ -1066,18 +1066,22 @@ class PetService:
 
     def _run_batch_update_task(self, task: BatchUpdateTask):
         """运行批量更新任务"""
-        try:
-            # 更新任务状态到文件存储
-            task_manager.update_task(task.task_id, {
-                'status': 'running',
-                'start_time': datetime.now().isoformat()
-            })
+        from src.app import create_app
+        app = create_app()
+        
+        with app.app_context():
+            try:
+                # 更新任务状态到文件存储
+                task_manager.update_task(task.task_id, {
+                    'status': 'running',
+                    'start_time': datetime.now().isoformat()
+                })
 
-            task.status = 'running'
-            task.start_time = datetime.now()
+                task.status = 'running'
+                task.start_time = datetime.now()
 
-            # 查询所有未估价的召唤兽
-            pets = db.session.query(Pet).filter(
+                # 查询所有未估价的召唤兽
+                pets = db.session.query(Pet).filter(
                 and_(
                     Pet.equip_list.isnot(None),
                     ~Pet.equip_list.like('%[null, null, null,%'),
@@ -1092,106 +1096,106 @@ class PetService:
                         Pet.equip_list_amount_warning > 0
                     )
                 )
-            ).all()
+                ).all()
 
-            if not pets:
+                if not pets:
+                    task.status = 'completed'
+                    task.end_time = datetime.now()
+                    task_manager.update_task(task.task_id, {
+                        'status': 'completed',
+                        'end_time': datetime.now().isoformat()
+                    })
+                    return
+
+                # 转换为字典列表
+                pets_data = []
+                for pet in pets:
+                    pet_dict = {}
+                    for column in pet.__table__.columns:
+                        value = getattr(pet, column.name)
+                        if hasattr(value, 'isoformat'):  # datetime对象
+                            pet_dict[column.name] = value.isoformat()
+                        else:
+                            pet_dict[column.name] = value
+                    pets_data.append(pet_dict)
+                
+                task.total_count = len(pets_data)
+                task.total_batches = (
+                    task.total_count + task.batch_size - 1) // task.batch_size
+                
+                # 更新任务信息到文件存储
+                task_manager.update_task(task.task_id, {
+                    'total_count': task.total_count,
+                    'total_batches': task.total_batches
+                })
+
+                logger.info(
+                    f"开始批量更新任务 {task.task_id}，共 {task.total_count} 只召唤兽，分 {task.total_batches} 批处理")
+
+                # 分批处理
+                for batch_start in range(0, task.total_count, task.batch_size):
+                    # 检查内存中的停止请求
+                    if task.is_stop_requested():
+                        task.status = 'cancelled'
+                        task.end_time = datetime.now()
+                        task_manager.update_task(task.task_id, {
+                            'status': 'cancelled',
+                            'end_time': datetime.now().isoformat()
+                        })
+                        logger.info(f"任务 {task.task_id} 被用户取消")
+                        return
+
+                    # 检查文件存储中的停止状态
+                    file_task = task_manager.get_task(task.task_id)
+                    if file_task and file_task.get('status') == 'cancelled':
+                        task.status = 'cancelled'
+                        task.end_time = datetime.now()
+                        logger.info(f"任务 {task.task_id} 在文件存储中被标记为取消")
+                        return
+                    
+                    batch_end = min(
+                        batch_start + task.batch_size, task.total_count)
+                    batch_pets = pets_data[batch_start:batch_end]
+                    task.current_batch += 1
+
+                    logger.info(
+                        f"处理第 {task.current_batch}/{task.total_batches} 批，共 {len(batch_pets)} 只召唤兽")
+
+                    # 处理当前批次
+                    batch_updated = self._process_batch(
+                        batch_pets, task)
+                    task.updated_count += batch_updated
+                    task.processed_count += len(batch_pets)
+
+                    # 更新进度到文件存储
+                    task_manager.update_task(task.task_id, {
+                        'current_batch': task.current_batch,
+                        'processed_count': task.processed_count,
+                        'updated_count': task.updated_count
+                    })
+
+                    # 短暂休息，避免过度占用资源
+                    time.sleep(0.1)
+
                 task.status = 'completed'
                 task.end_time = datetime.now()
                 task_manager.update_task(task.task_id, {
                     'status': 'completed',
                     'end_time': datetime.now().isoformat()
-                })
-                return
-
-            # 转换为字典列表
-            pets_data = []
-            for pet in pets:
-                pet_dict = {}
-                for column in pet.__table__.columns:
-                    value = getattr(pet, column.name)
-                    if hasattr(value, 'isoformat'):  # datetime对象
-                        pet_dict[column.name] = value.isoformat()
-                    else:
-                        pet_dict[column.name] = value
-                pets_data.append(pet_dict)
-            
-            task.total_count = len(pets_data)
-            task.total_batches = (
-                task.total_count + task.batch_size - 1) // task.batch_size
-
-            # 更新任务信息到文件存储
-            task_manager.update_task(task.task_id, {
-                'total_count': task.total_count,
-                'total_batches': task.total_batches
             })
-
-            logger.info(
-                f"开始批量更新任务 {task.task_id}，共 {task.total_count} 只召唤兽，分 {task.total_batches} 批处理")
-
-            # 分批处理
-            for batch_start in range(0, task.total_count, task.batch_size):
-                # 检查内存中的停止请求
-                if task.is_stop_requested():
-                    task.status = 'cancelled'
-                    task.end_time = datetime.now()
-                    task_manager.update_task(task.task_id, {
-                        'status': 'cancelled',
-                        'end_time': datetime.now().isoformat()
-                    })
-                    logger.info(f"任务 {task.task_id} 被用户取消")
-                    return
-
-                # 检查文件存储中的停止状态
-                file_task = task_manager.get_task(task.task_id)
-                if file_task and file_task.get('status') == 'cancelled':
-                    task.status = 'cancelled'
-                    task.end_time = datetime.now()
-                    logger.info(f"任务 {task.task_id} 在文件存储中被标记为取消")
-                    return
-
-                batch_end = min(
-                    batch_start + task.batch_size, task.total_count)
-                batch_pets = pets_data[batch_start:batch_end]
-                task.current_batch += 1
-
                 logger.info(
-                    f"处理第 {task.current_batch}/{task.total_batches} 批，共 {len(batch_pets)} 只召唤兽")
+                    f"任务 {task.task_id} 完成，成功更新 {task.updated_count}/{task.total_count} 只召唤兽")
 
-                # 处理当前批次
-                batch_updated = self._process_batch(
-                    batch_pets, task)
-                task.updated_count += batch_updated
-                task.processed_count += len(batch_pets)
-
-                # 更新进度到文件存储
+            except Exception as e:
+                task.status = 'failed'
+                task.error_message = str(e)
+                task.end_time = datetime.now()
                 task_manager.update_task(task.task_id, {
-                    'current_batch': task.current_batch,
-                    'processed_count': task.processed_count,
-                    'updated_count': task.updated_count
+                    'status': 'failed',
+                    'error_message': str(e),
+                    'end_time': datetime.now().isoformat()
                 })
-
-                # 短暂休息，避免过度占用资源
-                time.sleep(0.1)
-
-            task.status = 'completed'
-            task.end_time = datetime.now()
-            task_manager.update_task(task.task_id, {
-                'status': 'completed',
-                'end_time': datetime.now().isoformat()
-            })
-            logger.info(
-                f"任务 {task.task_id} 完成，成功更新 {task.updated_count}/{task.total_count} 只召唤兽")
-
-        except Exception as e:
-            task.status = 'failed'
-            task.error_message = str(e)
-            task.end_time = datetime.now()
-            task_manager.update_task(task.task_id, {
-                'status': 'failed',
-                'error_message': str(e),
-                'end_time': datetime.now().isoformat()
-            })
-            logger.error(f"任务 {task.task_id} 失败: {e}")
+                logger.error(f"任务 {task.task_id} 失败: {e}")
 
     def _process_batch(self, batch_pets: List[Dict], task: BatchUpdateTask) -> int:
         """处理一批召唤兽"""

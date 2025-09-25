@@ -405,9 +405,9 @@ class MarketDataCollector:
                 
                 # 性能优化提示
                 if actual_batch_size > 1000:
-                    print(f"⚠️  批次大小较大({actual_batch_size})，如果查询缓慢，建议设置更小的batch_size参数(100-800)")
+                    print(f"  批次大小较大({actual_batch_size})，如果查询缓慢，建议设置更小的batch_size参数(100-800)")
                 elif actual_batch_size < batch_size:
-                    print(f"💡 已自动调整批次大小: {batch_size} -> {actual_batch_size} (优化查询性能)")
+                    print(f" 已自动调整批次大小: {batch_size} -> {actual_batch_size} (优化查询性能)")
                 
                 # 优化的SQL查询 - 只选择必要字段，减少数据传输
                 base_query = """
@@ -490,18 +490,18 @@ class MarketDataCollector:
                     # 缓存全量数据到Redis
                     print(f"🔍 检查缓存设置: use_cache={use_cache}, force_refresh={force_refresh}")
                     if use_cache:
-                        print("✅ 进入Redis缓存存储分支")
+                        print(" 进入Redis缓存存储分支")
                         self._refresh_message = "缓存数据到Redis..."
                         self._refresh_progress = 95
                         
                         cache_start = time.time()
                         if self._set_full_cached_data(full_data_df):
                             cache_time = time.time() - cache_start
-                            print(f"✅ 全量数据已缓存到Redis，缓存耗时: {cache_time:.2f}秒")
+                            print(f" 全量数据已缓存到Redis，缓存耗时: {cache_time:.2f}秒")
                         else:
-                            print("❌ Redis全量缓存设置失败，但数据获取成功")
+                            print(" Redis全量缓存设置失败，但数据获取成功")
                     else:
-                        print("❌ 跳过Redis缓存存储，use_cache=False")
+                        print(" 跳过Redis缓存存储，use_cache=False")
                     
                     # 应用筛选条件并返回结果
                     self._refresh_message = "应用筛选条件..."
@@ -895,10 +895,10 @@ class MarketDataCollector:
             redis_cache = get_redis_cache()
             
             if not redis_cache or not redis_cache.is_available():
-                print("❌ Redis不可用")
+                print(" Redis不可用")
                 return False
             
-            print("✅ Redis连接正常，开始存储数据")
+            print(" Redis连接正常，开始存储数据")
             
             # 使用固定的全量缓存键
             full_cache_key = "market_data_full_empty_roles"
@@ -1002,7 +1002,7 @@ class MarketDataCollector:
         """
         try:
             print("🔄 开始手动刷新全量缓存（永不过期模式）...")
-            print("📊 这将从MySQL重新加载所有empty角色数据")
+            print(" 这将从MySQL重新加载所有empty角色数据")
             
             # 强制从数据库刷新，不使用现有缓存
             self.refresh_market_data(
@@ -1012,13 +1012,13 @@ class MarketDataCollector:
                 force_refresh=True
             )
             
-            print("✅ 全量缓存手动刷新完成")
+            print(" 全量缓存手动刷新完成")
             print("💾 数据已更新为最新版本，将永久保持直到下次手动刷新")
             return True
             
         except Exception as e:
             self.logger.error(f"刷新全量缓存失败: {e}")
-            print(f"❌ 手动刷新失败: {e}")
+            print(f" 手动刷新失败: {e}")
             return False
 
     def manual_refresh(self, max_records: int = 999999, filters: Optional[Dict[str, Any]] = None) -> bool:
@@ -1034,7 +1034,7 @@ class MarketDataCollector:
         """
         try:
             print("🔄 手动刷新市场数据...")
-            print("📊 强制从数据库重新加载数据")
+            print(" 强制从数据库重新加载数据")
             
             self.refresh_market_data(
                 filters=filters,
@@ -1043,13 +1043,13 @@ class MarketDataCollector:
                 force_refresh=True
             )
             
-            print("✅ 手动刷新完成")
+            print(" 手动刷新完成")
             print("💾 数据已更新，在永不过期模式下将保持最新状态")
             return True
             
         except Exception as e:
             self.logger.error(f"手动刷新失败: {e}")
-            print(f"❌ 手动刷新失败: {e}")
+            print(f" 手动刷新失败: {e}")
             return False
 
     def get_cache_status(self) -> Dict[str, Any]:

@@ -61,10 +61,10 @@ class PetEquipMarketDataCollector:
         try:
             from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
             self.equip_collector = EquipMarketDataCollector()
-            print("✅ 成功获取装备数据采集器实例，可共享缓存")
+            print(" 成功获取装备数据采集器实例，可共享缓存")
         except Exception as e:
             self.logger.warning(f"获取装备数据采集器实例失败: {e}")
-            print(f"⚠️ 无法共享装备数据采集器缓存: {e}")
+            print(f" 无法共享装备数据采集器缓存: {e}")
 
     def _get_shared_cache_data(self, fangyu: int = 0, speed: int = 0, shanghai: int = 0) -> Optional[pd.DataFrame]:
         """
@@ -84,14 +84,14 @@ class PetEquipMarketDataCollector:
         try:
             # 检查实例缓存是否有效
             if self._cached_pet_equip_data is not None:
-                print(f"✅ 使用实例缓存的宠物装备数据，共 {len(self._cached_pet_equip_data)} 条")
+                print(f" 使用实例缓存的宠物装备数据，共 {len(self._cached_pet_equip_data)} 条")
                 
                 # 根据属性值进一步过滤
                 filtered_data = self._filter_cached_data_by_attrs(
                     self._cached_pet_equip_data, fangyu, speed, shanghai
                 )
                 if not filtered_data.empty:
-                    print(f"✅ 按属性过滤后得到 {len(filtered_data)} 条宠物装备数据")
+                    print(f" 按属性过滤后得到 {len(filtered_data)} 条宠物装备数据")
                     return filtered_data
                 else:
                     print(f"实例缓存中没有找到符合条件的宠物装备数据")
@@ -109,14 +109,14 @@ class PetEquipMarketDataCollector:
             self._cache_timestamp = datetime.now()
             
             if not self._cached_pet_equip_data.empty:
-                print(f"✅ 从装备数据采集器获取并缓存 {len(self._cached_pet_equip_data)} 条宠物装备数据")
+                print(f" 从装备数据采集器获取并缓存 {len(self._cached_pet_equip_data)} 条宠物装备数据")
                 
                 # 根据属性值进一步过滤
                 filtered_data = self._filter_cached_data_by_attrs(
                     self._cached_pet_equip_data, fangyu, speed, shanghai
                 )
                 if not filtered_data.empty:
-                    print(f"✅ 按属性过滤后得到 {len(filtered_data)} 条宠物装备数据")
+                    print(f" 按属性过滤后得到 {len(filtered_data)} 条宠物装备数据")
                     return filtered_data
                 else:
                     print(f"缓存中没有找到符合条件的宠物装备数据")
@@ -127,7 +127,7 @@ class PetEquipMarketDataCollector:
                 
         except Exception as e:
             self.logger.warning(f"获取共享缓存数据失败: {e}")
-            print(f"⚠️ 共享缓存获取失败: {e}")
+            print(f" 共享缓存获取失败: {e}")
             return None
 
     def _filter_cached_data_by_attrs(self, cached_data: pd.DataFrame, 
@@ -170,7 +170,7 @@ class PetEquipMarketDataCollector:
         """清除实例缓存，强制下次重新从装备数据采集器获取数据"""
         self._cached_pet_equip_data = None
         self._cache_timestamp = None
-        print("✅ 已清除宠物装备数据实例缓存")
+        print(" 已清除宠物装备数据实例缓存")
 
     def get_market_data(self,
                         kindid: Optional[int] = None,
@@ -221,7 +221,7 @@ class PetEquipMarketDataCollector:
                     )
                     
                     elapsed_time = time.time() - start_time
-                    print(f"✅ 从共享缓存获取宠物装备数据完成，耗时: {elapsed_time:.3f}秒，返回: {len(filtered_data)} 条数据")
+                    print(f" 从共享缓存获取宠物装备数据完成，耗时: {elapsed_time:.3f}秒，返回: {len(filtered_data)} 条数据")
                     return filtered_data
             
             # 降级到MySQL查询

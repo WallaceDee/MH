@@ -40,10 +40,7 @@ from src.spider.helper.decode_desc import parse_pet_info
 
 class CBGPetSpider:
     def __init__(self):
-        # 修复编码问题
-        from src.spider.encoding_fix import fix_encoding
-        fix_encoding()
-        
+
         self.session = setup_session()
         self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
@@ -94,8 +91,8 @@ class CBGPetSpider:
         logger.propagate = False
         
         # 测试日志写入
-        logger.info("🎉 CBG召唤兽爬虫日志系统初始化完成")
-        logger.info(f"📁 日志文件路径: {log_file}")
+        logger.info("CBG召唤兽爬虫日志系统初始化完成")
+        logger.info(f"日志文件路径: {log_file}")
         
         return logger
 
@@ -534,7 +531,7 @@ class CBGPetSpider:
 
         search_type = 'overall_search_pet'
 
-        self.logger.info(f"🚀 开始召唤兽爬取，最大页数: {max_pages}")
+        self.logger.info(f"开始召唤兽爬取，最大页数: {max_pages}")
 
         # 获取参数
         params_file = 'config/pet_params.json'
@@ -549,11 +546,11 @@ class CBGPetSpider:
             if 'server_id' in cached_params:
                 search_type = 'search_pet'
             search_params = cached_params
-            self.logger.info(f"📊 使用传入的缓存参数: {len(search_params)} 个")
+            self.logger.info(f"使用传入的缓存参数: {len(search_params)} 个")
         else:
             search_params = await get_pet_search_params_async(use_browser=use_browser)
             if search_params:
-                self.logger.info(f"📊 使用搜索参数: {search_params}")
+                self.logger.info(f"使用搜索参数: {search_params}")
 
         if not search_params:
             self.logger.error(f"无法获取召唤兽的搜索参数，爬取中止")
@@ -573,7 +570,7 @@ class CBGPetSpider:
                 pets = await self.fetch_page(page_num, search_params, search_type)
                 
                 if pets is None:
-                    self.logger.warning(f"❌ 第 {page_num} 页数据获取失败，尝试重试...")
+                    self.logger.warning(f"第 {page_num} 页数据获取失败，尝试重试...")
                     await asyncio.sleep(5) # 等待5秒重试
                     pets = await self.fetch_page(page_num, search_params, search_type)
 
@@ -592,9 +589,9 @@ class CBGPetSpider:
                         desc_sumup_short = pet.get('desc_sumup_short', '无描述')
                         self.logger.info(f" ￥{price} - {pet_name}({level}级) - {desc_sumup_short} - {server_name} - {seller_nickname}")
                     
-                    self.logger.info(f"✅ 第 {page_num} 页完成，获取 {len(pets)} 条召唤兽，保存 {saved_count} 条")
+                    self.logger.info(f"第 {page_num} 页完成，获取 {len(pets)} 条召唤兽，保存 {saved_count} 条")
                 else:
-                    self.logger.info(f"📄 第 {page_num} 页没有数据，爬取结束")
+                    self.logger.info(f"第 {page_num} 页没有数据，爬取结束")
                     break 
 
                 # 添加延迟
@@ -609,7 +606,7 @@ class CBGPetSpider:
                 traceback.print_exc()
                 break
 
-        self.logger.info(f"🎉 召唤兽爬取完成！成功页数: {successful_pages}/{max_pages}, 总召唤兽数: {total_saved_count}")
+        self.logger.info(f"召唤兽爬取完成！成功页数: {successful_pages}/{max_pages}, 总召唤兽数: {total_saved_count}")
         
         # 强制刷新所有日志缓冲区，确保日志被完整写入文件
         import sys
@@ -656,9 +653,9 @@ def main():
                 delay_range=(1, 3), 
                 use_browser=use_browser_for_test
             )
-            print(f"--- ✅ 召唤兽爬虫测试完成 ---")
+            print(f"--- 召唤兽爬虫测试完成 ---")
         except Exception as e:
-            print(f"--- ❌ 召唤兽爬虫测试失败: {e} ---")
+            print(f"--- 召唤兽爬虫测试失败: {e} ---")
             import traceback
             traceback.print_exc()
 

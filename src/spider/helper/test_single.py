@@ -55,9 +55,9 @@ def test_single_case():
             py_val = py_result.get(field)
             js_val = expected_result.get(field)
             if py_val != js_val:
-                print(f"❌ {field}: Python={py_val}, JS={js_val}")
+                print(f" {field}: Python={py_val}, JS={js_val}")
             else:
-                print(f"✅ {field}: {py_val}")
+                print(f" {field}: {py_val}")
         
         # 比较进阶加点
         print("\n=== 进阶加点对比 ===")
@@ -82,7 +82,7 @@ def test_single_case():
         print(f"min_jie_add: Python={py_min}, JS={js_min}")
         
     except Exception as e:
-        print(f"❌ 解析失败: {e}")
+        print(f" 解析失败: {e}")
         import traceback
         traceback.print_exc()
 

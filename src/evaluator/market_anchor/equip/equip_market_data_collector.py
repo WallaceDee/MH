@@ -416,7 +416,7 @@ class EquipMarketDataCollector:
                 copy_success = self._copy_temp_cache_to_official(temp_cache_key, self._full_cache_key, df, chunk_size, ttl_seconds)
                 
                 if copy_success:
-                    print("✅ 无缝切换完成！新数据已生效")
+                    print(" 无缝切换完成！新数据已生效")
                     elapsed_time = time.time() - start_time
                     cache_info = "永不过期（仅手动刷新）" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时"
                     print(f"全量装备数据已缓存到Redis，缓存策略: {cache_info}，总耗时: {elapsed_time:.2f}秒")
@@ -433,13 +433,13 @@ class EquipMarketDataCollector:
                     
                     return True
                 else:
-                    print("❌ 无缝切换失败，清理临时数据...")
+                    print(" 无缝切换失败，清理临时数据...")
                     self.redis_cache.clear_pattern(f"{temp_cache_key}:*")
                     self._refresh_status = "error"
                     self._refresh_message = "无缝切换失败"
                     return False
             else:
-                print("❌ 新数据存储失败，清理临时数据...")
+                print(" 新数据存储失败，清理临时数据...")
                 self.redis_cache.clear_pattern(f"{temp_cache_key}:*")
                 self._refresh_status = "error"
                 self._refresh_message = "新数据存储失败"
@@ -1191,7 +1191,7 @@ class EquipMarketDataCollector:
         """
         手动刷新缓存（显式调用）
         """
-        print("📱 用户手动刷新装备缓存")
+        print(" 用户手动刷新装备缓存")
         return self.refresh_full_cache()
     
     def incremental_update(self, last_update_time: Optional[datetime] = None) -> bool:
@@ -1208,14 +1208,14 @@ class EquipMarketDataCollector:
             print("🔄 开始增量更新装备缓存...")
             
             if not self.redis_cache:
-                print("❌ Redis不可用，无法进行增量更新")
+                print(" Redis不可用，无法进行增量更新")
                 return False
             
             # 获取上次更新时间
             if last_update_time is None:
                 last_update_time = self._get_last_cache_update_time()
                 if last_update_time is None:
-                    print("⚠️ 无法获取上次更新时间，将进行全量刷新")
+                    print(" 无法获取上次更新时间，将进行全量刷新")
                     return self.refresh_full_cache()
             
             print(f"📅 上次更新时间: {last_update_time}")
@@ -1224,47 +1224,47 @@ class EquipMarketDataCollector:
             new_data = self._get_incremental_data_from_mysql(last_update_time)
             
             if new_data.empty:
-                print("✅ 没有新数据需要更新")
+                print(" 没有新数据需要更新")
                 return True
             
-            print(f"📊 发现 {len(new_data)} 条新数据")
+            print(f" 发现 {len(new_data)} 条新数据")
             
             # 优先从内存缓存获取现有数据
             existing_data = self._get_existing_data_from_memory()
             if existing_data is None or existing_data.empty:
-                print("⚠️ 内存缓存为空，尝试从Redis获取")
+                print(" 内存缓存为空，尝试从Redis获取")
                 existing_data = self._get_full_data_from_redis()
                 if existing_data is None or existing_data.empty:
-                    print("⚠️ Redis缓存也为空，将进行全量刷新")
+                    print(" Redis缓存也为空，将进行全量刷新")
                     return self.refresh_full_cache()
                 # 将Redis数据加载到内存缓存
                 self._full_data_cache = existing_data
-                print("✅ 已将Redis数据加载到内存缓存")
+                print(" 已将Redis数据加载到内存缓存")
             
-            print(f"📊 现有内存缓存数据: {len(existing_data)} 条")
+            print(f" 现有内存缓存数据: {len(existing_data)} 条")
             
             # 合并数据到内存缓存
             merged_data = self._merge_incremental_data(existing_data, new_data)
             
             # 更新内存缓存
             self._full_data_cache = merged_data
-            print(f"✅ 内存缓存更新完成，总数据量: {len(merged_data)} 条")
+            print(f" 内存缓存更新完成，总数据量: {len(merged_data)} 条")
             
             # 同步到Redis缓存
             success = self._sync_memory_cache_to_redis(merged_data)
             
             if success:
-                print(f"✅ 增量更新完成，数据已同步到Redis")
+                print(f" 增量更新完成，数据已同步到Redis")
                 # 更新缓存元数据中的最后更新时间
                 self._update_cache_metadata(merged_data)
                 return True
             else:
-                print("❌ Redis同步失败，但内存缓存已更新")
+                print(" Redis同步失败，但内存缓存已更新")
                 return False
                 
         except Exception as e:
             self.logger.error(f"增量更新失败: {e}")
-            print(f"❌ 增量更新异常: {e}")
+            print(f" 增量更新异常: {e}")
             return False
     
     def _get_last_cache_update_time(self) -> Optional[datetime]:
@@ -1464,7 +1464,7 @@ class EquipMarketDataCollector:
         """
         try:
             if not self.redis_cache or data.empty:
-                print("⚠️ Redis不可用或数据为空，跳过同步")
+                print(" Redis不可用或数据为空，跳过同步")
                 return True
             
             # 更新Redis缓存
@@ -1479,10 +1479,10 @@ class EquipMarketDataCollector:
             )
             
             if success:
-                print("✅ 内存缓存已同步到Redis")
+                print(" 内存缓存已同步到Redis")
                 return True
             else:
-                print("❌ 同步到Redis失败")
+                print(" 同步到Redis失败")
                 return False
                 
         except Exception as e:
@@ -1501,7 +1501,7 @@ class EquipMarketDataCollector:
         """
         try:
             if merged_data.empty:
-                print("⚠️ 合并后数据为空，跳过缓存更新")
+                print(" 合并后数据为空，跳过缓存更新")
                 return True
             
             # 更新内存缓存
@@ -1535,7 +1535,7 @@ class EquipMarketDataCollector:
             }
             
             self.redis_cache.set(f"{self._full_cache_key}:meta", metadata)
-            print("✅ 缓存元数据更新成功")
+            print(" 缓存元数据更新成功")
             
         except Exception as e:
             self.logger.warning(f"更新缓存元数据失败: {e}")
@@ -1562,10 +1562,10 @@ class EquipMarketDataCollector:
             if memory_data is not None and not memory_data.empty:
                 status['memory_cache_size'] = len(memory_data)
                 status['data_source'] = 'memory'
-                print(f"📊 从内存缓存获取状态信息，数据量: {len(memory_data)} 条")
+                print(f" 从内存缓存获取状态信息，数据量: {len(memory_data)} 条")
             else:
                 status['data_source'] = 'redis'
-                print("📊 内存缓存为空，从Redis获取状态信息")
+                print(" 内存缓存为空，从Redis获取状态信息")
             
             # 获取缓存中的最后更新时间（现在会优先从内存缓存获取）
             last_update_time = self._get_last_cache_update_time()
@@ -1582,9 +1582,9 @@ class EquipMarketDataCollector:
                     status['has_new_data'] = True
                     # 获取新数据数量（这里只是估算，实际数量需要查询）
                     status['new_data_count'] = self._estimate_new_data_count(last_update_time)
-                    print(f"📊 检测到新数据: {status['new_data_count']} 条")
+                    print(f" 检测到新数据: {status['new_data_count']} 条")
                 else:
-                    print("📊 没有新数据需要更新")
+                    print(" 没有新数据需要更新")
             
             return status
             
@@ -1667,22 +1667,22 @@ class EquipMarketDataCollector:
             status = self.get_incremental_update_status()
             
             if 'error' in status:
-                print(f"❌ 获取增量更新状态失败: {status['error']}")
+                print(f" 获取增量更新状态失败: {status['error']}")
                 return False
             
             if not status.get('has_new_data', False):
-                print("✅ 没有新数据需要更新")
+                print(" 没有新数据需要更新")
                 return True
             
             new_data_count = status.get('new_data_count', 0)
-            print(f"📊 检测到 {new_data_count} 条新数据，开始增量更新...")
+            print(f" 检测到 {new_data_count} 条新数据，开始增量更新...")
             
             # 执行增量更新
             return self.incremental_update()
             
         except Exception as e:
             self.logger.error(f"自动增量更新失败: {e}")
-            print(f"❌ 自动增量更新异常: {e}")
+            print(f" 自动增量更新异常: {e}")
             return False
     
     def force_incremental_update(self) -> bool:
@@ -1698,18 +1698,18 @@ class EquipMarketDataCollector:
             # 获取MySQL中的最新时间
             mysql_latest_time = self._get_mysql_latest_update_time()
             if mysql_latest_time is None:
-                print("❌ 无法获取MySQL最新时间")
+                print(" 无法获取MySQL最新时间")
                 return False
             
             # 获取缓存中的最后更新时间
             last_update_time = self._get_last_cache_update_time()
             if last_update_time is None:
-                print("⚠️ 无法获取缓存最后更新时间，将进行全量刷新")
+                print(" 无法获取缓存最后更新时间，将进行全量刷新")
                 return self.refresh_full_cache()
             
             # 如果MySQL时间早于缓存时间，说明没有新数据
             if mysql_latest_time <= last_update_time:
-                print("✅ MySQL数据没有更新，无需增量更新")
+                print(" MySQL数据没有更新，无需增量更新")
                 return True
             
             # 执行增量更新
@@ -1717,7 +1717,7 @@ class EquipMarketDataCollector:
             
         except Exception as e:
             self.logger.error(f"强制增量更新失败: {e}")
-            print(f"❌ 强制增量更新异常: {e}")
+            print(f" 强制增量更新异常: {e}")
             return False
 
     def get_cache_status(self) -> Dict[str, Any]:
@@ -2014,14 +2014,14 @@ class EquipMarketDataCollector:
             )
             
             if success:
-                print("✅ 临时缓存复制到正式缓存成功")
+                print(" 临时缓存复制到正式缓存成功")
                 return True
             else:
-                print("❌ 临时缓存复制到正式缓存失败")
+                print(" 临时缓存复制到正式缓存失败")
                 return False
                 
         except Exception as e:
-            print(f"❌ 复制临时缓存失败: {e}")
+            print(f" 复制临时缓存失败: {e}")
             return False
 
     def _rename_temp_cache_to_official(self, temp_key: str, official_key: str) -> bool:
@@ -2039,7 +2039,7 @@ class EquipMarketDataCollector:
             # 获取临时缓存的所有键
             temp_keys = self.redis_cache.client.keys(f"{temp_key}:*")
             if not temp_keys:
-                print(f"❌ 临时缓存键不存在: {temp_key}")
+                print(f" 临时缓存键不存在: {temp_key}")
                 return False
             
             print(f"找到 {len(temp_keys)} 个临时缓存键，开始重命名...")
@@ -2070,14 +2070,14 @@ class EquipMarketDataCollector:
             print(f"重命名完成: {success_count}/{total_operations} 个键操作成功")
             
             if success_count == total_operations:
-                print("✅ 所有临时缓存键重命名成功")
+                print(" 所有临时缓存键重命名成功")
                 return True
             else:
-                print(f"⚠️ 部分重命名失败: {success_count}/{total_operations}")
+                print(f" 部分重命名失败: {success_count}/{total_operations}")
                 return False
                 
         except Exception as e:
-            print(f"❌ 重命名临时缓存失败: {e}")
+            print(f" 重命名临时缓存失败: {e}")
             return False
 
     def _get_target_addon_classification(self, target_features: Dict[str, Any]) -> str:

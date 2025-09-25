@@ -750,14 +750,23 @@ class SpiderService:
             
             logger.info(f"启动Playwright收集器: {' '.join(cmd)}")
             
-            # 启动进程
+            # 设置环境变量确保UTF-8编码
+            env = os.environ.copy()
+            env['PYTHONIOENCODING'] = 'utf-8'
+            env['LANG'] = 'zh_CN.UTF-8'
+            env['LC_ALL'] = 'zh_CN.UTF-8'
+            
+            # 启动进程 - 显式设置UTF-8编码避免GBK编码错误
             current_process = subprocess.Popen(
                 cmd,
                 cwd=self.project_root,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True,
-                bufsize=1
+                encoding='utf-8',
+                errors='replace',  # 替换无法解码的字符
+                bufsize=1,
+                env=env
             )
             
             # 启动日志监控线程
@@ -766,7 +775,20 @@ class SpiderService:
                 try:
                     for line in iter(current_process.stdout.readline, ''):
                         if line:
-                            logger.info(f"Playwright: {line.strip()}")
+                            # 安全处理输出行，避免编码错误
+                            try:
+                                safe_line = line.strip()
+                                logger.info(f"Playwright: {safe_line}")
+                            except (UnicodeDecodeError, UnicodeEncodeError) as e:
+                                # 如果遇到编码问题，使用安全解码
+                                safe_line = line.encode('utf-8', errors='replace').decode('utf-8', errors='replace').strip()
+                                logger.info(f"Playwright: {safe_line}")
+                                logger.warning(f"编码错误已处理: {e}")
+                            except Exception as e:
+                                # 其他异常也记录但继续执行
+                                logger.error(f"处理输出行时发生异常: {e}")
+                                safe_line = f"[输出处理异常: {str(e)}]"
+                                logger.info(f"Playwright: {safe_line}")
                             # 更新任务状态
                             if "启动完成" in line or "浏览器已打开" in line:
                                 task_status["message"] = "Playwright收集器已启动，浏览器已打开"

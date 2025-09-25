@@ -181,6 +181,13 @@
           <span class="cBlue">{{ scope.row.init_dex || scope.row.speed || '' }}</span>
         </template>
       </el-table-column>
+      <!-- 时间信息 -->
+      <el-table-column prop="update_time" label="创建、更新" width="200">
+        <template slot-scope="scope">
+          <el-tag type="info">{{ scope.row.create_time }}</el-tag>
+          <el-tag>{{ scope.row.update_time }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="100">
         <template #default="scope">
           <el-link href="javascript:void(0)" type="danger" @click.native="handleDelete(scope.row)">删除</el-link>

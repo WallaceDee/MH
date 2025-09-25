@@ -171,7 +171,7 @@ async def _collect_params_base_async(url, collector_logic):
             await browser.close()
             
             if params_dict:
-                print(f"✅ 搜索参数收集成功！")
+                print(f" 搜索参数收集成功！")
             
             return params_dict
             
@@ -190,7 +190,7 @@ async def _collect_lingshi_logic(page):
     """灵饰参数收集的具体逻辑 - 直接模拟原始JavaScript逻辑"""
     params_dict = {}
     
-    print("🚀 开始收集灵饰参数...")
+    print(" 开始收集灵饰参数...")
     
     # 1. 等级范围参数 - 从LevelSlider对象获取
     try:
@@ -209,9 +209,9 @@ async def _collect_lingshi_logic(page):
         
         params_dict['equip_level_min'] = level_values['min']
         params_dict['equip_level_max'] = level_values['max']
-        print(f"✅ 等级范围: {level_values['min']}-{level_values['max']}")
+        print(f" 等级范围: {level_values['min']}-{level_values['max']}")
     except Exception as e:
-        print(f"❌ 获取等级范围参数失败: {e}")
+        print(f" 获取等级范围参数失败: {e}")
         params_dict['equip_level_min'] = 60
         params_dict['equip_level_max'] = 160
     
@@ -290,11 +290,11 @@ async def _collect_lingshi_logic(page):
             
             if value:
                 params_dict[param_name] = value
-                print(f"✅ {param_name}: {value}")
+                print(f" {param_name}: {value}")
             else:
-                print(f"⚠️ {param_name}: 无选择")
+                print(f" {param_name}: 无选择")
         except Exception as e:
-            print(f"❌ 获取{param_name}参数失败: {e}")
+            print(f" 获取{param_name}参数失败: {e}")
     
     # 3. 附加属性逻辑
     try:
@@ -308,7 +308,7 @@ async def _collect_lingshi_logic(page):
         
         if added_attr_logic:
             params_dict['added_attr_logic'] = added_attr_logic
-            print(f"✅ 附加属性逻辑: {added_attr_logic}")
+            print(f" 附加属性逻辑: {added_attr_logic}")
             
             # 根据逻辑类型处理附加属性
             if added_attr_logic == 'detail':
@@ -323,7 +323,7 @@ async def _collect_lingshi_logic(page):
                     if attr_value:
                         key = f'added_attr.{attr_value}'
                         params_dict[key] = (params_dict.get(key, 0) + 1)
-                        print(f"✅ 详细附加属性{i}: {attr_value}")
+                        print(f" 详细附加属性{i}: {attr_value}")
             else:
                 # 简单模式 - 收集两个面板的附加属性
                 added_attr_values = await page.evaluate('''
@@ -368,21 +368,21 @@ async def _collect_lingshi_logic(page):
                 for attr_value in added_attr_values:
                     key = f'added_attr.{attr_value}'
                     params_dict[key] = 1
-                    print(f"✅ 附加属性: {attr_value}")
+                    print(f" 附加属性: {attr_value}")
         else:
-            print("⚠️ 附加属性逻辑: 无选择")
+            print(" 附加属性逻辑: 无选择")
     except Exception as e:
-        print(f"❌ 获取附加属性逻辑参数失败: {e}")
+        print(f" 获取附加属性逻辑参数失败: {e}")
     
     # 4. 特效
     try:
         if await page.evaluate('() => document.getElementById("chk_has_eazy_effect")?.checked'):
             params_dict['special_effect'] = 1
-            print("✅ 特效: 超级简易")
+            print(" 特效: 超级简易")
         else:
-            print("⚠️ 特效: 无选择")
+            print(" 特效: 无选择")
     except Exception as e:
-        print(f"❌ 获取特效参数失败: {e}")
+        print(f" 获取特效参数失败: {e}")
     
     # 5. 收集数值输入参数 - 完全按照原始JavaScript逻辑
     txt_int_items = [
@@ -405,20 +405,20 @@ async def _collect_lingshi_logic(page):
             if value:
                 # 验证整数格式
                 if not value.isdigit():
-                    print(f"❌ {desc}必须是整数: {value}")
+                    print(f" {desc}必须是整数: {value}")
                     continue
                 
                 int_value = int(value)
                 if not (min_val <= int_value <= max_val):
-                    print(f"❌ {desc}超出取值范围 {min_val}-{max_val}: {int_value}")
+                    print(f" {desc}超出取值范围 {min_val}-{max_val}: {int_value}")
                     continue
                 
                 params_dict[item_name] = int_value
-                print(f"✅ {desc}: {int_value}")
+                print(f" {desc}: {int_value}")
             else:
-                print(f"⚠️ {desc}: 无值")
+                print(f" {desc}: 无值")
         except Exception as e:
-            print(f"❌ 获取{item_name}参数失败: {e}")
+            print(f" 获取{item_name}参数失败: {e}")
     
     # 6. 基础属性类型和值
     try:
@@ -431,11 +431,11 @@ async def _collect_lingshi_logic(page):
         
         if basic_attr_type:
             params_dict[basic_attr_type] = params_dict.get('basic_attr_value', 1)
-            print(f"✅ 基础属性类型: {basic_attr_type}")
+            print(f" 基础属性类型: {basic_attr_type}")
         else:
-            print("⚠️ 基础属性类型: 无选择")
+            print(" 基础属性类型: 无选择")
     except Exception as e:
-        print(f"❌ 获取基础属性类型参数失败: {e}")
+        print(f" 获取基础属性类型参数失败: {e}")
     
     # 7. 综合属性
     try:
@@ -457,11 +457,11 @@ async def _collect_lingshi_logic(page):
             params_dict['synthesized_attr_total'] = {
                 synthesized_attr_type: synthesized_attr_value or "1"
             }
-            print(f"✅ 综合属性: {synthesized_attr_type} = {synthesized_attr_value}")
+            print(f" 综合属性: {synthesized_attr_type} = {synthesized_attr_value}")
         else:
-            print("⚠️ 综合属性: 无选择")
+            print(" 综合属性: 无选择")
     except Exception as e:
-        print(f"❌ 获取综合属性参数失败: {e}")
+        print(f" 获取综合属性参数失败: {e}")
     
     # 8. 修理失败次数
     try:
@@ -474,14 +474,14 @@ async def _collect_lingshi_logic(page):
         
         if repair_fail:
             if not repair_fail.isdigit() or int(repair_fail) > 3:
-                print(f"❌ 修理失败取值范围是0~3的整数: {repair_fail}")
+                print(f" 修理失败取值范围是0~3的整数: {repair_fail}")
             else:
                 params_dict['repair_fail'] = int(repair_fail)
-                print(f"✅ 修理失败次数: {repair_fail}")
+                print(f" 修理失败次数: {repair_fail}")
         else:
-            print("⚠️ 修理失败次数: 无值")
+            print(" 修理失败次数: 无值")
     except Exception as e:
-        print(f"❌ 获取修理失败参数失败: {e}")
+        print(f" 获取修理失败参数失败: {e}")
     
     # 9. 套装效果
     try:
@@ -494,11 +494,11 @@ async def _collect_lingshi_logic(page):
         
         if suit_effect:
             params_dict['suit_effect'] = suit_effect
-            print(f"✅ 套装效果: {suit_effect}")
+            print(f" 套装效果: {suit_effect}")
         else:
-            print("⚠️ 套装效果: 无选择")
+            print(" 套装效果: 无选择")
     except Exception as e:
-        print(f"❌ 获取套装效果参数失败: {e}")
+        print(f" 获取套装效果参数失败: {e}")
     
     # 10. 价格处理（原JS: if (arg['price_min']) arg['price_min'] = arg['price_min'] * 100;）
     if 'price_min' in params_dict: 
@@ -521,28 +521,28 @@ async def _collect_lingshi_logic(page):
         ''')
         if serverid: 
             params_dict['serverid'] = serverid
-            print(f"✅ 服务器ID: {serverid}")
+            print(f" 服务器ID: {serverid}")
         else:
-            print("⚠️ 服务器ID: 无值")
+            print(" 服务器ID: 无值")
     except Exception as e:
-        print(f"❌ 获取服务器ID参数失败: {e}")
+        print(f" 获取服务器ID参数失败: {e}")
     
     # 跨服购买服务器ID
     try:
         cross_buy_serverid = await page.evaluate("() => document.getElementById('user_serverid')?.value || ''")
         if cross_buy_serverid: 
             params_dict['cross_buy_serverid'] = cross_buy_serverid
-            print(f"✅ 跨服购买服务器ID: {cross_buy_serverid}")
+            print(f" 跨服购买服务器ID: {cross_buy_serverid}")
         else:
-            print("⚠️ 跨服购买服务器ID: 无值")
+            print(" 跨服购买服务器ID: 无值")
     except Exception as e:
-        print(f"❌ 获取跨服购买服务器ID参数失败: {e}")
+        print(f" 获取跨服购买服务器ID参数失败: {e}")
     
     # 12. 清理临时参数
     if 'basic_attr_value' in params_dict:
         del params_dict['basic_attr_value']
     
-    print(f"\n📊 灵饰参数收集完成，共获取 {len(params_dict)} 个参数:")
+    print(f"\n 灵饰参数收集完成，共获取 {len(params_dict)} 个参数:")
     for key, value in params_dict.items():
         print(f"  {key}: {value}")
     
@@ -552,7 +552,7 @@ async def _collect_pet_equip_logic(page):
     """收集召唤兽装备搜索逻辑 - 参考overall_search_pet_equips.js"""
     params_dict = {}
     
-    print("🚀 开始收集召唤兽装备参数...")
+    print(" 开始收集召唤兽装备参数...")
     
     # 1. 等级范围参数 - 从LevelSlider对象获取
     try:
@@ -571,9 +571,9 @@ async def _collect_pet_equip_logic(page):
         
         params_dict['level_min'] = level_values['min']
         params_dict['level_max'] = level_values['max']
-        print(f"✅ 等级范围: {level_values['min']}-{level_values['max']}")
+        print(f" 等级范围: {level_values['min']}-{level_values['max']}")
     except Exception as e:
-        print(f"❌ 获取等级范围参数失败: {e}")
+        print(f" 获取等级范围参数失败: {e}")
         params_dict['level_min'] = 5
         params_dict['level_max'] = 145
     
@@ -600,11 +600,11 @@ async def _collect_pet_equip_logic(page):
         
         if equip_pos:
             params_dict['equip_pos'] = equip_pos
-            print(f"✅ 装备类型: {equip_pos}")
+            print(f" 装备类型: {equip_pos}")
         else:
-            print("⚠️ 装备类型: 无选择")
+            print(" 装备类型: 无选择")
     except Exception as e:
-        print(f"❌ 获取装备类型参数失败: {e}")
+        print(f" 获取装备类型参数失败: {e}")
     
     # 3. 精魄灵石属性
     try:
@@ -629,11 +629,11 @@ async def _collect_pet_equip_logic(page):
         
         if xiangqian_stone_attr:
             params_dict['xiangqian_stone_attr'] = xiangqian_stone_attr
-            print(f"✅ 精魄灵石属性: {xiangqian_stone_attr}")
+            print(f" 精魄灵石属性: {xiangqian_stone_attr}")
         else:
-            print("⚠️ 精魄灵石属性: 无选择")
+            print(" 精魄灵石属性: 无选择")
     except Exception as e:
-        print(f"❌ 获取精魄灵石属性参数失败: {e}")
+        print(f" 获取精魄灵石属性参数失败: {e}")
     
     # 4. 附加属性选择
     try:
@@ -655,12 +655,12 @@ async def _collect_pet_equip_logic(page):
         
         for attr_name, value in addon_attrs.items():
             params_dict[attr_name] = value
-            print(f"✅ 附加属性: {attr_name}")
+            print(f" 附加属性: {attr_name}")
         
         if not addon_attrs:
-            print("⚠️ 附加属性: 无选择")
+            print(" 附加属性: 无选择")
     except Exception as e:
-        print(f"❌ 获取附加属性参数失败: {e}")
+        print(f" 获取附加属性参数失败: {e}")
     
     # 5. 数值输入参数
     try:
@@ -683,18 +683,18 @@ async def _collect_pet_equip_logic(page):
                 int_value = int(value)
                 if int_value > 0:
                     params_dict[field_name] = int_value
-                    print(f"✅ {display_name}: {int_value}")
+                    print(f" {display_name}: {int_value}")
     except Exception as e:
-        print(f"❌ 获取数值输入参数失败: {e}")
+        print(f" 获取数值输入参数失败: {e}")
     
     # 6. 修理失败次数
     try:
         repair_failed_times = await page.evaluate('() => document.getElementById("repair_failed_times")?.value')
         if repair_failed_times:
             params_dict["repair_failed_times"] = repair_failed_times
-            print(f"✅ 修理失败次数: {repair_failed_times}")
+            print(f" 修理失败次数: {repair_failed_times}")
     except Exception as e:
-        print(f"❌ 获取修理失败次数参数失败: {e}")
+        print(f" 获取修理失败次数参数失败: {e}")
     
     # 7. 价格范围
     try:
@@ -705,9 +705,9 @@ async def _collect_pet_equip_logic(page):
                 price_min_value = float(price_min)
                 if price_min_value > 0:
                     params_dict["price_min"] = int(price_min_value * 100)  # 转换为分
-                    print(f"✅ 最低价格: {price_min_value}")
+                    print(f" 最低价格: {price_min_value}")
             except ValueError:
-                print("❌ 最低价格格式错误")
+                print(" 最低价格格式错误")
         
         price_max = await page.evaluate('() => document.getElementById("price_max")?.value?.trim()')
         if price_max:
@@ -715,18 +715,18 @@ async def _collect_pet_equip_logic(page):
                 price_max_value = float(price_max)
                 if price_max_value > 0:
                     params_dict["price_max"] = int(price_max_value * 100)  # 转换为分
-                    print(f"✅ 最高价格: {price_max_value}")
+                    print(f" 最高价格: {price_max_value}")
             except ValueError:
-                print("❌ 最高价格格式错误")
+                print(" 最高价格格式错误")
         
         # 价格范围检查
         if params_dict.get("price_min") and params_dict.get("price_max"):
             if params_dict["price_max"] < params_dict["price_min"]:
-                print("❌ 价格范围错误：最高价格小于最低价格")
+                print(" 价格范围错误：最高价格小于最低价格")
                 params_dict.pop("price_min", None)
                 params_dict.pop("price_max", None)
     except Exception as e:
-        print(f"❌ 获取价格参数失败: {e}")
+        print(f" 获取价格参数失败: {e}")
     
     # 8. 附加状态
     try:
@@ -743,11 +743,11 @@ async def _collect_pet_equip_logic(page):
             
             if is_valid:
                 params_dict["addon_status"] = addon_status
-                print(f"✅ 附加状态: {addon_status}")
+                print(f" 附加状态: {addon_status}")
             else:
-                print(f"❌ 附加状态无效: {addon_status}")
+                print(f" 附加状态无效: {addon_status}")
     except Exception as e:
-        print(f"❌ 获取附加状态参数失败: {e}")
+        print(f" 获取附加状态参数失败: {e}")
     
     # 9. 套装效果相关
     try:
@@ -755,22 +755,22 @@ async def _collect_pet_equip_logic(page):
         no_suit_effect = await page.evaluate('() => document.getElementById("no_suit_effect")?.checked')
         if no_suit_effect:
             params_dict['include_no_skill'] = 1
-            print("✅ 包含无套装效果")
+            print(" 包含无套装效果")
         
         has_suit_effect = await page.evaluate('() => document.getElementById("has_suit_effect")?.checked')
         has_suit_effect_disabled = await page.evaluate('() => document.getElementById("has_suit_effect")?.disabled')
         
         if has_suit_effect and not has_suit_effect_disabled:
             params_dict['include_can_cover_skill'] = 1
-            print("✅ 包含可覆盖套装效果")
+            print(" 包含可覆盖套装效果")
         
         # 属性总和包含伤害
         include_damage = await page.evaluate('() => document.getElementById("addon_sum_include_damage")?.checked')
         if include_damage:
             params_dict['addon_sum_include_damage'] = 1
-            print("✅ 属性总和包含伤害")
+            print(" 属性总和包含伤害")
     except Exception as e:
-        print(f"❌ 获取套装效果参数失败: {e}")
+        print(f" 获取套装效果参数失败: {e}")
     
     # 10. 服务器类型
     try:
@@ -790,11 +790,11 @@ async def _collect_pet_equip_logic(page):
         
         if server_type:
             params_dict['server_type'] = server_type
-            print(f"✅ 服务器类型: {server_type}")
+            print(f" 服务器类型: {server_type}")
         else:
-            print("⚠️ 服务器类型: 无选择")
+            print(" 服务器类型: 无选择")
     except Exception as e:
-        print(f"❌ 获取服务器类型参数失败: {e}")
+        print(f" 获取服务器类型参数失败: {e}")
     
     # 11. 指定服务器
     try:
@@ -810,9 +810,9 @@ async def _collect_pet_equip_logic(page):
         
         if serverid:
             params_dict['serverid'] = serverid
-            print(f"✅ 指定服务器: {serverid}")
+            print(f" 指定服务器: {serverid}")
     except Exception as e:
-        print(f"❌ 获取指定服务器参数失败: {e}")
+        print(f" 获取指定服务器参数失败: {e}")
     
     # 12. 跨服购买
     try:
@@ -820,23 +820,23 @@ async def _collect_pet_equip_logic(page):
         user_serverid = await page.evaluate('() => document.getElementById("user_serverid")?.value')
         if user_serverid:
             params_dict['cross_buy_serverid'] = user_serverid
-            print(f"✅ 跨服购买服务器: {user_serverid}")
+            print(f" 跨服购买服务器: {user_serverid}")
     except Exception as e:
-        print(f"❌ 获取跨服购买参数失败: {e}")
+        print(f" 获取跨服购买参数失败: {e}")
     
     # 13. 参数验证
     if not params_dict:
-        print("❌ 没有收集到任何搜索参数")
+        print(" 没有收集到任何搜索参数")
         return params_dict
     
-    print(f"✅ 成功收集到 {len(params_dict)} 个参数")
+    print(f" 成功收集到 {len(params_dict)} 个参数")
     return params_dict
 
 async def _collect_pet_logic(page):
     """收集召唤兽搜索逻辑 - 参考overall_search_pet.js"""
     params_dict = {}
     
-    print("🚀 开始收集召唤兽参数...")
+    print(" 开始收集召唤兽参数...")
     
     # 1. 召唤兽类型 - 原JS: if ($('pet_select_box').value) { var pet_type = this.get_pet_type_value(); arg['type'] = pet_type; }
     try:
@@ -859,11 +859,11 @@ async def _collect_pet_logic(page):
             ''')
             if pet_type:
                 params_dict['type'] = pet_type
-                print(f"✅ 召唤兽类型: {pet_name} -> {pet_type}")
+                print(f" 召唤兽类型: {pet_name} -> {pet_type}")
             else:
-                print(f"❌ 召唤兽类型无效: {pet_name}")
+                print(f" 召唤兽类型无效: {pet_name}")
     except Exception as e:
-        print(f"❌ 获取召唤兽类型参数失败: {e}")
+        print(f" 获取召唤兽类型参数失败: {e}")
     
     # 2. 收集各种选择器参数 - 原JS: var check_items = [['low_skill', this.low_skill_checker, false], ...]
     check_panels = [
@@ -982,11 +982,11 @@ async def _collect_pet_logic(page):
             
             if value:
                 params_dict[param_name] = value
-                print(f"✅ {param_name}: {value}")
+                print(f" {param_name}: {value}")
             else:
-                print(f"⚠️ {param_name}: 无选择")
+                print(f" {param_name}: 无选择")
         except Exception as e:
-            print(f"❌ 获取{param_name}参数失败: {e}")
+            print(f" 获取{param_name}参数失败: {e}")
     
     # 3. 技能相关参数 - 原JS: arg = this.get_skill_value(arg);
     try:
@@ -1022,7 +1022,7 @@ async def _collect_pet_logic(page):
         
         if skill_values:
             params_dict['skill'] = ','.join(skill_values)
-            print(f"✅ 包含技能: {len(skill_values)}个")
+            print(f" 包含技能: {len(skill_values)}个")
         
         # 收集不包含技能
         not_skill_panels = [
@@ -1056,10 +1056,10 @@ async def _collect_pet_logic(page):
         
         if not_skill_values:
             params_dict['not_in_skill'] = ','.join(not_skill_values)
-            print(f"✅ 不包含技能: {len(not_skill_values)}个")
+            print(f" 不包含技能: {len(not_skill_values)}个")
             
     except Exception as e:
-        print(f"❌ 获取技能参数失败: {e}")
+        print(f" 获取技能参数失败: {e}")
     
     # 4. 内丹和赐福技能
     try:
@@ -1090,7 +1090,7 @@ async def _collect_pet_logic(page):
         ''')
         if high_neidan_values:
             params_dict['high_neidan'] = high_neidan_values
-            print(f"✅ 高级内丹: {high_neidan_values}")
+            print(f" 高级内丹: {high_neidan_values}")
         
         # 低级内丹
         low_neidan_values = await page.evaluate('''
@@ -1119,7 +1119,7 @@ async def _collect_pet_logic(page):
         ''')
         if low_neidan_values:
             params_dict['low_neidan'] = low_neidan_values
-            print(f"✅ 低级内丹: {low_neidan_values}")
+            print(f" 低级内丹: {low_neidan_values}")
         
         # 赐福技能
         cifu_skills_values = await page.evaluate('''
@@ -1148,10 +1148,10 @@ async def _collect_pet_logic(page):
         ''')
         if cifu_skills_values:
             params_dict['evol_skill'] = cifu_skills_values
-            print(f"✅ 赐福技能: {cifu_skills_values}")
+            print(f" 赐福技能: {cifu_skills_values}")
             
     except Exception as e:
-        print(f"❌ 获取内丹和赐福技能参数失败: {e}")
+        print(f" 获取内丹和赐福技能参数失败: {e}")
     
     # 5. 复选框参数
     checkbox_items = [
@@ -1167,20 +1167,20 @@ async def _collect_pet_logic(page):
         try:
             if await page.evaluate(f'() => document.getElementById("{checkbox_id}")?.checked'):
                 params_dict[param_name] = 1
-                print(f"✅ {param_name}: 已选择")
+                print(f" {param_name}: 已选择")
         except Exception as e:
-            print(f"❌ 获取{param_name}参数失败: {e}")
+            print(f" 获取{param_name}参数失败: {e}")
     
     # 6. 赐福技能模式
     try:
         if await page.evaluate('() => document.getElementById("evol_skill_mode")?.checked'):
             params_dict['evol_skill_mode'] = 1
-            print("✅ 赐福技能模式: 满足全部")
+            print(" 赐福技能模式: 满足全部")
         else:
             params_dict['evol_skill_mode'] = 0
-            print("✅ 赐福技能模式: 满足一种")
+            print(" 赐福技能模式: 满足一种")
     except Exception as e:
-        print(f"❌ 获取赐福技能模式参数失败: {e}")
+        print(f" 获取赐福技能模式参数失败: {e}")
         params_dict['evol_skill_mode'] = 0
     
     # 7. 数值输入参数 - 完全按照原始JavaScript逻辑
@@ -1232,21 +1232,21 @@ async def _collect_pet_logic(page):
             ''')
             
             if value == 'invalid_number':
-                print(f"❌ {desc}必须是整数")
+                print(f" {desc}必须是整数")
                 continue
             elif value == 'out_of_range':
-                print(f"❌ {desc}超出取值范围 {min_val}-{max_val}")
+                print(f" {desc}超出取值范围 {min_val}-{max_val}")
                 continue
             elif value is not None:
                 params_dict[param_name] = value
-                print(f"✅ {desc}: {value}")
+                print(f" {desc}: {value}")
         except Exception as e:
-            print(f"❌ 获取{param_name}参数失败: {e}")
+            print(f" 获取{param_name}参数失败: {e}")
     
     # 8. 价格范围检查
     if 'price_min' in params_dict and 'price_max' in params_dict:
         if params_dict['price_max'] < params_dict['price_min']:
-            print("❌ 价格范围错误：最高价格小于最低价格")
+            print(" 价格范围错误：最高价格小于最低价格")
             params_dict.pop('price_min', None)
             params_dict.pop('price_max', None)
     
@@ -1264,12 +1264,12 @@ async def _collect_pet_logic(page):
         if growth:
             # 验证成长值格式: /^\d\.\d{1,3}$/
             if not re.match(r'^\d+\.\d{1,3}$', growth):
-                print(f"❌ 成长值错误, 最多3位小数: {growth}")
+                print(f" 成长值错误, 最多3位小数: {growth}")
             else:
                 params_dict['growth'] = int(float(growth) * 1000)
-                print(f"✅ 成长值: {growth} -> {params_dict['growth']}")
+                print(f" 成长值: {growth} -> {params_dict['growth']}")
     except Exception as e:
-        print(f"❌ 获取成长值参数失败: {e}")
+        print(f" 获取成长值参数失败: {e}")
     
     # 11. 服务器相关
     try:
@@ -1284,29 +1284,29 @@ async def _collect_pet_logic(page):
         ''')
         if serverid: 
             params_dict['serverid'] = serverid
-            print(f"✅ 服务器ID: {serverid}")
+            print(f" 服务器ID: {serverid}")
     except Exception as e:
-        print(f"❌ 获取服务器ID参数失败: {e}")
+        print(f" 获取服务器ID参数失败: {e}")
     
     # 跨服购买服务器ID
     try:
         cross_buy_serverid = await page.evaluate("() => document.getElementById('user_serverid')?.value || ''")
         if cross_buy_serverid: 
             params_dict['cross_buy_serverid'] = cross_buy_serverid
-            print(f"✅ 跨服购买服务器ID: {cross_buy_serverid}")
+            print(f" 跨服购买服务器ID: {cross_buy_serverid}")
     except Exception as e:
-        print(f"❌ 获取跨服购买服务器ID参数失败: {e}")
+        print(f" 获取跨服购买服务器ID参数失败: {e}")
     
     # 12. 特殊处理：技能数量不包含认证技能
     try:
         if 'skill_num' in params_dict and params_dict['skill_num'] > 0:
             if await page.evaluate('() => document.getElementById("no_include_sp_skill")?.checked'):
                 params_dict['no_include_sp_skill'] = 1
-                print("✅ 技能数量不包含认证技能")
+                print(" 技能数量不包含认证技能")
     except Exception as e:
-        print(f"❌ 获取技能数量特殊处理参数失败: {e}")
+        print(f" 获取技能数量特殊处理参数失败: {e}")
     
-    print(f"\n📊 召唤兽参数收集完成，共获取 {len(params_dict)} 个参数:")
+    print(f"\n 召唤兽参数收集完成，共获取 {len(params_dict)} 个参数:")
     for key, value in params_dict.items():
         print(f"  {key}: {value}")
     
@@ -1316,7 +1316,7 @@ async def _collect_normal_equip_logic(page):
     """普通装备参数收集的具体逻辑 - 直接模拟原始JavaScript逻辑"""
     params_dict = {}
     
-    print("🚀 开始收集参数...")
+    print(" 开始收集参数...")
     
 
     
@@ -1337,9 +1337,9 @@ async def _collect_normal_equip_logic(page):
         
         params_dict['level_min'] = level_values['min']
         params_dict['level_max'] = level_values['max']
-        print(f"✅ 等级范围: {level_values['min']}-{level_values['max']}")
+        print(f" 等级范围: {level_values['min']}-{level_values['max']}")
     except Exception as e:
-        print(f"❌ 获取等级范围参数失败: {e}")
+        print(f" 获取等级范围参数失败: {e}")
         params_dict['level_min'] = 60
         params_dict['level_max'] = 160
     
@@ -1454,16 +1454,16 @@ async def _collect_normal_equip_logic(page):
         ''')
             
             if selected_values == 'all_checked':
-                print(f"⚠️ {param_name}: 全选，跳过")
+                print(f" {param_name}: 全选，跳过")
                 continue
             elif selected_values:
                 params_dict[param_name] = selected_values
-                print(f"✅ {param_name}: {selected_values}")
+                print(f" {param_name}: {selected_values}")
             else:
-                print(f"⚠️ {param_name}: 无选择")
+                print(f" {param_name}: 无选择")
                 
         except Exception as e:
-            print(f"❌ 获取 {param_name} 参数失败: {e}")
+            print(f" 获取 {param_name} 参数失败: {e}")
             continue
     
     # 3. 特效模式
@@ -1477,9 +1477,9 @@ async def _collect_normal_equip_logic(page):
                 }
             ''')
             params_dict['special_mode'] = check_mode
-            print(f"✅ 特效模式: {check_mode}")
+            print(f" 特效模式: {check_mode}")
         except Exception as e:
-            print(f"❌ 获取特效模式参数失败: {e}")
+            print(f" 获取特效模式参数失败: {e}")
             params_dict['special_mode'] = 'and'
     
     # 4. 属性总和类型
@@ -1520,11 +1520,11 @@ async def _collect_normal_equip_logic(page):
         ''')
         if sum_attr_type:
             params_dict['sum_attr_type'] = sum_attr_type
-            print(f"✅ 属性总和类型: {sum_attr_type}")
+            print(f" 属性总和类型: {sum_attr_type}")
         else:
-            print("⚠️ 属性总和类型: 无选择")
+            print(" 属性总和类型: 无选择")
     except Exception as e:
-        print(f"❌ 获取属性总和类型参数失败: {e}")
+        print(f" 获取属性总和类型参数失败: {e}")
     
     # 5. 收集数值输入参数 - 完全按照原始JavaScript逻辑
     # 原JS: var txt_int_items = [['init_damage', 0, 10000, '初伤（包含命中）'], ...];
@@ -1577,19 +1577,19 @@ async def _collect_normal_equip_logic(page):
             ''')
             
             if element_value == 'invalid_number':
-                print(f"⚠️ {param_name}: 必须是整数")
+                print(f" {param_name}: 必须是整数")
                 continue
             elif element_value == 'out_of_range':
-                print(f"⚠️ {param_name}: 超出取值范围 {min_val}-{max_val}")
+                print(f" {param_name}: 超出取值范围 {min_val}-{max_val}")
                 continue
             elif element_value is not None:
                 params_dict[param_name] = element_value
-                print(f"✅ {param_name}: {element_value}")
+                print(f" {param_name}: {element_value}")
             else:
-                print(f"⚠️ {param_name}: 无值")
+                print(f" {param_name}: 无值")
                 
         except Exception as e:
-            print(f"❌ 获取 {param_name} 数值参数失败: {e}")
+            print(f" 获取 {param_name} 数值参数失败: {e}")
             continue
     
     # 6. 价格处理（原JS: if (arg['price_min']) arg['price_min'] = arg['price_min'] * 100;）
@@ -1607,11 +1607,11 @@ async def _collect_normal_equip_logic(page):
         star_checked = await page.evaluate("() => document.getElementById('chk_star')?.checked || false")
         if star_checked:
             params_dict['star'] = 1
-            print("✅ 星级: 已选择")
+            print(" 星级: 已选择")
         else:
-            print("⚠️ 星级: 未选择")
+            print(" 星级: 未选择")
     except Exception as e:
-        print(f"❌ 获取星级参数失败: {e}")
+        print(f" 获取星级参数失败: {e}")
     
     # 原JS: if (this.select_server.get_serverid()) arg['serverid'] = this.select_server.get_serverid();
     # 这个需要通过JavaScript对象，先尝试获取
@@ -1626,11 +1626,11 @@ async def _collect_normal_equip_logic(page):
         ''')
         if serverid: 
             params_dict['serverid'] = serverid
-            print(f"✅ 服务器ID: {serverid}")
+            print(f" 服务器ID: {serverid}")
         else:
-            print("⚠️ 服务器ID: 无值")
+            print(" 服务器ID: 无值")
     except Exception as e:
-        print(f"❌ 获取服务器ID参数失败: {e}")
+        print(f" 获取服务器ID参数失败: {e}")
 
     # 原JS: var suit_effect_ret = this.suit_value_getter.get_value(); if (suit_effect_ret.value) arg['suit_effect'] = suit_effect_ret.value;
     try:
@@ -1645,66 +1645,66 @@ async def _collect_normal_equip_logic(page):
         ''')
         if suit_effect: 
             params_dict['suit_effect'] = suit_effect
-            print(f"✅ 套装效果: {suit_effect}")
+            print(f" 套装效果: {suit_effect}")
         else:
-            print("⚠️ 套装效果: 无值")
+            print(" 套装效果: 无值")
     except Exception as e:
-        print(f"❌ 获取套装效果参数失败: {e}")
+        print(f" 获取套装效果参数失败: {e}")
     
     # 原JS: if ($("user_serverid") && $("user_serverid").value) arg['cross_buy_serverid'] = $("user_serverid").value;
     try:
         cross_buy_serverid = await page.evaluate("() => document.getElementById('user_serverid')?.value || ''")
         if cross_buy_serverid: 
             params_dict['cross_buy_serverid'] = cross_buy_serverid
-            print(f"✅ 跨服购买服务器ID: {cross_buy_serverid}")
+            print(f" 跨服购买服务器ID: {cross_buy_serverid}")
         else:
-            print("⚠️ 跨服购买服务器ID: 无值")
+            print(" 跨服购买服务器ID: 无值")
     except Exception as e:
-        print(f"❌ 获取跨服购买服务器ID参数失败: {e}")
+        print(f" 获取跨服购买服务器ID参数失败: {e}")
     
     # 原JS: if ($('for_role_race').value) arg['for_role_race'] = $('for_role_race').value;
     try:
         for_role_race = await page.evaluate("() => document.getElementById('for_role_race')?.value || ''")
         if for_role_race: 
             params_dict['for_role_race'] = for_role_race
-            print(f"✅ 角色种族: {for_role_race}")
+            print(f" 角色种族: {for_role_race}")
         else:
-            print("⚠️ 角色种族: 无值")
+            print(" 角色种族: 无值")
     except Exception as e:
-        print(f"❌ 获取角色种族参数失败: {e}")
+        print(f" 获取角色种族参数失败: {e}")
     
     # 原JS: if ($('for_role_sex').value) arg['for_role_sex'] = $('for_role_sex').value;
     try:
         for_role_sex = await page.evaluate("() => document.getElementById('for_role_sex')?.value || ''")
         if for_role_sex: 
             params_dict['for_role_sex'] = for_role_sex
-            print(f"✅ 角色性别: {for_role_sex}")
+            print(f" 角色性别: {for_role_sex}")
         else:
-            print("⚠️ 角色性别: 无值")
+            print(" 角色性别: 无值")
     except Exception as e:
-        print(f"❌ 获取角色性别参数失败: {e}")
+        print(f" 获取角色性别参数失败: {e}")
 
     # 原JS: var $160_attr = $('160_attr'); if ($160_attr.value) arg['160_attr'] = $160_attr.value;
     try:
         attr_160 = await page.evaluate("() => document.getElementById('160_attr')?.value || ''")
         if attr_160: 
             params_dict['160_attr'] = attr_160
-            print(f"✅ 160属性: {attr_160}")
+            print(f" 160属性: {attr_160}")
         else:
-            print("⚠️ 160属性: 无值")
+            print(" 160属性: 无值")
     except Exception as e:
-        print(f"❌ 获取160属性参数失败: {e}")
+        print(f" 获取160属性参数失败: {e}")
 
     # 原JS: if ($('chk_filter_hun_da_gem').checked) arg['filter_hun_da_gem'] = 1;
     try:
         hun_da_gem_checked = await page.evaluate("() => document.getElementById('chk_filter_hun_da_gem')?.checked || false")
         if hun_da_gem_checked:
             params_dict['filter_hun_da_gem'] = 1
-            print("✅ 混打宝石过滤: 已选择")
+            print(" 混打宝石过滤: 已选择")
         else:
-            print("⚠️ 混打宝石过滤: 未选择")
+            print(" 混打宝石过滤: 未选择")
     except Exception as e:
-        print(f"❌ 获取混打宝石过滤参数失败: {e}")
+        print(f" 获取混打宝石过滤参数失败: {e}")
 
     # 8. 熔炼属性处理 - 完全按照原始JavaScript逻辑
     
@@ -1727,12 +1727,12 @@ async def _collect_normal_equip_logic(page):
             has_attr_input = any(param in params_dict for param in attr_inputs)
             if has_attr_input:
                 params_dict['attr_with_melt'] = 1
-                print("✅ 属性熔炼: 包含熔炼")
+                print(" 属性熔炼: 包含熔炼")
         else:
             params_dict['attr_without_melt'] = 1
-            print("✅ 属性熔炼: 不包含熔炼")
+            print(" 属性熔炼: 不包含熔炼")
     except Exception as e:
-        print(f"❌ 获取属性熔炼参数失败: {e}")
+        print(f" 获取属性熔炼参数失败: {e}")
         params_dict['attr_without_melt'] = 1
     
     # 原JS属性总和熔炼逻辑:
@@ -1746,15 +1746,15 @@ async def _collect_normal_equip_logic(page):
         sum_attr_with_melt_checked = await page.evaluate("() => document.getElementById('chk_sum_attr_with_melt')?.checked ?? true")
         if sum_attr_with_melt_checked and 'sum_attr_value' in params_dict:
             params_dict['sum_attr_with_melt'] = 1
-            print("✅ 属性总和熔炼: 包含熔炼")
+            print(" 属性总和熔炼: 包含熔炼")
         else:
             params_dict['sum_attr_without_melt'] = 1
-            print("✅ 属性总和熔炼: 不包含熔炼")
+            print(" 属性总和熔炼: 不包含熔炼")
     except Exception as e:
-        print(f"❌ 获取属性总和熔炼参数失败: {e}")
+        print(f" 获取属性总和熔炼参数失败: {e}")
         params_dict['sum_attr_without_melt'] = 1
 
-    print(f"\n📊 参数收集完成，共获取 {len(params_dict)} 个参数:")
+    print(f"\n 参数收集完成，共获取 {len(params_dict)} 个参数:")
     for key, value in params_dict.items():
         print(f"  {key}: {value}")
 
@@ -1825,25 +1825,25 @@ async def main():
     print("\n--- 测试1: 浏览器模式 - 普通装备 ---")
     # params_normal = await get_equip_search_params_async(use_browser=True)
     # if params_normal:
-    #     print("✅ 成功获取普通装备参数")
+    #     print(" 成功获取普通装备参数")
     
     # 测试2: 不使用浏览器，加载默认或本地的灵饰参数
     print("\n--- 测试2: 本地/默认模式 - 灵饰 ---")
     params_lingshi = await get_lingshi_search_params_async(use_browser=False)
     if params_lingshi:
-        print(f"✅ 成功获取灵饰参数: \n{json.dumps(params_lingshi, ensure_ascii=False, indent=2)}")
+        print(f" 成功获取灵饰参数: \n{json.dumps(params_lingshi, ensure_ascii=False, indent=2)}")
 
     # 测试3: 同步接口
     print("\n--- 测试3: 同步接口 - 召唤兽装备 ---")
     params_pet_sync = get_pet_equip_search_params_sync(use_browser=False)
     if params_pet_sync:
-        print(f"✅ 成功获取召唤兽装备参数 (同步): \n{json.dumps(params_pet_sync, ensure_ascii=False, indent=2)}")
+        print(f" 成功获取召唤兽装备参数 (同步): \n{json.dumps(params_pet_sync, ensure_ascii=False, indent=2)}")
     
     # 测试4: 新增召唤兽搜索接口
     print("\n--- 测试4: 异步接口 - 召唤兽 ---")
     params_pet_async = await get_pet_search_params_async(use_browser=False)
     if params_pet_async:
-        print(f"✅ 成功获取召唤兽参数 (异步): \n{json.dumps(params_pet_async, ensure_ascii=False, indent=2)}")
+        print(f" 成功获取召唤兽参数 (异步): \n{json.dumps(params_pet_async, ensure_ascii=False, indent=2)}")
 
 
 # 角色搜索参数收集相关函数
@@ -1852,7 +1852,7 @@ async def _collect_role_logic(page):
     """角色参数收集的具体逻辑"""
     params_dict = {}
     
-    print("🚀 开始收集角色搜索参数...")
+    print(" 开始收集角色搜索参数...")
     
     try:
         # 直接读取隐藏字段 query_args 的值
@@ -1865,13 +1865,13 @@ async def _collect_role_logic(page):
                 import json
                 args_dict = json.loads(query_args_value)
                 params_dict.update(args_dict)
-                print(f"✅ 成功解析 query_args: {json.dumps(args_dict, ensure_ascii=False)}")
+                print(f" 成功解析 query_args: {json.dumps(args_dict, ensure_ascii=False)}")
             except json.JSONDecodeError as e:
-                print(f"❌ JSON 解析失败: {e}")
+                print(f" JSON 解析失败: {e}")
                 # 如果解析失败，使用默认参数
                 params_dict = DEFAULT_PARAMS['role'].copy()
         else:
-            print("⚠️ query_args 为空，使用默认参数")
+            print(" query_args 为空，使用默认参数")
             params_dict = DEFAULT_PARAMS['role'].copy()
         
         # 确保必要的字段存在
@@ -1884,14 +1884,14 @@ async def _collect_role_logic(page):
         if 'count' not in params_dict:
             params_dict['count'] = 15
         
-        print(f"\n📊 角色参数收集完成，共获取 {len(params_dict)} 个参数:")
+        print(f"\n 角色参数收集完成，共获取 {len(params_dict)} 个参数:")
         for key, value in params_dict.items():
             print(f"  {key}: {value}")
         
         return params_dict
         
     except Exception as e:
-        print(f"❌ 收集角色参数失败: {e}")
+        print(f" 收集角色参数失败: {e}")
         import traceback
         traceback.print_exc()
         # 返回默认参数

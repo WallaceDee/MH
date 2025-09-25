@@ -109,7 +109,7 @@ def analyze_differences(test_cases: List[Dict]) -> None:
                 print(f"\n📋 测试用例 {i}/{total_cases}")
                 print(f"召唤兽名称: {expected_result.get('pet_name', 'Unknown')}")
                 print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
-                print(f"❌ 发现 {len(differences)} 个差异:")
+                print(f" 发现 {len(differences)} 个差异:")
                 
                 # 按路径分组显示差异
                 diff_groups = {}
@@ -143,14 +143,14 @@ def analyze_differences(test_cases: List[Dict]) -> None:
             print(f"\n📋 测试用例 {i}/{total_cases}")
             print(f"召唤兽名称: {expected_result.get('pet_name', 'Unknown')}")
             print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
-            print(f"❌ 解析失败: {e}")
+            print(f" 解析失败: {e}")
             cases_with_diffs += 1
     
     print("\n" + "=" * 80)
-    print(f"📊 总结: {total_cases} 个测试用例中，{cases_matched} 个完全匹配，{cases_with_diffs} 个有差异")
+    print(f" 总结: {total_cases} 个测试用例中，{cases_matched} 个完全匹配，{cases_with_diffs} 个有差异")
     
     if cases_with_diffs > 0:
-        print("🔧 需要修复Python版本的解析逻辑")
+        print(" 需要修复Python版本的解析逻辑")
     else:
         print("🎉 所有测试用例都通过！")
 
@@ -221,7 +221,7 @@ def main():
     try:
         # 加载测试数据
         test_cases = load_test_data()
-        print(f"📁 加载了 {len(test_cases)} 个测试用例")
+        print(f" 加载了 {len(test_cases)} 个测试用例")
         
         # 分析差异
         analyze_differences(test_cases)
@@ -230,7 +230,7 @@ def main():
         detailed_analysis(test_cases)
         
     except Exception as e:
-        print(f"❌ 程序执行失败: {e}")
+        print(f" 程序执行失败: {e}")
         import traceback
         traceback.print_exc()
 
