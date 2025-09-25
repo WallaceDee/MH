@@ -49,6 +49,10 @@ from src.evaluator.constants.equipment_types import LINGSHI_KINDIDS, PET_EQUIP_K
 
 class CBGEquipSpider:
     def __init__(self):
+        # 修复编码问题
+        from src.spider.encoding_fix import fix_encoding
+        fix_encoding()
+        
         self.session = setup_session()
         self.base_url = 'https://xyq.cbg.163.com/cgi-bin/recommend.py'
         self.output_dir = self.create_output_dir()
@@ -80,9 +84,15 @@ class CBGEquipSpider:
         file_handler = logging.FileHandler(log_file, encoding='utf-8', mode='w')
         file_handler.setLevel(logging.INFO)
         
-        # 创建控制台处理器
+        # 创建控制台处理器 - 设置UTF-8编码避免GBK编码错误
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
+        # 设置控制台输出编码为UTF-8
+        if hasattr(console_handler.stream, 'reconfigure'):
+            try:
+                console_handler.stream.reconfigure(encoding='utf-8')
+            except Exception:
+                pass  # 如果设置失败，继续使用默认编码
         
         # 创建格式器
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -491,6 +501,25 @@ class CBGEquipSpider:
             self.logger.info("没有装备数据需要保存")
             return 0
         
+        try:
+            # 确保在Flask应用上下文中执行数据库操作
+            from flask import current_app
+            from src.app import create_app
+            
+            # 如果当前没有应用上下文，创建一个
+            if not current_app:
+                app = create_app()
+                with app.app_context():
+                    return self._save_equipment_data_with_context(equipments)
+            else:
+                return self._save_equipment_data_with_context(equipments)
+                
+        except Exception as e:
+            self.logger.error(f"保存装备数据到MySQL数据库失败: {e}")
+            return 0
+    
+    def _save_equipment_data_with_context(self, equipments):
+        """在Flask应用上下文中保存装备数据"""
         try:
             saved_count = 0
             skipped_count = 0

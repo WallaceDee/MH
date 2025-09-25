@@ -447,3 +447,64 @@ class EquipmentController:
         except Exception as e:
             logger.error(f"获取装备数据失败: {str(e)}")
             return {"error": f"获取装备数据失败: {str(e)}"}
+    
+    def incremental_update_cache(self, update_type: str = 'auto', last_update_time: Optional[str] = None) -> Dict:
+        """增量更新装备缓存"""
+        try:
+            from datetime import datetime
+            
+            result = self.service.incremental_update_cache(
+                update_type=update_type,
+                last_update_time=last_update_time
+            )
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"增量更新装备缓存失败: {str(e)}")
+            return {"error": f"增量更新装备缓存失败: {str(e)}"}
+    
+    def get_incremental_update_status(self) -> Dict:
+        """获取增量更新状态"""
+        try:
+            result = self.service.get_incremental_update_status()
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"获取增量更新状态失败: {str(e)}")
+            return {"error": f"获取增量更新状态失败: {str(e)}"}
+    
+    def auto_incremental_update(self) -> Dict:
+        """自动增量更新"""
+        try:
+            result = self.service.auto_incremental_update()
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"自动增量更新失败: {str(e)}")
+            return {"error": f"自动增量更新失败: {str(e)}"}
+    
+    def force_incremental_update(self) -> Dict:
+        """强制增量更新"""
+        try:
+            result = self.service.force_incremental_update()
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"强制增量更新失败: {str(e)}")
+            return {"error": f"强制增量更新失败: {str(e)}"}

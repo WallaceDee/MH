@@ -1237,3 +1237,34 @@ playwright._impl._errors.TargetClosedError: Target page, context or browser has 
 2025-09-16 00:35:35,131 - INFO - 数据收集已停止
 2025-09-16 00:35:35,131 - INFO - 数据收集已停止
 2025-09-16 00:35:35,131 - INFO - 数据收集已停止
+2025-09-25 18:12:09,772 - INFO - Spider实例将在需要时延迟创建
+2025-09-25 18:12:11,763 - INFO - 成功加载 41 个Cookie
+2025-09-25 18:12:11,827 - INFO - 已注入 41 个Cookie到浏览器上下文
+2025-09-25 18:12:12,090 - INFO - Playwright浏览器设置完成
+2025-09-25 18:12:12,112 - INFO - Playwright网络监听已设置
+2025-09-25 18:12:12,112 - INFO - 正在访问: https://xyq.cbg.163.com/cgi-bin/query.py?act=recommend_search&recommend_type=1
+2025-09-25 18:12:13,845 - INFO - 页面初始加载完成
+2025-09-25 18:12:16,380 - INFO - 捕获到类型（role）的响应: https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=1758795133835&act=recommd_by_role&server_id=132&areaid=54&server_name=%E8%A5%BF%E6%A0%85%E8%80%81%E8%A1%97&page=1&kindid=27&recommend_type=1&view_loc=reco_left&count=15 
+2025-09-25 18:12:16,380 - INFO - 开始创建角色spider实例...
+2025-09-25 18:12:18,071 - INFO - 装备特征提取器初始化成功
+2025-09-25 18:12:18,079 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 18:12:18,079 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 18:12:18,087 - INFO - Redis配置: host=47.86.33.98, port=6379, db=0, password=447363121
+2025-09-25 18:12:18,557 - INFO - Redis连接成功: 47.86.33.98:6379/0
+2025-09-25 18:12:18,627 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 18:12:18,635 - WARNING - 获取装备数据采集器实例失败: 'gbk' codec can't encode character '\u2705' in position 0: illegal multibyte sequence
+2025-09-25 18:12:18,635 - ERROR - 装备锚点估价器初始化失败: 'gbk' codec can't encode character '\u26a0' in position 0: illegal multibyte sequence
+2025-09-25 18:12:18,651 - INFO - 统一特征提取器初始化成功
+2025-09-25 18:12:18,660 - INFO - 装备特征提取器初始化成功
+2025-09-25 18:12:18,667 - INFO - 灵饰特征提取器初始化成功
+2025-09-25 18:12:18,667 - INFO - 宠物装备特征提取器初始化成功
+2025-09-25 18:12:18,731 - WARNING - 获取装备数据采集器实例失败: 'gbk' codec can't encode character '\u2705' in position 0: illegal multibyte sequence
+2025-09-25 18:12:18,731 - ERROR - 装备锚点估价器初始化失败: 'gbk' codec can't encode character '\u26a0' in position 0: illegal multibyte sequence
+2025-09-25 18:12:18,758 - INFO - 统一特征提取器初始化成功
+2025-09-25 18:12:19,130 - INFO - 角色特征提取器初始化成功
+2025-09-25 18:12:19,135 - ERROR - 角色市场锚定估价器初始化失败: 'gbk' codec can't encode character '\U0001f4be' in position 0: illegal multibyte sequence
+2025-09-25 18:12:19,164 - INFO - 宠物特征提取器初始化成功
+2025-09-25 18:12:19,237 - INFO - Redis缓存初始化成功，将使用Redis全量缓存模式
+2025-09-25 18:12:19,238 - INFO - 宠物锚点估价器初始化成功
+2025-09-25 18:12:19,251 - INFO - CBGSpider模块导入成功，开始实例化...
+2025-09-25 18:12:19,251 - INFO - 成功从config/cookies.txt加载Cookie
