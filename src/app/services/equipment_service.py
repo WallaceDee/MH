@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -355,30 +355,30 @@ class EquipmentService:
         3. `price` - 价格
         4. `equip_level` - 装备等级
 
-        ### 显示和样式字段
+        ### 🎨 显示和样式字段
         5. `highlight` - 亮点信息
         6. `dynamic_tags` - 动态标签
 
-        ### 宝石和强化字段
+        ### 💎 宝石和强化字段
         7. `gem_level` - 宝石等级
         8. `jinglian_level` - 精炼等级
         9. `xiang_qian_level` - 镶嵌等级
 
-        ### 特技和特效字段
+        ### ⚔️ 特技和特效字段
         10. `special_effect` - 特效
         11. `special_skill` - 特技
 
-                ### 套装和属性字段
+        ### ️ 套装和属性字段
         12. `suit_effect` - 套装效果
         13. `agg_added_attrs` - 附加属性
 
-        ### �� 伤害和属性字段
+        ###  伤害和属性字段
         14. `all_damage` - 总伤害
         15. `init_damage` - 初始伤害
         16. `damage` - 伤害（备用字段）
         17. `shanghai` - 伤害（备用字段）
 
-        ### �� 法术相关字段
+        ###  法术相关字段
         18. `init_wakan` - 初始灵力
         19. `magic_damage` - 法术伤害
         20. `init_defense` - 初始防御
@@ -392,7 +392,7 @@ class EquipmentService:
         26. `init_dex` - 初始敏捷
         27. `speed` - 速度（备用字段）
 
-        ### 🎯 功能操作字段
+        ###  功能操作字段
         28. `equip_sn` - 装备序列号（用于删除操作）
 
         29. `equip_type_desc` - 装备类型描述
@@ -1236,7 +1236,7 @@ class EquipmentService:
             from datetime import datetime
             
             # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector()
+            collector = EquipMarketDataCollector.get_instance()
             
             if update_type == 'auto':
                 # 自动检测并更新
@@ -1275,7 +1275,7 @@ class EquipmentService:
             from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
             
             # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector()
+            collector = EquipMarketDataCollector.get_instance()
             
             # 获取增量更新状态
             status = collector.get_incremental_update_status()
@@ -1292,7 +1292,7 @@ class EquipmentService:
             from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
             
             # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector()
+            collector = EquipMarketDataCollector.get_instance()
             
             # 执行自动增量更新
             success = collector.auto_incremental_update()
@@ -1318,7 +1318,7 @@ class EquipmentService:
             from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
             
             # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector()
+            collector = EquipMarketDataCollector.get_instance()
             
             # 执行强制增量更新
             success = collector.force_incremental_update()

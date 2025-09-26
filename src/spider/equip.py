@@ -14,6 +14,7 @@ import logging
 from datetime import datetime
 from urllib.parse import urlencode
 import asyncio
+import pandas as pd
 from playwright.async_api import async_playwright
 import re
 
@@ -80,15 +81,9 @@ class CBGEquipSpider:
         file_handler = logging.FileHandler(log_file, encoding='utf-8', mode='w')
         file_handler.setLevel(logging.INFO)
         
-        # 创建控制台处理器 - 设置UTF-8编码避免GBK编码错误
+        # 创建控制台处理器
         console_handler = logging.StreamHandler()
         console_handler.setLevel(logging.INFO)
-        # 设置控制台输出编码为UTF-8
-        if hasattr(console_handler.stream, 'reconfigure'):
-            try:
-                console_handler.stream.reconfigure(encoding='utf-8')
-            except Exception:
-                pass  # 如果设置失败，继续使用默认编码
         
         # 创建格式器
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -103,8 +98,8 @@ class CBGEquipSpider:
         logger.propagate = False
         
         # 测试日志写入
-        logger.info("CBG装备爬虫日志系统初始化完成")
-        logger.info(f"日志文件路径: {log_file}")
+        logger.info(" CBG装备爬虫日志系统初始化完成")
+        logger.info(f" 日志文件路径: {log_file}")
         
         return logger
 
@@ -515,8 +510,41 @@ class CBGEquipSpider:
             return 0
     
     def _save_equipment_data_with_context(self, equipments):
-        """在Flask应用上下文中保存装备数据"""
+        """在Flask应用上下文中保存装备数据 - 内存缓存 → MySQL → Redis"""
         try:
+            if not equipments:
+                self.logger.info("99999没有装备数据需要保存")
+                return 0
+            
+            self.logger.info(f"999999开始保存 {len(equipments)} 条装备数据...")
+            
+            # 第一步：立即发布DataFrame消息（超快响应）
+            if equipments:
+                try:
+                    from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
+                    
+                    # 将新数据转换为DataFrame
+                    new_data_df = pd.DataFrame(equipments)
+                    
+                    # 发布包含DataFrame的消息
+                    pubsub = get_redis_pubsub()
+                    message = {
+                        'type': MessageType.EQUIPMENT_DATA_SAVED,
+                        'data_count': len(equipments),
+                        'total_equipments': len(equipments),
+                        'action': 'add_dataframe'  # 标识这是添加DataFrame的操作
+                    }
+                    
+                    success = pubsub.publish_with_dataframe(Channel.EQUIPMENT_UPDATES, message, new_data_df)
+                    if success:
+                        self.logger.info("📢 已立即发布DataFrame消息到Redis")
+                    else:
+                        self.logger.warning("⚠️ 发布DataFrame消息失败")
+                        
+                except Exception as e:
+                    self.logger.warning(f"⚠️ 发布DataFrame消息失败: {e}")
+            
+            # 第二步：异步保存到MySQL数据库（较慢，但不影响响应速度）
             saved_count = 0
             skipped_count = 0
             
@@ -549,16 +577,122 @@ class CBGEquipSpider:
             db.session.commit()
             
             if saved_count > 0:
-                self.logger.info(f"成功保存 {saved_count} 条新装备数据到MySQL数据库")
+                self.logger.info(f" 成功保存 {saved_count} 条新装备数据到MySQL数据库")
             if skipped_count > 0:
-                self.logger.info(f"跳过 {skipped_count} 条已存在的装备数据")
-                
+                self.logger.info(f" 跳过 {skipped_count} 条已存在的装备数据")
+            
+            self.logger.info(f"🎉 装备数据保存流程完成: Redis → MySQL")
+            if saved_count > 0:
+                try:
+                    from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+                    collector = EquipMarketDataCollector.get_instance()
+                    
+                    # 将新数据转换为DataFrame并同步到Redis
+                    new_data_df = pd.DataFrame(equipments)
+                    redis_success = collector._sync_new_data_to_redis(new_data_df)
+                    
+                    if redis_success:
+                        self.logger.info("✅ 新数据已同步到Redis")
+                    else:
+                        self.logger.warning("⚠️ 新数据同步到Redis失败")
+                        
+                except Exception as e:
+                    self.logger.warning(f"⚠️ 同步新数据到Redis失败: {e}")
+            
+            self.logger.info(f" 装备数据保存流程完成: 内存缓存 → MySQL → Redis")
+            # 第四步：发布Redis消息通知其他进程
+            if saved_count > 0:
+                try:
+                    from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
+                    
+                    pubsub = get_redis_pubsub()
+                    message = {
+                        'type': MessageType.EQUIPMENT_DATA_SAVED,
+                        'data_count': saved_count,
+                        'total_equipments': len(equipments),
+                        'timestamp': datetime.now().isoformat()
+                    }
+                    
+                    success = pubsub.publish(Channel.EQUIPMENT_UPDATES, message)
+                    if success:
+                        self.logger.info("📢 已发布装备数据更新消息到Redis")
+                    else:
+                        self.logger.warning("⚠️ 发布装备数据更新消息失败")
+                        
+                except Exception as e:
+                    self.logger.warning(f"⚠️ 发布Redis消息失败: {e}")
+            
             return saved_count
             
         except Exception as e:
             db.session.rollback()
             self.logger.error(f"保存装备数据到MySQL数据库失败: {e}")
             return 0
+    
+    def _async_save_to_mysql(self, equipments):
+        """
+        异步保存装备数据到MySQL数据库（完全异步，不阻塞响应）
+        
+        Args:
+            equipments: 装备数据列表
+        """
+        try:
+            import threading
+            
+            def mysql_worker():
+                try:
+                    self.logger.info(f"🔄 开始异步保存 {len(equipments)} 条装备数据到MySQL...")
+                    
+                    # 在Flask应用上下文中保存数据
+                    from src.app import create_app
+                    app = create_app()
+                    
+                    with app.app_context():
+                        saved_count = 0
+                        skipped_count = 0
+                        
+                        for equipment_data in equipments:
+                            try:
+                                # 检查是否已存在相同的装备（根据equip_sn判断）
+                                equip_sn = equipment_data.get('equip_sn')
+                                if equip_sn:
+                                    existing = db.session.query(Equipment).filter_by(equip_sn=equip_sn).first()
+                                    if existing:
+                                        # 更新现有记录
+                                        for key, value in equipment_data.items():
+                                            if hasattr(existing, key):
+                                                setattr(existing, key, value)
+                                        # 更新时间戳
+                                        existing.update_time = datetime.now()
+                                        skipped_count += 1
+                                        continue
+                                
+                                # 创建新记录
+                                equipment = Equipment(**equipment_data)
+                                db.session.add(equipment)
+                                saved_count += 1
+                                
+                            except Exception as e:
+                                self.logger.error(f"异步保存单个装备数据失败: {e}")
+                                continue
+                        
+                        # 提交事务
+                        db.session.commit()
+                        
+                        if saved_count > 0:
+                            self.logger.info(f"✅ 异步保存 {saved_count} 条新装备数据到MySQL数据库")
+                        if skipped_count > 0:
+                            self.logger.info(f"✅ 异步跳过 {skipped_count} 条已存在的装备数据")
+                        
+                except Exception as e:
+                    self.logger.error(f"❌ 异步保存到MySQL失败: {e}")
+            
+            # 启动异步线程
+            mysql_thread = threading.Thread(target=mysql_worker, daemon=True)
+            mysql_thread.start()
+            
+        except Exception as e:
+            self.logger.error(f"❌ 启动异步MySQL保存线程失败: {e}")
 
     async def fetch_page(self, page=1, search_params=None, search_type='overall_search_equip'):
         """
@@ -660,7 +794,7 @@ class CBGEquipSpider:
             self.logger.error(f"未知的装备类型: {equip_type}")
             return
 
-        self.logger.info(f"开始 {equip_type} 装备爬取，最大页数: {max_pages}")
+        self.logger.info(f" 开始 {equip_type} 装备爬取，最大页数: {max_pages}")
 
         # 获取参数
         params_getter_async_map = {
@@ -684,11 +818,11 @@ class CBGEquipSpider:
                 else:
                     search_type = search_type.replace('overall_', '')
             search_params = cached_params
-            self.logger.info(f"使用传入的缓存参数: {len(search_params)} 个")
+            self.logger.info(f" 使用传入的缓存参数: {len(search_params)} 个")
         else:
             search_params = await params_getter_async_map[equip_type](use_browser=use_browser)
             if search_params:
-                self.logger.info(f"使用搜索参数: {len(search_params)} 个")
+                self.logger.info(f" 使用搜索参数: {len(search_params)} 个")
 
         if not search_params:
             self.logger.error(f"无法获取 {equip_type} 装备的搜索参数，爬取中止")
@@ -708,7 +842,7 @@ class CBGEquipSpider:
                 equipments = await self.fetch_page(page_num, search_params, search_type)
                 
                 if equipments is None:
-                    self.logger.warning(f"第 {page_num} 页数据获取失败，尝试重试...")
+                    self.logger.warning(f" 第 {page_num} 页数据获取失败，尝试重试...")
                     await asyncio.sleep(5) # 等待5秒重试
                     equipments = await self.fetch_page(page_num, search_params, search_type)
 
@@ -726,14 +860,14 @@ class CBGEquipSpider:
                         seller_nickname = equipment.get('seller_nickname', '未知卖家')
                         self.logger.info(f"￥{price} - {equip_name}({level}级) - {server_name} - {seller_nickname}")
                     
-                    self.logger.info(f"第 {page_num} 页完成，获取 {len(equipments)} 条装备，保存 {saved_count} 条")
+                    self.logger.info(f" 第 {page_num} 页完成，获取 {len(equipments)} 条装备，保存 {saved_count} 条")
                     
                     # 判断数据条数是否不足10条，如果不足则说明没有下一页
                     if len(equipments) < 10:
-                        self.logger.info(f"第 {page_num} 页数据条数({len(equipments)})不足10条，判断为最后一页，爬取结束")
+                        self.logger.info(f"📄 第 {page_num} 页数据条数({len(equipments)})不足10条，判断为最后一页，爬取结束")
                         break
                 else:
-                    self.logger.info(f"第 {page_num} 页没有数据，爬取结束")
+                    self.logger.info(f"📄 第 {page_num} 页没有数据，爬取结束")
                     break 
 
                 # 添加延迟
@@ -748,7 +882,7 @@ class CBGEquipSpider:
                 traceback.print_exc()
                 break
 
-        self.logger.info(f"{equip_type} 装备爬取完成！成功页数: {successful_pages}/{max_pages}, 总装备数: {total_saved_count}")
+        self.logger.info(f" {equip_type} 装备爬取完成！成功页数: {successful_pages}/{max_pages}, 总装备数: {total_saved_count}")
         
         # 强制刷新所有日志缓冲区，确保日志被完整写入文件
         import sys
@@ -799,9 +933,9 @@ def main():
                 use_browser=use_browser_for_test, 
                 equip_type=equip_type_to_test
             )
-            print(f"--- {equip_type_to_test} 装备爬虫测试完成 ---")
+            print(f"---  {equip_type_to_test} 装备爬虫测试完成 ---")
         except Exception as e:
-            print(f"--- {equip_type_to_test} 装备爬虫测试失败: {e} ---")
+            print(f"---  {equip_type_to_test} 装备爬虫测试失败: {e} ---")
             import traceback
             traceback.print_exc()
     

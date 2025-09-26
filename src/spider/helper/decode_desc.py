@@ -18,7 +18,7 @@ from datetime import datetime
 
 # 添加src目录到路径以便导入LPCHelper
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
-from utils.lpc_helper import LPCHelper
+from src.utils.lpc_helper import LPCHelper
 
 logger = logging.getLogger(__name__)
 

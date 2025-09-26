@@ -390,7 +390,7 @@ class EquipAnchorEvaluator(BaseValuator):
         self.logger = logging.getLogger(__name__)
 
         # 初始化装备市场数据采集器 - 使用单例模式确保实例一致
-        self.market_collector = EquipMarketDataCollector()
+        self.market_collector = EquipMarketDataCollector.get_instance()
         print(f"EquipAnchorEvaluator 使用市场数据采集器实例ID: {id(self.market_collector)}")
 
         # 初始化灵饰装备市场数据采集器

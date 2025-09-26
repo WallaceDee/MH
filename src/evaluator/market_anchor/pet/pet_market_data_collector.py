@@ -463,7 +463,7 @@ class PetMarketDataCollector:
                     self._refresh_message = f"检查缓存失败: {str(e)}"
                     # 继续执行重新加载
             
-            print("🧪 开始从MySQL加载宠物数据到Redis...")
+            print(" 开始从MySQL加载宠物数据到Redis...")
             
             # 从数据库加载全量数据
             from src.database import db
@@ -640,7 +640,7 @@ class PetMarketDataCollector:
             
             if success:
                 # 新数据存储成功，开始无缝切换
-                print("🔄 开始无缝切换：将临时数据切换为正式数据...")
+                print(" 开始无缝切换：将临时数据切换为正式数据...")
                 
                 # 1. 先清理旧的正式缓存数据
                 print("清理旧的正式缓存数据...")
@@ -848,7 +848,7 @@ class PetMarketDataCollector:
 
     def refresh_full_cache(self) -> bool:
         """手动刷新全量缓存"""
-        print("🔄 手动刷新宠物全量缓存...")
+        print(" 手动刷新宠物全量缓存...")
         self._full_data_cache = None  # 清空内存缓存
         return self._load_full_data_to_redis(force_refresh=True)
     

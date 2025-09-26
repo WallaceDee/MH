@@ -183,7 +183,7 @@ class PetService:
                  warning_rate: Optional[float] = 0.4,
                  sort_by: Optional[str] = 'price', sort_order: Optional[str] = 'asc') -> Dict:
         """获取分页的宠物列表
-            🎯 直接使用的字段（从后端API返回的数据）
+             直接使用的字段（从后端API返回的数据）
             基础信息字段：
             eid - 宠物eid
             equip_sn -  宠物序列号

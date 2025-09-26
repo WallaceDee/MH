@@ -106,7 +106,7 @@ def analyze_differences(test_cases: List[Dict]) -> None:
             
             if differences:
                 cases_with_diffs += 1
-                print(f"\n📋 测试用例 {i}/{total_cases}")
+                print(f"\n 测试用例 {i}/{total_cases}")
                 print(f"召唤兽名称: {expected_result.get('pet_name', 'Unknown')}")
                 print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
                 print(f" 发现 {len(differences)} 个差异:")
@@ -140,7 +140,7 @@ def analyze_differences(test_cases: List[Dict]) -> None:
                 # 完全匹配时不输出任何日志
                 
         except Exception as e:
-            print(f"\n📋 测试用例 {i}/{total_cases}")
+            print(f"\n 测试用例 {i}/{total_cases}")
             print(f"召唤兽名称: {expected_result.get('pet_name', 'Unknown')}")
             print(f"召唤兽ID: {expected_result.get('type_id', 'Unknown')}")
             print(f" 解析失败: {e}")
@@ -152,7 +152,7 @@ def analyze_differences(test_cases: List[Dict]) -> None:
     if cases_with_diffs > 0:
         print(" 需要修复Python版本的解析逻辑")
     else:
-        print("🎉 所有测试用例都通过！")
+        print(" 所有测试用例都通过！")
 
 def detailed_analysis(test_cases: List[Dict]) -> None:
     """详细分析第一个有差异的测试用例"""

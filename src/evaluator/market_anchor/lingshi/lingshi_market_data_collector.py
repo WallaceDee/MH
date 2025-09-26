@@ -42,7 +42,7 @@ class LingshiMarketDataCollector:
         """初始化装备数据采集器实例"""
         try:
             from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-            self.equip_collector = EquipMarketDataCollector()
+            self.equip_collector = EquipMarketDataCollector.get_instance()
             print(" 成功获取装备数据采集器实例，可共享缓存")
         except Exception as e:
             self.logger.warning(f"获取装备数据采集器实例失败: {e}")

@@ -448,8 +448,8 @@ def refresh_equipment_data():
         # 获取请求参数
         data = request.get_json() or {}
         
-        # 获取装备数据采集器实例
-        collector = EquipMarketDataCollector()
+        # 获取装备数据采集器实例（使用单例模式）
+        collector = EquipMarketDataCollector.get_instance()
         
         # 检查是否正在刷新
         if collector._refresh_status == "running":
@@ -497,16 +497,40 @@ def get_equipment_market_data_status():
     try:
         from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
         
-        # 获取装备数据采集器实例
-        collector = EquipMarketDataCollector()
+        import time
+        
+        # 获取装备数据采集器实例（使用单例模式）
+        start_time = time.time()
+        collector = EquipMarketDataCollector.get_instance()
+        instance_time = (time.time() - start_time) * 1000
         
         # 添加调试信息
-        print(f"🔍 装备市场数据状态 - 实例ID: {id(collector)}")
+        print(f"🔍 装备市场数据状态 - 实例ID: {id(collector)} (耗时: {instance_time:.2f}ms)")
         print(f"🔍 内存缓存状态: {collector._full_data_cache is not None and not collector._full_data_cache.empty if collector._full_data_cache is not None else False}")
         print(f"🔍 刷新状态: {collector._refresh_status}")
         
         # 获取MySQL装备数据总数
+        mysql_start = time.time()
         mysql_count = collector._get_mysql_equipments_count()
+        mysql_time = (time.time() - mysql_start) * 1000
+        print(f"🔍 MySQL查询耗时: {mysql_time:.2f}ms")
+        
+        # 获取Redis数据总数（从元数据获取，不加载实际数据）
+        redis_count = 0
+        redis_start = time.time()
+        try:
+            if collector.redis_cache and collector.redis_cache.is_available():
+                # 从Redis元数据获取数据总数
+                metadata = collector.redis_cache.get(f"{collector._full_cache_key}:meta")
+                redis_count = metadata.get('total_rows', 0)
+                print(f"🔍 Redis缓存数据量（元数据）: {redis_count} 条")
+            else:
+                print("🔍 Redis不可用")
+        except Exception as e:
+            print(f"🔍 获取Redis数据总数失败: {e}")
+        finally:
+            redis_time = (time.time() - redis_start) * 1000
+            print(f"🔍 Redis查询耗时: {redis_time:.2f}ms")
         
         # 获取基本状态信息
         status_info = {
@@ -516,7 +540,8 @@ def get_equipment_market_data_status():
             "data_count": len(collector._full_data_cache) if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
             "data_columns": list(collector._full_data_cache.columns) if collector._full_data_cache is not None and not collector._full_data_cache.empty else [],
             "memory_usage_mb": collector._full_data_cache.memory_usage(deep=True).sum() / 1024 / 1024 if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
-            "mysql_data_count": mysql_count
+            "mysql_data_count": mysql_count,
+            "redis_data_count": redis_count
         }
         
         # 添加刷新进度信息

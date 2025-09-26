@@ -3,7 +3,10 @@ from typing import Dict, Any, List, Optional, Union, Tuple
 import logging
 import pandas as pd
 import os
-
+from src.evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
+from src.database import db
+from src.models.equipment import Equipment
+from sqlalchemy import and_, or_, func, text
 # 从配置文件加载常量
 from .constant import (
     get_agility_suits, get_magic_suits, get_high_value_suits,
@@ -37,25 +40,6 @@ LOW_VALUE_EFFECTS = get_low_value_effects()
 # 添加项目根目录到Python路径，解决模块导入问题
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-try:
-    from ...feature_extractor.equip_feature_extractor import EquipFeatureExtractor
-    from src.database import db
-    from src.models.equipment import Equipment
-    from sqlalchemy import and_, or_, func, text
-except ImportError:
-    try:
-        from src.evaluator.feature_extractor.equip_feature_extractor import EquipFeatureExtractor
-        from src.database import db
-        from src.models.equipment import Equipment
-        from sqlalchemy import and_, or_, func, text
-    except ImportError:
-        # 如果都导入失败，创建一个简单的占位符
-        class EquipFeatureExtractor:
-            def __init__(self):
-                pass
-
-            def extract_features(self, equip_data):
-                return {}
 
 
 class EquipMarketDataCollector:
@@ -81,6 +65,18 @@ class EquipMarketDataCollector:
                 print("使用现有的 EquipMarketDataCollector 单例实例")
             
             return cls._instance
+    
+    @classmethod
+    def get_instance(cls):
+        """获取单例实例的类方法（推荐使用）"""
+        if cls._instance is None:
+            return cls()
+        return cls._instance
+    
+    @classmethod
+    def instance(cls):
+        """获取单例实例的类方法（别名，更简洁）"""
+        return cls.get_instance()
 
     def __init__(self):
         """
@@ -125,6 +121,17 @@ class EquipMarketDataCollector:
         
         # MySQL数据统计
         self.mysql_data_count = 0  # MySQL中equipments表的总记录数
+        
+        # 初始化Redis发布/订阅，用于跨进程数据同步
+        try:
+            from src.utils.redis_pubsub import get_redis_pubsub, Channel
+            self.redis_pubsub = get_redis_pubsub()
+            # 订阅装备数据更新频道
+            self.redis_pubsub.subscribe(Channel.EQUIPMENT_UPDATES, self._handle_equipment_update_message)
+            self.logger.info("✅ Redis发布/订阅初始化成功，已订阅装备数据更新频道")
+        except Exception as e:
+            self.logger.warning(f"⚠️ Redis发布/订阅初始化失败: {e}")
+            self.redis_pubsub = None
         
         self._initialized = True
         cache_mode = "永不过期模式" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时过期"
@@ -217,7 +224,7 @@ class EquipMarketDataCollector:
                     self._refresh_message = f"检查缓存失败: {str(e)}"
                     # 继续执行重新加载
             
-            print("🧪 [临时测试模式] 开始从MySQL加载装备数据到Redis...")
+            print(" [临时测试模式] 开始从MySQL加载装备数据到Redis...")
             
             # 从数据库加载全量数据
             from src.database import db
@@ -401,7 +408,7 @@ class EquipMarketDataCollector:
             
             if success:
                 # 新数据存储成功，开始无缝切换
-                print("🔄 开始无缝切换：将临时数据切换为正式数据...")
+                print(" 开始无缝切换：将临时数据切换为正式数据...")
                 
                 # 1. 先清理旧的正式缓存数据
                 print("清理旧的正式缓存数据...")
@@ -1170,7 +1177,7 @@ class EquipMarketDataCollector:
 
     def refresh_full_cache(self) -> bool:
         """手动刷新全量缓存"""
-        print("🔄 手动刷新装备全量缓存...")
+        print(" 手动刷新装备全量缓存...")
         self._full_data_cache = None  # 清空内存缓存
         return self._load_full_data_to_redis(force_refresh=True)
     
@@ -1205,7 +1212,7 @@ class EquipMarketDataCollector:
             bool: 是否更新成功
         """
         try:
-            print("🔄 开始增量更新装备缓存...")
+            print(" 开始增量更新装备缓存...")
             
             if not self.redis_cache:
                 print(" Redis不可用，无法进行增量更新")
@@ -1311,6 +1318,13 @@ class EquipMarketDataCollector:
                 if pd.notna(max_time):
                     print(f"📅 从Redis数据获取最后更新时间: {max_time}")
                     return max_time.to_pydatetime()
+            
+            # 如果Redis中也没有数据，尝试从MySQL获取最新时间
+            print("📅 Redis中没有数据，尝试从MySQL获取最新时间...")
+            mysql_latest_time = self._get_mysql_latest_update_time()
+            if mysql_latest_time:
+                print(f"📅 从MySQL获取最新时间: {mysql_latest_time}")
+                return mysql_latest_time
             
             print("📅 未找到最后更新时间")
             return None
@@ -1425,10 +1439,10 @@ class EquipMarketDataCollector:
                 merged_data = existing_data
             else:
                 # 使用equip_sn作为主键进行合并
-                # 先删除现有数据中与新数据重复的记录
-                existing_data = existing_data[~existing_data['equip_sn'].isin(new_data['equip_sn'])]
+                # 先删除现有数据中与新数据重复的记录（创建副本，不修改原数据）
+                existing_data_filtered = existing_data[~existing_data['equip_sn'].isin(new_data['equip_sn'])]
                 # 然后合并
-                merged_data = pd.concat([existing_data, new_data], ignore_index=True)
+                merged_data = pd.concat([existing_data_filtered, new_data], ignore_index=True)
             
             print(f"数据合并完成: 现有 {len(existing_data)} 条 + 新增 {len(new_data)} 条 = 总计 {len(merged_data)} 条")
             return merged_data
@@ -1439,7 +1453,7 @@ class EquipMarketDataCollector:
     
     def _get_existing_data_from_memory(self) -> Optional[pd.DataFrame]:
         """
-        从内存缓存获取现有数据
+        从内存缓存获取现有数据，如果为空则尝试从Redis加载
         
         Returns:
             Optional[pd.DataFrame]: 内存缓存中的数据，如果不存在则返回None
@@ -1447,10 +1461,81 @@ class EquipMarketDataCollector:
         try:
             if self._full_data_cache is not None and not self._full_data_cache.empty:
                 return self._full_data_cache
-            return None
+            
+            # 如果内存缓存为空，尝试从Redis加载数据到内存缓存
+            print("📊 内存缓存为空，尝试从Redis加载数据到内存缓存...")
+            try:
+                redis_data = self._get_full_data_from_redis()
+                if redis_data is not None and not redis_data.empty:
+                    self._full_data_cache = redis_data
+                    print(f"📊 成功从Redis加载数据到内存缓存，数据量: {len(redis_data)} 条")
+                    return redis_data
+                else:
+                    print("📊 Redis缓存也为空，尝试从MySQL获取最新数据...")
+                    # 如果Redis也没有数据，尝试从MySQL获取最新数据
+                    try:
+                        mysql_data = self._get_mysql_latest_data()
+                        if mysql_data is not None and not mysql_data.empty:
+                            self._full_data_cache = mysql_data
+                            print(f"📊 成功从MySQL加载数据到内存缓存，数据量: {len(mysql_data)} 条")
+                            return mysql_data
+                        else:
+                            print("📊 MySQL中也没有数据")
+                            return None
+                    except Exception as mysql_e:
+                        print(f"📊 从MySQL加载数据失败: {mysql_e}")
+                        return None
+            except Exception as e:
+                print(f"📊 从Redis加载数据失败: {e}")
+                return None
+                
         except Exception as e:
             self.logger.warning(f"获取内存缓存数据失败: {e}")
             return None
+    
+    def add_new_equipment_data(self, new_equipments: List[Dict[str, Any]]) -> bool:
+        """
+        添加新的装备数据到内存缓存
+        
+        Args:
+            new_equipments: 新的装备数据列表
+            
+        Returns:
+            bool: 是否添加成功
+        """
+        try:
+            if not new_equipments:
+                print(" 没有新装备数据需要添加")
+                return True
+            
+            print(f" 开始添加 {len(new_equipments)} 条新装备数据到内存缓存...")
+            
+            # 将新数据转换为DataFrame
+            new_data_df = pd.DataFrame(new_equipments)
+            
+            # 确保有equip_sn列
+            if 'equip_sn' not in new_data_df.columns:
+                print(" 新数据缺少equip_sn列，无法添加")
+                return False
+            
+            # 检查当前内存缓存状态
+            if self._full_data_cache is not None and not self._full_data_cache.empty:
+                # 如果内存缓存有数据，进行合并
+                print(f" 内存缓存已有数据 {len(self._full_data_cache)} 条，开始合并...")
+                merged_data = self._merge_incremental_data(self._full_data_cache, new_data_df)
+                self._full_data_cache = merged_data
+                print(f" 内存缓存已更新，数据量: {len(merged_data)} 条")
+            else:
+                # 如果内存缓存为空，直接使用新数据
+                print(" 内存缓存为空，直接使用新数据")
+                self._full_data_cache = new_data_df
+                print(f" 内存缓存已更新，数据量: {len(new_data_df)} 条")
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"添加新装备数据到内存缓存失败: {e}")
+            return False
     
     def _sync_memory_cache_to_redis(self, data: pd.DataFrame) -> bool:
         """
@@ -1617,6 +1702,57 @@ class EquipMarketDataCollector:
             
         except Exception as e:
             self.logger.error(f"获取MySQL最新时间失败: {e}")
+            return None
+    
+    def _get_mysql_latest_data(self, limit: int = 1000) -> Optional[pd.DataFrame]:
+        """
+        从MySQL获取最新的装备数据
+        
+        Args:
+            limit: 获取数据的数量限制
+            
+        Returns:
+            Optional[pd.DataFrame]: 最新的装备数据
+        """
+        try:
+            from src.database import db
+            from src.models.equipment import Equipment
+            from flask import current_app
+            from src.app import create_app
+            
+            # 确保在Flask应用上下文中
+            if not current_app:
+                app = create_app()
+                with app.app_context():
+                    return self._get_mysql_latest_data(limit)
+            
+            # 查询最新的装备数据
+            equipments = db.session.query(Equipment).order_by(Equipment.update_time.desc()).limit(limit).all()
+            
+            if not equipments:
+                return None
+            
+            # 转换为DataFrame
+            data_list = []
+            for equipment in equipments:
+                equipment_dict = {
+                    'equip_sn': equipment.equip_sn,
+                    'price': equipment.price,
+                    'server_name': equipment.server_name,
+                    'equip_name': equipment.equip_name,
+                    'equip_level': equipment.equip_level,
+                    'kindid': equipment.kindid,
+                    'update_time': equipment.update_time,
+                    'create_time': equipment.create_time
+                }
+                data_list.append(equipment_dict)
+            
+            df = pd.DataFrame(data_list)
+            print(f"📊 从MySQL获取最新数据: {len(df)} 条")
+            return df
+            
+        except Exception as e:
+            self.logger.warning(f"获取MySQL最新数据失败: {e}")
             return None
     
     def _estimate_new_data_count(self, last_update_time: datetime) -> int:
@@ -2178,3 +2314,180 @@ class EquipMarketDataCollector:
         except Exception as e:
             self.logger.error(f"按属性分类获取市场数据失败: {e}")
             return pd.DataFrame()
+    
+    def _handle_equipment_update_message(self, message: Dict[str, Any]):
+        """
+        处理装备数据更新消息（跨进程通信）
+        
+        Args:
+            message: 接收到的消息
+        """
+        try:
+            message_type = message.get('type')
+            timestamp = message.get('timestamp')
+            action = message.get('action', 'refresh')
+            
+            self.logger.info(f"📨 收到装备数据更新消息: {message_type}, 时间: {timestamp}, 操作: {action}")
+            
+            if message_type == 'equipment_data_saved':
+                data_count = message.get('data_count', 0)
+                total_equipments = message.get('total_equipments', 0)
+                
+                self.logger.info(f"📨 爬虫进程保存了 {data_count} 条新装备数据，总处理 {total_equipments} 条")
+                
+                if action == 'add_dataframe' and 'dataframe' in message:
+                    # 直接更新内存缓存，然后异步同步到Redis
+                    dataframe = message['dataframe']
+                    self.logger.info(f"📨 直接更新内存缓存，数据量: {len(dataframe)} 条")
+                    
+                    # 直接更新内存缓存
+                    success = self._update_memory_cache_with_dataframe(dataframe)
+                    
+                    if success:
+                        # 异步同步到Redis（不阻塞）
+                        self._async_sync_to_redis()
+                    else:
+                        # 如果直接更新失败，回退到从Redis刷新
+                        self._refresh_memory_cache_from_redis()
+                else:
+                    # 传统方式：从Redis刷新内存缓存
+                    self._refresh_memory_cache_from_redis()
+                
+        except Exception as e:
+            self.logger.error(f"❌ 处理装备数据更新消息失败: {e}")
+    
+    def _update_memory_cache_with_dataframe(self, new_dataframe: pd.DataFrame) -> bool:
+        """
+        直接使用DataFrame更新内存缓存（超快响应）
+        
+        Args:
+            new_dataframe: 新的装备数据DataFrame
+            
+        Returns:
+            bool: 是否更新成功
+        """
+        try:
+            if new_dataframe.empty:
+                self.logger.info("📊 没有新数据需要更新到内存缓存")
+                return True
+            
+            self.logger.info(f"🔄 开始直接更新内存缓存，新数据量: {len(new_dataframe)} 条")
+            
+            # 如果内存缓存为空，直接使用新数据
+            if self._full_data_cache is None or self._full_data_cache.empty:
+                self._full_data_cache = new_dataframe.copy()
+                self.logger.info(f"✅ 内存缓存已直接更新（首次），数据量: {len(new_dataframe)} 条")
+                return True
+            
+            # 合并现有数据和新数据
+            merged_data = self._merge_incremental_data(self._full_data_cache, new_dataframe)
+            
+            # 更新内存缓存
+            self._full_data_cache = merged_data
+            
+            self.logger.info(f"✅ 内存缓存已直接更新，数据量: {len(self._full_data_cache)} 条")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"❌ 直接更新内存缓存失败: {e}")
+            return False
+    
+    def _async_sync_to_redis(self):
+        """
+        异步同步内存缓存到Redis（不阻塞主线程）
+        """
+        try:
+            import threading
+            
+            def sync_worker():
+                try:
+                    self.logger.info("🔄 开始异步同步内存缓存到Redis...")
+                    success = self._sync_memory_cache_to_redis()
+                    if success:
+                        self.logger.info("✅ 异步同步到Redis完成")
+                    else:
+                        self.logger.warning("⚠️ 异步同步到Redis失败")
+                except Exception as e:
+                    self.logger.error(f"❌ 异步同步到Redis失败: {e}")
+            
+            # 启动异步线程
+            sync_thread = threading.Thread(target=sync_worker, daemon=True)
+            sync_thread.start()
+            
+        except Exception as e:
+            self.logger.error(f"❌ 启动异步同步线程失败: {e}")
+    
+    def _refresh_memory_cache_from_redis(self):
+        """
+        从Redis刷新内存缓存（跨进程数据同步）
+        """
+        try:
+            if not self.redis_cache:
+                self.logger.warning("⚠️ Redis不可用，无法刷新内存缓存")
+                return False
+            
+            self.logger.info("🔄 开始从Redis刷新内存缓存...")
+            
+            # 从Redis获取最新数据
+            cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+            
+            if cached_data is not None and not cached_data.empty:
+                # 更新内存缓存
+                self._full_data_cache = cached_data
+                self.logger.info(f"✅ 内存缓存已从Redis刷新，数据量: {len(cached_data)} 条")
+                return True
+            else:
+                self.logger.warning("⚠️ Redis中没有数据，无法刷新内存缓存")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"❌ 从Redis刷新内存缓存失败: {e}")
+            return False
+    
+    def _sync_new_data_to_redis(self, new_data: pd.DataFrame) -> bool:
+        """
+        将新数据同步到Redis（不操作内存缓存）
+        这个方法专门用于爬虫进程，避免影响API进程的内存缓存
+        
+        Args:
+            new_data: 新的装备数据DataFrame
+            
+        Returns:
+            bool: 是否同步成功
+        """
+        try:
+            if not self.redis_cache or not self.redis_cache.is_available():
+                self.logger.warning("⚠️ Redis不可用，无法同步新数据")
+                return False
+            
+            if new_data.empty:
+                self.logger.info("📊 没有新数据需要同步到Redis")
+                return True
+            
+            self.logger.info(f"🔄 开始将 {len(new_data)} 条新数据同步到Redis...")
+            
+            # 从Redis获取现有数据
+            existing_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+            
+            if existing_data is not None and not existing_data.empty:
+                # 合并现有数据和新数据
+                merged_data = self._merge_incremental_data(existing_data, new_data)
+                self.logger.info(f"📊 数据合并完成: 现有 {len(existing_data)} 条 + 新增 {len(new_data)} 条 = 总计 {len(merged_data)} 条")
+            else:
+                # 如果Redis中没有数据，直接使用新数据
+                merged_data = new_data
+                self.logger.info(f"📊 Redis中没有现有数据，直接使用新数据: {len(merged_data)} 条")
+            
+            # 将合并后的数据同步到Redis
+            success = self.redis_cache.set_chunked_data(self._full_cache_key, merged_data)
+            
+            if success:
+                self.logger.info(f"✅ 新数据已成功同步到Redis，总数据量: {len(merged_data)} 条")
+                return True
+            else:
+                self.logger.error("❌ 新数据同步到Redis失败")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"❌ 同步新数据到Redis失败: {e}")
+            return False

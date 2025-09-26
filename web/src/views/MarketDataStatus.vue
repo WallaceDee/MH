@@ -201,6 +201,10 @@
                     <span class="value">{{ equipmentMarketDataStatus.mysql_data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
+                    <span class="label">Redis总数:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.redis_data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
                     <span class="label">内存占用:</span>
                     <span class="value">{{ (equipmentMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
                   </div>
@@ -866,7 +870,7 @@ export default {
           // systemApi.getEquipmentIncrementalUpdateStatus().catch(() => ({ code: 500, data: {} })),
           systemApi.getRedisStatus().catch(() => ({ code: 500, data: {} }))
         ])
-
+        // equipmentIncrementalStatusResponse,
         if (roleResponse.code === 200) {
           this.status = roleResponse.data || {}
         }
@@ -879,9 +883,9 @@ export default {
           this.petMarketDataStatus = petMarketDataStatusResponse.data || {}
         }
 
-        if (equipmentIncrementalStatusResponse.code === 200) {
-          this.equipmentIncrementalStatus = equipmentIncrementalStatusResponse.data || {}
-        }
+        // if (equipmentIncrementalStatusResponse.code === 200) {
+        //   this.equipmentIncrementalStatus = equipmentIncrementalStatusResponse.data || {}
+        // }
 
         if (redisResponse.code === 200) {
           this.redisStatus = redisResponse.data || {}

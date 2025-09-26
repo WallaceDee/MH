@@ -890,7 +890,7 @@ class MarketDataCollector:
     def _set_full_cached_data(self, data: pd.DataFrame) -> bool:
         """将全量数据缓存到Redis - 使用分块存储和Pipeline优化"""
         try:
-            print(f"🔄 开始缓存数据到Redis，数据量: {len(data)} 条")
+            print(f" 开始缓存数据到Redis，数据量: {len(data)} 条")
             from src.utils.redis_cache import get_redis_cache
             redis_cache = get_redis_cache()
             
@@ -1001,7 +1001,7 @@ class MarketDataCollector:
             bool: 是否成功刷新缓存
         """
         try:
-            print("🔄 开始手动刷新全量缓存（永不过期模式）...")
+            print(" 开始手动刷新全量缓存（永不过期模式）...")
             print(" 这将从MySQL重新加载所有empty角色数据")
             
             # 强制从数据库刷新，不使用现有缓存
@@ -1033,7 +1033,7 @@ class MarketDataCollector:
             bool: 是否成功刷新
         """
         try:
-            print("🔄 手动刷新市场数据...")
+            print(" 手动刷新市场数据...")
             print(" 强制从数据库重新加载数据")
             
             self.refresh_market_data(
