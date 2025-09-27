@@ -288,22 +288,8 @@ class EquipMarketDataCollector:
                         break
                         
                     # 只查询特征提取器需要的字段（排除iType和cDesc）
-                    # 增加灵饰特征提取器需要的字段：'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed'
-                    required_fields = [
-                        Equipment.equip_level, Equipment.kindid, Equipment.init_damage, Equipment.init_damage_raw,
-                        Equipment.all_damage, Equipment.init_wakan, Equipment.init_defense, Equipment.init_hp,
-                        Equipment.init_dex, Equipment.mingzhong, Equipment.shanghai, Equipment.addon_tizhi,
-                        Equipment.addon_liliang, Equipment.addon_naili, Equipment.addon_minjie, Equipment.addon_lingli,
-                        Equipment.addon_moli, Equipment.agg_added_attrs, Equipment.gem_value, Equipment.gem_level,
-                        Equipment.special_skill, Equipment.special_effect, Equipment.suit_effect, Equipment.large_equip_desc,
-                        # 灵饰特征提取器需要的字段
-                        Equipment.damage, Equipment.defense, Equipment.magic_damage, Equipment.magic_defense,
-                        Equipment.fengyin, Equipment.anti_fengyin, Equipment.speed,
-                        # 召唤兽装备特征提取器需要的字段
-                        Equipment.fangyu, Equipment.qixue, Equipment.addon_fali, Equipment.xiang_qian_level, Equipment.addon_status,
-                        # 基础字段
-                        Equipment.equip_sn, Equipment.price, Equipment.server_name, Equipment.update_time
-                    ]
+                    from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
+                    required_fields = [getattr(Equipment, field) for field in EQUIPMENT_CACHE_REQUIRED_FIELDS]
                     query = db.session.query(*required_fields).offset(offset).limit(actual_limit)
                     equipments = query.all()
                     
@@ -818,47 +804,8 @@ class EquipMarketDataCollector:
                     )
             
             # 构建SQLAlchemy查询 - 只查询特征提取器需要的字段
-            # 根据特征提取器统计，需要以下字段（排除iType和cDesc）：
-            # 增加灵饰特征提取器需要的字段：'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed'
-            required_fields = [
-                Equipment.equip_level,
-                Equipment.kindid,
-                Equipment.init_damage,
-                Equipment.init_damage_raw,
-                Equipment.all_damage,
-                Equipment.init_wakan,
-                Equipment.init_defense,
-                Equipment.init_hp,
-                Equipment.init_dex,
-                Equipment.mingzhong,
-                Equipment.shanghai,
-                Equipment.addon_tizhi,
-                Equipment.addon_liliang,
-                Equipment.addon_naili,
-                Equipment.addon_minjie,
-                Equipment.addon_lingli,
-                Equipment.addon_moli,
-                Equipment.agg_added_attrs,
-                Equipment.gem_value,
-                Equipment.gem_level,
-                Equipment.special_skill,
-                Equipment.special_effect,
-                Equipment.suit_effect,
-                Equipment.large_equip_desc,
-                # 灵饰特征提取器需要的字段
-                Equipment.damage,
-                Equipment.defense,
-                Equipment.magic_damage,
-                Equipment.magic_defense,
-                Equipment.fengyin,
-                Equipment.anti_fengyin,
-                Equipment.speed,
-                # 保留一些必要的元数据字段
-                Equipment.equip_sn,
-                Equipment.price,
-                Equipment.server_name,
-                Equipment.update_time
-            ]
+            from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
+            required_fields = [getattr(Equipment, field) for field in EQUIPMENT_CACHE_REQUIRED_FIELDS]
             query = db.session.query(*required_fields)
 
             if kindid is not None:
@@ -1356,21 +1303,8 @@ class EquipMarketDataCollector:
                     return self._get_incremental_data_from_mysql(last_update_time)
             
             # 查询自上次更新以来的新数据
-            required_fields = [
-                Equipment.equip_level, Equipment.kindid, Equipment.init_damage, Equipment.init_damage_raw,
-                Equipment.all_damage, Equipment.init_wakan, Equipment.init_defense, Equipment.init_hp,
-                Equipment.init_dex, Equipment.mingzhong, Equipment.shanghai, Equipment.addon_tizhi,
-                Equipment.addon_liliang, Equipment.addon_naili, Equipment.addon_minjie, Equipment.addon_lingli,
-                Equipment.addon_moli, Equipment.agg_added_attrs, Equipment.gem_value, Equipment.gem_level,
-                Equipment.special_skill, Equipment.special_effect, Equipment.suit_effect, Equipment.large_equip_desc,
-                # 灵饰特征提取器需要的字段
-                Equipment.damage, Equipment.defense, Equipment.magic_damage, Equipment.magic_defense,
-                Equipment.fengyin, Equipment.anti_fengyin, Equipment.speed,
-                # 召唤兽装备特征提取器需要的字段
-                Equipment.fangyu, Equipment.qixue, Equipment.addon_fali, Equipment.xiang_qian_level, Equipment.addon_status,
-                # 基础字段
-                Equipment.equip_sn, Equipment.price, Equipment.server_name, Equipment.update_time
-            ]
+            from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
+            required_fields = [getattr(Equipment, field) for field in EQUIPMENT_CACHE_REQUIRED_FIELDS]
             
             query = db.session.query(*required_fields).filter(
                 Equipment.update_time > last_update_time
@@ -2402,7 +2336,7 @@ class EquipMarketDataCollector:
             def sync_worker():
                 try:
                     self.logger.info("🔄 开始异步同步内存缓存到Redis...")
-                    success = self._sync_memory_cache_to_redis()
+                    success = self._sync_memory_cache_to_redis(self._full_data_cache)
                     if success:
                         self.logger.info("✅ 异步同步到Redis完成")
                     else:
@@ -2448,6 +2382,7 @@ class EquipMarketDataCollector:
         """
         将新数据同步到Redis（不操作内存缓存）
         这个方法专门用于爬虫进程，避免影响API进程的内存缓存
+        优化版本：直接追加新数据，避免全量读取
         
         Args:
             new_data: 新的装备数据DataFrame
@@ -2464,29 +2399,62 @@ class EquipMarketDataCollector:
                 self.logger.info("📊 没有新数据需要同步到Redis")
                 return True
             
-            self.logger.info(f"🔄 开始将 {len(new_data)} 条新数据同步到Redis...")
+            self.logger.info(f"🔄 开始将 {len(new_data)} 条新数据直接追加到Redis...")
             
-            # 从Redis获取现有数据
-            existing_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+            # 优化：直接追加新数据到Redis，避免全量读取
+            # 使用Redis的列表结构存储增量数据
+            incremental_key = f"{self._full_cache_key}:incremental"
             
-            if existing_data is not None and not existing_data.empty:
-                # 合并现有数据和新数据
-                merged_data = self._merge_incremental_data(existing_data, new_data)
-                self.logger.info(f"📊 数据合并完成: 现有 {len(existing_data)} 条 + 新增 {len(new_data)} 条 = 总计 {len(merged_data)} 条")
+            # 将新数据序列化并追加到Redis列表
+            import pickle
+            import base64
+            
+            success_count = 0
+            for index, row in new_data.iterrows():
+                try:
+                    # 将每行数据序列化
+                    row_data = row.to_dict()
+                    serialized_data = base64.b64encode(pickle.dumps(row_data)).decode('utf-8')
+                    
+                    # 追加到Redis列表
+                    self.redis_cache.client.lpush(incremental_key, serialized_data)
+                    success_count += 1
+                    
+                except Exception as row_error:
+                    self.logger.error(f"❌ 序列化第 {index} 行数据失败: {row_error}")
+                    continue
+            
+            # 设置增量数据的过期时间（与主缓存一致）
+            try:
+                ttl_seconds = None if self._cache_ttl_hours == -1 else self._cache_ttl_hours * 3600
+                if ttl_seconds:
+                    self.redis_cache.client.expire(incremental_key, ttl_seconds)
+            except Exception as ttl_error:
+                self.logger.warning(f"⚠️ 设置Redis TTL失败: {ttl_error}")
+            
+            if success_count == len(new_data):
+                self.logger.info(f"✅ 新数据已成功追加到Redis增量列表，数据量: {success_count} 条")
             else:
-                # 如果Redis中没有数据，直接使用新数据
-                merged_data = new_data
-                self.logger.info(f"📊 Redis中没有现有数据，直接使用新数据: {len(merged_data)} 条")
+                self.logger.warning(f"⚠️ 部分数据追加到Redis失败，成功: {success_count}/{len(new_data)} 条")
+                if success_count == 0:
+                    raise Exception("所有数据追加到Redis都失败")
             
-            # 将合并后的数据同步到Redis
-            success = self.redis_cache.set_chunked_data(self._full_cache_key, merged_data)
+            # 发布增量更新消息，通知API进程刷新缓存
+            try:
+                from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
+                pubsub = get_redis_pubsub()
+                message = {
+                    'type': MessageType.EQUIPMENT_DATA_SAVED,
+                    'data_count': len(new_data),
+                    'action': 'incremental_update',
+                    'incremental_key': incremental_key
+                }
+                pubsub.publish(Channel.EQUIPMENT_UPDATES, message)
+                self.logger.info("📢 已发布增量更新消息")
+            except Exception as e:
+                self.logger.warning(f"⚠️ 发布增量更新消息失败: {e}")
             
-            if success:
-                self.logger.info(f"✅ 新数据已成功同步到Redis，总数据量: {len(merged_data)} 条")
-                return True
-            else:
-                self.logger.error("❌ 新数据同步到Redis失败")
-                return False
+            return True
                 
         except Exception as e:
             self.logger.error(f"❌ 同步新数据到Redis失败: {e}")

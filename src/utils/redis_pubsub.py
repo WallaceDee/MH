@@ -12,6 +12,7 @@ from typing import Dict, Any, Optional, Callable
 from datetime import datetime
 import threading
 import time
+import pandas as pd
 
 
 class RedisPubSub:

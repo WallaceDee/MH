@@ -112,3 +112,23 @@ def get_equip_category_name(kindid: int) -> str:
 def is_helm(kindid: int) -> bool:
     """判断是否为头盔"""
     return kindid in HELMET_KINDIDS
+
+
+# 装备数据缓存需要的字段列表
+# 用于特征提取和估价系统，避免传输不必要的数据
+EQUIPMENT_CACHE_REQUIRED_FIELDS = [
+    # 基础装备属性
+    'equip_level', 'kindid', 'init_damage', 'init_damage_raw',
+    'all_damage', 'init_wakan', 'init_defense', 'init_hp',
+    'init_dex', 'mingzhong', 'shanghai', 'addon_tizhi',
+    'addon_liliang', 'addon_naili', 'addon_minjie', 'addon_lingli',
+    'addon_moli', 'agg_added_attrs', 'gem_value', 'gem_level',
+    'special_skill', 'special_effect', 'suit_effect', 'large_equip_desc',
+    # 灵饰特征提取器需要的字段
+    'damage', 'defense', 'magic_damage', 'magic_defense',
+    'fengyin', 'anti_fengyin', 'speed',
+    # 召唤兽装备特征提取器需要的字段
+    'fangyu', 'qixue', 'addon_fali', 'xiang_qian_level', 'addon_status',
+    # 基础字段
+    'equip_sn', 'price', 'server_name', 'update_time'
+]

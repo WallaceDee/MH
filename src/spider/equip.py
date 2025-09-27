@@ -512,19 +512,30 @@ class CBGEquipSpider:
     def _save_equipment_data_with_context(self, equipments):
         """在Flask应用上下文中保存装备数据 - 内存缓存 → MySQL → Redis"""
         try:
+            # 在子线程中重新导入pandas，确保可用
+            import pandas as pd
+            
             if not equipments:
-                self.logger.info("99999没有装备数据需要保存")
+                self.logger.info("没有装备数据需要保存")
                 return 0
             
-            self.logger.info(f"999999开始保存 {len(equipments)} 条装备数据...")
+            self.logger.info(f"开始保存 {len(equipments)} 条装备数据...")
             
             # 第一步：立即发布DataFrame消息（超快响应）
             if equipments:
                 try:
                     from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
                     
-                    # 将新数据转换为DataFrame
-                    new_data_df = pd.DataFrame(equipments)
+                    # 将新数据转换为DataFrame，只包含必要字段
+                    from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
+                    
+                    # 过滤数据，只保留必要字段
+                    filtered_equipments = []
+                    for equipment in equipments:
+                        filtered_equipment = {k: v for k, v in equipment.items() if k in EQUIPMENT_CACHE_REQUIRED_FIELDS}
+                        filtered_equipments.append(filtered_equipment)
+                    
+                    new_data_df = pd.DataFrame(filtered_equipments)
                     
                     # 发布包含DataFrame的消息
                     pubsub = get_redis_pubsub()
@@ -581,26 +592,34 @@ class CBGEquipSpider:
             if skipped_count > 0:
                 self.logger.info(f" 跳过 {skipped_count} 条已存在的装备数据")
             
-            self.logger.info(f"🎉 装备数据保存流程完成: Redis → MySQL")
+            # 第三步：MySQL保存成功后，同步到Redis
             if saved_count > 0:
                 try:
+                    import pandas as pd
                     from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
                     collector = EquipMarketDataCollector.get_instance()
                     
-                    # 将新数据转换为DataFrame并同步到Redis
-                    new_data_df = pd.DataFrame(equipments)
+                    # 将新数据转换为DataFrame并同步到Redis，只包含必要字段
+                    from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
+                    
+                    # 过滤数据，只保留必要字段
+                    filtered_equipments = []
+                    for equipment in equipments:
+                        filtered_equipment = {k: v for k, v in equipment.items() if k in EQUIPMENT_CACHE_REQUIRED_FIELDS}
+                        filtered_equipments.append(filtered_equipment)
+                    
+                    new_data_df = pd.DataFrame(filtered_equipments)
                     redis_success = collector._sync_new_data_to_redis(new_data_df)
                     
                     if redis_success:
-                        self.logger.info("✅ 新数据已同步到Redis")
+                        self.logger.info("✅ MySQL保存成功，新数据已同步到Redis")
                     else:
-                        self.logger.warning("⚠️ 新数据同步到Redis失败")
+                        self.logger.warning("⚠️ MySQL保存成功，但新数据同步到Redis失败")
                         
                 except Exception as e:
-                    self.logger.warning(f"⚠️ 同步新数据到Redis失败: {e}")
+                    self.logger.warning(f"⚠️ MySQL保存成功，但同步新数据到Redis失败: {e}")
             
-            self.logger.info(f" 装备数据保存流程完成: 内存缓存 → MySQL → Redis")
-            # 第四步：发布Redis消息通知其他进程
+            self.logger.info(f"🎉 装备数据保存流程完成: 内存缓存 → MySQL → Redis")
             if saved_count > 0:
                 try:
                     from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
