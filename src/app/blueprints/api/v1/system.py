@@ -515,15 +515,18 @@ def get_equipment_market_data_status():
         mysql_time = (time.time() - mysql_start) * 1000
         print(f"🔍 MySQL查询耗时: {mysql_time:.2f}ms")
         
-        # 获取Redis数据总数（从元数据获取，不加载实际数据）
+        # 获取Redis数据总数（从Hash元数据获取，不加载实际数据）
         redis_count = 0
         redis_start = time.time()
         try:
             if collector.redis_cache and collector.redis_cache.is_available():
-                # 从Redis元数据获取数据总数
-                metadata = collector.redis_cache.get(f"{collector._full_cache_key}:meta")
-                redis_count = metadata.get('total_rows', 0)
-                print(f"🔍 Redis缓存数据量（元数据）: {redis_count} 条")
+                # 从Hash结构元数据获取数据总数
+                hash_metadata = collector.redis_cache.get(f"{collector._full_cache_key}:hash:meta")
+                if hash_metadata and 'total_count' in hash_metadata:
+                    redis_count = hash_metadata.get('total_count', 0)
+                    print(f"🔍 Redis缓存数据量: {redis_count} 条")
+                else:
+                    print("🔍 Redis Hash元数据不存在")
             else:
                 print("🔍 Redis不可用")
         except Exception as e:

@@ -690,6 +690,179 @@ class RedisCache:
             self.logger.error(f"获取缓存类型统计失败: {e}")
             return {}
 
+    def set_hash_data(self, hash_key: str, data: pd.DataFrame, ttl: Optional[int] = None) -> bool:
+        """
+        将DataFrame数据存储为Redis Hash结构
+        
+        Args:
+            hash_key: Hash键名
+            data: 要存储的DataFrame，必须包含equip_sn列
+            ttl: 过期时间（秒）
+            
+        Returns:
+            bool: 是否存储成功
+        """
+        if not self.is_available() or data.empty:
+            return False
+        
+        if 'equip_sn' not in data.columns:
+            self.logger.error("DataFrame必须包含equip_sn列")
+            return False
+        
+        try:
+            full_key = self._make_key(hash_key)
+            
+            self.logger.info(f"开始存储Hash数据: {full_key}，数据量: {len(data)} 条")
+            
+            # 使用Pipeline批量设置
+            pipe = self.client.pipeline()
+            
+            for _, row in data.iterrows():
+                equip_sn = str(row['equip_sn'])
+                row_data = row.to_dict()
+                
+                # 序列化行数据
+                serialized_data = pickle.dumps(row_data)
+                
+                # 添加到Hash
+                pipe.hset(full_key, equip_sn, serialized_data)
+            
+            # 执行Pipeline
+            pipe.execute()
+            
+            # 设置过期时间
+            if ttl:
+                self.client.expire(full_key, ttl)
+            
+            # 存储元数据
+            metadata = {
+                'total_count': len(data),
+                'columns': data.columns.tolist(),
+                'created_at': datetime.now().isoformat(),
+                'structure': 'hash'
+            }
+            meta_key = f"{full_key}:meta"
+            self.client.set(meta_key, pickle.dumps(metadata))
+            if ttl:
+                self.client.expire(meta_key, ttl)
+            
+            self.logger.info(f"✅ Hash数据存储完成: {full_key}，数据量: {len(data)} 条")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"存储Hash数据失败 {hash_key}: {e}")
+            return False
+
+    def get_hash_data(self, hash_key: str) -> Optional[pd.DataFrame]:
+        """
+        从Redis Hash获取DataFrame数据
+        
+        Args:
+            hash_key: Hash键名
+            
+        Returns:
+            Optional[pd.DataFrame]: 合并后的DataFrame
+        """
+        if not self.is_available():
+            return None
+        
+        try:
+            full_key = self._make_key(hash_key)
+            
+            # 检查Hash是否存在
+            if not self.client.exists(full_key):
+                self.logger.info(f"Hash不存在: {full_key}")
+                return pd.DataFrame()
+            
+            # 获取所有Hash数据
+            hash_data = self.client.hgetall(full_key)
+            
+            if not hash_data:
+                return pd.DataFrame()
+            
+            # 反序列化数据
+            records = []
+            for equip_sn, serialized_data in hash_data.items():
+                try:
+                    row_data = pickle.loads(serialized_data)
+                    records.append(row_data)
+                except Exception as e:
+                    self.logger.warning(f"反序列化数据失败 {equip_sn}: {e}")
+                    continue
+            
+            if not records:
+                return pd.DataFrame()
+            
+            # 转换为DataFrame
+            df = pd.DataFrame(records)
+            
+            self.logger.info(f"✅ 获取Hash数据完成: {full_key}，数据量: {len(df)} 条")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"获取Hash数据失败 {hash_key}: {e}")
+            return None
+
+    def update_hash_incremental(self, hash_key: str, new_data: pd.DataFrame, ttl: Optional[int] = None) -> bool:
+        """
+        增量更新Hash数据，相同equip_sn自动覆盖
+        
+        Args:
+            hash_key: Hash键名
+            new_data: 新增数据DataFrame
+            ttl: 过期时间（秒）
+            
+        Returns:
+            bool: 是否更新成功
+        """
+        if not self.is_available() or new_data.empty:
+            return False
+        
+        if 'equip_sn' not in new_data.columns:
+            self.logger.error("DataFrame必须包含equip_sn列")
+            return False
+        
+        try:
+            full_key = self._make_key(hash_key)
+            
+            self.logger.info(f"开始增量更新Hash数据: {full_key}，新增: {len(new_data)} 条")
+            
+            # 使用Pipeline批量更新
+            pipe = self.client.pipeline()
+            
+            for _, row in new_data.iterrows():
+                equip_sn = str(row['equip_sn'])
+                row_data = row.to_dict()
+                
+                # 序列化行数据
+                serialized_data = pickle.dumps(row_data)
+                
+                # 更新Hash（相同equip_sn自动覆盖）
+                pipe.hset(full_key, equip_sn, serialized_data)
+            
+            # 执行Pipeline
+            pipe.execute()
+            
+            # 更新元数据
+            meta_key = f"{full_key}:meta"
+            if self.client.exists(meta_key):
+                try:
+                    metadata = pickle.loads(self.client.get(meta_key))
+                    metadata['last_update'] = datetime.now().isoformat()
+                    metadata['total_count'] = self.client.hlen(full_key)
+                    self.client.set(meta_key, pickle.dumps(metadata))
+                    if ttl:
+                        self.client.expire(meta_key, ttl)
+                except Exception as e:
+                    self.logger.warning(f"更新元数据失败: {e}")
+            
+            self.logger.info(f"✅ 增量更新Hash数据完成: {full_key}，新增: {len(new_data)} 条")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"增量更新Hash数据失败 {hash_key}: {e}")
+            return False
+
 
 # 全局缓存实例
 _redis_cache = None

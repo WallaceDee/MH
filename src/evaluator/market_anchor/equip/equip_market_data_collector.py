@@ -201,7 +201,8 @@ class EquipMarketDataCollector:
                 
                 try:
                     print("🔍 开始检查Redis缓存...")
-                    cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+                    hash_key = f"{self._full_cache_key}:hash"
+                    cached_data = self.redis_cache.get_hash_data(hash_key)
                     print(f"🔍 Redis缓存检查完成，结果: {cached_data is not None}")
                     
                     if cached_data is not None and not cached_data.empty:
@@ -246,8 +247,8 @@ class EquipMarketDataCollector:
             # 获取MySQL装备数据总数
             full_count = db.session.query(Equipment).count()
             self.mysql_data_count = full_count
-            total_count = full_count  # 加载全部数据
-            # total_count = 1500  # 临时测试：加载500条数据
+            # total_count = full_count  # 加载全部数据
+            total_count = 1500  # 临时测试：加载500条数据
 
             print(f"装备总记录数: {full_count}，本次加载: {total_count} 条")
             
@@ -446,7 +447,7 @@ class EquipMarketDataCollector:
             return False
 
     def _get_full_data_from_redis(self) -> Optional[pd.DataFrame]:
-        """从Redis获取全量装备数据"""
+        """从Redis获取全量装备数据（使用Hash结构）"""
         if not self.redis_cache:
             return None
             
@@ -456,15 +457,16 @@ class EquipMarketDataCollector:
                 print(f"从内存缓存获取全量数据: {len(self._full_data_cache)} 条")
                 return self._full_data_cache
             
-            # 从Redis获取分块数据
-            cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+            # 从Redis Hash获取数据
+            hash_key = f"{self._full_cache_key}:hash"
+            cached_data = self.redis_cache.get_hash_data(hash_key)
             
             if cached_data is not None and not cached_data.empty:
-                print(f"从Redis分块缓存获取全量数据: {len(cached_data)} 条")
+                print(f"从Redis Hash缓存获取全量数据: {len(cached_data)} 条")
                 self._full_data_cache = cached_data  # 缓存到内存
                 return cached_data
             else:
-                print("Redis全量缓存未命中")
+                print("Redis Hash缓存未命中")
                 return None
                 
         except Exception as e:
@@ -926,17 +928,8 @@ class EquipMarketDataCollector:
             if equipments:
                 # 转换为字典列表 - 现在查询返回的是元组
                 data_list = []
-                field_names = [
-                    'equip_level', 'kindid', 'init_damage', 'init_damage_raw', 'all_damage',
-                    'init_wakan', 'init_defense', 'init_hp', 'init_dex', 'mingzhong', 'shanghai',
-                    'addon_tizhi', 'addon_liliang', 'addon_naili', 'addon_minjie', 'addon_lingli', 'addon_moli',
-                    'agg_added_attrs', 'gem_value', 'gem_level', 'special_skill', 'special_effect', 'suit_effect',
-                    'large_equip_desc',
-                    # 灵饰特征提取器需要的字段
-                    'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed',
-                    # 基础字段
-                    'equip_sn', 'price', 'server_name', 'update_time'
-                ]
+                # 使用动态字段名列表，确保与查询字段一致
+                field_names = EQUIPMENT_CACHE_REQUIRED_FIELDS
                 
                 for equipment_tuple in equipments:
                     equipment_dict = {}
@@ -1255,7 +1248,8 @@ class EquipMarketDataCollector:
                 return last_time
             
             # 如果元数据中没有，尝试从数据中获取最新的update_time
-            cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+            hash_key = f"{self._full_cache_key}:hash"
+            cached_data = self.redis_cache.get_hash_data(hash_key)
             if cached_data is not None and not cached_data.empty and 'update_time' in cached_data.columns:
                 # 确保update_time是datetime类型
                 if cached_data['update_time'].dtype == 'object':
@@ -1316,19 +1310,8 @@ class EquipMarketDataCollector:
                 return pd.DataFrame()
             
             # 转换为DataFrame
-            field_names = [
-                'equip_level', 'kindid', 'init_damage', 'init_damage_raw', 'all_damage',
-                'init_wakan', 'init_defense', 'init_hp', 'init_dex', 'mingzhong', 'shanghai',
-                'addon_tizhi', 'addon_liliang', 'addon_naili', 'addon_minjie', 'addon_lingli', 'addon_moli',
-                'agg_added_attrs', 'gem_value', 'gem_level', 'special_skill', 'special_effect', 'suit_effect',
-                'large_equip_desc',
-                # 灵饰特征提取器需要的字段
-                'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed',
-                # 召唤兽装备特征提取器需要的字段
-                'fangyu', 'qixue', 'addon_fali', 'xiang_qian_level', 'addon_status',
-                # 基础字段
-                'equip_sn', 'price', 'server_name', 'update_time'
-            ]
+            # 使用动态字段名列表，确保与查询字段一致
+            field_names = EQUIPMENT_CACHE_REQUIRED_FIELDS
             
             data_list = []
             for equipment_tuple in equipments:
@@ -1473,7 +1456,7 @@ class EquipMarketDataCollector:
     
     def _sync_memory_cache_to_redis(self, data: pd.DataFrame) -> bool:
         """
-        将内存缓存数据同步到Redis
+        将内存缓存数据同步到Redis（使用Hash结构）
         
         Args:
             data: 要同步的数据
@@ -1486,26 +1469,25 @@ class EquipMarketDataCollector:
                 print(" Redis不可用或数据为空，跳过同步")
                 return True
             
-            # 更新Redis缓存
-            chunk_size = 500
+            # 使用Hash结构存储
+            hash_key = f"{self._full_cache_key}:hash"
             ttl_seconds = None if self._cache_ttl_hours == -1 else self._cache_ttl_hours * 3600
             
-            success = self.redis_cache.set_chunked_data(
-                base_key=self._full_cache_key,
+            success = self.redis_cache.set_hash_data(
+                hash_key=hash_key,
                 data=data,
-                chunk_size=chunk_size,
                 ttl=ttl_seconds
             )
             
             if success:
-                print(" 内存缓存已同步到Redis")
+                print(" 内存缓存已同步到Redis Hash")
                 return True
             else:
-                print(" 同步到Redis失败")
+                print(" 同步到Redis Hash失败")
                 return False
                 
         except Exception as e:
-            self.logger.error(f"同步到Redis失败: {e}")
+            self.logger.error(f"同步到Redis Hash失败: {e}")
             return False
 
     def _update_cache_with_merged_data(self, merged_data: pd.DataFrame) -> bool:
@@ -2283,6 +2265,10 @@ class EquipMarketDataCollector:
                     else:
                         # 如果直接更新失败，回退到从Redis刷新
                         self._refresh_memory_cache_from_redis()
+                elif action == 'hash_update':
+                    # Hash结构增量更新：增量更新内存缓存
+                    self.logger.info("📨 Hash结构更新，增量更新内存缓存")
+                    self._incremental_update_memory_cache_from_redis()
                 else:
                     # 传统方式：从Redis刷新内存缓存
                     self._refresh_memory_cache_from_redis()
@@ -2353,7 +2339,7 @@ class EquipMarketDataCollector:
     
     def _refresh_memory_cache_from_redis(self):
         """
-        从Redis刷新内存缓存（跨进程数据同步）
+        从Redis刷新内存缓存（跨进程数据同步，使用Hash结构）
         """
         try:
             if not self.redis_cache:
@@ -2362,8 +2348,9 @@ class EquipMarketDataCollector:
             
             self.logger.info("🔄 开始从Redis刷新内存缓存...")
             
-            # 从Redis获取最新数据
-            cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+            # 从Redis Hash获取最新数据
+            hash_key = f"{self._full_cache_key}:hash"
+            cached_data = self.redis_cache.get_hash_data(hash_key)
             
             if cached_data is not None and not cached_data.empty:
                 # 更新内存缓存
@@ -2371,18 +2358,53 @@ class EquipMarketDataCollector:
                 self.logger.info(f"✅ 内存缓存已从Redis刷新，数据量: {len(cached_data)} 条")
                 return True
             else:
-                self.logger.warning("⚠️ Redis中没有数据，无法刷新内存缓存")
+                self.logger.warning("⚠️ Redis Hash中没有数据，无法刷新内存缓存")
                 return False
                 
         except Exception as e:
             self.logger.error(f"❌ 从Redis刷新内存缓存失败: {e}")
             return False
+
+    def _incremental_update_memory_cache_from_redis(self):
+        """
+        从Redis增量更新内存缓存（避免完全替换）
+        """
+        try:
+            if not self.redis_cache:
+                self.logger.warning("⚠️ Redis不可用，无法增量更新内存缓存")
+                return False
+            
+            self.logger.info("🔄 开始从Redis增量更新内存缓存...")
+            
+            # 从Redis Hash获取最新数据
+            hash_key = f"{self._full_cache_key}:hash"
+            redis_data = self.redis_cache.get_hash_data(hash_key)
+            
+            if redis_data is not None and not redis_data.empty:
+                if self._full_data_cache is not None and not self._full_data_cache.empty:
+                    # 内存缓存存在，进行合并
+                    self.logger.info(f"🔄 合并内存缓存和Redis数据...")
+                    merged_data = self._merge_incremental_data(self._full_data_cache, redis_data)
+                    self._full_data_cache = merged_data
+                    self.logger.info(f"✅ 内存缓存已增量更新，数据量: {len(merged_data)} 条")
+                else:
+                    # 内存缓存为空，直接使用Redis数据
+                    self._full_data_cache = redis_data
+                    self.logger.info(f"✅ 内存缓存已从Redis初始化，数据量: {len(redis_data)} 条")
+                
+                return True
+            else:
+                self.logger.warning("⚠️ Redis Hash中没有数据，无法增量更新内存缓存")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"❌ 从Redis增量更新内存缓存失败: {e}")
+            return False
     
     def _sync_new_data_to_redis(self, new_data: pd.DataFrame) -> bool:
         """
         将新数据同步到Redis（不操作内存缓存）
-        这个方法专门用于爬虫进程，避免影响API进程的内存缓存
-        优化版本：直接追加新数据，避免全量读取
+        使用Hash结构，相同equip_sn自动覆盖
         
         Args:
             new_data: 新的装备数据DataFrame
@@ -2399,62 +2421,37 @@ class EquipMarketDataCollector:
                 self.logger.info("📊 没有新数据需要同步到Redis")
                 return True
             
-            self.logger.info(f"🔄 开始将 {len(new_data)} 条新数据直接追加到Redis...")
+            self.logger.info(f"🔄 开始将 {len(new_data)} 条新数据同步到Redis Hash...")
             
-            # 优化：直接追加新数据到Redis，避免全量读取
-            # 使用Redis的列表结构存储增量数据
-            incremental_key = f"{self._full_cache_key}:incremental"
+            # 使用Hash结构存储，相同equip_sn自动覆盖
+            hash_key = f"{self._full_cache_key}:hash"
+            ttl_seconds = None if self._cache_ttl_hours == -1 else self._cache_ttl_hours * 3600
             
-            # 将新数据序列化并追加到Redis列表
-            import pickle
-            import base64
+            # 增量更新Hash数据
+            success = self.redis_cache.update_hash_incremental(hash_key, new_data, ttl_seconds)
             
-            success_count = 0
-            for index, row in new_data.iterrows():
+            if success:
+                self.logger.info(f"✅ 新数据已成功同步到Redis Hash，数据量: {len(new_data)} 条")
+                
+                # 发布增量更新消息，通知API进程刷新缓存
                 try:
-                    # 将每行数据序列化
-                    row_data = row.to_dict()
-                    serialized_data = base64.b64encode(pickle.dumps(row_data)).decode('utf-8')
-                    
-                    # 追加到Redis列表
-                    self.redis_cache.client.lpush(incremental_key, serialized_data)
-                    success_count += 1
-                    
-                except Exception as row_error:
-                    self.logger.error(f"❌ 序列化第 {index} 行数据失败: {row_error}")
-                    continue
-            
-            # 设置增量数据的过期时间（与主缓存一致）
-            try:
-                ttl_seconds = None if self._cache_ttl_hours == -1 else self._cache_ttl_hours * 3600
-                if ttl_seconds:
-                    self.redis_cache.client.expire(incremental_key, ttl_seconds)
-            except Exception as ttl_error:
-                self.logger.warning(f"⚠️ 设置Redis TTL失败: {ttl_error}")
-            
-            if success_count == len(new_data):
-                self.logger.info(f"✅ 新数据已成功追加到Redis增量列表，数据量: {success_count} 条")
+                    from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
+                    pubsub = get_redis_pubsub()
+                    message = {
+                        'type': MessageType.EQUIPMENT_DATA_SAVED,
+                        'data_count': len(new_data),
+                        'action': 'hash_update',
+                        'hash_key': hash_key
+                    }
+                    pubsub.publish(Channel.EQUIPMENT_UPDATES, message)
+                    self.logger.info("📢 已发布Hash更新消息")
+                except Exception as e:
+                    self.logger.warning(f"⚠️ 发布Hash更新消息失败: {e}")
+                
+                return True
             else:
-                self.logger.warning(f"⚠️ 部分数据追加到Redis失败，成功: {success_count}/{len(new_data)} 条")
-                if success_count == 0:
-                    raise Exception("所有数据追加到Redis都失败")
-            
-            # 发布增量更新消息，通知API进程刷新缓存
-            try:
-                from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
-                pubsub = get_redis_pubsub()
-                message = {
-                    'type': MessageType.EQUIPMENT_DATA_SAVED,
-                    'data_count': len(new_data),
-                    'action': 'incremental_update',
-                    'incremental_key': incremental_key
-                }
-                pubsub.publish(Channel.EQUIPMENT_UPDATES, message)
-                self.logger.info("📢 已发布增量更新消息")
-            except Exception as e:
-                self.logger.warning(f"⚠️ 发布增量更新消息失败: {e}")
-            
-            return True
+                self.logger.error("❌ 同步新数据到Redis Hash失败")
+                return False
                 
         except Exception as e:
             self.logger.error(f"❌ 同步新数据到Redis失败: {e}")
