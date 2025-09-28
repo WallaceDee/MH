@@ -20,7 +20,7 @@ import logging
 from src.utils.project_path import get_project_root, get_data_path
 from src.database import db
 from src.models.pet import Pet
-from sqlalchemy import and_, or_, func, text
+from sqlalchemy import and_, or_, func, text, Float
 
 # 导入任务管理器
 from .task_manager import task_manager
@@ -304,7 +304,7 @@ class PetService:
                                 and_(
                                     Pet.equip_list_amount > 0,
                                     Pet.price > 0,
-                                    func.cast(Pet.equip_list_amount, func.FLOAT) / func.cast(Pet.price, func.FLOAT) > warning_rate
+                                    func.cast(Pet.equip_list_amount, Float) / func.cast(Pet.price, Float) > warning_rate
                                 )
                             )
                         )

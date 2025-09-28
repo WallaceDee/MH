@@ -27,8 +27,8 @@ class RedisCache:
                  db: int = 0,
                  password: Optional[str] = '447363121',
                  decode_responses: bool = False,
-                 socket_timeout: float = 30.0,  # 增加到30秒
-                 socket_connect_timeout: float = 10.0,  # 增加到10秒
+                 socket_timeout: float = 120.0,  # 增加到120秒，支持大数据量操作
+                 socket_connect_timeout: float = 30.0,  # 增加到30秒
                  retry_on_timeout: bool = True,
                  health_check_interval: int = 30):
         """
@@ -493,123 +493,6 @@ class RedisCache:
             self.logger.error(f"批量获取缓存失败: {e}")
             return {}
 
-    def set_chunked_data(self, base_key: str, data: pd.DataFrame, chunk_size: int = 1000, ttl: Optional[int] = None) -> bool:
-        """
-        分块存储大型DataFrame - 避免单个Redis键过大
-        
-        Args:
-            base_key: 基础键名
-            data: 要存储的DataFrame
-            chunk_size: 每块的行数
-            ttl: 过期时间（秒）
-            
-        Returns:
-            bool: 是否存储成功
-        """
-        if not self.is_available() or data.empty:
-            return False
-        
-        try:
-            total_rows = len(data)
-            total_chunks = (total_rows + chunk_size - 1) // chunk_size
-            
-            self.logger.info(f"开始分块存储数据: {total_rows} 行，分为 {total_chunks} 块")
-            
-            # 准备批量数据
-            chunk_data = {}
-            
-            # 存储元数据
-            metadata = {
-                'total_rows': total_rows,
-                'total_chunks': total_chunks,
-                'chunk_size': chunk_size,
-                'columns': data.columns.tolist(),
-                'index_name': data.index.name,
-                'created_at': datetime.now().isoformat()
-            }
-            chunk_data[f"{base_key}:meta"] = metadata
-            
-            # 分块存储数据
-            for i in range(total_chunks):
-                start_idx = i * chunk_size
-                end_idx = min(start_idx + chunk_size, total_rows)
-                chunk_df = data.iloc[start_idx:end_idx].copy()
-                
-                chunk_key = f"{base_key}:chunk_{i}"
-                chunk_data[chunk_key] = chunk_df
-            
-            # 使用Pipeline批量设置
-            success = self.set_batch(chunk_data, ttl)
-            
-            if success:
-                self.logger.info(f"分块存储完成: {base_key}，共 {total_chunks} 块")
-            else:
-                self.logger.error(f"分块存储失败: {base_key}")
-                
-            return success
-            
-        except Exception as e:
-            self.logger.error(f"分块存储数据失败 {base_key}: {e}")
-            return False
-
-    def get_chunked_data(self, base_key: str) -> Optional[pd.DataFrame]:
-        """
-        获取分块存储的DataFrame
-        
-        Args:
-            base_key: 基础键名
-            
-        Returns:
-            Optional[pd.DataFrame]: 合并后的DataFrame
-        """
-        if not self.is_available():
-            return None
-        
-        try:
-            # 获取元数据
-            metadata = self.get(f"{base_key}:meta")
-            if not metadata:
-                self.logger.debug(f"未找到分块数据元数据: {base_key}")
-                return None
-            
-            total_chunks = metadata['total_chunks']
-            self.logger.info(f"开始获取分块数据: {base_key}，共 {total_chunks} 块")
-            
-            # 批量获取所有块
-            chunk_keys = [f"{base_key}:chunk_{i}" for i in range(total_chunks)]
-            chunk_data = self.get_batch(chunk_keys)
-            
-            if len(chunk_data) != total_chunks:
-                self.logger.warning(f"分块数据不完整: {len(chunk_data)}/{total_chunks}")
-                return None
-            
-            # 合并数据块
-            chunks = []
-            for i in range(total_chunks):
-                chunk_key = f"{base_key}:chunk_{i}"
-                if chunk_key in chunk_data:
-                    chunks.append(chunk_data[chunk_key])
-                else:
-                    self.logger.error(f"缺失数据块: {chunk_key}")
-                    return None
-            
-            # 合并DataFrame
-            result_df = pd.concat(chunks, ignore_index=False)
-            
-            # 恢复列信息
-            if 'columns' in metadata:
-                result_df.columns = metadata['columns']
-            
-            # 恢复索引信息
-            if 'index_name' in metadata and metadata['index_name']:
-                result_df.index.name = metadata['index_name']
-            
-            self.logger.info(f"分块数据获取完成: {base_key}，共 {len(result_df)} 行")
-            return result_df
-            
-        except Exception as e:
-            self.logger.error(f"获取分块数据失败 {base_key}: {e}")
-            return None
 
     def get_redis_info(self):
         """获取Redis服务器信息"""
@@ -714,21 +597,25 @@ class RedisCache:
             
             self.logger.info(f"开始存储Hash数据: {full_key}，数据量: {len(data)} 条")
             
-            # 使用Pipeline批量设置
-            pipe = self.client.pipeline()
-            
-            for _, row in data.iterrows():
-                equip_sn = str(row['equip_sn'])
-                row_data = row.to_dict()
+            # 对于大数据量，使用分批处理
+            if len(data) > 2000:
+                return self._set_large_hash_data(full_key, data, ttl)
+            else:
+                # 小数据量直接处理
+                pipe = self.client.pipeline()
                 
-                # 序列化行数据
-                serialized_data = pickle.dumps(row_data)
+                for _, row in data.iterrows():
+                    equip_sn = str(row['equip_sn'])
+                    row_data = row.to_dict()
+                    
+                    # 序列化行数据
+                    serialized_data = pickle.dumps(row_data)
+                    
+                    # 添加到Hash
+                    pipe.hset(full_key, equip_sn, serialized_data)
                 
-                # 添加到Hash
-                pipe.hset(full_key, equip_sn, serialized_data)
-            
-            # 执行Pipeline
-            pipe.execute()
+                # 执行Pipeline
+                pipe.execute()
             
             # 设置过期时间
             if ttl:
@@ -752,10 +639,65 @@ class RedisCache:
         except Exception as e:
             self.logger.error(f"存储Hash数据失败 {hash_key}: {e}")
             return False
+    
+    def _set_large_hash_data(self, full_key: str, data: pd.DataFrame, ttl: Optional[int]) -> bool:
+        """
+        分批存储大数据量Hash数据
+        
+        Args:
+            full_key: 完整的Redis键名
+            data: 要存储的数据
+            ttl: 过期时间
+            
+        Returns:
+            bool: 是否存储成功
+        """
+        try:
+            import time
+            batch_size = 2000  # 每批2000条
+            total_batches = (len(data) + batch_size - 1) // batch_size
+            
+            self.logger.info(f"大数据量分批存储: {len(data)} 条，分 {total_batches} 批处理")
+            
+            # 分批存储数据
+            for batch_num in range(total_batches):
+                start_idx = batch_num * batch_size
+                end_idx = min((batch_num + 1) * batch_size, len(data))
+                batch_data = data.iloc[start_idx:end_idx]
+                
+                self.logger.info(f"  处理第 {batch_num + 1}/{total_batches} 批，数据量: {len(batch_data)} 条")
+                
+                # 使用Pipeline批量设置
+                pipe = self.client.pipeline()
+                
+                for _, row in batch_data.iterrows():
+                    equip_sn = str(row['equip_sn'])
+                    row_data = row.to_dict()
+                    
+                    # 序列化行数据
+                    serialized_data = pickle.dumps(row_data)
+                    
+                    # 添加到Hash
+                    pipe.hset(full_key, equip_sn, serialized_data)
+                
+                # 执行Pipeline
+                pipe.execute()
+                
+                # 每批之间稍作休息，避免Redis过载
+                if batch_num < total_batches - 1:
+                    time.sleep(0.1)
+            
+            self.logger.info(f"✅ 大数据量Hash数据存储完成: {full_key}，总数据量: {len(data)} 条")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"大数据量Hash数据存储失败: {e}")
+            return False
 
     def get_hash_data(self, hash_key: str) -> Optional[pd.DataFrame]:
         """
         从Redis Hash获取DataFrame数据
+        优化版本：支持大数据量分批读取
         
         Args:
             hash_key: Hash键名
@@ -774,9 +716,104 @@ class RedisCache:
                 self.logger.info(f"Hash不存在: {full_key}")
                 return pd.DataFrame()
             
-            # 获取所有Hash数据
-            hash_data = self.client.hgetall(full_key)
+            # 先获取Hash的大小，判断是否需要分批读取
+            hash_size = self.client.hlen(full_key)
+            if hash_size == 0:
+                return pd.DataFrame()
             
+            self.logger.info(f"开始获取Hash数据: {full_key}，数据量: {hash_size} 条")
+            
+            # 对于大数据量，使用分批读取
+            if hash_size > 5000:
+                return self._get_large_hash_data(full_key, hash_size)
+            else:
+                # 小数据量直接读取
+                hash_data = self.client.hgetall(full_key)
+                return self._deserialize_hash_data(hash_data, full_key)
+            
+        except Exception as e:
+            self.logger.error(f"获取Hash数据失败 {hash_key}: {e}")
+            return None
+    
+    def _get_large_hash_data(self, full_key: str, hash_size: int) -> Optional[pd.DataFrame]:
+        """
+        分批获取大数据量Hash数据
+        
+        Args:
+            full_key: 完整的Redis键名
+            hash_size: Hash大小
+            
+        Returns:
+            Optional[pd.DataFrame]: 合并后的DataFrame
+        """
+        try:
+            import time
+            batch_size = 2000  # 每批2000条
+            total_batches = (hash_size + batch_size - 1) // batch_size
+            
+            self.logger.info(f"大数据量分批读取: {hash_size} 条，分 {total_batches} 批处理")
+            
+            all_records = []
+            cursor = 0
+            
+            for batch_num in range(total_batches):
+                self.logger.info(f"  读取第 {batch_num + 1}/{total_batches} 批数据...")
+                
+                # 使用HSCAN分批读取
+                batch_data = {}
+                scan_cursor = cursor
+                
+                while True:
+                    scan_cursor, data = self.client.hscan(full_key, cursor=scan_cursor, count=batch_size)
+                    batch_data.update(data)
+                    
+                    # 如果扫描完成（cursor=0）或者已经读取足够的数据，跳出循环
+                    if scan_cursor == 0:
+                        break
+                    # 如果当前批次数据量已经达到预期，也跳出循环
+                    if len(batch_data) >= batch_size:
+                        break
+                
+                # 反序列化当前批次数据
+                batch_records = self._deserialize_hash_data(batch_data, full_key, batch_num + 1)
+                if batch_records is not None and not batch_records.empty:
+                    all_records.append(batch_records)
+                    self.logger.info(f"  第 {batch_num + 1} 批数据反序列化完成: {len(batch_records)} 条")
+                
+                cursor = scan_cursor
+                # 如果扫描完成，跳出外层循环
+                if cursor == 0:
+                    self.logger.info(f"  Redis扫描完成，总共处理了 {batch_num + 1} 批数据")
+                    break
+                
+                # 每批之间稍作休息
+                time.sleep(0.01)
+            
+            if not all_records:
+                return pd.DataFrame()
+            
+            # 合并所有批次数据
+            df = pd.concat(all_records, ignore_index=True)
+            self.logger.info(f"✅ 大数据量Hash数据获取完成: {full_key}，总数据量: {len(df)} 条")
+            return df
+            
+        except Exception as e:
+            self.logger.error(f"大数据量Hash数据获取失败: {e}")
+            return None
+    
+    def _deserialize_hash_data(self, hash_data: dict, full_key: str, batch_num: int = None) -> Optional[pd.DataFrame]:
+        """
+        反序列化Hash数据
+        
+        Args:
+            hash_data: Hash数据字典
+            full_key: 完整的Redis键名
+            batch_num: 批次号（用于日志）
+            
+        Returns:
+            Optional[pd.DataFrame]: 反序列化后的DataFrame
+        """
+        try:
             if not hash_data:
                 return pd.DataFrame()
             
@@ -796,11 +833,12 @@ class RedisCache:
             # 转换为DataFrame
             df = pd.DataFrame(records)
             
-            self.logger.info(f"✅ 获取Hash数据完成: {full_key}，数据量: {len(df)} 条")
+            batch_info = f"第 {batch_num} 批" if batch_num else ""
+            self.logger.info(f"✅ {batch_info}Hash数据反序列化完成: {len(df)} 条")
             return df
             
         except Exception as e:
-            self.logger.error(f"获取Hash数据失败 {hash_key}: {e}")
+            self.logger.error(f"反序列化Hash数据失败: {e}")
             return None
 
     def update_hash_incremental(self, hash_key: str, new_data: pd.DataFrame, ttl: Optional[int] = None) -> bool:
@@ -845,16 +883,33 @@ class RedisCache:
             
             # 更新元数据
             meta_key = f"{full_key}:meta"
-            if self.client.exists(meta_key):
-                try:
+            try:
+                # 获取当前Hash的实际数据量
+                actual_count = self.client.hlen(full_key)
+                
+                if self.client.exists(meta_key):
+                    # 更新现有元数据
                     metadata = pickle.loads(self.client.get(meta_key))
                     metadata['last_update'] = datetime.now().isoformat()
-                    metadata['total_count'] = self.client.hlen(full_key)
+                    metadata['total_count'] = actual_count
                     self.client.set(meta_key, pickle.dumps(metadata))
                     if ttl:
                         self.client.expire(meta_key, ttl)
-                except Exception as e:
-                    self.logger.warning(f"更新元数据失败: {e}")
+                else:
+                    # 创建新的元数据
+                    metadata = {
+                        'created_at': datetime.now().isoformat(),
+                        'last_update': datetime.now().isoformat(),
+                        'total_count': actual_count,
+                        'data_type': 'equipment_hash'
+                    }
+                    self.client.set(meta_key, pickle.dumps(metadata))
+                    if ttl:
+                        self.client.expire(meta_key, ttl)
+                        
+                self.logger.info(f"元数据已更新: {meta_key}, 数据量: {actual_count}")
+            except Exception as e:
+                self.logger.warning(f"更新元数据失败: {e}")
             
             self.logger.info(f"✅ 增量更新Hash数据完成: {full_key}，新增: {len(new_data)} 条")
             return True

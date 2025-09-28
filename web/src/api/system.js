@@ -186,13 +186,6 @@ export const systemApi = {
     return api.post('/equipment/cache/incremental-update', data)
   },
 
-  /**
-   * 装备自动增量更新
-   * @returns {Promise}
-   */
-  autoIncrementalUpdateEquipment() {
-    return api.post('/equipment/cache/auto-update')
-  },
 
   /**
    * 装备强制增量更新

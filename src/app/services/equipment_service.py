@@ -1239,8 +1239,8 @@ class EquipmentService:
             collector = EquipMarketDataCollector.get_instance()
             
             if update_type == 'auto':
-                # 自动检测并更新
-                success = collector.auto_incremental_update()
+                # 自动检测并更新（已移除）
+                return {"error": "自动检测更新功能已移除，请使用手动增量更新"}
             elif update_type == 'time':
                 # 基于时间戳更新
                 if last_update_time:
@@ -1286,31 +1286,6 @@ class EquipmentService:
             logger.error(f"获取增量更新状态失败: {str(e)}")
             return {"error": f"获取增量更新状态失败: {str(e)}"}
     
-    def auto_incremental_update(self) -> Dict:
-        """自动增量更新"""
-        try:
-            from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-            
-            # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector.get_instance()
-            
-            # 执行自动增量更新
-            success = collector.auto_incremental_update()
-            
-            if success:
-                # 获取更新后的状态
-                status = collector.get_incremental_update_status()
-                return {
-                    "success": True,
-                    "message": "自动增量更新成功",
-                    "status": status
-                }
-            else:
-                return {"error": "自动增量更新失败"}
-            
-        except Exception as e:
-            logger.error(f"自动增量更新失败: {str(e)}")
-            return {"error": f"自动增量更新失败: {str(e)}"}
     
     def force_incremental_update(self) -> Dict:
         """强制增量更新"""
@@ -1337,6 +1312,32 @@ class EquipmentService:
         except Exception as e:
             logger.error(f"强制增量更新失败: {str(e)}")
             return {"error": f"强制增量更新失败: {str(e)}"}
+    
+    def refresh_memory_cache(self) -> Dict:
+        """刷新内存缓存"""
+        try:
+            from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+            
+            # 获取装备市场数据采集器实例
+            collector = EquipMarketDataCollector.get_instance()
+            
+            # 执行内存缓存刷新
+            success = collector._refresh_memory_cache_from_redis()
+            
+            if success:
+                # 获取刷新后的状态
+                status = collector.get_incremental_update_status()
+                return {
+                    "success": True,
+                    "message": "内存缓存刷新成功",
+                    "status": status
+                }
+            else:
+                return {"error": "内存缓存刷新失败"}
+            
+        except Exception as e:
+            logger.error(f"刷新内存缓存失败: {str(e)}")
+            return {"error": f"刷新内存缓存失败: {str(e)}"}
 
 
 equipment_service = EquipmentService()

@@ -44,7 +44,7 @@
             </el-col>
           </el-row>
           <div class="result-footer">
-            <SimilarEquipmentModal :equipment="item" :similar-data="similarData" 
+            <SimilarEquipmentModal :key="item.equip_sn" :equipment="item" :similar-data="similarData" 
               @valuation-updated="(data) => handleValuationUpdated(data, index)">
               <el-link href="javascript:void(0)" type="primary" style="font-weight: bold;">{{ item.name || `装备 ${index +
                 1}`

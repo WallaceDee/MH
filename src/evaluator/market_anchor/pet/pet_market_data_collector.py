@@ -440,7 +440,8 @@ class PetMarketDataCollector:
                 
                 try:
                     print("🔍 开始检查Redis缓存...")
-                    cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+                    hash_key = f"{self._full_cache_key}:hash"
+                    cached_data = self.redis_cache.get_hash_data(hash_key)
                     print(f"🔍 Redis缓存检查完成，结果: {cached_data is not None}")
                     
                     if cached_data is not None and not cached_data.empty:
@@ -619,10 +620,10 @@ class PetMarketDataCollector:
             for attempt in range(max_retries):
                 try:
                     print(f"第 {attempt + 1} 次尝试存储新数据到临时键...")
-                    success = self.redis_cache.set_chunked_data(
-                        base_key=temp_cache_key,
+                    temp_hash_key = f"{temp_cache_key}:hash"
+                    success = self.redis_cache.set_hash_data(
+                        hash_key=temp_hash_key,
                         data=df,
-                        chunk_size=chunk_size,
                         ttl=ttl_seconds
                     )
                     if success:
@@ -702,11 +703,12 @@ class PetMarketDataCollector:
                 print(f"从内存缓存获取全量数据: {len(self._full_data_cache)} 条")
                 return self._full_data_cache
             
-            # 从Redis获取分块数据
-            cached_data = self.redis_cache.get_chunked_data(self._full_cache_key)
+            # 从Redis获取Hash数据
+            hash_key = f"{self._full_cache_key}:hash"
+            cached_data = self.redis_cache.get_hash_data(hash_key)
             
             if cached_data is not None and not cached_data.empty:
-                print(f"从Redis分块缓存获取全量数据: {len(cached_data)} 条")
+                print(f"从Redis Hash缓存获取全量数据: {len(cached_data)} 条")
                 self._full_data_cache = cached_data  # 缓存到内存
                 return cached_data
             else:
@@ -827,11 +829,11 @@ class PetMarketDataCollector:
         try:
             print(f"开始复制临时缓存 {temp_key} 到正式缓存 {official_key}...")
             
-            # 直接使用set_chunked_data重新存储到正式键
-            success = self.redis_cache.set_chunked_data(
-                base_key=official_key,
+            # 直接使用set_hash_data重新存储到正式Hash键
+            official_hash_key = f"{official_key}:hash"
+            success = self.redis_cache.set_hash_data(
+                hash_key=official_hash_key,
                 data=df,
-                chunk_size=chunk_size,
                 ttl=ttl_seconds
             )
             

@@ -528,19 +528,6 @@ def get_incremental_update_status():
     except Exception as e:
         return error_response(f"获取增量更新状态失败: {str(e)}")
 
-@equipment_bp.route('/cache/auto-update', methods=['POST'])
-def auto_incremental_update():
-    """自动增量更新"""
-    try:
-        result = controller.auto_incremental_update()
-        
-        if "error" in result:
-            return error_response(result["error"])
-        
-        return success_response(data=result, message="自动增量更新成功")
-        
-    except Exception as e:
-        return error_response(f"自动增量更新失败: {str(e)}")
 
 @equipment_bp.route('/cache/force-update', methods=['POST'])
 def force_incremental_update():
@@ -555,3 +542,17 @@ def force_incremental_update():
         
     except Exception as e:
         return error_response(f"强制增量更新失败: {str(e)}")
+
+@equipment_bp.route('/cache/refresh-memory', methods=['POST'])
+def refresh_memory_cache():
+    """刷新内存缓存"""
+    try:
+        result = controller.refresh_memory_cache()
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="内存缓存刷新成功")
+        
+    except Exception as e:
+        return error_response(f"内存缓存刷新失败: {str(e)}")

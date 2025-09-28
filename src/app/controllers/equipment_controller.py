@@ -481,19 +481,6 @@ class EquipmentController:
             logger.error(f"获取增量更新状态失败: {str(e)}")
             return {"error": f"获取增量更新状态失败: {str(e)}"}
     
-    def auto_incremental_update(self) -> Dict:
-        """自动增量更新"""
-        try:
-            result = self.service.auto_incremental_update()
-            
-            if "error" in result:
-                return result
-            
-            return result
-            
-        except Exception as e:
-            logger.error(f"自动增量更新失败: {str(e)}")
-            return {"error": f"自动增量更新失败: {str(e)}"}
     
     def force_incremental_update(self) -> Dict:
         """强制增量更新"""
@@ -508,3 +495,17 @@ class EquipmentController:
         except Exception as e:
             logger.error(f"强制增量更新失败: {str(e)}")
             return {"error": f"强制增量更新失败: {str(e)}"}
+    
+    def refresh_memory_cache(self) -> Dict:
+        """刷新内存缓存"""
+        try:
+            result = self.service.refresh_memory_cache()
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"刷新内存缓存失败: {str(e)}")
+            return {"error": f"刷新内存缓存失败: {str(e)}"}

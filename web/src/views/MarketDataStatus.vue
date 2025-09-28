@@ -158,7 +158,7 @@
             <!-- 装备数据操作栏 -->
             <div class="tab-action-bar">
               <el-button type="info" @click="refreshEquipmentData" icon="el-icon-box" :disabled="refreshing">
-                加载装备数据
+                从redis中加载数据
               </el-button>
 
               <el-button type="success" @click="incrementalUpdateEquipment" icon="el-icon-refresh-left" 
@@ -166,14 +166,10 @@
                 增量更新
               </el-button>
 
-              <el-button type="warning" @click="autoIncrementalUpdateEquipment" icon="el-icon-magic-stick" 
-                :loading="equipmentAutoUpdating" :disabled="refreshing">
-                自动检测更新
-              </el-button>
 
               <el-button type="danger" @click="refreshEquipmentFullCache" icon="el-icon-refresh"
                 :loading="equipmentCacheRefreshing">
-                同步装备数据
+                全量同步装备(mysql)
               </el-button>
             </div>
 
@@ -187,13 +183,13 @@
                     <span>装备缓存状态</span>
                   </div>
                   <div class="status-item">
-                    <span class="label">数据已加载:</span>
+                    <span class="label">数据已加载到内存:</span>
                     <el-tag :type="equipmentMarketDataStatus.data_loaded ? 'success' : 'danger'">
                       {{ equipmentMarketDataStatus.data_loaded ? '是' : '否' }}
                     </el-tag>
                   </div>
                   <div class="status-item">
-                    <span class="label">数据条数:</span>
+                    <span class="label">内存数据条数:</span>
                     <span class="value">{{ equipmentMarketDataStatus.data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
@@ -683,7 +679,6 @@ export default {
       equipmentLoading: false,  // 区分装备加载和装备同步
       equipmentMarketDataStatus: {},  // 装备市场数据状态
       equipmentIncrementalUpdating: false,  // 装备增量更新状态
-      equipmentAutoUpdating: false,  // 装备自动更新状态
       equipmentIncrementalStatus: {},  // 装备增量更新状态信息
       // 召唤兽数据相关
       petCacheRefreshing: false,
@@ -741,8 +736,6 @@ export default {
         return '加载装备数据'
       } else if (this.equipmentIncrementalUpdating) {
         return '增量更新装备数据'
-      } else if (this.equipmentAutoUpdating) {
-        return '自动检测更新装备数据'
       } else if (this.fullCacheRefreshing) {
         return '同步市场数据'
       } else {
@@ -762,8 +755,6 @@ export default {
         return '正在加载装备数据...'
       } else if (this.equipmentIncrementalUpdating) {
         return '正在增量更新装备数据...'
-      } else if (this.equipmentAutoUpdating) {
-        return '正在自动检测更新装备数据...'
       } else if (this.fullCacheRefreshing) {
         return '正在同步市场数据...'
       } else {
@@ -786,6 +777,16 @@ export default {
 
     // 监听页面可见性变化
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
+  },
+
+  watch: {
+    // 监听标签页切换，切换时刷新对应状态
+    activeTab(newTab, oldTab) {
+      if (newTab !== oldTab) {
+        console.log(`标签页从 ${oldTab} 切换到 ${newTab}，刷新对应状态`)
+        this.refreshStatus()
+      }
+    }
   },
 
   beforeDestroy() {
@@ -851,7 +852,7 @@ export default {
       } else {
         // 页面可见时恢复自动刷新
         console.log('页面可见，恢复自动刷新')
-        this.startAutoRefresh()
+        // this.startAutoRefresh()
         // 立即刷新一次状态
         this.refreshStatus()
       }
@@ -862,57 +863,51 @@ export default {
 
       this.loading = true
       try {
-        // 并行获取角色数据状态、装备数据状态、召唤兽数据状态、装备增量更新状态和Redis状态
-        const [roleResponse, equipmentMarketDataStatusResponse, petMarketDataStatusResponse, redisResponse] = await Promise.all([
-          systemApi.getMarketDataStatus(),
-          systemApi.getEquipmentMarketDataStatus().catch(() => ({ code: 500, data: {} })),
-          systemApi.getPetMarketDataStatus().catch(() => ({ code: 500, data: {} })),
-          // systemApi.getEquipmentIncrementalUpdateStatus().catch(() => ({ code: 500, data: {} })),
-          systemApi.getRedisStatus().catch(() => ({ code: 500, data: {} }))
-        ])
-        // equipmentIncrementalStatusResponse,
-        if (roleResponse.code === 200) {
-          this.status = roleResponse.data || {}
-        }
-
-        if (equipmentMarketDataStatusResponse.code === 200) {
-          this.equipmentMarketDataStatus = equipmentMarketDataStatusResponse.data || {}
-        }
-
-        if (petMarketDataStatusResponse.code === 200) {
-          this.petMarketDataStatus = petMarketDataStatusResponse.data || {}
-        }
-
-        // if (equipmentIncrementalStatusResponse.code === 200) {
-        //   this.equipmentIncrementalStatus = equipmentIncrementalStatusResponse.data || {}
-        // }
-
-        if (redisResponse.code === 200) {
-          this.redisStatus = redisResponse.data || {}
-        }
-
-        // 如果发现正在刷新但前端没有显示进度，恢复进度弹框
-        if (roleResponse.data && roleResponse.data.refresh_status === 'running' && !this.refreshing) {
-          this.refreshing = true
-          this.showRefreshDialog = true
-          this.initializeProgress()
-
-          // 从后端恢复进度信息
-          this.refreshProgress = roleResponse.data.refresh_progress || 0
-          this.refreshMessage = roleResponse.data.refresh_message || '正在处理...'
-          this.refreshedCount = roleResponse.data.refresh_processed_records || 0
-          this.currentBatch = roleResponse.data.refresh_current_batch || 0
-          this.totalBatches = roleResponse.data.refresh_total_batches || 0
-
-          // 如果有开始时间，使用它
-          if (roleResponse.data.refresh_start_time) {
-            this.refreshStartTime = new Date(roleResponse.data.refresh_start_time).getTime()
+        // 根据当前激活的标签页只刷新对应的状态
+        if (this.activeTab === 'role') {
+          const roleResponse = await systemApi.getMarketDataStatus()
+          if (roleResponse.code === 200) {
+            this.status = roleResponse.data || {}
           }
 
-          // 开始轮询进度
-          this.startProgressPolling()
+          // 如果发现正在刷新但前端没有显示进度，恢复进度弹框
+          if (roleResponse.data && roleResponse.data.refresh_status === 'running' && !this.refreshing) {
+            this.refreshing = true
+            this.showRefreshDialog = true
+            this.initializeProgress()
 
-          this.$message.info('检测到正在进行的数据刷新任务，已恢复进度显示')
+            // 从后端恢复进度信息
+            this.refreshProgress = roleResponse.data.refresh_progress || 0
+            this.refreshMessage = roleResponse.data.refresh_message || '正在处理...'
+            this.refreshedCount = roleResponse.data.refresh_processed_records || 0
+            this.currentBatch = roleResponse.data.refresh_current_batch || 0
+            this.totalBatches = roleResponse.data.refresh_total_batches || 0
+
+            // 如果有开始时间，使用它
+            if (roleResponse.data.refresh_start_time) {
+              this.refreshStartTime = new Date(roleResponse.data.refresh_start_time).getTime()
+            }
+
+            // 开始轮询进度
+            this.startProgressPolling()
+
+            this.$message.info('检测到正在进行的数据刷新任务，已恢复进度显示')
+          }
+        } else if (this.activeTab === 'equipment') {
+          const equipmentResponse = await systemApi.getEquipmentMarketDataStatus()
+          if (equipmentResponse.code === 200) {
+            this.equipmentMarketDataStatus = equipmentResponse.data || {}
+          }
+        } else if (this.activeTab === 'pet') {
+          const petResponse = await systemApi.getPetMarketDataStatus()
+          if (petResponse.code === 200) {
+            this.petMarketDataStatus = petResponse.data || {}
+          }
+        } else if (this.activeTab === 'redis') {
+          const redisResponse = await systemApi.getRedisStatus()
+          if (redisResponse.code === 200) {
+            this.redisStatus = redisResponse.data || {}
+          }
         }
 
       } catch (error) {
@@ -989,7 +984,7 @@ export default {
       this.progressTimer = setInterval(async () => {
         if (this.petCacheRefreshing || this.petLoading) {
           await this.updatePetProgressFromBackend()
-        } else if (this.equipmentCacheRefreshing || this.equipmentLoading || this.equipmentIncrementalUpdating || this.equipmentAutoUpdating) {
+        } else if (this.equipmentCacheRefreshing || this.equipmentLoading || this.equipmentIncrementalUpdating) {
           await this.updateEquipmentProgressFromBackend()
         } else {
           await this.updateProgressFromBackend()
@@ -1057,7 +1052,6 @@ export default {
         this.equipmentCacheRefreshing = false
         this.equipmentLoading = false
         this.equipmentIncrementalUpdating = false
-        this.equipmentAutoUpdating = false
         this.petCacheRefreshing = false
         this.petLoading = false
       }, 2000)
@@ -1423,8 +1417,6 @@ export default {
             this.completeProgress()
             if (this.equipmentIncrementalUpdating) {
               this.$message.success(`装备增量更新完成！处理了 ${this.refreshedCount} 条数据`)
-            } else if (this.equipmentAutoUpdating) {
-              this.$message.success(`装备自动检测更新完成！处理了 ${this.refreshedCount} 条数据`)
             } else {
               this.$message.success(`装备缓存刷新完成！处理了 ${this.refreshedCount} 条数据`)
             }
@@ -1450,7 +1442,6 @@ export default {
             this.equipmentCacheRefreshing = false
             this.equipmentLoading = false
             this.equipmentIncrementalUpdating = false
-            this.equipmentAutoUpdating = false
           }
           // 如果是 'running' 状态，继续轮询
         }
@@ -1520,41 +1511,6 @@ export default {
       }
     },
 
-    async autoIncrementalUpdateEquipment() {
-      if (this.equipmentAutoUpdating || this.refreshing) return
-
-      try {
-        this.$confirm('自动检测更新将检查MySQL中是否有新数据，如有则自动进行增量更新，是否继续？', '确认自动检测更新', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'info'
-        }).then(async () => {
-          this.refreshing = true
-          this.equipmentAutoUpdating = true
-          this.showRefreshDialog = true
-          this.initializeProgress()
-
-          const response = await systemApi.autoIncrementalUpdateEquipment()
-          if (response.code === 200) {
-            this.$message.success('装备自动检测更新已启动，正在后台处理...')
-            this.startProgressPolling()
-          } else {
-            this.$message.error(response.message || '启动装备自动检测更新失败')
-            this.refreshing = false
-            this.equipmentAutoUpdating = false
-            this.showRefreshDialog = false
-          }
-        }).catch(() => {
-          // 用户取消操作
-        })
-      } catch (error) {
-        console.error('启动装备自动检测更新失败:', error)
-        this.$message.error('启动装备自动检测更新失败，请检查网络连接')
-        this.refreshing = false
-        this.equipmentAutoUpdating = false
-        this.showRefreshDialog = false
-      }
-    },
 
     getEquipmentTypeName(kindid) {
       const kindidOptions = [...window.AUTO_SEARCH_CONFIG.weapon_armors.map(([value, label]) => ({ value, label })), ...window.lingshiKinds.map(([value, label]) => ({ value, label })), {

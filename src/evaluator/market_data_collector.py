@@ -869,16 +869,17 @@ class MarketDataCollector:
             # 使用固定的全量缓存键
             full_cache_key = "market_data_full_empty_roles"
             
-            print("尝试从Redis分块缓存获取全量数据...")
+            print("尝试从Redis Hash缓存获取全量数据...")
             
-            # 尝试获取分块数据
-            cached_data = redis_cache.get_chunked_data(full_cache_key)
+            # 尝试获取Hash数据
+            hash_key = f"{full_cache_key}:hash"
+            cached_data = redis_cache.get_hash_data(hash_key)
             
             if cached_data is not None and not cached_data.empty:
-                print(f"从Redis分块缓存获取数据成功: {len(cached_data)} 条")
+                print(f"从Redis Hash缓存获取数据成功: {len(cached_data)} 条")
                 return cached_data
             else:
-                print("Redis分块缓存未命中")
+                print("Redis Hash缓存未命中")
                 return None
                 
         except Exception as e:
@@ -926,22 +927,22 @@ class MarketDataCollector:
             else:
                 chunk_size = 500   # 小数据集
             
-            # 使用分块存储
-            success = redis_cache.set_chunked_data(
-                base_key=full_cache_key,
+            # 使用Hash存储
+            hash_key = f"{full_cache_key}:hash"
+            success = redis_cache.set_hash_data(
+                hash_key=hash_key,
                 data=data,
-                chunk_size=chunk_size,
                 ttl=ttl_seconds
             )
             
             if success:
                 if cache_hours == -1:
-                    print(f"全量数据已分块缓存到Redis，缓存时间: 永不过期，块大小: {chunk_size}")
+                    print(f"全量数据已Hash缓存到Redis，缓存时间: 永不过期")
                 else:
-                    print(f"全量数据已分块缓存到Redis，缓存时间: {cache_hours}小时，块大小: {chunk_size}")
+                    print(f"全量数据已Hash缓存到Redis，缓存时间: {cache_hours}小时")
                 return True
             else:
-                print("Redis分块缓存设置失败")
+                print("Redis Hash缓存设置失败")
                 return False
                 
         except Exception as e:

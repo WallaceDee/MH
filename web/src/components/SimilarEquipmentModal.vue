@@ -119,6 +119,12 @@ export default {
       try {
         // 第一个接口：获取装备估价信息
         this.valuationLoading = true
+        if (window.is_pet_equip(equipment.kindid)) {
+          equipment = {
+            kindid: 29,
+            desc: equipment.desc
+          }
+        }
         const response = await this.$api.equipment.getEquipmentValuation({
           equipment_data: equipment,
           strategy: 'fair_value',
