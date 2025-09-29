@@ -573,6 +573,37 @@ class RedisCache:
             self.logger.error(f"获取缓存类型统计失败: {e}")
             return {}
 
+    def rename_key(self, old_key: str, new_key: str) -> bool:
+        """
+        原子性地重命名Redis键（高效的无缝切换）
+        
+        Args:
+            old_key: 原键名
+            new_key: 新键名
+            
+        Returns:
+            bool: 是否重命名成功
+        """
+        try:
+            if not self.is_available():
+                return False
+            
+            # 使用_make_key方法添加前缀
+            old_full_key = self._make_key(old_key)
+            new_full_key = self._make_key(new_key)
+            
+            # 使用Redis的RENAME命令进行原子性重命名
+            result = self.client.rename(old_full_key, new_full_key)
+            if result:
+                self.logger.info(f"✅ 键重命名成功: {old_full_key} -> {new_full_key}")
+                return True
+            else:
+                self.logger.warning(f"⚠️ 键重命名失败: {old_full_key} -> {new_full_key}")
+                return False
+        except Exception as e:
+            self.logger.error(f"❌ 键重命名异常: {e}")
+            return False
+
     def set_hash_data(self, hash_key: str, data: pd.DataFrame, ttl: Optional[int] = None) -> bool:
         """
         将DataFrame数据存储为Redis Hash结构

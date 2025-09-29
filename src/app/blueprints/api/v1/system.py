@@ -521,12 +521,33 @@ def get_equipment_market_data_status():
         try:
             if collector.redis_cache and collector.redis_cache.is_available():
                 # 从Hash结构元数据获取数据总数
-                hash_metadata = collector.redis_cache.get(f"{collector._full_cache_key}:hash:meta")
-                if hash_metadata and 'total_count' in hash_metadata:
-                    redis_count = hash_metadata.get('total_count', 0)
-                    print(f"🔍 Redis缓存数据量: {redis_count} 条")
+                meta_key = f"{collector._full_cache_key}:meta"
+                print(f"🔍 尝试获取Redis元数据键: {meta_key}")
+                
+                # 先检查键是否存在
+                full_meta_key = collector.redis_cache._make_key(meta_key)
+                print(f"🔍 完整元数据键: {full_meta_key}")
+                
+                # 检查键是否存在
+                key_exists = collector.redis_cache.client.exists(full_meta_key)
+                print(f"🔍 元数据键是否存在: {key_exists}")
+                
+                if key_exists:
+                    hash_metadata = collector.redis_cache.get(meta_key)
+                    print(f"🔍 Redis元数据内容: {hash_metadata}")
+                    if hash_metadata and 'total_count' in hash_metadata:
+                        redis_count = hash_metadata.get('total_count', 0)
+                        print(f"🔍 Redis缓存数据量: {redis_count} 条")
+                    else:
+                        print("🔍 Redis Hash元数据缺少total_count字段")
                 else:
-                    print("🔍 Redis Hash元数据不存在")
+                    print("🔍 Redis Hash元数据键不存在")
+                    
+                    # 尝试直接获取Hash数据量
+                    hash_key = collector.redis_cache._make_key(collector._full_cache_key)
+                    hash_count = collector.redis_cache.client.hlen(hash_key)
+                    print(f"🔍 直接获取Hash数据量: {hash_count} 条")
+                    redis_count = hash_count
             else:
                 print("🔍 Redis不可用")
         except Exception as e:

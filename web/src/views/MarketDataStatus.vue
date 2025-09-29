@@ -183,7 +183,7 @@
                     <span>装备缓存状态</span>
                   </div>
                   <div class="status-item">
-                    <span class="label">数据已加载到内存:</span>
+                    <span class="label">数据是否已加载到内存:</span>
                     <el-tag :type="equipmentMarketDataStatus.data_loaded ? 'success' : 'danger'">
                       {{ equipmentMarketDataStatus.data_loaded ? '是' : '否' }}
                     </el-tag>
