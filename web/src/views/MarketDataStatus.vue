@@ -201,7 +201,7 @@
                     <span class="value">{{ equipmentMarketDataStatus.redis_data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
-                    <span class="label">内存占用:</span>
+                    <span class="label">Redis内存占用:</span>
                     <span class="value">{{ (equipmentMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
                   </div>
                   <div class="status-item">
@@ -209,7 +209,7 @@
                     <span class="value">{{ (equipmentMarketDataStatus.data_columns || []).length }}</span>
                   </div>
                   <div v-if="equipmentMarketDataStatus.last_refresh_time" class="status-item">
-                    <span class="label">最后刷新:</span>
+                    <span class="label">Redis最后刷新:</span>
                     <span class="value">{{ formatTime(equipmentMarketDataStatus.last_refresh_time) }}</span>
                   </div>
                   <div v-if="equipmentIncrementalStatus.has_new_data" class="status-item">
@@ -897,11 +897,65 @@ export default {
           const equipmentResponse = await systemApi.getEquipmentMarketDataStatus()
           if (equipmentResponse.code === 200) {
             this.equipmentMarketDataStatus = equipmentResponse.data || {}
+            
+            // 检查装备数据刷新状态，如果正在运行但前端没有显示进度，恢复进度弹框
+            if (equipmentResponse.data && equipmentResponse.data.refresh_status === 'running' && !this.equipmentCacheRefreshing && !this.equipmentLoading) {
+              this.equipmentCacheRefreshing = true
+              this.showRefreshDialog = true
+              this.initializeProgress()
+
+              // 从后端恢复进度信息
+              this.refreshProgress = equipmentResponse.data.refresh_progress || 0
+              this.refreshMessage = equipmentResponse.data.refresh_message || '正在处理装备数据...'
+              this.refreshedCount = equipmentResponse.data.refresh_processed_records || 0
+              this.currentBatch = equipmentResponse.data.refresh_current_batch || 0
+              this.totalBatches = equipmentResponse.data.refresh_total_batches || 0
+
+              // 如果有开始时间，使用它
+              if (equipmentResponse.data.refresh_start_time) {
+                this.refreshStartTime = new Date(equipmentResponse.data.refresh_start_time).getTime()
+              }
+
+              // 开始轮询进度
+              this.startProgressPolling()
+
+              this.$message.info('检测到正在进行的装备数据刷新任务，已恢复进度显示')
+            }
+            
+            // 检查装备增量更新状态
+            if (equipmentResponse.data && equipmentResponse.data.refresh_status === 'running' && !this.equipmentIncrementalUpdating) {
+              // 这里可以根据具体的增量更新状态字段来判断
+              // 暂时使用相同的逻辑
+            }
           }
         } else if (this.activeTab === 'pet') {
           const petResponse = await systemApi.getPetMarketDataStatus()
           if (petResponse.code === 200) {
             this.petMarketDataStatus = petResponse.data || {}
+            
+            // 检查召唤兽数据刷新状态，如果正在运行但前端没有显示进度，恢复进度弹框
+            if (petResponse.data && petResponse.data.refresh_status === 'running' && !this.petCacheRefreshing && !this.petLoading) {
+              this.petCacheRefreshing = true
+              this.showRefreshDialog = true
+              this.initializeProgress()
+
+              // 从后端恢复进度信息
+              this.refreshProgress = petResponse.data.refresh_progress || 0
+              this.refreshMessage = petResponse.data.refresh_message || '正在处理召唤兽数据...'
+              this.refreshedCount = petResponse.data.refresh_processed_records || 0
+              this.currentBatch = petResponse.data.refresh_current_batch || 0
+              this.totalBatches = petResponse.data.refresh_total_batches || 0
+
+              // 如果有开始时间，使用它
+              if (petResponse.data.refresh_start_time) {
+                this.refreshStartTime = new Date(petResponse.data.refresh_start_time).getTime()
+              }
+
+              // 开始轮询进度
+              this.startProgressPolling()
+
+              this.$message.info('检测到正在进行的召唤兽数据刷新任务，已恢复进度显示')
+            }
           }
         } else if (this.activeTab === 'redis') {
           const redisResponse = await systemApi.getRedisStatus()
@@ -1006,16 +1060,29 @@ export default {
           this.refreshedCount = data.refresh_processed_records || 0
           this.currentBatch = data.refresh_current_batch || 0
           this.totalBatches = data.refresh_total_batches || 0
+          
+          // 如果有后端返回的耗时，优先使用它
+          if (data.refresh_elapsed_seconds !== undefined) {
+            this.refreshStartTime = Date.now() - (data.refresh_elapsed_seconds * 1000)
+          } else if (data.refresh_start_time && !this.refreshStartTime) {
+            // 如果没有elapsed_seconds但有start_time，使用start_time
+            this.refreshStartTime = new Date(data.refresh_start_time).getTime()
+          }
 
           // 检查刷新状态
           if (data.refresh_status === 'completed') {
             this.completeProgress()
             this.$message.success(`数据刷新完成！处理了 ${this.refreshedCount} 条数据`)
 
-            // 延迟关闭对话框
+            // 延迟关闭对话框，但保留耗时信息
             setTimeout(() => {
               this.showRefreshDialog = false
-              this.resetProgress()
+              // 不重置refreshStartTime，让用户看到最终耗时
+              this.refreshProgress = 0
+              this.refreshMessage = ''
+              this.refreshedCount = 0
+              this.currentBatch = 0
+              this.totalBatches = 0
             }, 2000)
 
             // 刷新主状态
@@ -1354,16 +1421,29 @@ export default {
           this.refreshedCount = data.processed_records || 0
           this.currentBatch = data.current_batch || 0
           this.totalBatches = data.total_batches || 0
+          
+          // 如果有后端返回的耗时，优先使用它
+          if (data.elapsed_seconds !== undefined) {
+            this.refreshStartTime = Date.now() - (data.elapsed_seconds * 1000)
+          } else if (data.start_time && !this.refreshStartTime) {
+            // 如果没有elapsed_seconds但有start_time，使用start_time
+            this.refreshStartTime = new Date(data.start_time).getTime()
+          }
 
           // 检查刷新状态
           if (data.status === 'completed') {
             this.completeProgress()
             this.$message.success(`召唤兽缓存刷新完成！处理了 ${this.refreshedCount} 条数据`)
 
-            // 延迟关闭对话框
+            // 延迟关闭对话框，但保留耗时信息
             setTimeout(() => {
               this.showRefreshDialog = false
-              this.resetProgress()
+              // 不重置refreshStartTime，让用户看到最终耗时
+              this.refreshProgress = 0
+              this.refreshMessage = ''
+              this.refreshedCount = 0
+              this.currentBatch = 0
+              this.totalBatches = 0
             }, 2000)
 
             // 刷新召唤兽状态
@@ -1411,6 +1491,14 @@ export default {
           this.refreshedCount = data.processed_records || 0
           this.currentBatch = data.current_batch || 0
           this.totalBatches = data.total_batches || 0
+          
+          // 如果有后端返回的耗时，优先使用它
+          if (data.elapsed_seconds !== undefined) {
+            this.refreshStartTime = Date.now() - (data.elapsed_seconds * 1000)
+          } else if (data.start_time && !this.refreshStartTime) {
+            // 如果没有elapsed_seconds但有start_time，使用start_time
+            this.refreshStartTime = new Date(data.start_time).getTime()
+          }
 
           // 检查刷新状态
           if (data.status === 'completed') {
@@ -1421,10 +1509,15 @@ export default {
               this.$message.success(`装备缓存刷新完成！处理了 ${this.refreshedCount} 条数据`)
             }
 
-            // 延迟关闭对话框
+            // 延迟关闭对话框，但保留耗时信息
             setTimeout(() => {
               this.showRefreshDialog = false
-              this.resetProgress()
+              // 不重置refreshStartTime，让用户看到最终耗时
+              this.refreshProgress = 0
+              this.refreshMessage = ''
+              this.refreshedCount = 0
+              this.currentBatch = 0
+              this.totalBatches = 0
             }, 2000)
 
             // 刷新装备状态和增量更新状态
@@ -1442,6 +1535,8 @@ export default {
             this.equipmentCacheRefreshing = false
             this.equipmentLoading = false
             this.equipmentIncrementalUpdating = false
+          }else{
+            this.refreshStartTime = new Date(data.start_time).getTime()
           }
           // 如果是 'running' 状态，继续轮询
         }

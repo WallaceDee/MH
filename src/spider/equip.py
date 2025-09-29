@@ -620,26 +620,9 @@ class CBGEquipSpider:
                     self.logger.warning(f"⚠️ MySQL保存成功，但同步新数据到Redis失败: {e}")
             
             self.logger.info(f"🎉 装备数据保存流程完成: 内存缓存 → MySQL → Redis")
-            if saved_count > 0:
-                try:
-                    from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
-                    
-                    pubsub = get_redis_pubsub()
-                    message = {
-                        'type': MessageType.EQUIPMENT_DATA_SAVED,
-                        'data_count': saved_count,
-                        'total_equipments': len(equipments),
-                        'timestamp': datetime.now().isoformat()
-                    }
-                    
-                    success = pubsub.publish(Channel.EQUIPMENT_UPDATES, message)
-                    if success:
-                        self.logger.info("📢 已发布装备数据更新消息到Redis")
-                    else:
-                        self.logger.warning("⚠️ 发布装备数据更新消息失败")
-                        
-                except Exception as e:
-                    self.logger.warning(f"⚠️ 发布Redis消息失败: {e}")
+            # 注意：不需要再次发送消息，因为已经在第540行发送了包含DataFrame的add_dataframe消息
+            # 该消息已经触发了内存缓存的直接更新和Redis的异步同步
+            # 这里只记录MySQL保存完成的状态
             
             return saved_count
             

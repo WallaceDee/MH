@@ -543,11 +543,10 @@ def get_equipment_market_data_status():
                 else:
                     print("🔍 Redis Hash元数据键不存在")
                     
-                    # 尝试直接获取Hash数据量
-                    hash_key = collector.redis_cache._make_key(collector._full_cache_key)
-                    hash_count = collector.redis_cache.client.hlen(hash_key)
-                    print(f"🔍 直接获取Hash数据量: {hash_count} 条")
-                    redis_count = hash_count
+                    # 避免调用hlen()，因为这会触发Redis扫描，影响性能
+                    # 如果元数据不存在，说明可能没有数据或者数据正在加载中
+                    print("🔍 元数据不存在，跳过Redis数据量查询以避免性能影响")
+                    redis_count = 0
             else:
                 print("🔍 Redis不可用")
         except Exception as e:
