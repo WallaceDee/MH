@@ -1229,89 +1229,6 @@ class EquipmentService:
         except Exception as e:
             return {"error": f"获取装备数据失败: {str(e)}"}
     
-    def incremental_update_cache(self, update_type: str = 'auto', last_update_time: Optional[str] = None) -> Dict:
-        """增量更新装备缓存"""
-        try:
-            from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-            from datetime import datetime
-            
-            # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector.get_instance()
-            
-            if update_type == 'auto':
-                # 自动检测并更新（已移除）
-                return {"error": "自动检测更新功能已移除，请使用手动增量更新"}
-            elif update_type == 'time':
-                # 基于时间戳更新
-                if last_update_time:
-                    try:
-                        last_time = datetime.fromisoformat(last_update_time)
-                        success = collector.incremental_update(last_time)
-                    except ValueError:
-                        return {"error": "时间格式错误，请使用ISO格式"}
-                else:
-                    success = collector.incremental_update()
-            else:
-                return {"error": f"不支持的更新类型: {update_type}"}
-            
-            if success:
-                # 获取更新后的状态
-                status = collector.get_incremental_update_status()
-                return {
-                    "success": True,
-                    "message": "增量更新成功",
-                    "status": status
-                }
-            else:
-                return {"error": "增量更新失败"}
-            
-        except Exception as e:
-            logger.error(f"增量更新装备缓存失败: {str(e)}")
-            return {"error": f"增量更新装备缓存失败: {str(e)}"}
-    
-    def get_incremental_update_status(self) -> Dict:
-        """获取增量更新状态"""
-        try:
-            from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-            
-            # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector.get_instance()
-            
-            # 获取增量更新状态
-            status = collector.get_incremental_update_status()
-            
-            return status
-            
-        except Exception as e:
-            logger.error(f"获取增量更新状态失败: {str(e)}")
-            return {"error": f"获取增量更新状态失败: {str(e)}"}
-    
-    
-    def force_incremental_update(self) -> Dict:
-        """强制增量更新"""
-        try:
-            from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-            
-            # 获取装备市场数据采集器实例
-            collector = EquipMarketDataCollector.get_instance()
-            
-            # 执行强制增量更新
-            success = collector.force_incremental_update()
-            
-            if success:
-                # 获取更新后的状态
-                status = collector.get_incremental_update_status()
-                return {
-                    "success": True,
-                    "message": "强制增量更新成功",
-                    "status": status
-                }
-            else:
-                return {"error": "强制增量更新失败"}
-            
-        except Exception as e:
-            logger.error(f"强制增量更新失败: {str(e)}")
-            return {"error": f"强制增量更新失败: {str(e)}"}
     
     def refresh_memory_cache(self) -> Dict:
         """刷新内存缓存"""
@@ -1325,12 +1242,9 @@ class EquipmentService:
             success = collector._refresh_memory_cache_from_redis()
             
             if success:
-                # 获取刷新后的状态
-                status = collector.get_incremental_update_status()
                 return {
                     "success": True,
-                    "message": "内存缓存刷新成功",
-                    "status": status
+                    "message": "内存缓存刷新成功"
                 }
             else:
                 return {"error": "内存缓存刷新失败"}

@@ -533,13 +533,30 @@ def get_equipment_market_data_status():
                 print(f"🔍 元数据键是否存在: {key_exists}")
                 
                 if key_exists:
-                    hash_metadata = collector.redis_cache.get(meta_key)
-                    print(f"🔍 Redis元数据内容: {hash_metadata}")
-                    if hash_metadata and 'total_count' in hash_metadata:
-                        redis_count = hash_metadata.get('total_count', 0)
-                        print(f"🔍 Redis缓存数据量: {redis_count} 条")
-                    else:
-                        print("🔍 Redis Hash元数据缺少total_count字段")
+                    # 元数据是作为普通字符串存储的，需要反序列化
+                    import pickle
+                    try:
+                        metadata_bytes = collector.redis_cache.client.get(full_meta_key)
+                        if metadata_bytes:
+                            hash_metadata = pickle.loads(metadata_bytes)
+                            print(f"🔍 Redis元数据内容: {hash_metadata}")
+                            if hash_metadata and 'total_count' in hash_metadata:
+                                redis_count = hash_metadata.get('total_count', 0)
+                                print(f"🔍 Redis缓存数据量: {redis_count} 条")
+                            else:
+                                print("🔍 Redis元数据缺少total_count字段")
+                        else:
+                            print("🔍 Redis元数据为空")
+                    except Exception as e:
+                        print(f"🔍 反序列化Redis元数据失败: {e}")
+                        # 尝试作为Hash结构获取（向后兼容）
+                        hash_metadata = collector.redis_cache.get(meta_key)
+                        print(f"🔍 Redis元数据内容(Hash): {hash_metadata}")
+                        if hash_metadata and 'total_count' in hash_metadata:
+                            redis_count = hash_metadata.get('total_count', 0)
+                            print(f"🔍 Redis缓存数据量: {redis_count} 条")
+                        else:
+                            print("🔍 Redis Hash元数据缺少total_count字段")
                 else:
                     print("🔍 Redis Hash元数据键不存在")
                     

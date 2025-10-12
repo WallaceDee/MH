@@ -169,31 +169,9 @@ export const systemApi = {
     return api.get('/system/market-data/equipment/refresh-status')
   },
 
-  /**
-   * 获取装备增量更新状态
-   * @returns {Promise}
-   */
-  getEquipmentIncrementalUpdateStatus() {
-    return api.get('/equipment/cache/incremental-status')
-  },
-
-  /**
-   * 装备增量更新
-   * @param {Object} data - 更新参数
-   * @returns {Promise}
-   */
-  incrementalUpdateEquipment(data = {}) {
-    return api.post('/equipment/cache/incremental-update', data)
-  },
 
 
-  /**
-   * 装备强制增量更新
-   * @returns {Promise}
-   */
-  forceIncrementalUpdateEquipment() {
-    return api.post('/equipment/cache/force-update')
-  },
+
 
   /**
    * 获取召唤兽市场数据状态

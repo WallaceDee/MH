@@ -4,11 +4,12 @@ console.log('CBG爬虫助手后台脚本已加载');
 // DevTools Protocol 监听器
 class DevToolsListener {
   constructor() {
-    this.tabId = null
+    this.currentTabId = null // 当前监听的标签页ID
     this.isListening = false
     this.recommendData = []
     this.pendingMessage = null // 存储待发送的消息
     this.sentRequests = new Set() // 跟踪已发送的请求ID
+    this.activeCbgTabs = new Set() // 跟踪所有CBG标签页
     this.init()
   }
 
@@ -28,15 +29,21 @@ class DevToolsListener {
       
       if (changeInfo.status === 'complete' && tab.url && tab.url.includes('cbg.163.com')) {
         console.log('检测到CBG页面加载完成:', tab.url);
-        // 只有在还没有连接或者连接的是不同标签页时才重新连接
-        if (!this.isListening || this.tabId !== tabId) {
-          this.tabId = tabId
-          this.startListening()
+        this.activeCbgTabs.add(tabId)
+        
+        // 如果当前没有监听任何标签页，或者激活的是当前监听的标签页，则开始监听
+        if (!this.isListening || this.currentTabId === tabId) {
+          this.switchToTab(tabId)
         } else {
-          console.log('DevTools Protocol已连接，无需重复连接')
+          console.log('当前正在监听其他标签页，等待用户切换到该标签页')
         }
-        // 当检测到CBG页面时，不自动打开side panel（避免用户手势错误）
-        // chrome.sidePanel.open({ tabId: tabId });
+      } else if (tab.url && !tab.url.includes('cbg.163.com')) {
+        // 如果标签页不再是CBG页面，从跟踪列表中移除
+        this.activeCbgTabs.delete(tabId)
+        if (this.currentTabId === tabId) {
+          console.log('当前监听的标签页不再是CBG页面，停止监听')
+          this.stopListening()
+        }
       }
     }
 
@@ -52,22 +59,32 @@ class DevToolsListener {
         
         if (tab.url && tab.url.includes('cbg.163.com')) {
           console.log('激活CBG页面:', tab.url);
-          // 只有在还没有连接或者连接的是不同标签页时才重新连接
-          if (!this.isListening || this.tabId !== activeInfo.tabId) {
-            this.tabId = activeInfo.tabId
-            this.startListening()
-          } else {
-            console.log('DevTools Protocol已连接，无需重复连接')
+          this.activeCbgTabs.add(activeInfo.tabId)
+          this.switchToTab(activeInfo.tabId)
+        } else {
+          // 如果激活的不是CBG页面，且当前正在监听该标签页，则停止监听
+          if (this.currentTabId === activeInfo.tabId) {
+            console.log('激活的标签页不是CBG页面，停止监听')
+            this.stopListening()
           }
-          // 当激活CBG页面时，不自动打开side panel（避免用户手势错误）
-          // chrome.sidePanel.open({ tabId: activeInfo.tabId });
         }
       })
+    }
+
+    // 监听标签页关闭
+    const onRemovedListener = (tabId) => {
+      console.log('标签页关闭事件:', tabId)
+      this.activeCbgTabs.delete(tabId)
+      if (this.currentTabId === tabId) {
+        console.log('当前监听的标签页已关闭，停止监听')
+        this.stopListening()
+      }
     }
 
     // 注册监听器
     chrome.tabs.onUpdated.addListener(onUpdatedListener)
     chrome.tabs.onActivated.addListener(onActivatedListener)
+    chrome.tabs.onRemoved.addListener(onRemovedListener)
 
     console.log('DevTools监听器已绑定')
 
@@ -87,8 +104,8 @@ class DevToolsListener {
       
       if (activeTab && activeTab.url && activeTab.url.includes('cbg.163.com')) {
         console.log('检测到当前活动标签页是CBG页面，立即连接DevTools Protocol')
-        this.tabId = activeTab.id
-        this.startListening()
+        this.activeCbgTabs.add(activeTab.id)
+        this.switchToTab(activeTab.id)
       } else {
         console.log('当前活动标签页不是CBG页面，等待用户切换到CBG页面')
         console.log('当前标签页信息:', {
@@ -102,10 +119,57 @@ class DevToolsListener {
     }
   }
 
+  // 切换到指定标签页进行监听
+  async switchToTab(tabId) {
+    console.log('切换到标签页进行监听:', tabId)
+    
+    // 如果已经在监听该标签页，无需重复操作
+    if (this.isListening && this.currentTabId === tabId) {
+      console.log('已经在监听该标签页，无需重复操作')
+      return
+    }
+    
+    // 停止当前监听
+    if (this.isListening) {
+      console.log('停止当前监听，切换到新标签页')
+      await this.stopListening()
+    }
+    
+    // 开始监听新标签页
+    this.currentTabId = tabId
+    await this.startListening()
+  }
+
+  // 停止监听
+  async stopListening() {
+    if (!this.isListening) {
+      console.log('当前没有在监听，无需停止')
+      return
+    }
+    
+    try {
+      if (this.currentTabId) {
+        await chrome.debugger.detach({ tabId: this.currentTabId })
+        console.log('✅ 已断开DevTools Protocol连接')
+      }
+    } catch (error) {
+      console.log('断开连接时出错（可能没有连接）:', error.message)
+    }
+    
+    this.isListening = false
+    this.currentTabId = null
+    
+    // 通知side panel连接断开
+    this.sendMessageToSidePanel({
+      action: 'devtoolsDisconnected',
+      message: '⚠️ 连接已断开，请刷新页面重试'
+    })
+  }
+
   async startListening() {
     console.log('startListening 被调用，当前状态:', {
       isListening: this.isListening,
-      tabId: this.tabId,
+      currentTabId: this.currentTabId,
       recommendDataLength: this.recommendData.length
     })
     
@@ -114,17 +178,17 @@ class DevToolsListener {
       return
     }
     
-    if (!this.tabId) {
-      console.log('DevTools Protocol连接条件不满足: 缺少tabId')
+    if (!this.currentTabId) {
+      console.log('DevTools Protocol连接条件不满足: 缺少currentTabId')
       return
     }
 
     try {
-      console.log(`开始连接DevTools Protocol到标签页 ${this.tabId}`)
+      console.log(`开始连接DevTools Protocol到标签页 ${this.currentTabId}`)
 
       // 先尝试断开现有连接
       try {
-        await chrome.debugger.detach({ tabId: this.tabId })
+        await chrome.debugger.detach({ tabId: this.currentTabId })
         console.log('已断开现有调试器连接')
         // 等待一小段时间让连接完全断开
         await new Promise((resolve) => setTimeout(resolve, 200))
@@ -134,16 +198,16 @@ class DevToolsListener {
       }
 
       // 连接到DevTools Protocol
-      const target = await chrome.debugger.attach({ tabId: this.tabId }, '1.3')
+      const target = await chrome.debugger.attach({ tabId: this.currentTabId }, '1.3')
       console.log('✅ DevTools Protocol已连接')
 
       // 启用Network域
-      await chrome.debugger.sendCommand({ tabId: this.tabId }, 'Network.enable')
+      await chrome.debugger.sendCommand({ tabId: this.currentTabId }, 'Network.enable')
       console.log('✅ Network域已启用')
 
       // 监听网络请求
       chrome.debugger.onEvent.addListener((source, method, params) => {
-        if (source.tabId === this.tabId) {
+        if (source.tabId === this.currentTabId) {
           this.handleNetworkEvent(method, params)
         }
       })
@@ -154,7 +218,7 @@ class DevToolsListener {
       // 通知side panel连接成功
       this.sendMessageToSidePanel({
         action: 'devtoolsConnected',
-        message: 'DevTools Protocol连接成功，开始监听网络请求'
+        message: `✅ 连接成功！正在监听当前页面的数据请求`
       })
     } catch (error) {
       console.error('❌ 启动DevTools监听失败:', error)
@@ -177,7 +241,7 @@ class DevToolsListener {
     // 通知side panel显示警告信息
     this.sendMessageToSidePanel({
       action: 'showDebuggerWarning',
-      message: '检测到其他调试器已连接，请关闭Chrome开发者工具后重新加载页面'
+      message: '⚠️ 检测到Chrome开发者工具已打开，请关闭后重新加载页面'
     })
   }
 
@@ -250,7 +314,7 @@ class DevToolsListener {
       try {
         // 获取响应内容
         const response = await chrome.debugger.sendCommand(
-          { tabId: this.tabId },
+          { tabId: this.currentTabId },
           'Network.getResponseBody',
           { requestId: requestId }
         )
@@ -346,6 +410,26 @@ class DevToolsListener {
     this.sentRequests.clear() // 清空已发送请求跟踪
     this.updateUI()
   }
+
+  // 获取所有CBG标签页信息
+  getCbgTabsInfo() {
+    return {
+      currentTabId: this.currentTabId,
+      isListening: this.isListening,
+      activeCbgTabs: Array.from(this.activeCbgTabs),
+      totalData: this.recommendData.length
+    }
+  }
+
+  // 手动切换到指定标签页
+  async switchToSpecificTab(tabId) {
+    if (this.activeCbgTabs.has(tabId)) {
+      await this.switchToTab(tabId)
+      return { success: true, message: `已切换到标签页 ${tabId}` }
+    } else {
+      return { success: false, message: `标签页 ${tabId} 不是CBG页面` }
+    }
+  }
 }
 
 // 初始化DevTools监听器
@@ -395,6 +479,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // 刷新当前页面
       handleRefreshCurrentPage(sendResponse);
       return true; // 保持消息通道开放
+      
+    case 'getCbgTabsInfo':
+      // 获取所有CBG标签页信息
+      sendResponse({
+        success: true,
+        data: devToolsListener.getCbgTabsInfo()
+      });
+      return true;
+      
+    case 'switchToTab':
+      // 切换到指定标签页
+      handleSwitchToTab(request.tabId, sendResponse);
+      return true; // 保持消息通道开放
   }
 });
 
@@ -430,6 +527,20 @@ async function handleRefreshCurrentPage(sendResponse) {
     sendResponse({ 
       success: false, 
       error: `刷新页面失败: ${error.message}` 
+    });
+  }
+}
+
+// 处理切换到指定标签页的请求
+async function handleSwitchToTab(tabId, sendResponse) {
+  try {
+    const result = await devToolsListener.switchToSpecificTab(tabId);
+    sendResponse(result);
+  } catch (error) {
+    console.error('❌ 切换标签页失败:', error);
+    sendResponse({ 
+      success: false, 
+      error: `切换标签页失败: ${error.message}` 
     });
   }
 }

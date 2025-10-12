@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome扩展标签页切换测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .tab-list {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .tab-item {
+            padding: 5px;
+            margin: 2px 0;
+            background-color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .tab-item:hover { background-color: #e9ecef; }
+        .tab-item.active { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chrome扩展标签页切换测试</h1>
+        
+        <div id="status" class="status info">
+            正在检查扩展连接状态...
+        </div>
+        
+        <div class="tab-list">
+            <h3>CBG标签页列表</h3>
+            <div id="tabList">正在加载...</div>
+        </div>
+        
+        <div>
+            <h3>操作按钮</h3>
+            <button onclick="refreshStatus()">刷新状态</button>
+            <button onclick="getCbgTabs()">获取CBG标签页</button>
+            <button onclick="clearData()">清空数据</button>
+        </div>
+        
+        <div id="log" style="margin-top: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px; max-height: 300px; overflow-y: auto;">
+            <h4>操作日志</h4>
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTabId = null;
+        let cbgTabs = [];
+
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logContent = document.getElementById('logContent');
+            const timestamp = new Date().toLocaleTimeString();
+            const logItem = document.createElement('div');
+            logItem.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${message}`;
+            logItem.style.color = type === 'error' ? '#721c24' : type === 'success' ? '#155724' : '#0c5460';
+            logContent.appendChild(logItem);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        // 更新状态显示
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // 检查扩展连接
+        async function checkConnection() {
+            try {
+                const response = await chrome.runtime.sendMessage({ action: 'ping' });
+                if (response && response.success) {
+                    updateStatus('✅ 扩展连接正常', 'success');
+                    addLog('扩展连接检查成功');
+                    return true;
+                } else {
+                    updateStatus('❌ 扩展连接失败', 'error');
+                    addLog('扩展连接检查失败', 'error');
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('❌ 无法连接到扩展', 'error');
+                addLog(`连接错误: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // 获取CBG标签页信息
+        async function getCbgTabs() {
+            try {
+                addLog('正在获取CBG标签页信息...');
+                const response = await chrome.runtime.sendMessage({ action: 'getCbgTabsInfo' });
+                
+                if (response && response.success) {
+                    const data = response.data;
+                    currentTabId = data.currentTabId;
+                    cbgTabs = data.activeCbgTabs;
+                    
+                    updateStatus(`✅ 找到 ${cbgTabs.length} 个CBG标签页，当前监听: ${currentTabId || '无'}`, 'success');
+                    addLog(`CBG标签页: ${cbgTabs.join(', ')}`);
+                    addLog(`当前监听标签页: ${currentTabId || '无'}`);
+                    addLog(`监听状态: ${data.isListening ? '是' : '否'}`);
+                    addLog(`数据总量: ${data.totalData}`);
+                    
+                    updateTabList();
+                } else {
+                    updateStatus('❌ 获取CBG标签页失败', 'error');
+                    addLog('获取CBG标签页失败', 'error');
+                }
+            } catch (error) {
+                updateStatus('❌ 获取CBG标签页出错', 'error');
+                addLog(`获取错误: ${error.message}`, 'error');
+            }
+        }
+
+        // 更新标签页列表显示
+        function updateTabList() {
+            const tabList = document.getElementById('tabList');
+            if (cbgTabs.length === 0) {
+                tabList.innerHTML = '<div>没有找到CBG标签页</div>';
+                return;
+            }
+
+            tabList.innerHTML = cbgTabs.map(tabId => {
+                const isActive = tabId === currentTabId;
+                return `
+                    <div class="tab-item ${isActive ? 'active' : ''}" onclick="switchToTab(${tabId})">
+                        <strong>标签页 ${tabId}</strong> ${isActive ? '(当前监听)' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 切换到指定标签页
+        async function switchToTab(tabId) {
+            try {
+                addLog(`正在切换到标签页 ${tabId}...`);
+                const response = await chrome.runtime.sendMessage({ 
+                    action: 'switchToTab', 
+                    tabId: tabId 
+                });
+                
+                if (response && response.success) {
+                    updateStatus(`✅ ${response.message}`, 'success');
+                    addLog(`切换成功: ${response.message}`, 'success');
+                    // 刷新状态
+                    setTimeout(() => {
+                        getCbgTabs();
+                    }, 1000);
+                } else {
+                    updateStatus(`❌ ${response.message || '切换失败'}`, 'error');
+                    addLog(`切换失败: ${response.message || '未知错误'}`, 'error');
+                }
+            } catch (error) {
+                updateStatus('❌ 切换标签页出错', 'error');
+                addLog(`切换错误: ${error.message}`, 'error');
+            }
+        }
+
+        // 清空数据
+        async function clearData() {
+            try {
+                addLog('正在清空推荐数据...');
+                const response = await chrome.runtime.sendMessage({ action: 'clearRecommendData' });
+                updateStatus('✅ 数据已清空', 'success');
+                addLog('数据清空成功', 'success');
+            } catch (error) {
+                updateStatus('❌ 清空数据失败', 'error');
+                addLog(`清空错误: ${error.message}`, 'error');
+            }
+        }
+
+        // 刷新状态
+        async function refreshStatus() {
+            addLog('正在刷新状态...');
+            await checkConnection();
+            await getCbgTabs();
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', async () => {
+            addLog('页面加载完成，开始初始化...');
+            await refreshStatus();
+        });
+
+        // 监听来自扩展的消息
+        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+            addLog(`收到扩展消息: ${JSON.stringify(message)}`);
+            
+            if (message.action === 'devtoolsConnected') {
+                updateStatus(`✅ ${message.message}`, 'success');
+                addLog(`DevTools连接: ${message.message}`, 'success');
+            } else if (message.action === 'devtoolsDisconnected') {
+                updateStatus(`⚠️ ${message.message}`, 'info');
+                addLog(`DevTools断开: ${message.message}`, 'info');
+            } else if (message.action === 'addRecommendData') {
+                addLog(`收到推荐数据: ${message.data.length} 条`);
+            }
+        });
+    </script>
+</body>
+</html>

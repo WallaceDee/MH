@@ -361,6 +361,7 @@ window.lingshiKinds = [
   [63, '手镯'],
   [64, '佩饰']
 ]
+
 window.is_lingshi_equip = function (kindid) {
   return window.lingshiKinds.some((item) => item[0] == kindid)
 }

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端数据长度控制测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .data-list {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .data-item {
+            padding: 5px;
+            margin: 2px 0;
+            background-color: white;
+            border-radius: 3px;
+            border-left: 3px solid #007bff;
+        }
+        .data-item.old {
+            border-left-color: #dc3545;
+            opacity: 0.7;
+        }
+        .data-item.new {
+            border-left-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>前端数据长度控制测试</h1>
+        
+        <div id="status" class="status info">
+            准备开始测试...
+        </div>
+        
+        <div>
+            <h3>测试操作</h3>
+            <button onclick="addSingleData()">添加1条数据</button>
+            <button onclick="addMultipleData(3)">添加3条数据</button>
+            <button onclick="addMultipleData(5)">添加5条数据</button>
+            <button onclick="addMultipleData(8)">添加8条数据</button>
+            <button onclick="clearData()">清空数据</button>
+            <button onclick="simulateRealScenario()">模拟真实场景</button>
+        </div>
+        
+        <div class="data-list">
+            <h3>数据列表 (当前: <span id="dataCount">0</span>/10)</h3>
+            <div id="dataList">暂无数据</div>
+        </div>
+        
+        <div id="log" style="margin-top: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px; max-height: 200px; overflow-y: auto;">
+            <h4>操作日志</h4>
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟Vue组件的数据结构
+        let recommendData = [];
+        let dataIdCounter = 1;
+
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logContent = document.getElementById('logContent');
+            const timestamp = new Date().toLocaleTimeString();
+            const logItem = document.createElement('div');
+            logItem.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${message}`;
+            logItem.style.color = type === 'error' ? '#721c24' : type === 'success' ? '#155724' : '#0c5460';
+            logContent.appendChild(logItem);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        // 更新状态显示
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // 模拟前端的数据处理逻辑
+        function addRecommendData(newData) {
+            console.log('接收到增量数据:', newData);
+            
+            // 处理增量数据
+            const processedNewData = newData.map(item => {
+                return {
+                    ...item,
+                    status: 'parsing'
+                };
+            }) || [];
+            
+            if (processedNewData.length > 0) {
+                // 将新数据添加到现有数组中
+                recommendData.unshift(...processedNewData);
+                
+                // 控制最大长度为10，移除最旧的数据
+                const maxLength = 10;
+                if (recommendData.length > maxLength) {
+                    const removedCount = recommendData.length - maxLength;
+                    recommendData = recommendData.slice(0, maxLength);
+                    console.log(`📊 前端数据长度超过限制，已移除 ${removedCount} 条旧数据`);
+                    addLog(`📊 数据长度超过限制，已移除 ${removedCount} 条旧数据`, 'info');
+                }
+                
+                addLog(`📥 接收到增量数据，新增: ${processedNewData.length}, 总计: ${recommendData.length}`, 'success');
+                updateDataDisplay();
+            }
+        }
+
+        // 更新数据显示
+        function updateDataDisplay() {
+            const dataList = document.getElementById('dataList');
+            const dataCount = document.getElementById('dataCount');
+            
+            dataCount.textContent = recommendData.length;
+            
+            if (recommendData.length === 0) {
+                dataList.innerHTML = '暂无数据';
+                return;
+            }
+            
+            dataList.innerHTML = recommendData.map((item, index) => {
+                const isNew = index < 3; // 前3条标记为新数据
+                const isOld = index >= 7; // 后3条标记为旧数据
+                return `
+                    <div class="data-item ${isNew ? 'new' : isOld ? 'old' : ''}">
+                        <strong>ID: ${item.requestId}</strong> - ${item.url} 
+                        <span style="color: #666;">(${item.status})</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 添加单条数据
+        function addSingleData() {
+            const newData = [{
+                requestId: `req_${dataIdCounter++}`,
+                url: `https://xyq.cbg.163.com/cgi-bin/recommend.py?page=${dataIdCounter}`,
+                method: 'GET',
+                timestamp: Date.now(),
+                status: 'pending'
+            }];
+            
+            addRecommendData(newData);
+            updateStatus(`添加了1条数据，当前总数: ${recommendData.length}`, 'success');
+        }
+
+        // 添加多条数据
+        function addMultipleData(count) {
+            const newData = [];
+            for (let i = 0; i < count; i++) {
+                newData.push({
+                    requestId: `req_${dataIdCounter++}`,
+                    url: `https://xyq.cbg.163.com/cgi-bin/recommend.py?page=${dataIdCounter}`,
+                    method: 'GET',
+                    timestamp: Date.now(),
+                    status: 'pending'
+                });
+            }
+            
+            addRecommendData(newData);
+            updateStatus(`添加了${count}条数据，当前总数: ${recommendData.length}`, 'success');
+        }
+
+        // 清空数据
+        function clearData() {
+            recommendData = [];
+            updateDataDisplay();
+            updateStatus('数据已清空', 'info');
+            addLog('数据已清空', 'info');
+        }
+
+        // 模拟真实场景
+        function simulateRealScenario() {
+            addLog('开始模拟真实场景...', 'info');
+            updateStatus('模拟真实场景中...', 'info');
+            
+            // 模拟用户快速浏览，产生多个请求
+            let step = 0;
+            const steps = [
+                () => addMultipleData(2), // 初始2条
+                () => addMultipleData(3), // 再添加3条，总共5条
+                () => addMultipleData(4), // 再添加4条，总共9条
+                () => addMultipleData(2), // 再添加2条，总共11条，应该移除1条
+                () => addMultipleData(3), // 再添加3条，总共13条，应该移除3条
+                () => addMultipleData(5), // 再添加5条，总共15条，应该移除5条
+            ];
+            
+            const interval = setInterval(() => {
+                if (step < steps.length) {
+                    steps[step]();
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    updateStatus('真实场景模拟完成', 'success');
+                    addLog('真实场景模拟完成', 'success');
+                }
+            }, 1000);
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            addLog('页面加载完成，开始测试...', 'info');
+            updateStatus('准备就绪，可以开始测试', 'success');
+        });
+    </script>
+</body>
+</html>

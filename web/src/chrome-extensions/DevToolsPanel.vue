@@ -19,7 +19,7 @@
               style="line-height: 1.2em;">下一页</a>
           </el-row>
         </div>
-        <a v-if="!devtoolsConnected" href="javascript:void 0;" @click="reconnectDevTools">重连</a>
+        <a v-if="!devtoolsConnected" href="javascript:void 0;" @click="reconnectDevTools">重新连接</a>
         <a v-if="!isInNewWindow" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
           @click.prevent="openInNewTab">新窗口打开</a>
         <a v-if="!pageInfo.hasPager" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
@@ -90,12 +90,12 @@
                 </el-card>
               </el-col>
             </el-row>
-            <el-button @click="toggleResponse(index)" size="mini" type="text">
+            <!-- <el-button @click="toggleResponse(index)" size="mini" type="text">
               {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据
             </el-button>
             <div v-if="expandedItems.includes(index)" class="response-content">
               <pre>{{ JSON.stringify(item.responseData, null, 2) }}</pre>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -122,7 +122,7 @@ export default {
       recommendData: [],
       expandedItems: [],
       processedRequests: new Set(), // 记录已处理的请求ID
-      devtoolsConnected: false, // DevTools Protocol连接状态
+      devtoolsConnected: false, // 数据监听连接状态
       connectionStatus: '检查中...', // 连接状态描述
       connectionCheckTimer: null, // 连接检查定时器
       isInNewWindow: false // 是否在新窗口中打开
@@ -232,10 +232,10 @@ export default {
     },
 
     reconnectDevTools() {
-      // 重新连接DevTools
+      // 重新连接数据监听
       this.connectionStatus = '重连中...'
       this.checkConnectionStatus()
-      this.$notify.info('正在尝试重新连接DevTools...')
+      this.$notify.info('正在尝试重新连接数据监听...')
     },
 
     async clickPageButton(direction) {
@@ -248,9 +248,9 @@ export default {
           return
         }
 
-        // 检查Chrome调试API连接状态
+        // 检查数据监听连接状态
         if (!this.devtoolsConnected) {
-          this.$notify.warning('DevTools连接已断开，请重新加载页面')
+          this.$notify.warning('数据监听连接已断开，请重新加载页面')
           return
         }
 
@@ -396,7 +396,7 @@ export default {
         if (error.message && error.message.includes('Could not establish connection')) {
           this.devtoolsConnected = false
           this.connectionStatus = '连接断开'
-          this.$notify.error('DevTools连接已断开，请重新加载页面或刷新扩展')
+          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')
         } else {
           this.$notify.error('操作失败: ' + error.message)
         }
@@ -413,9 +413,9 @@ export default {
           return
         }
 
-        // 检查Chrome调试API连接状态
+        // 检查数据监听连接状态
         if (!this.devtoolsConnected) {
-          this.$notify.warning('DevTools连接已断开，请重新加载页面')
+          this.$notify.warning('数据监听连接已断开，请重新加载页面')
           return
         }
 
@@ -676,6 +676,15 @@ export default {
           if (newData.length > 0) {
             // 将新数据添加到现有数组中
             this.recommendData.unshift(...newData)
+            
+            // 控制最大长度为10，移除最旧的数据
+            const maxLength = 10
+            if (this.recommendData.length > maxLength) {
+              const removedCount = this.recommendData.length - maxLength
+              this.recommendData = this.recommendData.slice(0, maxLength)
+              console.log(`📊 前端数据长度超过限制，已移除 ${removedCount} 条旧数据`)
+            }
+            
             this.getPagerInfo().then(res => {
               this.pageInfo = res
             })
@@ -764,8 +773,16 @@ export default {
 
     formatTime(timestamp) {
       if (!timestamp) return ''
-      const date = new Date(timestamp)
-      return date.toLocaleTimeString()
+      
+      // 直接使用当前系统时间，避免复杂的时间戳转换
+      const now = new Date()
+      
+      return now.toLocaleTimeString('zh-CN', { 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
     },
 
     checkIfInNewWindow() {

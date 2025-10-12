@@ -17,6 +17,8 @@ import asyncio
 import pandas as pd
 from playwright.async_api import async_playwright
 import re
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 # 添加项目根目录到Python路径
 from src.utils.project_path import get_project_root
@@ -64,6 +66,10 @@ class CBGEquipSpider:
         # 初始化其他组件
         self.setup_session()
         self.retry_attempts = 1
+        
+        # 初始化线程池（用于异步数据库操作）
+        self._executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix='EquipDB-')
+        self.logger.info("线程池初始化完成，最大并发数: 3")
 
     def _setup_logger(self):
         """设置专用的日志器"""
@@ -509,8 +515,178 @@ class CBGEquipSpider:
             self.logger.error(f"保存装备数据到MySQL数据库失败: {e}")
             return 0
     
+    def _filter_equipment_fields(self, equipments):
+        """
+        过滤装备字段，只保留缓存所需字段（优化内存占用）
+        
+        Args:
+            equipments: 装备数据列表
+            
+        Returns:
+            list: 过滤后的装备数据列表
+        """
+        from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
+        
+        # 使用列表推导式，更高效
+        return [
+            {k: v for k, v in equipment.items() if k in EQUIPMENT_CACHE_REQUIRED_FIELDS}
+            for equipment in equipments
+        ]
+    
+    def _get_redis_total_count(self):
+        """
+        获取Redis中的装备总条数
+        
+        Returns:
+            int: Redis中的装备总条数，获取失败返回0
+        """
+        try:
+            from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+            from src.utils.redis_cache import get_redis_cache
+            
+            collector = EquipMarketDataCollector.get_instance()
+            redis_cache = get_redis_cache()
+            
+            if redis_cache and redis_cache.is_available():
+                # 获取Redis Hash的总条数
+                full_key = redis_cache._make_key(collector._full_cache_key)
+                total_count = redis_cache.client.hlen(full_key)
+                self.logger.debug(f"Redis装备总条数: {total_count}")
+                return total_count
+            else:
+                self.logger.warning("Redis不可用，无法获取总条数")
+                return 0
+                
+        except Exception as e:
+            self.logger.warning(f"获取Redis总条数失败: {e}")
+            return 0
+    
+    def _publish_dataframe_message(self, new_data_df, data_count):
+        """
+        发布DataFrame消息到Redis（立即通知前端，只更新内存数据，不包含总数）
+        
+        Args:
+            new_data_df: DataFrame数据
+            data_count: 本次新增的数据条数
+            
+        Returns:
+            bool: 发布是否成功
+        """
+        try:
+            from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
+            
+            pubsub = get_redis_pubsub()
+            message = {
+                'type': MessageType.EQUIPMENT_DATA_SAVED,
+                'data_count': data_count,  # 本次数据量
+                'action': 'add_dataframe'  # 只用于立即更新内存缓存
+            }
+            
+            success = pubsub.publish_with_dataframe(Channel.EQUIPMENT_UPDATES, message, new_data_df)
+            if success:
+                self.logger.info(f"📢 已立即发布DataFrame消息到Redis (本次:{data_count}条)")
+            else:
+                self.logger.warning("⚠️ 发布DataFrame消息失败")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ 发布DataFrame消息失败: {e}")
+            return False
+    
+    def _batch_save_to_mysql(self, equipments):
+        """
+        批量保存到MySQL，优化数据库查询性能
+        
+        Args:
+            equipments: 装备数据列表
+            
+        Returns:
+            tuple: (新增数量, 更新数量)
+        """
+        try:
+            # 批量查询已存在的装备（一次查询代替N次查询）
+            equip_sns = [eq.get('equip_sn') for eq in equipments if eq.get('equip_sn')]
+            
+            existing_equipments = {}
+            if equip_sns:
+                existing_list = db.session.query(Equipment).filter(
+                    Equipment.equip_sn.in_(equip_sns)
+                ).all()
+                existing_equipments = {eq.equip_sn: eq for eq in existing_list}
+            
+            new_equipments = []
+            updated_count = 0
+            
+            # 遍历装备数据，分类为新增和更新
+            for equipment_data in equipments:
+                try:
+                    equip_sn = equipment_data.get('equip_sn')
+                    
+                    if equip_sn and equip_sn in existing_equipments:
+                        # 更新现有记录
+                        existing = existing_equipments[equip_sn]
+                        for key, value in equipment_data.items():
+                            if hasattr(existing, key):
+                                setattr(existing, key, value)
+                        existing.update_time = datetime.now()
+                        updated_count += 1
+                    else:
+                        # 准备新记录
+                        new_equipments.append(Equipment(**equipment_data))
+                        
+                except Exception as e:
+                    self.logger.error(f"处理单个装备数据失败: {e}")
+                    continue
+            
+            # 批量插入新记录
+            if new_equipments:
+                db.session.bulk_save_objects(new_equipments)
+            
+            # 提交事务
+            db.session.commit()
+            
+            if len(new_equipments) > 0:
+                self.logger.info(f"✅ 成功保存 {len(new_equipments)} 条新装备数据到MySQL数据库")
+            if updated_count > 0:
+                self.logger.info(f"✅ 更新 {updated_count} 条已存在的装备数据")
+            
+            return len(new_equipments), updated_count
+            
+        except Exception as e:
+            db.session.rollback()
+            self.logger.error(f"批量保存MySQL失败: {e}")
+            raise
+    
+    def _sync_to_redis_cache(self, new_data_df):
+        """
+        同步新数据到Redis缓存
+        
+        Args:
+            new_data_df: 新数据的DataFrame
+            
+        Returns:
+            bool: 同步是否成功
+        """
+        try:
+            from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
+            
+            collector = EquipMarketDataCollector.get_instance()
+            redis_success = collector._sync_new_data_to_redis(new_data_df)
+            
+            if redis_success:
+                self.logger.info("✅ 新数据已同步到Redis缓存")
+            else:
+                self.logger.warning("⚠️ 新数据同步到Redis失败")
+            
+            return redis_success
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ 同步新数据到Redis失败: {e}")
+            return False
+    
     def _save_equipment_data_with_context(self, equipments):
-        """在Flask应用上下文中保存装备数据 - 内存缓存 → MySQL → Redis"""
+        """在Flask应用上下文中保存装备数据 - 内存缓存 → MySQL → Redis（异步优化版）"""
         try:
             # 在子线程中重新导入pandas，确保可用
             import pandas as pd
@@ -521,180 +697,144 @@ class CBGEquipSpider:
             
             self.logger.info(f"开始保存 {len(equipments)} 条装备数据...")
             
-            # 第一步：立即发布DataFrame消息（超快响应）
-            if equipments:
-                try:
-                    from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
-                    
-                    # 将新数据转换为DataFrame，只包含必要字段
-                    from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
-                    
-                    # 过滤数据，只保留必要字段
-                    filtered_equipments = []
-                    for equipment in equipments:
-                        filtered_equipment = {k: v for k, v in equipment.items() if k in EQUIPMENT_CACHE_REQUIRED_FIELDS}
-                        filtered_equipments.append(filtered_equipment)
-                    
-                    new_data_df = pd.DataFrame(filtered_equipments)
-                    
-                    # 发布包含DataFrame的消息
-                    pubsub = get_redis_pubsub()
-                    message = {
-                        'type': MessageType.EQUIPMENT_DATA_SAVED,
-                        'data_count': len(equipments),
-                        'total_equipments': len(equipments),
-                        'action': 'add_dataframe'  # 标识这是添加DataFrame的操作
-                    }
-                    
-                    success = pubsub.publish_with_dataframe(Channel.EQUIPMENT_UPDATES, message, new_data_df)
-                    if success:
-                        self.logger.info("📢 已立即发布DataFrame消息到Redis")
-                    else:
-                        self.logger.warning("⚠️ 发布DataFrame消息失败")
-                        
-                except Exception as e:
-                    self.logger.warning(f"⚠️ 发布DataFrame消息失败: {e}")
+            # 优化：只过滤一次，避免重复代码
+            filtered_equipments = self._filter_equipment_fields(equipments)
+            new_data_df = pd.DataFrame(filtered_equipments)
             
-            # 第二步：异步保存到MySQL数据库（较慢，但不影响响应速度）
-            saved_count = 0
-            skipped_count = 0
+            # 第一步：立即发布DataFrame消息（超快响应，最高优先级）
+            self._publish_dataframe_message(new_data_df, len(equipments))
             
-            for equipment_data in equipments:
-                try:
-                    # 检查是否已存在相同的装备（根据equip_sn判断）
-                    equip_sn = equipment_data.get('equip_sn')
-                    if equip_sn:
-                        existing = db.session.query(Equipment).filter_by(equip_sn=equip_sn).first()
-                        if existing:
-                            # 更新现有记录
-                            for key, value in equipment_data.items():
-                                if hasattr(existing, key):
-                                    setattr(existing, key, value)
-                            # 更新时间戳
-                            existing.update_time = datetime.now()
-                            skipped_count += 1
-                            continue
-                    
-                    # 创建新记录
-                    equipment = Equipment(**equipment_data)
-                    db.session.add(equipment)
-                    saved_count += 1
-                    
-                except Exception as e:
-                    self.logger.error(f"保存单个装备数据失败: {e}")
-                    continue
+            # 第二步：异步批量保存到MySQL数据库（不阻塞主流程）
+            self._submit_async_save_task(equipments, new_data_df)
             
-            # 提交事务
-            db.session.commit()
+            self.logger.info(f"🎉 装备数据已提交异步保存任务: 内存缓存(已完成) → MySQL(处理中) → Redis(处理中)")
             
-            if saved_count > 0:
-                self.logger.info(f" 成功保存 {saved_count} 条新装备数据到MySQL数据库")
-            if skipped_count > 0:
-                self.logger.info(f" 跳过 {skipped_count} 条已存在的装备数据")
-            
-            # 第三步：MySQL保存成功后，同步到Redis
-            if saved_count > 0:
-                try:
-                    import pandas as pd
-                    from src.evaluator.market_anchor.equip.equip_market_data_collector import EquipMarketDataCollector
-                    collector = EquipMarketDataCollector.get_instance()
-                    
-                    # 将新数据转换为DataFrame并同步到Redis，只包含必要字段
-                    from src.evaluator.constants.equipment_types import EQUIPMENT_CACHE_REQUIRED_FIELDS
-                    
-                    # 过滤数据，只保留必要字段
-                    filtered_equipments = []
-                    for equipment in equipments:
-                        filtered_equipment = {k: v for k, v in equipment.items() if k in EQUIPMENT_CACHE_REQUIRED_FIELDS}
-                        filtered_equipments.append(filtered_equipment)
-                    
-                    new_data_df = pd.DataFrame(filtered_equipments)
-                    redis_success = collector._sync_new_data_to_redis(new_data_df)
-                    
-                    if redis_success:
-                        self.logger.info("✅ MySQL保存成功，新数据已同步到Redis")
-                    else:
-                        self.logger.warning("⚠️ MySQL保存成功，但新数据同步到Redis失败")
-                        
-                except Exception as e:
-                    self.logger.warning(f"⚠️ MySQL保存成功，但同步新数据到Redis失败: {e}")
-            
-            self.logger.info(f"🎉 装备数据保存流程完成: 内存缓存 → MySQL → Redis")
-            # 注意：不需要再次发送消息，因为已经在第540行发送了包含DataFrame的add_dataframe消息
-            # 该消息已经触发了内存缓存的直接更新和Redis的异步同步
-            # 这里只记录MySQL保存完成的状态
-            
-            return saved_count
+            # 返回预估的新增数量（实际数量由异步任务计算）
+            return len(equipments)
             
         except Exception as e:
-            db.session.rollback()
-            self.logger.error(f"保存装备数据到MySQL数据库失败: {e}")
+            self.logger.error(f"保存装备数据失败: {e}")
             return 0
     
-    def _async_save_to_mysql(self, equipments):
+    def _submit_async_save_task(self, equipments, new_data_df):
         """
-        异步保存装备数据到MySQL数据库（完全异步，不阻塞响应）
+        提交异步保存任务到线程池
         
         Args:
             equipments: 装备数据列表
+            new_data_df: 过滤后的DataFrame
         """
         try:
-            import threading
+            # 使用线程池异步执行保存任务
+            future = self._executor.submit(
+                self._async_batch_save_worker,
+                equipments,
+                new_data_df
+            )
             
-            def mysql_worker():
-                try:
-                    self.logger.info(f"🔄 开始异步保存 {len(equipments)} 条装备数据到MySQL...")
-                    
-                    # 在Flask应用上下文中保存数据
-                    from src.app import create_app
-                    app = create_app()
-                    
-                    with app.app_context():
-                        saved_count = 0
-                        skipped_count = 0
-                        
-                        for equipment_data in equipments:
-                            try:
-                                # 检查是否已存在相同的装备（根据equip_sn判断）
-                                equip_sn = equipment_data.get('equip_sn')
-                                if equip_sn:
-                                    existing = db.session.query(Equipment).filter_by(equip_sn=equip_sn).first()
-                                    if existing:
-                                        # 更新现有记录
-                                        for key, value in equipment_data.items():
-                                            if hasattr(existing, key):
-                                                setattr(existing, key, value)
-                                        # 更新时间戳
-                                        existing.update_time = datetime.now()
-                                        skipped_count += 1
-                                        continue
-                                
-                                # 创建新记录
-                                equipment = Equipment(**equipment_data)
-                                db.session.add(equipment)
-                                saved_count += 1
-                                
-                            except Exception as e:
-                                self.logger.error(f"异步保存单个装备数据失败: {e}")
-                                continue
-                        
-                        # 提交事务
-                        db.session.commit()
-                        
-                        if saved_count > 0:
-                            self.logger.info(f"✅ 异步保存 {saved_count} 条新装备数据到MySQL数据库")
-                        if skipped_count > 0:
-                            self.logger.info(f"✅ 异步跳过 {skipped_count} 条已存在的装备数据")
-                        
-                except Exception as e:
-                    self.logger.error(f"❌ 异步保存到MySQL失败: {e}")
-            
-            # 启动异步线程
-            mysql_thread = threading.Thread(target=mysql_worker, daemon=True)
-            mysql_thread.start()
+            # 添加完成回调，记录结果
+            future.add_done_callback(self._async_save_callback)
             
         except Exception as e:
-            self.logger.error(f"❌ 启动异步MySQL保存线程失败: {e}")
+            self.logger.error(f"❌ 提交异步保存任务失败: {e}")
+    
+    def _async_save_callback(self, future):
+        """异步保存任务完成回调"""
+        try:
+            result = future.result()
+            if result:
+                saved_count, updated_count, saved_dataframe = result
+                self.logger.info(
+                    f"✅ 异步保存完成: 新增 {saved_count} 条, 更新 {updated_count} 条"
+                )
+                
+                # 如果有新增数据，发布包含DataFrame的增量更新消息
+                if saved_count > 0 and saved_dataframe is not None and not saved_dataframe.empty:
+                    self._publish_dataframe_message(saved_dataframe, saved_count)
+                else:
+                    # 没有新增数据时，只发送完成消息
+                    self._publish_save_complete_message(saved_count, updated_count)
+                
+        except Exception as e:
+            self.logger.error(f"❌ 异步保存任务执行失败: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+    
+    def _publish_save_complete_message(self, saved_count, updated_count):
+        """
+        发布保存完成消息（可选，用于显示实际新增和更新数量）
+        
+        Args:
+            saved_count: 新增数量
+            updated_count: 更新数量
+        """
+        try:
+            from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
+            
+            pubsub = get_redis_pubsub()
+            message = {
+                'type': MessageType.EQUIPMENT_DATA_SAVED,
+                'data_count': saved_count,  # 本次实际新增数量
+                'updated_count': updated_count,  # 本次更新数量
+                'action': 'save_complete'  # 标识这是保存完成消息
+            }
+            
+            # 不需要DataFrame，只发送消息
+            success = pubsub.publish(Channel.EQUIPMENT_UPDATES, message)
+            if success:
+                self.logger.info(f"📢 已发布保存完成消息 (新增:{saved_count}, 更新:{updated_count})")
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ 发布保存完成消息失败: {e}")
+    
+    def _async_batch_save_worker(self, equipments, new_data_df):
+        """
+        异步批量保存工作线程（在线程池中执行）
+        
+        Args:
+            equipments: 装备数据列表
+            new_data_df: 过滤后的DataFrame
+            
+        Returns:
+            tuple: (新增数量, 更新数量, 实际保存的DataFrame)
+        """
+        try:
+            # 在Flask应用上下文中执行数据库操作
+            from src.app import create_app
+            app = create_app()
+            
+            with app.app_context():
+                self.logger.info(f"🔄 异步任务开始处理 {len(equipments)} 条装备数据...")
+                
+                # 第一步：批量保存到MySQL
+                saved_count, updated_count = self._batch_save_to_mysql(equipments)
+                
+                # 获取实际保存成功的数据DataFrame
+                saved_dataframe = None
+                if saved_count > 0:
+                    # 第二步：同步到Redis（只在有新数据时）
+                    self._sync_to_redis_cache(new_data_df)
+                    # 返回实际新增的数据（用于增量更新消息）
+                    saved_dataframe = new_data_df.copy()
+                
+                return saved_count, updated_count, saved_dataframe
+                
+        except Exception as e:
+            self.logger.error(f"❌ 异步批量保存工作线程失败: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+            return 0, 0, None
+    
+    def __del__(self):
+        """析构方法，确保线程池正确关闭"""
+        try:
+            if hasattr(self, '_executor'):
+                self.logger.info("正在关闭线程池...")
+                self._executor.shutdown(wait=True, cancel_futures=False)
+                self.logger.info("线程池已关闭")
+        except Exception as e:
+            # 析构时可能logger已经被回收
+            print(f"关闭线程池时出错: {e}")
 
     async def fetch_page(self, page=1, search_params=None, search_type='overall_search_equip'):
         """

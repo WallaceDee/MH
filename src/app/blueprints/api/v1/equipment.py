@@ -493,55 +493,6 @@ def get_equip_config():
     except Exception as e:
         return error_response(f"获取装备数据失败: {str(e)}")
 
-@equipment_bp.route('/cache/incremental-update', methods=['POST'])
-def incremental_update_cache():
-    """增量更新装备缓存"""
-    try:
-        data = request.get_json() or {}
-        update_type = data.get('type', 'auto')  # auto, time
-        last_update_time = data.get('last_update_time')
-        
-        result = controller.incremental_update_cache(
-            update_type=update_type,
-            last_update_time=last_update_time
-        )
-        
-        if "error" in result:
-            return error_response(result["error"])
-        
-        return success_response(data=result, message="增量更新成功")
-        
-    except Exception as e:
-        return error_response(f"增量更新失败: {str(e)}")
-
-@equipment_bp.route('/cache/incremental-status', methods=['GET'])
-def get_incremental_update_status():
-    """获取增量更新状态"""
-    try:
-        result = controller.get_incremental_update_status()
-        
-        if "error" in result:
-            return error_response(result["error"])
-        
-        return success_response(data=result, message="获取增量更新状态成功")
-        
-    except Exception as e:
-        return error_response(f"获取增量更新状态失败: {str(e)}")
-
-
-@equipment_bp.route('/cache/force-update', methods=['POST'])
-def force_incremental_update():
-    """强制增量更新"""
-    try:
-        result = controller.force_incremental_update()
-        
-        if "error" in result:
-            return error_response(result["error"])
-        
-        return success_response(data=result, message="强制增量更新成功")
-        
-    except Exception as e:
-        return error_response(f"强制增量更新失败: {str(e)}")
 
 @equipment_bp.route('/cache/refresh-memory', methods=['POST'])
 def refresh_memory_cache():

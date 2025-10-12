@@ -8720,6 +8720,28 @@ module.exports = function (exec) {
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/function-apply.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/core-js/internals/function-apply.js ***!
+  \**********************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var NATIVE_BIND = __webpack_require__(/*! ../internals/function-bind-native */ "./node_modules/core-js/internals/function-bind-native.js");
+
+var FunctionPrototype = Function.prototype;
+var apply = FunctionPrototype.apply;
+var call = FunctionPrototype.call;
+
+// eslint-disable-next-line es/no-function-prototype-bind, es/no-reflect -- safe
+module.exports = typeof Reflect == 'object' && Reflect.apply || (NATIVE_BIND ? call.bind(apply) : function () {
+  return call.apply(apply, arguments);
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/function-bind-context.js":
 /*!*****************************************************************!*\
   !*** ./node_modules/core-js/internals/function-bind-context.js ***!
@@ -11469,6 +11491,69 @@ $({ target: 'Iterator', proto: true, real: true, forced: IS_PURE || mapWithoutCl
     return new IteratorProxy(getIteratorDirect(this), {
       mapper: mapper
     });
+  }
+});
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/es.iterator.reduce.js":
+/*!************************************************************!*\
+  !*** ./node_modules/core-js/modules/es.iterator.reduce.js ***!
+  \************************************************************/
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var iterate = __webpack_require__(/*! ../internals/iterate */ "./node_modules/core-js/internals/iterate.js");
+var aCallable = __webpack_require__(/*! ../internals/a-callable */ "./node_modules/core-js/internals/a-callable.js");
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var getIteratorDirect = __webpack_require__(/*! ../internals/get-iterator-direct */ "./node_modules/core-js/internals/get-iterator-direct.js");
+var iteratorClose = __webpack_require__(/*! ../internals/iterator-close */ "./node_modules/core-js/internals/iterator-close.js");
+var iteratorHelperWithoutClosingOnEarlyError = __webpack_require__(/*! ../internals/iterator-helper-without-closing-on-early-error */ "./node_modules/core-js/internals/iterator-helper-without-closing-on-early-error.js");
+var apply = __webpack_require__(/*! ../internals/function-apply */ "./node_modules/core-js/internals/function-apply.js");
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+
+var $TypeError = TypeError;
+
+// https://bugs.webkit.org/show_bug.cgi?id=291651
+var FAILS_ON_INITIAL_UNDEFINED = fails(function () {
+  // eslint-disable-next-line es/no-iterator-prototype-reduce, es/no-array-prototype-keys, array-callback-return -- required for testing
+  [].keys().reduce(function () { /* empty */ }, undefined);
+});
+
+var reduceWithoutClosingOnEarlyError = !FAILS_ON_INITIAL_UNDEFINED && iteratorHelperWithoutClosingOnEarlyError('reduce', $TypeError);
+
+// `Iterator.prototype.reduce` method
+// https://tc39.es/ecma262/#sec-iterator.prototype.reduce
+$({ target: 'Iterator', proto: true, real: true, forced: FAILS_ON_INITIAL_UNDEFINED || reduceWithoutClosingOnEarlyError }, {
+  reduce: function reduce(reducer /* , initialValue */) {
+    anObject(this);
+    try {
+      aCallable(reducer);
+    } catch (error) {
+      iteratorClose(this, 'throw', error);
+    }
+
+    var noInitial = arguments.length < 2;
+    var accumulator = noInitial ? undefined : arguments[1];
+    if (reduceWithoutClosingOnEarlyError) {
+      return apply(reduceWithoutClosingOnEarlyError, this, noInitial ? [reducer] : [reducer, accumulator]);
+    }
+    var record = getIteratorDirect(this);
+    var counter = 0;
+    iterate(record, function (value) {
+      if (noInitial) {
+        noInitial = false;
+        accumulator = value;
+      } else {
+        accumulator = reducer(accumulator, value, counter);
+      }
+      counter++;
+    }, { IS_RECORD: true });
+    if (noInitial) throw new $TypeError('Reduce of empty iterator with no initial value');
+    return accumulator;
   }
 });
 

@@ -247,7 +247,7 @@ class EquipMarketDataCollector:
             full_count = db.session.query(Equipment).count()
             self.mysql_data_count = full_count
             total_count = full_count  # 加载全部数据
-            # total_count = 998  # 临时测试：加载500条数据
+            # total_count = 20001  # 临时测试：加载500条数据
 
             print(f"装备总记录数: {full_count}，本次加载: {total_count} 条")
             
@@ -407,25 +407,12 @@ class EquipMarketDataCollector:
             
             if success:
                 # 新数据存储成功，开始无缝切换
-                print(" 开始无缝切换：将临时数据切换为正式数据...")
+                print(" 开始无缝切换：将临时数据切换为正式数据（原子操作）...")
                 
-                # 1. 先清理旧的正式缓存数据（不包括临时键）
-                print("清理旧的正式缓存数据...")
-                # 直接删除正式缓存键，不包括临时键
-                old_cleared_count = 0
-                if self.redis_cache.client.exists(self.redis_cache._make_key(self._full_cache_key)):
-                    self.redis_cache.client.delete(self.redis_cache._make_key(self._full_cache_key))
-                    old_cleared_count += 1
-                if self.redis_cache.client.exists(self.redis_cache._make_key(f"{self._full_cache_key}:meta")):
-                    self.redis_cache.client.delete(self.redis_cache._make_key(f"{self._full_cache_key}:meta"))
-                    old_cleared_count += 1
-                if old_cleared_count > 0:
-                    print(f"已清理 {old_cleared_count} 个旧正式缓存键")
-                else:
-                    print("没有找到旧的正式缓存数据")
-                
-                # 2. 直接重新存储到正式键（更简单可靠的方式）
-                print("将临时数据复制到正式键...")
+                # 使用RENAME原子操作，自动覆盖旧数据（无时间窗口，避免数据丢失）
+                # RENAME命令会自动删除目标键（如果存在），然后将源键重命名为目标键
+                # 这是一个原子操作，不会出现数据为空的情况
+                print("使用RENAME原子操作切换数据（避免删除旧数据导致的空窗期）...")
                 copy_success = self._copy_temp_cache_to_official(temp_cache_key, self._full_cache_key, df, chunk_size, ttl_seconds)
                 
                 if copy_success:
@@ -1207,7 +1194,7 @@ class EquipMarketDataCollector:
         print(" 用户手动刷新装备缓存")
         return self.refresh_full_cache()
     
-    def incremental_update(self, last_update_time: Optional[datetime] = None) -> bool:
+    def _incremental_update_removed(self, last_update_time: Optional[datetime] = None) -> bool:
         """
         增量更新缓存数据 - 先操作内存缓存，再同步到Redis
         
@@ -1234,7 +1221,7 @@ class EquipMarketDataCollector:
             print(f"📅 上次更新时间: {last_update_time}")
             
             # 查询新增或更新的数据
-            new_data = self._get_incremental_data_from_mysql(last_update_time)
+            new_data = self._get_incremental_data_from_mysql_removed(last_update_time)
             
             if new_data.empty:
                 print(" 没有新数据需要更新")
@@ -1257,7 +1244,7 @@ class EquipMarketDataCollector:
             print(f" 现有内存缓存数据: {len(existing_data)} 条")
             
             # 合并数据到内存缓存
-            merged_data = self._merge_incremental_data(existing_data, new_data)
+            merged_data = self._merge_incremental_data_removed(existing_data, new_data)
             
             # 更新内存缓存
             self._full_data_cache = merged_data
@@ -1339,7 +1326,7 @@ class EquipMarketDataCollector:
             self.logger.warning(f"获取最后更新时间失败: {e}")
             return None
     
-    def _get_incremental_data_from_mysql(self, last_update_time: datetime) -> pd.DataFrame:
+    def _get_incremental_data_from_mysql_removed(self, last_update_time: datetime) -> pd.DataFrame:
         """
         从MySQL获取增量数据
         
@@ -1359,7 +1346,7 @@ class EquipMarketDataCollector:
             if not current_app:
                 app = create_app()
                 with app.app_context():
-                    return self._get_incremental_data_from_mysql(last_update_time)
+                    return self._get_incremental_data_from_mysql_removed(last_update_time)
             
             # 查询自上次更新以来的新数据
             required_fields = [
@@ -1421,7 +1408,7 @@ class EquipMarketDataCollector:
             self.logger.error(f"获取增量数据失败: {e}")
             return pd.DataFrame()
     
-    def _merge_incremental_data(self, existing_data: pd.DataFrame, new_data: pd.DataFrame) -> pd.DataFrame:
+    def _merge_incremental_data_removed(self, existing_data: pd.DataFrame, new_data: pd.DataFrame) -> pd.DataFrame:
         """
         合并现有数据和增量数据
         
@@ -1528,7 +1515,7 @@ class EquipMarketDataCollector:
             if self._full_data_cache is not None and not self._full_data_cache.empty:
                 # 如果内存缓存有数据，进行合并
                 print(f" 内存缓存已有数据 {len(self._full_data_cache)} 条，开始合并...")
-                merged_data = self._merge_incremental_data(self._full_data_cache, new_data_df)
+                merged_data = self._merge_incremental_data_removed(self._full_data_cache, new_data_df)
                 self._full_data_cache = merged_data
                 print(f" 内存缓存已更新，数据量: {len(merged_data)} 条")
             else:
@@ -1579,7 +1566,7 @@ class EquipMarketDataCollector:
             self.logger.error(f"同步到Redis失败: {e}")
             return False
     
-    def _incremental_sync_to_redis(self, new_data: pd.DataFrame) -> bool:
+    def _incremental_sync_to_redis_removed(self, new_data: pd.DataFrame) -> bool:
         """
         真正的增量同步新数据到Redis（只同步新增数据，不读取全量数据）
         
@@ -1665,7 +1652,7 @@ class EquipMarketDataCollector:
         except Exception as e:
             self.logger.warning(f"更新缓存元数据失败: {e}")
     
-    def get_incremental_update_status(self) -> Dict[str, Any]:
+    def _get_incremental_update_status_removed(self) -> Dict[str, Any]:
         """
         获取增量更新状态信息 - 优先从内存缓存获取
         
@@ -1829,7 +1816,7 @@ class EquipMarketDataCollector:
             return 0
     
     
-    def auto_incremental_update(self) -> bool:
+    def _auto_incremental_update_removed(self) -> bool:
         """
         自动检测并执行增量更新
         
@@ -1861,7 +1848,7 @@ class EquipMarketDataCollector:
             print(f" 自动增量更新异常: {e}")
             return False
     
-    def force_incremental_update(self) -> bool:
+    def _force_incremental_update_removed(self) -> bool:
         """
         强制增量更新（忽略缓存状态检查）
         
@@ -2415,7 +2402,7 @@ class EquipMarketDataCollector:
                 return True
             
             # 合并现有数据和新数据
-            merged_data = self._merge_incremental_data(self._full_data_cache, new_dataframe)
+            merged_data = self._merge_incremental_data_removed(self._full_data_cache, new_dataframe)
             
             # 更新内存缓存
             self._full_data_cache = merged_data
@@ -2442,7 +2429,7 @@ class EquipMarketDataCollector:
                     if new_data is not None and not new_data.empty:
                         # 增量同步：只同步新增数据
                         self.logger.info("🔄 开始异步增量同步到Redis...")
-                        success = self._incremental_sync_to_redis(new_data)
+                        success = self._incremental_sync_to_redis_removed(new_data)
                         if success:
                             self.logger.info("✅ 异步增量同步到Redis完成")
                         else:

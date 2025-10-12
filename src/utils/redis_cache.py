@@ -18,6 +18,31 @@ import numpy as np
 import os
 
 
+def _deserialize_chunk_worker(chunk_items):
+    """
+    多进程worker函数：反序列化单个数据块
+    必须定义在模块顶层，才能被ProcessPoolExecutor序列化
+    
+    Args:
+        chunk_items: [(equip_sn, serialized_data), ...]
+        
+    Returns:
+        list: 反序列化后的记录列表
+    """
+    import pickle
+    records = []
+    
+    for equip_sn, serialized_data in chunk_items:
+        try:
+            row_data = pickle.loads(serialized_data)
+            records.append(row_data)
+        except:
+            # 忽略错误，继续处理下一条
+            continue
+    
+    return records
+
+
 class RedisCache:
     """Redis缓存管理器"""
     
@@ -576,6 +601,7 @@ class RedisCache:
     def rename_key(self, old_key: str, new_key: str) -> bool:
         """
         原子性地重命名Redis键（高效的无缝切换）
+        同时重命名主键和对应的元数据键
         
         Args:
             old_key: 原键名
@@ -592,13 +618,32 @@ class RedisCache:
             old_full_key = self._make_key(old_key)
             new_full_key = self._make_key(new_key)
             
-            # 使用Redis的RENAME命令进行原子性重命名
+            # 先检查源键是否存在
+            if not self.client.exists(old_full_key):
+                self.logger.error(f"❌ 源键不存在，无法重命名: {old_full_key}")
+                return False
+            
+            # 使用Redis的RENAME命令进行原子性重命名（会自动覆盖目标键）
             result = self.client.rename(old_full_key, new_full_key)
             if result:
-                self.logger.info(f"✅ 键重命名成功: {old_full_key} -> {new_full_key}")
+                self.logger.info(f"✅ 主键重命名成功: {old_full_key} -> {new_full_key}")
+                
+                # 同时重命名元数据键
+                old_meta_key = f"{old_full_key}:meta"
+                new_meta_key = f"{new_full_key}:meta"
+                
+                if self.client.exists(old_meta_key):
+                    meta_result = self.client.rename(old_meta_key, new_meta_key)
+                    if meta_result:
+                        self.logger.info(f"✅ 元数据键重命名成功: {old_meta_key} -> {new_meta_key}")
+                    else:
+                        self.logger.warning(f"⚠️ 元数据键重命名失败: {old_meta_key} -> {new_meta_key}")
+                else:
+                    self.logger.info(f"ℹ️ 元数据键不存在，跳过重命名: {old_meta_key}")
+                
                 return True
             else:
-                self.logger.warning(f"⚠️ 键重命名失败: {old_full_key} -> {new_full_key}")
+                self.logger.warning(f"⚠️ 主键重命名失败: {old_full_key} -> {new_full_key}")
                 return False
         except Exception as e:
             self.logger.error(f"❌ 键重命名异常: {e}")
@@ -718,7 +763,23 @@ class RedisCache:
                 if batch_num < total_batches - 1:
                     time.sleep(0.1)
             
-            self.logger.info(f"✅ 大数据量Hash数据存储完成: {full_key}，总数据量: {len(data)} 条")
+            # 设置过期时间
+            if ttl:
+                self.client.expire(full_key, ttl)
+            
+            # 存储元数据
+            metadata = {
+                'total_count': len(data),
+                'columns': data.columns.tolist(),
+                'created_at': datetime.now().isoformat(),
+                'structure': 'hash'
+            }
+            meta_key = f"{full_key}:meta"
+            self.client.set(meta_key, pickle.dumps(metadata))
+            if ttl:
+                self.client.expire(meta_key, ttl)
+            
+            self.logger.info(f"✅ 大数据量Hash数据存储完成: {full_key}，总数据量: {len(data)} 条（含元数据）")
             return True
             
         except Exception as e:
@@ -848,38 +909,86 @@ class RedisCache:
             if not hash_data:
                 return pd.DataFrame()
             
-            # 反序列化数据
-            records = []
-            for equip_sn, serialized_data in hash_data.items():
-                try:
-                    row_data = pickle.loads(serialized_data)
-                    records.append(row_data)
-                except Exception as e:
-                    self.logger.warning(f"反序列化数据失败 {equip_sn}: {e}")
-                    continue
+            # 根据数据量选择串行或并行反序列化
+            data_size = len(hash_data)
             
-            if not records:
-                return pd.DataFrame()
+            if data_size < 500:
+                # 小数据量：串行处理（避免进程开销）
+                records = []
+                for equip_sn, serialized_data in hash_data.items():
+                    try:
+                        row_data = pickle.loads(serialized_data)
+                        records.append(row_data)
+                    except Exception as e:
+                        self.logger.warning(f"反序列化数据失败 {equip_sn}: {e}")
+                        continue
+                
+                if not records:
+                    return pd.DataFrame()
+                
+                df = pd.DataFrame(records)
+                batch_info = f"第 {batch_num} 批" if batch_num else ""
+                self.logger.info(f"✅ {batch_info}Hash数据反序列化完成: {len(df)} 条（串行）")
+                return df
             
-            # 转换为DataFrame
-            df = pd.DataFrame(records)
-            
-            batch_info = f"第 {batch_num} 批" if batch_num else ""
-            self.logger.info(f"✅ {batch_info}Hash数据反序列化完成: {len(df)} 条")
-            return df
+            else:
+                # 大数据量：多进程并行处理（绕过GIL限制）
+                import time
+                from concurrent.futures import ProcessPoolExecutor, as_completed
+                import multiprocessing
+                
+                start_time = time.time()
+                # 使用CPU核心数，但不超过8个进程
+                max_workers = min(multiprocessing.cpu_count(), 8)
+                
+                # 将数据分块
+                items = list(hash_data.items())
+                chunk_size = max(len(items) // max_workers, 100)
+                chunks = [items[i:i + chunk_size] for i in range(0, len(items), chunk_size)]
+                
+                self.logger.info(f"  并行反序列化: {len(items)}条，分{len(chunks)}块，{max_workers}进程")
+                
+                all_records = []
+                
+                # 使用多进程池并行反序列化
+                with ProcessPoolExecutor(max_workers=max_workers) as executor:
+                    futures = [
+                        executor.submit(_deserialize_chunk_worker, chunk) 
+                        for chunk in chunks
+                    ]
+                    
+                    for future in as_completed(futures):
+                        try:
+                            chunk_records = future.result(timeout=30)
+                            if chunk_records:
+                                all_records.extend(chunk_records)
+                        except Exception as e:
+                            self.logger.error(f"  块反序列化失败: {e}")
+                
+                if not all_records:
+                    return pd.DataFrame()
+                
+                df = pd.DataFrame(all_records)
+                elapsed = time.time() - start_time
+                
+                batch_info = f"第 {batch_num} 批" if batch_num else ""
+                self.logger.info(f"✅ {batch_info}Hash数据反序列化完成: {len(df)} 条（并行{max_workers}进程，{elapsed:.2f}s）")
+                return df
             
         except Exception as e:
             self.logger.error(f"反序列化Hash数据失败: {e}")
             return None
 
-    def update_hash_incremental(self, hash_key: str, new_data: pd.DataFrame, ttl: Optional[int] = None) -> bool:
+    def update_hash_incremental(self, hash_key: str, new_data: pd.DataFrame, ttl: Optional[int] = None, 
+                                pipeline_batch_size: int = 1000) -> bool:
         """
-        增量更新Hash数据，相同equip_sn自动覆盖
+        增量更新Hash数据，使用优化的Pipeline批量处理
         
         Args:
             hash_key: Hash键名
             new_data: 新增数据DataFrame
             ttl: 过期时间（秒）
+            pipeline_batch_size: Pipeline批次大小，默认1000条
             
         Returns:
             bool: 是否更新成功
@@ -893,61 +1002,95 @@ class RedisCache:
         
         try:
             full_key = self._make_key(hash_key)
+            total_rows = len(new_data)
             
-            self.logger.info(f"开始增量更新Hash数据: {full_key}，新增: {len(new_data)} 条")
+            self.logger.info(f"开始增量更新Hash数据: {full_key}，新增: {total_rows} 条")
             
-            # 使用Pipeline批量更新
-            pipe = self.client.pipeline()
+            # 分批处理，避免Pipeline命令过多导致内存问题
+            batch_count = 0
+            total_batches = (total_rows + pipeline_batch_size - 1) // pipeline_batch_size
             
-            for _, row in new_data.iterrows():
-                equip_sn = str(row['equip_sn'])
-                row_data = row.to_dict()
+            for start_idx in range(0, total_rows, pipeline_batch_size):
+                end_idx = min(start_idx + pipeline_batch_size, total_rows)
+                batch_data = new_data.iloc[start_idx:end_idx]
+                batch_count += 1
                 
-                # 序列化行数据
-                serialized_data = pickle.dumps(row_data)
+                # 创建Pipeline
+                pipe = self.client.pipeline(transaction=False)  # 非事务模式，性能更好
                 
-                # 更新Hash（相同equip_sn自动覆盖）
-                pipe.hset(full_key, equip_sn, serialized_data)
-            
-            # 执行Pipeline
-            pipe.execute()
-            
-            # 更新元数据
-            meta_key = f"{full_key}:meta"
-            try:
-                # 获取当前Hash的实际数据量
-                actual_count = self.client.hlen(full_key)
+                # 批量添加HSET命令
+                for _, row in batch_data.iterrows():
+                    equip_sn = str(row['equip_sn'])
+                    row_data = row.to_dict()
+                    serialized_data = pickle.dumps(row_data)
+                    pipe.hset(full_key, equip_sn, serialized_data)
                 
-                if self.client.exists(meta_key):
-                    # 更新现有元数据
-                    metadata = pickle.loads(self.client.get(meta_key))
-                    metadata['last_update'] = datetime.now().isoformat()
-                    metadata['total_count'] = actual_count
-                    self.client.set(meta_key, pickle.dumps(metadata))
-                    if ttl:
-                        self.client.expire(meta_key, ttl)
-                else:
-                    # 创建新的元数据
-                    metadata = {
-                        'created_at': datetime.now().isoformat(),
-                        'last_update': datetime.now().isoformat(),
-                        'total_count': actual_count,
-                        'data_type': 'equipment_hash'
-                    }
-                    self.client.set(meta_key, pickle.dumps(metadata))
-                    if ttl:
-                        self.client.expire(meta_key, ttl)
-                        
-                self.logger.info(f"元数据已更新: {meta_key}, 数据量: {actual_count}")
-            except Exception as e:
-                self.logger.warning(f"更新元数据失败: {e}")
+                # 执行Pipeline（一次网络往返执行所有命令）
+                pipe.execute()
+                
+                if total_batches > 1:
+                    self.logger.debug(f"批次 {batch_count}/{total_batches} 完成 ({end_idx}/{total_rows})")
             
-            self.logger.info(f"✅ 增量更新Hash数据完成: {full_key}，新增: {len(new_data)} 条")
+            # 使用Pipeline优化元数据更新（减少网络往返）
+            self._update_hash_metadata_with_pipeline(full_key, ttl)
+            
+            self.logger.info(f"✅ 增量更新Hash数据完成: {full_key}，新增: {total_rows} 条，批次: {batch_count}")
             return True
             
         except Exception as e:
             self.logger.error(f"增量更新Hash数据失败 {hash_key}: {e}")
             return False
+    
+    def _update_hash_metadata_with_pipeline(self, full_key: str, ttl: Optional[int] = None):
+        """
+        使用Pipeline优化元数据更新，减少网络往返
+        
+        Args:
+            full_key: Redis完整键名
+            ttl: 过期时间（秒）
+        """
+        try:
+            meta_key = f"{full_key}:meta"
+            
+            # 创建Pipeline
+            pipe = self.client.pipeline(transaction=False)
+            
+            # 批量执行多个命令
+            pipe.hlen(full_key)  # 获取Hash长度
+            pipe.exists(meta_key)  # 检查元数据是否存在
+            pipe.get(meta_key)  # 获取现有元数据（如果存在）
+            
+            # 一次性执行所有命令
+            results = pipe.execute()
+            actual_count = results[0]
+            meta_exists = results[1]
+            existing_meta = results[2]
+            
+            # 构建元数据
+            if meta_exists and existing_meta:
+                metadata = pickle.loads(existing_meta)
+                metadata['last_update'] = datetime.now().isoformat()
+                metadata['total_count'] = actual_count
+            else:
+                metadata = {
+                    'created_at': datetime.now().isoformat(),
+                    'last_update': datetime.now().isoformat(),
+                    'total_count': actual_count,
+                    'data_type': 'equipment_hash'
+                }
+            
+            # 使用Pipeline更新元数据
+            pipe = self.client.pipeline(transaction=False)
+            pipe.set(meta_key, pickle.dumps(metadata))
+            if ttl:
+                pipe.expire(meta_key, ttl)
+                pipe.expire(full_key, ttl)
+            pipe.execute()
+            
+            self.logger.debug(f"元数据已更新: {meta_key}, 数据量: {actual_count}")
+            
+        except Exception as e:
+            self.logger.warning(f"更新元数据失败: {e}")
 
 
 # 全局缓存实例

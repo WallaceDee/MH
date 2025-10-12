@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间戳显示测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+        }
+        .test-item h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .time-display {
+            font-family: monospace;
+            font-size: 14px;
+            background-color: #e9ecef;
+            padding: 5px;
+            border-radius: 3px;
+            margin: 5px 0;
+        }
+        .debug-info {
+            font-size: 12px;
+            color: #666;
+            background-color: #f1f3f4;
+            padding: 5px;
+            border-radius: 3px;
+            margin: 5px 0;
+            white-space: pre-wrap;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>时间戳显示测试</h1>
+        
+        <div class="test-item">
+            <h4>当前系统时间</h4>
+            <div class="time-display" id="currentTime">加载中...</div>
+        </div>
+        
+        <div class="test-item">
+            <h4>模拟DevTools Protocol时间戳</h4>
+            <button onclick="testDevToolsTimestamp()">测试DevTools时间戳</button>
+            <div class="time-display" id="devtoolsTime">点击按钮测试</div>
+            <div class="debug-info" id="devtoolsDebug"></div>
+        </div>
+        
+        <div class="test-item">
+            <h4>模拟绝对时间戳</h4>
+            <button onclick="testAbsoluteTimestamp()">测试绝对时间戳</button>
+            <div class="time-display" id="absoluteTime">点击按钮测试</div>
+            <div class="debug-info" id="absoluteDebug"></div>
+        </div>
+        
+        <div class="test-item">
+            <h4>时间戳转换测试</h4>
+            <button onclick="testTimestampConversion()">测试时间戳转换</button>
+            <div class="time-display" id="conversionTime">点击按钮测试</div>
+            <div class="debug-info" id="conversionDebug"></div>
+        </div>
+        
+        <div class="test-item">
+            <h4>时区测试</h4>
+            <button onclick="testTimezone()">测试时区显示</button>
+            <div class="time-display" id="timezoneTime">点击按钮测试</div>
+            <div class="debug-info" id="timezoneDebug"></div>
+        </div>
+    </div>
+
+    <script>
+        // 更新当前时间显示
+        function updateCurrentTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // 测试DevTools Protocol时间戳
+        function testDevToolsTimestamp() {
+            const now = Date.now();
+            const pageLoadTime = performance.timing.navigationStart || performance.timeOrigin;
+            const devtoolsTimestamp = now - pageLoadTime; // 模拟DevTools时间戳
+            
+            const debugInfo = {
+                currentTime: now,
+                pageLoadTime: pageLoadTime,
+                devtoolsTimestamp: devtoolsTimestamp,
+                currentTimeString: new Date(now).toLocaleTimeString('zh-CN', { hour12: false })
+            };
+            
+            document.getElementById('devtoolsDebug').textContent = JSON.stringify(debugInfo, null, 2);
+            
+            // 使用Vue组件中的逻辑
+            const absoluteTimestamp = pageLoadTime + devtoolsTimestamp;
+            const date = new Date(absoluteTimestamp);
+            const formattedTime = date.toLocaleTimeString('zh-CN', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            document.getElementById('devtoolsTime').textContent = formattedTime;
+        }
+
+        // 测试绝对时间戳
+        function testAbsoluteTimestamp() {
+            const now = Date.now();
+            const date = new Date(now);
+            
+            const debugInfo = {
+                timestamp: now,
+                dateObject: date,
+                formattedTime: date.toLocaleTimeString('zh-CN', { hour12: false })
+            };
+            
+            document.getElementById('absoluteDebug').textContent = JSON.stringify(debugInfo, null, 2);
+            document.getElementById('absoluteTime').textContent = date.toLocaleTimeString('zh-CN', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // 测试时间戳转换
+        function testTimestampConversion() {
+            const now = Date.now();
+            const pageLoadTime = performance.timing.navigationStart || performance.timeOrigin;
+            const devtoolsTimestamp = now - pageLoadTime;
+            
+            // 测试不同的转换方法
+            const method1 = pageLoadTime + devtoolsTimestamp;
+            const method2 = now;
+            const method3 = Date.now();
+            
+            const debugInfo = {
+                originalTime: now,
+                pageLoadTime: pageLoadTime,
+                devtoolsTimestamp: devtoolsTimestamp,
+                method1: method1,
+                method2: method2,
+                method3: method3,
+                method1Time: new Date(method1).toLocaleTimeString('zh-CN', { hour12: false }),
+                method2Time: new Date(method2).toLocaleTimeString('zh-CN', { hour12: false }),
+                method3Time: new Date(method3).toLocaleTimeString('zh-CN', { hour12: false })
+            };
+            
+            document.getElementById('conversionDebug').textContent = JSON.stringify(debugInfo, null, 2);
+            document.getElementById('conversionTime').textContent = new Date(method1).toLocaleTimeString('zh-CN', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // 测试时区显示
+        function testTimezone() {
+            const now = new Date();
+            
+            const debugInfo = {
+                utcTime: now.toUTCString(),
+                localTime: now.toString(),
+                timezoneOffset: now.getTimezoneOffset(),
+                localeTime: now.toLocaleTimeString('zh-CN', { hour12: false }),
+                localeTimeWithTimezone: now.toLocaleTimeString('zh-CN', { 
+                    hour12: false,
+                    timeZone: 'Asia/Shanghai'
+                })
+            };
+            
+            document.getElementById('timezoneDebug').textContent = JSON.stringify(debugInfo, null, 2);
+            document.getElementById('timezoneTime').textContent = now.toLocaleTimeString('zh-CN', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+        });
+    </script>
+</body>
+</html>
+

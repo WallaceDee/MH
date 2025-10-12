@@ -31,6 +31,10 @@ class RedisPubSub:
         self.subscribe_thread = None
         self.running = False
         self.logger = logging.getLogger(__name__)
+        self.reconnect_attempts = 0  # 重连尝试次数
+        self.max_reconnect_attempts = 10  # 最大重连次数
+        self.reconnect_delay = 1  # 初始重连延迟（秒）
+        self.max_reconnect_delay = 60  # 最大重连延迟（秒）
         
     def _create_redis_client(self) -> redis.Redis:
         """创建Redis客户端"""
@@ -180,7 +184,7 @@ class RedisPubSub:
         self.logger.info("📡 启动Redis订阅线程")
     
     def _subscribe_loop(self):
-        """订阅循环"""
+        """订阅循环，支持自动重连"""
         while self.running:
             try:
                 # 获取消息，超时1秒
@@ -188,10 +192,22 @@ class RedisPubSub:
                 
                 if message and message['type'] == 'message':
                     self._handle_message(message)
+                    # 收到消息说明连接正常，重置重连计数
+                    if self.reconnect_attempts > 0:
+                        self.reconnect_attempts = 0
+                        self.reconnect_delay = 1
                     
+            except redis.ConnectionError as e:
+                self.logger.error(f"Redis连接错误: {e}")
+                self._reconnect()
             except Exception as e:
-                self.logger.error(f"订阅循环错误: {e}")
-                time.sleep(1)
+                error_msg = str(e)
+                if "Connection closed" in error_msg or "ConnectionError" in error_msg:
+                    self.logger.error(f"Redis连接断开: {e}")
+                    self._reconnect()
+                else:
+                    self.logger.error(f"订阅循环错误: {e}")
+                    time.sleep(1)
     
     def _handle_message(self, message):
         """处理接收到的消息"""
@@ -228,12 +244,53 @@ class RedisPubSub:
         except Exception as e:
             self.logger.error(f"处理消息失败: {e}")
     
+    def _reconnect(self):
+        """重新连接Redis并恢复订阅"""
+        if self.reconnect_attempts >= self.max_reconnect_attempts:
+            self.logger.error(f"达到最大重连次数 ({self.max_reconnect_attempts})，停止重连")
+            self.running = False
+            return
+        
+        self.reconnect_attempts += 1
+        
+        # 计算退避延迟（指数退避）
+        delay = min(self.reconnect_delay * (2 ** (self.reconnect_attempts - 1)), self.max_reconnect_delay)
+        self.logger.info(f"尝试重连 Redis (第 {self.reconnect_attempts}/{self.max_reconnect_attempts} 次)，等待 {delay} 秒...")
+        time.sleep(delay)
+        
+        try:
+            # 关闭旧的 pubsub 连接
+            try:
+                self.pubsub.close()
+            except:
+                pass
+            
+            # 重新创建 Redis 客户端
+            self.redis_client = self._create_redis_client()
+            self.pubsub = self.redis_client.pubsub()
+            
+            # 重新订阅所有频道
+            if self.subscribers:
+                self.logger.info(f"重新订阅 {len(self.subscribers)} 个频道...")
+                for channel in self.subscribers.keys():
+                    self.pubsub.subscribe(channel)
+                    self.logger.info(f"📡 已重新订阅频道: {channel}")
+            
+            self.logger.info("Redis 重连成功")
+            
+        except Exception as e:
+            self.logger.error(f"Redis 重连失败: {e}")
+            # 继续循环会在下次获取消息时再次尝试重连
+    
     def stop(self):
         """停止订阅"""
         self.running = False
         if self.subscribe_thread:
             self.subscribe_thread.join(timeout=2)
-        self.pubsub.close()
+        try:
+            self.pubsub.close()
+        except:
+            pass
         self.logger.info("📡 停止Redis订阅")
 
 
