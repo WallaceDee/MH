@@ -247,7 +247,7 @@ class EquipMarketDataCollector:
             full_count = db.session.query(Equipment).count()
             self.mysql_data_count = full_count
             total_count = full_count  # 加载全部数据
-            # total_count = 20001  # 临时测试：加载500条数据
+            # total_count = 2000  # 临时测试：加载500条数据
 
             print(f"装备总记录数: {full_count}，本次加载: {total_count} 条")
             
@@ -1410,7 +1410,7 @@ class EquipMarketDataCollector:
     
     def _merge_incremental_data_removed(self, existing_data: pd.DataFrame, new_data: pd.DataFrame) -> pd.DataFrame:
         """
-        合并现有数据和增量数据
+        合并现有数据和增量数据（优化版，处理列不匹配的情况）
         
         Args:
             existing_data: 现有缓存数据
@@ -1420,29 +1420,54 @@ class EquipMarketDataCollector:
             pd.DataFrame: 合并后的数据
         """
         try:
-            # 确保两个DataFrame的列顺序一致
-            if not existing_data.empty and not new_data.empty:
-                # 确保列顺序一致
-                new_data = new_data.reindex(columns=existing_data.columns, fill_value=None)
-            
-            # 合并数据，新数据会覆盖相同equip_sn的旧数据
+            # 边界情况处理
             if existing_data.empty:
-                merged_data = new_data
-            elif new_data.empty:
-                merged_data = existing_data
-            else:
-                # 使用equip_sn作为主键进行合并
-                # 先删除现有数据中与新数据重复的记录（创建副本，不修改原数据）
-                existing_data_filtered = existing_data[~existing_data['equip_sn'].isin(new_data['equip_sn'])]
-                # 然后合并
-                merged_data = pd.concat([existing_data_filtered, new_data], ignore_index=True)
+                self.logger.info(f"✅ 现有数据为空，直接使用新数据: {len(new_data)} 条")
+                return new_data.copy()
             
-            print(f"数据合并完成: 现有 {len(existing_data)} 条 + 新增 {len(new_data)} 条 = 总计 {len(merged_data)} 条")
+            if new_data.empty:
+                self.logger.info(f"⚠️ 新数据为空，保持现有数据: {len(existing_data)} 条")
+                return existing_data.copy()
+            
+            # 检查必要的列是否存在
+            if 'equip_sn' not in new_data.columns:
+                self.logger.warning(f"⚠️ 新数据缺少equip_sn列，无法合并，保持现有数据")
+                return existing_data.copy()
+            
+            if 'equip_sn' not in existing_data.columns:
+                self.logger.warning(f"⚠️ 现有数据缺少equip_sn列，直接使用新数据")
+                return new_data.copy()
+            
+            # 获取所有列的并集
+            all_columns = list(set(existing_data.columns) | set(new_data.columns))
+            
+            # 确保两个DataFrame都有所有列（缺失的列填充None）
+            for col in all_columns:
+                if col not in existing_data.columns:
+                    existing_data[col] = None
+                if col not in new_data.columns:
+                    new_data[col] = None
+            
+            # 确保列顺序一致
+            existing_data = existing_data[all_columns]
+            new_data = new_data[all_columns]
+            
+            # 使用equip_sn作为主键进行合并
+            # 先删除现有数据中与新数据重复的记录
+            existing_data_filtered = existing_data[~existing_data['equip_sn'].isin(new_data['equip_sn'])].copy()
+            
+            # 然后合并
+            merged_data = pd.concat([existing_data_filtered, new_data], ignore_index=True)
+            
+            self.logger.info(f"✅ 数据合并完成: 现有 {len(existing_data)} 条 + 新增 {len(new_data)} 条 = 总计 {len(merged_data)} 条")
             return merged_data
             
         except Exception as e:
-            self.logger.error(f"合并数据失败: {e}")
-            return existing_data
+            self.logger.error(f"❌ 合并数据失败: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+            # 失败时返回现有数据，保证不丢失数据
+            return existing_data.copy() if not existing_data.empty else new_data.copy()
     
     def _get_existing_data_from_memory(self) -> Optional[pd.DataFrame]:
         """

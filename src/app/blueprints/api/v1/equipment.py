@@ -494,6 +494,20 @@ def get_equip_config():
         return error_response(f"获取装备数据失败: {str(e)}")
 
 
+@equipment_bp.route('/cache/refresh-lingshi', methods=['POST'])
+def refresh_lingshi_cache():
+    """强制刷新灵饰数据缓存"""
+    try:
+        result = controller.refresh_lingshi_cache()
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="灵饰缓存刷新成功")
+        
+    except Exception as e:
+        return error_response(f"刷新灵饰缓存失败: {str(e)}")
+
 @equipment_bp.route('/cache/refresh-memory', methods=['POST'])
 def refresh_memory_cache():
     """刷新内存缓存"""

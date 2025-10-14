@@ -1252,6 +1252,30 @@ class EquipmentService:
         except Exception as e:
             logger.error(f"刷新内存缓存失败: {str(e)}")
             return {"error": f"刷新内存缓存失败: {str(e)}"}
+    
+    def refresh_lingshi_cache(self) -> Dict:
+        """强制刷新灵饰数据缓存"""
+        try:
+            from src.evaluator.market_anchor.lingshi.lingshi_market_data_collector import LingshiMarketDataCollector
+            
+            # 获取灵饰市场数据采集器实例
+            collector = LingshiMarketDataCollector()
+            
+            # 执行强制缓存刷新
+            result = collector.force_refresh_cache()
+            
+            if result is not None:
+                return {
+                    "success": True,
+                    "message": "灵饰缓存刷新成功",
+                    "data_count": len(result) if hasattr(result, '__len__') else 0
+                }
+            else:
+                return {"error": "灵饰缓存刷新失败"}
+            
+        except Exception as e:
+            logger.error(f"刷新灵饰缓存失败: {str(e)}")
+            return {"error": f"刷新灵饰缓存失败: {str(e)}"}
 
 
 equipment_service = EquipmentService()

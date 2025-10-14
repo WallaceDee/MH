@@ -462,3 +462,17 @@ class EquipmentController:
         except Exception as e:
             logger.error(f"刷新内存缓存失败: {str(e)}")
             return {"error": f"刷新内存缓存失败: {str(e)}"}
+    
+    def refresh_lingshi_cache(self) -> Dict:
+        """强制刷新灵饰数据缓存"""
+        try:
+            result = self.service.refresh_lingshi_cache()
+            
+            if "error" in result:
+                return result
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"刷新灵饰缓存失败: {str(e)}")
+            return {"error": f"刷新灵饰缓存失败: {str(e)}"}

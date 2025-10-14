@@ -686,7 +686,7 @@ class CBGEquipSpider:
             return False
     
     def _save_equipment_data_with_context(self, equipments):
-        """在Flask应用上下文中保存装备数据 - 内存缓存 → MySQL → Redis（异步优化版）"""
+        """在Flask应用上下文中保存装备数据 - 内存缓存优先快速响应 → MySQL → Redis"""
         try:
             # 在子线程中重新导入pandas，确保可用
             import pandas as pd
@@ -701,13 +701,18 @@ class CBGEquipSpider:
             filtered_equipments = self._filter_equipment_fields(equipments)
             new_data_df = pd.DataFrame(filtered_equipments)
             
-            # 第一步：立即发布DataFrame消息（超快响应，最高优先级）
-            self._publish_dataframe_message(new_data_df, len(equipments))
+            # 第一步：立即发布DataFrame消息，快速更新内存缓存（最高优先级，超快响应）
+            publish_success = self._publish_dataframe_message(new_data_df, len(equipments))
             
-            # 第二步：异步批量保存到MySQL数据库（不阻塞主流程）
+            if publish_success:
+                self.logger.info(f"✅ 已立即通知内存缓存更新 {len(equipments)} 条数据（快速响应）")
+            else:
+                self.logger.warning(f"⚠️ 内存缓存通知发送失败，但继续保存到数据库")
+            
+            # 第二步：异步批量保存到MySQL和Redis（不阻塞主流程）
             self._submit_async_save_task(equipments, new_data_df)
             
-            self.logger.info(f"🎉 装备数据已提交异步保存任务: 内存缓存(已完成) → MySQL(处理中) → Redis(处理中)")
+            self.logger.info(f"🎉 装备数据保存流程: 内存缓存(✅已通知) → MySQL(处理中) → Redis(处理中)")
             
             # 返回预估的新增数量（实际数量由异步任务计算）
             return len(equipments)
@@ -739,21 +744,22 @@ class CBGEquipSpider:
             self.logger.error(f"❌ 提交异步保存任务失败: {e}")
     
     def _async_save_callback(self, future):
-        """异步保存任务完成回调"""
+        """异步保存任务完成回调 - 记录MySQL和Redis保存结果"""
         try:
             result = future.result()
             if result:
-                saved_count, updated_count, saved_dataframe = result
+                saved_count, updated_count, saved_dataframe, redis_synced = result
                 self.logger.info(
-                    f"✅ 异步保存完成: 新增 {saved_count} 条, 更新 {updated_count} 条"
+                    f"✅ 异步保存完成: 新增 {saved_count} 条, 更新 {updated_count} 条, Redis同步: {'成功' if redis_synced else '失败'}"
                 )
                 
-                # 如果有新增数据，发布包含DataFrame的增量更新消息
-                if saved_count > 0 and saved_dataframe is not None and not saved_dataframe.empty:
-                    self._publish_dataframe_message(saved_dataframe, saved_count)
-                else:
-                    # 没有新增数据时，只发送完成消息
-                    self._publish_save_complete_message(saved_count, updated_count)
+                # 内存缓存已在主线程中立即更新，这里不再发送消息
+                if saved_count > 0 and redis_synced:
+                    self.logger.info(f"✅ MySQL和Redis保存成功，数据一致性已保证")
+                elif saved_count > 0 and not redis_synced:
+                    self.logger.warning(f"⚠️ MySQL保存成功但Redis同步失败，内存和MySQL已有数据，需手动同步Redis")
+                elif updated_count > 0:
+                    self.logger.info(f"📝 无新增数据，更新了 {updated_count} 条现有数据")
                 
         except Exception as e:
             self.logger.error(f"❌ 异步保存任务执行失败: {e}")
@@ -789,14 +795,14 @@ class CBGEquipSpider:
     
     def _async_batch_save_worker(self, equipments, new_data_df):
         """
-        异步批量保存工作线程（在线程池中执行）
+        异步批量保存工作线程（在线程池中执行）- MySQL → Redis → 通知内存缓存
         
         Args:
             equipments: 装备数据列表
             new_data_df: 过滤后的DataFrame
             
         Returns:
-            tuple: (新增数量, 更新数量, 实际保存的DataFrame)
+            tuple: (新增数量, 更新数量, 实际保存的DataFrame, Redis同步状态)
         """
         try:
             # 在Flask应用上下文中执行数据库操作
@@ -809,21 +815,28 @@ class CBGEquipSpider:
                 # 第一步：批量保存到MySQL
                 saved_count, updated_count = self._batch_save_to_mysql(equipments)
                 
-                # 获取实际保存成功的数据DataFrame
+                # 第二步：同步到Redis（只在有新数据时）
+                redis_synced = False
                 saved_dataframe = None
-                if saved_count > 0:
-                    # 第二步：同步到Redis（只在有新数据时）
-                    self._sync_to_redis_cache(new_data_df)
-                    # 返回实际新增的数据（用于增量更新消息）
-                    saved_dataframe = new_data_df.copy()
                 
-                return saved_count, updated_count, saved_dataframe
+                if saved_count > 0:
+                    # 同步到Redis缓存
+                    redis_synced = self._sync_to_redis_cache(new_data_df)
+                    
+                    if redis_synced:
+                        # 返回实际新增的数据（用于通知内存缓存更新）
+                        saved_dataframe = new_data_df.copy()
+                        self.logger.info(f"✅ MySQL和Redis保存成功，准备通知内存缓存更新")
+                    else:
+                        self.logger.warning(f"⚠️ MySQL保存成功但Redis同步失败，不更新内存缓存")
+                
+                return saved_count, updated_count, saved_dataframe, redis_synced
                 
         except Exception as e:
             self.logger.error(f"❌ 异步批量保存工作线程失败: {e}")
             import traceback
             self.logger.error(traceback.format_exc())
-            return 0, 0, None
+            return 0, 0, None, False
     
     def __del__(self):
         """析构方法，确保线程池正确关闭"""

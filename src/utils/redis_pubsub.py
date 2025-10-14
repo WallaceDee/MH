@@ -27,7 +27,7 @@ class RedisPubSub:
         """
         self.redis_client = redis_client or self._create_redis_client()
         self.pubsub = self.redis_client.pubsub()
-        self.subscribers = {}  # 存储订阅者回调函数
+        self.subscribers = {}  # 存储订阅者回调函数列表 {channel: [callback1, callback2, ...]}
         self.subscribe_thread = None
         self.running = False
         self.logger = logging.getLogger(__name__)
@@ -126,7 +126,7 @@ class RedisPubSub:
     
     def subscribe(self, channel: str, callback: Callable[[Dict[str, Any]], None]) -> bool:
         """
-        订阅指定频道
+        订阅指定频道（支持多个订阅者）
         
         Args:
             channel: 频道名称
@@ -136,10 +136,18 @@ class RedisPubSub:
             bool: 是否订阅成功
         """
         try:
-            self.subscribers[channel] = callback
-            self.pubsub.subscribe(channel)
+            # 如果频道不存在，创建回调列表
+            if channel not in self.subscribers:
+                self.subscribers[channel] = []
+                self.pubsub.subscribe(channel)
+                self.logger.info(f"📡 订阅频道: {channel} (首次订阅)")
             
-            self.logger.info(f"📡 订阅频道: {channel}")
+            # 添加回调到列表（避免重复添加）
+            if callback not in self.subscribers[channel]:
+                self.subscribers[channel].append(callback)
+                self.logger.info(f"📡 添加回调到频道: {channel} (共 {len(self.subscribers[channel])} 个订阅者)")
+            else:
+                self.logger.debug(f"📡 回调已存在，跳过: {channel}")
             
             # 启动订阅线程
             if not self.running:
@@ -210,7 +218,7 @@ class RedisPubSub:
                     time.sleep(1)
     
     def _handle_message(self, message):
-        """处理接收到的消息"""
+        """处理接收到的消息（调用所有订阅者的回调）"""
         try:
             channel = message['channel']
             data = message['data']
@@ -236,10 +244,22 @@ class RedisPubSub:
                     self.logger.error(f"反序列化DataFrame失败: {e}")
                     message_data['dataframe'] = None
             
-            # 调用对应的回调函数
+            # 调用所有订阅者的回调函数
             if channel in self.subscribers:
-                callback = self.subscribers[channel]
-                callback(message_data)
+                callbacks = self.subscribers[channel]
+                if isinstance(callbacks, list):
+                    # 新版本：支持多个订阅者
+                    for callback in callbacks:
+                        try:
+                            callback(message_data)
+                        except Exception as e:
+                            self.logger.error(f"回调函数执行失败: {e}")
+                else:
+                    # 兼容旧版本：单个回调
+                    try:
+                        callbacks(message_data)
+                    except Exception as e:
+                        self.logger.error(f"回调函数执行失败: {e}")
                 
         except Exception as e:
             self.logger.error(f"处理消息失败: {e}")

@@ -35,6 +35,9 @@ class LingshiMarketDataCollector:
         # 缓存过滤后的灵饰数据，避免重复读取和过滤
         self._cached_lingshi_data = None
         self._cache_timestamp = None
+        
+        # 订阅装备数据更新消息
+        self._setup_equipment_update_subscription()
 
         print(f"灵饰数据采集器初始化，使用MySQL数据库")
     
@@ -47,6 +50,31 @@ class LingshiMarketDataCollector:
         except Exception as e:
             self.logger.warning(f"获取装备数据采集器实例失败: {e}")
             print(f" 无法共享装备数据采集器缓存: {e}")
+    
+    def _setup_equipment_update_subscription(self):
+        """设置装备数据更新消息订阅"""
+        try:
+            from src.utils.redis_pubsub import get_redis_pubsub, Channel
+            
+            # 获取Redis发布订阅实例
+            redis_pubsub = get_redis_pubsub()
+            
+            # 订阅装备数据更新消息
+            success = redis_pubsub.subscribe(
+                Channel.EQUIPMENT_UPDATES,
+                self.handle_equipment_update_message
+            )
+            
+            if success:
+                self.logger.info("📨 灵饰采集器已订阅装备数据更新消息")
+                print(" 灵饰采集器已订阅装备数据更新消息")
+            else:
+                self.logger.warning("📨 灵饰采集器订阅装备数据更新消息失败")
+                print(" 灵饰采集器订阅装备数据更新消息失败")
+                
+        except Exception as e:
+            self.logger.error(f"设置装备数据更新订阅失败: {e}")
+            print(f" 设置装备数据更新订阅失败: {e}")
     
     def _get_shared_cache_data(self, kindid: Optional[int] = None) -> Optional[pd.DataFrame]:
         """
@@ -117,6 +145,87 @@ class LingshiMarketDataCollector:
         self._cached_lingshi_data = None
         self._cache_timestamp = None
         print(" 已清除灵饰数据实例缓存")
+    
+    def force_refresh_cache(self):
+        """强制刷新缓存，包括装备数据采集器的缓存"""
+        print(" 强制刷新灵饰数据缓存...")
+        
+        # 1. 清除实例缓存
+        self.clear_cache()
+        
+        # 2. 强制刷新装备数据采集器的缓存
+        if self.equip_collector:
+            print(" 刷新装备数据采集器缓存...")
+            success = self.equip_collector.force_refresh_full_cache()
+            if success:
+                print(" 装备数据采集器缓存刷新成功")
+            else:
+                print(" 装备数据采集器缓存刷新失败")
+        
+        # 3. 重新获取数据
+        print(" 重新获取灵饰数据...")
+        return self._get_shared_cache_data()
+    
+    def handle_equipment_update_message(self, message: Dict[str, Any]):
+        """
+        处理装备数据更新消息，自动同步新增的灵饰数据
+        
+        Args:
+            message: 装备数据更新消息
+        """
+        try:
+            message_type = message.get('type')
+            action = message.get('action', 'refresh')
+            
+            self.logger.info(f"📨 灵饰采集器收到装备数据更新消息: {message_type}, 操作: {action}")
+            
+            if message_type == 'equipment_data_saved':
+                if action == 'add_dataframe' and 'dataframe' in message:
+                    # 直接更新灵饰缓存，只同步新增的灵饰数据
+                    dataframe = message['dataframe']
+                    self._update_lingshi_cache_with_dataframe(dataframe)
+                else:
+                    # 清除实例缓存，下次会自动从装备数据采集器获取最新数据
+                    self.clear_cache()
+                    self.logger.info("📨 已清除灵饰数据缓存，下次将获取最新数据")
+                
+        except Exception as e:
+            self.logger.error(f"❌ 处理装备数据更新消息失败: {e}")
+    
+    def _update_lingshi_cache_with_dataframe(self, new_dataframe: pd.DataFrame):
+        """
+        直接使用DataFrame更新灵饰缓存，只同步灵饰数据
+        
+        Args:
+            new_dataframe: 新的装备数据DataFrame
+        """
+        try:
+            # 过滤出灵饰数据 (kindid: 61-64)
+            lingshi_data = new_dataframe[new_dataframe['kindid'].isin([61, 62, 63, 64])].copy()
+            
+            if lingshi_data.empty:
+                self.logger.info("📨 新增数据中没有灵饰数据，跳过同步")
+                return
+            
+            self.logger.info(f"📨 从新增数据中提取到 {len(lingshi_data)} 条灵饰数据")
+            
+            # 更新实例缓存
+            if self._cached_lingshi_data is None or self._cached_lingshi_data.empty:
+                # 如果缓存为空，直接使用新数据
+                self._cached_lingshi_data = lingshi_data
+            else:
+                # 合并新数据到现有缓存
+                self._cached_lingshi_data = pd.concat([self._cached_lingshi_data, lingshi_data], ignore_index=True)
+                # 去重（基于equip_sn）
+                self._cached_lingshi_data = self._cached_lingshi_data.drop_duplicates(subset=['equip_sn'], keep='last')
+            
+            self._cache_timestamp = datetime.now()
+            self.logger.info(f"📨 灵饰缓存更新成功，当前缓存 {len(self._cached_lingshi_data)} 条数据")
+            
+        except Exception as e:
+            self.logger.error(f"❌ 更新灵饰缓存失败: {e}")
+            # 如果更新失败，清除缓存以确保数据一致性
+            self.clear_cache()
 
     def get_market_data(self,
                         kindid: Optional[int] = None,
