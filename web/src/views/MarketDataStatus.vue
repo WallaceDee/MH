@@ -21,83 +21,66 @@
             <!-- 角色数据操作栏 -->
             <div class="tab-action-bar">
               <el-button type="success" @click="refreshMarketData" icon="el-icon-download" :disabled="refreshing">
-                加载市场数据
+                加载基准角色(redis)
               </el-button>
 
-              <el-button type="warning" @click="refreshFullCache" icon="el-icon-refresh" :loading="fullCacheRefreshing">
-                同步市场数据
+              <el-button type="primary" @click="refreshFullCache" icon="el-icon-refresh" :loading="fullCacheRefreshing">
+                全量同步基准角色(mysql)
               </el-button>
             </div>
 
             <!-- 角色数据状态卡片 -->
             <el-row :gutter="20" class="status-cards">
-              <!-- 基本状态 -->
-              <el-col :span="6">
+              <!-- 基准角色缓存状态 -->
+              <el-col :span="8">
                 <el-card class="status-card">
                   <div slot="header" class="card-header">
-                    <i class="el-icon-data-line"></i>
-                    <span>数据状态</span>
+                    <i class="el-icon-user"></i>
+                    <span>基准角色缓存状态</span>
                   </div>
                   <div class="status-item">
-                    <span class="label">数据已加载:</span>
+                    <span class="label">数据是否已加载到内存:</span>
                     <el-tag :type="status.data_loaded ? 'success' : 'danger'">
                       {{ status.data_loaded ? '是' : '否' }}
                     </el-tag>
                   </div>
                   <div class="status-item">
-                    <span class="label">数据条数:</span>
-                    <span class="value">{{ status.data_count || 0 | numberFormat }}</span>
+                    <span class="label">内存数据条数:</span>
+                    <span class="value">{{ status.data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
                     <span class="label">MySQL总数:</span>
                     <span class="value">{{ status.mysql_data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
-                    <span class="label">内存占用:</span>
+                    <span class="label">Redis总数:</span>
+                    <span class="value">{{ status.redis_data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">Redis内存占用:</span>
                     <span class="value">{{ (status.memory_usage_mb || 0).toFixed(2) }} MB</span>
                   </div>
                   <div class="status-item">
                     <span class="label">特征维度:</span>
                     <span class="value">{{ (status.data_columns || []).length }}</span>
                   </div>
-                </el-card>
-              </el-col>
-
-              <!-- 缓存状态 -->
-              <el-col :span="6">
-                <el-card class="status-card">
-                  <div slot="header" class="card-header">
-                    <i class="el-icon-time"></i>
-                    <span>缓存状态</span>
-                  </div>
-                  <div class="status-item">
-                    <span class="label">缓存模式:</span>
-                    <el-tag type="success">
-                      永不过期
-                    </el-tag>
-                  </div>
-                  <div class="status-item">
-                    <span class="label">最后刷新:</span>
+                  <div v-if="status.last_refresh_time" class="status-item">
+                    <span class="label">Redis最后刷新:</span>
                     <span class="value">{{ formatTime(status.last_refresh_time) }}</span>
                   </div>
-                  <div class="status-item">
-                    <span class="label">刷新方式:</span>
-                    <span class="value">仅手动刷新</span>
-                  </div>
-                  <div class="status-item">
-                    <span class="label">数据稳定性:</span>
-                    <el-tag type="success" size="mini">高</el-tag>
-                  </div>
                 </el-card>
               </el-col>
 
-
-              <!-- 数据统计 -->
-              <el-col :span="6">
+              <!-- 角色数据统计 -->
+              <el-col :span="8">
                 <el-card class="status-card">
                   <div slot="header" class="card-header">
-                    <i class="el-icon-s-data"></i>
-                    <span>数据统计</span>
+                    <i class="el-icon-data-analysis"></i>
+                    <span>角色数据统计</span>
+                  </div>
+                  <div v-if="status.data_count" class="status-item">
+                    <span class="label">总角色数:</span>
+                    <span class="value">{{ status.data_count | numberFormat }}</span>
                   </div>
                   <div v-if="status.price_statistics" class="status-item">
                     <span class="label">价格范围:</span>
@@ -110,19 +93,38 @@
                     <span class="label">平均价格:</span>
                     <span class="value">{{ status.price_statistics.avg_price.toFixed(0) | numberFormat }}</span>
                   </div>
+                  <div v-if="status.price_statistics" class="status-item">
+                    <span class="label">中位数价格:</span>
+                    <span class="value">{{ status.price_statistics.median_price ? status.price_statistics.median_price.toFixed(0) : 0 | numberFormat }}</span>
+                  </div>
                   <div v-if="status.level_statistics" class="status-item">
                     <span class="label">等级范围:</span>
                     <span class="value">
-                      {{ status.level_statistics.min_level }} - {{ status.level_statistics.max_level }}
+                      {{ status.level_statistics.min_level }} -
+                      {{ status.level_statistics.max_level }}
                     </span>
                   </div>
-                  <div v-if="status.role_type_distribution" class="status-item">
-                    <span class="label">角色类型:</span>
-                    <div class="role-type-tags">
-                      <el-tag v-for="(count, type) in status.role_type_distribution" :key="type" size="mini">
-                        {{ type }}: {{ count }}
-                      </el-tag>
-                    </div>
+                  <div v-if="status.high_value_count" class="status-item">
+                    <span class="label">高价值角色:</span>
+                    <span class="value">{{ status.high_value_count | numberFormat }} 条</span>
+                  </div>
+                </el-card>
+              </el-col>
+
+              <!-- 角色类型分布 -->
+              <el-col :span="8">
+                <el-card class="status-card">
+                  <div slot="header" class="card-header">
+                    <i class="el-icon-s-custom"></i>
+                    <span>角色类型分布</span>
+                  </div>
+                  <div v-if="status.role_type_distribution" class="role-type-tags">
+                    <el-tag v-for="(count, type) in status.role_type_distribution" :key="type" size="mini" type="primary">
+                      {{ type }}: {{ count }}
+                    </el-tag>
+                  </div>
+                  <div v-else class="no-data">
+                    <span>暂无角色类型分布数据</span>
                   </div>
                 </el-card>
               </el-col>
@@ -157,13 +159,10 @@
           <div class="tab-content">
             <!-- 装备数据操作栏 -->
             <div class="tab-action-bar">
-              <el-button type="info" @click="refreshEquipmentData" icon="el-icon-box" :disabled="refreshing">
-                从redis中加载数据
+              <el-button type="success" @click="refreshEquipmentData" icon="el-icon-box" :disabled="refreshing">
+                加载装备(redis)
               </el-button>
-
-
-
-              <el-button type="danger" @click="refreshEquipmentFullCache" icon="el-icon-refresh"
+              <el-button type="primary" @click="refreshEquipmentFullCache" icon="el-icon-refresh"
                 :loading="equipmentCacheRefreshing">
                 全量同步装备(mysql)
               </el-button>
@@ -301,12 +300,12 @@
             <!-- 召唤兽数据操作栏 -->
             <div class="tab-action-bar">
               <el-button type="success" @click="refreshPetData" icon="el-icon-star-off" :disabled="refreshing">
-                加载召唤兽数据
+                加载召唤兽
               </el-button>
 
-              <el-button type="warning" @click="refreshPetFullCache" icon="el-icon-refresh"
+              <el-button type="primary" @click="refreshPetFullCache" icon="el-icon-refresh"
                 :loading="petCacheRefreshing">
-                同步召唤兽数据
+                全量同步召唤兽(mysql)
               </el-button>
             </div>
 
@@ -320,13 +319,13 @@
                     <span>召唤兽缓存状态</span>
                   </div>
                   <div class="status-item">
-                    <span class="label">数据已加载:</span>
+                    <span class="label">数据是否已加载到内存:</span>
                     <el-tag :type="petMarketDataStatus.data_loaded ? 'success' : 'danger'">
                       {{ petMarketDataStatus.data_loaded ? '是' : '否' }}
                     </el-tag>
                   </div>
                   <div class="status-item">
-                    <span class="label">数据条数:</span>
+                    <span class="label">内存数据条数:</span>
                     <span class="value">{{ petMarketDataStatus.data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
@@ -334,7 +333,11 @@
                     <span class="value">{{ petMarketDataStatus.mysql_data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
-                    <span class="label">内存占用:</span>
+                    <span class="label">Redis总数:</span>
+                    <span class="value">{{ petMarketDataStatus.redis_data_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">Redis内存占用:</span>
                     <span class="value">{{ (petMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
                   </div>
                   <div class="status-item">
@@ -658,7 +661,8 @@ export default {
       progressTimer: null,
       currentBatch: 0,
       totalBatches: 0,
-      // 全量缓存相关
+      // 角色数据相关
+      roleLoading: false,  // 区分角色加载和角色同步
       fullCacheRefreshing: false,
       // 装备数据相关
       equipmentCacheRefreshing: false,
@@ -949,25 +953,27 @@ export default {
 
     async refreshMarketData() {
       try {
-        this.$confirm('刷新市场数据将优先使用缓存快速更新，如需完全重新加载请使用"刷新全量缓存"，是否继续？', '确认刷新', {
+        this.$confirm('优先使用Redis缓存快速加载（约2秒），如缓存不存在则从MySQL加载。如需强制更新数据请使用"全量同步基准角色"，是否继续？', '确认加载', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          type: 'warning'
+          type: 'info'
         }).then(async () => {
+          // 使用相同的进度显示机制
           this.refreshing = true
+          this.roleLoading = true
           this.showRefreshDialog = true
           this.initializeProgress()
-          // 启动后台刷新
-          const response = await systemApi.refreshMarketData()
 
+          const response = await systemApi.refreshMarketData()
           if (response.code === 200) {
-            this.$message.success('数据刷新已启动，正在后台处理...')
+            this.$message.success('角色数据刷新已启动，正在后台处理...')
 
             // 开始轮询进度
             this.startProgressPolling()
           } else {
-            this.$message.error(response.message || '启动刷新失败')
+            this.$message.error(response.message || '启动角色数据刷新失败')
             this.refreshing = false
+            this.roleLoading = false
             this.showRefreshDialog = false
           }
         }).catch(() => {
@@ -977,6 +983,7 @@ export default {
         console.error('启动刷新失败:', error)
         this.$message.error('启动刷新失败，请检查网络连接')
         this.refreshing = false
+        this.roleLoading = false
         this.showRefreshDialog = false
       }
     },
@@ -1009,16 +1016,18 @@ export default {
         this.progressTimer = null
       }
 
-      // 开始轮询后端进度
-      this.progressTimer = setInterval(async () => {
-        if (this.petCacheRefreshing || this.petLoading) {
-          await this.updatePetProgressFromBackend()
-        } else if (this.equipmentCacheRefreshing || this.equipmentLoading || this.equipmentIncrementalUpdating) {
-          await this.updateEquipmentProgressFromBackend()
-        } else {
-          await this.updateProgressFromBackend()
-        }
-      }, 10 * 1000) // 每10秒查询一次进度
+    // 开始轮询后端进度
+    this.progressTimer = setInterval(async () => {
+      if (this.petCacheRefreshing || this.petLoading) {
+        await this.updatePetProgressFromBackend()
+      } else if (this.equipmentCacheRefreshing || this.equipmentLoading || this.equipmentIncrementalUpdating) {
+        await this.updateEquipmentProgressFromBackend()
+      } else if (this.refreshing || this.fullCacheRefreshing || this.roleLoading) {
+        await this.updateRoleProgressFromBackend()
+      } else {
+        await this.updateProgressFromBackend()
+      }
+    }, 10 * 1000) // 每10秒查询一次进度
 
       console.log('进度轮询定时器已启动')
     },
@@ -1071,6 +1080,7 @@ export default {
             this.$message.error('数据刷新失败')
             this.stopProgressTimer()
             this.refreshing = false
+            this.roleLoading = false
             this.fullCacheRefreshing = false
             this.equipmentCacheRefreshing = false
             this.equipmentLoading = false
@@ -1089,7 +1099,9 @@ export default {
       this.refreshMessage = '刷新完成！'
       this.stopProgressTimer()
       setTimeout(() => {
+        // 重置所有刷新状态标志
         this.refreshing = false
+        this.roleLoading = false
         this.fullCacheRefreshing = false
         this.equipmentCacheRefreshing = false
         this.equipmentLoading = false
@@ -1122,6 +1134,7 @@ export default {
 
       // 重置所有刷新状态
       this.refreshing = false
+      this.roleLoading = false
       this.fullCacheRefreshing = false
       this.equipmentCacheRefreshing = false
       this.equipmentLoading = false
@@ -1192,7 +1205,7 @@ export default {
       if (this.fullCacheRefreshing || this.refreshing) return
 
       try {
-        this.$confirm('刷新全量缓存将跳过所有缓存，直接从MySQL重新加载所有empty角色数据，耗时较长但数据最新，是否继续？', '确认刷新', {
+        this.$confirm('强制从MySQL重新加载全部基准角色数据并更新Redis缓存，耗时较长（约400秒）但确保数据最新，是否继续？', '确认全量同步', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -1212,6 +1225,7 @@ export default {
           } else {
             this.$message.error(response.message || '启动全量缓存刷新失败')
             this.refreshing = false
+            this.roleLoading = false
             this.fullCacheRefreshing = false
             this.showRefreshDialog = false
           }
@@ -1222,6 +1236,7 @@ export default {
         console.error('启动全量缓存刷新失败:', error)
         this.$message.error('启动全量缓存刷新失败，请检查网络连接')
         this.refreshing = false
+        this.roleLoading = false
         this.fullCacheRefreshing = false
         this.showRefreshDialog = false
       }
@@ -1439,6 +1454,84 @@ export default {
         }
       } catch (error) {
         console.error('获取召唤兽刷新进度失败:', error)
+      }
+    },
+
+    // 角色数据专门的进度更新方法（以装备实现为标准）
+    async updateRoleProgressFromBackend() {
+      try {
+        // 使用专门的角色刷新状态API（与装备实现保持一致）
+        const response = await systemApi.getRoleRefreshStatus()
+        if (response.code === 200) {
+          const data = response.data
+
+          // 更新进度信息（使用与装备一致的字段名）
+          this.refreshProgress = data.progress || 0
+          this.refreshMessage = data.message || ''
+          this.refreshedCount = data.processed_records || 0
+          this.currentBatch = data.current_batch || 0
+          this.totalBatches = data.total_batches || 0
+          
+          // 如果有后端返回的耗时，优先使用它
+          if (data.elapsed_seconds !== undefined) {
+            this.refreshStartTime = Date.now() - (data.elapsed_seconds * 1000)
+          } else if (data.start_time && !this.refreshStartTime) {
+            // 如果没有elapsed_seconds但有start_time，使用start_time
+            this.refreshStartTime = new Date(data.start_time).getTime()
+          }
+
+          // 检查刷新状态
+          if (data.status === 'completed') {
+            this.completeProgress()
+            this.$message.success(`角色缓存刷新完成！处理了 ${this.refreshedCount} 条数据`)
+
+            // 延迟关闭对话框，但保留耗时信息
+            setTimeout(() => {
+              this.showRefreshDialog = false
+              // 不重置refreshStartTime，让用户看到最终耗时
+              this.refreshProgress = 0
+              this.refreshMessage = ''
+              this.refreshedCount = 0
+              this.currentBatch = 0
+              this.totalBatches = 0
+            }, 2000)
+
+            // 刷新角色状态
+            setTimeout(() => {
+              this.refreshRoleStatus()
+            }, 500)
+
+          } else if (data.status === 'error') {
+            this.refreshMessage = data.message || '角色数据处理失败'
+            this.refreshProgress = 0
+            this.$message.error('角色数据处理失败')
+            this.stopProgressTimer()
+            this.refreshing = false
+            this.roleLoading = false
+            this.fullCacheRefreshing = false
+          } else {
+            // 如果有开始时间但还没设置，使用后端的时间
+            if (data.start_time && !this.refreshStartTime) {
+              this.refreshStartTime = new Date(data.start_time).getTime()
+            }
+          }
+          // 如果是 'running' 状态，继续轮询
+        }
+      } catch (error) {
+        console.error('获取角色刷新进度失败:', error)
+      }
+    },
+
+    // 角色状态专门的刷新方法
+    async refreshRoleStatus() {
+      try {
+        const statusResponse = await systemApi.getMarketDataStatus()
+
+        if (statusResponse.code === 200) {
+          this.status = statusResponse.data || {}
+        }
+      } catch (error) {
+        console.error('获取角色状态失败:', error)
       }
     },
 
@@ -1851,5 +1944,19 @@ export default {
   gap: 4px;
   max-height: 60px;
   overflow-y: auto;
+}
+
+/* 角色类型分布样式 */
+.role-type-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 10px 0;
+}
+
+.no-data {
+  text-align: center;
+  color: #909399;
+  padding: 20px 0;
 }
 </style>

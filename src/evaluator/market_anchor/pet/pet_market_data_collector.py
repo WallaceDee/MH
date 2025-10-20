@@ -423,13 +423,14 @@ class PetMarketDataCollector:
             import time
             from datetime import datetime
             
-            # 初始化进度跟踪
-            self._refresh_status = "running"
-            self._refresh_progress = 0
-            self._refresh_message = "开始加载宠物数据..."
-            self._refresh_start_time = datetime.now()
-            self._refresh_processed_records = 0
-            self._refresh_current_batch = 0
+            # 初始化进度跟踪（如果还没有开始）
+            if self._refresh_status != "running":
+                self._refresh_status = "running"
+                self._refresh_progress = 0
+                self._refresh_message = "开始加载宠物数据..."
+                self._refresh_start_time = datetime.now()
+                self._refresh_processed_records = 0
+                self._refresh_current_batch = 0
             
             start_time = time.time()
             
@@ -839,6 +840,10 @@ class PetMarketDataCollector:
             
             if success:
                 print(" 临时缓存复制到正式缓存成功")
+                
+                # 保存元数据（包含total_count）
+                self._save_cache_metadata(df)
+                
                 return True
             else:
                 print(" 临时缓存复制到正式缓存失败")
@@ -847,6 +852,38 @@ class PetMarketDataCollector:
         except Exception as e:
             print(f" 复制临时缓存失败: {e}")
             return False
+
+    def _save_cache_metadata(self, df: pd.DataFrame) -> None:
+        """
+        保存缓存元数据到Redis
+        
+        Args:
+            df: 数据DataFrame
+        """
+        try:
+            if not self.redis_cache or df.empty:
+                return
+            
+            # 保存元数据（统一使用total_count）
+            metadata = {
+                'total_count': len(df),
+                'created_at': datetime.now().isoformat(),
+                'last_update_time': datetime.now().isoformat(),
+                'total_chunks': (len(df) + 499) // 500,  # 假设chunk_size=500
+                'chunk_size': 500
+            }
+            
+            # 使用pickle序列化存储元数据
+            import pickle
+            meta_key = f"{self._full_cache_key}:meta"
+            full_meta_key = self.redis_cache._make_key(meta_key)
+            metadata_bytes = pickle.dumps(metadata)
+            self.redis_cache.client.set(full_meta_key, metadata_bytes)
+            print(f" 召唤兽缓存元数据保存成功: {len(df)} 条数据")
+            
+        except Exception as e:
+            self.logger.warning(f"保存召唤兽缓存元数据失败: {e}")
+            print(f"保存召唤兽缓存元数据失败: {e}")
 
     def refresh_full_cache(self) -> bool:
         """手动刷新全量缓存"""
@@ -900,7 +937,7 @@ class PetMarketDataCollector:
                     metadata = self.redis_cache.get(f"{self._full_cache_key}:meta")
                     if metadata:
                         status['full_cache_exists'] = True
-                        status['full_cache_size'] = metadata.get('total_rows', 0)
+                        status['full_cache_size'] = metadata.get('total_count', 0)
                         status['cache_created_at'] = metadata.get('created_at')
                         status['chunk_info'] = {
                             'total_chunks': metadata.get('total_chunks', 0),

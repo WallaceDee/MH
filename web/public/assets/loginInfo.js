@@ -1,5 +1,5 @@
 // 自动生成的登录信息文件
-// 生成时间: 1760454365.5125284
+// 生成时间: 1760538949.1188905
 
 window.LoginInfo = {
   "area_id": 54,
@@ -10,8 +10,8 @@ window.LoginInfo = {
   "area_name": "浙江1区",
   "block_urs": "ch****10@163.com",
   "user_icon": "2",
-  "user_msg_num": 5,
-  "safe_code": "9EefP2mD",
+  "user_msg_num": 3,
+  "safe_code": "AGPJtkQY",
   "user_level": "0",
   "user_roles": {
     "46171057": {

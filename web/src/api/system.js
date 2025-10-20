@@ -111,6 +111,14 @@ export const systemApi = {
   },
 
   /**
+   * 获取角色刷新进度状态
+   * @returns {Promise}
+   */
+  getRoleRefreshStatus() {
+    return api.get('/system/market-data/role/refresh-status')
+  },
+
+  /**
    * 获取缓存状态
    * @returns {Promise}
    */
@@ -174,6 +182,14 @@ export const systemApi = {
 
 
   /**
+   * 获取召唤兽缓存状态
+   * @returns {Promise}
+   */
+  getPetCacheStatus() {
+    return api.get('/system/market-data/pet/cache-status')
+  },
+
+  /**
    * 获取召唤兽市场数据状态
    * @returns {Promise}
    */
@@ -186,7 +202,10 @@ export const systemApi = {
    * @returns {Promise}
    */
   refreshPetData() {
-    return api.post('/system/market-data/pet/refresh')
+    return api.post('/system/market-data/pet/refresh', {
+      force_refresh: false,
+      use_cache: true
+    })
   },
 
   /**
@@ -194,7 +213,10 @@ export const systemApi = {
    * @returns {Promise}
    */
   refreshPetFullCache() {
-    return api.post('/system/market-data/pet/refresh-full-cache')
+    return api.post('/system/market-data/pet/refresh', {
+      force_refresh: true,
+      use_cache: true
+    })
   },
 
   /**

@@ -62,6 +62,10 @@ class MarketDataCollector:
         # Flask-Caching 缓存实例（延迟初始化）
         self._cache = None
         
+        # Redis缓存实例
+        from src.utils.redis_cache import get_redis_cache
+        self.redis_cache = get_redis_cache()
+        
         # 进度跟踪相关属性
         self._refresh_status = "idle"  # idle, running, completed, error
         self._refresh_progress = 0  # 0-100
@@ -363,8 +367,6 @@ class MarketDataCollector:
                 connection_config = self._get_optimized_connection_config(db_config)
                 engine = create_engine(db_config, **connection_config)
                 
-                # 输出数据库索引优化建议
-                self._optimize_database_indexes()
                 
                 self._refresh_message = "分析数据量..."
                 self._refresh_progress = 25
@@ -402,12 +404,6 @@ class MarketDataCollector:
                 self._refresh_progress = 30
                 
                 print(f"将分 {total_batches} 批处理，每批 {actual_batch_size} 条")
-                
-                # 性能优化提示
-                if actual_batch_size > 1000:
-                    print(f"  批次大小较大({actual_batch_size})，如果查询缓慢，建议设置更小的batch_size参数(100-800)")
-                elif actual_batch_size < batch_size:
-                    print(f" 已自动调整批次大小: {batch_size} -> {actual_batch_size} (优化查询性能)")
                 
                 # 优化的SQL查询 - 只选择必要字段，减少数据传输
                 base_query = """
@@ -488,9 +484,7 @@ class MarketDataCollector:
                     print(f"价格范围: {full_data_df['price'].min():.1f} - {full_data_df['price'].max():.1f}")
                     
                     # 缓存全量数据到Redis
-                    print(f"🔍 检查缓存设置: use_cache={use_cache}, force_refresh={force_refresh}")
                     if use_cache:
-                        print(" 进入Redis缓存存储分支")
                         self._refresh_message = "缓存数据到Redis..."
                         self._refresh_progress = 95
                         
@@ -889,8 +883,9 @@ class MarketDataCollector:
 
 
     def _set_full_cached_data(self, data: pd.DataFrame) -> bool:
-        """将全量数据缓存到Redis - 使用分块存储和Pipeline优化"""
+        """将全量数据缓存到Redis - 使用无缝切换策略（临时键+RENAME原子操作）"""
         try:
+            import time
             print(f" 开始缓存数据到Redis，数据量: {len(data)} 条")
             from src.utils.redis_cache import get_redis_cache
             redis_cache = get_redis_cache()
@@ -909,15 +904,7 @@ class MarketDataCollector:
             # 永不过期模式：ttl_seconds = None，否则转换为秒
             ttl_seconds = None if cache_hours == -1 else int(cache_hours * 3600)
             
-            print(f"开始使用分块存储全量数据: {len(data)} 条记录")
-            
-            # 先清理旧的缓存数据，确保覆盖
-            print("清理旧的缓存数据...")
-            cleared_count = redis_cache.clear_pattern(f"{full_cache_key}:*")
-            if cleared_count > 0:
-                print(f"已清理 {cleared_count} 个旧缓存键")
-            else:
-                print("没有找到旧的缓存数据")
+            print(f"开始使用无缝切换策略存储全量数据: {len(data)} 条记录")
             
             # 根据数据大小动态调整块大小
             if len(data) > 10000:
@@ -927,22 +914,63 @@ class MarketDataCollector:
             else:
                 chunk_size = 500   # 小数据集
             
-            # 使用Hash存储
-            hash_key = f"{full_cache_key}:hash"
-            success = redis_cache.set_hash_data(
-                hash_key=hash_key,
-                data=data,
-                ttl=ttl_seconds
-            )
+            # 无缝更新策略：先存储新数据到临时键，再原子切换
+            # 使用临时键名存储新数据，避免覆盖现有数据
+            temp_cache_key = f"{full_cache_key}_temp_{int(time.time())}"
+            print(f"使用临时键名存储新数据: {temp_cache_key}")
+            
+            # 重试机制 - 先存储到临时键
+            success = False
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    print(f"第 {attempt + 1} 次尝试存储新数据到临时键...")
+                    temp_hash_key = f"{temp_cache_key}:hash"
+                    success = redis_cache.set_hash_data(
+                        hash_key=temp_hash_key,
+                        data=data,
+                        ttl=ttl_seconds,
+                        key_column='eid'  # 角色数据使用eid作为主键
+                    )
+                    if success:
+                        print("新数据存储到临时键成功！")
+                        break
+                    else:
+                        print(f"第 {attempt + 1} 次存储失败，准备重试...")
+                except Exception as e:
+                    print(f"第 {attempt + 1} 次存储异常: {e}")
+                    if attempt < max_retries - 1:
+                        time.sleep(2)  # 等待2秒后重试
+                    else:
+                        print("所有重试都失败了")
             
             if success:
-                if cache_hours == -1:
-                    print(f"全量数据已Hash缓存到Redis，缓存时间: 永不过期")
+                # 新数据存储成功，开始无缝切换
+                print(" 开始无缝切换：将临时数据切换为正式数据（原子操作）...")
+                
+                # 使用RENAME原子操作，自动覆盖旧数据（无时间窗口，避免数据丢失）
+                print("使用RENAME原子操作切换数据（避免删除旧数据导致的空窗期）...")
+                copy_success = self._copy_temp_cache_to_official(
+                    temp_cache_key, full_cache_key, data, chunk_size, ttl_seconds
+                )
+                
+                if copy_success:
+                    print(" 无缝切换完成！新数据已生效")
+                    cache_info = "永不过期（仅手动刷新）" if cache_hours == -1 else f"{cache_hours}小时"
+                    print(f"全量角色数据已缓存到Redis，缓存策略: {cache_info}")
+                    
+                    # 清理临时数据
+                    print("清理临时数据...")
+                    redis_cache.clear_pattern(f"{temp_cache_key}:*")
+                    
+                    return True
                 else:
-                    print(f"全量数据已Hash缓存到Redis，缓存时间: {cache_hours}小时")
-                return True
+                    print(" 无缝切换失败，清理临时数据...")
+                    redis_cache.clear_pattern(f"{temp_cache_key}:*")
+                    return False
             else:
-                print("Redis Hash缓存设置失败")
+                print(" 新数据存储失败，清理临时数据...")
+                redis_cache.clear_pattern(f"{temp_cache_key}:*")
                 return False
                 
         except Exception as e:
@@ -950,6 +978,41 @@ class MarketDataCollector:
             print("Redis缓存失败")
             return False
 
+    def _copy_temp_cache_to_official(self, temp_key: str, official_key: str, df: pd.DataFrame, chunk_size: int, ttl_seconds: Optional[int]) -> bool:
+        """
+        将临时缓存无缝切换到正式缓存（高效原子操作）
+        
+        Args:
+            temp_key: 临时缓存键名
+            official_key: 正式缓存键名
+            df: 数据DataFrame（用于验证）
+            chunk_size: 块大小（用于验证）
+            ttl_seconds: TTL秒数（用于验证）
+            
+        Returns:
+            bool: 是否切换成功
+        """
+        try:
+            from src.utils.redis_cache import get_redis_cache
+            redis_cache = get_redis_cache()
+            
+            print(f"开始无缝切换：将临时缓存 {temp_key} 重命名为正式缓存 {official_key}...")
+            
+            # 角色数据使用Hash存储，需要重命名hash键
+            temp_hash_key = f"{temp_key}:hash"
+            official_hash_key = f"{official_key}:hash"
+            
+            # 使用Redis的原子性RENAME命令进行无缝切换
+            success = redis_cache.rename_key(temp_hash_key, official_hash_key)
+            
+            if success:
+                return True
+            else:
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"临时缓存无缝切换异常: {e}")
+            return False
 
     def _apply_filters(self, data: pd.DataFrame, filters: Optional[Dict[str, Any]], max_records: int) -> pd.DataFrame:
         """对数据应用筛选条件"""
@@ -995,22 +1058,22 @@ class MarketDataCollector:
 
     def refresh_full_cache(self) -> bool:
         """
-        手动刷新全量缓存 - 从MySQL重新加载所有empty角色数据到Redis
-        这是在永不过期模式下更新数据的主要方法
+        手动刷新全量缓存 - 强制从MySQL重新加载所有empty角色数据到Redis
+        这是在永不过期模式下更新数据的主要方法，确保数据是最新的
         
         Returns:
             bool: 是否成功刷新缓存
         """
         try:
-            print(" 开始手动刷新全量缓存（永不过期模式）...")
-            print(" 这将从MySQL重新加载所有empty角色数据")
+            print(" 开始全量同步基准角色（从MySQL重新加载）...")
+            print(" 这将强制从MySQL重新加载所有empty角色数据，忽略现有Redis缓存")
             
             # 强制从数据库刷新，不使用现有缓存
             self.refresh_market_data(
                 filters=None, 
                 max_records=999999,  # 设置很大的值以获取全部数据
                 use_cache=True,
-                force_refresh=True
+                force_refresh=True  # 强制刷新，跳过Redis缓存检查
             )
             
             print(" 全量缓存手动刷新完成")
@@ -1090,7 +1153,7 @@ class MarketDataCollector:
                     if metadata:
                         status['full_cache_exists'] = True
                         status['cache_type'] = 'chunked'
-                        status['full_cache_size'] = metadata.get('total_rows', 0)
+                        status['full_cache_size'] = metadata.get('total_count', 0)
                         status['full_cache_last_update'] = metadata.get('created_at')
                         status['chunk_info'] = {
                             'total_chunks': metadata.get('total_chunks', 0),
@@ -1169,23 +1232,6 @@ class MarketDataCollector:
             self.logger.error(f"批量处理第{batch_num}批数据失败: {e}")
             return []
 
-    def _optimize_database_indexes(self):
-        """
-        优化数据库索引建议 - 仅输出建议，不执行
-        """
-        index_suggestions = [
-            "CREATE INDEX idx_roles_type_price ON roles(role_type, price);",
-            "CREATE INDEX idx_roles_eid ON roles(eid);",
-            "CREATE INDEX idx_large_equip_eid ON large_equip_desc_data(eid);",
-            "CREATE INDEX idx_roles_level ON roles(level);",
-            "CREATE INDEX idx_roles_serverid ON roles(serverid);",
-            "CREATE INDEX idx_roles_school ON roles(school);"
-        ]
-        
-        print("🔍 数据库索引优化建议:")
-        for suggestion in index_suggestions:
-            print(f"  {suggestion}")
-        print("📝 请在数据库中手动执行这些索引创建语句以提升查询性能")
 
     def _get_optimized_connection_config(self, db_config: str) -> Dict:
         """

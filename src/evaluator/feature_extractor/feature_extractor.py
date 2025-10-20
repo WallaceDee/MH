@@ -31,19 +31,30 @@ class FeatureExtractor:
         self.hot_server_list = load_jsonc_relative_to_file(
             __file__, '../../constant/hot_server_list.json')
         
-        # 初始化规则估价器（延迟导入避免循环依赖）
-        self.rule_evaluator = None
+        # 预加载外观配置文件，避免重复加载
+        self.appearance_config = self._load_appearance_config()
+        
+        # 预初始化规则估价器，避免重复初始化
+        self.rule_evaluator = self._init_rule_evaluator()
+
+    def _init_rule_evaluator(self):
+        """初始化规则估价器"""
+        try:
+            from ..rule_evaluator import RuleEvaluator
+            evaluator = RuleEvaluator()
+            self.logger.info("规则估价器初始化成功")
+            return evaluator
+        except Exception as e:
+            self.logger.warning(f"规则估价器初始化失败: {e}")
+            return None
 
     def _get_rule_evaluator(self):
-        """获取规则估价器实例（延迟初始化）"""
-        if self.rule_evaluator is None:
-            from ..rule_evaluator import RuleEvaluator
-            self.rule_evaluator = RuleEvaluator()
+        """获取规则估价器实例（已预初始化）"""
         return self.rule_evaluator
 
     def extract_features(self, role_data: Dict[str, Any]) -> Dict[str, Union[int, float, str]]:
         """
-        提取所有特征
+        提取所有特征（优化版本 - 预加载配置，避免重复加载）
         Returns:
             Dict[str, Union[int, float, str]]: 提取的特征字典，包含以下字段:
                 - level (int): 等级
@@ -470,13 +481,13 @@ class FeatureExtractor:
                     skins = json.loads(skins_str)
                     if isinstance(skins, dict):
                         skin_total_value = 0
-                        config = self._load_appearance_config()
-                        limited_avt_widget = config.get(
+                        # 使用预加载的配置，避免重复加载
+                        limited_avt_widget = self.appearance_config.get(
                             'limited_avt_widget', {})
 
                         # 使用新的变体组合计算逻辑
                         skin_total_value = self._calculate_skin_variant_value(
-                            skins, gender, config)
+                            skins, gender, self.appearance_config)
 
                         # 处理特殊挂件（恶魔猪猪等）
                         for skin_id, skin_item in skins.items():
@@ -539,9 +550,8 @@ class FeatureExtractor:
             int: 物品价值（元）
         """
         try:
-            # 加载配置文件
-            config = self._load_appearance_config()
-            items_config = config.get(config_key, {})
+            # 使用预加载的配置，避免重复加载
+            items_config = self.appearance_config.get(config_key, {})
 
             # 首先尝试直接匹配
             if item_name in items_config:
@@ -706,11 +716,51 @@ class FeatureExtractor:
         try:
             # 从constant目录加载外观配置文件
             constant_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'constant', 'ex_avt_value.jsonc')
-            return load_jsonc(constant_path)
+            config = load_jsonc(constant_path)
+            self.logger.info(f"外观配置文件加载成功: {constant_path}")
+            return config
 
         except Exception as e:
             self.logger.error(f"加载外观配置文件失败: {e}")
             return {}
+
+    def reload_appearance_config(self):
+        """重新加载外观配置文件（用于配置更新）"""
+        try:
+            self.appearance_config = self._load_appearance_config()
+            self.logger.info("外观配置文件重新加载成功")
+            return True
+        except Exception as e:
+            self.logger.error(f"重新加载外观配置文件失败: {e}")
+            return False
+
+    def reload_rule_evaluator_config(self):
+        """重新加载规则估价器配置（用于配置更新）"""
+        try:
+            if self.rule_evaluator is not None:
+                success = self.rule_evaluator.reload_configs()
+                if success:
+                    self.logger.info("规则估价器配置重新加载成功")
+                return success
+            else:
+                self.logger.warning("规则估价器未初始化，无法重新加载配置")
+                return False
+        except Exception as e:
+            self.logger.error(f"重新加载规则估价器配置失败: {e}")
+            return False
+
+    def get_config_info(self):
+        """获取配置信息（用于调试）"""
+        return {
+            'appearance_config_loaded': bool(self.appearance_config),
+            'appearance_config_keys': list(self.appearance_config.keys()) if self.appearance_config else [],
+            'rule_config_loaded': bool(self.config),
+            'hot_server_list_loaded': bool(self.hot_server_list),
+            'rule_evaluator_loaded': bool(self.rule_evaluator),
+            'rule_evaluator_config_loaded': bool(self.rule_evaluator.rule_config) if self.rule_evaluator else False,
+            'rule_evaluator_discount_rates_loaded': bool(self.rule_evaluator.discount_rates) if self.rule_evaluator else False
+        }
+
 
     def _extract_market_features(self, data):
         """提取市场行为特征"""

@@ -1664,15 +1664,20 @@ class EquipMarketDataCollector:
             
             # 更新元数据
             metadata = {
-                'total_rows': len(merged_data),
+                'total_count': len(merged_data),  # 统一使用total_count
                 'created_at': datetime.now().isoformat(),
                 'last_update_time': datetime.now().isoformat(),
                 'total_chunks': (len(merged_data) + 499) // 500,  # 假设chunk_size=500
                 'chunk_size': 500
             }
             
-            self.redis_cache.set(f"{self._full_cache_key}:meta", metadata)
-            print(" 缓存元数据更新成功")
+            # 使用pickle序列化存储元数据（与召唤兽保持一致）
+            import pickle
+            meta_key = f"{self._full_cache_key}:meta"
+            full_meta_key = self.redis_cache._make_key(meta_key)
+            metadata_bytes = pickle.dumps(metadata)
+            self.redis_cache.client.set(full_meta_key, metadata_bytes)
+            print(" 装备缓存元数据更新成功")
             
         except Exception as e:
             self.logger.warning(f"更新缓存元数据失败: {e}")
@@ -1934,7 +1939,7 @@ class EquipMarketDataCollector:
                     metadata = self.redis_cache.get(f"{self._full_cache_key}:meta")
                     if metadata:
                         status['full_cache_exists'] = True
-                        status['full_cache_size'] = metadata.get('total_rows', 0)
+                        status['full_cache_size'] = metadata.get('total_count', 0)
                         status['cache_created_at'] = metadata.get('created_at')
                         status['chunk_info'] = {
                             'total_chunks': metadata.get('total_chunks', 0),

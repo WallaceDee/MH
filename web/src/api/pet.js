@@ -51,39 +51,12 @@ export const petApi = {
   },
 
   /**
-   * 通过召唤兽SN查找锚点（便捷接口）
-   * @param {string} petSn - 召唤兽序列号
-   * @param {Object} params - 查询参数
-   * @returns {Promise}
-   */
-  findAnchorsBySn(petSn, params = {}) {
-    return api.get(`/pet/anchors/${petSn}`, params)
-  },
-
-  /**
-   * 通过召唤兽SN获取估价（便捷接口）
-   * @param {string} petSn - 召唤兽序列号
-   * @param {Object} params - 估价参数
-   * @returns {Promise}
-   */
-  getValuationBySn(petSn, params = {}) {
-    return api.get(`/pet/valuation/${petSn}`, params)
-  },
-
-    /**
    * 更新召唤兽装备价格
    * @param {Object} data - 召唤兽数据和估价参数
    * @returns {Promise}
    */
   updatePetEquipmentsPrice(data) {
     return api.post('/pet/update-equipments-price', data)
-  },
-  /**
-   * 健康检查
-   * @returns {Promise}
-   */
-  healthCheck() {
-    return api.get('/pet/health')
   },
 
   /**

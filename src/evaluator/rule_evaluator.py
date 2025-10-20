@@ -6,9 +6,42 @@ from src.utils.jsonc_loader import load_jsonc_from_config_dir
 
 class RuleEvaluator:
     def __init__(self):
-    
         self.logger = logging.getLogger(__name__)
+        
+        # 预加载配置文件，避免重复加载
+        self.rule_config = self._load_rule_config()
+        self.discount_rates = self._load_discount_rates()
 
+    def _load_rule_config(self):
+        """加载规则配置文件"""
+        try:
+            config = load_jsonc_from_config_dir('rule_setting.jsonc', __file__)
+            self.logger.info("规则配置文件加载成功")
+            return config
+        except Exception as e:
+            self.logger.error(f"加载规则配置文件失败: {e}")
+            return {}
+
+    def _load_discount_rates(self):
+        """加载折价率配置文件"""
+        try:
+            config = load_jsonc_from_config_dir('rate.jsonc', __file__)
+            self.logger.info("折价率配置文件加载成功")
+            return config
+        except Exception as e:
+            self.logger.error(f"加载折价率配置文件失败: {e}")
+            return {}
+
+    def reload_configs(self):
+        """重新加载配置文件（用于配置更新）"""
+        try:
+            self.rule_config = self._load_rule_config()
+            self.discount_rates = self._load_discount_rates()
+            self.logger.info("规则估价器配置文件重新加载成功")
+            return True
+        except Exception as e:
+            self.logger.error(f"重新加载配置文件失败: {e}")
+            return False
 
     def calc_rule_evaluation_from_features(self, features):
         """基于已提取的特征计算规则估价
@@ -44,11 +77,9 @@ class RuleEvaluator:
             Dict[str, float]: 包含各项价值详情的字典
         """
         try:
-            # 加载规则配置
-            RULE = load_jsonc_from_config_dir('rule_setting.jsonc', __file__)
-            
-            # 加载折价率配置
-            DISCOUNT_RATES = load_jsonc_from_config_dir('rate.jsonc', __file__)
+            # 使用预加载的配置，避免重复加载
+            RULE = self.rule_config
+            DISCOUNT_RATES = self.discount_rates
             
             value_breakdown = {}
             total_value = 0

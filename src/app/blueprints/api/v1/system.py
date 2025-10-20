@@ -311,7 +311,7 @@ def update_search_param(param_type: str):
     
 @system_bp.route('/market-data/status', methods=['GET'])
 def get_market_data_status():
-    """获取市场数据状态"""
+    """获取市场数据状态（参考装备实现）"""
     try:
         from src.evaluator.market_data_collector import MarketDataCollector
         
@@ -321,6 +321,30 @@ def get_market_data_status():
         # 获取MySQL数据总数
         mysql_count = collector._get_empty_roles_count()
         
+        # 获取Redis数据总数（如果有Redis缓存）
+        redis_count = 0
+        try:
+            if hasattr(collector, 'redis_cache') and collector.redis_cache and collector.redis_cache.is_available():
+                # 使用正确的键名（与存储时一致）
+                full_cache_key = "market_data_full_empty_roles"
+                hash_key = f"{full_cache_key}:hash"
+                meta_key = f"{hash_key}:meta"
+                
+                # 获取完整的键名（包含前缀）
+                full_meta_key = collector.redis_cache._make_key(meta_key)
+                
+                # 从元数据中获取总数（元数据是pickle序列化的）
+                if collector.redis_cache.client.exists(full_meta_key):
+                    import pickle
+                    metadata_bytes = collector.redis_cache.client.get(full_meta_key)
+                    if metadata_bytes:
+                        hash_metadata = pickle.loads(metadata_bytes)
+                        if hash_metadata and 'total_count' in hash_metadata:
+                            redis_count = hash_metadata.get('total_count', 0)
+                            logger.info(f"Redis角色数据总数: {redis_count} 条")
+        except Exception as e:
+            logger.warning(f"获取Redis角色数据总数失败: {e}")
+        
         # 获取基本状态信息
         status_info = {
             "data_loaded": collector._data_loaded,
@@ -329,7 +353,8 @@ def get_market_data_status():
             "data_count": len(collector.market_data) if not collector.market_data.empty else 0,
             "data_columns": list(collector.market_data.columns) if not collector.market_data.empty else [],
             "memory_usage_mb": collector.market_data.memory_usage(deep=True).sum() / 1024 / 1024 if not collector.market_data.empty else 0,
-            "mysql_data_count": mysql_count
+            "mysql_data_count": mysql_count,
+            "redis_data_count": redis_count
         }
         
         # 添加刷新进度信息
@@ -357,6 +382,11 @@ def get_market_data_status():
                     "median_price": float(collector.market_data['price'].median())
                 }
                 status_info["price_statistics"] = price_stats
+                
+                # 高价值角色统计（价格 > 10000的角色）
+                if 'price' in collector.market_data.columns:
+                    high_value_count = len(collector.market_data[collector.market_data['price'] > 10000])
+                    status_info["high_value_count"] = high_value_count
                 
                 # 角色类型分布
                 if 'role_type' in collector.market_data.columns:
@@ -658,6 +688,25 @@ def get_equipment_market_data_status():
         return error_response(f"获取装备市场数据状态失败: {str(e)}")
 
 
+@system_bp.route('/market-data/pet/cache-status', methods=['GET'])
+def get_pet_cache_status():
+    """获取召唤兽缓存状态"""
+    try:
+        from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+        
+        # 获取召唤兽数据采集器实例
+        collector = PetMarketDataCollector()
+        
+        # 获取缓存状态
+        cache_status = collector.get_cache_status()
+        
+        return success_response(data=cache_status, message="获取召唤兽缓存状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取召唤兽缓存状态失败: {e}")
+        return error_response(f"获取召唤兽缓存状态失败: {str(e)}")
+
+
 @system_bp.route('/market-data/pet/status', methods=['GET'])
 def get_pet_market_data_status():
     """获取召唤兽市场数据状态"""
@@ -675,6 +724,55 @@ def get_pet_market_data_status():
         # 获取MySQL召唤兽数据总数
         mysql_count = collector._get_mysql_pets_count()
         
+        # 获取Redis数据总数（从Hash元数据获取，不加载实际数据）
+        redis_count = 0
+        try:
+            if collector.redis_cache and collector.redis_cache.is_available():
+                # 从Hash结构元数据获取数据总数
+                meta_key = f"{collector._full_cache_key}:meta"
+                print(f"🔍 尝试获取召唤兽Redis元数据键: {meta_key}")
+                
+                # 先检查键是否存在
+                full_meta_key = collector.redis_cache._make_key(meta_key)
+                print(f"🔍 完整元数据键: {full_meta_key}")
+                
+                # 检查键是否存在
+                key_exists = collector.redis_cache.client.exists(full_meta_key)
+                print(f"🔍 元数据键是否存在: {key_exists}")
+                
+                if key_exists:
+                    # 元数据是作为普通字符串存储的，需要反序列化
+                    import pickle
+                    try:
+                        metadata_bytes = collector.redis_cache.client.get(full_meta_key)
+                        if metadata_bytes:
+                            hash_metadata = pickle.loads(metadata_bytes)
+                            print(f"🔍 召唤兽Redis元数据内容: {hash_metadata}")
+                            if hash_metadata and 'total_count' in hash_metadata:
+                                redis_count = hash_metadata.get('total_count', 0)
+                                print(f"🔍 召唤兽Redis缓存数据量: {redis_count} 条")
+                            else:
+                                print("🔍 召唤兽Redis元数据缺少total_count字段")
+                        else:
+                            print("🔍 召唤兽Redis元数据为空")
+                    except Exception as e:
+                        print(f"🔍 反序列化召唤兽Redis元数据失败: {e}")
+                        # 尝试作为Hash结构获取（向后兼容）
+                        hash_metadata = collector.redis_cache.get(meta_key)
+                        print(f"🔍 召唤兽Redis元数据内容(Hash): {hash_metadata}")
+                        if hash_metadata and 'total_count' in hash_metadata:
+                            redis_count = hash_metadata.get('total_count', 0)
+                            print(f"🔍 召唤兽Redis缓存数据量: {redis_count} 条")
+                        else:
+                            print("🔍 召唤兽Redis Hash元数据缺少total_count字段")
+                else:
+                    print("🔍 召唤兽Redis Hash元数据键不存在")
+                    redis_count = 0
+            else:
+                print("🔍 召唤兽Redis不可用")
+        except Exception as e:
+            print(f"🔍 获取召唤兽Redis数据总数失败: {e}")
+        
         # 获取基本状态信息
         status_info = {
             "data_loaded": collector._full_data_cache is not None and not collector._full_data_cache.empty,
@@ -683,7 +781,8 @@ def get_pet_market_data_status():
             "data_count": len(collector._full_data_cache) if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
             "data_columns": list(collector._full_data_cache.columns) if collector._full_data_cache is not None and not collector._full_data_cache.empty else [],
             "memory_usage_mb": collector._full_data_cache.memory_usage(deep=True).sum() / 1024 / 1024 if collector._full_data_cache is not None and not collector._full_data_cache.empty else 0,
-            "mysql_data_count": mysql_count
+            "mysql_data_count": mysql_count,
+            "redis_data_count": redis_count
         }
         
         # 添加刷新进度信息
@@ -779,64 +878,66 @@ def get_pet_market_data_status():
 
 @system_bp.route('/market-data/pet/refresh', methods=['POST'])
 def refresh_pet_data():
-    """刷新召唤兽数据"""
+    """启动召唤兽数据刷新"""
     try:
         from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+        import threading
+        from datetime import datetime
+        
+        # 获取请求参数
+        data = request.get_json() or {}
         
         # 获取召唤兽数据采集器实例
         collector = PetMarketDataCollector()
         
-        # 启动后台数据刷新
-        import threading
+        # 检查是否正在刷新
+        if collector._refresh_status == "running":
+            return error_response("召唤兽数据刷新正在进行中，请等待完成后再试")
         
-        def refresh_task():
+        # 设置刷新参数
+        use_cache = data.get('use_cache', True)
+        force_refresh = data.get('force_refresh', False)
+        
+        # 在后台线程中执行刷新
+        def background_refresh():
             try:
-                # 加载召唤兽数据到Redis缓存
-                collector._load_full_data_to_redis()
+                # 确保进度状态正确初始化
+                collector._refresh_status = "running"
+                collector._refresh_progress = 0
+                collector._refresh_message = "正在启动召唤兽数据刷新..."
+                collector._refresh_start_time = datetime.now()
+                collector._refresh_processed_records = 0
+                collector._refresh_total_records = 0
+                collector._refresh_current_batch = 0
+                collector._refresh_total_batches = 0
+                
+                if force_refresh:
+                    # 强制刷新，完全重新加载
+                    collector.refresh_full_cache()
+                else:
+                    # 使用缓存，如果缓存不存在则加载
+                    collector._load_full_data_to_redis(force_refresh=False)
             except Exception as e:
-                logger.error(f"召唤兽数据刷新任务失败: {e}")
+                logger.error(f"后台刷新召唤兽数据失败: {e}")
+                collector._refresh_status = "error"
+                collector._refresh_message = f"刷新失败: {str(e)}"
         
-        # 在后台线程中执行刷新任务
-        thread = threading.Thread(target=refresh_task)
-        thread.daemon = True
-        thread.start()
+        # 启动后台线程
+        refresh_thread = threading.Thread(target=background_refresh)
+        refresh_thread.daemon = True
+        refresh_thread.start()
         
-        return success_response(message="召唤兽数据刷新已启动，正在后台处理...")
+        # 立即返回启动成功的响应
+        return success_response(data={
+            "refresh_started": True,
+            "message": "召唤兽数据刷新已启动，请使用状态接口查询进度",
+            "force_refresh": force_refresh,
+            "use_cache": use_cache
+        }, message="召唤兽数据刷新已启动")
         
     except Exception as e:
         logger.error(f"启动召唤兽数据刷新失败: {e}")
         return error_response(f"启动召唤兽数据刷新失败: {str(e)}")
-
-
-@system_bp.route('/market-data/pet/refresh-full-cache', methods=['POST'])
-def refresh_pet_full_cache():
-    """刷新召唤兽全量缓存"""
-    try:
-        from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
-        
-        # 获取召唤兽数据采集器实例
-        collector = PetMarketDataCollector()
-        
-        # 启动后台全量缓存刷新
-        import threading
-        
-        def refresh_task():
-            try:
-                # 强制刷新全量缓存
-                collector.refresh_full_cache()
-            except Exception as e:
-                logger.error(f"召唤兽全量缓存刷新任务失败: {e}")
-        
-        # 在后台线程中执行刷新任务
-        thread = threading.Thread(target=refresh_task)
-        thread.daemon = True
-        thread.start()
-        
-        return success_response(message="召唤兽全量缓存刷新已启动，正在后台处理...")
-        
-    except Exception as e:
-        logger.error(f"启动召唤兽全量缓存刷新失败: {e}")
-        return error_response(f"启动召唤兽全量缓存刷新失败: {str(e)}")
 
 
 @system_bp.route('/market-data/pet/refresh-status', methods=['GET'])
@@ -1041,7 +1142,7 @@ def get_market_data_analysis():
 
 @system_bp.route('/market-data/refresh', methods=['POST'])
 def refresh_market_data():
-    """启动分批刷新市场数据"""
+    """启动角色市场数据刷新（与装备实现保持一致的模式）"""
     try:
         from src.evaluator.market_data_collector import MarketDataCollector
         import threading
@@ -1054,22 +1155,27 @@ def refresh_market_data():
         
         # 检查是否正在刷新
         if collector._refresh_status == "running":
-            return error_response("数据刷新正在进行中，请等待完成后再试")
+            return error_response("角色数据刷新正在进行中，请等待完成后再试")
         
         # 设置刷新参数
-        filters = data.get('filters', None)
         use_cache = data.get('use_cache', True)
         force_refresh = data.get('force_refresh', False)
+        
         # 在后台线程中执行刷新
         def background_refresh():
             try:
-                collector.refresh_market_data(
-                    filters=filters,
-                    use_cache=use_cache,
-                    force_refresh=force_refresh,
-                )
+                if force_refresh:
+                    # 全量同步：强制从MySQL重新加载，更新Redis缓存
+                    collector.refresh_full_cache()
+                else:
+                    # 普通加载：优先使用Redis缓存，如果缓存不存在则从MySQL加载
+                    collector.refresh_market_data(
+                        filters=None,
+                        use_cache=use_cache,
+                        force_refresh=False
+                    )
             except Exception as e:
-                logger.error(f"后台刷新失败: {e}")
+                logger.error(f"后台刷新角色数据失败: {e}")
                 collector._refresh_status = "error"
                 collector._refresh_message = f"刷新失败: {str(e)}"
         
@@ -1081,13 +1187,33 @@ def refresh_market_data():
         # 立即返回启动成功的响应
         return success_response(data={
             "refresh_started": True,
-            "message": "数据刷新已启动，请使用状态接口查询进度",
-            "filters_applied": filters
-        }, message="数据刷新已启动")
+            "message": "角色数据刷新已启动，请使用状态接口查询进度",
+            "force_refresh": force_refresh,
+            "use_cache": use_cache
+        }, message="角色数据刷新已启动")
         
     except Exception as e:
         logger.error(f"启动刷新失败: {e}")
         return error_response(f"启动刷新失败: {str(e)}")
+
+
+@system_bp.route('/market-data/role/refresh-status', methods=['GET'])
+def get_role_refresh_status():
+    """获取角色数据刷新进度状态"""
+    try:
+        from src.evaluator.market_data_collector import MarketDataCollector
+        
+        # 获取角色市场数据收集器实例
+        collector = MarketDataCollector()
+        
+        # 获取刷新状态
+        refresh_status = collector.get_refresh_status()
+        
+        return success_response(data=refresh_status, message="获取角色刷新状态成功")
+        
+    except Exception as e:
+        logger.error(f"获取角色刷新状态失败: {e}")
+        return error_response(f"获取角色刷新状态失败: {str(e)}")
 
 
 @system_bp.route('/health', methods=['GET'])

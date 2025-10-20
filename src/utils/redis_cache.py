@@ -649,14 +649,15 @@ class RedisCache:
             self.logger.error(f"❌ 键重命名异常: {e}")
             return False
 
-    def set_hash_data(self, hash_key: str, data: pd.DataFrame, ttl: Optional[int] = None) -> bool:
+    def set_hash_data(self, hash_key: str, data: pd.DataFrame, ttl: Optional[int] = None, key_column: str = 'equip_sn') -> bool:
         """
         将DataFrame数据存储为Redis Hash结构
         
         Args:
             hash_key: Hash键名
-            data: 要存储的DataFrame，必须包含equip_sn列
+            data: 要存储的DataFrame
             ttl: 过期时间（秒）
+            key_column: 用作Hash field的列名，默认为'equip_sn'（装备）；角色数据使用'eid'
             
         Returns:
             bool: 是否存储成功
@@ -664,31 +665,49 @@ class RedisCache:
         if not self.is_available() or data.empty:
             return False
         
-        if 'equip_sn' not in data.columns:
-            self.logger.error("DataFrame必须包含equip_sn列")
-            return False
+        # 检查DataFrame中是否存在指定的键列
+        if key_column not in data.columns:
+            # 尝试从索引中获取
+            if hasattr(data.index, 'name') and data.index.name == key_column:
+                # 索引名匹配，重置索引使其成为普通列
+                data = data.reset_index()
+            else:
+                # 尝试重置索引看是否包含该列
+                reset_data = data.reset_index()
+                if key_column in reset_data.columns:
+                    data = reset_data
+                else:
+                    # 列不存在，记录详细错误信息
+                    available_columns = list(data.columns)
+                    self.logger.error(
+                        f"主键列 '{key_column}' 不存在于数据中。\n"
+                        f"可用的列 ({len(available_columns)} 个): {', '.join(available_columns[:20])}"
+                        f"{'...(还有更多列)' if len(available_columns) > 20 else ''}"
+                    )
+                    return False
         
         try:
             full_key = self._make_key(hash_key)
             
-            self.logger.info(f"开始存储Hash数据: {full_key}，数据量: {len(data)} 条")
+            self.logger.info(f"开始存储Hash数据: {full_key}，数据量: {len(data)} 条，主键列: {key_column}")
             
             # 对于大数据量，使用分批处理
             if len(data) > 2000:
-                return self._set_large_hash_data(full_key, data, ttl)
+                return self._set_large_hash_data(full_key, data, ttl, key_column)
             else:
                 # 小数据量直接处理
                 pipe = self.client.pipeline()
                 
                 for _, row in data.iterrows():
-                    equip_sn = str(row['equip_sn'])
+                    # 从指定的列获取键值
+                    key_value = str(row[key_column])
                     row_data = row.to_dict()
                     
                     # 序列化行数据
                     serialized_data = pickle.dumps(row_data)
                     
                     # 添加到Hash
-                    pipe.hset(full_key, equip_sn, serialized_data)
+                    pipe.hset(full_key, key_value, serialized_data)
                 
                 # 执行Pipeline
                 pipe.execute()
@@ -716,7 +735,7 @@ class RedisCache:
             self.logger.error(f"存储Hash数据失败 {hash_key}: {e}")
             return False
     
-    def _set_large_hash_data(self, full_key: str, data: pd.DataFrame, ttl: Optional[int]) -> bool:
+    def _set_large_hash_data(self, full_key: str, data: pd.DataFrame, ttl: Optional[int], key_column: str = 'equip_sn') -> bool:
         """
         分批存储大数据量Hash数据
         
@@ -724,6 +743,7 @@ class RedisCache:
             full_key: 完整的Redis键名
             data: 要存储的数据
             ttl: 过期时间
+            key_column: 用作Hash field的列名
             
         Returns:
             bool: 是否存储成功
@@ -733,7 +753,7 @@ class RedisCache:
             batch_size = 2000  # 每批2000条
             total_batches = (len(data) + batch_size - 1) // batch_size
             
-            self.logger.info(f"大数据量分批存储: {len(data)} 条，分 {total_batches} 批处理")
+            self.logger.info(f"大数据量分批存储: {len(data)} 条，分 {total_batches} 批处理，主键列: {key_column}")
             
             # 分批存储数据
             for batch_num in range(total_batches):
@@ -747,14 +767,15 @@ class RedisCache:
                 pipe = self.client.pipeline()
                 
                 for _, row in batch_data.iterrows():
-                    equip_sn = str(row['equip_sn'])
+                    # 从指定的列获取键值
+                    key_value = str(row[key_column])
                     row_data = row.to_dict()
                     
                     # 序列化行数据
                     serialized_data = pickle.dumps(row_data)
                     
                     # 添加到Hash
-                    pipe.hset(full_key, equip_sn, serialized_data)
+                    pipe.hset(full_key, key_value, serialized_data)
                 
                 # 执行Pipeline
                 pipe.execute()
@@ -980,7 +1001,7 @@ class RedisCache:
             return None
 
     def update_hash_incremental(self, hash_key: str, new_data: pd.DataFrame, ttl: Optional[int] = None, 
-                                pipeline_batch_size: int = 1000) -> bool:
+                                pipeline_batch_size: int = 1000, key_column: str = 'equip_sn') -> bool:
         """
         增量更新Hash数据，使用优化的Pipeline批量处理
         
@@ -989,6 +1010,7 @@ class RedisCache:
             new_data: 新增数据DataFrame
             ttl: 过期时间（秒）
             pipeline_batch_size: Pipeline批次大小，默认1000条
+            key_column: 用作Hash field的列名，默认为'equip_sn'（装备）；角色数据使用'eid'
             
         Returns:
             bool: 是否更新成功
@@ -996,15 +1018,23 @@ class RedisCache:
         if not self.is_available() or new_data.empty:
             return False
         
-        if 'equip_sn' not in new_data.columns:
-            self.logger.error("DataFrame必须包含equip_sn列")
-            return False
+        # 检查DataFrame中是否存在指定的键列
+        if key_column not in new_data.columns and key_column != new_data.index.name:
+            # 如果key_column不在列中，检查是否是索引
+            if key_column not in new_data.columns and not (hasattr(new_data.index, 'name') and new_data.index.name == key_column):
+                # 尝试重置索引看是否包含该列
+                reset_data = new_data.reset_index()
+                if key_column not in reset_data.columns:
+                    self.logger.error(f"DataFrame必须包含{key_column}列或将其设为索引")
+                    return False
+                # 如果重置索引后有该列，使用重置后的数据
+                new_data = reset_data
         
         try:
             full_key = self._make_key(hash_key)
             total_rows = len(new_data)
             
-            self.logger.info(f"开始增量更新Hash数据: {full_key}，新增: {total_rows} 条")
+            self.logger.info(f"开始增量更新Hash数据: {full_key}，新增: {total_rows} 条，主键列: {key_column}")
             
             # 分批处理，避免Pipeline命令过多导致内存问题
             batch_count = 0
@@ -1020,10 +1050,11 @@ class RedisCache:
                 
                 # 批量添加HSET命令
                 for _, row in batch_data.iterrows():
-                    equip_sn = str(row['equip_sn'])
+                    # 从指定的列获取键值
+                    key_value = str(row[key_column])
                     row_data = row.to_dict()
                     serialized_data = pickle.dumps(row_data)
-                    pipe.hset(full_key, equip_sn, serialized_data)
+                    pipe.hset(full_key, key_value, serialized_data)
                 
                 # 执行Pipeline（一次网络往返执行所有命令）
                 pipe.execute()
