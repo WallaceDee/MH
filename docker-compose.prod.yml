@@ -11,6 +11,12 @@ services:
     restart: unless-stopped
     ports:
       - "80:5000"  # 直接映射到80端口
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
     environment:
       # Flask配置
       - FLASK_APP=src/app.py

@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-/dist
+# /dist  # 注释掉，允许dist目录被提交
 
 
 # local env files

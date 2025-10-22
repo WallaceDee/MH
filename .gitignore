@@ -1,5 +1,5 @@
 web/node_modules
-web/dist
+# web/dist  # 注释掉，允许dist目录被提交
 web/package-lock.json
 web/yarn.lock
 web/yarn-error.log
