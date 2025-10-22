@@ -10,7 +10,7 @@ services:
     container_name: cbg-spider-app
     restart: unless-stopped
     ports:
-      - "8080:5000"  # 临时使用8080端口
+      - "80:5000"  # 直接映射到80端口
     deploy:
       resources:
         limits:
