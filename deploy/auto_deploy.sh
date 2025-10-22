@@ -45,12 +45,25 @@ check_command() {
     fi
 }
 
+# 检查Docker Compose命令
+check_docker_compose() {
+    if command -v "docker-compose" &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+    elif docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker compose"
+    else
+        log_error "Docker Compose 命令未找到，请先安装"
+        exit 1
+    fi
+    log_info "使用Docker Compose命令: $DOCKER_COMPOSE_CMD"
+}
+
 # 检查必要的命令
 check_commands() {
     log_info "检查必要命令..."
     check_command "git"
     check_command "docker"
-    check_command "docker-compose"
+    check_docker_compose
     log_success "所有必要命令检查通过"
 }
 
@@ -79,7 +92,7 @@ stop_services() {
     log_info "停止当前服务..."
     if [ -f "$PROJECT_DIR/$DOCKER_COMPOSE_FILE" ]; then
         cd "$PROJECT_DIR"
-        docker-compose -f "$DOCKER_COMPOSE_FILE" down || true
+        $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" down || true
         log_success "服务已停止"
     else
         log_warning "未找到docker-compose文件，跳过停止服务"
@@ -113,11 +126,11 @@ build_and_start() {
     
     # 构建镜像
     log_info "构建Docker镜像..."
-    docker-compose -f "$DOCKER_COMPOSE_FILE" build --no-cache
+    $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" build --no-cache
     
     # 启动服务
     log_info "启动服务..."
-    docker-compose -f "$DOCKER_COMPOSE_FILE" up -d
+    $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" up -d
     
     log_success "服务启动完成"
 }
@@ -194,7 +207,7 @@ rollback() {
     
     # 启动服务
     cd "$PROJECT_DIR"
-    docker-compose -f "$DOCKER_COMPOSE_FILE" up -d
+    $DOCKER_COMPOSE_CMD -f "$DOCKER_COMPOSE_FILE" up -d
     
     log_success "回滚完成"
 }

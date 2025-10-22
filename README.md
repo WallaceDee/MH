@@ -1,5 +1,6 @@
 # CBG爬虫前后端分离版 ✨
-
+cd /usr/lingtong
+docker compose -f docker-compose.prod.yml up --build -d
 ## 🚀 一键启动
 
 ### 🥇 最简单（推荐）

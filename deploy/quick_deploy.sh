@@ -37,13 +37,23 @@ else
     git clone -b "$BRANCH" "$REPO_URL" .
 fi
 
+# 检查Docker Compose命令
+if command -v "docker-compose" &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+else
+    echo "❌ Docker Compose 命令未找到"
+    exit 1
+fi
+
 # 停止旧服务
 echo "🛑 停止旧服务..."
-docker-compose -f docker-compose.prod.yml down || true
+$DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down || true
 
 # 构建并启动
 echo "🔨 构建并启动服务..."
-docker-compose -f docker-compose.prod.yml up --build -d
+$DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up --build -d
 
 # 等待服务启动
 echo "⏳ 等待服务启动..."
@@ -56,5 +66,5 @@ if docker ps | grep -q "cbg-spider-app"; then
     echo "🔧 API地址: http://localhost/api/v1"
 else
     echo "❌ 部署失败，请检查日志"
-    docker-compose -f docker-compose.prod.yml logs
+    $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs
 fi

@@ -45,8 +45,22 @@ fi
 
 # 1. 安装必要依赖
 log_info "安装必要依赖..."
-apt-get update
-apt-get install -y python3 python3-pip git curl ufw
+
+# 检测系统类型
+if command -v yum &> /dev/null; then
+    # CentOS/RHEL系统
+    yum update -y
+    yum install -y python3 python3-pip git curl firewalld
+    systemctl start firewalld
+    systemctl enable firewalld
+elif command -v apt-get &> /dev/null; then
+    # Ubuntu/Debian系统
+    apt-get update
+    apt-get install -y python3 python3-pip git curl ufw
+else
+    log_error "不支持的系统类型，请手动安装依赖"
+    exit 1
+fi
 
 # 2. 安装Python依赖
 log_info "安装Python依赖..."
@@ -85,9 +99,18 @@ EOF
 
 # 7. 配置防火墙（如果需要）
 log_info "配置防火墙..."
-ufw allow 80/tcp
-ufw allow 5000/tcp
-ufw allow 9000/tcp
+if command -v firewall-cmd &> /dev/null; then
+    # CentOS/RHEL防火墙
+    firewall-cmd --permanent --add-port=80/tcp
+    firewall-cmd --permanent --add-port=5000/tcp
+    firewall-cmd --permanent --add-port=9000/tcp
+    firewall-cmd --reload
+elif command -v ufw &> /dev/null; then
+    # Ubuntu/Debian防火墙
+    ufw allow 80/tcp
+    ufw allow 5000/tcp
+    ufw allow 9000/tcp
+fi
 
 # 8. 启动服务
 log_info "启动Webhook服务..."
