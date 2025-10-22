@@ -332,10 +332,14 @@ class MessageType:
     EQUIPMENT_DATA_SAVED = "equipment_data_saved"
     EQUIPMENT_CACHE_UPDATED = "equipment_cache_updated"
     EQUIPMENT_CACHE_REFRESHED = "equipment_cache_refreshed"
+    PET_DATA_SAVED = "pet_data_saved"
+    PET_CACHE_UPDATED = "pet_cache_updated"
+    PET_CACHE_REFRESHED = "pet_cache_refreshed"
 
 
 # 频道名称常量
 class Channel:
     """频道名称常量"""
     EQUIPMENT_UPDATES = "equipment_updates"
+    PET_UPDATES = "pet_updates"
     CACHE_UPDATES = "cache_updates"

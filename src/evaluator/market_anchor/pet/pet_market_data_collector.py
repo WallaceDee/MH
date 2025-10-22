@@ -1,5 +1,6 @@
 import pandas as pd
 import logging
+import json
 from typing import Dict, Any, List, Optional, Tuple, Union
 from datetime import datetime
 
@@ -76,6 +77,17 @@ class PetMarketDataCollector:
         
         # MySQL数据统计
         self.mysql_data_count = 0  # MySQL中pets表的总记录数
+        
+        # 初始化Redis发布/订阅，用于跨进程数据同步
+        try:
+            from src.utils.redis_pubsub import get_redis_pubsub, Channel
+            self.redis_pubsub = get_redis_pubsub()
+            # 订阅召唤兽数据更新频道
+            self.redis_pubsub.subscribe(Channel.PET_UPDATES, self._handle_pet_update_message)
+            self.logger.info("✅ Redis发布/订阅初始化成功，已订阅召唤兽数据更新频道")
+        except Exception as e:
+            self.logger.warning(f"⚠️ Redis发布/订阅初始化失败: {e}")
+            self.redis_pubsub = None
         
         self._initialized = True
         cache_mode = "永不过期模式" if self._cache_ttl_hours == -1 else f"{self._cache_ttl_hours}小时过期"
@@ -1025,3 +1037,207 @@ class PetMarketDataCollector:
                     "start_time": None,
                     "elapsed_seconds": 0
                 }
+    
+    def _handle_pet_update_message(self, message: Dict[str, Any]):
+        """
+        处理召唤兽数据更新消息 - 更新内存缓存并同步到Redis
+        
+        Args:
+            message: Redis Pub/Sub消息
+        """
+        try:
+            action = message.get('action', '')
+            self.logger.info(f"📨 收到召唤兽数据更新消息: {action}")
+            
+            if action == 'add_dataframe' and 'dataframe' in message:
+                dataframe = message['dataframe']
+                if dataframe is not None and not dataframe.empty:
+                    # 直接更新内存缓存
+                    success = self._update_memory_cache_with_dataframe(dataframe)
+                    
+                    if success:
+                        self.logger.info(f"✅ 内存缓存已更新 {len(dataframe)} 条召唤兽数据")
+                        # 异步增量同步到Redis（只同步新增数据，不阻塞）
+                        self._async_sync_to_redis(dataframe)
+                    else:
+                        self.logger.warning("⚠️ 内存缓存更新失败")
+                else:
+                    self.logger.warning("⚠️ 消息中的DataFrame为空或无效")
+            else:
+                self.logger.debug(f"📨 忽略消息类型: {action}")
+                
+        except Exception as e:
+            self.logger.error(f"❌ 处理召唤兽数据更新消息失败: {e}")
+    
+    def _update_memory_cache_with_dataframe(self, new_dataframe: pd.DataFrame) -> bool:
+        """
+        直接使用DataFrame更新内存缓存（超快响应）
+        
+        Args:
+            new_dataframe: 新的召唤兽数据DataFrame
+            
+        Returns:
+            bool: 是否更新成功
+        """
+        try:
+            if new_dataframe.empty:
+                self.logger.info("📊 没有新数据需要更新到内存缓存")
+                return True
+            
+            self.logger.info(f"🔄 开始直接更新内存缓存，新数据量: {len(new_dataframe)} 条")
+            
+            # 如果内存缓存为空，直接使用新数据
+            if self._full_data_cache is None or self._full_data_cache.empty:
+                self._full_data_cache = new_dataframe.copy()
+                self.logger.info(f"✅ 内存缓存已直接更新（首次），数据量: {len(new_dataframe)} 条")
+                return True
+            
+            # 合并现有数据和新数据
+            merged_data = self._merge_incremental_data_removed(self._full_data_cache, new_dataframe)
+            
+            # 更新内存缓存
+            self._full_data_cache = merged_data
+            
+            self.logger.info(f"✅ 内存缓存已直接更新，数据量: {len(self._full_data_cache)} 条")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"❌ 直接更新内存缓存失败: {e}")
+            return False
+    
+    def _merge_incremental_data_removed(self, existing_df: pd.DataFrame, new_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        合并增量数据，新数据覆盖旧数据
+        
+        Args:
+            existing_df: 现有数据DataFrame
+            new_df: 新数据DataFrame
+            
+        Returns:
+            pd.DataFrame: 合并后的DataFrame
+        """
+        try:
+            if existing_df.empty:
+                return new_df.copy()
+            
+            if new_df.empty:
+                return existing_df.copy()
+            
+            # 使用concat合并，然后去重（保留最新的）
+            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            
+            # 基于equip_sn去重，保留最后一个（最新的）
+            if 'equip_sn' in combined_df.columns:
+                combined_df = combined_df.drop_duplicates(subset=['equip_sn'], keep='last')
+            elif 'eid' in combined_df.columns:
+                combined_df = combined_df.drop_duplicates(subset=['eid'], keep='last')
+            
+            return combined_df
+            
+        except Exception as e:
+            self.logger.error(f"❌ 合并增量数据失败: {e}")
+            return existing_df
+    
+    def _async_sync_to_redis(self, new_data: pd.DataFrame = None):
+        """
+        异步同步新数据到Redis（不阻塞主流程）
+        
+        Args:
+            new_data: 新数据DataFrame
+        """
+        try:
+            if new_data is not None and not new_data.empty:
+                # 同步新数据到Redis
+                self._sync_new_data_to_redis(new_data)
+            else:
+                # 如果没有新数据，重新加载全量数据到Redis
+                self._load_full_data_to_redis(force_refresh=True)
+                
+        except Exception as e:
+            self.logger.warning(f"⚠️ 异步同步到Redis失败: {e}")
+    
+    def _sync_new_data_to_redis(self, new_data_df: pd.DataFrame) -> bool:
+        """
+        同步新数据到Redis缓存
+        
+        Args:
+            new_data_df: 新数据的DataFrame
+            
+        Returns:
+            bool: 同步是否成功
+        """
+        try:
+            if not self.redis_cache or not self.redis_cache.is_available():
+                self.logger.warning("Redis不可用，无法同步新数据")
+                return False
+            
+            if new_data_df.empty:
+                self.logger.info("新数据为空，跳过Redis同步")
+                return True
+            
+            # 逐行存储到Redis Hash
+            full_key = self.redis_cache._make_key(f"{self._full_cache_key}:hash")
+            
+            for index, row in new_data_df.iterrows():
+                try:
+                    equip_sn = row.get('equip_sn')
+                    if not equip_sn:
+                        continue
+                    
+                    # 将行数据转换为字典并序列化
+                    row_dict = row.to_dict()
+                    row_json = json.dumps(row_dict, ensure_ascii=False, default=str)
+                    
+                    # 存储到Redis Hash
+                    self.redis_cache.client.hset(full_key, equip_sn, row_json)
+                    
+                except Exception as e:
+                    self.logger.warning(f"同步单条召唤兽数据到Redis失败: {e}")
+                    continue
+            
+            self.logger.info(f"✅ 成功同步 {len(new_data_df)} 条召唤兽数据到Redis")
+            
+            # 更新Redis元数据
+            self._update_redis_metadata()
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"❌ 同步新数据到Redis失败: {e}")
+            return False
+    
+    def _update_redis_metadata(self) -> None:
+        """
+        更新Redis元数据（基于当前Redis中的实际数据量）
+        """
+        try:
+            if not self.redis_cache or not self.redis_cache.is_available():
+                return
+            
+            # 获取当前Redis中的实际数据量
+            full_key = self.redis_cache._make_key(f"{self._full_cache_key}:hash")
+            actual_count = self.redis_cache.client.hlen(full_key)
+            
+            if actual_count == 0:
+                return
+            
+            # 更新元数据
+            metadata = {
+                'total_count': actual_count,
+                'created_at': datetime.now().isoformat(),
+                'last_update_time': datetime.now().isoformat(),
+                'total_chunks': (actual_count + 499) // 500,  # 假设chunk_size=500
+                'chunk_size': 500
+            }
+            
+            # 使用pickle序列化存储元数据
+            import pickle
+            meta_key = f"{self._full_cache_key}:meta"
+            full_meta_key = self.redis_cache._make_key(meta_key)
+            metadata_bytes = pickle.dumps(metadata)
+            self.redis_cache.client.set(full_meta_key, metadata_bytes)
+            
+            self.logger.info(f"✅ Redis元数据已更新: {actual_count} 条数据")
+            
+        except Exception as e:
+            self.logger.warning(f"更新Redis元数据失败: {e}")

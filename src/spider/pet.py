@@ -14,7 +14,10 @@ import logging
 from datetime import datetime
 from urllib.parse import urlencode
 import asyncio
+import pandas as pd
 from playwright.async_api import async_playwright
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 # 添加项目根目录到Python路径
 from src.utils.project_path import get_project_root
@@ -37,6 +40,9 @@ from src.utils.cookie_manager import (
 # 导入召唤兽描述解析相关模块
 from src.spider.helper.decode_desc import parse_pet_info
 
+# 导入召唤兽类型常量
+from src.evaluator.constants.equipment_types import PET_CACHE_REQUIRED_FIELDS
+
 
 class CBGPetSpider:
     def __init__(self):
@@ -50,6 +56,10 @@ class CBGPetSpider:
         # 初始化其他组件
         self.setup_session()
         self.retry_attempts = 1
+        
+        # 初始化线程池（用于异步数据库操作）
+        self._executor = ThreadPoolExecutor(max_workers=3, thread_name_prefix='PetDB-')
+        self.logger.info("线程池初始化完成，最大并发数: 3")
 
     def _setup_logger(self):
         """设置专用的日志器"""
@@ -392,53 +402,329 @@ class CBGPetSpider:
             self.logger.error(f"保存召唤兽数据到MySQL数据库失败: {e}")
             return 0
     
-    def _save_pet_data_with_context(self, pets):
-        """在Flask应用上下文中保存召唤兽数据"""
+    def _filter_pet_fields(self, pets):
+        """
+        过滤召唤兽字段，只保留缓存所需字段（优化内存占用）
+        
+        Args:
+            pets: 召唤兽数据列表
+            
+        Returns:
+            list: 过滤后的召唤兽数据列表
+        """
+        # 使用列表推导式，更高效
+        return [
+            {k: v for k, v in pet.items() if k in PET_CACHE_REQUIRED_FIELDS}
+            for pet in pets
+        ]
+    
+    def _get_redis_total_count(self):
+        """
+        获取Redis中的召唤兽总条数
+        
+        Returns:
+            int: Redis中的召唤兽总条数，获取失败返回0
+        """
         try:
-            self.logger.info(f"开始保存 {len(pets)} 条召唤兽数据到MySQL数据库")
+            from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+            from src.utils.redis_cache import get_redis_cache
             
-            saved_count = 0
-            skipped_count = 0
+            collector = PetMarketDataCollector()
+            redis_cache = get_redis_cache()
             
+            if redis_cache and redis_cache.is_available():
+                # 获取Redis Hash的总条数
+                full_key = redis_cache._make_key(collector._full_cache_key)
+                total_count = redis_cache.client.hlen(full_key)
+                self.logger.debug(f"Redis召唤兽总条数: {total_count}")
+                return total_count
+            else:
+                self.logger.warning("Redis不可用，无法获取总条数")
+                return 0
+                
+        except Exception as e:
+            self.logger.warning(f"获取Redis总条数失败: {e}")
+            return 0
+    
+    def _publish_dataframe_message(self, new_data_df, data_count):
+        """
+        发布DataFrame消息到Redis（立即通知前端，只更新内存数据，不包含总数）
+        
+        Args:
+            new_data_df: DataFrame数据
+            data_count: 本次新增的数据条数
+            
+        Returns:
+            bool: 发布是否成功
+        """
+        try:
+            from src.utils.redis_pubsub import get_redis_pubsub, MessageType, Channel
+            
+            pubsub = get_redis_pubsub()
+            message = {
+                'type': MessageType.PET_CACHE_UPDATED,
+                'data_count': data_count,  # 本次数据量
+                'action': 'add_dataframe'  # 只用于立即更新内存缓存
+            }
+            
+            success = pubsub.publish_with_dataframe(Channel.PET_UPDATES, message, new_data_df)
+            if success:
+                self.logger.info(f"📢 已立即发布DataFrame消息到Redis (本次:{data_count}条)")
+            else:
+                self.logger.warning("⚠️ 发布DataFrame消息失败")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ 发布DataFrame消息失败: {e}")
+            return False
+    
+    def _batch_save_to_mysql(self, pets):
+        """
+        批量保存到MySQL，优化数据库查询性能
+        
+        Args:
+            pets: 召唤兽数据列表
+            
+        Returns:
+            tuple: (新增数量, 更新数量)
+        """
+        try:
+            # 批量查询已存在的召唤兽（一次查询代替N次查询）
+            equip_sns = [pet.get('equip_sn') for pet in pets if pet.get('equip_sn')]
+            
+            existing_pets = {}
+            if equip_sns:
+                existing_list = db.session.query(Pet).filter(
+                    Pet.equip_sn.in_(equip_sns)
+                ).all()
+                existing_pets = {pet.equip_sn: pet for pet in existing_list}
+            
+            new_pets = []
+            updated_count = 0
+            
+            # 遍历召唤兽数据，分类为新增和更新
+            # 先对同一批次中的重复数据进行去重（保留最后一个）
+            seen_equip_sns = set()
+            unique_pets = []
             for pet_data in pets:
-                try:
-                    # 检查是否已存在相同的宠物记录
-                    existing_pet = db.session.query(Pet).filter_by(eid=pet_data['eid']).first()
-                    
-                    if existing_pet:
-                        # 更新现有记录
-                        for key, value in pet_data.items():
-                            if hasattr(existing_pet, key):
-                                setattr(existing_pet, key, value)
-                        existing_pet.update_time = datetime.utcnow()
-                        skipped_count += 1
-                        self.logger.debug(f"更新现有宠物记录: {pet_data.get('equip_name', '未知')} - {pet_data.get('eid')}")
+                equip_sn = pet_data.get('equip_sn')
+                if equip_sn:
+                    if equip_sn in seen_equip_sns:
+                        # 找到已存在的记录并替换
+                        for i, existing_pet in enumerate(unique_pets):
+                            if existing_pet.get('equip_sn') == equip_sn:
+                                unique_pets[i] = pet_data
+                                break
                     else:
-                        # 创建新记录
-                        new_pet = Pet(**pet_data)
-                        new_pet.update_time = datetime.utcnow()
-                        db.session.add(new_pet)
-                        saved_count += 1
-                        self.logger.debug(f"添加新宠物记录: {pet_data.get('equip_name', '未知')} - {pet_data.get('eid')}")
+                        seen_equip_sns.add(equip_sn)
+                        unique_pets.append(pet_data)
+                else:
+                    # 没有equip_sn的记录直接添加
+                    unique_pets.append(pet_data)
+            
+            for pet_data in unique_pets:
+                try:
+                    equip_sn = pet_data.get('equip_sn')
+                    
+                    if equip_sn and equip_sn in existing_pets:
+                        # 更新现有记录
+                        existing = existing_pets[equip_sn]
+                        for key, value in pet_data.items():
+                            if hasattr(existing, key):
+                                setattr(existing, key, value)
+                        existing.update_time = datetime.now()
+                        updated_count += 1
+                    else:
+                        # 准备新记录
+                        new_pets.append(Pet(**pet_data))
                         
                 except Exception as e:
-                    self.logger.error(f"保存单个宠物数据失败: {e}")
+                    self.logger.error(f"处理单个召唤兽数据失败: {e}")
                     continue
+            
+            # 批量插入新记录
+            if new_pets:
+                db.session.bulk_save_objects(new_pets)
             
             # 提交事务
             db.session.commit()
             
-            self.logger.info(f"成功保存宠物数据到MySQL数据库:")
-            self.logger.info(f"   新保存: {saved_count} 条")
-            self.logger.info(f"   更新现有: {skipped_count} 条")
-            self.logger.info(f"   总计处理: {saved_count + skipped_count} 条")
+            if len(new_pets) > 0:
+                self.logger.info(f"✅ 成功保存 {len(new_pets)} 条新召唤兽数据到MySQL数据库")
+            if updated_count > 0:
+                self.logger.info(f"✅ 更新 {updated_count} 条已存在的召唤兽数据")
             
-            return saved_count + skipped_count
+            return len(new_pets), updated_count
             
         except Exception as e:
-            self.logger.error(f"保存召唤兽数据到MySQL数据库失败: {e}")
             db.session.rollback()
+            self.logger.error(f"批量保存MySQL失败: {e}")
+            raise
+    
+    def _sync_to_redis_cache(self, new_data_df):
+        """
+        同步新数据到Redis缓存
+        
+        Args:
+            new_data_df: 新数据的DataFrame
+            
+        Returns:
+            bool: 同步是否成功
+        """
+        try:
+            from src.evaluator.market_anchor.pet.pet_market_data_collector import PetMarketDataCollector
+            
+            collector = PetMarketDataCollector()
+            redis_success = collector._sync_new_data_to_redis(new_data_df)
+            
+            if redis_success:
+                self.logger.info("✅ 新数据已同步到Redis缓存")
+            else:
+                self.logger.warning("⚠️ 新数据同步到Redis失败")
+            
+            return redis_success
+            
+        except Exception as e:
+            self.logger.warning(f"⚠️ 同步新数据到Redis失败: {e}")
+            return False
+    
+    def _save_pet_data_with_context(self, pets):
+        """在Flask应用上下文中保存召唤兽数据 - 内存缓存优先快速响应 → MySQL → Redis"""
+        try:
+            # 在子线程中重新导入pandas，确保可用
+            import pandas as pd
+            
+            if not pets:
+                self.logger.info("没有召唤兽数据需要保存")
+                return 0
+            
+            self.logger.info(f"开始保存 {len(pets)} 条召唤兽数据...")
+            
+            # 优化：只过滤一次，避免重复代码
+            filtered_pets = self._filter_pet_fields(pets)
+            new_data_df = pd.DataFrame(filtered_pets)
+            
+            # 第一步：立即发布DataFrame消息，快速更新内存缓存（最高优先级，超快响应）
+            publish_success = self._publish_dataframe_message(new_data_df, len(pets))
+            
+            if publish_success:
+                self.logger.info(f"✅ 已立即通知内存缓存更新 {len(pets)} 条数据（快速响应）")
+            else:
+                self.logger.warning(f"⚠️ 内存缓存通知发送失败，但继续保存到数据库")
+            
+            # 第二步：异步批量保存到MySQL和Redis（不阻塞主流程）
+            self._submit_async_save_task(pets, new_data_df)
+            
+            self.logger.info(f"🎉 召唤兽数据保存流程: 内存缓存(✅已通知) → MySQL(处理中) → Redis(处理中)")
+            
+            # 返回预估的新增数量（实际数量由异步任务计算）
+            return len(pets)
+            
+        except Exception as e:
+            self.logger.error(f"保存召唤兽数据失败: {e}")
             return 0
+    
+    def _submit_async_save_task(self, pets, new_data_df):
+        """
+        提交异步保存任务到线程池
+        
+        Args:
+            pets: 召唤兽数据列表
+            new_data_df: 过滤后的DataFrame
+        """
+        try:
+            # 使用线程池异步执行保存任务
+            future = self._executor.submit(
+                self._async_batch_save_worker,
+                pets,
+                new_data_df
+            )
+            
+            # 添加完成回调，记录结果
+            future.add_done_callback(self._async_save_callback)
+            
+        except Exception as e:
+            self.logger.error(f"❌ 提交异步保存任务失败: {e}")
+    
+    def _async_save_callback(self, future):
+        """异步保存任务完成回调 - 记录MySQL和Redis保存结果"""
+        try:
+            result = future.result()
+            if result:
+                saved_count, updated_count, saved_dataframe, redis_synced = result
+                self.logger.info(
+                    f"✅ 异步保存完成: 新增 {saved_count} 条, 更新 {updated_count} 条, Redis同步: {'成功' if redis_synced else '失败'}"
+                )
+                
+                # 内存缓存已在主线程中立即更新，这里不再发送消息
+                if saved_count > 0 and redis_synced:
+                    self.logger.info(f"✅ MySQL和Redis保存成功，数据一致性已保证")
+                elif saved_count > 0 and not redis_synced:
+                    self.logger.warning(f"⚠️ MySQL保存成功但Redis同步失败，内存和MySQL已有数据，需手动同步Redis")
+                elif updated_count > 0:
+                    self.logger.info(f"📝 无新增数据，更新了 {updated_count} 条现有数据")
+                
+        except Exception as e:
+            self.logger.error(f"❌ 异步保存任务执行失败: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+    
+    def _async_batch_save_worker(self, pets, new_data_df):
+        """
+        异步批量保存工作线程（在线程池中执行）- MySQL → Redis → 通知内存缓存
+        
+        Args:
+            pets: 召唤兽数据列表
+            new_data_df: 过滤后的DataFrame
+            
+        Returns:
+            tuple: (新增数量, 更新数量, 实际保存的DataFrame, Redis同步状态)
+        """
+        try:
+            # 在Flask应用上下文中执行数据库操作
+            from src.app import create_app
+            app = create_app()
+            
+            with app.app_context():
+                self.logger.info(f"🔄 异步任务开始处理 {len(pets)} 条召唤兽数据...")
+                
+                # 第一步：批量保存到MySQL
+                saved_count, updated_count = self._batch_save_to_mysql(pets)
+                
+                # 第二步：同步到Redis（只在有新数据时）
+                redis_synced = False
+                saved_dataframe = None
+                
+                if saved_count > 0:
+                    # 同步到Redis缓存
+                    redis_synced = self._sync_to_redis_cache(new_data_df)
+                    
+                    if redis_synced:
+                        # 返回实际新增的数据（用于通知内存缓存更新）
+                        saved_dataframe = new_data_df.copy()
+                        self.logger.info(f"✅ MySQL和Redis保存成功，准备通知内存缓存更新")
+                    else:
+                        self.logger.warning(f"⚠️ MySQL保存成功但Redis同步失败，不更新内存缓存")
+                
+                return saved_count, updated_count, saved_dataframe, redis_synced
+                
+        except Exception as e:
+            self.logger.error(f"❌ 异步批量保存工作线程失败: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+            return 0, 0, None, False
+    
+    def __del__(self):
+        """析构方法，确保线程池正确关闭"""
+        try:
+            if hasattr(self, '_executor'):
+                self.logger.info("正在关闭线程池...")
+                self._executor.shutdown(wait=True, cancel_futures=False)
+                self.logger.info("线程池已关闭")
+        except Exception as e:
+            # 析构时可能logger已经被回收
+            print(f"关闭线程池时出错: {e}")
 
     async def fetch_page(self, page=1, search_params=None, search_type='overall_search_pet'):
         """
@@ -626,33 +912,3 @@ class CBGPetSpider:
             self.logger.error(f"启动召唤兽爬虫失败: {e}")
             import traceback
             traceback.print_exc()
-
-
-def main():
-    """主函数，用于测试"""
-    async def run_test():
-        spider = CBGPetSpider()
-        
-        # --- 测试配置 ---
-        use_browser_for_test = True   # 是否使用浏览器获取参数
-        max_pages_to_crawl = 2
-        # ----------------
-        
-        print(f"\n--- 正在测试: 召唤兽爬虫 ---")
-        
-        try:
-            await spider.crawl_all_pages_async(
-                max_pages=max_pages_to_crawl, 
-                delay_range=(1, 3), 
-                use_browser=use_browser_for_test
-            )
-            print(f"---  召唤兽爬虫测试完成 ---")
-        except Exception as e:
-            print(f"---  召唤兽爬虫测试失败: {e} ---")
-            import traceback
-            traceback.print_exc()
-
-    asyncio.run(run_test())
-
-if __name__ == '__main__':
-    main()

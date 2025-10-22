@@ -1065,37 +1065,3 @@ class CBGEquipSpider:
             self.logger.error(f"启动装备爬虫失败: {e}")
             import traceback
             traceback.print_exc()
-
-
-def main():
-    """主函数，用于测试"""
-    
-    async def run_test():
-        spider = CBGEquipSpider()
-        
-        # --- 测试配置 ---
-        equip_type_to_test = 'lingshi'  # 可选: 'normal', 'lingshi', 'pet'
-        use_browser_for_test = True   # 是否使用浏览器获取参数
-        max_pages_to_crawl = 1
-        # ----------------
-        
-        print(f"\n--- 正在测试: {equip_type_to_test} 装备爬虫 ---")
-        
-        try:
-            await spider.crawl_all_pages_async(
-                max_pages=max_pages_to_crawl, 
-                delay_range=(1, 3), 
-                use_browser=use_browser_for_test, 
-                equip_type=equip_type_to_test
-            )
-            print(f"---  {equip_type_to_test} 装备爬虫测试完成 ---")
-        except Exception as e:
-            print(f"---  {equip_type_to_test} 装备爬虫测试失败: {e} ---")
-            import traceback
-            traceback.print_exc()
-    
-    # 运行测试
-    asyncio.run(run_test())
-
-if __name__ == '__main__':
-    main()

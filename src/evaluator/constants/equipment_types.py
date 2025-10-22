@@ -132,3 +132,40 @@ EQUIPMENT_CACHE_REQUIRED_FIELDS = [
     # 基础字段
     'equip_sn', 'price', 'server_name', 'update_time'
 ]
+
+# 召唤兽数据缓存需要的字段列表
+# 用于特征提取和估价系统，避免传输不必要的数据
+PET_CACHE_REQUIRED_FIELDS = [
+    # 基础召唤兽属性
+    'equip_sn', 'eid', 'equip_name', 'level', 'kindid', 'price', 'server_name',
+    'update_time', 'desc', 'desc_sumup_short', 'large_equip_desc',
+    
+    # 解析出的召唤兽属性（核心估价字段）
+    'pet_name', 'type_id', 'pet_grade', 'blood', 'magic', 'attack', 'defence',
+    'speed', 'soma', 'magic_powner', 'strength', 'endurance', 'smartness',
+    'potential', 'wakan', 'max_blood', 'max_magic', 'lifetime', 'five_aptitude',
+    
+    # 资质相关
+    'attack_aptitude', 'defence_aptitude', 'physical_aptitude', 'magic_aptitude',
+    'speed_aptitude', 'avoid_aptitude', 'growth',
+    
+    # 技能相关
+    'all_skill', 'sp_skill', 'all_skills', 'sp_skill_id', 'evol_skill_list',
+    'evol_skills',
+    
+    # 进阶和特性
+    'is_baobao', 'jinjie', 'lx', 'jinjie_cnt', 'texing', 'core_close',
+    
+    # 加点相关
+    'ti_zhi_add', 'fa_li_add', 'li_liang_add', 'nai_li_add', 'min_jie_add',
+    
+    # 扩展属性
+    'attack_ext', 'defence_ext', 'speed_ext', 'avoid_ext', 'physical_ext', 'magic_ext',
+    
+    # 其他重要属性
+    'neidan', 'equip_list', 'color', 'summon_color', 'iMagDam', 'iMagDef',
+    'used_sjg', 'used_yuanxiao', 'used_lianshou', 'used_qianjinlu', 'other',
+    
+    # 装备估价相关
+    'equip_list_amount', 'equip_list_amount_warning'
+]
