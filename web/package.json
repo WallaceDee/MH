@@ -6,8 +6,6 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli lint",
-    "dev:chrome": "vue-cli-service serve --mode chrome",
-    "build:webcomponents": "node build-webcomponents.js",
     "build:devtools-panel": "webpack --config webpack.chrome-extension.config.js",
     "dev:devtools-panel": "webpack --config webpack.chrome-extension.config.js --watch"
   },

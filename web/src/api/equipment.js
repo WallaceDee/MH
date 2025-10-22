@@ -133,5 +133,14 @@ export const equipmentApi = {
    */
   deleteAbnormalEquipment(equipSn) {
     return api.delete(`/equipment/abnormal/${equipSn}`)
+  },
+
+  /**
+   * 获取装备统计数据
+   * @param {Object} params - 查询参数
+   * @returns {Promise}
+   */
+  getEquipmentStats(params = {}) {
+    return api.get('/equipment/stats', params)
   }
 } 

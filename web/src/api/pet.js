@@ -122,5 +122,14 @@ export const petApi = {
    */
   getPetByEquipSn(year, month, equipSn) {
     return api.get(`/pet/${year}/${month}/${equipSn}`)
+  },
+
+  /**
+   * 获取召唤兽统计数据
+   * @param {Object} params - 查询参数
+   * @returns {Promise}
+   */
+  getPetStats(params = {}) {
+    return api.get('/pet/stats', params)
   }
 } 

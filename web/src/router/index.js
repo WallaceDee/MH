@@ -7,6 +7,15 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
+    name: 'Index',
+    component: () => import('../views/Index.vue'),
+    meta: {
+      title: '梦幻灵瞳 - CBG数据分析平台',
+      hideHeader: true
+    }
+  },
+  {
+    path: '/home',
     name: 'Home',
     component: Home
   },

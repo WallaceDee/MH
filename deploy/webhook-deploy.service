@@ -1,0 +1,22 @@
+[Unit]
+Description=CBG Project GitHub Webhook Deploy Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/lingtong
+ExecStart=/usr/bin/python3 /usr/lingtong/deploy/webhook_deploy.py
+Restart=always
+RestartSec=10
+Environment=GITHUB_WEBHOOK_SECRET=your-webhook-secret
+Environment=REPO_NAME=WallaceDee/MH
+Environment=BRANCH=master
+
+# 日志配置
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=webhook-deploy
+
+[Install]
+WantedBy=multi-user.target

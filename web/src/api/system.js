@@ -225,5 +225,13 @@ export const systemApi = {
    */
   getPetRefreshStatus() {
     return api.get('/system/market-data/pet/refresh-status')
+  },
+
+  /**
+   * 获取系统统计数据
+   * @returns {Promise}
+   */
+  getSystemStats() {
+    return api.get('/system/stats')
   }
 } 

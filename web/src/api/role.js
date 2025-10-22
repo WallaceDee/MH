@@ -125,4 +125,13 @@ export const roleApi = {
     return api.get('/role/health')
   },
 
+  /**
+   * 获取角色统计数据
+   * @param {Object} params - 查询参数
+   * @returns {Promise}
+   */
+  getRoleStats(params = {}) {
+    return api.get('/role/stats', params)
+  }
+
 } 
