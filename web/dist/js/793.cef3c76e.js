@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkweb"]=self["webpackChunkweb"]||[]).push([[793],{3793:function(n,e,u){u.r(e),u.d(e,{default:function(){return f}});var t=function(){var n=this;n._self._c;return n._m(0)},l=[function(){var n=this,e=n._self._c;return e("div",[e("h1",[n._v("装备详情")])])}],r={name:"EquipmentDetail"},i=r,s=u(1656),c=(0,s.A)(i,t,l,!1,null,null,null),f=c.exports}}]);
+//# sourceMappingURL=793.cef3c76e.js.map

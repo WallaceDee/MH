@@ -10,14 +10,19 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
-# 构建前端
-echo "📦 构建前端项目..."
-./deploy/build-frontend.sh
-
-if [ $? -ne 0 ]; then
-    echo "❌ 前端构建失败，停止部署"
+# 检查前端构建文件
+echo "📁 检查前端构建文件..."
+if [ ! -d "web/dist" ]; then
+    echo "❌ 前端构建文件不存在，请先上传web/dist目录"
     exit 1
 fi
+
+if [ ! -f "web/dist/index.html" ]; then
+    echo "❌ 前端构建文件不完整，缺少index.html"
+    exit 1
+fi
+
+echo "✅ 前端构建文件检查通过"
 
 # 停止现有容器
 echo "🛑 停止现有容器..."
