@@ -26,11 +26,11 @@ echo "✅ 前端构建文件检查通过"
 
 # 停止现有容器
 echo "🛑 停止现有容器..."
-docker-compose -f docker-compose.prod.yml down
+docker compose -f docker-compose.prod.yml down
 
 # 构建并启动服务
 echo "🔨 构建并启动服务..."
-docker-compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d --build
 
 # 检查服务状态
 echo "🔍 检查服务状态..."
@@ -63,4 +63,4 @@ echo "   - API接口: http://localhost/api/v1/"
 
 # 显示容器状态
 echo "📊 容器状态:"
-docker-compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml ps
