@@ -136,6 +136,15 @@ export const equipmentApi = {
   },
 
   /**
+   * 提取装备特征
+   * @param {Object} data - 装备数据和参数
+   * @returns {Promise}
+   */
+  extractFeatures(data) {
+    return api.post('/equipment/extract-features', data)
+  },
+
+  /**
    * 获取装备统计数据
    * @param {Object} params - 查询参数
    * @returns {Promise}
