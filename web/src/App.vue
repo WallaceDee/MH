@@ -1,7 +1,7 @@
 <template>
   <el-container>
-    <Header v-if="!$route.meta.hideHeader" />
-    <el-main :style="{padding:$route.meta.hideHeader?'0':'20px'}">
+    <Header v-if="$route.meta.showHeader" />
+    <el-main :style="{padding:$route.meta.showHeader?'20px':'0'}">
       <router-view />
     </el-main>
   </el-container>

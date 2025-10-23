@@ -13,6 +13,22 @@ module.exports = defineConfig({
   },
   publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
   
+  // 多入口配置
+  pages: {
+    index: {
+      entry: 'src/main.js',
+      template: 'public/index.html',
+      filename: 'index.html',
+      title: '梦幻灵瞳 - CBG数据分析平台'
+    },
+    admin: {
+      entry: 'src/admin.js',
+      template: 'public/admin.html',
+      filename: 'admin.html',
+      title: '梦幻灵瞳 - 管理后台'
+    }
+  },
+  
   // 配置webpack以解决MooTools冲突
   configureWebpack: {
     // 配置webpack忽略某些全局变量

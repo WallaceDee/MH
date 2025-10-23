@@ -356,3 +356,48 @@ def get_equip_config():
         return error_response(f"获取装备数据失败: {str(e)}")
 
 
+@equipment_bp.route('/stats', methods=['GET'])
+def get_equipment_stats():
+    """获取装备统计数据"""
+    try:
+        from datetime import datetime
+        import os
+        import glob
+        
+        # 获取装备数据总数
+        total_count = 0
+        try:
+            # 尝试从数据库获取总数
+            result = controller.get_equipments({
+                'page': 1,
+                'page_size': 1,
+                'count_only': True
+            })
+            if result and 'total' in result:
+                total_count = result['total']
+        except Exception as e:
+            logger.warning(f"从数据库获取装备总数失败: {e}")
+        
+        # 获取最后更新时间
+        last_update = "未知"
+        try:
+            # 查找最新的装备数据文件
+            equipment_files = glob.glob('data/**/cbg_equip_*.db', recursive=True)
+            if equipment_files:
+                latest_file = max(equipment_files, key=os.path.getmtime)
+                last_update = datetime.fromtimestamp(os.path.getmtime(latest_file)).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            logger.warning(f"获取装备最后更新时间失败: {e}")
+        
+        stats_data = {
+            "total": total_count,
+            "lastUpdate": last_update
+        }
+        
+        return success_response(data=stats_data, message="获取装备统计成功")
+        
+    except Exception as e:
+        logger.error(f"获取装备统计失败: {e}")
+        return error_response(f"获取装备统计失败: {str(e)}")
+
+

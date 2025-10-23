@@ -2,15 +2,15 @@
 # 连接到现有的MariaDB数据库
 
 services:
-  # CBG全栈应用服务（Flask + Vue.js）
-  cbg-app:
+  # CBG API服务（仅提供API）
+  cbg-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: cbg-spider-app
+    container_name: cbg-api
     restart: unless-stopped
-    ports:
-      - "80:5000"  # 直接映射到80端口
+    expose:
+      - "5000"
     deploy:
       resources:
         limits:
@@ -54,11 +54,33 @@ services:
       - cbg-network
       
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/v1/system/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # Nginx反向代理服务
+  cbg-nginx:
+    image: nginx:alpine
+    container_name: cbg-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      # Nginx配置
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # 前端构建文件
+      - ./web/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - cbg-api
+    networks:
+      - cbg-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   cbg-network:

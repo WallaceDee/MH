@@ -423,4 +423,49 @@ def delete_pet(pet_sn):
         return success_response(message="宠物删除成功")
         
     except Exception as e:
-        return error_response(f"删除宠物失败: {str(e)}") 
+        return error_response(f"删除宠物失败: {str(e)}")
+
+
+@pet_bp.route('/stats', methods=['GET'])
+def get_pet_stats():
+    """获取召唤兽统计数据"""
+    try:
+        from datetime import datetime
+        import os
+        import glob
+        
+        # 获取召唤兽数据总数
+        total_count = 0
+        try:
+            # 尝试从数据库获取总数
+            result = controller.get_pets({
+                'page': 1,
+                'page_size': 1,
+                'count_only': True
+            })
+            if result and 'total' in result:
+                total_count = result['total']
+        except Exception as e:
+            logger.warning(f"从数据库获取召唤兽总数失败: {e}")
+        
+        # 获取最后更新时间
+        last_update = "未知"
+        try:
+            # 查找最新的召唤兽数据文件
+            pet_files = glob.glob('data/**/cbg_pets_*.db', recursive=True)
+            if pet_files:
+                latest_file = max(pet_files, key=os.path.getmtime)
+                last_update = datetime.fromtimestamp(os.path.getmtime(latest_file)).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            logger.warning(f"获取召唤兽最后更新时间失败: {e}")
+        
+        stats_data = {
+            "total": total_count,
+            "lastUpdate": last_update
+        }
+        
+        return success_response(data=stats_data, message="获取召唤兽统计成功")
+        
+    except Exception as e:
+        logger.error(f"获取召唤兽统计失败: {e}")
+        return error_response(f"获取召唤兽统计失败: {str(e)}") 

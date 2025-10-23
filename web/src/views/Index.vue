@@ -152,6 +152,10 @@
           <div class="stat-content">
             <h3>{{ statsData.roleCount || 0 }}</h3>
             <p>角色数量</p>
+            <div class="stat-update">
+              <i class="el-icon-time"></i>
+              <span>最后更新: {{ statsData.roleLastUpdate || '--' }}</span>
+            </div>
           </div>
         </div>
         
@@ -162,6 +166,10 @@
           <div class="stat-content">
             <h3>{{ statsData.equipmentCount || 0 }}</h3>
             <p>装备数量</p>
+            <div class="stat-update">
+              <i class="el-icon-time"></i>
+              <span>最后更新: {{ statsData.equipmentLastUpdate || '--' }}</span>
+            </div>
           </div>
         </div>
         
@@ -172,16 +180,10 @@
           <div class="stat-content">
             <h3>{{ statsData.petCount || 0 }}</h3>
             <p>召唤兽数量</p>
-          </div>
-        </div>
-        
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="el-icon-timer"></i>
-          </div>
-          <div class="stat-content">
-            <h3>{{ statsData.lastUpdate || '--' }}</h3>
-            <p>最后更新</p>
+            <div class="stat-update">
+              <i class="el-icon-time"></i>
+              <span>最后更新: {{ statsData.petLastUpdate || '--' }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -199,7 +201,9 @@ export default {
         roleCount: 0,
         equipmentCount: 0,
         petCount: 0,
-        lastUpdate: '--'
+        roleLastUpdate: '--',
+        equipmentLastUpdate: '--',
+        petLastUpdate: '--'
       }
     }
   },
@@ -211,19 +215,23 @@ export default {
     async loadStatsData() {
       try {
         // 并行请求各种统计数据
-        const [roleStats, equipmentStats, petStats, systemStats] = await Promise.all([
-          this.$api.role.getRoleStats().catch(() => ({ total: 0 })),
-          this.$api.equipment.getEquipmentStats().catch(() => ({ total: 0 })),
-          this.$api.pet.getPetStats().catch(() => ({ total: 0 })),
-          this.$api.system.getSystemStats().catch(() => ({ lastUpdate: '--' }))
+        const [roleStats, equipmentStats, petStats] = await Promise.all([
+          this.$api.role.getRoleStats().catch(() => ({ code: 200, data: { total: 0, lastUpdate: '--' } })),
+          this.$api.equipment.getEquipmentStats().catch(() => ({ code: 200, data: { total: 0, lastUpdate: '--' } })),
+          this.$api.pet.getPetStats().catch(() => ({ code: 200, data: { total: 0, lastUpdate: '--' } }))
         ])
 
+        // 处理API响应数据，从data字段中获取实际数据
         this.statsData = {
-          roleCount: roleStats.total || 0,
-          equipmentCount: equipmentStats.total || 0,
-          petCount: petStats.total || 0,
-          lastUpdate: systemStats.lastUpdate || '--'
+          roleCount: (roleStats.code === 200 && roleStats.data) ? (roleStats.data.total || 0) : 0,
+          equipmentCount: (equipmentStats.code === 200 && equipmentStats.data) ? (equipmentStats.data.total || 0) : 0,
+          petCount: (petStats.code === 200 && petStats.data) ? (petStats.data.total || 0) : 0,
+          roleLastUpdate: (roleStats.code === 200 && roleStats.data) ? (roleStats.data.lastUpdate || '--') : '--',
+          equipmentLastUpdate: (equipmentStats.code === 200 && equipmentStats.data) ? (equipmentStats.data.lastUpdate || '--') : '--',
+          petLastUpdate: (petStats.code === 200 && petStats.data) ? (petStats.data.lastUpdate || '--') : '--'
         }
+
+        console.log('统计数据加载完成:', this.statsData)
       } catch (error) {
         console.error('加载统计数据失败:', error)
       }
@@ -438,6 +446,24 @@ export default {
 .stat-content p {
   color: #666;
   font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.stat-update {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #999;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.stat-update i {
+  font-size: 0.8rem;
+}
+
+.stat-update span {
+  font-size: 0.8rem;
 }
 
 

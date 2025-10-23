@@ -12,6 +12,7 @@ import os
 import json
 import logging
 import time
+from datetime import datetime
 
 # 添加src目录到Python路径
 import sys
@@ -93,8 +94,14 @@ def get_config_file(filename):
             cleaned_lines.append(line)
         
         js_content = '\n'.join(cleaned_lines)
-        # 直接返回文件内容
-        return Response(js_content, mimetype='text/plain')
+        
+        # 设置缓存头，让浏览器缓存静态配置文件
+        response = Response(js_content, mimetype='application/javascript')
+        response.headers['Cache-Control'] = 'public, max-age=36000'  # 缓存1小时
+        response.headers['ETag'] = f'"{hash(js_content)}"'  # 设置ETag用于缓存验证
+        response.headers['Last-Modified'] = datetime.fromtimestamp(os.path.getmtime(config_path)).strftime('%a, %d %b %Y %H:%M:%S GMT')
+        
+        return response
         
     except Exception as e:
         return f"获取配置失败: {str(e)}", 500
@@ -1214,6 +1221,44 @@ def get_role_refresh_status():
     except Exception as e:
         logger.error(f"获取角色刷新状态失败: {e}")
         return error_response(f"获取角色刷新状态失败: {str(e)}")
+
+
+@system_bp.route('/stats', methods=['GET'])
+def get_system_stats():
+    """获取系统统计数据"""
+    try:
+        # 获取最后更新时间
+        last_update = "未知"
+        try:
+            # 尝试从最新的数据文件获取修改时间
+            import glob
+            data_files = []
+            
+            # 查找最新的数据文件
+            for pattern in ['data/cbg_*.db', 'data/*/cbg_*.db']:
+                data_files.extend(glob.glob(pattern))
+            
+            # 如果没找到，尝试查找所有数据库文件
+            if not data_files:
+                data_files = glob.glob('data/**/cbg_*.db', recursive=True)
+            
+            if data_files:
+                latest_file = max(data_files, key=os.path.getmtime)
+                last_update = datetime.fromtimestamp(os.path.getmtime(latest_file)).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            logger.warning(f"获取最后更新时间失败: {e}")
+        
+        stats_data = {
+            "lastUpdate": last_update,
+            "systemStatus": "运行中",
+            "version": "1.0.0"
+        }
+        
+        return success_response(data=stats_data, message="获取系统统计成功")
+        
+    except Exception as e:
+        logger.error(f"获取系统统计失败: {e}")
+        return error_response(f"获取系统统计失败: {str(e)}")
 
 
 @system_bp.route('/health', methods=['GET'])
