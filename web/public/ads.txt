@@ -1,0 +1,16 @@
+# ads.txt file for Google AdSense
+# This file should be placed in the root of your domain
+# Format: domain.com, publisher_id, relationship, certification_authority_id
+
+# 如何获取发布商ID：
+# 1. 登录 https://www.google.com/adsense/
+# 2. 进入"账户" → "账户信息"
+# 3. 在"账户详情"中找到"发布商ID"
+# 4. 复制发布商ID（格式：pub-1234567890123456）
+
+# 标准Google AdSense条目（使用你的实际发布商ID）：
+google.com, pub-5050651199311342, DIRECT, f08c47fec0942fa0
+
+# 你的发布商ID已配置完成！
+# 发布商ID: pub-5050651199311342
+# 客户ID: 8327586816

@@ -31,6 +31,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制项目文件（包含预构建的前端dist目录）
 COPY . .
 
+
 # 创建必要的目录
 RUN mkdir -p /app/data /app/logs /app/output /app/config
 
