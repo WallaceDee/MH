@@ -336,7 +336,7 @@ def get_valuation_by_eid(eid):
         max_anchors = request.args.get('max_anchors', 30, type=int)
         
         result = controller.get_role_valuation(
-            role_data, 
+            eid, 
             strategy, 
             similarity_threshold, 
             max_anchors

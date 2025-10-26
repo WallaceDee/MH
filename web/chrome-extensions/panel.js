@@ -17,25 +17,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.iterator.map.js */ "./node_modules/core-js/modules/es.iterator.map.js");
 /* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.set.difference.v2.js */ "./node_modules/core-js/modules/es.set.difference.v2.js");
-/* harmony import */ var core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.set.intersection.v2.js */ "./node_modules/core-js/modules/es.set.intersection.v2.js");
-/* harmony import */ var core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_5__);
-/* harmony import */ var core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.set.is-disjoint-from.v2.js */ "./node_modules/core-js/modules/es.set.is-disjoint-from.v2.js");
-/* harmony import */ var core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.set.is-subset-of.v2.js */ "./node_modules/core-js/modules/es.set.is-subset-of.v2.js");
-/* harmony import */ var core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.set.is-superset-of.v2.js */ "./node_modules/core-js/modules/es.set.is-superset-of.v2.js");
-/* harmony import */ var core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_8__);
-/* harmony import */ var core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.set.symmetric-difference.v2.js */ "./node_modules/core-js/modules/es.set.symmetric-difference.v2.js");
-/* harmony import */ var core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_9__);
-/* harmony import */ var core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.set.union.v2.js */ "./node_modules/core-js/modules/es.set.union.v2.js");
-/* harmony import */ var core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_10__);
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
-/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_11__);
-/* harmony import */ var _components_RoleInfo_RoleImage_vue__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @/components/RoleInfo/RoleImage.vue */ "./src/components/RoleInfo/RoleImage.vue");
-/* harmony import */ var _components_SimilarRoleModal_vue__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @/components/SimilarRoleModal.vue */ "./src/components/SimilarRoleModal.vue");
-/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+/* harmony import */ var core_js_modules_es_iterator_reduce_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.iterator.reduce.js */ "./node_modules/core-js/modules/es.iterator.reduce.js");
+/* harmony import */ var core_js_modules_es_iterator_reduce_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_reduce_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.set.difference.v2.js */ "./node_modules/core-js/modules/es.set.difference.v2.js");
+/* harmony import */ var core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.set.intersection.v2.js */ "./node_modules/core-js/modules/es.set.intersection.v2.js");
+/* harmony import */ var core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.set.is-disjoint-from.v2.js */ "./node_modules/core-js/modules/es.set.is-disjoint-from.v2.js");
+/* harmony import */ var core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.set.is-subset-of.v2.js */ "./node_modules/core-js/modules/es.set.is-subset-of.v2.js");
+/* harmony import */ var core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.set.is-superset-of.v2.js */ "./node_modules/core-js/modules/es.set.is-superset-of.v2.js");
+/* harmony import */ var core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.set.symmetric-difference.v2.js */ "./node_modules/core-js/modules/es.set.symmetric-difference.v2.js");
+/* harmony import */ var core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! core-js/modules/es.set.union.v2.js */ "./node_modules/core-js/modules/es.set.union.v2.js");
+/* harmony import */ var core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! dayjs */ "./node_modules/dayjs/dayjs.min.js");
+/* harmony import */ var dayjs__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(dayjs__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var _components_RoleInfo_RoleImage_vue__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @/components/RoleInfo/RoleImage.vue */ "./src/components/RoleInfo/RoleImage.vue");
+/* harmony import */ var _components_SimilarRoleModal_vue__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @/components/SimilarRoleModal.vue */ "./src/components/SimilarRoleModal.vue");
+/* harmony import */ var _components_EquipBatchValuationResult_vue__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @/components/EquipBatchValuationResult.vue */ "./src/components/EquipBatchValuationResult.vue");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+
+
 
 
 
@@ -62,7 +67,7 @@ __webpack_require__.r(__webpack_exports__);
         hasPrev: false,
         hasNext: false
       },
-      selectedDate: dayjs__WEBPACK_IMPORTED_MODULE_11___default()().format('YYYY-MM'),
+      selectedDate: dayjs__WEBPACK_IMPORTED_MODULE_12___default()().format('YYYY-MM'),
       recommendData: [],
       expandedItems: [],
       processedRequests: new Set(),
@@ -73,13 +78,27 @@ __webpack_require__.r(__webpack_exports__);
       // 连接状态描述
       connectionCheckTimer: null,
       // 连接检查定时器
-      isInNewWindow: false // 是否在新窗口中打开
+      isInNewWindow: false,
+      // 是否在新窗口中打开
+
+      // 装备估价相关数据
+      valuationDialogVisible: false,
+      valuationResults: [],
+      valuationTotalValue: 0,
+      valuationEquipmentList: [],
+      valuationLoading: false,
+      valuationDialogTitle: {},
+      batchValuateParams: {
+        similarity_threshold: 0.7,
+        max_anchors: 30
+      }
     };
   },
-  mixins: [_utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_14__.commonMixin],
+  mixins: [_utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_16__.commonMixin],
   components: {
-    RoleImage: _components_RoleInfo_RoleImage_vue__WEBPACK_IMPORTED_MODULE_12__["default"],
-    SimilarRoleModal: _components_SimilarRoleModal_vue__WEBPACK_IMPORTED_MODULE_13__["default"]
+    RoleImage: _components_RoleInfo_RoleImage_vue__WEBPACK_IMPORTED_MODULE_13__["default"],
+    SimilarRoleModal: _components_SimilarRoleModal_vue__WEBPACK_IMPORTED_MODULE_14__["default"],
+    EquipBatchValuationResult: _components_EquipBatchValuationResult_vue__WEBPACK_IMPORTED_MODULE_15__["default"]
   },
   computed: {},
   mounted() {
@@ -816,6 +835,288 @@ __webpack_require__.r(__webpack_exports__);
           this.$notify.error('打开新窗口失败: ' + error.message);
         }
       }
+    },
+    // 装备估价相关方法
+    async handleEquipPrice(role) {
+      const roleData = this.parserRoleData(role);
+      const {
+        using_equips,
+        not_using_equips,
+        split_equips,
+        basic_info
+      } = roleData;
+      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map(item => ({
+        ...item,
+        iType: item.type,
+        cDesc: item.desc,
+        serverid: role.serverid,
+        server_name: role.server_name
+      }));
+      this.valuationDialogTitle = {
+        nickname: basic_info.nickname,
+        school: basic_info.school,
+        server_name: role.server_name,
+        eid: role.eid
+      };
+      try {
+        // 先显示弹窗和骨架屏
+        this.valuationDialogVisible = true;
+        this.valuationLoading = true;
+        this.valuationResults = [];
+        this.valuationTotalValue = 0;
+        this.valuationEquipmentList = equip_list;
+
+        // 调用批量估价API
+        const response = await this.$api.equipment.batchEquipmentValuation({
+          eid: role.eid,
+          equipment_list: equip_list,
+          strategy: 'fair_value',
+          similarity_threshold: this.batchValuateParams.similarity_threshold,
+          max_anchors: this.batchValuateParams.max_anchors
+        });
+        if (response.code === 200) {
+          const data = response.data;
+          const results = data.results || [];
+          const totalValue = results.reduce((sum, result) => {
+            return sum + (result.estimated_price || 0);
+          }, 0);
+
+          // 更新弹窗内容，显示实际数据
+          this.valuationResults = results;
+          this.valuationTotalValue = totalValue;
+          this.valuationLoading = false;
+        } else {
+          this.$notify.error({
+            title: '错误',
+            message: response.message || '装备估价失败'
+          });
+          this.closeValuationDialog();
+        }
+      } catch (error) {
+        console.error('装备估价失败:', error);
+        this.$notify.error({
+          title: '错误',
+          message: '装备估价失败'
+        });
+        this.closeValuationDialog();
+      } finally {
+        this.valuationLoading = false;
+      }
+    },
+    // 关闭装备估价结果对话框
+    closeValuationDialog() {
+      this.valuationDialogVisible = false;
+      this.valuationResults = [];
+      this.valuationTotalValue = 0;
+      this.valuationEquipmentList = [];
+      this.valuationDialogTitle = {};
+    },
+    // 宠物估价方法（占位符）
+    handlePetPrice(role) {
+      this.$notify.info({
+        title: '提示',
+        message: '宠物估价功能暂未实现'
+      });
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=script&lang=js":
+/*!***************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=script&lang=js ***!
+  \***************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.iterator.constructor.js */ "./node_modules/core-js/modules/es.iterator.constructor.js");
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_iterator_filter_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.filter.js */ "./node_modules/core-js/modules/es.iterator.filter.js");
+/* harmony import */ var core_js_modules_es_iterator_filter_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_filter_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.iterator.map.js */ "./node_modules/core-js/modules/es.iterator.map.js");
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _components_EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/components/EquipmentImage/EquipmentImage.vue */ "./src/components/EquipmentImage/EquipmentImage.vue");
+/* harmony import */ var _components_SimilarEquipmentModal_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/components/SimilarEquipmentModal.vue */ "./src/components/SimilarEquipmentModal.vue");
+/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'EquipBatchValuationResult',
+  props: {
+    results: {
+      type: Array,
+      required: true
+    },
+    equipmentList: {
+      type: Array,
+      required: true
+    },
+    totalValue: {
+      type: Number,
+      default: 0
+    },
+    valuateParams: {
+      type: Object,
+      required: true
+    },
+    loading: {
+      type: Boolean,
+      default: false
+    },
+    colSpan: {
+      type: Number,
+      default: 6
+    }
+  },
+  data() {
+    return {
+      similarData: null,
+      currentTotalValue: 0,
+      currentList: []
+    };
+  },
+  mixins: [_utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_5__.equipmentMixin, _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_6__.commonMixin],
+  components: {
+    EquipmentImage: _components_EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
+    SimilarEquipmentModal: _components_SimilarEquipmentModal_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
+  },
+  watch: {
+    totalValue(newVal) {
+      this.currentTotalValue = newVal;
+    },
+    results(newVal) {
+      // 为每个结果添加对应的装备信息
+      const resultsWithEquipment = newVal.map((result, index) => ({
+        ...result,
+        ...this.equipmentList[index],
+        resultIndex: index
+      }));
+
+      // 分离高置信度和低置信度
+      const highConfidenceResults = resultsWithEquipment.filter(result => result.confidence === 1);
+      const lowConfidenceResults = resultsWithEquipment.filter(result => result.confidence !== 1);
+
+      // 排序
+      highConfidenceResults.sort((a, b) => a.estimated_price - b.estimated_price);
+      lowConfidenceResults.sort((a, b) => a.confidence - b.confidence);
+
+      // 合并：低置信度在前，高置信度在后
+      this.currentList = [...lowConfidenceResults, ...highConfidenceResults];
+    }
+  },
+  computed: {
+    totalCount() {
+      return this.results.length;
+    },
+    successCount() {
+      return this.results.filter(result => !result.error).length;
+    }
+  },
+  mounted() {
+    this.currentTotalValue = this.totalValue;
+  },
+  methods: {
+    // 处理估价结果更新
+    handleValuationUpdated(data, resultIndex) {
+      // 更新总价值
+      if (this.results[resultIndex]) {
+        this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price + data.estimated_price;
+      }
+
+      // 更新结果数据 - 这是必须保留的操作
+      this.$set(this.results, resultIndex, data);
+      console.log('估价数据更新完成:', data);
+    },
+    // 根据置信度获取标签类型
+    getConfidenceTagType(confidence) {
+      if (confidence >= 0.9) {
+        return 'success'; // 绿色 - 高置信度
+      } else if (confidence >= 0.7) {
+        return ''; // 蓝色 - 中等置信度
+      } else if (confidence >= 0.5) {
+        return 'info'; // 灰色 - 较低置信度
+      } else if (confidence >= 0.3) {
+        return 'warning'; // 橙色 - 较低置信度
+      } else {
+        return 'danger'; // 红色 - 低置信度
+      }
+    },
+    // 根据结果获取结果项的CSS类
+    getResultItemClass(result) {
+      if (result.error) {
+        return 'error';
+      }
+
+      // 根据置信度返回不同的类名
+      const confidence = result.confidence || 0;
+      if (confidence >= 0.9) {
+        return 'confidence-high';
+      } else if (confidence >= 0.7) {
+        return 'confidence-medium';
+      } else if (confidence >= 0.5) {
+        return 'confidence-low';
+      } else if (confidence >= 0.3) {
+        return 'confidence-very-low';
+      } else {
+        return 'confidence-extremely-low';
+      }
+    },
+    // 根据置信度获取价格样式
+    getPriceStyle(confidence) {
+      const baseStyle = {
+        fontSize: '18px',
+        fontWeight: 'bold',
+        justifyContent: 'end'
+      };
+      if (!confidence || confidence < 0.3) {
+        return {
+          ...baseStyle,
+          color: '#f56c6c'
+        }; // 红色 - 极低置信度
+      } else if (confidence < 0.5) {
+        return {
+          ...baseStyle,
+          color: '#e6a23c'
+        }; // 橙色 - 很低置信度
+      } else if (confidence < 0.7) {
+        return {
+          ...baseStyle,
+          color: '#909399'
+        }; // 灰色 - 较低置信度
+      } else if (confidence < 0.9) {
+        return {
+          ...baseStyle,
+          color: '#409eff'
+        }; // 蓝色 - 中等置信度
+      } else {
+        return {
+          ...baseStyle,
+          color: '#67c23a'
+        }; // 绿色 - 高置信度
+      }
+    },
+    // 获取概览卡片的颜色类
+    getOverviewClass() {
+      const successRate = this.totalCount > 0 ? this.successCount / this.totalCount : 0;
+      if (successRate >= 0.9) {
+        return 'confidence-high';
+      } else if (successRate >= 0.7) {
+        return 'confidence-medium';
+      } else if (successRate >= 0.5) {
+        return 'confidence-low';
+      } else if (successRate >= 0.3) {
+        return 'confidence-very-low';
+      } else {
+        return 'confidence-extremely-low';
+      }
     }
   }
 });
@@ -953,6 +1254,223 @@ __webpack_require__.r(__webpack_exports__);
         height: this.height,
         cursor: this.cursor
       };
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=script&lang=js":
+/*!********************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=script&lang=js ***!
+  \********************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EquipmentImage/EquipmentImage.vue */ "./src/components/EquipmentImage/EquipmentImage.vue");
+/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+/* harmony import */ var _SimilarGetMore_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./SimilarGetMore.vue */ "./src/components/SimilarGetMore.vue");
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'EquipmentValuation',
+  components: {
+    EquipmentImage: _EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_0__["default"],
+    SimilarGetMore: _SimilarGetMore_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+  },
+  mixins: [_utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_1__.equipmentMixin, _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_2__.commonMixin],
+  props: {
+    valuation: {
+      type: Object,
+      default: null
+    },
+    targetEquipment: {
+      type: Object,
+      required: true
+    }
+  },
+  data() {
+    return {
+      weaponConfig: null,
+      addon_total_standards: null,
+      all_damage_standards: null,
+      init_damage_raw_standards: null
+    };
+  },
+  computed: {
+    isWeapon() {
+      return window.is_weapon_equip(this.valuation?.feature?.kindid);
+    },
+    // 计算估价与售价的比率
+    priceRatio() {
+      if (!this.valuation || !this.valuation.estimated_price_yuan || !this.targetEquipment.price) {
+        return null;
+      }
+      const estimatedPrice = parseFloat(this.valuation.estimated_price_yuan);
+      const sellingPrice = parseFloat(this.targetEquipment.price) / 100; // 转换为元
+
+      if (sellingPrice === 0) return null;
+      return estimatedPrice / sellingPrice;
+    },
+    priceRatioTagType() {
+      if (!this.priceRatio) return '';
+      const ratio = this.priceRatio;
+      const deviation = Math.abs(ratio - 1) * 100;
+      if (deviation < 5) {
+        return 'success';
+      } else if (deviation < 10) {
+        return 'info';
+      } else if (deviation < 20) {
+        return 'warning';
+      } else {
+        return 'danger';
+      }
+    },
+    priceRatioText() {
+      if (!this.priceRatio) return '';
+      const ratio = this.priceRatio;
+      const deviation = Math.abs(ratio - 1) * 100;
+      if (deviation < 5) {
+        return `估价极为贴合市场（±${deviation.toFixed(1)}%）`;
+      } else if (deviation < 10) {
+        return `估价较为贴合（±${deviation.toFixed(1)}%）`;
+      } else if (deviation < 20) {
+        return `估价有一定偏差（±${deviation.toFixed(1)}%）`;
+      } else if (ratio > 1) {
+        return `估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`;
+      } else {
+        return `估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`;
+      }
+    },
+    // 根据置信度返回对应的CSS类
+    confidenceClass() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return 'confidence-extremely-low';
+      }
+      const confidence = this.valuation.confidence;
+      if (confidence >= 0.8) {
+        return 'confidence-high'; // >= 80%: 高置信度 (绿色)
+      } else if (confidence >= 0.6) {
+        return 'confidence-medium'; // 60-79%: 中等置信度 (蓝色)
+      } else if (confidence >= 0.4) {
+        return 'confidence-low'; // 40-59%: 较低置信度 (灰色)
+      } else if (confidence >= 0.2) {
+        return 'confidence-very-low'; // 20-39%: 很低置信度 (橙色)
+      } else {
+        return 'confidence-extremely-low'; // < 20%: 极低置信度 (红色)
+      }
+    },
+    // 置信度文本颜色类
+    confidenceTextClass() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return 'text-danger';
+      }
+      const confidence = this.valuation.confidence;
+      if (confidence >= 0.8) {
+        return 'text-success';
+      } else if (confidence >= 0.6) {
+        return 'text-primary';
+      } else if (confidence >= 0.4) {
+        return 'text-info';
+      } else if (confidence >= 0.2) {
+        return 'text-warning';
+      } else {
+        return 'text-danger';
+      }
+    },
+    // 置信度图标
+    confidenceIcon() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return 'el-icon-warning';
+      }
+      const confidence = this.valuation.confidence;
+      if (confidence >= 0.8) {
+        return 'el-icon-success';
+      } else if (confidence >= 0.6) {
+        return 'el-icon-info';
+      } else if (confidence >= 0.4) {
+        return 'el-icon-question';
+      } else if (confidence >= 0.2) {
+        return 'el-icon-warning';
+      } else {
+        return 'el-icon-error';
+      }
+    },
+    // 置信度等级描述
+    confidenceLevel() {
+      if (!this.valuation || !this.valuation.confidence) {
+        return '(数据缺失)';
+      }
+      const confidence = this.valuation.confidence;
+      if (confidence >= 0.8) {
+        return '(高)';
+      } else if (confidence >= 0.6) {
+        return '(中)';
+      } else if (confidence >= 0.4) {
+        return '(偏低)';
+      } else if (confidence >= 0.2) {
+        return '(很低)';
+      } else {
+        return '(极低)';
+      }
+    }
+  },
+  methods: {
+    getWeaponConfig() {
+      this.$api.equipment.getWeaponConfig().then(res => {
+        if (res.code === 200) {
+          this.weaponConfig = res.data;
+          this.addon_total_standards = res.data.addon_total_standards;
+          this.all_damage_standards = res.data.all_damage_standards;
+          this.init_damage_raw_standards = res.data.init_damage_raw_standards;
+        }
+      });
+    },
+    async markAsAbnormal() {
+      try {
+        // 调用API标记装备为异常
+        const response = await this.$api.equipment.markEquipmentAsAbnormal({
+          equipment_data: this.targetEquipment,
+          reason: '标记异常',
+          notes: '用户手动标记的异常装备'
+        });
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '提示',
+            message: '装备已标记为异常'
+          });
+          // 可以触发父组件刷新或其他操作
+          this.$emit('abnormal-marked', this.targetEquipment);
+        } else {
+          this.$notify.error({
+            title: '提示',
+            message: response.message || '标记异常失败'
+          });
+        }
+      } catch (error) {
+        console.error('标记异常失败:', error);
+        this.$notify.error({
+          title: '提示',
+          message: '标记异常失败，请稍后重试'
+        });
+      }
+    },
+    getStrategyName(strategy) {
+      const strategyNames = {
+        fair_value: '公允价值',
+        competitive: '竞争价格',
+        premium: '溢价估值'
+      };
+      return strategyNames[strategy] || strategy;
+    }
+  },
+  mounted() {
+    if (this.isWeapon) {
+      this.getWeaponConfig();
     }
   }
 });
@@ -1718,6 +2236,407 @@ const riderNumPerLine = 5;
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=script&lang=js":
+/*!***********************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=script&lang=js ***!
+  \***********************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.iterator.constructor.js */ "./node_modules/core-js/modules/es.iterator.constructor.js");
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.map.js */ "./node_modules/core-js/modules/es.iterator.map.js");
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_iterator_reduce_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.iterator.reduce.js */ "./node_modules/core-js/modules/es.iterator.reduce.js");
+/* harmony import */ var core_js_modules_es_iterator_reduce_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_reduce_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _EquipmentValuation_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./EquipmentValuation.vue */ "./src/components/EquipmentValuation.vue");
+/* harmony import */ var _SimilarEquipmentTable_vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./SimilarEquipmentTable.vue */ "./src/components/SimilarEquipmentTable.vue");
+/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'SimilarEquipmentModal',
+  components: {
+    EquipmentValuation: _EquipmentValuation_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
+    SimilarEquipmentTable: _SimilarEquipmentTable_vue__WEBPACK_IMPORTED_MODULE_4__["default"]
+  },
+  mixins: [_utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_5__.equipmentMixin, _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_6__.commonMixin],
+  props: {
+    equipment: {
+      type: Object,
+      required: true
+    },
+    placement: {
+      type: String,
+      default: 'left-end'
+    },
+    similarityThreshold: {
+      type: Number,
+      default: 0.8
+    },
+    maxAnchors: {
+      type: Number,
+      default: 30
+    }
+  },
+  data() {
+    return {
+      visible: false,
+      valuationLoading: false,
+      // 装备估价接口加载状态
+      anchorsLoading: false,
+      // 相似装备锚点接口加载状态
+      error: false,
+      similarData: null,
+      equipmentValuation: {}
+    };
+  },
+  computed: {
+    // 整体加载状态
+    loading() {
+      return this.valuationLoading || this.anchorsLoading;
+    }
+  },
+  methods: {
+    async handleShow() {
+      if (!this.similarData) {
+        await this.loadSimilarEquipments();
+      }
+    },
+    async refresh() {
+      await this.loadSimilarEquipments();
+    },
+    // 加载相似装备
+    async loadSimilarEquipments() {
+      this.error = false;
+      this.equipmentValuation = {};
+      this.similarData = null;
+      try {
+        await this.loadEquipmentValuation(this.equipment, this.similarityThreshold);
+      } catch (error) {
+        console.error('加载相似装备失败:', error);
+        this.error = true;
+      }
+    },
+    // 统一的装备估价加载方法
+    async loadEquipmentValuation(equipment, similarityThreshold) {
+      try {
+        // 第一个接口：获取装备估价信息
+        this.valuationLoading = true;
+        if (window.is_pet_equip(equipment.kindid)) {
+          equipment = {
+            kindid: 29,
+            desc: equipment.desc
+          };
+        }
+        const response = await this.$api.equipment.getEquipmentValuation({
+          equipment_data: equipment,
+          strategy: 'fair_value',
+          similarity_threshold: similarityThreshold,
+          max_anchors: this.maxAnchors
+        });
+        const result = response.data;
+        this.equipmentValuation = result;
+
+        // 向父组件发出估价结果更新事件
+        this.$emit('valuation-updated', result);
+
+        // 初始化相似装备数据
+        this.similarData = {
+          anchor_count: result.anchor_count,
+          similarity_threshold: result.similarity_threshold || similarityThreshold,
+          max_anchors: result.max_anchors || this.maxAnchors,
+          anchors: [],
+          statistics: {
+            price_range: result.anchor_count ? {
+              min: Math.min(...result.anchors.map(a => a.price || 0)),
+              max: Math.max(...result.anchors.map(a => a.price || 0)),
+              avg: result.anchors.reduce((sum, a) => sum + (a.price || 0), 0) / result.anchors.length
+            } : {
+              min: 0,
+              max: 0,
+              avg: 0
+            },
+            similarity_range: result.anchor_count ? {
+              min: Math.min(...result.anchors.map(a => a.similarity || 0)),
+              max: Math.max(...result.anchors.map(a => a.similarity || 0)),
+              avg: result.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / result.anchors.length
+            } : {
+              min: 0,
+              max: 0,
+              avg: 0
+            }
+          }
+        };
+        this.valuationLoading = false;
+
+        // 处理估价响应，如果有锚点数据则加载详细信息
+        if (result?.anchor_count > 0 && result?.anchors?.length > 0) {
+          // 第二个接口：获取相似装备锚点详细数据
+          this.anchorsLoading = true;
+          try {
+            // 使用估价结果中的equip_sn_list直接获取相似装备列表，避免重复计算
+            const anchorsResponse = await this.$api.equipment.getEquipmentList({
+              page_size: 99,
+              equip_sn_list: result.anchors.map(item => item.equip_sn)
+            });
+            this.anchorsLoading = false;
+            // 合并相似度和数据
+            if (anchorsResponse.code === 200 && anchorsResponse.data?.data) {
+              const anchorsData = anchorsResponse.data.data;
+              const parsedAnchors = anchorsData.map((item, index) => {
+                // 添加相似度信息
+                item.similarity = result.anchors[index].similarity;
+                item.features = result.anchors[index].features;
+                return item;
+              });
+
+              // 更新相似装备数据
+              this.$set(this.similarData, 'anchors', parsedAnchors);
+            } else {
+              console.warn('未获取到相似装备锚点数据:', anchorsResponse.message);
+            }
+          } catch (error) {
+            console.error('查询相似装备锚点失败:', error);
+            // 锚点查询失败不影响估价结果显示
+          }
+        }
+      } catch (error) {
+        console.error('装备估价失败:', error);
+        this.$notify.error({
+          title: '估价请求失败',
+          message: '网络请求异常，请稍后重试',
+          duration: 3000
+        });
+        throw error;
+      } finally {
+        // 确保在出现异常时也重置加载状态
+        this.valuationLoading = false;
+        this.anchorsLoading = false;
+      }
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=script&lang=js":
+/*!***********************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=script&lang=js ***!
+  \***********************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EquipmentImage/EquipmentImage.vue */ "./src/components/EquipmentImage/EquipmentImage.vue");
+/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'SimilarEquipmentTable',
+  components: {
+    EquipmentImage: _EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  mixins: [_utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_1__.equipmentMixin, _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_2__.commonMixin],
+  props: {
+    anchors: {
+      type: Array,
+      default: () => []
+    },
+    loading: {
+      type: Boolean,
+      default: false
+    }
+  },
+  methods: {
+    // 获取特效名称
+    getSpecialEffectName(id) {
+      // 直接使用全局变量
+      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_effect) {
+        const effectName = window.AUTO_SEARCH_CONFIG.equip_special_effect[id.toString()];
+        if (effectName) return effectName;
+      }
+      return `特效${id}`;
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarGetMore.vue?vue&type=script&lang=js":
+/*!****************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarGetMore.vue?vue&type=script&lang=js ***!
+  \****************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.iterator.constructor.js */ "./node_modules/core-js/modules/es.iterator.constructor.js");
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.some.js */ "./node_modules/core-js/modules/es.iterator.some.js");
+/* harmony import */ var core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! qs */ "./node_modules/qs/lib/index.js");
+/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(qs__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/utils/windowReuseManager */ "./src/utils/windowReuseManager.js");
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'SimilarGetMore',
+  props: {
+    message: {
+      type: String,
+      default: ''
+    },
+    targetEquipment: {
+      type: Object,
+      default: () => ({})
+    },
+    type: {
+      type: String,
+      default: 'equip'
+    }
+  },
+  methods: {
+    async goToMoreSimilar() {
+      let externalParams = {};
+      if (this.type === 'equip') {
+        console.log(this.targetEquipment, 'this.targetEquipment');
+        const {
+          equip_name,
+          large_equip_desc,
+          equip_type_desc,
+          icon,
+          equip_face_img,
+          equip_level,
+          kindid,
+          equip_type,
+          iType,
+          serverid,
+          server_name
+        } = this.targetEquipment;
+        externalParams = {
+          action: 'similar_equip',
+          equip_type: 'normal',
+          activeTab: 'equip',
+          equip_name,
+          large_equip_desc,
+          equip_type_desc,
+          equip_face_img: equip_face_img || icon,
+          equip_level,
+          kindid,
+          type: iType || equip_type || undefined,
+          serverid,
+          server_name
+        };
+        if (window.is_pet_equip(externalParams.kindid)) {
+          externalParams.equip_type = 'pet';
+          //TODO:sssssssssssssssssssss
+        } else if (window.lingshiKinds.some(([kId]) => kId === externalParams.kindid)) {
+          externalParams.equip_type = 'lingshi';
+        }
+        if (!externalParams.equip_name) {
+          externalParams.equip_name = this.targetEquipment.name;
+        }
+        if (!externalParams.equip_type_desc) {
+          externalParams.equip_type_desc = this.targetEquipment.static_desc;
+        }
+      } else if (this.type === 'pet') {
+        //TODO: RoleList跳转的参数需要处理
+        const {
+          equip_sn,
+          role_grade_limit,
+          equip_level,
+          growth,
+          is_baobao,
+          all_skill,
+          sp_skill,
+          evol_skill_list,
+          texing,
+          lx,
+          equip_list,
+          neidan,
+          equip_face_img,
+          serverid,
+          server_name
+        } = this.targetEquipment;
+        externalParams = {
+          action: 'similar_pet',
+          activeTab: 'pet',
+          equip_face_img,
+          equip_sn,
+          role_grade_limit,
+          equip_level,
+          growth,
+          is_baobao,
+          all_skill,
+          sp_skill,
+          evol_skill_list,
+          texing,
+          lx,
+          equip_list,
+          neidan,
+          serverid,
+          server_name
+        };
+        console.log(externalParams, 'externalParams');
+      }
+
+      // 尝试复用已存在的窗口
+      console.log('🔍 开始检查可复用的窗口，参数:', externalParams);
+      const existingWindow = await _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_2__["default"].checkForExistingWindow(externalParams, 1000);
+      if (existingWindow) {
+        console.log('✅ 找到可复用的窗口:', existingWindow.windowId);
+
+        // 聚焦到已存在的窗口
+        _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_2__["default"].requestFocus(existingWindow.windowId);
+
+        // 直接更新窗口参数，强制刷新页面
+        console.log('🔄 直接更新窗口参数，强制刷新页面...');
+        _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_2__["default"].requestUpdateParams(existingWindow.windowId, externalParams);
+        console.log('🎯 复用已存在的窗口:', existingWindow.windowId);
+        return;
+      }
+      console.log('❌ 没有找到可复用的窗口，创建新窗口');
+      // 如果没有可复用的窗口，则创建新窗口
+      this.createNewWindow(externalParams);
+    },
+    createNewWindow(params) {
+      // 使用qs库将参数转换为URL查询字符串
+      const queryString = qs__WEBPACK_IMPORTED_MODULE_3___default().stringify(params);
+      const url = `/#/auto-params?${queryString}`;
+
+      // 计算窗口位置，使其显示在右下角
+      const screenWidth = window.screen.availWidth;
+      const screenHeight = window.screen.availHeight;
+      const windowWidth = 1000;
+      const windowHeight = 700;
+      const left = screenWidth - windowWidth - 20; // 距离右边缘20px
+      const top = screenHeight - windowHeight - 20; // 距离下边缘20px
+
+      const newWindow = window.open(url, '_blank', `popup=1,location=no,width=${windowWidth},height=${windowHeight},left=${left},top=${top}`);
+      if (newWindow) {
+        console.log('创建新窗口:', url);
+      }
+    }
+  },
+  mounted() {
+    console.log(this.targetEquipment, 'this.targetEquipment');
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarRoleModal.vue?vue&type=script&lang=js":
 /*!******************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarRoleModal.vue?vue&type=script&lang=js ***!
@@ -2304,11 +3223,28 @@ var render = function render() {
         attrs: {
           type: "danger"
         }
-      }, [_vm._v("空号")]) : [_c("el-tag", [_vm._v("⚔️ " + _vm._s(_vm.get_equip_num(_vm.parserRoleData(role))))]), _vm._v(" "), _c("el-tag", {
+      }, [_vm._v("空号")]) : [_vm.get_equip_num(_vm.parserRoleData(role)) > 0 ? _c("el-tag", {
+        staticStyle: {
+          cursor: "pointer"
+        },
+        on: {
+          click: function ($event) {
+            return _vm.handleEquipPrice(role);
+          }
+        }
+      }, [_vm._v("\n                          ⚔️ " + _vm._s(_vm.get_equip_num(_vm.parserRoleData(role))) + "\n                        ")]) : _vm._e(), _vm._v(" "), _vm.get_pet_num(_vm.parserRoleData(role)) > 0 ? _c("el-tag", {
+        staticStyle: {
+          cursor: "pointer"
+        },
         attrs: {
           type: "success"
+        },
+        on: {
+          click: function ($event) {
+            return _vm.handlePetPrice(role);
+          }
         }
-      }, [_vm._v("🐲 " + _vm._s(_vm.get_pet_num(_vm.parserRoleData(role))))])]], 2)])], 1), _vm._v(" "), _c("div", [_c("SimilarRoleModal", {
+      }, [_vm._v("\n                          🐲 " + _vm._s(_vm.get_pet_num(_vm.parserRoleData(role))) + "\n                        ")]) : _vm._e()]], 2)])], 1), _vm._v(" "), _c("div", [_c("SimilarRoleModal", {
         attrs: {
           role: {
             ...role,
@@ -2332,7 +3268,247 @@ var render = function render() {
         }
       }, [_vm._v("👤\n                        裸号")])], 1)])], 1)], 1)], 1);
     }), 1)], 1) : _vm._e()]);
-  }), 0)], 1)]);
+  }), 0)], 1), _vm._v(" "), _c("el-dialog", {
+    attrs: {
+      visible: _vm.valuationDialogVisible,
+      width: "1000px",
+      "close-on-click-modal": false,
+      "close-on-press-escape": false,
+      "custom-class": "batch-valuation-dialog"
+    },
+    on: {
+      "update:visible": function ($event) {
+        _vm.valuationDialogVisible = $event;
+      }
+    }
+  }, [_c("span", {
+    staticClass: "el-dialog__title",
+    attrs: {
+      slot: "title"
+    },
+    slot: "title"
+  }, [_c("el-tag", {
+    attrs: {
+      size: "mini"
+    }
+  }, [_vm._v(_vm._s(_vm.valuationDialogTitle.server_name))]), _vm._v("\n      /\n      "), _c("el-tag", {
+    attrs: {
+      type: "info",
+      size: "mini"
+    }
+  }, [_vm._v(_vm._s(_vm.valuationDialogTitle.school))]), _vm._v("/\n      "), _c("el-link", {
+    attrs: {
+      href: _vm.getCBGLinkByType(_vm.valuationDialogTitle.eid),
+      target: "_blank"
+    }
+  }, [_vm._v(_vm._s(_vm.valuationDialogTitle.nickname))])], 1), _vm._v(" "), _c("EquipBatchValuationResult", {
+    attrs: {
+      results: _vm.valuationResults,
+      "total-value": _vm.valuationTotalValue,
+      "equipment-list": _vm.valuationEquipmentList,
+      "valuate-params": _vm.batchValuateParams,
+      loading: _vm.valuationLoading
+    },
+    on: {
+      close: _vm.closeValuationDialog
+    }
+  })], 1)], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "batch-valuation-result",
+    style: _vm.$attrs.style
+  }, [_vm.loading ? _c("div", {
+    staticClass: "skeleton-container"
+  }, [_c("el-skeleton", {
+    attrs: {
+      rows: 12,
+      animated: ""
+    }
+  })], 1) : [_c("div", {
+    staticClass: "result-item",
+    class: _vm.getOverviewClass(),
+    staticStyle: {
+      "min-height": "unset"
+    }
+  }, [_c("el-row", {
+    staticStyle: {
+      "margin-bottom": "20px"
+    },
+    attrs: {
+      gutter: 20
+    }
+  }, [_c("el-col", {
+    attrs: {
+      span: 6
+    }
+  }, [_c("el-statistic", {
+    attrs: {
+      "group-separator": ",",
+      precision: 2,
+      value: _vm.currentTotalValue / 100,
+      title: "估价总值",
+      "value-style": {
+        fontSize: "28px",
+        fontWeight: "bold"
+      }
+    }
+  }, [_c("template", {
+    slot: "formatter"
+  }, [_c("span", {
+    domProps: {
+      innerHTML: _vm._s(_vm.formatPrice(_vm.currentTotalValue))
+    }
+  })])], 2)], 1), _vm._v(" "), _c("el-col", {
+    attrs: {
+      span: 6
+    }
+  }, [_c("el-statistic", {
+    attrs: {
+      "group-separator": ",",
+      precision: 0,
+      value: _vm.successCount,
+      title: "成功估价",
+      "value-style": {
+        fontSize: "28px",
+        fontWeight: "bold",
+        color: "#67c23a"
+      }
+    }
+  }, [_c("template", {
+    slot: "suffix"
+  }, [_c("span", {
+    staticStyle: {
+      color: "#909399",
+      "font-size": "16px"
+    }
+  }, [_vm._v("/ " + _vm._s(_vm.totalCount))])])], 2)], 1)], 1)], 1), _vm._v(" "), _c("el-row", {
+    staticStyle: {
+      "flex-wrap": "wrap"
+    },
+    attrs: {
+      type: "flex"
+    }
+  }, _vm._l(_vm.currentList, function (item, index) {
+    return _c("el-col", {
+      key: item.equip_sn || index,
+      staticClass: "result-item",
+      class: _vm.getResultItemClass(item),
+      attrs: {
+        span: _vm.colSpan
+      }
+    }, [_c("el-row", {
+      attrs: {
+        type: "flex",
+        align: "middle",
+        justify: "space-between"
+      }
+    }, [_c("el-col", {
+      staticStyle: {
+        width: "50px"
+      }
+    }, [_c("EquipmentImage", {
+      attrs: {
+        placement: "top",
+        image: false,
+        equipment: _vm.getEquipImageProps(item),
+        "lock-type": item.lock_type,
+        size: "small",
+        popoverWidth: 300
+      }
+    })], 1), _vm._v(" "), _c("el-col", {
+      staticClass: "price-info",
+      staticStyle: {
+        width: "calc(100% - 50px)"
+      }
+    }, [_c("el-statistic", {
+      attrs: {
+        "value-style": _vm.getPriceStyle(item.confidence)
+      }
+    }, [_c("template", {
+      slot: "formatter"
+    }, [_c("span", {
+      domProps: {
+        innerHTML: _vm._s(_vm.formatPrice(item.estimated_price))
+      }
+    })])], 2)], 1)], 1), _vm._v(" "), _c("div", {
+      staticClass: "result-footer"
+    }, [_c("SimilarEquipmentModal", {
+      key: item.equip_sn,
+      attrs: {
+        equipment: item,
+        "similar-data": _vm.similarData
+      },
+      on: {
+        "valuation-updated": data => _vm.handleValuationUpdated(data, index)
+      }
+    }, [_c("el-link", {
+      staticStyle: {
+        "font-weight": "bold"
+      },
+      attrs: {
+        href: "javascript:void(0)",
+        type: "primary"
+      }
+    }, [_vm._v(_vm._s(item.name || `装备 ${index + 1}`))])], 1), _vm._v(" "), !item.error ? _c("el-tag", {
+      attrs: {
+        type: _vm.getConfidenceTagType(item.confidence)
+      }
+    }, [_vm._v("\n            置信度: " + _vm._s((item.confidence * 100).toFixed(1)) + "%\n          ")]) : _c("el-tag", {
+      attrs: {
+        type: "danger",
+        title: item.error
+      }
+    }, [_vm._v("估价失败")])], 1), _vm._v(" "), _c("div", {
+      staticClass: "equip-tag-info"
+    }, [_vm.getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel ? _c("el-tag", {
+      attrs: {
+        type: "success"
+      }
+    }, [_vm._v(_vm._s(_vm.getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel) + "锻")]) : _vm._e(), _vm._v(" "), _vm._l(_vm.getEquipGemInfoAndBlueBlock(item.cDesc).blueBlock, function (tag) {
+      return _c("el-tag", {
+        key: tag,
+        attrs: {
+          type: "primary"
+        }
+      }, [_vm._v(_vm._s(tag))]);
+    })], 2)], 1);
+  }), 1)], _vm._v(" "), _c("div", {
+    staticClass: "dialog-footer",
+    staticStyle: {
+      "text-align": "center",
+      "margin-top": "20px"
+    }
+  }, [_c("el-button", {
+    attrs: {
+      type: "primary"
+    },
+    on: {
+      click: function ($event) {
+        return _vm.$emit("close");
+      }
+    }
+  }, [_vm._v("关闭")])], 1)], 2);
 };
 var staticRenderFns = [];
 render._withStripped = true;
@@ -2527,6 +3703,142 @@ var render = function render() {
       isBinding: _vm.isBinding
     }
   }) : _vm._e()], 1) : _vm._e();
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "valuation-info",
+    class: _vm.confidenceClass
+  }, [_c("el-row", {
+    attrs: {
+      type: "flex",
+      align: "middle",
+      justify: "space-between"
+    }
+  }, [_c("el-row", {
+    attrs: {
+      type: "flex",
+      align: "middle"
+    }
+  }, [_c("EquipmentImage", {
+    attrs: {
+      equipment: _vm.targetEquipment,
+      width: "50px",
+      height: "50px",
+      placement: "left"
+    }
+  }), _vm._v(" "), _vm.targetEquipment.price ? _c("span", {
+    staticStyle: {
+      "margin-left": "10px"
+    },
+    domProps: {
+      innerHTML: _vm._s(_vm.formatFullPrice(_vm.targetEquipment))
+    }
+  }) : _vm._e(), _vm._v(" "), _vm.isWeapon ? _c("div", {
+    staticStyle: {
+      "margin-left": "10px"
+    }
+  }, [_c("div", {
+    staticStyle: {
+      "margin-bottom": "5px"
+    }
+  }, [_c("el-tag", {
+    attrs: {
+      type: "success"
+    }
+  }, [_vm._v("属性：+" + _vm._s(_vm.valuation.feature.addon_total) + "点" + _vm._s(_vm.addon_total_standards?.[_vm.valuation.feature.equip_level]))]), _vm._v(" "), _c("el-divider", {
+    attrs: {
+      direction: "vertical"
+    }
+  }), _vm._v(" "), _c("el-tag", {
+    attrs: {
+      type: "primary"
+    }
+  }, [_vm._v("总伤：" + _vm._s(_vm.valuation.feature.all_damage) + "/" + _vm._s(parseInt(_vm.all_damage_standards?.[_vm.valuation.feature.equip_level][1] + 25 * _vm.valuation.feature.equip_level / 30)))])], 1), _vm._v(" "), _c("div", [_c("el-tag", {
+    attrs: {
+      type: "danger"
+    }
+  }, [_vm._v("初伤：" + _vm._s(_vm.valuation.feature.init_damage_raw) + "点" + _vm._s(_vm.init_damage_raw_standards?.[_vm.valuation.feature.equip_level]))]), _vm._v(" "), _c("el-divider", {
+    attrs: {
+      direction: "vertical"
+    }
+  }), _vm._v(" "), _c("el-tag", {
+    attrs: {
+      type: "danger"
+    }
+  }, [_vm._v("初总伤：" + _vm._s(_vm.valuation.feature.init_damage) + "点" + _vm._s(_vm.all_damage_standards?.[_vm.valuation.feature.equip_level]))])], 1)]) : _vm._e()], 1), _vm._v(" "), _c("div", {
+    staticStyle: {
+      width: "170px",
+      "flex-shrink": "0"
+    }
+  }, [_c("el-button", {
+    attrs: {
+      type: "primary",
+      size: "mini"
+    },
+    on: {
+      click: function ($event) {
+        return _vm.$emit("refresh");
+      }
+    }
+  }, [_vm._v("刷新")]), _vm._v(" "), _c("SimilarGetMore", {
+    attrs: {
+      "target-equipment": _vm.targetEquipment
+    }
+  })], 1)], 1), _vm._v(" "), _c("div", {
+    staticClass: "valuation-main"
+  }, [_c("span", {
+    staticClass: "valuation-label"
+  }, [_vm._v("装备估价:")]), _vm._v(" "), _c("span", {
+    staticClass: "valuation-price"
+  }, [_vm._v(_vm._s(_vm.valuation?.estimated_price_yuan || "-") + "元")]), _vm._v(" "), _c("span", {
+    staticClass: "valuation-strategy"
+  }, [_vm._v("(" + _vm._s(_vm.valuation ? _vm.getStrategyName(_vm.valuation.strategy) : "-") + ")")]), _vm._v(" "), _c("el-link", {
+    attrs: {
+      type: "danger",
+      size: "mini"
+    },
+    nativeOn: {
+      click: function ($event) {
+        return _vm.markAsAbnormal.apply(null, arguments);
+      }
+    }
+  }, [_vm._v("标记为异常")]), _vm._v(" "), _vm.priceRatio ? _c("span", {
+    staticClass: "price-ratio"
+  }, [_c("el-tag", {
+    attrs: {
+      type: _vm.priceRatioTagType,
+      "disable-transitions": ""
+    }
+  }, [_vm._v("\n        " + _vm._s(_vm.priceRatioText) + "\n      ")])], 1) : _vm._e()], 1), _vm._v(" "), _c("div", {
+    staticClass: "valuation-details"
+  }, [_c("span", {
+    staticClass: "confidence-display",
+    class: _vm.confidenceTextClass
+  }, [_c("i", {
+    class: _vm.confidenceIcon
+  }), _vm._v("\n      置信度: " + _vm._s(_vm.valuation ? (_vm.valuation.confidence * 100).toFixed(1) + "%" : "-") + "\n      "), _c("span", {
+    staticClass: "confidence-level"
+  }, [_vm._v(_vm._s(_vm.confidenceLevel))])]), _vm._v(" "), _c("span", [_vm._v("基于" + _vm._s(_vm.valuation.anchor_count) + "个锚点")]), _vm._v(" "), _vm.priceRatio ? _c("span", [_vm._v("估价比率: " + _vm._s((_vm.priceRatio * 100).toFixed(1)) + "%")]) : _vm._e()])], 1);
 };
 var staticRenderFns = [];
 render._withStripped = true;
@@ -4755,6 +6067,307 @@ render._withStripped = true;
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true":
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("el-popover", {
+    attrs: {
+      "data-equip-sn": _vm.equipment.equip_sn,
+      placement: _vm.placement,
+      width: "720",
+      trigger: "click",
+      "popper-class": "similar-equip-popper"
+    },
+    on: {
+      show: _vm.handleShow
+    },
+    scopedSlots: _vm._u([{
+      key: "reference",
+      fn: function () {
+        return [_vm._t("default", function () {
+          return [_c("el-link", {
+            staticStyle: {
+              "font-size": "12px"
+            },
+            attrs: {
+              type: "primary"
+            }
+          }, [_vm._v("查看相似")])];
+        })];
+      },
+      proxy: true
+    }], null, true),
+    model: {
+      value: _vm.visible,
+      callback: function ($$v) {
+        _vm.visible = $$v;
+      },
+      expression: "visible"
+    }
+  }, [_vm._v(" "), _vm.visible ? _c("div", [_vm.valuationLoading ? _c("div", {
+    staticClass: "loading-info"
+  }, [_c("el-skeleton", {
+    attrs: {
+      rows: 12,
+      animated: ""
+    }
+  })], 1) : _vm.similarData ? _c("div", [_c("div", {
+    staticClass: "similar-header"
+  }, [_c("h4", [_vm._v("相似装备 (共" + _vm._s(_vm.similarData.anchor_count) + "个) "), _c("el-divider", {
+    attrs: {
+      direction: "vertical"
+    }
+  }), _vm._v(" "), _c("el-tag", {
+    attrs: {
+      type: "info",
+      size: "mini"
+    }
+  }, [_vm._v("相似度阈值: " + _vm._s(_vm.similarData.similarity_threshold))]), _vm._v(" "), _c("el-divider", {
+    attrs: {
+      direction: "vertical"
+    }
+  }), _vm._v(" "), _c("el-tag", {
+    attrs: {
+      type: "info",
+      size: "mini"
+    }
+  }, [_vm._v("最大锚点数: " + _vm._s(_vm.similarData.max_anchors))])], 1), _vm._v(" "), _c("EquipmentValuation", {
+    attrs: {
+      valuation: _vm.equipmentValuation,
+      "target-equipment": _vm.getEquipImageProps(_vm.equipment)
+    },
+    on: {
+      refresh: _vm.refresh
+    }
+  }), _vm._v(" "), _vm.similarData.statistics ? _c("div", {
+    staticClass: "stats"
+  }, [_c("span", [_vm._v("\n            价格范围:\n            "), _c("span", {
+    domProps: {
+      innerHTML: _vm._s(_vm.formatPrice(_vm.similarData.statistics.price_range.min))
+    }
+  }), _vm._v("\n            -\n            "), _c("span", {
+    domProps: {
+      innerHTML: _vm._s(_vm.formatPrice(_vm.similarData.statistics.price_range.max))
+    }
+  })]), _vm._v(" "), _c("span", [_vm._v(" 平均相似度: " + _vm._s(_vm.similarData.statistics.similarity_range.avg.toFixed(3)) + " ")])]) : _vm._e()], 1), _vm._v(" "), !_vm.anchorsLoading && !_vm.similarData?.anchors?.length ? _c("el-empty", {
+    attrs: {
+      description: "暂无数据"
+    }
+  }) : _c("SimilarEquipmentTable", {
+    directives: [{
+      name: "loading",
+      rawName: "v-loading",
+      value: _vm.anchorsLoading,
+      expression: "anchorsLoading"
+    }],
+    attrs: {
+      anchors: _vm.similarData.anchors,
+      "element-loading-text": "正在加载相似装备"
+    }
+  })], 1) : _vm._e()]) : _vm._e()]);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true":
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("el-table", {
+    directives: [{
+      name: "loading",
+      rawName: "v-loading",
+      value: _vm.loading,
+      expression: "loading"
+    }],
+    staticStyle: {
+      width: "100%"
+    },
+    attrs: {
+      data: _vm.anchors,
+      stripe: "",
+      "max-height": "300",
+      sortable: "",
+      "sort-by": ["price", "similarity"],
+      "sort-order": ["ascending", "descending"]
+    }
+  }, [_c("el-table-column", {
+    attrs: {
+      fixed: "",
+      prop: "price",
+      label: "价格 (元)",
+      width: "100",
+      sortable: ""
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function (scope) {
+        return [_c("div", {
+          domProps: {
+            innerHTML: _vm._s(_vm.formatFullPrice(scope.row, true))
+          }
+        })];
+      }
+    }])
+  }), _vm._v(" "), _c("el-table-column", {
+    attrs: {
+      fixed: "",
+      label: "装备",
+      width: "70"
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function (scope) {
+        return [_c("equipment-image", {
+          attrs: {
+            equipment: scope.row
+          }
+        })];
+      }
+    }])
+  }), _vm._v(" "), _c("el-table-column", {
+    attrs: {
+      prop: "similarity",
+      label: "相似度",
+      width: "80",
+      sortable: ""
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function (scope) {
+        return [_c("el-tag", {
+          attrs: {
+            type: _vm.getSimilarityTagType(scope.row.similarity)
+          }
+        }, [_vm._v("\n        " + _vm._s(scope.row.similarity) + "\n      ")])];
+      }
+    }])
+  }), _vm._v(" "), _c("el-table-column", {
+    attrs: {
+      prop: "equip_level",
+      label: "等级",
+      width: "60"
+    }
+  }), _vm._v(" "), _c("el-table-column", {
+    attrs: {
+      label: "特技/特效/套装",
+      "min-width": "120"
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function (scope) {
+        return [_c("div", {
+          staticClass: "special-info"
+        }, [_c("div", {
+          staticClass: "equip_desc_blue",
+          attrs: {
+            "data-specia-effet": scope.row.special_effect,
+            "data-special-skill": scope.row.special_skill
+          }
+        }), _vm._v(" "), _c("p", {
+          domProps: {
+            innerHTML: _vm._s(_vm.formatSpecialSkillsAndEffects(scope.row))
+          }
+        }), _vm._v(" "), _c("p", [_vm._v("  " + _vm._s(_vm.formatSuitEffect(scope.row)))])])];
+      }
+    }])
+  }), _vm._v(" "), _c("el-table-column", {
+    attrs: {
+      prop: "server_name",
+      label: "服务器",
+      width: "80"
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function (scope) {
+        return [_c("span", [_vm._v(_vm._s(scope.row.server_name))]), _vm._v(" "), _c("div", {
+          domProps: {
+            innerHTML: _vm._s(_vm.formatFullPrice(scope.row, "cross"))
+          }
+        })];
+      }
+    }])
+  }), _vm._v(" "), _c("el-table-column", {
+    attrs: {
+      label: "操作",
+      width: "80"
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function (scope) {
+        return [_c("el-link", {
+          attrs: {
+            href: _vm.getCBGLinkByType(scope.row.eid, "equip"),
+            type: "danger",
+            target: "_blank"
+          }
+        }, [_vm._v("藏宝阁")])];
+      }
+    }])
+  })], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarGetMore.vue?vue&type=template&id=c65454e0":
+/*!***************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarGetMore.vue?vue&type=template&id=c65454e0 ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("el-button", {
+    attrs: {
+      type: "success"
+    },
+    on: {
+      click: _vm.goToMoreSimilar
+    }
+  }, [_vm._v("\n  查看更多相似\n")]);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarRoleModal.vue?vue&type=template&id=78818f48&scoped=true":
 /*!*****************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarRoleModal.vue?vue&type=template&id=78818f48&scoped=true ***!
@@ -5184,7 +6797,31 @@ var ___CSS_LOADER_URL_IMPORT_0___ = new URL(/* asset import */ __webpack_require
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_0___);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.panel[data-v-42c7142d] {\n  box-sizing: border-box;\n  padding: 16px;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ") repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n.panel-header[data-v-42c7142d] {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n.panel-header h3[data-v-42c7142d] {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n.connection-status[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n.status-indicator[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.status-dot[data-v-42c7142d] {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n.status-dot.connected[data-v-42c7142d] {\n  background-color: #52c41a;\n  animation: pulse-green-strong-42c7142d 1.5s infinite;\n}\n.status-dot.disconnected[data-v-42c7142d] {\n  background-color: #faad14;\n  animation: pulse-orange-strong-42c7142d 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n}\n75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n}\n.status-text[data-v-42c7142d] {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n.mode-indicator[data-v-42c7142d] {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n.mode-indicator.sidepanel[data-v-42c7142d] {\n  background-color: #1890ff;\n  color: white;\n}\n.mode-indicator.new-window[data-v-42c7142d] {\n  background-color: #52c41a;\n  color: white;\n}\n.new-window-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.new-window-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.sidebar-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.sidebar-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.data-section h4[data-v-42c7142d] {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n.empty-state[data-v-42c7142d] {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n.request-list[data-v-42c7142d] {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n.request-item[data-v-42c7142d] {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n.request-item[data-v-42c7142d]:last-child {\n  border-bottom: none;\n}\n.request-item[data-v-42c7142d]:hover {\n  background-color: #fafafa;\n}\n.request-item.parsing[data-v-42c7142d] {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse-42c7142d 2s ease-in-out infinite;\n}\n@keyframes pulse-42c7142d {\n0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n}\n100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n}\n.request-info[data-v-42c7142d] {\n  margin-bottom: 8px;\n}\n.request-url[data-v-42c7142d] {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n.request-meta[data-v-42c7142d] {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n.method[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status[data-v-42c7142d] {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status.pending[data-v-42c7142d] {\n  background: #faad14;\n  color: white;\n}\n.status.completed[data-v-42c7142d] {\n  background: #52c41a;\n  color: white;\n}\n.status.parsing[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n}\n.status.parsing .el-icon-loading[data-v-42c7142d] {\n  animation: rotating-42c7142d 2s linear infinite;\n}\n@keyframes rotating-42c7142d {\n0% {\n    transform: rotate(0deg);\n}\n100% {\n    transform: rotate(360deg);\n}\n}\n.status.failed[data-v-42c7142d] {\n  background: #ff4d4f;\n  color: white;\n}\n.timestamp[data-v-42c7142d] {\n  color: #999;\n}\n.response-data[data-v-42c7142d] {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n.response-content[data-v-42c7142d] {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n.response-content pre[data-v-42c7142d] {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n.role-card[data-v-42c7142d] .el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role[data-v-42c7142d] {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n.role-card.empty-role[data-v-42c7142d]:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n.role-card.empty-role[data-v-42c7142d] .el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role .el-link[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role span[data-v-42c7142d] {\n  opacity: 0.7;\n}\n", "",{"version":3,"sources":["webpack://./src/chrome-extensions/DevToolsPanel.vue"],"names":[],"mappings":";AA23BA;EACA,sBAAA;EACA,aAAA;EACA,gFAAA;EACA,mBAAA;EACA,iBAAA;EACA,4DAAA;EACA,YAAA;EACA,cAAA;AACA;AAEA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,mBAAA;EACA,oBAAA;EACA,gCAAA;AACA;AAEA;EACA,SAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,SAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,QAAA;AACA;AAEA;EACA,kBAAA;EACA,QAAA;EACA,SAAA;EACA,gCAAA;EACA,UAAA;EACA,WAAA;EACA,kBAAA;EACA,qBAAA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,oDAAA;AACA;AAEA;EACA,yBAAA;EACA,mDAAA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,2CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,4CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AACA;AAEA;EACA,eAAA;EACA,WAAA;EACA,gBAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,kBAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,kBAAA;EACA,kBAAA;EACA,WAAA;EACA,iBAAA;EACA,kBAAA;EACA,uBAAA;AACA;AAEA;EACA,iBAAA;EACA,kBAAA;EACA,yBAAA;EACA,gBAAA;AACA;AAEA;EACA,gCAAA;EACA,kBAAA;EACA,iCAAA;AACA;AAEA;EACA,mBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,6CAAA;EACA,iDAAA;AACA;AAEA;AACA;IACA,6CAAA;AACA;AAEA;IACA,8CAAA;AACA;AAEA;IACA,6CAAA;AACA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;EACA,wDAAA;EACA,eAAA;EACA,WAAA;EACA,qBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,SAAA;EACA,eAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,+CAAA;AACA;AAEA;AACA;IACA,uBAAA;AACA;AAEA;IACA,yBAAA;AACA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,WAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,6BAAA;AACA;AAEA;EACA,eAAA;EACA,mBAAA;EACA,kBAAA;EACA,YAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,SAAA;EACA,wDAAA;EACA,eAAA;EACA,gBAAA;EACA,WAAA;EACA,qBAAA;EACA,sBAAA;AACA;AAEA;EACA,YAAA;AACA;;AAEA,aAAA;AACA;EACA,YAAA;EACA,sBAAA;EACA,yBAAA;EACA,yBAAA;EACA,yBAAA;AACA;AAEA;EACA,YAAA;EACA,sBAAA;AACA;AAEA;EACA,yBAAA;AACA;;AAEA,gBAAA;AACA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA","sourcesContent":["<template>\n  <div class=\"panel\">\n    <div class=\"panel-header\">\n      <el-row type=\"flex\" align=\"middle\">\n        <div style=\"width: 32px;height: 32px;margin-right: 10px;position: relative;\">\n          <img src=\"~@/assets/logo.png\" alt=\"梦幻灵瞳\" style=\"width: 32px;height: 32px;\">\n          <span class=\"status-dot\"\n            :class=\"{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }\"></span>\n        </div>\n        <h3 style=\"color: #fff;\">梦幻灵瞳</h3>\n      </el-row>\n      <div class=\"connection-status\">\n        <div id=\"pager\" class=\"fr\" v-if=\"pageInfo.hasPager\">\n          <el-row class=\"pages\" type=\"flex\" align=\"middle\">\n            <span style=\"color: #fff;margin-right: 10px;\"> 第{{ pageInfo.currentPage }}页, 共{{ pageInfo.total }}页 </span>\n            <a v-if=\"pageInfo.hasPrev\" href=\"javascript:void 0;\" @click.prevent=\"prevPage\"\n              style=\"line-height: 1.2em;\">上一页</a>\n            <a v-if=\"pageInfo.hasNext\" href=\"javascript:void 0;\" @click.prevent=\"nextPage\"\n              style=\"line-height: 1.2em;\">下一页</a>\n          </el-row>\n        </div>\n        <a v-if=\"!devtoolsConnected\" href=\"javascript:void 0;\" @click=\"reconnectDevTools\">重新连接</a>\n        <a v-if=\"!isInNewWindow\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"openInNewTab\">新窗口打开</a>\n        <a v-if=\"!pageInfo.hasPager\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"refreshCurrentPage\">刷新页面</a>\n        <a v-if=\"recommendData.length > 0\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"clearData\">清空数据</a>\n      </div>\n    </div>\n    <div class=\"data-section\">\n      <el-empty v-if=\"recommendData.length === 0\" class=\"empty-state\" description=\"暂无数据，请访问梦幻西游藏宝阁页面\"></el-empty>\n      <div v-else class=\"request-list\">\n        <div v-for=\"(item, index) in recommendData\" :key=\"item.requestId\" class=\"request-item\"\n          :class=\"{ 'parsing': item.status === 'parsing' }\">\n          <div class=\"request-info\">\n            <div class=\"request-meta\">\n              <span class=\"status\" :class=\"item.status\">\n                <template v-if=\"item.status === 'parsing'\">\n                  <i class=\"el-icon-loading\"></i> 解析中...\n                </template>\n                <template v-else-if=\"item.status === 'completed'\">\n                  <i class=\"el-icon-success\"></i> 解析完成\n                </template>\n                <template v-else>\n                  <i class=\"el-icon-error\"></i> 解析失败\n                </template>\n              </span>\n              <span class=\"timestamp\">{{ formatTime(item.timestamp) }}</span>\n            </div>\n          </div>\n          <div v-if=\"item.responseData\" class=\"response-data\">\n            <el-row :gutter=\"4\">\n              <el-col v-for=\"role in parseListData(item.responseData)?.equip_list\" :key=\"role.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\" :class=\"{ 'empty-role': isEmptyRole(parserRoleData(role)) }\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <RoleImage :key=\"role.eid\" :other_info=\"role.other_info\" :roleInfo=\"parserRoleData(role)\" />\n                      <el-link :href=\"getCBGLinkByType(role.eid, 'role')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ role.seller_nickname }}</el-link>\n                    </el-col>\n                    <el-col>\n                      <div>\n                        <el-tag type=\"success\" v-if=\"role.accept_bargain == 1\">接受还价</el-tag>\n                        <el-tag type=\"danger\" v-else>拒绝还价</el-tag>\n                      </div>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(role.price, true)\"></span>\n                      </div>\n                      <div>\n                        <el-tag type=\"danger\" v-if=\"isEmptyRole(parserRoleData(role))\">空号</el-tag>\n                        <template v-else>\n                          <el-tag>⚔️ {{ get_equip_num(parserRoleData(role)) }}</el-tag>\n                          <el-tag type=\"success\">🐲 {{ get_pet_num(parserRoleData(role)) }}</el-tag>\n                        </template>\n                      </div>\n\n                    </el-col>\n                  </el-row>\n                  <div>\n                    <SimilarRoleModal :role=\"{ ...role, roleInfo: parserRoleData(role) }\"\n                      :search-params=\"{ selectedDate: selectedDate, roleType: 'normal' }\">\n                      <div> <el-link type=\"primary\" href=\"javascript:void 0;\" @click.prevent\n                          :disabled=\"item.status !== 'completed'\">👤\n                          裸号</el-link></div>\n                    </SimilarRoleModal>\n                  </div>\n                </el-card>\n              </el-col>\n            </el-row>\n            <!-- <el-button @click=\"toggleResponse(index)\" size=\"mini\" type=\"text\">\n              {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据\n            </el-button>\n            <div v-if=\"expandedItems.includes(index)\" class=\"response-content\">\n              <pre>{{ JSON.stringify(item.responseData, null, 2) }}</pre>\n            </div> -->\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</template>\n<script>\nimport dayjs from 'dayjs'\nimport RoleImage from '@/components/RoleInfo/RoleImage.vue'\nimport SimilarRoleModal from '@/components/SimilarRoleModal.vue'\nimport { commonMixin } from '@/utils/mixins/commonMixin'\nexport default {\n  name: 'DevToolsPanel',\n  data() {\n    return {\n      pageInfo: {\n        hasPager: false,\n        currentPage: 0,\n        total: 0,\n        hasPrev: false,\n        hasNext: false\n      },\n      selectedDate: dayjs().format('YYYY-MM'),\n      recommendData: [],\n      expandedItems: [],\n      processedRequests: new Set(), // 记录已处理的请求ID\n      devtoolsConnected: false, // 数据监听连接状态\n      connectionStatus: '检查中...', // 连接状态描述\n      connectionCheckTimer: null, // 连接检查定时器\n      isInNewWindow: false // 是否在新窗口中打开\n    }\n  },\n  mixins: [commonMixin],\n  components: {\n    RoleImage,\n    SimilarRoleModal\n  },\n  computed: {\n\n  },\n  mounted() {\n    // 通知background script侧边栏已打开\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelOpened'\n      })\n    }\n\n    // 监听页面可见性变化，当页面不可见时通知关闭\n    document.addEventListener('visibilitychange', this.handleVisibilityChange)\n\n    this.initMessageListener()\n    this.checkConnectionStatus()\n    this.checkIfInNewWindow()\n\n    // // 设置定时检查（每5秒检查一次）\n    // this.connectionCheckTimer = setInterval(() => {\n    //   this.checkConnectionStatus()\n    // }, 5000)\n  },\n  beforeDestroy() {\n    // 通知background script侧边栏已关闭\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelClosed'\n      })\n    }\n\n    // 移除可见性变化监听器\n    document.removeEventListener('visibilitychange', this.handleVisibilityChange)\n\n    // 移除Chrome消息监听器\n    this.removeMessageListener()\n    // 清理定时器\n    if (this.connectionCheckTimer) {\n      clearInterval(this.connectionCheckTimer)\n      this.connectionCheckTimer = null\n    }\n    // 清理组件状态\n    this.recommendData = []\n    this.expandedItems = []\n  },\n  methods: {\n    handleVisibilityChange() {\n      // 当页面不可见时，通知background script侧边栏已关闭\n      if (document.hidden) {\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelClosed'\n          })\n        }\n      } else {\n        this.getPagerInfo().then(res => {\n          this.pageInfo = res\n        })\n        // 当页面重新可见时，通知background script侧边栏已打开\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelOpened'\n          })\n        }\n      }\n    },\n\n    isEmptyRole(roleInfo) {\n      const noEquip = this.get_equip_num(roleInfo) === 0\n      let noPet = true\n      for (let pet of roleInfo.pet_info) {\n        if (pet.pet_grade > 100 && pet.is_baobao === '是') {\n          noPet = false\n          break\n        }\n        if (pet.pet_grade > 100 && pet.is_baobao === '否' && pet.all_skills.length > 4) {\n          noPet = false\n          break\n        }\n      }\n      return noEquip && noPet\n    },\n    get_pet_num(roleInfo) {\n      return roleInfo.pet_info.length + roleInfo.split_pets.length\n    },\n    get_equip_num(roleInfo) {\n      return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length\n    },\n    nextPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('next')\n    },\n\n    prevPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('prev')\n    },\n\n    reconnectDevTools() {\n      // 重新连接数据监听\n      this.connectionStatus = '重连中...'\n      this.checkConnectionStatus()\n      this.$notify.info('正在尝试重新连接数据监听...')\n    },\n\n    async clickPageButton(direction) {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  \n                  let targetButton = null\n                  const isNext = '${direction}' === 'next'\n                  \n                  if (isNext) {\n                    // 查找下一页按钮 - 根据实际HTML格式优化\n                    // 1. 优先查找包含\"下一页\"文本的链接\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '下一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"下一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码大于当前页码，说明是下一页\n                            if (!isNaN(linkPage) && linkPage > currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  } else {\n                    // 查找上一页按钮\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    \n                    // 1. 优先查找包含\"上一页\"文本的链接\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '上一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"上一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码小于当前页码，说明是上一页\n                            if (!isNaN(linkPage) && linkPage < currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  }\n                  \n                  if (!targetButton) {\n                    return 'ERROR:未找到${direction === 'next' ? '下一页' : '上一页'}按钮'\n                  }\n                  \n                  // 检查按钮是否可点击\n                  if (targetButton.disabled || targetButton.classList.contains('disabled')) {\n                    return 'ERROR:${direction === 'next' ? '下一页' : '上一页'}按钮不可点击，可能已到${direction === 'next' ? '最后一页' : '第一页'}'\n                  }\n                  \n                  // 获取当前页码信息用于日志\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPageInfo = ''\n                  if (currentPageLink) {\n                    const currentPageText = currentPageLink.textContent.trim()\n                    currentPageInfo = ' (当前第' + currentPageText + '页)'\n                  }\n                  \n                  // 点击按钮\n                  targetButton.click()\n                  return 'SUCCESS:已点击${direction === 'next' ? '下一页' : '上一页'}按钮' + currentPageInfo\n                } catch (error) {\n                  return 'ERROR:执行失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        this.pageInfo = await this.getPagerInfo()\n        // 处理Chrome调试API的返回结果\n        if (result && result.result && result.result.value) {\n          const message = result.result.value\n\n          if (message.startsWith('SUCCESS:')) {\n            this.$notify.success(message.substring(8)) // 移除\"SUCCESS:\"前缀\n            console.log(`${direction === 'next' ? '下一页' : '上一页'}按钮点击成功`)\n          } else if (message.startsWith('ERROR:')) {\n            this.$notify.warning(message.substring(6)) // 移除\"ERROR:\"前缀\n            console.warn(`${direction === 'next' ? '下一页' : '上一页'}按钮点击失败:`, message)\n          } else {\n            this.$notify.error('执行页面操作失败：未知返回结果')\n            console.error('页面操作结果异常:', result)\n          }\n        } else {\n          this.$notify.error('执行页面操作失败')\n          console.error('页面操作结果异常:', result)\n        }\n\n      } catch (error) {\n        console.error(`点击${direction === 'next' ? '下一页' : '上一页'}按钮失败:`, error)\n\n        // 检查是否是连接断开错误\n        if (error.message && error.message.includes('Could not establish connection')) {\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接断开'\n          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')\n        } else {\n          this.$notify.error('操作失败: ' + error.message)\n        }\n      }\n    },\n\n    async getPagerInfo() {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码获取分页器信息\n        //在pagerDiv的innerText中查找 `共100页`，获取100\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                let hasPager = false\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  hasPager = true\n                  // 获取当前页码\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPage = 0\n                  if (currentPageLink) {\n                    currentPage = currentPageLink.textContent.trim()\n                  }\n                  \n                  // 从innerText中查找\"共X页\"模式\n                  let total = 0\n                  const innerText = pagerDiv.innerText || pagerDiv.textContent || ''\n                  \n                  // 手动查找\"共\"和\"页\"之间的数字\n                  const gongIndex = innerText.indexOf('共')\n                  const yeIndex = innerText.indexOf('页', gongIndex)\n                  \n                  if (gongIndex !== -1 && yeIndex !== -1) {\n                    const textBetween = innerText.substring(gongIndex + 1, yeIndex).trim()\n                    total = textBetween\n                    console.log('textBetween:', textBetween)\n                    const numberMatch = textBetween.match(/(\\d+)/)\n                    if (numberMatch) {\n                      total = numberMatch[1]\n                    }\n                  }\n                  \n                  // 检查是否有上一页/下一页按钮\n                  const hasPrev = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('上一页')\n                  const hasNext = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('下一页')\n                  \n                  // return 'SUCCESS:第' + currentPage + '页，共' + total + '页 (上一页:' + (hasPrev ? '有' : '无') + ', 下一页:' + (hasNext ? '有' : '无') + ')'\n                  return JSON.stringify({\n                    hasPager: hasPager,\n                    currentPage: currentPage*1,\n                    total: total*1,\n                    hasPrev: hasPrev,\n                    hasNext: hasNext\n                  })\n                } catch (error) {\n                  return 'ERROR:获取分页器信息失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        console.log('resultresultresultresult:', result)\n        // 处理返回结果\n        if (result && result.result && result.result.value) {\n          return JSON.parse(result.result.value)\n        } else {\n          return {\n            hasPager: false,\n            currentPage: 0,\n            total: 0,\n            hasPrev: false,\n            hasNext: false\n          }\n        }\n      } catch (error) {\n        console.error('获取分页器信息失败:', error)\n        return {\n          hasPager: false,\n          currentPage: 0,\n          total: 0,\n          hasPrev: false,\n          hasNext: false\n        }\n      }\n    },\n    parserRoleData(data) {\n      const roleInfo = new window.RoleInfoParser(data.large_equip_desc, { equip_level: data.equip_level })\n      return roleInfo.result\n      // return {\n      //   RoleInfoParser: roleInfo,\n      //   roleInfo: roleInfo.result,\n      //   accept_bargain: data.accept_bargain,\n      //   collect_num: data.collect_num,\n      //   dynamic_tags: data.dynamic_tags,\n      //   eid: data.eid,\n      //   highlight: data.highlight,\n      //   is_split_independent_role: data.is_split_independent_role,\n      //   is_split_main_role: data.is_split_main_role,\n      //   large_equip_desc: data.large_equip_desc,\n      //   level: data.level,\n      //   other_info: data.other_info,\n      //   school: data.school,\n      //   seller_nickname: data.seller_nickname,\n      //   server_name: data.server_name,\n      //   serverid: data.serverid,\n      //   price: data.price,\n      //   sum_exp: data.sum_exp,\n      //   create_time: data.create_time,\n      //   update_time: data.create_time,\n      //   all_equip_json: '',\n      //   all_summon_json: '',\n      //   split_price_desc: '',\n      //   pet_price: '',\n      //   equip_price: '',\n      //   base_price: '',\n      //   history_price: '',\n      // }\n    },\n    parseListData(responseDataStr) {\n      // 解析响应数据 Request.JSONP.request_map.request_数字(xxxx) 中的xxxx\n      const match = responseDataStr.match(/Request\\.JSONP\\.request_map\\.request_\\d+\\((.*)\\)/)\n      let templateJSONStr = '{}'\n      if (match) {\n        templateJSONStr = match[1]\n      } else {\n        templateJSONStr = responseDataStr\n      }\n      try {\n        let templateJSON = {}\n        if (typeof templateJSONStr === 'string') {\n          templateJSON = JSON.parse(templateJSONStr)\n        } else {\n          // h5\n          templateJSON = templateJSONStr\n        }\n        return templateJSON\n      } catch (error) {\n        console.error('解析响应数据失败:', error)\n        return {}\n      }\n    },\n    initMessageListener() {\n      console.log('DevToolsPanel mounted, initializing listener')\n\n      // 使用单例模式确保只有一个监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 如果已经有全局监听器，先移除\n        if (window.cbgDevToolsListener) {\n          chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        }\n\n        // 创建全局监听器\n        window.cbgDevToolsListener = (request, sender, sendResponse) => {\n          console.log('DevToolsPanel received Chrome message:', request.action)\n          this.handleChromeMessage(request, sender, sendResponse)\n          sendResponse({ success: true })\n        }\n\n        // 注册监听器\n        chrome.runtime.onMessage.addListener(window.cbgDevToolsListener)\n        console.log('Chrome message listener registered for DevToolsPanel')\n      }\n    },\n\n    removeMessageListener() {\n      // 移除Chrome消息监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime && window.cbgDevToolsListener) {\n        chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        delete window.cbgDevToolsListener\n        console.log('Chrome message listener removed for DevToolsPanel')\n      }\n    },\n\n    checkConnectionStatus() {\n      // 检查Chrome扩展连接状态\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 尝试发送ping消息检查连接\n        chrome.runtime.sendMessage({ action: 'ping' }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.log('Chrome extension connection check failed:', chrome.runtime.lastError)\n            this.devtoolsConnected = false\n            this.connectionStatus = '未连接'\n          } else if (response && response.success) {\n            console.log('Chrome extension connection check successful:', response)\n            this.devtoolsConnected = true\n            this.connectionStatus = '已连接'\n          } else {\n            console.log('Chrome extension connection check failed: invalid response')\n            this.devtoolsConnected = false\n            this.connectionStatus = '连接异常'\n          }\n        })\n      } else {\n        console.log('Chrome runtime not available')\n        this.devtoolsConnected = false\n        this.connectionStatus = 'Chrome环境不可用'\n      }\n    },\n    changeRecommendDataStatus({ requestId, status }) {\n      const targetIndex = this.recommendData.findIndex(item => item.requestId === requestId)\n      if (targetIndex !== -1) {\n        // this.recommendData[targetIndex].status = status\n        this.$set(this.recommendData[targetIndex], 'status', status)\n      }\n    },\n    processNewData(dataArray) {\n      // 只处理新完成的请求，避免重复处理\n      if (dataArray && dataArray.length > 0) {\n        dataArray.forEach(item => {\n          if (item.responseData &&\n            item.url &&\n            item.requestId &&\n            !this.processedRequests.has(item.requestId)) {\n\n            // 标记为已处理\n            this.processedRequests.add(item.requestId)\n            console.log(`开始处理新请求: ${item.requestId}`)\n\n            // 调用解析响应数据接口\n            this.$api.spider.parseResponse({\n              url: item.url,\n              response_text: item.responseData\n            }).then(res => {\n              console.log(`请求 ${item.requestId} 解析结果:`, res)\n              if (res.code === 200) {\n                console.log(`请求 ${item.requestId} 数据解析成功:`, res.data)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed' })\n              } else {\n                console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n              }\n            }).catch(error => {\n              console.error(`请求 ${item.requestId} 解析请求失败:`, error)\n              // 解析失败时移除标记，允许重试\n              this.processedRequests.delete(item.requestId)\n              this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n            })\n          }\n        })\n      }\n    },\n\n    handleChromeMessage(request, sender, sendResponse) {\n      switch (request.action) {\n        case 'addRecommendData':\n          console.log('接收到增量数据:', request)\n          // 处理增量数据\n          const newData = request.data.map(item => {\n            return {\n              ...item,\n              status: 'parsing'\n            }\n          }) || []\n          if (newData.length > 0) {\n            // 将新数据添加到现有数组中\n            this.recommendData.unshift(...newData)\n            \n            // 控制最大长度为10，移除最旧的数据\n            const maxLength = 10\n            if (this.recommendData.length > maxLength) {\n              const removedCount = this.recommendData.length - maxLength\n              this.recommendData = this.recommendData.slice(0, maxLength)\n              console.log(`📊 前端数据长度超过限制，已移除 ${removedCount} 条旧数据`)\n            }\n            \n            this.getPagerInfo().then(res => {\n              this.pageInfo = res\n            })\n            console.log('📥 接收到增量数据，新增:', newData.length, '总计:', this.recommendData.length)\n            // 处理新数据\n            this.processNewData(newData)\n          }\n          break\n\n        case 'devtoolsConnected':\n          this.devtoolsConnected = true\n          this.connectionStatus = '已连接'\n          this.$notify.success(request.message)\n          break\n\n        case 'showDebuggerWarning':\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接冲突'\n          this.$notify.warning(request.message)\n          break\n\n        case 'clearRecommendData':\n          this.recommendData = []\n          this.expandedItems = []\n          this.processedRequests.clear()\n          console.log('清空推荐数据和处理记录')\n          break\n      }\n    },\n\n\n    clearData() {\n      this.recommendData = []\n      this.expandedItems = []\n      this.processedRequests.clear() // 清空已处理请求记录\n      // 通知background script清空数据\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'clearRecommendData'\n        })\n      }\n    },\n\n    // 刷新当前页面\n    refreshCurrentPage() {\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'refreshCurrentPage'\n        }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.error('刷新页面失败:', chrome.runtime.lastError)\n            this.$notify.error({\n              title: '刷新失败',\n              message: '无法刷新页面，请检查扩展权限'\n            })\n          } else if (response && response.success) {\n            console.log('页面刷新成功:', response.message)\n            this.$notify.success({\n              title: '刷新成功',\n              message: '页面正在刷新...'\n            })\n          } else {\n            console.error('刷新页面失败:', response.error)\n            this.$notify.error({\n              title: '刷新失败',\n              message: response.error || '未知错误'\n            })\n          }\n        })\n      } else {\n        this.$notify.error({\n          title: '刷新失败',\n          message: 'Chrome扩展环境不可用'\n        })\n      }\n    },\n\n    toggleResponse(index) {\n      const expandedIndex = this.expandedItems.indexOf(index)\n      if (expandedIndex > -1) {\n        this.expandedItems.splice(expandedIndex, 1)\n      } else {\n        this.expandedItems.push(index)\n      }\n    },\n\n    formatTime(timestamp) {\n      if (!timestamp) return ''\n      \n      // 直接使用当前系统时间，避免复杂的时间戳转换\n      const now = new Date()\n      \n      return now.toLocaleTimeString('zh-CN', { \n        hour12: false,\n        hour: '2-digit',\n        minute: '2-digit',\n        second: '2-digit'\n      })\n    },\n\n    checkIfInNewWindow() {\n      // 检测是否在新窗口中打开\n      try {\n\n        // 方法1: 检查chrome.devtools API是否存在（最可靠的方法）\n        if (typeof chrome !== 'undefined' && chrome.devtools && chrome.devtools.inspectedWindow) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过API检测）')\n          return\n        }\n\n        // 方法2: 检查URL模式 - 区分SidePanel和新窗口\n        const currentUrl = window.location.href\n        if (currentUrl.includes('chrome-extension://')) {\n          // 检查是否是SidePanel页面\n          if (currentUrl.includes('panel.html')) {\n            // panel.html是SidePanel页面\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过URL检测）')\n            return\n          } else if (currentUrl.includes('panel.html')) {\n            // panel.html是新窗口页面\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过URL检测）')\n            return\n          }\n        }\n\n        // 方法3: 检查页面标题\n        if (document.title === '梦幻灵瞳') {\n          // 需要进一步区分是SidePanel还是新窗口\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过标题+URL检测）')\n            return\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过标题检测）')\n            return\n          }\n        }\n\n        // 方法4: 检查是否在iframe中\n        if (window.self !== window.top) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过iframe检测）')\n          return\n        }\n\n        // 方法5: 检查parent窗口\n        if (window.parent === window) {\n          // 顶级窗口，需要进一步判断\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过parent+URL检测）')\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过parent检测）')\n          }\n        } else {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过parent检测）')\n        }\n\n      } catch (error) {\n        console.error('检测窗口环境失败:', error)\n        // 默认假设在新窗口中\n        this.isInNewWindow = true\n        console.log('检测失败，默认在新窗口中打开')\n      }\n    },\n\n    async openInNewTab() {\n      try {\n        // 直接创建新标签页打开扩展页面\n        const extensionUrl = chrome.runtime.getURL('panel.html')\n\n        // 使用chrome.tabs.create在新标签页中打开\n        await chrome.tabs.create({\n          url: extensionUrl,\n          active: true // 激活新标签页\n        })\n\n        this.$notify.success('已在新标签页中打开扩展面板')\n\n      } catch (error) {\n        console.error('打开新标签页失败:', error)\n\n        // 如果chrome.tabs.create失败，尝试使用window.open\n        try {\n          const extensionUrl = chrome.runtime.getURL('panel.html')\n          window.open(extensionUrl, '_blank')\n          this.$notify.success('已在新窗口中打开扩展面板')\n        } catch (fallbackError) {\n          console.error('备用方法也失败:', fallbackError)\n          this.$notify.error('打开新窗口失败: ' + error.message)\n        }\n      }\n    },\n  }\n}\n</script>\n\n<style scoped>\n.panel {\n  box-sizing: border-box;\n  padding: 16px;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(~@/../public/assets/images/areabg.webp) repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n\n.panel-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n\n.panel-header h3 {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n\n.connection-status {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n\n.status-indicator {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.status-dot {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n\n.status-dot.connected {\n  background-color: #52c41a;\n  animation: pulse-green-strong 1.5s infinite;\n}\n\n.status-dot.disconnected {\n  background-color: #faad14;\n  animation: pulse-orange-strong 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n\n  25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n  }\n\n  75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n}\n\n.status-text {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n\n.mode-indicator {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n\n.mode-indicator.sidepanel {\n  background-color: #1890ff;\n  color: white;\n}\n\n.mode-indicator.new-window {\n  background-color: #52c41a;\n  color: white;\n}\n\n.new-window-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.new-window-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.sidebar-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.sidebar-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.data-section h4 {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n\n.empty-state {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n\n.request-list {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n\n.request-item {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n\n.request-item:last-child {\n  border-bottom: none;\n}\n\n.request-item:hover {\n  background-color: #fafafa;\n}\n\n.request-item.parsing {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse 2s ease-in-out infinite;\n}\n\n@keyframes pulse {\n  0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n\n  50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n  }\n\n  100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n}\n\n.request-info {\n  margin-bottom: 8px;\n}\n\n.request-url {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n\n.request-meta {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n\n.method {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status.pending {\n  background: #faad14;\n  color: white;\n}\n\n.status.completed {\n  background: #52c41a;\n  color: white;\n}\n\n.status.parsing {\n  background: #1890ff;\n  color: white;\n}\n\n.status.parsing .el-icon-loading {\n  animation: rotating 2s linear infinite;\n}\n\n@keyframes rotating {\n  0% {\n    transform: rotate(0deg);\n  }\n\n  100% {\n    transform: rotate(360deg);\n  }\n}\n\n.status.failed {\n  background: #ff4d4f;\n  color: white;\n}\n\n.timestamp {\n  color: #999;\n}\n\n.response-data {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n\n.response-content {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n\n.response-content pre {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n\n.role-card /deep/.el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n\n.role-card.empty-role:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n\n.role-card.empty-role /deep/.el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag {\n  opacity: 0.7;\n}\n\n.role-card.empty-role .el-link {\n  opacity: 0.7;\n}\n\n.role-card.empty-role span {\n  opacity: 0.7;\n}\n</style>\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.panel[data-v-42c7142d] {\n  box-sizing: border-box;\n  padding: 16px;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ") repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n.panel-header[data-v-42c7142d] {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n.panel-header h3[data-v-42c7142d] {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n.connection-status[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n.status-indicator[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.status-dot[data-v-42c7142d] {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n.status-dot.connected[data-v-42c7142d] {\n  background-color: #52c41a;\n  animation: pulse-green-strong-42c7142d 1.5s infinite;\n}\n.status-dot.disconnected[data-v-42c7142d] {\n  background-color: #faad14;\n  animation: pulse-orange-strong-42c7142d 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n}\n75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n}\n.status-text[data-v-42c7142d] {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n.mode-indicator[data-v-42c7142d] {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n.mode-indicator.sidepanel[data-v-42c7142d] {\n  background-color: #1890ff;\n  color: white;\n}\n.mode-indicator.new-window[data-v-42c7142d] {\n  background-color: #52c41a;\n  color: white;\n}\n.new-window-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.new-window-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.sidebar-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.sidebar-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.data-section h4[data-v-42c7142d] {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n.empty-state[data-v-42c7142d] {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n.request-list[data-v-42c7142d] {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n.request-item[data-v-42c7142d] {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n.request-item[data-v-42c7142d]:last-child {\n  border-bottom: none;\n}\n.request-item[data-v-42c7142d]:hover {\n  background-color: #fafafa;\n}\n.request-item.parsing[data-v-42c7142d] {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse-42c7142d 2s ease-in-out infinite;\n}\n@keyframes pulse-42c7142d {\n0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n}\n100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n}\n.request-info[data-v-42c7142d] {\n  margin-bottom: 8px;\n}\n.request-url[data-v-42c7142d] {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n.request-meta[data-v-42c7142d] {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n.method[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status[data-v-42c7142d] {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status.pending[data-v-42c7142d] {\n  background: #faad14;\n  color: white;\n}\n.status.completed[data-v-42c7142d] {\n  background: #52c41a;\n  color: white;\n}\n.status.parsing[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n}\n.status.parsing .el-icon-loading[data-v-42c7142d] {\n  animation: rotating-42c7142d 2s linear infinite;\n}\n@keyframes rotating-42c7142d {\n0% {\n    transform: rotate(0deg);\n}\n100% {\n    transform: rotate(360deg);\n}\n}\n.status.failed[data-v-42c7142d] {\n  background: #ff4d4f;\n  color: white;\n}\n.timestamp[data-v-42c7142d] {\n  color: #999;\n}\n.response-data[data-v-42c7142d] {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n.response-content[data-v-42c7142d] {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n.response-content pre[data-v-42c7142d] {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n.role-card[data-v-42c7142d] .el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role[data-v-42c7142d] {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n.role-card.empty-role[data-v-42c7142d]:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n.role-card.empty-role[data-v-42c7142d] .el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role .el-link[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role span[data-v-42c7142d] {\n  opacity: 0.7;\n}\n", "",{"version":3,"sources":["webpack://./src/chrome-extensions/DevToolsPanel.vue"],"names":[],"mappings":";AA++BA;EACA,sBAAA;EACA,aAAA;EACA,gFAAA;EACA,mBAAA;EACA,iBAAA;EACA,4DAAA;EACA,YAAA;EACA,cAAA;AACA;AAEA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,mBAAA;EACA,oBAAA;EACA,gCAAA;AACA;AAEA;EACA,SAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,SAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,QAAA;AACA;AAEA;EACA,kBAAA;EACA,QAAA;EACA,SAAA;EACA,gCAAA;EACA,UAAA;EACA,WAAA;EACA,kBAAA;EACA,qBAAA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,oDAAA;AACA;AAEA;EACA,yBAAA;EACA,mDAAA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,2CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,4CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AACA;AAEA;EACA,eAAA;EACA,WAAA;EACA,gBAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,kBAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,kBAAA;EACA,kBAAA;EACA,WAAA;EACA,iBAAA;EACA,kBAAA;EACA,uBAAA;AACA;AAEA;EACA,iBAAA;EACA,kBAAA;EACA,yBAAA;EACA,gBAAA;AACA;AAEA;EACA,gCAAA;EACA,kBAAA;EACA,iCAAA;AACA;AAEA;EACA,mBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,6CAAA;EACA,iDAAA;AACA;AAEA;AACA;IACA,6CAAA;AACA;AAEA;IACA,8CAAA;AACA;AAEA;IACA,6CAAA;AACA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;EACA,wDAAA;EACA,eAAA;EACA,WAAA;EACA,qBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,SAAA;EACA,eAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,+CAAA;AACA;AAEA;AACA;IACA,uBAAA;AACA;AAEA;IACA,yBAAA;AACA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,WAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,6BAAA;AACA;AAEA;EACA,eAAA;EACA,mBAAA;EACA,kBAAA;EACA,YAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,SAAA;EACA,wDAAA;EACA,eAAA;EACA,gBAAA;EACA,WAAA;EACA,qBAAA;EACA,sBAAA;AACA;AAEA;EACA,YAAA;AACA;;AAEA,aAAA;AACA;EACA,YAAA;EACA,sBAAA;EACA,yBAAA;EACA,yBAAA;EACA,yBAAA;AACA;AAEA;EACA,YAAA;EACA,sBAAA;AACA;AAEA;EACA,yBAAA;AACA;;AAEA,gBAAA;AACA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA","sourcesContent":["<template>\n  <div class=\"panel\">\n    <div class=\"panel-header\">\n      <el-row type=\"flex\" align=\"middle\">\n        <div style=\"width: 32px;height: 32px;margin-right: 10px;position: relative;\">\n          <img src=\"~@/assets/logo.png\" alt=\"梦幻灵瞳\" style=\"width: 32px;height: 32px;\">\n          <span class=\"status-dot\"\n            :class=\"{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }\"></span>\n        </div>\n        <h3 style=\"color: #fff;\">梦幻灵瞳</h3>\n      </el-row>\n      <div class=\"connection-status\">\n        <div id=\"pager\" class=\"fr\" v-if=\"pageInfo.hasPager\">\n          <el-row class=\"pages\" type=\"flex\" align=\"middle\">\n            <span style=\"color: #fff;margin-right: 10px;\"> 第{{ pageInfo.currentPage }}页, 共{{ pageInfo.total }}页 </span>\n            <a v-if=\"pageInfo.hasPrev\" href=\"javascript:void 0;\" @click.prevent=\"prevPage\"\n              style=\"line-height: 1.2em;\">上一页</a>\n            <a v-if=\"pageInfo.hasNext\" href=\"javascript:void 0;\" @click.prevent=\"nextPage\"\n              style=\"line-height: 1.2em;\">下一页</a>\n          </el-row>\n        </div>\n        <a v-if=\"!devtoolsConnected\" href=\"javascript:void 0;\" @click=\"reconnectDevTools\">重新连接</a>\n        <a v-if=\"!isInNewWindow\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"openInNewTab\">新窗口打开</a>\n        <a v-if=\"!pageInfo.hasPager\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"refreshCurrentPage\">刷新页面</a>\n        <a v-if=\"recommendData.length > 0\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"clearData\">清空数据</a>\n      </div>\n    </div>\n    <div class=\"data-section\">\n      <el-empty v-if=\"recommendData.length === 0\" class=\"empty-state\" description=\"暂无数据，请访问梦幻西游藏宝阁页面\"></el-empty>\n      <div v-else class=\"request-list\">\n        <div v-for=\"(item, index) in recommendData\" :key=\"item.requestId\" class=\"request-item\"\n          :class=\"{ 'parsing': item.status === 'parsing' }\">\n          <div class=\"request-info\">\n            <div class=\"request-meta\">\n              <span class=\"status\" :class=\"item.status\">\n                <template v-if=\"item.status === 'parsing'\">\n                  <i class=\"el-icon-loading\"></i> 解析中...\n                </template>\n                <template v-else-if=\"item.status === 'completed'\">\n                  <i class=\"el-icon-success\"></i> 解析完成\n                </template>\n                <template v-else>\n                  <i class=\"el-icon-error\"></i> 解析失败\n                </template>\n              </span>\n              <span class=\"timestamp\">{{ formatTime(item.timestamp) }}</span>\n            </div>\n          </div>\n          <div v-if=\"item.responseData\" class=\"response-data\">\n            <el-row :gutter=\"4\">\n              <el-col v-for=\"role in parseListData(item.responseData)?.equip_list\" :key=\"role.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\" :class=\"{ 'empty-role': isEmptyRole(parserRoleData(role)) }\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <RoleImage :key=\"role.eid\" :other_info=\"role.other_info\" :roleInfo=\"parserRoleData(role)\" />\n                      <el-link :href=\"getCBGLinkByType(role.eid, 'role')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ role.seller_nickname }}</el-link>\n                    </el-col>\n                    <el-col>\n                      <div>\n                        <el-tag type=\"success\" v-if=\"role.accept_bargain == 1\">接受还价</el-tag>\n                        <el-tag type=\"danger\" v-else>拒绝还价</el-tag>\n                      </div>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(role.price, true)\"></span>\n                      </div>\n                      <div>\n                        <el-tag type=\"danger\" v-if=\"isEmptyRole(parserRoleData(role))\">空号</el-tag>\n                        <template v-else>\n                          <el-tag @click=\"handleEquipPrice(role)\" style=\"cursor: pointer;\" v-if=\"get_equip_num(parserRoleData(role)) > 0\">\n                            ⚔️ {{ get_equip_num(parserRoleData(role)) }}\n                          </el-tag>\n                          <el-tag type=\"success\" @click=\"handlePetPrice(role)\" style=\"cursor: pointer;\" v-if=\"get_pet_num(parserRoleData(role)) > 0\">\n                            🐲 {{ get_pet_num(parserRoleData(role)) }}\n                          </el-tag>\n                        </template>\n                      </div>\n\n                    </el-col>\n                  </el-row>\n                  <div>\n                    <SimilarRoleModal :role=\"{ ...role, roleInfo: parserRoleData(role) }\"\n                      :search-params=\"{ selectedDate: selectedDate, roleType: 'normal' }\">\n                      <div> <el-link type=\"primary\" href=\"javascript:void 0;\" @click.prevent\n                          :disabled=\"item.status !== 'completed'\">👤\n                          裸号</el-link></div>\n                    </SimilarRoleModal>\n                  </div>\n                </el-card>\n              </el-col>\n            </el-row>\n            <!-- <el-button @click=\"toggleResponse(index)\" size=\"mini\" type=\"text\">\n              {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据\n            </el-button>\n            <div v-if=\"expandedItems.includes(index)\" class=\"response-content\">\n              <pre>{{ JSON.stringify(item.responseData, null, 2) }}</pre>\n            </div> -->\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <!-- 装备估价结果对话框 -->\n    <el-dialog :visible.sync=\"valuationDialogVisible\" width=\"1000px\" :close-on-click-modal=\"false\"\n      :close-on-press-escape=\"false\" custom-class=\"batch-valuation-dialog\">\n      <span slot=\"title\" class=\"el-dialog__title\">\n        <el-tag size=\"mini\">{{ valuationDialogTitle.server_name }}</el-tag>\n        /\n        <el-tag type=\"info\" size=\"mini\">{{ valuationDialogTitle.school }}</el-tag>/\n        <el-link :href=\"getCBGLinkByType(valuationDialogTitle.eid)\" target=\"_blank\">{{ valuationDialogTitle.nickname\n        }}</el-link>\n      </span>\n      <EquipBatchValuationResult :results=\"valuationResults\" :total-value=\"valuationTotalValue\"\n        :equipment-list=\"valuationEquipmentList\" :valuate-params=\"batchValuateParams\" :loading=\"valuationLoading\"\n        @close=\"closeValuationDialog\" />\n    </el-dialog>\n  </div>\n</template>\n<script>\nimport dayjs from 'dayjs'\nimport RoleImage from '@/components/RoleInfo/RoleImage.vue'\nimport SimilarRoleModal from '@/components/SimilarRoleModal.vue'\nimport EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'\nimport { commonMixin } from '@/utils/mixins/commonMixin'\nexport default {\n  name: 'DevToolsPanel',\n  data() {\n    return {\n      pageInfo: {\n        hasPager: false,\n        currentPage: 0,\n        total: 0,\n        hasPrev: false,\n        hasNext: false\n      },\n      selectedDate: dayjs().format('YYYY-MM'),\n      recommendData: [],\n      expandedItems: [],\n      processedRequests: new Set(), // 记录已处理的请求ID\n      devtoolsConnected: false, // 数据监听连接状态\n      connectionStatus: '检查中...', // 连接状态描述\n      connectionCheckTimer: null, // 连接检查定时器\n      isInNewWindow: false, // 是否在新窗口中打开\n      \n      // 装备估价相关数据\n      valuationDialogVisible: false,\n      valuationResults: [],\n      valuationTotalValue: 0,\n      valuationEquipmentList: [],\n      valuationLoading: false,\n      valuationDialogTitle: {},\n      batchValuateParams: {\n        similarity_threshold: 0.7,\n        max_anchors: 30\n      }\n    }\n  },\n  mixins: [commonMixin],\n  components: {\n    RoleImage,\n    SimilarRoleModal,\n    EquipBatchValuationResult\n  },\n  computed: {\n\n  },\n  mounted() {\n    // 通知background script侧边栏已打开\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelOpened'\n      })\n    }\n\n    // 监听页面可见性变化，当页面不可见时通知关闭\n    document.addEventListener('visibilitychange', this.handleVisibilityChange)\n\n    this.initMessageListener()\n    this.checkConnectionStatus()\n    this.checkIfInNewWindow()\n\n    // // 设置定时检查（每5秒检查一次）\n    // this.connectionCheckTimer = setInterval(() => {\n    //   this.checkConnectionStatus()\n    // }, 5000)\n  },\n  beforeDestroy() {\n    // 通知background script侧边栏已关闭\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelClosed'\n      })\n    }\n\n    // 移除可见性变化监听器\n    document.removeEventListener('visibilitychange', this.handleVisibilityChange)\n\n    // 移除Chrome消息监听器\n    this.removeMessageListener()\n    // 清理定时器\n    if (this.connectionCheckTimer) {\n      clearInterval(this.connectionCheckTimer)\n      this.connectionCheckTimer = null\n    }\n    // 清理组件状态\n    this.recommendData = []\n    this.expandedItems = []\n  },\n  methods: {\n    handleVisibilityChange() {\n      // 当页面不可见时，通知background script侧边栏已关闭\n      if (document.hidden) {\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelClosed'\n          })\n        }\n      } else {\n        this.getPagerInfo().then(res => {\n          this.pageInfo = res\n        })\n        // 当页面重新可见时，通知background script侧边栏已打开\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelOpened'\n          })\n        }\n      }\n    },\n\n    isEmptyRole(roleInfo) {\n      const noEquip = this.get_equip_num(roleInfo) === 0\n      let noPet = true\n      for (let pet of roleInfo.pet_info) {\n        if (pet.pet_grade > 100 && pet.is_baobao === '是') {\n          noPet = false\n          break\n        }\n        if (pet.pet_grade > 100 && pet.is_baobao === '否' && pet.all_skills.length > 4) {\n          noPet = false\n          break\n        }\n      }\n      return noEquip && noPet\n    },\n    get_pet_num(roleInfo) {\n      return roleInfo.pet_info.length + roleInfo.split_pets.length\n    },\n    get_equip_num(roleInfo) {\n      return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length\n    },\n    nextPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('next')\n    },\n\n    prevPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('prev')\n    },\n\n    reconnectDevTools() {\n      // 重新连接数据监听\n      this.connectionStatus = '重连中...'\n      this.checkConnectionStatus()\n      this.$notify.info('正在尝试重新连接数据监听...')\n    },\n\n    async clickPageButton(direction) {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  \n                  let targetButton = null\n                  const isNext = '${direction}' === 'next'\n                  \n                  if (isNext) {\n                    // 查找下一页按钮 - 根据实际HTML格式优化\n                    // 1. 优先查找包含\"下一页\"文本的链接\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '下一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"下一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码大于当前页码，说明是下一页\n                            if (!isNaN(linkPage) && linkPage > currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  } else {\n                    // 查找上一页按钮\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    \n                    // 1. 优先查找包含\"上一页\"文本的链接\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '上一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"上一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码小于当前页码，说明是上一页\n                            if (!isNaN(linkPage) && linkPage < currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  }\n                  \n                  if (!targetButton) {\n                    return 'ERROR:未找到${direction === 'next' ? '下一页' : '上一页'}按钮'\n                  }\n                  \n                  // 检查按钮是否可点击\n                  if (targetButton.disabled || targetButton.classList.contains('disabled')) {\n                    return 'ERROR:${direction === 'next' ? '下一页' : '上一页'}按钮不可点击，可能已到${direction === 'next' ? '最后一页' : '第一页'}'\n                  }\n                  \n                  // 获取当前页码信息用于日志\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPageInfo = ''\n                  if (currentPageLink) {\n                    const currentPageText = currentPageLink.textContent.trim()\n                    currentPageInfo = ' (当前第' + currentPageText + '页)'\n                  }\n                  \n                  // 点击按钮\n                  targetButton.click()\n                  return 'SUCCESS:已点击${direction === 'next' ? '下一页' : '上一页'}按钮' + currentPageInfo\n                } catch (error) {\n                  return 'ERROR:执行失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        this.pageInfo = await this.getPagerInfo()\n        // 处理Chrome调试API的返回结果\n        if (result && result.result && result.result.value) {\n          const message = result.result.value\n\n          if (message.startsWith('SUCCESS:')) {\n            this.$notify.success(message.substring(8)) // 移除\"SUCCESS:\"前缀\n            console.log(`${direction === 'next' ? '下一页' : '上一页'}按钮点击成功`)\n          } else if (message.startsWith('ERROR:')) {\n            this.$notify.warning(message.substring(6)) // 移除\"ERROR:\"前缀\n            console.warn(`${direction === 'next' ? '下一页' : '上一页'}按钮点击失败:`, message)\n          } else {\n            this.$notify.error('执行页面操作失败：未知返回结果')\n            console.error('页面操作结果异常:', result)\n          }\n        } else {\n          this.$notify.error('执行页面操作失败')\n          console.error('页面操作结果异常:', result)\n        }\n\n      } catch (error) {\n        console.error(`点击${direction === 'next' ? '下一页' : '上一页'}按钮失败:`, error)\n\n        // 检查是否是连接断开错误\n        if (error.message && error.message.includes('Could not establish connection')) {\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接断开'\n          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')\n        } else {\n          this.$notify.error('操作失败: ' + error.message)\n        }\n      }\n    },\n\n    async getPagerInfo() {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码获取分页器信息\n        //在pagerDiv的innerText中查找 `共100页`，获取100\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                let hasPager = false\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  hasPager = true\n                  // 获取当前页码\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPage = 0\n                  if (currentPageLink) {\n                    currentPage = currentPageLink.textContent.trim()\n                  }\n                  \n                  // 从innerText中查找\"共X页\"模式\n                  let total = 0\n                  const innerText = pagerDiv.innerText || pagerDiv.textContent || ''\n                  \n                  // 手动查找\"共\"和\"页\"之间的数字\n                  const gongIndex = innerText.indexOf('共')\n                  const yeIndex = innerText.indexOf('页', gongIndex)\n                  \n                  if (gongIndex !== -1 && yeIndex !== -1) {\n                    const textBetween = innerText.substring(gongIndex + 1, yeIndex).trim()\n                    total = textBetween\n                    console.log('textBetween:', textBetween)\n                    const numberMatch = textBetween.match(/(\\d+)/)\n                    if (numberMatch) {\n                      total = numberMatch[1]\n                    }\n                  }\n                  \n                  // 检查是否有上一页/下一页按钮\n                  const hasPrev = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('上一页')\n                  const hasNext = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('下一页')\n                  \n                  // return 'SUCCESS:第' + currentPage + '页，共' + total + '页 (上一页:' + (hasPrev ? '有' : '无') + ', 下一页:' + (hasNext ? '有' : '无') + ')'\n                  return JSON.stringify({\n                    hasPager: hasPager,\n                    currentPage: currentPage*1,\n                    total: total*1,\n                    hasPrev: hasPrev,\n                    hasNext: hasNext\n                  })\n                } catch (error) {\n                  return 'ERROR:获取分页器信息失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        console.log('resultresultresultresult:', result)\n        // 处理返回结果\n        if (result && result.result && result.result.value) {\n          return JSON.parse(result.result.value)\n        } else {\n          return {\n            hasPager: false,\n            currentPage: 0,\n            total: 0,\n            hasPrev: false,\n            hasNext: false\n          }\n        }\n      } catch (error) {\n        console.error('获取分页器信息失败:', error)\n        return {\n          hasPager: false,\n          currentPage: 0,\n          total: 0,\n          hasPrev: false,\n          hasNext: false\n        }\n      }\n    },\n    parserRoleData(data) {\n      const roleInfo = new window.RoleInfoParser(data.large_equip_desc, { equip_level: data.equip_level })\n      return roleInfo.result\n      // return {\n      //   RoleInfoParser: roleInfo,\n      //   roleInfo: roleInfo.result,\n      //   accept_bargain: data.accept_bargain,\n      //   collect_num: data.collect_num,\n      //   dynamic_tags: data.dynamic_tags,\n      //   eid: data.eid,\n      //   highlight: data.highlight,\n      //   is_split_independent_role: data.is_split_independent_role,\n      //   is_split_main_role: data.is_split_main_role,\n      //   large_equip_desc: data.large_equip_desc,\n      //   level: data.level,\n      //   other_info: data.other_info,\n      //   school: data.school,\n      //   seller_nickname: data.seller_nickname,\n      //   server_name: data.server_name,\n      //   serverid: data.serverid,\n      //   price: data.price,\n      //   sum_exp: data.sum_exp,\n      //   create_time: data.create_time,\n      //   update_time: data.create_time,\n      //   all_equip_json: '',\n      //   all_summon_json: '',\n      //   split_price_desc: '',\n      //   pet_price: '',\n      //   equip_price: '',\n      //   base_price: '',\n      //   history_price: '',\n      // }\n    },\n    parseListData(responseDataStr) {\n      // 解析响应数据 Request.JSONP.request_map.request_数字(xxxx) 中的xxxx\n      const match = responseDataStr.match(/Request\\.JSONP\\.request_map\\.request_\\d+\\((.*)\\)/)\n      let templateJSONStr = '{}'\n      if (match) {\n        templateJSONStr = match[1]\n      } else {\n        templateJSONStr = responseDataStr\n      }\n      try {\n        let templateJSON = {}\n        if (typeof templateJSONStr === 'string') {\n          templateJSON = JSON.parse(templateJSONStr)\n        } else {\n          // h5\n          templateJSON = templateJSONStr\n        }\n        return templateJSON\n      } catch (error) {\n        console.error('解析响应数据失败:', error)\n        return {}\n      }\n    },\n    initMessageListener() {\n      console.log('DevToolsPanel mounted, initializing listener')\n\n      // 使用单例模式确保只有一个监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 如果已经有全局监听器，先移除\n        if (window.cbgDevToolsListener) {\n          chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        }\n\n        // 创建全局监听器\n        window.cbgDevToolsListener = (request, sender, sendResponse) => {\n          console.log('DevToolsPanel received Chrome message:', request.action)\n          this.handleChromeMessage(request, sender, sendResponse)\n          sendResponse({ success: true })\n        }\n\n        // 注册监听器\n        chrome.runtime.onMessage.addListener(window.cbgDevToolsListener)\n        console.log('Chrome message listener registered for DevToolsPanel')\n      }\n    },\n\n    removeMessageListener() {\n      // 移除Chrome消息监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime && window.cbgDevToolsListener) {\n        chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        delete window.cbgDevToolsListener\n        console.log('Chrome message listener removed for DevToolsPanel')\n      }\n    },\n\n    checkConnectionStatus() {\n      // 检查Chrome扩展连接状态\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 尝试发送ping消息检查连接\n        chrome.runtime.sendMessage({ action: 'ping' }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.log('Chrome extension connection check failed:', chrome.runtime.lastError)\n            this.devtoolsConnected = false\n            this.connectionStatus = '未连接'\n          } else if (response && response.success) {\n            console.log('Chrome extension connection check successful:', response)\n            this.devtoolsConnected = true\n            this.connectionStatus = '已连接'\n          } else {\n            console.log('Chrome extension connection check failed: invalid response')\n            this.devtoolsConnected = false\n            this.connectionStatus = '连接异常'\n          }\n        })\n      } else {\n        console.log('Chrome runtime not available')\n        this.devtoolsConnected = false\n        this.connectionStatus = 'Chrome环境不可用'\n      }\n    },\n    changeRecommendDataStatus({ requestId, status }) {\n      const targetIndex = this.recommendData.findIndex(item => item.requestId === requestId)\n      if (targetIndex !== -1) {\n        // this.recommendData[targetIndex].status = status\n        this.$set(this.recommendData[targetIndex], 'status', status)\n      }\n    },\n    processNewData(dataArray) {\n      // 只处理新完成的请求，避免重复处理\n      if (dataArray && dataArray.length > 0) {\n        dataArray.forEach(item => {\n          if (item.responseData &&\n            item.url &&\n            item.requestId &&\n            !this.processedRequests.has(item.requestId)) {\n\n            // 标记为已处理\n            this.processedRequests.add(item.requestId)\n            console.log(`开始处理新请求: ${item.requestId}`)\n\n            // 调用解析响应数据接口\n            this.$api.spider.parseResponse({\n              url: item.url,\n              response_text: item.responseData\n            }).then(res => {\n              console.log(`请求 ${item.requestId} 解析结果:`, res)\n              if (res.code === 200) {\n                console.log(`请求 ${item.requestId} 数据解析成功:`, res.data)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed' })\n              } else {\n                console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n              }\n            }).catch(error => {\n              console.error(`请求 ${item.requestId} 解析请求失败:`, error)\n              // 解析失败时移除标记，允许重试\n              this.processedRequests.delete(item.requestId)\n              this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n            })\n          }\n        })\n      }\n    },\n\n    handleChromeMessage(request, sender, sendResponse) {\n      switch (request.action) {\n        case 'addRecommendData':\n          console.log('接收到增量数据:', request)\n          // 处理增量数据\n          const newData = request.data.map(item => {\n            return {\n              ...item,\n              status: 'parsing'\n            }\n          }) || []\n          if (newData.length > 0) {\n            // 将新数据添加到现有数组中\n            this.recommendData.unshift(...newData)\n            \n            // 控制最大长度为10，移除最旧的数据\n            const maxLength = 10\n            if (this.recommendData.length > maxLength) {\n              const removedCount = this.recommendData.length - maxLength\n              this.recommendData = this.recommendData.slice(0, maxLength)\n              console.log(`📊 前端数据长度超过限制，已移除 ${removedCount} 条旧数据`)\n            }\n            \n            this.getPagerInfo().then(res => {\n              this.pageInfo = res\n            })\n            console.log('📥 接收到增量数据，新增:', newData.length, '总计:', this.recommendData.length)\n            // 处理新数据\n            this.processNewData(newData)\n          }\n          break\n\n        case 'devtoolsConnected':\n          this.devtoolsConnected = true\n          this.connectionStatus = '已连接'\n          this.$notify.success(request.message)\n          break\n\n        case 'showDebuggerWarning':\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接冲突'\n          this.$notify.warning(request.message)\n          break\n\n        case 'clearRecommendData':\n          this.recommendData = []\n          this.expandedItems = []\n          this.processedRequests.clear()\n          console.log('清空推荐数据和处理记录')\n          break\n      }\n    },\n\n\n    clearData() {\n      this.recommendData = []\n      this.expandedItems = []\n      this.processedRequests.clear() // 清空已处理请求记录\n      // 通知background script清空数据\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'clearRecommendData'\n        })\n      }\n    },\n\n    // 刷新当前页面\n    refreshCurrentPage() {\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'refreshCurrentPage'\n        }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.error('刷新页面失败:', chrome.runtime.lastError)\n            this.$notify.error({\n              title: '刷新失败',\n              message: '无法刷新页面，请检查扩展权限'\n            })\n          } else if (response && response.success) {\n            console.log('页面刷新成功:', response.message)\n            this.$notify.success({\n              title: '刷新成功',\n              message: '页面正在刷新...'\n            })\n          } else {\n            console.error('刷新页面失败:', response.error)\n            this.$notify.error({\n              title: '刷新失败',\n              message: response.error || '未知错误'\n            })\n          }\n        })\n      } else {\n        this.$notify.error({\n          title: '刷新失败',\n          message: 'Chrome扩展环境不可用'\n        })\n      }\n    },\n\n    toggleResponse(index) {\n      const expandedIndex = this.expandedItems.indexOf(index)\n      if (expandedIndex > -1) {\n        this.expandedItems.splice(expandedIndex, 1)\n      } else {\n        this.expandedItems.push(index)\n      }\n    },\n\n    formatTime(timestamp) {\n      if (!timestamp) return ''\n      \n      // 直接使用当前系统时间，避免复杂的时间戳转换\n      const now = new Date()\n      \n      return now.toLocaleTimeString('zh-CN', { \n        hour12: false,\n        hour: '2-digit',\n        minute: '2-digit',\n        second: '2-digit'\n      })\n    },\n\n    checkIfInNewWindow() {\n      // 检测是否在新窗口中打开\n      try {\n\n        // 方法1: 检查chrome.devtools API是否存在（最可靠的方法）\n        if (typeof chrome !== 'undefined' && chrome.devtools && chrome.devtools.inspectedWindow) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过API检测）')\n          return\n        }\n\n        // 方法2: 检查URL模式 - 区分SidePanel和新窗口\n        const currentUrl = window.location.href\n        if (currentUrl.includes('chrome-extension://')) {\n          // 检查是否是SidePanel页面\n          if (currentUrl.includes('panel.html')) {\n            // panel.html是SidePanel页面\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过URL检测）')\n            return\n          } else if (currentUrl.includes('panel.html')) {\n            // panel.html是新窗口页面\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过URL检测）')\n            return\n          }\n        }\n\n        // 方法3: 检查页面标题\n        if (document.title === '梦幻灵瞳') {\n          // 需要进一步区分是SidePanel还是新窗口\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过标题+URL检测）')\n            return\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过标题检测）')\n            return\n          }\n        }\n\n        // 方法4: 检查是否在iframe中\n        if (window.self !== window.top) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过iframe检测）')\n          return\n        }\n\n        // 方法5: 检查parent窗口\n        if (window.parent === window) {\n          // 顶级窗口，需要进一步判断\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过parent+URL检测）')\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过parent检测）')\n          }\n        } else {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过parent检测）')\n        }\n\n      } catch (error) {\n        console.error('检测窗口环境失败:', error)\n        // 默认假设在新窗口中\n        this.isInNewWindow = true\n        console.log('检测失败，默认在新窗口中打开')\n      }\n    },\n\n    async openInNewTab() {\n      try {\n        // 直接创建新标签页打开扩展页面\n        const extensionUrl = chrome.runtime.getURL('panel.html')\n\n        // 使用chrome.tabs.create在新标签页中打开\n        await chrome.tabs.create({\n          url: extensionUrl,\n          active: true // 激活新标签页\n        })\n\n        this.$notify.success('已在新标签页中打开扩展面板')\n\n      } catch (error) {\n        console.error('打开新标签页失败:', error)\n\n        // 如果chrome.tabs.create失败，尝试使用window.open\n        try {\n          const extensionUrl = chrome.runtime.getURL('panel.html')\n          window.open(extensionUrl, '_blank')\n          this.$notify.success('已在新窗口中打开扩展面板')\n        } catch (fallbackError) {\n          console.error('备用方法也失败:', fallbackError)\n          this.$notify.error('打开新窗口失败: ' + error.message)\n        }\n      }\n    },\n    \n    // 装备估价相关方法\n    async handleEquipPrice(role) {\n      const roleData = this.parserRoleData(role)\n      const { using_equips, not_using_equips, split_equips, basic_info } = roleData\n      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ \n        ...item, \n        iType: item.type, \n        cDesc: item.desc, \n        serverid: role.serverid, \n        server_name: role.server_name \n      }))\n      \n      this.valuationDialogTitle = {\n        nickname: basic_info.nickname,\n        school: basic_info.school,\n        server_name: role.server_name,\n        eid: role.eid\n      }\n\n      try {\n        // 先显示弹窗和骨架屏\n        this.valuationDialogVisible = true\n        this.valuationLoading = true\n        this.valuationResults = []\n        this.valuationTotalValue = 0\n        this.valuationEquipmentList = equip_list\n        \n        // 调用批量估价API\n        const response = await this.$api.equipment.batchEquipmentValuation({\n          eid: role.eid,\n          equipment_list: equip_list,\n          strategy: 'fair_value',\n          similarity_threshold: this.batchValuateParams.similarity_threshold,\n          max_anchors: this.batchValuateParams.max_anchors\n        })\n\n        if (response.code === 200) {\n          const data = response.data\n          const results = data.results || []\n          const totalValue = results.reduce((sum, result) => {\n            return sum + (result.estimated_price || 0)\n          }, 0)\n          \n          // 更新弹窗内容，显示实际数据\n          this.valuationResults = results\n          this.valuationTotalValue = totalValue\n          this.valuationLoading = false\n        } else {\n          this.$notify.error({\n            title: '错误',\n            message: response.message || '装备估价失败'\n          })\n          this.closeValuationDialog()\n        }\n      } catch (error) {\n        console.error('装备估价失败:', error)\n        this.$notify.error({\n          title: '错误',\n          message: '装备估价失败'\n        })\n        this.closeValuationDialog()\n      } finally {\n        this.valuationLoading = false\n      }\n    },\n    \n    // 关闭装备估价结果对话框\n    closeValuationDialog() {\n      this.valuationDialogVisible = false\n      this.valuationResults = []\n      this.valuationTotalValue = 0\n      this.valuationEquipmentList = []\n      this.valuationDialogTitle = {}\n    },\n    \n    // 宠物估价方法（占位符）\n    handlePetPrice(role) {\n      this.$notify.info({\n        title: '提示',\n        message: '宠物估价功能暂未实现'\n      })\n    }\n  }\n}\n</script>\n\n<style scoped>\n.panel {\n  box-sizing: border-box;\n  padding: 16px;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(~@/../public/assets/images/areabg.webp) repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n\n.panel-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n\n.panel-header h3 {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n\n.connection-status {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n\n.status-indicator {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.status-dot {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n\n.status-dot.connected {\n  background-color: #52c41a;\n  animation: pulse-green-strong 1.5s infinite;\n}\n\n.status-dot.disconnected {\n  background-color: #faad14;\n  animation: pulse-orange-strong 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n\n  25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n  }\n\n  75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n}\n\n.status-text {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n\n.mode-indicator {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n\n.mode-indicator.sidepanel {\n  background-color: #1890ff;\n  color: white;\n}\n\n.mode-indicator.new-window {\n  background-color: #52c41a;\n  color: white;\n}\n\n.new-window-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.new-window-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.sidebar-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.sidebar-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.data-section h4 {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n\n.empty-state {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n\n.request-list {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n\n.request-item {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n\n.request-item:last-child {\n  border-bottom: none;\n}\n\n.request-item:hover {\n  background-color: #fafafa;\n}\n\n.request-item.parsing {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse 2s ease-in-out infinite;\n}\n\n@keyframes pulse {\n  0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n\n  50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n  }\n\n  100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n}\n\n.request-info {\n  margin-bottom: 8px;\n}\n\n.request-url {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n\n.request-meta {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n\n.method {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status.pending {\n  background: #faad14;\n  color: white;\n}\n\n.status.completed {\n  background: #52c41a;\n  color: white;\n}\n\n.status.parsing {\n  background: #1890ff;\n  color: white;\n}\n\n.status.parsing .el-icon-loading {\n  animation: rotating 2s linear infinite;\n}\n\n@keyframes rotating {\n  0% {\n    transform: rotate(0deg);\n  }\n\n  100% {\n    transform: rotate(360deg);\n  }\n}\n\n.status.failed {\n  background: #ff4d4f;\n  color: white;\n}\n\n.timestamp {\n  color: #999;\n}\n\n.response-data {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n\n.response-content {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n\n.response-content pre {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n\n.role-card /deep/.el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n\n.role-card.empty-role:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n\n.role-card.empty-role /deep/.el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag {\n  opacity: 0.7;\n}\n\n.role-card.empty-role .el-link {\n  opacity: 0.7;\n}\n\n.role-card.empty-role span {\n  opacity: 0.7;\n}\n</style>\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css":
+/*!************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css ***!
+  \************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.batch-valuation-result[data-v-3e1e2d34] {\r\n  width: 960px;\r\n  margin: 0 auto;\n}\n.result-overview[data-v-3e1e2d34] {\r\n  margin-bottom: 30px;\n}\n.overview-card[data-v-3e1e2d34] {\r\n  display: flex;\r\n  justify-content: space-around;\r\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\r\n  color: white;\r\n  padding: 30px 20px;\r\n  border-radius: 12px;\r\n  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);\n}\n.overview-item[data-v-3e1e2d34] {\r\n  text-align: center;\r\n  flex: 1;\n}\n.result-details[data-v-3e1e2d34] {\r\n  background: white;\r\n  border-radius: 8px;\r\n  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);\r\n  overflow: hidden;\n}\n.details-header[data-v-3e1e2d34] {\r\n  padding: 20px;\r\n  border-bottom: 1px solid #ebeef5;\n}\n.details-header h3[data-v-3e1e2d34] {\r\n  margin: 0;\r\n  color: #303133;\n}\n.results-list[data-v-3e1e2d34] {\r\n  max-height: 400px;\r\n  overflow-y: auto;\n}\n.result-item[data-v-3e1e2d34] {\r\n  padding: 15px 20px;\r\n  border-bottom: 1px solid #f0f0f0;\r\n  transition: background-color 0.3s;\r\n  min-height: 100px;\n}\n.result-item[data-v-3e1e2d34]:hover {\r\n  background-color: #f5f7fa;\n}\r\n\r\n/* 根据置信度的悬停效果 */\n.result-item.confidence-high[data-v-3e1e2d34]:hover {\r\n  background-color: rgba(103, 194, 58, 0.1);\n}\n.result-item.confidence-medium[data-v-3e1e2d34]:hover {\r\n  background-color: rgba(64, 158, 255, 0.1);\n}\n.result-item.confidence-low[data-v-3e1e2d34]:hover {\r\n  background-color: rgba(144, 147, 153, 0.1);\n}\n.result-item.confidence-very-low[data-v-3e1e2d34]:hover {\r\n  background-color: rgba(230, 162, 60, 0.1);\n}\n.result-item.confidence-extremely-low[data-v-3e1e2d34]:hover {\r\n  background-color: rgba(245, 108, 108, 0.1);\n}\n.result-item.success[data-v-3e1e2d34] {\r\n  border-left: 4px solid #67c23a;\n}\n.result-item.error[data-v-3e1e2d34] {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\n}\r\n\r\n/* 根据置信度的颜色变化 */\n.result-item.confidence-high[data-v-3e1e2d34] {\r\n  border-left: 4px solid #67c23a;\r\n  /* 绿色 - 高置信度 */\r\n  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);\n}\n.result-item.confidence-medium[data-v-3e1e2d34] {\r\n  border-left: 4px solid #409eff;\r\n  /* 蓝色 - 中等置信度 */\r\n  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);\n}\n.result-item.confidence-low[data-v-3e1e2d34] {\r\n  border-left: 4px solid #909399;\r\n  /* 灰色 - 较低置信度 */\r\n  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);\n}\n.result-item.confidence-very-low[data-v-3e1e2d34] {\r\n  border-left: 4px solid #e6a23c;\r\n  /* 橙色 - 很低置信度 */\r\n  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);\n}\n.result-item.confidence-extremely-low[data-v-3e1e2d34] {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\n}\n.result-footer[data-v-3e1e2d34] {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  margin-top: 8px;\n}\n.price-info[data-v-3e1e2d34] {\r\n  display: flex;\r\n  align-items: center;\n}\n.price-info .el-statistic .con {\r\n  justify-content: flex-end;\n}\n.equipment-info[data-v-3e1e2d34] {\r\n  text-align: right;\n}\n.equip-name[data-v-3e1e2d34] {\r\n  font-weight: bold;\r\n  color: #303133;\n}\n.equip-level[data-v-3e1e2d34] {\r\n  color: #909399;\r\n  margin-left: 5px;\n}\n.error-content[data-v-3e1e2d34] {\r\n  color: #f56c6c;\n}\n.error-message[data-v-3e1e2d34] {\r\n  font-size: 14px;\n}\n.result-actions[data-v-3e1e2d34] {\r\n  margin-top: 20px;\r\n  text-align: center;\n}\r\n\r\n/* 滚动条样式 */\n.results-list[data-v-3e1e2d34]::-webkit-scrollbar {\r\n  width: 6px;\n}\n.results-list[data-v-3e1e2d34]::-webkit-scrollbar-track {\r\n  background: #f1f1f1;\r\n  border-radius: 3px;\n}\n.results-list[data-v-3e1e2d34]::-webkit-scrollbar-thumb {\r\n  background: #c1c1c1;\r\n  border-radius: 3px;\n}\n.results-list[data-v-3e1e2d34]::-webkit-scrollbar-thumb:hover {\r\n  background: #a8a8a8;\n}\r\n\r\n/* 骨架屏样式 */\n.skeleton-container[data-v-3e1e2d34] {\r\n  padding: 20px 0;\n}\n.skeleton-item[data-v-3e1e2d34] {\r\n  padding: 15px;\r\n  border: 1px solid #f0f0f0;\r\n  border-radius: 8px;\r\n  margin-bottom: 10px;\n}\n.skeleton-header[data-v-3e1e2d34] {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  margin-bottom: 15px;\n}\n.skeleton-content[data-v-3e1e2d34] {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\n}\n.skeleton-price[data-v-3e1e2d34] {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: flex-end;\r\n  gap: 8px;\n}\n.equip-tag-info[data-v-3e1e2d34] {\r\n  margin-top: 5px;\n}\n.equip-tag-info>*[data-v-3e1e2d34] {\r\n  margin-right: 5px;\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/EquipBatchValuationResult.vue"],"names":[],"mappings":";AAiPA;EACA,YAAA;EACA,cAAA;AACA;AAEA;EACA,mBAAA;AACA;AAEA;EACA,aAAA;EACA,6BAAA;EACA,6DAAA;EACA,YAAA;EACA,kBAAA;EACA,mBAAA;EACA,yCAAA;AACA;AAEA;EACA,kBAAA;EACA,OAAA;AACA;AAEA;EACA,iBAAA;EACA,kBAAA;EACA,yCAAA;EACA,gBAAA;AACA;AAEA;EACA,aAAA;EACA,gCAAA;AACA;AAEA;EACA,SAAA;EACA,cAAA;AACA;AAEA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,kBAAA;EACA,gCAAA;EACA,iCAAA;EACA,iBAAA;AACA;AAEA;EACA,yBAAA;AACA;;AAEA,eAAA;AACA;EACA,yCAAA;AACA;AAEA;EACA,yCAAA;AACA;AAEA;EACA,0CAAA;AACA;AAEA;EACA,yCAAA;AACA;AAEA;EACA,0CAAA;AACA;AAEA;EACA,8BAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;;AAEA,eAAA;AACA;EACA,8BAAA;EACA,cAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,eAAA;AACA;AAGA;EACA,aAAA;EACA,mBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,iBAAA;AACA;AAEA;EACA,iBAAA;EACA,cAAA;AACA;AAEA;EACA,cAAA;EACA,gBAAA;AACA;AAEA;EACA,cAAA;AACA;AAEA;EACA,eAAA;AACA;AAEA;EACA,gBAAA;EACA,kBAAA;AACA;;AAEA,UAAA;AACA;EACA,UAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,mBAAA;AACA;;AAEA,UAAA;AACA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,yBAAA;EACA,kBAAA;EACA,mBAAA;AACA;AAEA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,mBAAA;AACA;AAEA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;AACA;AAEA;EACA,aAAA;EACA,sBAAA;EACA,qBAAA;EACA,QAAA;AACA;AAEA;EACA,eAAA;AACA;AAEA;EACA,iBAAA;AACA","sourcesContent":["<template>\r\n  <div class=\"batch-valuation-result\" :style=\"$attrs.style\">\r\n    <!-- Loading骨架屏 -->\r\n    <div v-if=\"loading\" class=\"skeleton-container\">\r\n      <el-skeleton :rows=\"12\" animated />\r\n    </div>\r\n    <!-- 结果概览 -->\r\n    <!-- 实际结果 -->\r\n    <template v-else>\r\n      <div class=\"result-item\" :class=\"getOverviewClass()\" style=\"min-height: unset;\">\r\n        <el-row :gutter=\"20\" style=\"margin-bottom: 20px;\">\r\n          <el-col :span=\"6\">\r\n            <el-statistic group-separator=\",\" :precision=\"2\" :value=\"currentTotalValue / 100\" title=\"估价总值\"\r\n              :value-style=\"{ fontSize: '28px', fontWeight: 'bold' }\">\r\n              <template slot=\"formatter\">\r\n                <span v-html=\"formatPrice(currentTotalValue)\"></span>\r\n              </template>\r\n            </el-statistic>\r\n          </el-col>\r\n          <el-col :span=\"6\">\r\n            <el-statistic group-separator=\",\" :precision=\"0\" :value=\"successCount\" title=\"成功估价\"\r\n              :value-style=\"{ fontSize: '28px', fontWeight: 'bold', color: '#67c23a' }\">\r\n              <template slot=\"suffix\">\r\n                <span style=\"color: #909399; font-size: 16px\">/ {{ totalCount }}</span>\r\n              </template>\r\n            </el-statistic>\r\n          </el-col>\r\n        </el-row>\r\n      </div>\r\n\r\n      <el-row type=\"flex\" style=\"flex-wrap: wrap;\">\r\n        <el-col :span=\"colSpan\" v-for=\"(item, index) in currentList\" :key=\"item.equip_sn || index\" class=\"result-item\"\r\n          :class=\"getResultItemClass(item)\">\r\n          <el-row type=\"flex\" align=\"middle\" justify=\"space-between\">\r\n            <el-col style=\"width: 50px;\">\r\n              <EquipmentImage placement=\"top\" :image=\"false\" :equipment=\"getEquipImageProps(item)\"\r\n                :lock-type=\"item.lock_type\" size=\"small\" :popoverWidth=\"300\" />\r\n            </el-col>\r\n            <el-col class=\"price-info\" style=\"width: calc(100% - 50px);\">\r\n              <el-statistic :value-style=\"getPriceStyle(item.confidence)\"> <template slot=\"formatter\">\r\n                  <span v-html=\"formatPrice(item.estimated_price)\"></span>\r\n                </template>\r\n              </el-statistic>\r\n            </el-col>\r\n          </el-row>\r\n          <div class=\"result-footer\">\r\n            <SimilarEquipmentModal :key=\"item.equip_sn\" :equipment=\"item\" :similar-data=\"similarData\" \r\n              @valuation-updated=\"(data) => handleValuationUpdated(data, index)\">\r\n              <el-link href=\"javascript:void(0)\" type=\"primary\" style=\"font-weight: bold;\">{{ item.name || `装备 ${index +\r\n                1}`\r\n              }}</el-link>\r\n            </SimilarEquipmentModal>\r\n            <el-tag :type=\"getConfidenceTagType(item.confidence)\" v-if=\"!item.error\">\r\n              置信度: {{ (item.confidence * 100).toFixed(1) }}%\r\n            </el-tag>\r\n            <el-tag v-else type=\"danger\" :title=\"item.error\">估价失败</el-tag>\r\n          </div>\r\n          <div class=\"equip-tag-info\">\r\n            <el-tag type=\"success\" v-if=\"getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel\">{{\r\n              getEquipGemInfoAndBlueBlock(item.cDesc).gemLevel }}锻</el-tag>\r\n            <el-tag v-for=\"tag in getEquipGemInfoAndBlueBlock(item.cDesc).blueBlock\" :key=\"tag\" type=\"primary\">{{ tag\r\n            }}</el-tag>\r\n          </div>\r\n        </el-col>\r\n      </el-row>\r\n    </template>\r\n    <!-- 关闭按钮 -->\r\n    <div class=\"dialog-footer\" style=\"text-align: center; margin-top: 20px;\">\r\n      <el-button @click=\"$emit('close')\" type=\"primary\">关闭</el-button>\r\n    </div>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'\r\nimport SimilarEquipmentModal from '@/components/SimilarEquipmentModal.vue'\r\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\r\nimport { commonMixin } from '@/utils/mixins/commonMixin'\r\n\r\nexport default {\r\n  name: 'EquipBatchValuationResult',\r\n  props: {\r\n    results: {\r\n      type: Array,\r\n      required: true\r\n    },\r\n    equipmentList: {\r\n      type: Array,\r\n      required: true\r\n    },\r\n    totalValue: {\r\n      type: Number,\r\n      default: 0\r\n    },\r\n    valuateParams: {\r\n      type: Object,\r\n      required: true\r\n    },\r\n    loading: {\r\n      type: Boolean,\r\n      default: false\r\n    },\r\n    colSpan: {\r\n      type: Number,\r\n      default: 6\r\n    }\r\n  },\r\n  data() {\r\n    return {\r\n      similarData: null,\r\n      currentTotalValue: 0,\r\n      currentList: []\r\n    }\r\n  },\r\n  mixins: [equipmentMixin, commonMixin],\r\n  components: {\r\n    EquipmentImage,\r\n    SimilarEquipmentModal\r\n  },\r\n  watch: {\r\n    totalValue(newVal) {\r\n      this.currentTotalValue = newVal\r\n    },\r\n    results(newVal) {\r\n      // 为每个结果添加对应的装备信息\r\n      const resultsWithEquipment = newVal.map((result, index) => ({\r\n        ...result,\r\n        ...this.equipmentList[index],\r\n        resultIndex: index\r\n      }))\r\n\r\n      // 分离高置信度和低置信度\r\n      const highConfidenceResults = resultsWithEquipment.filter(result => result.confidence === 1)\r\n      const lowConfidenceResults = resultsWithEquipment.filter(result => result.confidence !== 1)\r\n\r\n      // 排序\r\n      highConfidenceResults.sort((a, b) => a.estimated_price - b.estimated_price)\r\n      lowConfidenceResults.sort((a, b) => a.confidence - b.confidence)\r\n\r\n      // 合并：低置信度在前，高置信度在后\r\n      this.currentList = [...lowConfidenceResults, ...highConfidenceResults]\r\n    }\r\n  },\r\n  computed: {\r\n    totalCount() {\r\n      return this.results.length\r\n    },\r\n    successCount() {\r\n      return this.results.filter((result) => !result.error).length\r\n    }\r\n  },\r\n  mounted() {\r\n    this.currentTotalValue = this.totalValue\r\n  },\r\n  methods: {\r\n    // 处理估价结果更新\r\n    handleValuationUpdated(data, resultIndex) {\r\n      // 更新总价值\r\n      if (this.results[resultIndex]) {\r\n        this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price + data.estimated_price\r\n      }\r\n      \r\n      // 更新结果数据 - 这是必须保留的操作\r\n      this.$set(this.results, resultIndex, data)\r\n      \r\n      console.log('估价数据更新完成:', data)\r\n    },\r\n\r\n    // 根据置信度获取标签类型\r\n    getConfidenceTagType(confidence) {\r\n      if (confidence >= 0.9) {\r\n        return 'success'  // 绿色 - 高置信度\r\n      } else if (confidence >= 0.7) {\r\n        return ''  // 蓝色 - 中等置信度\r\n      } else if (confidence >= 0.5) {\r\n        return 'info'     // 灰色 - 较低置信度\r\n      } else if (confidence >= 0.3) {\r\n        return 'warning'     // 橙色 - 较低置信度\r\n      } else {\r\n        return 'danger'   // 红色 - 低置信度\r\n      }\r\n    },\r\n\r\n    // 根据结果获取结果项的CSS类\r\n    getResultItemClass(result) {\r\n      if (result.error) {\r\n        return 'error'\r\n      }\r\n\r\n      // 根据置信度返回不同的类名\r\n      const confidence = result.confidence || 0\r\n      if (confidence >= 0.9) {\r\n        return 'confidence-high'\r\n      } else if (confidence >= 0.7) {\r\n        return 'confidence-medium'\r\n      } else if (confidence >= 0.5) {\r\n        return 'confidence-low'\r\n      } else if (confidence >= 0.3) {\r\n        return 'confidence-very-low'\r\n      } else {\r\n        return 'confidence-extremely-low'\r\n      }\r\n    },\r\n\r\n    // 根据置信度获取价格样式\r\n    getPriceStyle(confidence) {\r\n      const baseStyle = { fontSize: '18px', fontWeight: 'bold', justifyContent: 'end' }\r\n\r\n      if (!confidence || confidence < 0.3) {\r\n        return { ...baseStyle, color: '#f56c6c' }  // 红色 - 极低置信度\r\n      } else if (confidence < 0.5) {\r\n        return { ...baseStyle, color: '#e6a23c' }  // 橙色 - 很低置信度\r\n      } else if (confidence < 0.7) {\r\n        return { ...baseStyle, color: '#909399' }  // 灰色 - 较低置信度\r\n      } else if (confidence < 0.9) {\r\n        return { ...baseStyle, color: '#409eff' }  // 蓝色 - 中等置信度\r\n      } else {\r\n        return { ...baseStyle, color: '#67c23a' }  // 绿色 - 高置信度\r\n      }\r\n    },\r\n\r\n    // 获取概览卡片的颜色类\r\n    getOverviewClass() {\r\n      const successRate = this.totalCount > 0 ? (this.successCount / this.totalCount) : 0\r\n      if (successRate >= 0.9) {\r\n        return 'confidence-high'\r\n      } else if (successRate >= 0.7) {\r\n        return 'confidence-medium'\r\n      } else if (successRate >= 0.5) {\r\n        return 'confidence-low'\r\n      } else if (successRate >= 0.3) {\r\n        return 'confidence-very-low'\r\n      } else {\r\n        return 'confidence-extremely-low'\r\n      }\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n.batch-valuation-result {\r\n  width: 960px;\r\n  margin: 0 auto;\r\n}\r\n\r\n.result-overview {\r\n  margin-bottom: 30px;\r\n}\r\n\r\n.overview-card {\r\n  display: flex;\r\n  justify-content: space-around;\r\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\r\n  color: white;\r\n  padding: 30px 20px;\r\n  border-radius: 12px;\r\n  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);\r\n}\r\n\r\n.overview-item {\r\n  text-align: center;\r\n  flex: 1;\r\n}\r\n\r\n.result-details {\r\n  background: white;\r\n  border-radius: 8px;\r\n  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);\r\n  overflow: hidden;\r\n}\r\n\r\n.details-header {\r\n  padding: 20px;\r\n  border-bottom: 1px solid #ebeef5;\r\n}\r\n\r\n.details-header h3 {\r\n  margin: 0;\r\n  color: #303133;\r\n}\r\n\r\n.results-list {\r\n  max-height: 400px;\r\n  overflow-y: auto;\r\n}\r\n\r\n.result-item {\r\n  padding: 15px 20px;\r\n  border-bottom: 1px solid #f0f0f0;\r\n  transition: background-color 0.3s;\r\n  min-height: 100px;\r\n}\r\n\r\n.result-item:hover {\r\n  background-color: #f5f7fa;\r\n}\r\n\r\n/* 根据置信度的悬停效果 */\r\n.result-item.confidence-high:hover {\r\n  background-color: rgba(103, 194, 58, 0.1);\r\n}\r\n\r\n.result-item.confidence-medium:hover {\r\n  background-color: rgba(64, 158, 255, 0.1);\r\n}\r\n\r\n.result-item.confidence-low:hover {\r\n  background-color: rgba(144, 147, 153, 0.1);\r\n}\r\n\r\n.result-item.confidence-very-low:hover {\r\n  background-color: rgba(230, 162, 60, 0.1);\r\n}\r\n\r\n.result-item.confidence-extremely-low:hover {\r\n  background-color: rgba(245, 108, 108, 0.1);\r\n}\r\n\r\n.result-item.success {\r\n  border-left: 4px solid #67c23a;\r\n}\r\n\r\n.result-item.error {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\r\n}\r\n\r\n/* 根据置信度的颜色变化 */\r\n.result-item.confidence-high {\r\n  border-left: 4px solid #67c23a;\r\n  /* 绿色 - 高置信度 */\r\n  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);\r\n}\r\n\r\n.result-item.confidence-medium {\r\n  border-left: 4px solid #409eff;\r\n  /* 蓝色 - 中等置信度 */\r\n  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);\r\n}\r\n\r\n.result-item.confidence-low {\r\n  border-left: 4px solid #909399;\r\n  /* 灰色 - 较低置信度 */\r\n  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);\r\n}\r\n\r\n.result-item.confidence-very-low {\r\n  border-left: 4px solid #e6a23c;\r\n  /* 橙色 - 很低置信度 */\r\n  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);\r\n}\r\n\r\n.result-item.confidence-extremely-low {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\r\n}\r\n\r\n.result-footer {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  margin-top: 8px;\r\n}\r\n\r\n\r\n.price-info {\r\n  display: flex;\r\n  align-items: center;\r\n}\r\n\r\n:global(.price-info .el-statistic .con) {\r\n  justify-content: flex-end;\r\n}\r\n\r\n.equipment-info {\r\n  text-align: right;\r\n}\r\n\r\n.equip-name {\r\n  font-weight: bold;\r\n  color: #303133;\r\n}\r\n\r\n.equip-level {\r\n  color: #909399;\r\n  margin-left: 5px;\r\n}\r\n\r\n.error-content {\r\n  color: #f56c6c;\r\n}\r\n\r\n.error-message {\r\n  font-size: 14px;\r\n}\r\n\r\n.result-actions {\r\n  margin-top: 20px;\r\n  text-align: center;\r\n}\r\n\r\n/* 滚动条样式 */\r\n.results-list::-webkit-scrollbar {\r\n  width: 6px;\r\n}\r\n\r\n.results-list::-webkit-scrollbar-track {\r\n  background: #f1f1f1;\r\n  border-radius: 3px;\r\n}\r\n\r\n.results-list::-webkit-scrollbar-thumb {\r\n  background: #c1c1c1;\r\n  border-radius: 3px;\r\n}\r\n\r\n.results-list::-webkit-scrollbar-thumb:hover {\r\n  background: #a8a8a8;\r\n}\r\n\r\n/* 骨架屏样式 */\r\n.skeleton-container {\r\n  padding: 20px 0;\r\n}\r\n\r\n.skeleton-item {\r\n  padding: 15px;\r\n  border: 1px solid #f0f0f0;\r\n  border-radius: 8px;\r\n  margin-bottom: 10px;\r\n}\r\n\r\n.skeleton-header {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  margin-bottom: 15px;\r\n}\r\n\r\n.skeleton-content {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n}\r\n\r\n.skeleton-price {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: flex-end;\r\n  gap: 8px;\r\n}\r\n\r\n.equip-tag-info {\r\n  margin-top: 5px;\r\n}\r\n\r\n.equip-tag-info>* {\r\n  margin-right: 5px;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
 
@@ -5239,6 +6876,30 @@ ___CSS_LOADER_EXPORT___.push([module.id, "\n/* 装备描述样式 */\n.equip-des
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css":
+/*!*****************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.valuation-info[data-v-b3167e7a] {\r\n  margin: 12px 0;\r\n  padding: 12px;\r\n  background-color: #f8f9fa;\r\n  border-radius: 6px;\r\n  border-left: 4px solid #409eff;\r\n  display: flex;\r\n  flex-direction: column;\r\n  gap: 8px;\n}\n.valuation-main[data-v-b3167e7a] {\r\n  font-size: 14px;\r\n  display: flex;\r\n  align-items: center;\r\n  flex-wrap: wrap;\r\n  gap: 8px;\n}\n.valuation-label[data-v-b3167e7a] {\r\n  color: #606266;\r\n  font-weight: 500;\n}\n.valuation-price[data-v-b3167e7a] {\r\n  color: #e6a23c;\r\n  font-weight: 600;\r\n  font-size: 16px;\n}\n.valuation-strategy[data-v-b3167e7a] {\r\n  color: #909399;\r\n  font-size: 12px;\n}\n.valuation-details[data-v-b3167e7a] {\r\n  display: flex;\r\n  gap: 15px;\r\n  font-size: 12px;\r\n  color: #909399;\r\n  flex-wrap: wrap;\n}\n.confidence-display[data-v-b3167e7a] {\r\n  display: flex;\r\n  align-items: center;\r\n  gap: 4px;\r\n  font-weight: 500;\n}\n.confidence-display i[data-v-b3167e7a] {\r\n  font-size: 14px;\n}\n.confidence-level[data-v-b3167e7a] {\r\n  font-size: 11px;\r\n  opacity: 0.8;\n}\r\n\r\n/* 置信度文本颜色 */\n.text-success[data-v-b3167e7a] {\r\n  color: #67c23a !important;\n}\n.text-primary[data-v-b3167e7a] {\r\n  color: #409eff !important;\n}\n.text-info[data-v-b3167e7a] {\r\n  color: #909399 !important;\n}\n.text-warning[data-v-b3167e7a] {\r\n  color: #e6a23c !important;\n}\n.text-danger[data-v-b3167e7a] {\r\n  color: #f56c6c !important;\n}\r\n/* 根据置信度的颜色变化 */\n.valuation-info.confidence-high[data-v-b3167e7a] {\r\n  border-left: 4px solid #67c23a;\r\n  /* 绿色 - 高置信度 */\r\n  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);\n}\n.valuation-info.confidence-medium[data-v-b3167e7a] {\r\n  border-left: 4px solid #409eff;\r\n  /* 蓝色 - 中等置信度 */\r\n  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);\n}\n.valuation-info.confidence-low[data-v-b3167e7a] {\r\n  border-left: 4px solid #909399;\r\n  /* 灰色 - 较低置信度 */\r\n  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);\n}\n.valuation-info.confidence-very-low[data-v-b3167e7a] {\r\n  border-left: 4px solid #e6a23c;\r\n  /* 橙色 - 很低置信度 */\r\n  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);\n}\n.valuation-info.confidence-extremely-low[data-v-b3167e7a] {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/EquipmentValuation.vue"],"names":[],"mappings":";AAgRA;EACA,cAAA;EACA,aAAA;EACA,yBAAA;EACA,kBAAA;EACA,8BAAA;EACA,aAAA;EACA,sBAAA;EACA,QAAA;AACA;AAEA;EACA,eAAA;EACA,aAAA;EACA,mBAAA;EACA,eAAA;EACA,QAAA;AACA;AAEA;EACA,cAAA;EACA,gBAAA;AACA;AAEA;EACA,cAAA;EACA,gBAAA;EACA,eAAA;AACA;AAEA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,SAAA;EACA,eAAA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,QAAA;EACA,gBAAA;AACA;AAEA;EACA,eAAA;AACA;AAEA;EACA,eAAA;EACA,YAAA;AACA;;AAEA,YAAA;AACA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AACA,eAAA;AACA;EACA,8BAAA;EACA,cAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA","sourcesContent":["<template>\r\n  <div class=\"valuation-info\" :class=\"confidenceClass\">\r\n    <el-row type=\"flex\" align=\"middle\" justify=\"space-between\">\r\n      <el-row type=\"flex\" align=\"middle\">\r\n        <EquipmentImage :equipment=\"targetEquipment\" width=\"50px\" height=\"50px\" placement=\"left\" />\r\n        <span v-if=\"targetEquipment.price\" v-html=\"formatFullPrice(targetEquipment)\" style=\"margin-left: 10px\"></span>\r\n        <div v-if=\"isWeapon\" style=\"margin-left: 10px\">\r\n          <div style=\"margin-bottom: 5px\"> <el-tag type=\"success\">属性：+{{ valuation.feature.addon_total }}点{{\r\n            addon_total_standards?.[valuation.feature.equip_level] }}</el-tag>\r\n            <el-divider direction=\"vertical\" />\r\n            <el-tag type=\"primary\">总伤：{{ valuation.feature.all_damage }}/{{\r\n              parseInt(all_damage_standards?.[valuation.feature.equip_level][1]\r\n                + (25 * valuation.feature.equip_level / 30)) }}</el-tag>\r\n          </div>\r\n          <div>\r\n            <el-tag type=\"danger\">初伤：{{ valuation.feature.init_damage_raw }}点{{\r\n              init_damage_raw_standards?.[valuation.feature.equip_level] }}</el-tag>\r\n            <el-divider direction=\"vertical\" />\r\n            <el-tag type=\"danger\">初总伤：{{ valuation.feature.init_damage }}点{{\r\n              all_damage_standards?.[valuation.feature.equip_level] }}</el-tag>\r\n          </div>\r\n        </div>\r\n      </el-row>\r\n      <!-- 刷新和相似装备界面 -->\r\n      <div style=\"width: 170px;flex-shrink: 0;\">\r\n        <el-button type=\"primary\" @click=\"$emit('refresh')\" size=\"mini\">刷新</el-button>\r\n        <SimilarGetMore :target-equipment=\"targetEquipment\" />\r\n      </div>\r\n    </el-row>\r\n    <div class=\"valuation-main\">\r\n      <span class=\"valuation-label\">装备估价:</span>\r\n      <span class=\"valuation-price\">{{ valuation?.estimated_price_yuan || '-' }}元</span>\r\n      <span class=\"valuation-strategy\">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>\r\n      <el-link type=\"danger\" @click.native=\"markAsAbnormal\" size=\"mini\">标记为异常</el-link>\r\n\r\n      <!-- 价格比率显示 -->\r\n      <span v-if=\"priceRatio\" class=\"price-ratio\">\r\n        <el-tag :type=\"priceRatioTagType\" disable-transitions>\r\n          {{ priceRatioText }}\r\n        </el-tag>\r\n      </span>\r\n    </div>\r\n    <div class=\"valuation-details\">\r\n      <span class=\"confidence-display\" :class=\"confidenceTextClass\">\r\n        <i :class=\"confidenceIcon\"></i>\r\n        置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}\r\n        <span class=\"confidence-level\">{{ confidenceLevel }}</span>\r\n      </span>\r\n      <span>基于{{ valuation.anchor_count }}个锚点</span>\r\n      <span v-if=\"priceRatio\">估价比率: {{ (priceRatio * 100).toFixed(1) }}%</span>\r\n    </div>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport EquipmentImage from './EquipmentImage/EquipmentImage.vue'\r\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\r\nimport { commonMixin } from '@/utils/mixins/commonMixin'\r\nimport SimilarGetMore from './SimilarGetMore.vue'\r\n\r\nexport default {\r\n  name: 'EquipmentValuation',\r\n  components: {\r\n    EquipmentImage,\r\n    SimilarGetMore\r\n  },\r\n  mixins: [equipmentMixin, commonMixin],\r\n  props: {\r\n    valuation: {\r\n      type: Object,\r\n      default: null\r\n    },\r\n    targetEquipment: {\r\n      type: Object,\r\n      required: true\r\n    }\r\n  },\r\n  data() {\r\n    return {\r\n      weaponConfig: null,\r\n      addon_total_standards: null,\r\n      all_damage_standards: null,\r\n      init_damage_raw_standards: null,\r\n    }\r\n  },\r\n  computed: {\r\n    isWeapon() {\r\n      return window.is_weapon_equip(this.valuation?.feature?.kindid)\r\n    },\r\n    // 计算估价与售价的比率\r\n    priceRatio() {\r\n      if (!this.valuation || !this.valuation.estimated_price_yuan || !this.targetEquipment.price) {\r\n        return null\r\n      }\r\n\r\n      const estimatedPrice = parseFloat(this.valuation.estimated_price_yuan)\r\n      const sellingPrice = parseFloat(this.targetEquipment.price) / 100 // 转换为元\r\n\r\n      if (sellingPrice === 0) return null\r\n\r\n      return estimatedPrice / sellingPrice\r\n    },\r\n    priceRatioTagType() {\r\n      if (!this.priceRatio) return ''\r\n      const ratio = this.priceRatio\r\n      const deviation = Math.abs(ratio - 1) * 100\r\n      if (deviation < 5) {\r\n        return 'success'\r\n      } else if (deviation < 10) {\r\n        return 'info'\r\n      } else if (deviation < 20) {\r\n        return 'warning'\r\n      } else {\r\n        return 'danger'\r\n      }\r\n    },\r\n    priceRatioText() {\r\n      if (!this.priceRatio) return ''\r\n      const ratio = this.priceRatio\r\n      const deviation = Math.abs(ratio - 1) * 100\r\n      if (deviation < 5) {\r\n        return `估价极为贴合市场（±${deviation.toFixed(1)}%）`\r\n      } else if (deviation < 10) {\r\n        return `估价较为贴合（±${deviation.toFixed(1)}%）`\r\n      } else if (deviation < 20) {\r\n        return `估价有一定偏差（±${deviation.toFixed(1)}%）`\r\n      } else if (ratio > 1) {\r\n        return `估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`\r\n      } else {\r\n        return `估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`\r\n      }\r\n    },\r\n    // 根据置信度返回对应的CSS类\r\n    confidenceClass() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return 'confidence-extremely-low'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return 'confidence-high'        // >= 80%: 高置信度 (绿色)\r\n      } else if (confidence >= 0.6) {\r\n        return 'confidence-medium'      // 60-79%: 中等置信度 (蓝色)\r\n      } else if (confidence >= 0.4) {\r\n        return 'confidence-low'         // 40-59%: 较低置信度 (灰色)\r\n      } else if (confidence >= 0.2) {\r\n        return 'confidence-very-low'    // 20-39%: 很低置信度 (橙色)\r\n      } else {\r\n        return 'confidence-extremely-low' // < 20%: 极低置信度 (红色)\r\n      }\r\n    },\r\n    // 置信度文本颜色类\r\n    confidenceTextClass() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return 'text-danger'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return 'text-success'\r\n      } else if (confidence >= 0.6) {\r\n        return 'text-primary'\r\n      } else if (confidence >= 0.4) {\r\n        return 'text-info'\r\n      } else if (confidence >= 0.2) {\r\n        return 'text-warning'\r\n      } else {\r\n        return 'text-danger'\r\n      }\r\n    },\r\n    // 置信度图标\r\n    confidenceIcon() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return 'el-icon-warning'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return 'el-icon-success'\r\n      } else if (confidence >= 0.6) {\r\n        return 'el-icon-info'\r\n      } else if (confidence >= 0.4) {\r\n        return 'el-icon-question'\r\n      } else if (confidence >= 0.2) {\r\n        return 'el-icon-warning'\r\n      } else {\r\n        return 'el-icon-error'\r\n      }\r\n    },\r\n    // 置信度等级描述\r\n    confidenceLevel() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return '(数据缺失)'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return '(高)'\r\n      } else if (confidence >= 0.6) {\r\n        return '(中)'\r\n      } else if (confidence >= 0.4) {\r\n        return '(偏低)'\r\n      } else if (confidence >= 0.2) {\r\n        return '(很低)'\r\n      } else {\r\n        return '(极低)'\r\n      }\r\n    },\r\n  },\r\n  methods: {\r\n    getWeaponConfig() {\r\n      this.$api.equipment.getWeaponConfig().then(res => {\r\n        if (res.code === 200) {\r\n          this.weaponConfig = res.data\r\n          this.addon_total_standards = res.data.addon_total_standards\r\n          this.all_damage_standards = res.data.all_damage_standards\r\n          this.init_damage_raw_standards = res.data.init_damage_raw_standards\r\n        }\r\n      })\r\n    },\r\n    async markAsAbnormal() {\r\n      try {\r\n        // 调用API标记装备为异常\r\n        const response = await this.$api.equipment.markEquipmentAsAbnormal({\r\n          equipment_data: this.targetEquipment,\r\n          reason: '标记异常',\r\n          notes: '用户手动标记的异常装备'\r\n        })\r\n\r\n        if (response.code === 200) {\r\n          this.$notify.success({\r\n            title: '提示',\r\n            message: '装备已标记为异常'\r\n          })\r\n          // 可以触发父组件刷新或其他操作\r\n          this.$emit('abnormal-marked', this.targetEquipment)\r\n        } else {\r\n          this.$notify.error({\r\n            title: '提示',\r\n            message: response.message || '标记异常失败'\r\n          })\r\n        }\r\n      } catch (error) {\r\n        console.error('标记异常失败:', error)\r\n        this.$notify.error({\r\n          title: '提示',\r\n          message: '标记异常失败，请稍后重试'\r\n        })\r\n      }\r\n    },\r\n    getStrategyName(strategy) {\r\n      const strategyNames = {\r\n        fair_value: '公允价值',\r\n        competitive: '竞争价格',\r\n        premium: '溢价估值'\r\n      }\r\n      return strategyNames[strategy] || strategy\r\n    },\r\n  },\r\n  mounted() {\r\n    if (this.isWeapon) {\r\n      this.getWeaponConfig()\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n.valuation-info {\r\n  margin: 12px 0;\r\n  padding: 12px;\r\n  background-color: #f8f9fa;\r\n  border-radius: 6px;\r\n  border-left: 4px solid #409eff;\r\n  display: flex;\r\n  flex-direction: column;\r\n  gap: 8px;\r\n}\r\n\r\n.valuation-main {\r\n  font-size: 14px;\r\n  display: flex;\r\n  align-items: center;\r\n  flex-wrap: wrap;\r\n  gap: 8px;\r\n}\r\n\r\n.valuation-label {\r\n  color: #606266;\r\n  font-weight: 500;\r\n}\r\n\r\n.valuation-price {\r\n  color: #e6a23c;\r\n  font-weight: 600;\r\n  font-size: 16px;\r\n}\r\n\r\n.valuation-strategy {\r\n  color: #909399;\r\n  font-size: 12px;\r\n}\r\n\r\n.valuation-details {\r\n  display: flex;\r\n  gap: 15px;\r\n  font-size: 12px;\r\n  color: #909399;\r\n  flex-wrap: wrap;\r\n}\r\n\r\n.confidence-display {\r\n  display: flex;\r\n  align-items: center;\r\n  gap: 4px;\r\n  font-weight: 500;\r\n}\r\n\r\n.confidence-display i {\r\n  font-size: 14px;\r\n}\r\n\r\n.confidence-level {\r\n  font-size: 11px;\r\n  opacity: 0.8;\r\n}\r\n\r\n/* 置信度文本颜色 */\r\n.text-success {\r\n  color: #67c23a !important;\r\n}\r\n\r\n.text-primary {\r\n  color: #409eff !important;\r\n}\r\n\r\n.text-info {\r\n  color: #909399 !important;\r\n}\r\n\r\n.text-warning {\r\n  color: #e6a23c !important;\r\n}\r\n\r\n.text-danger {\r\n  color: #f56c6c !important;\r\n}\r\n/* 根据置信度的颜色变化 */\r\n.valuation-info.confidence-high {\r\n  border-left: 4px solid #67c23a;\r\n  /* 绿色 - 高置信度 */\r\n  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);\r\n}\r\n\r\n.valuation-info.confidence-medium {\r\n  border-left: 4px solid #409eff;\r\n  /* 蓝色 - 中等置信度 */\r\n  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);\r\n}\r\n\r\n.valuation-info.confidence-low {\r\n  border-left: 4px solid #909399;\r\n  /* 灰色 - 较低置信度 */\r\n  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);\r\n}\r\n\r\n.valuation-info.confidence-very-low {\r\n  border-left: 4px solid #e6a23c;\r\n  /* 橙色 - 很低置信度 */\r\n  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);\r\n}\r\n\r\n.valuation-info.confidence-extremely-low {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/RoleInfo/RoleImage.vue?vue&type=style&index=0&id=8c1934ec&scoped=true&lang=css":
 /*!*****************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/RoleInfo/RoleImage.vue?vue&type=style&index=0&id=8c1934ec&scoped=true&lang=css ***!
@@ -5266,6 +6927,54 @@ var ___CSS_LOADER_URL_REPLACEMENT_1___ = _node_modules_css_loader_dist_runtime_g
 var ___CSS_LOADER_URL_REPLACEMENT_2___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_2___);
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, "\n[data-v-8c1934ec] .role-info-tabs .el-tabs__nav .el-tabs__item {\r\n  padding: 0 !important;\r\n  width: 98px;\r\n  height: 26px;\r\n  line-height: 26px;\r\n  background: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ") no-repeat;\r\n  text-align: center;\r\n  float: left;\r\n  margin-right: 3px;\r\n  display: inline;\r\n  color: #748da4;\r\n  cursor: pointer;\n}\n[data-v-8c1934ec] .role-info-tabs .el-tabs__nav .el-tabs__item.is-active {\r\n  background: url(" + ___CSS_LOADER_URL_REPLACEMENT_1___ + ") no-repeat;\r\n  color: #fff;\n}\n.role-info-popover {\r\n  padding: 0 !important;\r\n  background: transparent;\r\n  box-shadow: none;\r\n  border: none;\r\n  font-size: 12px;\n}\n.role-info-popover .tabCont {\r\n  padding: 0 !important;\r\n  background: none;\n}\n.role-info-popover .tabCont {\r\n  padding: 0 !important;\n}\n.role-info-popover .el-tabs__header {\r\n  margin-bottom: 0 !important;\r\n  border-bottom: 2px solid #fff;\n}\n.role-info-popover .el-tabs__content {\r\n  padding: 12px;\r\n  background: url(" + ___CSS_LOADER_URL_REPLACEMENT_2___ + ") repeat-y -100px;\r\n  min-height: 510px;\n}\n.role-info-popover .el-tabs__active-bar {\r\n  display: none !important;\n}\n.shenqi-modal {\r\n  position: relative;\r\n  top: unset;\r\n  left: unset;\r\n  margin-left: unset;\n}\n.shenqi-info-popover {\r\n  padding: 0 !important;\r\n  background: #0a1f28;\r\n  border-color: #0a1f28;\n}\n.shenqi-info-popover .popper__arrow::after {\r\n  border-bottom-color: #0a1f28 !important;\n}\n.role-info-popover .popper__arrow::after {\r\n  border-right-color: #0a1f28 !important;\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/RoleInfo/RoleImage.vue"],"names":[],"mappings":";AAoyDA;EACA,qBAAA;EACA,WAAA;EACA,YAAA;EACA,iBAAA;EACA,6DAAA;EACA,kBAAA;EACA,WAAA;EACA,iBAAA;EACA,eAAA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,6DAAA;EACA,WAAA;AACA;AAEA;EACA,qBAAA;EACA,uBAAA;EACA,gBAAA;EACA,YAAA;EACA,eAAA;AACA;AAEA;EACA,qBAAA;EACA,gBAAA;AACA;AAEA;EACA,qBAAA;AACA;AAEA;EACA,2BAAA;EACA,6BAAA;AACA;AAEA;EACA,aAAA;EACA,mEAAA;EACA,iBAAA;AACA;AAEA;EACA,wBAAA;AACA;AAEA;EACA,kBAAA;EACA,UAAA;EACA,WAAA;EACA,kBAAA;AACA;AAEA;EACA,qBAAA;EACA,mBAAA;EACA,qBAAA;AACA;AAEA;EACA,uCAAA;AACA;AAEA;EACA,sCAAA;AACA","sourcesContent":["<template>\r\n  <el-popover v-model=\"visible\" :width=\"715\" :data-equip-sn=\"$attrs.equip_sn\" placement=\"right\" trigger=\"click\"\r\n    popper-class=\"role-info-popover\">\r\n    <template #reference>\r\n      <slot></slot>\r\n      <el-image :src=\"imageUrl\" fit=\"cover\" :style=\"imageStyle\" referrerpolicy=\"no-referrer\" style=\"display: block;\">\r\n        <div slot=\"error\" class=\"image-slot\">\r\n          <i class=\"el-icon-picture-outline\"></i>\r\n        </div>\r\n      </el-image>\r\n    </template>\r\n    <div id=\"role_info_box\" v-if=\"visible\">\r\n      <el-tabs v-model=\"activeName\" class=\"role-info-tabs tabCont\">\r\n        <el-tab-pane label=\"人物/修炼\" name=\"role_basic\" v-if=\"basic_info\">\r\n          <div class=\"cols\" style=\"width: 320px\">\r\n            <div class=\"subTab\">\r\n              <h4 class=\"subTabLeft role_basic_attr_tab\" :class=\"{ off: currentDisplayIndex !== 0 }\"\r\n                @click=\"toggle_display(0)\">\r\n                人物状态\r\n              </h4>\r\n              <h4 class=\"subTabRight role_basic_attr_tab\" :class=\"{ off: currentDisplayIndex !== 1 }\"\r\n                @click=\"toggle_display(1)\">\r\n                输出/抗性\r\n              </h4>\r\n            </div>\r\n            <table class=\"tb02 role_basic_attr_table\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"\r\n              v-show=\"currentDisplayIndex === 0\">\r\n              <colgroup>\r\n                <col width=\"180\" />\r\n                <col width=\"140\" />\r\n              </colgroup>\r\n              <tr>\r\n                <td><strong>级别：</strong>{{ basic_info.role_level }}</td>\r\n                <td><strong>名称：</strong>{{ htmlEncode(basic_info.nickname) }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>角色：</strong>{{ basic_info.role_kind_name }}</td>\r\n                <td><strong>人气：</strong>{{ basic_info.pride }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>帮派：</strong>{{ basic_info.org }}</td>\r\n                <td><strong>帮贡：</strong>{{ basic_info.org_offer }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td>\r\n                  <strong>门派：</strong><span id=\"kindName\">{{ basic_info.school }}</span>\r\n                </td>\r\n                <td><strong>门贡：</strong>{{ basic_info.school_offer }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>气血：</strong>{{ basic_info.hp_max }}</td>\r\n                <td><strong>体质：</strong>{{ basic_info.cor_all }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>魔法：</strong>{{ basic_info.mp_max }}</td>\r\n                <td><strong>魔力：</strong>{{ basic_info.mag_all }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>命中：</strong>{{ basic_info.att_all }}</td>\r\n                <td><strong>力量：</strong>{{ basic_info.str_all }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>伤害：</strong>{{ basic_info.damage_all }}</td>\r\n                <td><strong>耐力：</strong>{{ basic_info.res_all }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>防御：</strong>{{ basic_info.def_all }}</td>\r\n                <td><strong>敏捷：</strong>{{ basic_info.spe_all }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>速度：</strong>{{ basic_info.dex_all }}</td>\r\n                <td><strong>潜力：</strong>{{ basic_info.point }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td v-if=\"basic_info.fa_shang !== undefined\">\r\n                  <strong>法伤：</strong>{{ basic_info.fa_shang }}\r\n                </td>\r\n                <td v-else><strong>躲避：</strong>{{ basic_info.dod_all }}</td>\r\n                <td><strong>靓号特效：</strong>{{ basic_info.is_niceid }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td v-if=\"basic_info.fa_fang !== undefined\">\r\n                  <strong>法防：</strong>{{ basic_info.fa_fang }}\r\n                </td>\r\n                <td v-else><strong>灵力：</strong>{{ basic_info.mag_def_all }}</td>\r\n                <td><strong>成就点数：</strong>{{ basic_info.chengjiu }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>获得经验：</strong>{{ basic_info.upexp }}</td>\r\n                <td><strong>已用潜能果数量：</strong>{{ basic_info.qian_neng_guo }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td>\r\n                  <span v-if=\"\r\n                    basic_info.qian_yuan_dan && basic_info.qian_yuan_dan.new_value === undefined\r\n                  \">\r\n                    <strong>已兑换乾元丹数量：</strong>{{ basic_info.qian_yuan_dan.old_value }}\r\n                  </span>\r\n                  <span v-else>\r\n                    <strong>新版乾元丹数量：</strong>{{ basic_info.qian_yuan_dan.new_value }}\r\n                  </span>\r\n                </td>\r\n                <td>\r\n                  <strong>总经验：</strong>{{ basic_info.sum_exp }}\r\n                  <i v-if=\"basic_info.ach_info\" class=\"question hoverTips\">\r\n                    <span class=\"hoverTipsDetail\">{{ basic_info.ach_info }}</span>\r\n                  </i>\r\n                </td>\r\n              </tr>\r\n              <tr>\r\n                <td>\r\n                  <strong>月饼粽子机缘：</strong>{{ (basic_info.add_point || 0) + (basic_info.ji_yuan || 0) }}/{{\r\n                    extraAttrPoints\r\n                  }}\r\n                  <i v-if=\"extraAttrPoints > 0\" class=\"question hoverTips\">\r\n                    <span class=\"hoverTipsDetail\">\r\n                      月饼粽子食用量：{{ basic_info.add_point }}<br /><br />已获得机缘属性：{{\r\n                        basic_info.ji_yuan\r\n                      }}\r\n                    </span>\r\n                  </i>\r\n                </td>\r\n                <td><strong>原始种族：</strong><span v-html=\"basic_info.ori_race\"></span></td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>历史门派：</strong>{{ basic_info.changesch }}</td>\r\n                <td><strong>属性保存方案：</strong>{{ basic_info.propkept }}</td>\r\n              </tr>\r\n              <tr>\r\n                <td><strong>飞升/渡劫/化圣：</strong>{{ basic_info.fly_status }}</td>\r\n                <td v-if=\"basic_info.role_level >= 120\">\r\n                  <strong>生死劫：</strong>{{ basic_info.shengsijie }}\r\n                </td>\r\n                <td v-else></td>\r\n              </tr>\r\n            </table>\r\n            <table class=\"tb02 role_basic_attr_table\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\"\r\n              v-show=\"currentDisplayIndex === 1\">\r\n              <template v-if=\"!basic_info.other_attr\">\r\n                <colgroup>\r\n                  <col width=\"320\" />\r\n                </colgroup>\r\n                <tr>\r\n                  <td><br />重新寄售后才能显示</td>\r\n                </tr>\r\n              </template>\r\n              <template v-else>\r\n                <colgroup>\r\n                  <col width=\"160\" />\r\n                  <col width=\"160\" />\r\n                </colgroup>\r\n                <tr>\r\n                  <td colspan=\"2\"><strong style=\"font-size: 16px; color: white\">输出</strong></td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>灵力：</strong></td>\r\n                  <td>{{ basic_info.other_attr['14'] }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>物理暴击等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['6'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['6'] * 10) / Math.max(30, basic_info.role_level) || 0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>穿刺等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['8'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['8'] * 3) / Math.max(30, basic_info.role_level) || 0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>狂暴等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['5'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['5'] * 3) / Math.max(30, basic_info.role_level) || 0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>法术暴击等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['7'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['7'] * 10) / Math.max(30, basic_info.role_level) || 0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>法术伤害结果：</strong></td>\r\n                  <td>{{ basic_info.other_attr['12'] }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>封印命中等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['1'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['1'] * 10) /\r\n                        Math.max(30, basic_info.role_level + 25) || 0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>治疗能力：</strong></td>\r\n                  <td>{{ basic_info.other_attr['3'] }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td colspan=\"2\"><strong style=\"font-size: 16px; color: white\">抗性</strong></td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>抗物理暴击等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['9'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['9'] * 10) / Math.max(30, basic_info.role_level) || 0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>格挡值：</strong></td>\r\n                  <td>{{ basic_info.other_attr['11'] }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>抗法术暴击等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['10'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['10'] * 10) / Math.max(30, basic_info.role_level) ||\r\n                        0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>抵抗封印等级：</strong></td>\r\n                  <td>\r\n                    {{ basic_info.other_attr['2'] }}({{\r\n                      (\r\n                        (basic_info.other_attr['2'] * 10) /\r\n                        Math.max(30, basic_info.role_level + 25) || 0\r\n                      ).toFixed(2)\r\n                    }}%)\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>气血回复效果：</strong></td>\r\n                  <td>{{ basic_info.other_attr['4'] }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>躲避：</strong></td>\r\n                  <td>{{ basic_info.other_attr['13'] }}</td>\r\n                </tr>\r\n              </template>\r\n            </table>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"width: 320px\">\r\n            <h4>角色修炼及宠修</h4>\r\n            <table class=\"tb02\" width=\"49%\" cellspacing=\"0\" cellpadding=\"0\" style=\"float: left\">\r\n              <tr v-for=\"(item, index) in role_xiulian\" :key=\"index\">\r\n                <th width=\"100\">{{ item.name }}：</th>\r\n                <td style=\"white-space: nowrap\">{{ item.info }}</td>\r\n              </tr>\r\n            </table>\r\n\r\n            <table class=\"tb02\" width=\"49%\" cellspacing=\"0\" cellpadding=\"0\" style=\"float: right\">\r\n              <tr v-if=\"yu_shou_shu !== undefined\">\r\n                <th width=\"100\">育兽术：</th>\r\n                <td>{{ yu_shou_shu }}</td>\r\n              </tr>\r\n              <tr v-for=\"(item, index) in pet_ctrl_skill\" :key=\"index\">\r\n                <th width=\"100\">{{ item.name }}：</th>\r\n                <td>{{ item.grade }}</td>\r\n              </tr>\r\n            </table>\r\n\r\n            <div class=\"blank9\" style=\"clear: both\"></div>\r\n            <div class=\"blank9\"></div>\r\n            <h4>积分 其他</h4>\r\n            <table width=\"92%\" class=\"tb02\" cellspacing=\"0\" cellpadding=\"0\">\r\n              <tr>\r\n                <th width=\"80\">比武积分：</th>\r\n                <td>{{ basic_info.hero_score }}</td>\r\n                <th width=\"80\">剑会积分：</th>\r\n                <td>{{ basic_info.sword_score }}</td>\r\n              </tr>\r\n              <tr>\r\n                <th width=\"80\">三界功绩：</th>\r\n                <td>{{ basic_info.sanjie_score }}</td>\r\n                <th width=\"80\">副本积分：</th>\r\n                <td>{{ basic_info.dup_score }}</td>\r\n              </tr>\r\n              <tr>\r\n                <th width=\"80\">神器积分：</th>\r\n                <td>{{ basic_info.shenqi_score }}</td>\r\n                <th></th>\r\n                <td></td>\r\n              </tr>\r\n            </table>\r\n          </div>\r\n        </el-tab-pane>\r\n        <el-tab-pane label=\"技能\" name=\"role_skill\" v-if=\"school_skill\">\r\n          <div class=\"cols\" style=\"width: 200px\">\r\n            <h4>师门技能</h4>\r\n            <div class=\"skill\">\r\n              <p v-if=\"school_skill.length > 7\" class=\"textCenter cDYellow\">师门技能信息有误</p>\r\n              <p v-else-if=\"school_skill.length == 0\" class=\"textCenter cDYellow\">师门技能都是0</p>\r\n              <ul v-else id=\"school_skill_lists\">\r\n                <li style=\"left: 60px; top: 0\">\r\n                  <img referrerpolicy=\"no-referrer\" :src=\"school_skill2_icon\" :data_equip_name=\"school_skill2_name\"\r\n                    data_skill_type=\"school_skill\" :data_equip_desc=\"school_skill2_desc\"\r\n                    data_tip_box=\"RoleSkillTipsBox\" />\r\n                  <p>{{ school_skill2_grade }}</p>\r\n                  <h5>{{ school_skill2_name }}</h5>\r\n                </li>\r\n                <li style=\"left: 0; top: 50px\">\r\n                  <img referrerpolicy=\"no-referrer\" :src=\"school_skill3_icon\" :data_equip_name=\"school_skill3_name\"\r\n                    data_skill_type=\"school_skill\" :data_equip_desc=\"school_skill3_desc\"\r\n                    data_tip_box=\"RoleSkillTipsBox\" />\r\n                  <p>{{ school_skill3_grade }}</p>\r\n                  <h5>{{ school_skill3_name }}</h5>\r\n                </li>\r\n                <li style=\"left: 120px; top: 50px\">\r\n                  <img referrerpolicy=\"no-referrer\" :src=\"school_skill4_icon\" :data_equip_name=\"school_skill4_name\"\r\n                    data_skill_type=\"school_skill\" :data_equip_desc=\"school_skill4_desc\"\r\n                    data_tip_box=\"RoleSkillTipsBox\" />\r\n                  <p>{{ school_skill4_grade }}</p>\r\n                  <h5>{{ school_skill4_name }}</h5>\r\n                </li>\r\n                <li style=\"left: 0; top: 140px\">\r\n                  <img referrerpolicy=\"no-referrer\" :src=\"school_skill5_icon\" :data_equip_name=\"school_skill5_name\"\r\n                    data_skill_type=\"school_skill\" :data_equip_desc=\"school_skill5_desc\"\r\n                    data_tip_box=\"RoleSkillTipsBox\" />\r\n                  <p>{{ school_skill5_grade }}</p>\r\n                  <h5>{{ school_skill5_name }}</h5>\r\n                </li>\r\n                <li style=\"left: 120px; top: 140px\">\r\n                  <img referrerpolicy=\"no-referrer\" :src=\"school_skill6_icon\" :data_equip_name=\"school_skill6_name\"\r\n                    data_skill_type=\"school_skill\" :data_equip_desc=\"school_skill6_desc\"\r\n                    data_tip_box=\"RoleSkillTipsBox\" />\r\n                  <p>{{ school_skill6_grade }}</p>\r\n                  <h5>{{ school_skill6_name }}</h5>\r\n                </li>\r\n                <li style=\"left: 60px; top: 94px\">\r\n                  <img referrerpolicy=\"no-referrer\" :src=\"school_skill1_icon\" :data_equip_name=\"school_skill1_name\"\r\n                    data_skill_type=\"school_skill\" :data_equip_desc=\"school_skill1_desc\"\r\n                    data_tip_box=\"RoleSkillTipsBox\" />\r\n                  <p>{{ school_skill1_grade }}</p>\r\n                  <h5>{{ school_skill1_name }}</h5>\r\n                </li>\r\n                <li style=\"left: 60px; top: 200px\">\r\n                  <img referrerpolicy=\"no-referrer\" :src=\"school_skill7_icon\" :data_equip_name=\"school_skill7_name\"\r\n                    data_skill_type=\"school_skill\" :data_equip_desc=\"school_skill7_desc\"\r\n                    data_tip_box=\"RoleSkillTipsBox\" />\r\n                  <p>{{ school_skill7_grade }}</p>\r\n                  <h5>{{ school_skill7_name }}</h5>\r\n                </li>\r\n              </ul>\r\n            </div>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"width: 442px; margin-left: 18px\">\r\n            <h4>生活技能</h4>\r\n            <div class=\"blank12\"></div>\r\n            <div v-if=\"life_skill && life_skill.length > 0\">\r\n              <table cellspacing=\"0\" cellpadding=\"0\" class=\"skillTb\" id=\"life_skill_lists\">\r\n                <tr v-for=\"(row, rowIndex) in skillRows(life_skill, 7)\" :key=\"rowIndex\">\r\n                  <td v-for=\"(item, itemIndex) in row\" :key=\"itemIndex\">\r\n                    <img referrerpolicy=\"no-referrer\" :src=\"item.skill_icon\" width=\"40\" height=\"40\"\r\n                      :data_equip_name=\"item.name\" data_skill_type=\"life_skill\" :data_equip_desc=\"item.desc\"\r\n                      data_tip_box=\"RoleSkillTipsBox\" />\r\n                    <p>{{ item.skill_grade }}</p>\r\n                    <h5>{{ item.skill_name }}</h5>\r\n                  </td>\r\n                </tr>\r\n              </table>\r\n            </div>\r\n            <div v-else class=\"textCenter\" style=\"padding-bottom: 30px\">无</div>\r\n\r\n            <div class=\"blank9\"></div>\r\n            <h4>剧情技能</h4>\r\n            <div class=\"blank12\"></div>\r\n            <div v-if=\"ju_qing_skill && ju_qing_skill.length > 0\">\r\n              <table cellspacing=\"0\" cellpadding=\"0\" class=\"skillTb\" id=\"juqing_skill_lists\">\r\n                <tr v-for=\"(row, rowIndex) in skillRows(ju_qing_skill, 7)\" :key=\"rowIndex\">\r\n                  <td v-for=\"(item, itemIndex) in row\" :key=\"itemIndex\">\r\n                    <img referrerpolicy=\"no-referrer\" :src=\"item.skill_icon\" width=\"40\" height=\"40\"\r\n                      :data_equip_name=\"item.name\" data_skill_type=\"ju_qing_skill\" :data_equip_desc=\"item.desc\"\r\n                      data_tip_box=\"RoleSkillTipsBox\" />\r\n                    <p>{{ item.skill_grade }}</p>\r\n                    <h5>{{ item.skill_name }}</h5>\r\n                  </td>\r\n                </tr>\r\n              </table>\r\n            </div>\r\n            <div v-else class=\"textCenter\" style=\"padding-bottom: 30px\">无</div>\r\n\r\n            <p class=\"textRight cDYellow\">剩余技能点：{{ left_skill_point }}</p>\r\n            <div class=\"blank9\"></div>\r\n            <h4>熟练度</h4>\r\n            <table width=\"92%\" class=\"tb02\" cellspacing=\"0\" cellpadding=\"0\">\r\n              <tr>\r\n                <th width=\"100\">打造熟练度：</th>\r\n                <td>{{ shuliandu.smith_skill }}</td>\r\n                <th width=\"100\">裁缝熟练度：</th>\r\n                <td>{{ shuliandu.sew_skill }}</td>\r\n              </tr>\r\n            </table>\r\n          </div>\r\n        </el-tab-pane>\r\n        <el-tab-pane label=\"道具/法宝\" name=\"role_equips\">\r\n          <div class=\"cols\" style=\"width: 350px\">\r\n            <h4>道具</h4>\r\n\r\n            <table width=\"80%\" style=\"margin: 0 auto\" cellspacing=\"3\" cellpadding=\"3\" id=\"RoleUsingEquips\">\r\n              <tr>\r\n                <td colspan=\"3\">\r\n                  <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\">\r\n                    <tr>\r\n                      <td>\r\n                        <ItemPopover id=\"role_using_equip_187\" :equipment=\"get_using_equip(187)\" />\r\n                      </td>\r\n                      <td>\r\n                        <ItemPopover id=\"role_using_equip_187\" :equipment=\"get_using_equip(188)\" />\r\n                      </td>\r\n                      <td>\r\n                        <ItemPopover id=\"role_using_equip_187\" :equipment=\"get_using_equip(190)\" />\r\n                      </td>\r\n                      <td>\r\n                        <ItemPopover id=\"role_using_equip_187\" :equipment=\"get_using_equip(189)\" />\r\n                      </td>\r\n                    </tr>\r\n                  </table>\r\n                </td>\r\n              </tr>\r\n              <tr>\r\n                <td>\r\n                  <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\">\r\n                    <tr>\r\n                      <td>\r\n                        <ItemPopover id=\"role_using_equip_1\" :equipment=\"get_using_equip(1)\" />\r\n                      </td>\r\n                    </tr>\r\n                    <tr>\r\n                      <td>\r\n                        <ItemPopover id=\"role_using_equip_6\" :equipment=\"get_using_equip(6)\" />\r\n                      </td>\r\n                    </tr>\r\n                    <tr>\r\n                      <td>\r\n                        <ItemPopover id=\"role_using_equip_5\" :equipment=\"get_using_equip(5)\" />\r\n                      </td>\r\n                    </tr>\r\n                  </table>\r\n                </td>\r\n                <td>\r\n                  <table class=\"tb02\" cellspacing=\"0\" cellpadding=\"0\">\r\n                    <tr>\r\n                      <th>现金：</th>\r\n                      <td>{{ basic_info.cash }}</td>\r\n                    </tr>\r\n                    <tr>\r\n                      <th>存银：</th>\r\n                      <td>{{ basic_info.saving }}</td>\r\n                    </tr>\r\n                    <tr>\r\n                      <th>储备：</th>\r\n                      <td>{{ basic_info.learn_cash }}</td>\r\n                    </tr>\r\n                    <tr>\r\n                      <th>善恶：</th>\r\n                      <td>{{ basic_info.badness }}</td>\r\n                    </tr>\r\n                    <tr>\r\n                      <th>仙玉：</th>\r\n                      <td>{{ basic_info.xianyu }}</td>\r\n                    </tr>\r\n                    <tr>\r\n                      <th>精力：</th>\r\n                      <td>{{ basic_info.energy }}</td>\r\n                    </tr>\r\n                  </table>\r\n                </td>\r\n                <td>\r\n                  <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\">\r\n                    <tr>\r\n                      <td>\r\n                        <ItemPopover :equipment=\"get_using_equip(4)\" id=\"role_using_equip_4\" />\r\n                      </td>\r\n                    </tr>\r\n                    <tr>\r\n                      <td>\r\n                        <ItemPopover :equipment=\"get_using_equip(2)\" id=\"role_using_equip_2\" />\r\n                      </td>\r\n                    </tr>\r\n                    <tr>\r\n                      <td>\r\n                        <ItemPopover :equipment=\"get_using_equip(3)\" id=\"role_using_equip3\" />\r\n                      </td>\r\n                    </tr>\r\n                  </table>\r\n                </td>\r\n              </tr>\r\n            </table>\r\n\r\n            <div class=\"blank9\"></div>\r\n            <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"RoleStoreEquips\">\r\n              <tr v-for=\"(row, rowIndex) in storeEquipsRows\" :key=\"rowIndex\">\r\n                <td v-for=\"(equip, colIndex) in row\" :key=\"colIndex\">\r\n                  <ItemPopover :id=\"'store_equip_tips' + (rowIndex * 5 + colIndex + 1)\" :equipment=\"equip\r\n                    ? {\r\n                      equip_sn: equip.equip_sn,\r\n                      equip_face_img: equip.small_icon,\r\n                      equip_name: equip.name,\r\n                      equip_type_desc: equip.static_desc,\r\n                      large_equip_desc: equip.desc,\r\n                      lock_type: equip.lock_type\r\n                    }\r\n                    : null\r\n                    \" />\r\n                </td>\r\n                <td v-for=\"i in 5 - row.length\" :key=\"'empty-' + i\">\r\n                  <ItemPopover :equipment=\"null\" />\r\n                </td>\r\n              </tr>\r\n            </table>\r\n\r\n            <div v-if=\"split_equips && split_equips.length\" class=\"blank9\"></div>\r\n            <h4 v-if=\"split_equips && split_equips.length\">拆卖道具</h4>\r\n            <table v-if=\"split_equips && split_equips.length\" cellspacing=\"0\" cellpadding=\"3\" class=\"tb03 size50\"\r\n              id=\"RoleSplitEquips\">\r\n              <tr v-for=\"(row, rowIndex) in splitEquipsRows\" :key=\"rowIndex\">\r\n                <td v-for=\"(equip, colIndex) in row\" :key=\"colIndex\">\r\n                  <a style=\"display: block; width: 100%; height: 100%\" :href=\"getCBGLinkByType(equip.eid, 'equip')\"\r\n                    target=\"_blank\" tid=\"gl03odgw\" :data_trace_text=\"equip.eid\">\r\n                    <ItemPopover :equipment=\"get_using_equip(equip)\" />\r\n                  </a>\r\n                </td>\r\n                <td v-for=\"i in 5 - row.length\" :key=\"'empty-' + i\"></td>\r\n              </tr>\r\n            </table>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"width: 300px; margin-left: 25px\">\r\n            <div class=\"cols\" style=\"width: 145px; margin-left: 0\">\r\n              <h4>神器</h4>\r\n              <div class=\"blank9\"></div>\r\n              <table style=\"table-layout: fixed\" cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\"\r\n                id=\"RoleStoreShenqi\">\r\n                <tr>\r\n                  <el-popover trigger=\"click\" placement=\"bottom\" popper-class=\"shenqi-info-popover\">\r\n                    <template #reference>\r\n                      <td v-if=\"shenqi\" id=\"shenqi\" class=\"shenqi_td\" style=\"background: #c0b9dd\"\r\n                        :data_equip_name=\"shenqi.name\" :data_equip_type=\"shenqi.type\" :data_equip_desc=\"shenqi.desc\"\r\n                        :data_equip_type_desc=\"shenqi.static_desc\">\r\n                        <ItemPopover :equipment=\"{\r\n                          equip_face_img: shenqi.icon,\r\n                          equip_name: shenqi.name,\r\n                          equip_type_desc: shenqi.static_desc,\r\n                          large_equip_desc: shenqi.desc\r\n                        }\" />\r\n                      </td>\r\n                    </template>\r\n                    <div class=\"shenqi-modal\" id=\"shenqiModal\">\r\n                      <h4 class=\"modal-head\">\r\n                        神器属性 <span class=\"modal-close-btn\" id=\"shenqiCloseBtn\"></span>\r\n                      </h4>\r\n                      <div class=\"shenqi-modal-content\">\r\n                        <ul v-if=\"shenqi?.isNew\" class=\"shenqi-tab\">\r\n                          <li v-for=\"i in 3\" :key=\"i\" :class=\"[\r\n                            'tab-item',\r\n                            'js_shenqi_tab',\r\n                            !shenqi_components['shenqi' + i]\r\n                              ? 'disable'\r\n                              : shenqi_components['shenqi' + i] &&\r\n                                shenqi_components['shenqi' + i].actived\r\n                                ? 'active'\r\n                                : ''\r\n                          ]\" :data-index=\"i - 1\" @click=\"switchShenqiTab(i - 1)\">\r\n                            第{{ ['一', '二', '三'][i - 1] }}套属性\r\n                          </li>\r\n                        </ul>\r\n\r\n                        <div class=\"shenqi-list\">\r\n                          <div v-for=\"(modalData, key) in shenqi_components\" :key=\"key\" class=\"js_shenqi_panel\"\r\n                            :style=\"{ display: !modalData.actived ? 'none' : '' }\">\r\n                            <div v-for=\"(component, compIndex) in modalData.components\" :key=\"compIndex\"\r\n                              class=\"shenqi-itme\">\r\n                              <div class=\"shenqi-item-left\">\r\n                                <img referrerpolicy=\"no-referrer\" :src=\"component.buweiPic\" />\r\n                              </div>\r\n                              <div class=\"col-r\">\r\n                                <ul class=\"shenqi-item-center\">\r\n                                  <li v-for=\"(wuxing, wuxingIndex) in component.wuxing\" :key=\"wuxingIndex\">\r\n                                    <div v-if=\"wuxing.status !== 1\" class=\"img-wrap\">\r\n                                      <img referrerpolicy=\"no-referrer\" :src=\"wuxing.lingxiPic\" />\r\n                                    </div>\r\n                                    <div v-else>\r\n                                      <div class=\"img-wrap\">\r\n                                        <img referrerpolicy=\"no-referrer\" :src=\"wuxing.lingxiPic\" />\r\n                                        <span v-if=\"wuxing.wuxing_affix_text\" class=\"cizhui\">{{\r\n                                          wuxing.wuxing_affix_text\r\n                                          }}</span>\r\n                                      </div>\r\n                                      <p>{{ wuxing.wuxingText }}</p>\r\n                                    </div>\r\n                                  </li>\r\n                                </ul>\r\n                                <ul class=\"shenqi-item-right\">\r\n                                  <li v-for=\"(wuxing, wuxingIndex) in component.wuxing\" :key=\"wuxingIndex\">\r\n                                    {{ wuxing.attr }}\r\n                                  </li>\r\n                                </ul>\r\n                              </div>\r\n                            </div>\r\n                          </div>\r\n                        </div>\r\n                      </div>\r\n                    </div>\r\n                  </el-popover>\r\n\r\n                  <td v-if=\"huoshenta\" class=\"shenqi_td\" style=\"background: #c0b9dd\" :data_equip_name=\"huoshenta.name\"\r\n                    :data_equip_type=\"shenqi?.type\" :data_equip_desc=\"huoshenta.desc\" data_equip_type_desc=\"\">\r\n                    <ItemPopover :equipment=\"{\r\n                      equip_face_img: huoshenta.icon,\r\n                      equip_name: huoshenta.name,\r\n                      large_equip_desc: huoshenta.desc\r\n                    }\" />\r\n                  </td>\r\n                  <td v-if=\"!shenqi && !huoshenta\" style=\"background: rgb(192, 185, 221)\"></td>\r\n                </tr>\r\n              </table>\r\n            </div>\r\n            <div class=\"cols\" style=\"width: 145px; margin-right: 0\">\r\n              <h4>已装备灵宝</h4>\r\n              <div class=\"blank9\"></div>\r\n              <table style=\"table-layout: fixed\" cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\">\r\n                <tr id=\"RoleUsingLingbao\">\r\n                  <template v-for=\"(item, i) in using_lingbao.concat([null, null]).slice(0, 2)\">\r\n                    <td v-if=\"item\" :key=\"'lingbao-' + i\" style=\"background: #c0b9dd\" :data_equip_name=\"item.name\"\r\n                      :data_equip_type=\"item.type\" :data_equip_desc=\"item.desc\"\r\n                      :data_equip_type_desc=\"item.static_desc\">\r\n                      <ItemPopover :equipment=\"{\r\n                        equip_face_img: item.icon,\r\n                        equip_name: item.name,\r\n                        equip_type_desc: item.static_desc,\r\n                        large_equip_desc: item.desc\r\n                      }\" />\r\n                    </td>\r\n                    <td v-else :key=\"'empty-' + i\" style=\"background: #c0b9dd\"></td>\r\n                  </template>\r\n                </tr>\r\n              </table>\r\n            </div>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"width: 300px; margin-left: 24px\">\r\n            <div class=\"blank12\"></div>\r\n            <h4>未装备灵宝</h4>\r\n            <div class=\"blank9\"></div>\r\n            <div style=\"\r\n                max-height: 125px;\r\n                width: 274px;\r\n                overflow: auto;\r\n                overflow-x: hidden;\r\n                margin: 0 auto;\r\n              \">\r\n              <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"RoleNoUsingLingbao\">\r\n                <tr v-for=\"(row, rowIndex) in nousingLingbaoRows\" :key=\"rowIndex\">\r\n                  <template v-for=\"(item, colIndex) in row\">\r\n                    <td v-if=\"item\" :key=\"'lingbao-' + colIndex\" style=\"background: #c0b9dd\"\r\n                      :data_equip_name=\"item.name\" :data_equip_type=\"item.type\" :data_equip_desc=\"item.desc\"\r\n                      :data_equip_type_desc=\"item.static_desc\">\r\n                      <ItemPopover :equipment=\"{\r\n                        equip_face_img: item.icon,\r\n                        equip_name: item.name,\r\n                        equip_type_desc: item.static_desc,\r\n                        large_equip_desc: item.desc\r\n                      }\" />\r\n                    </td>\r\n                    <td v-else :key=\"'empty-' + colIndex\" style=\"background: #c0b9dd\"></td>\r\n                  </template>\r\n                </tr>\r\n              </table>\r\n            </div>\r\n\r\n            <div class=\"blank12\"></div>\r\n            <h4>已装备法宝</h4>\r\n            <div class=\"blank9\"></div>\r\n            <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"RoleUsingFabao\">\r\n              <tr>\r\n                <td v-for=\"i in 4\" :key=\"'fabao-' + i\" style=\"background: #c0b9dd\">\r\n                  <ItemPopover :equipment=\"get_using_fabao(i)\" align=\"middle\" />\r\n                </td>\r\n              </tr>\r\n            </table>\r\n            <div class=\"blank12\"></div>\r\n            <h4>\r\n              未装备的所有法宝\r\n              <span v-if=\"unused_fabao_sum !== undefined\">({{ unused_fabao_sum }}/{{ fabao_storage_size }})</span>\r\n            </h4>\r\n            <div class=\"blank9\"></div>\r\n            <div id=\"fabao_table_wrapper\" style=\"\r\n                height: 205px;\r\n                width: 274px;\r\n                overflow: auto;\r\n                overflow-x: hidden;\r\n                margin: 0 auto;\r\n              \">\r\n              <table width=\"256\" style=\"table-layout: fixed\" cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\"\r\n                id=\"RoleStoreFabao\">\r\n                <tr v-for=\"(row, rowIndex) in storeFabaoRows\" :key=\"rowIndex\">\r\n                  <td v-for=\"(fabao, colIndex) in row\" :key=\"colIndex\" v-if=\"fabao\" style=\"background: #c0b9dd\">\r\n                    <ItemPopover :equipment=\"get_using_fabao(fabao)\" />\r\n                  </td>\r\n                  <td v-for=\"i in 5 - row.length\" :key=\"'empty-' + i\" style=\"background: #c0b9dd\"></td>\r\n                </tr>\r\n              </table>\r\n            </div>\r\n\r\n            <div class=\"blank9\"></div>\r\n            <table class=\"tb02\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\r\n              <tr>\r\n                <th width=\"100\">行囊扩展：</th>\r\n                <td>{{ basic_info.package_num }}</td>\r\n              </tr>\r\n            </table>\r\n          </div>\r\n        </el-tab-pane>\r\n        <el-tab-pane label=\"召唤兽/孩子\" name=\"role_pets\">\r\n          <div class=\"cols\" style=\"width: 190px\">\r\n            <!-- 拆卖召唤兽 -->\r\n            <div v-if=\"split_pets && split_pets.length\">\r\n              <h4>拆卖召唤兽</h4>\r\n              <div class=\"blank9\"></div>\r\n              <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50 pet-split-tb\" id=\"RoleSplitPets\">\r\n                <tr v-if=\"split_pets.length === 0\">\r\n                  <td class=\"noData\">无</td>\r\n                </tr>\r\n                <template v-else>\r\n                  <tr v-for=\"(row, rowIndex) in splitPetsRows\" :key=\"rowIndex\">\r\n                    <td v-for=\"(pet, colIndex) in row\" :key=\"colIndex\">\r\n                      <div class=\"pet-split-img-wrap\">\r\n                        <img referrerpolicy=\"no-referrer\" :src=\"pet.icon\" :data_idx=\"rowIndex * 3 + colIndex\"\r\n                          @click=\"onPetAvatarClick(pet)\"\r\n                          :class=\"{ on: current_pet && current_pet.equip_sn === pet.equip_sn }\" />\r\n                      </div>\r\n                      <a :href=\"getCBGLinkByType(pet.eid, 'equip')\" tid=\"57i8um2f\" :data_trace_text=\"pet.eid\"\r\n                        target=\"_blank\" class=\"btn-pet-detail\">查看详情</a>\r\n                    </td>\r\n                    <td v-for=\"i in 3 - row.length\" :key=\"'empty-' + i\"\r\n                      style=\"width: 54px; height: 54px; display: none\">\r\n                      &nbsp;\r\n                    </td>\r\n                  </tr>\r\n                </template>\r\n              </table>\r\n            </div>\r\n\r\n            <!-- 召唤兽 -->\r\n            <h4>召唤兽({{ pet_info.length }}/{{ allow_pet_count }})</h4>\r\n            <div class=\"blank9\"></div>\r\n            <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"RolePets\">\r\n              <tr v-if=\"pet_info.length === 0\">\r\n                <td class=\"noData\">无</td>\r\n              </tr>\r\n              <template v-else>\r\n                <tr v-for=\"(row, rowIndex) in petInfoRows\" :key=\"rowIndex\">\r\n                  <td v-for=\"(pet, colIndex) in row\" :key=\"colIndex\" style=\"width: 54px; height: 54px; cursor: pointer;position: relative;\">\r\n                    <img referrerpolicy=\"no-referrer\" :src=\"pet.icon\" :data_idx=\"rowIndex * 3 + colIndex\"\r\n                      @click=\"onPetAvatarClick(pet)\"\r\n                      :class=\"{ on: current_pet && current_pet.equip_sn === pet.equip_sn }\" />\r\n                    <div v-if=\"getPetRightLock(pet)?.length > 0\"\r\n                      style=\"position: absolute; width: 14px; right: 0px; top: 0px;\">\r\n                      <img v-for=\"l in getPetRightLock(pet)\" :key=\"l\"\r\n                        :src=\"require(`../../../public/assets/images/time_lock_${l}.webp`)\"\r\n                        style=\"height: 14px; width: 14px; display: block;\">\r\n                    </div>\r\n                    <div v-if=\"getPetLeftLock(pet)?.length > 0\"\r\n                      style=\"position: absolute; width: 14px; left: 0px; top: 0px;\">\r\n                      <img v-for=\"l in getPetLeftLock(pet)\" :key=\"l\"\r\n                        :src=\"require(`../../../public/assets/images/time_lock_${l}.webp`)\"\r\n                        style=\"height: 14px; width: 14px;display: block;\">\r\n                    </div>\r\n                  </td>\r\n                  <td v-for=\"i in 3 - row.length\" :key=\"'empty-' + i\" style=\"width: 54px; height: 54px; display: none\">\r\n                    &nbsp;\r\n                  </td>\r\n                </tr>\r\n              </template>\r\n            </table>\r\n\r\n            <div class=\"blank12\"></div>\r\n\r\n            <!-- 孩子 -->\r\n            <h4>孩子</h4>\r\n            <div class=\"blank9\"></div>\r\n            <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"RoleChilds\">\r\n              <tr v-if=\"child_info.length === 0\">\r\n                <td class=\"noData\">无</td>\r\n              </tr>\r\n              <template v-else>\r\n                <tr v-for=\"(row, rowIndex) in childListRows\" :key=\"rowIndex\">\r\n                  <td v-for=\"(child, colIndex) in row\" :key=\"colIndex\"\r\n                    style=\"width: 54px; height: 54px; cursor: pointer\">\r\n                    <img referrerpolicy=\"no-referrer\" :src=\"child.icon\" :data_idx=\"rowIndex * 2 + colIndex\"\r\n                      @click=\"onPetAvatarClick({ index: colIndex, ...child })\" :class=\"{\r\n                        on:\r\n                          current_pet &&\r\n                          current_pet.equip_sn === child.equip_sn &&\r\n                          current_pet.index === colIndex\r\n                      }\" />\r\n                  </td>\r\n                  <td v-for=\"i in 2 - row.length\" :key=\"'empty-' + i\" style=\"width: 54px; height: 54px; display: none\">\r\n                    &nbsp;\r\n                  </td>\r\n                </tr>\r\n              </template>\r\n            </table>\r\n\r\n            <div class=\"blank12\"></div>\r\n\r\n            <!-- 特殊召唤兽 -->\r\n            <h4>特殊召唤兽</h4>\r\n            <div class=\"blank9\"></div>\r\n            <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb02\">\r\n              <tr v-if=\"special_pet_info === undefined\">\r\n                <td colspan=\"3\" class=\"noData\">未知</td>\r\n              </tr>\r\n              <tr v-else-if=\"special_pet_info.length === 0\">\r\n                <td colspan=\"3\" class=\"noData\">无</td>\r\n              </tr>\r\n              <template v-else>\r\n                <template v-for=\"(pet, petIndex) in special_pet_info\">\r\n                  <tr :key=\"petIndex\">\r\n                    <th>{{ pet.cName }}</th>\r\n                    <td>{{ pet.all_skills[0].name }}</td>\r\n                    <td>{{ pet.all_skills[0].value }}</td>\r\n                  </tr>\r\n                  <tr v-for=\"(skill, skillIndex) in pet.all_skills.slice(1)\" :key=\"skillIndex\">\r\n                    <td>&nbsp;</td>\r\n                    <td>{{ skill.name }}</td>\r\n                    <td>{{ skill.value }}</td>\r\n                  </tr>\r\n                </template>\r\n              </template>\r\n            </table>\r\n\r\n            <div class=\"blank12\"></div>\r\n\r\n            <!-- 召唤兽心得技能 -->\r\n            <h4>召唤兽心得技能</h4>\r\n            <table class=\"tb02\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\r\n              <tbody>\r\n                <tr>\r\n                  <th width=\"100\">已解锁技能数：</th>\r\n                  <td class=\"sbook-skill-val\" id=\"show_more_sbook_skill\">\r\n                    <span v-if=\"sbook_skill && sbook_skill.length > 0\" class=\"text-underline\" :title=\"sbook_skill.join(',')\">{{ sbook_skill.length\r\n                      }}/{{\r\n                        sbook_skill_total }}</span>\r\n                    <span v-else>无</span>\r\n                  </td>\r\n                </tr>\r\n              </tbody>\r\n            </table>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"width: 456px; margin-left: 18px\" id=\"pet_detail_panel\">\r\n            <div v-if=\"pet_info.length === 0 && child_info.length === 0 && split_pets.length === 0\">\r\n              <h4>详细信息</h4>\r\n              <div class=\"blank9\"></div>\r\n              <table class=\"tb02 petZiZhiTb\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\r\n                <tr>\r\n                  <td class=\"noData\" style=\"text-align: center\">无</td>\r\n                </tr>\r\n              </table>\r\n            </div>\r\n            <PetDetail v-else-if=\"current_pet\" :current_pet=\"current_pet\" />\r\n          </div>\r\n        </el-tab-pane>\r\n        <el-tab-pane label=\"坐骑\" name=\"role_riders\">\r\n          <div class=\"cols\" style=\"width: 320px\">\r\n            <h4>坐骑</h4>\r\n            <div class=\"blank9\"></div>\r\n            <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"RoleRiders\">\r\n              <tr v-if=\"rider_info.length <= 0\">\r\n                <td class=\"noData\">无</td>\r\n              </tr>\r\n              <template v-else>\r\n                <tr v-for=\"(row, rowIndex) in riderRows\" :key=\"rowIndex\">\r\n                  <td v-for=\"(rider, colIndex) in row\" :key=\"colIndex\"\r\n                    style=\"width: 54px; height: 54px; cursor: pointer\">\r\n                    <img referrerpolicy=\"no-referrer\" :src=\"rider.icon\" width=\"50\" height=\"50\"\r\n                      :data_idx=\"rowIndex * 5 + colIndex\" @click=\"current_rider_index = `${rowIndex}-${colIndex}`\"\r\n                      :class=\"{ on: current_rider_index === `${rowIndex}-${colIndex}` }\" />\r\n                  </td>\r\n                  <td v-for=\"i in 5 - row.length\" :key=\"'empty-' + i\" style=\"display: none\"></td>\r\n                </tr>\r\n              </template>\r\n            </table>\r\n            <div class=\"blank12\"></div>\r\n            <div id=\"rider_detail_panel\">\r\n              <table class=\"tb02\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\r\n                <tr>\r\n                  <th>类型：</th>\r\n                  <td>{{ currentRider.type_name }}</td>\r\n                  <th>主属性：</th>\r\n                  <td>{{ currentRider.mattrib }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <th>等级：</th>\r\n                  <td>{{ currentRider.grade }}</td>\r\n                  <th>&nbsp;</th>\r\n                  <td>&nbsp;</td>\r\n                </tr>\r\n                <tr>\r\n                  <th>成长：</th>\r\n                  <td>{{ currentRider.exgrow }}</td>\r\n                  <th>&nbsp;</th>\r\n                  <td>&nbsp;</td>\r\n                </tr>\r\n              </table>\r\n              <div class=\"blank12\"></div>\r\n              <div v-if=\"currentRider && currentRider.all_skills && currentRider.all_skills.length > 0\">\r\n                <table cellspacing=\"0\" cellpadding=\"0\" class=\"skillTb\" id=\"RoleRiderSkill\">\r\n                  <tr v-for=\"(row, rowIndex) in riderSkillRows\" :key=\"rowIndex\">\r\n                    <td v-for=\"(skill, colIndex) in row\" :key=\"colIndex\">\r\n                      <img :title=\"skill.name + ' (' + skill.grade + '级)\\n' + skill.desc\" referrerpolicy=\"no-referrer\"\r\n                        :src=\"skill.icon\" width=\"40\" height=\"40\" :data_equip_name=\"skill.name\"\r\n                        data_skill_type=\"riderSkill\" :data_equip_desc=\"skill.desc\" :data_equip_level=\"skill.grade\"\r\n                    />\r\n                      <p>{{ skill.grade }}</p>\r\n                    </td>\r\n                    <td v-for=\"i in 6 - row.length\" :key=\"'empty-' + i\"></td>\r\n                  </tr>\r\n                </table>\r\n              </div>\r\n            </div>\r\n\r\n            <h4>携带玄灵珠</h4>\r\n            <div class=\"blank9\"></div>\r\n            <div class=\"roleModuleScroller\" style=\"max-height: 22em\">\r\n              <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"RoleXunlingzhu\">\r\n                <tr v-if=\"rider_plan_list.length > 0\">\r\n                  <td v-for=\"(riderplan, index) in rider_plan_list\" :key=\"index\"\r\n                    style=\"width: 54px; height: 54px; cursor: pointer\">\r\n                    <img referrerpolicy=\"no-referrer\" v-if=\"riderplan.type == 1\" :src=\"ResUrl + '/images/big/56973.gif'\"\r\n                      width=\"50\" height=\"50\" :data_idx=\"index\" @click=\"current_rider_plan_index = index\"\r\n                      :class=\"{ on: current_rider_plan_index === index }\" />\r\n                    <img referrerpolicy=\"no-referrer\" v-else-if=\"riderplan.type == 2\"\r\n                      :src=\"ResUrl + '/images/big/56974.gif'\" width=\"50\" height=\"50\" :data_idx=\"index\"\r\n                      @click=\"current_rider_plan_index = index\" :class=\"{ on: current_rider_plan_index === index }\" />\r\n                    <span v-if=\"index == 0\">第一套</span>\r\n                    <span v-else-if=\"index == 1\">第二套</span>\r\n                  </td>\r\n                </tr>\r\n                <tr v-else>\r\n                  <td class=\"noData\">无</td>\r\n                </tr>\r\n              </table>\r\n              <div class=\"blank12\"></div>\r\n              <div id=\"xuanlingzhu_detail_panel\">\r\n                <div v-if=\"currentRiderPlan\">\r\n                  <table class=\"tb02\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\r\n                    <tr v-if=\"currentRiderPlan.type === 1\">\r\n                      <th style=\"width: 48px\">类型：</th>\r\n                      <td>{{ currentRiderPlan.level }}级回春</td>\r\n                      <th>&nbsp;</th>\r\n                      <td>&nbsp;</td>\r\n                    </tr>\r\n                    <tr v-if=\"currentRiderPlan.type === 1\">\r\n                      <th style=\"width: 48px\">效果：</th>\r\n                      <td>\r\n                        战斗中\"召唤\"召唤兽或孩子时，恢复自身{{\r\n                          EquipLevel * currentRiderPlan.level\r\n                        }}点气血和{{ currentRiderPlan.level }}点愤怒。\r\n                      </td>\r\n                    </tr>\r\n                    <tr v-if=\"currentRiderPlan.type === 2\">\r\n                      <th style=\"width: 48px\">类型：</th>\r\n                      <td>{{ currentRiderPlan.level }}级破军</td>\r\n                      <th>&nbsp;</th>\r\n                      <td>&nbsp;</td>\r\n                    </tr>\r\n                    <tr v-if=\"currentRiderPlan.type === 2\">\r\n                      <th style=\"width: 48px\">效果：</th>\r\n                      <td>\r\n                        战斗中\"召唤\"召唤兽或孩子时，有{{\r\n                          currentRiderPlan.level * 12.5\r\n                        }}%几率提升自身1%伤害，持续到战斗结束。\r\n                      </td>\r\n                    </tr>\r\n                  </table>\r\n                </div>\r\n              </div>\r\n            </div>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"float: right; width: 320px; margin-right: 28px; margin-bottom: 10px\">\r\n            <h4>限量祥瑞</h4>\r\n            <div class=\"blank9\"></div>\r\n            <div v-if=\"nosale_xiangrui == undefined\">\r\n              <p class=\"textCenter cDYellow\">祥瑞信息未知</p>\r\n            </div>\r\n            <div v-else class=\"roleModuleScroller\" style=\"max-height: 22em\">\r\n              <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb02\" id=\"RoleXiangRui\">\r\n                <tr v-if=\"nosale_xiangrui.length <= 0\">\r\n                  <td class=\"noData\">无</td>\r\n                </tr>\r\n                <template v-else>\r\n                  <tr v-for=\"xiangrui in nosale_xiangrui\" :key=\"xiangrui.name\">\r\n                    <th :class=\"{enhance:limitedSkinList.includes(xiangrui.name)}\">{{ xiangrui.name }}</th>\r\n                    <td>\r\n                      技能：\r\n                      <span v-if=\"xiangrui.skill_name\">\r\n                        {{ xiangrui.skill_name }}\r\n                        <span v-if=\"xiangrui.skill_level\">&nbsp;{{ xiangrui.skill_level }}</span>\r\n                      </span>\r\n                      <span v-else>无</span>\r\n                    </td>\r\n                  </tr>\r\n                </template>\r\n              </table>\r\n            </div>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"float: right; clear: right; width: 320px; margin-right: 28px\">\r\n            <h4>普通祥瑞</h4>\r\n            <div class=\"blank9\"></div>\r\n            <div v-if=\"xiangrui == undefined\">\r\n              <p class=\"textCenter cDYellow\">祥瑞信息未知</p>\r\n            </div>\r\n            <div v-else class=\"roleModuleScroller\" style=\"max-height: 22em\">\r\n              <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb02\" id=\"RoleXiangRui\">\r\n                <tr v-if=\"xiangrui.length <= 0\">\r\n                  <td class=\"noData\">无</td>\r\n                </tr>\r\n                <template v-else>\r\n                  <tr>\r\n                    <th>祥瑞总数</th>\r\n                    <td>{{ normal_xiangrui_num ? normal_xiangrui_num : totalXiangruiNum }}</td>\r\n                  </tr>\r\n                  <tr v-for=\"xiangrui in xiangrui\" :key=\"xiangrui.name\">\r\n                    <th>{{ xiangrui.name }}</th>\r\n                    <td>\r\n                      技能：\r\n                      <span v-if=\"xiangrui.skill_name\">\r\n                        {{ xiangrui.skill_name }}\r\n                        <span v-if=\"xiangrui.skill_level\">&nbsp;{{ xiangrui.skill_level }}</span>\r\n                      </span>\r\n                      <span v-else>无</span>\r\n                    </td>\r\n                  </tr>\r\n                </template>\r\n              </table>\r\n            </div>\r\n          </div>\r\n        </el-tab-pane>\r\n        <el-tab-pane label=\"锦衣/外观\" name=\"role_clothes\">\r\n          <div class=\"cols tab-jinyi\" style=\"width: 320px\">\r\n            <div class=\"module\">\r\n              <h4>彩果染色</h4>\r\n              <div class=\"blank9\"></div>\r\n              <table v-if=\"basic_info.body_caiguo !== undefined && basic_info.box_caiguo !== undefined\" class=\"tb02\"\r\n                width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\r\n                <tr>\r\n                  <th width=\"55%\">身上染色折算彩果数：</th>\r\n                  <td>{{ basic_info.body_caiguo }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <th>衣柜已保存染色方案：</th>\r\n                  <td>{{ basic_info.box_caiguo }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td colspan=\"2\" class=\"cGray\" style=\"font-size: 12px; padding-left: 0px; padding-right: 0px\">\r\n                    （衣柜保存的染色方案包括花豆染色方案和彩果染色方案）\r\n                  </td>\r\n                </tr>\r\n                <tr>\r\n                  <th>所有染色折算彩果数：</th>\r\n                  <td>{{ basic_info.total_caiguo }}</td>\r\n                </tr>\r\n              </table>\r\n              <p v-else-if=\"basic_info.caiguo !== undefined\" class=\"textCenter cDYellow\">\r\n                角色拥有折算彩果总量：{{ basic_info.caiguo }}\r\n              </p>\r\n              <p v-else class=\"textCenter cDYellow\">彩果信息未知</p>\r\n            </div>\r\n            <div v-if=\"new_clothes !== undefined\">\r\n              <div v-for=\"(item, index) in titleConf\" :key=\"index\" class=\"module module-jinyi\">\r\n                <h4>{{ item.title }}</h4>\r\n                <p class=\"jinyi-num\">{{ item.title }}总数：{{ getClothesList(item.key).length }}</p>\r\n                <ul v-if=\"getClothesList(item.key)\" class=\"jinyi-attr-list\">\r\n                  <li v-for=\"(clothesItem, clothesIndex) in getClothesList(item.key)\" :key=\"clothesIndex\" class=\"item\">\r\n                    {{ clothesItem.name }}\r\n                  </li>\r\n                </ul>\r\n              </div>\r\n            </div>\r\n          </div>\r\n\r\n          <div class=\"cols\" style=\"width: 320px; margin-left: 18px\">\r\n            <h4>锦衣道具栏</h4>\r\n            <div class=\"blank9\"></div>\r\n            <p v-if=\"clothes === undefined && new_clothes === undefined\" class=\"textCenter cDYellow\">\r\n              锦衣信息未知\r\n            </p>\r\n\r\n            <div v-else-if=\"new_clothes !== undefined\">\r\n              <ul class=\"xianyu-wrap\">\r\n                <li><i class=\"icon icon-xianyu\"></i>仙玉: {{ basic_info.xianyu }}</li>\r\n                <li>\r\n                  <i class=\"icon icon-xianyu-jifen\"></i>仙玉积分: {{ basic_info.xianyu_score }}\r\n                </li>\r\n                <li><i class=\"icon icon-qicai-jifen\"></i>七彩积分: {{ basic_info.qicai_score }}</li>\r\n              </ul>\r\n              <div class=\"new-jinyi-list\">\r\n                <p class=\"jinyi-num\">锦衣总数：{{ basic_info.total_avatar }}</p>\r\n                <div v-for=\"(item, index) in new_clothes\" :key=\"index\"\r\n                  :class=\"'module module-jinyi module-jinyi—' + index\">\r\n                  <p class=\"jinyi-sub-title\">{{ item.title }}</p>\r\n                  <ul v-if=\"item.list.length > 0\" class=\"jinyi-attr-list\">\r\n                    <li v-for=\"(clothesItem, clothesIndex) in item.list\" :key=\"clothesIndex\" class=\"item\" :style=\"limitedSkinList.includes(clothesItem.name.split('·')[0])? 'background:rgba(255, 102, 0, 0.5);color:rgb(0,255,0);' : ''\" >\r\n                      {{ clothesItem.name }}\r\n                    </li>\r\n                  </ul>\r\n                  <p v-else class=\"empty\">无</p>\r\n                </div>\r\n              </div>\r\n            </div>\r\n\r\n            <div v-else>\r\n              <div class=\"roleModuleScroller\" style=\"max-height: 22em\">\r\n                <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb02\" id=\"RoleClothesi\">\r\n                  <tr v-if=\"clothes.length <= 0\">\r\n                    <td class=\"noData\">无</td>\r\n                  </tr>\r\n                  <template v-else>\r\n                    <tr>\r\n                      <th style=\"text-align: left\">\r\n                        锦衣总数 : <span style=\"color: white\">{{ getTotalAvatar() }}</span>\r\n                      </th>\r\n                      <th>&nbsp;</th>\r\n                    </tr>\r\n                    <tr v-for=\"(row, rowIndex) in clothesRows\" :key=\"rowIndex\">\r\n                      <th v-for=\"(clothesItem, colIndex) in row\" :key=\"colIndex\" style=\"text-align: left\" >\r\n                        {{ clothesItem ? clothesItem.name : '' }}\r\n                      </th>\r\n                    </tr>\r\n                  </template>\r\n                </table>\r\n              </div>\r\n            </div>\r\n            <div class=\"blank9\"></div>\r\n          </div>\r\n        </el-tab-pane>\r\n        <el-tab-pane label=\"玩家之家\" name=\"role_home\">\r\n          <div class=\"cols tab-home\" style=\"width:320px;\">\r\n            <div class=\"module\">\r\n              <h4>房屋信息</h4>\r\n              <div class=\"blank9\"></div>\r\n              <table width=\"92%\" class=\"tb02\" cellspacing=\"0\" cellpadding=\"0\">\r\n                <tr>\r\n                  <td><strong>婚否：</strong>{{ basic_info.is_married }}</td>\r\n                  <td><strong>同袍：</strong>{{ basic_info.is_tongpao }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>居住房屋：</strong>{{ basic_info.fangwu_info }}</td>\r\n                  <td v-if=\"basic_info.fangwu_owner_info\"><strong>是否产权所有人：</strong>{{ basic_info.fangwu_owner_info }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>庭院等级：</strong>{{ basic_info.tingyuan_info }}</td>\r\n                  <td><strong>牧场：</strong>{{ basic_info.muchang_info }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td><strong>社区：</strong>{{ basic_info.community_info }}</td>\r\n                </tr>\r\n                <tr>\r\n                  <td colspan=\"3\"><strong>房契：</strong>{{ basic_info.house_fangqi }}</td>\r\n                </tr>\r\n              </table>\r\n              <div class=\"module module-jinyi\">\r\n                <h4>窗景</h4>\r\n                <p class=\"jinyi-num\">窗景总数：{{ house.house_indoor_view_cnt }}</p>\r\n                <ul v-if=\"house.house_indoor_view && house.house_indoor_view.length\" class=\"jinyi-attr-list roleplay-attr-list\">\r\n                  <li v-for=\"item in house.house_indoor_view\" :key=\"item.name\" class=\"item\">{{ item.name }}</li>\r\n                </ul>\r\n              </div>\r\n              <div class=\"module module-jinyi\">\r\n                <h4>庭院主题</h4>\r\n                <p class=\"jinyi-num\">庭院主题总数：{{ house.house_yard_map_cnt }}</p>\r\n                <ul v-if=\"house.house_yard_map && house.house_yard_map.length\" class=\"jinyi-attr-list roleplay-attr-list\">\r\n                  <li v-for=\"item in house.house_yard_map\" :key=\"item.name\" class=\"item\">{{ item.name }}</li>\r\n                </ul>\r\n              </div>\r\n              <div class=\"module module-jinyi\">\r\n                <h4>庭院特效</h4>\r\n                <p class=\"jinyi-num\">庭院特效总数：{{ house.house_yard_animate_cnt }}</p>\r\n                <ul v-if=\"house.house_yard_animate && house.house_yard_animate.length\" class=\"jinyi-attr-list roleplay-attr-list\">\r\n                  <li v-for=\"item in house.house_yard_animate\" :key=\"item.name\" class=\"item\">{{ item.name }}</li>\r\n                </ul>\r\n              </div>\r\n              <div class=\"module module-jinyi\">\r\n                <h4>庭院饰品</h4>\r\n                <p class=\"jinyi-num\">庭院饰品总数：{{ house.house_yard_fur_cnt }}</p>\r\n                <ul v-if=\"house.house_yard_fur && house.house_yard_fur.length\" class=\"jinyi-attr-list roleplay-attr-list\">\r\n                  <li v-for=\"item in house.house_yard_fur\" :key=\"item.name\" class=\"item\">{{ item.name }}*{{ item.count }}</li>\r\n                </ul>\r\n              </div>\r\n            </div>\r\n          </div>\r\n          \r\n          <div class=\"cols\" style=\"width:320px; margin-left:18px;\">\r\n            <div class=\"module module-jinyi module-roleplay\">\r\n              <h4>建材</h4>\r\n              <p class=\"jinyi-num\">建材总数：{{ house.house_building_material_cnt }}</p>\r\n              <ul v-if=\"house.house_building_material && house.house_building_material.length\" class=\"jinyi-attr-list roleplay-attr-list\">\r\n                <li v-for=\"item in house.house_building_material\" :key=\"item.name\" class=\"item\">\r\n                  <span>{{ item.name }}</span>*{{ item.count }}\r\n                </li>\r\n              </ul>\r\n            </div>\r\n            <div class=\"module module-jinyi\">\r\n              <h4>家具</h4>\r\n              <p class=\"jinyi-num\">家具总数：{{ house.house_jiaju_num }}</p>\r\n              <ul v-if=\"house.house_jiaju && house.house_jiaju.length\" class=\"jinyi-attr-list roleplay-attr-list\">\r\n                <li v-for=\"item in house.house_jiaju\" :key=\"item.name\" class=\"item\">\r\n                  <span>{{ item.name }}</span>*{{ item.count }}\r\n                </li>\r\n              </ul>\r\n            </div>\r\n            <div class=\"blank9\"></div>\r\n          </div>\r\n        </el-tab-pane>\r\n      </el-tabs>\r\n    </div>\r\n  </el-popover>\r\n</template>\r\n\r\n<script>\r\nimport { commonMixin } from '@/utils/mixins/commonMixin'\r\nimport  ItemPopover  from './ItemPopover.vue'\r\nimport PetDetail from './PetDetail.vue'\r\n\r\nconst riderNumPerLine = 5\r\nexport default {\r\n  name: 'RoleImage',\r\n  components: {\r\n    ItemPopover,\r\n    PetDetail\r\n  },\r\n  mixins: [commonMixin],\r\n  props: {\r\n    size: { type: String, default: 'small' },\r\n    width: { type: String, default: '50px' },\r\n    height: { type: String, default: '50px' },\r\n    cursor: { type: String, default: 'pointer' },\r\n    placement: { type: String, default: 'right' },\r\n    popoverWidth: { type: String, default: '400px' },\r\n    other_info: {\r\n      type: String,\r\n      default: ''\r\n    },\r\n    roleInfo: {\r\n      type: Object,\r\n      required: true\r\n    }\r\n  },\r\n  data() {\r\n    return {\r\n      limitedSkinList:window.limitedSkinList || [],\r\n      ResUrl: window.ResUrl,\r\n      shenqi_visible: false,\r\n      visible: false,\r\n      activeName: 'role_basic',\r\n      basic_info: null,\r\n      school_skill: null,\r\n      life_skill: null,\r\n      ju_qing_skill: null,\r\n      shuliandu: null,\r\n      left_skill_point: 0,\r\n      role_xiulian: [],\r\n      pet_ctrl_skill: [],\r\n      yu_shou_shu: undefined,\r\n      currentDisplayIndex: 0, // 添加当前显示索引\r\n      not_using_equips: null,\r\n      split_equips: null,\r\n      shenqi: null,\r\n      huoshenta: null,\r\n      using_lingbao: null,\r\n      nousing_lingbao: null,\r\n      nousing_fabao: null,\r\n      using_fabao: null,\r\n      unused_fabao_sum: null,\r\n      fabao_storage_size: null,\r\n      shenqi_components: {},\r\n      split_pets: [],\r\n      pet_info: [],\r\n      child_info: [],\r\n      special_pet_info: [],\r\n      sbook_skill: [],\r\n      allow_pet_count: 0,\r\n      sbook_skill_total: 0,\r\n      current_pet: null,\r\n      rider_info: [],\r\n      current_rider_index: '0-0',\r\n      rider_plan_list: [],\r\n      current_rider_plan_index: 0,\r\n      xiangrui: [],\r\n      nosale_xiangrui: [],\r\n      normal_xiangrui_num: 0,\r\n      EquipLevel: 159,\r\n      clothes: null,\r\n      new_clothes: null,\r\n      house: null,\r\n      titleConf: [\r\n        {\r\n          title: '称谓特效',\r\n          key: 'title_effect'\r\n        },\r\n        {\r\n          title: '施法/攻击特效',\r\n          key: 'perform_effect'\r\n        },\r\n        {\r\n          title: '冒泡框',\r\n          key: 'chat_effect'\r\n        },\r\n        {\r\n          title: '头像框',\r\n          key: 'icon_effect'\r\n        },\r\n        {\r\n          title: '彩饰-队标',\r\n          key: 'achieve_show'\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  computed: {\r\n    currentRider() {\r\n      const [rowIndex, colIndex] = this.current_rider_index.split('-').map(Number)\r\n      const rider = this.rider_info[rowIndex * riderNumPerLine + colIndex]\r\n      return rider || {}\r\n    },\r\n    currentRiderPlan() {\r\n      return this.rider_plan_list[this.current_rider_plan_index] || null\r\n    },\r\n    imageUrl() {\r\n      const icon = this.other_info?window.get_role_icon(this.other_info):''\r\n      return window.ResUrl + '/images/role_icon/small/' + icon + '.gif'\r\n    },\r\n    imageStyle() {\r\n      return {\r\n        display: 'block',\r\n        width: this.width,\r\n        height: this.height,\r\n        cursor: this.cursor\r\n      }\r\n    },\r\n    extraAttrPoints() {\r\n      const currentFullYear = window.ServerTime\r\n        ? +window.ServerTime.split('-')[0]\r\n        : new Date().getFullYear()\r\n      return (currentFullYear - 2004 + 1) * 3\r\n    },\r\n    // 师门技能相关属性\r\n    school_skill1_icon() {\r\n      return this.school_skill && this.school_skill[0] ? this.school_skill[0].skill_icon : ''\r\n    },\r\n    school_skill1_name() {\r\n      return this.school_skill && this.school_skill[0] ? this.school_skill[0].skill_name : ''\r\n    },\r\n    school_skill1_grade() {\r\n      return this.school_skill && this.school_skill[0] ? this.school_skill[0].skill_grade : ''\r\n    },\r\n    school_skill1_desc() {\r\n      return this.school_skill && this.school_skill[0] ? this.school_skill[0].desc : ''\r\n    },\r\n\r\n    school_skill2_icon() {\r\n      return this.school_skill && this.school_skill[1] ? this.school_skill[1].skill_icon : ''\r\n    },\r\n    school_skill2_name() {\r\n      return this.school_skill && this.school_skill[1] ? this.school_skill[1].skill_name : ''\r\n    },\r\n    school_skill2_grade() {\r\n      return this.school_skill && this.school_skill[1] ? this.school_skill[1].skill_grade : ''\r\n    },\r\n    school_skill2_desc() {\r\n      return this.school_skill && this.school_skill[1] ? this.school_skill[1].desc : ''\r\n    },\r\n\r\n    school_skill3_icon() {\r\n      return this.school_skill && this.school_skill[2] ? this.school_skill[2].skill_icon : ''\r\n    },\r\n    school_skill3_name() {\r\n      return this.school_skill && this.school_skill[2] ? this.school_skill[2].skill_name : ''\r\n    },\r\n    school_skill3_grade() {\r\n      return this.school_skill && this.school_skill[2] ? this.school_skill[2].skill_grade : ''\r\n    },\r\n    school_skill3_desc() {\r\n      return this.school_skill && this.school_skill[2] ? this.school_skill[2].desc : ''\r\n    },\r\n\r\n    school_skill4_icon() {\r\n      return this.school_skill && this.school_skill[3] ? this.school_skill[3].skill_icon : ''\r\n    },\r\n    school_skill4_name() {\r\n      return this.school_skill && this.school_skill[3] ? this.school_skill[3].skill_name : ''\r\n    },\r\n    school_skill4_grade() {\r\n      return this.school_skill && this.school_skill[3] ? this.school_skill[3].skill_grade : ''\r\n    },\r\n    school_skill4_desc() {\r\n      return this.school_skill && this.school_skill[3] ? this.school_skill[3].desc : ''\r\n    },\r\n\r\n    school_skill5_icon() {\r\n      return this.school_skill && this.school_skill[4] ? this.school_skill[4].skill_icon : ''\r\n    },\r\n    school_skill5_name() {\r\n      return this.school_skill && this.school_skill[4] ? this.school_skill[4].skill_name : ''\r\n    },\r\n    school_skill5_grade() {\r\n      return this.school_skill && this.school_skill[4] ? this.school_skill[4].skill_grade : ''\r\n    },\r\n    school_skill5_desc() {\r\n      return this.school_skill && this.school_skill[4] ? this.school_skill[4].desc : ''\r\n    },\r\n\r\n    school_skill6_icon() {\r\n      return this.school_skill && this.school_skill[5] ? this.school_skill[5].skill_icon : ''\r\n    },\r\n    school_skill6_name() {\r\n      return this.school_skill && this.school_skill[5] ? this.school_skill[5].skill_name : ''\r\n    },\r\n    school_skill6_grade() {\r\n      return this.school_skill && this.school_skill[5] ? this.school_skill[5].skill_grade : ''\r\n    },\r\n    school_skill6_desc() {\r\n      return this.school_skill && this.school_skill[5] ? this.school_skill[5].desc : ''\r\n    },\r\n\r\n    school_skill7_icon() {\r\n      return this.school_skill && this.school_skill[6] ? this.school_skill[6].skill_icon : ''\r\n    },\r\n    school_skill7_name() {\r\n      return this.school_skill && this.school_skill[6] ? this.school_skill[6].skill_name : ''\r\n    },\r\n    school_skill7_grade() {\r\n      return this.school_skill && this.school_skill[6] ? this.school_skill[6].skill_grade : ''\r\n    },\r\n    school_skill7_desc() {\r\n      return this.school_skill && this.school_skill[6] ? this.school_skill[6].desc : ''\r\n    },\r\n\r\n    // 装备相关计算属性\r\n    storeEquipsRows() {\r\n      const numPerLine = 5\r\n      const equips = this.not_using_equips || []\r\n      const equipsNum = equips.length\r\n\r\n      // 计算需要的行数，确保至少有4行\r\n      let loopTimes = parseInt(equipsNum / numPerLine) + (equipsNum % numPerLine ? 1 : 0)\r\n      loopTimes = loopTimes < 4 ? 4 : loopTimes\r\n\r\n      const rows = []\r\n      for (let i = 0; i < loopTimes; i++) {\r\n        const items = equips.slice(i * numPerLine, (i + 1) * numPerLine)\r\n        rows.push(items)\r\n      }\r\n      return rows\r\n    },\r\n\r\n    splitEquipsRows() {\r\n      if (!this.split_equips || this.split_equips.length === 0) return []\r\n      const numPerLine = 5\r\n      const rows = []\r\n      for (let i = 0; i < this.split_equips.length; i += numPerLine) {\r\n        rows.push(this.split_equips.slice(i, i + numPerLine))\r\n      }\r\n      return rows\r\n    },\r\n\r\n    nousingLingbaoRows() {\r\n      const colCount = 5\r\n      const lingbao = this.nousing_lingbao || []\r\n      const max = Math.max(1, Math.ceil(lingbao.length / colCount))\r\n      const rows = []\r\n      for (let i = 0; i < max; i++) {\r\n        const row = []\r\n        for (let j = 0; j < colCount; j++) {\r\n          const index = i * colCount + j\r\n          row.push(lingbao[index] || null)\r\n        }\r\n        rows.push(row)\r\n      }\r\n      return rows\r\n    },\r\n\r\n    storeFabaoRows() {\r\n      if (!this.nousing_fabao || this.nousing_fabao.length === 0) return []\r\n      const numPerLine = 5\r\n      const rows = []\r\n      for (let i = 0; i < this.nousing_fabao.length; i += numPerLine) {\r\n        rows.push(this.nousing_fabao.slice(i, i + numPerLine))\r\n      }\r\n      // 确保至少有4行\r\n      while (rows.length < 4) {\r\n        rows.push([])\r\n      }\r\n      return rows\r\n    },\r\n\r\n    // 召唤兽相关计算属性\r\n    splitPetsRows() {\r\n      const numPerLine = 3\r\n      const pets = this.split_pets || []\r\n      const petNum = pets.length\r\n      const loopTimes =\r\n        petNum === 0 ? 1 : parseInt(petNum / numPerLine) + (petNum % numPerLine ? 1 : 0)\r\n\r\n      const rows = []\r\n      for (let i = 0; i < loopTimes; i++) {\r\n        const items = pets.slice(i * numPerLine, (i + 1) * numPerLine)\r\n        rows.push(items)\r\n      }\r\n      return rows\r\n    },\r\n    petInfoRows() {\r\n      const numPerLine = 3\r\n      const pets = this.pet_info || []\r\n      const petNum = pets.length\r\n      const loopTimes =\r\n        petNum === 0 ? 1 : parseInt(petNum / numPerLine) + (petNum % numPerLine ? 1 : 0)\r\n\r\n      const rows = []\r\n      for (let i = 0; i < loopTimes; i++) {\r\n        const items = pets.slice(i * numPerLine, (i + 1) * numPerLine)\r\n        rows.push(items)\r\n      }\r\n      return rows\r\n    },\r\n\r\n    childListRows() {\r\n      const numPerLine = 2\r\n      const children = this.child_info || []\r\n      const childNum = children.length\r\n      const loopTimes =\r\n        childNum === 0 ? 1 : parseInt(childNum / numPerLine) + (childNum % numPerLine ? 1 : 0)\r\n\r\n      const rows = []\r\n      for (let i = 0; i < loopTimes; i++) {\r\n        const items = children.slice(i * numPerLine, (i + 1) * numPerLine)\r\n        rows.push(items)\r\n      }\r\n      return rows\r\n    },\r\n\r\n\r\n\r\n    // 坐骑相关计算属性\r\n    riderRows() {\r\n      const numPerLine = riderNumPerLine\r\n      const riders = this.rider_info || []\r\n      const riderNum = riders.length\r\n      const loopTimes = parseInt(riderNum / numPerLine) + (riderNum % numPerLine ? 1 : 0)\r\n\r\n      const rows = []\r\n      for (let i = 0; i < loopTimes; i++) {\r\n        const items = riders.slice(i * numPerLine, (i + 1) * numPerLine)\r\n        rows.push(items)\r\n      }\r\n      return rows\r\n    },\r\n\r\n    // 计算祥瑞总数\r\n    totalXiangruiNum() {\r\n      const nosaleNum = this.nosale_xiangrui ? this.nosale_xiangrui.length : 0\r\n      const totalNum = this.basic_info ? this.basic_info.total_horse : 0\r\n\r\n      if (!totalNum && this.xiangrui) {\r\n        const num = this.xiangrui.length\r\n        return num >= 10 ? '大于等于10' : num\r\n      } else {\r\n        return totalNum - nosaleNum\r\n      }\r\n    },\r\n\r\n    // 坐骑技能行计算属性\r\n    riderSkillRows() {\r\n      if (!this.currentRider || !this.currentRider.all_skills) return []\r\n      const numPerLine = 6\r\n      const skills = this.currentRider.all_skills\r\n      const skillNum = skills.length\r\n      let loopTimes = parseInt(skillNum / numPerLine) + (skillNum % numPerLine ? 1 : 0)\r\n      if (loopTimes === 0) {\r\n        loopTimes = 1\r\n      }\r\n\r\n      const rows = []\r\n      for (let i = 0; i < loopTimes; i++) {\r\n        const items = skills.slice(i * numPerLine, (i + 1) * numPerLine)\r\n        rows.push(items)\r\n      }\r\n      return rows\r\n    },\r\n    clothesRows() {\r\n      const numPerLine = 2\r\n      const rows = []\r\n      for (let i = 0; i < this.clothes.length; i += numPerLine) {\r\n        const row = this.clothes.slice(i, i + numPerLine)\r\n        // 填充空位\r\n        while (row.length < numPerLine) {\r\n          row.push(null)\r\n        }\r\n        rows.push(row)\r\n      }\r\n      return rows\r\n    }\r\n  },\r\n  watch: {\r\n    visible: {\r\n      handler(newVal) {\r\n        if(newVal) {\r\n          this.getLimitedSkinConfig()\r\n        }\r\n      },\r\n      immediate: true\r\n    }\r\n  },\r\n  mounted() {\r\n    if(!this.roleInfo.basic_info) return\r\n    this.basic_info = this.roleInfo.basic_info || {}\r\n    this.role_xiulian = this.roleInfo.role_xiulian || []\r\n    this.pet_ctrl_skill = this.roleInfo.pet_ctrl_skill || []\r\n    this.yu_shou_shu = this.roleInfo.role_skill.yu_shou_shu\r\n    this.school_skill = this.roleInfo.role_skill.school_skill\r\n    this.life_skill = this.roleInfo.role_skill.life_skill\r\n    this.ju_qing_skill = this.roleInfo.role_skill.ju_qing_skill\r\n    this.shuliandu = this.roleInfo.role_skill.shuliandu\r\n    this.left_skill_point = this.roleInfo.left_skill_point || 0\r\n\r\n    // 装备相关数据\r\n    this.using_equips = this.roleInfo.using_equips || []\r\n    this.not_using_equips = this.roleInfo.not_using_equips || []\r\n    this.split_equips = this.roleInfo.split_equips || []\r\n    this.shenqi = this.roleInfo.shenqi || null\r\n    this.huoshenta = this.roleInfo.huoshenta || null\r\n    this.shenqi_components = this.roleInfo.shenqi_components || {}\r\n    this.using_lingbao = this.roleInfo.using_lingbao || []\r\n    this.nousing_lingbao = this.roleInfo.nousing_lingbao || []\r\n    this.nousing_fabao = this.roleInfo.nousing_fabao || []\r\n    this.using_fabao = this.roleInfo.using_fabao || []\r\n    this.unused_fabao_sum = this.roleInfo.unused_fabao_sum\r\n    this.fabao_storage_size = this.roleInfo.fabao_storage_size\r\n\r\n    //召唤兽\r\n    this.split_pets = this.roleInfo.split_pets || []\r\n    this.pet_info = this.roleInfo.pet_info || []\r\n    if (this.pet_info.length > 0) {\r\n      this.current_pet = this.pet_info[0]\r\n    } else if (this.split_pets.length > 0) {\r\n      this.current_pet = this.split_pets[0]\r\n    } else if (this.child_info.length > 0) {\r\n      this.current_pet = this.child_info[0]\r\n    }\r\n    this.child_info = this.roleInfo.child_info || []\r\n    this.special_pet_info = this.roleInfo.special_pet_info || []\r\n    this.sbook_skill = this.roleInfo.sbook_skill || []\r\n    this.allow_pet_count = this.roleInfo.allow_pet_count || 0\r\n    this.sbook_skill_total = this.roleInfo.sbook_skill_total || 0\r\n\r\n    //坐骑\r\n    this.rider_info = this.roleInfo.rider_info || []\r\n    this.rider_plan_list = this.roleInfo.rider_plan_list || []\r\n    this.xiangrui = this.roleInfo.xiangrui || []\r\n    this.nosale_xiangrui = this.roleInfo.nosale_xiangrui || []\r\n    this.normal_xiangrui_num = this.roleInfo.normal_xiangrui_num || 0\r\n\r\n    // 初始化坐骑选择\r\n    if (this.rider_info.length > 0) {\r\n      this.current_rider_index = '0-0'\r\n    }\r\n\r\n    // 初始化玄灵珠选择\r\n    if (this.rider_plan_list.length > 0) {\r\n      this.current_rider_plan_index = 0\r\n    }\r\n    this.EquipLevel = this.basic_info.role_level\r\n    // 初始化锦衣数据\r\n    this.clothes = this.roleInfo.clothes || null\r\n    this.new_clothes = this.roleInfo.new_clothes || null\r\n    \r\n    // 初始化房屋数据\r\n    this.house = this.roleInfo.house || {}\r\n  },\r\n  methods: {\r\n    async getLimitedSkinConfig() {\r\n      if (!window.limitedSkinList) {\r\n        const config = await this.$api.system.getLimitedSkinConfig()\r\n        const limitedSkinList = []\r\n        for (const itemType in config) {\r\n          for (const kName in config[itemType]) {\r\n            limitedSkinList.push(kName)\r\n          }\r\n        }\r\n        window.limitedSkinList  = limitedSkinList\r\n      }\r\n      this.limitedSkinList = window.limitedSkinList\r\n    },\r\n    getPetRightLock(pet) {\r\n      return pet.lock_type?.filter(item => item !== 9 && item !== 'protect' && item !== 'huoyue')\r\n    },\r\n    getPetLeftLock(pet) {\r\n      return pet.lock_type?.filter(item => item === 9 || item === 'protect' || item === 'huoyue')\r\n    },\r\n    onPetAvatarClick(pet) {\r\n      this.current_pet = pet\r\n    },\r\n    get_using_equip(target) {\r\n      const equip =\r\n        typeof target === 'number' ? this.using_equips.find(({ pos }) => pos === target) : target\r\n      if (equip) {\r\n        return {\r\n          equip_sn: equip.equip_sn,\r\n          equip_face_img: equip.small_icon,\r\n          equip_name: equip.name,\r\n          equip_type_desc: equip.static_desc,\r\n          large_equip_desc: equip.desc,\r\n          lock_type: equip.lock_type,\r\n\r\n          src: equip.small_icon,\r\n          data_equip_name: equip.name,\r\n          data_equip_type: equip.type,\r\n          data_equip_desc: equip.desc,\r\n          data_equip_type_desc: equip.static_desc\r\n        }\r\n      }\r\n    },\r\n    get_using_fabao(target) {\r\n      const fabao =\r\n        typeof target === 'number' ? this.using_fabao.find(({ pos }) => pos === target) : target\r\n      if (fabao) {\r\n        return {\r\n          equip_sn: fabao.type,\r\n          equip_face_img: fabao.icon,\r\n          equip_name: fabao.name,\r\n          equip_type_desc: fabao.static_desc,\r\n          large_equip_desc: fabao.desc,\r\n\r\n          icon: fabao.icon,\r\n          data_equip_name: fabao.name,\r\n          data_equip_type: fabao.type,\r\n          data_equip_desc: fabao.desc,\r\n          data_equip_type_desc: fabao.static_desc\r\n        }\r\n      }\r\n    },\r\n    htmlEncode(str) {\r\n      if (!str) return ''\r\n      return str\r\n        .replace(/&/g, '&amp;')\r\n        .replace(/</g, '&lt;')\r\n        .replace(/>/g, '&gt;')\r\n        .replace(/\"/g, '&quot;')\r\n        .replace(/'/g, '&#39;')\r\n    },\r\n    toggle_display(index) {\r\n      // 使用Vue响应式数据控制显示状态\r\n      this.currentDisplayIndex = index\r\n    },\r\n    skillRows(skills, numPerLine) {\r\n      if (!skills || skills.length === 0) return []\r\n      const rows = []\r\n      for (let i = 0; i < skills.length; i += numPerLine) {\r\n        rows.push(skills.slice(i, i + numPerLine))\r\n      }\r\n      return rows\r\n    },\r\n    switchShenqiTab(index) {\r\n      // 检查该套属性是否存在且有效\r\n      const shenqiKey = 'shenqi' + (index + 1)\r\n      const shenqiData = this.shenqi_components[shenqiKey]\r\n\r\n      if (!shenqiData) {\r\n        return // 如果该套属性不存在，不执行切换\r\n      }\r\n\r\n      // 先将所有套属性设置为非激活状态\r\n      Object.keys(this.shenqi_components).forEach((key) => {\r\n        if (this.shenqi_components[key]) {\r\n          this.shenqi_components[key].actived = false\r\n        }\r\n      })\r\n\r\n      // 将选中的套属性设置为激活状态\r\n      this.shenqi_components[shenqiKey].actived = true\r\n    },\r\n\r\n    getClothesList(key) {\r\n      return this[key] || []\r\n    },\r\n    getTotalAvatar() {\r\n      if (this.basic_info.total_avatar) {\r\n        return this.basic_info.total_avatar\r\n      }\r\n      return this.clothes.length < 20 ? this.clothes.length : '大于等于20'\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n::v-deep .role-info-tabs .el-tabs__nav .el-tabs__item {\r\n  padding: 0 !important;\r\n  width: 98px;\r\n  height: 26px;\r\n  line-height: 26px;\r\n  background: url(~@/../public/assets/images/tag1.webp) no-repeat;\r\n  text-align: center;\r\n  float: left;\r\n  margin-right: 3px;\r\n  display: inline;\r\n  color: #748da4;\r\n  cursor: pointer;\r\n}\r\n\r\n::v-deep .role-info-tabs .el-tabs__nav .el-tabs__item.is-active {\r\n  background: url(~@/../public/assets/images/tag2.webp) no-repeat;\r\n  color: #fff;\r\n}\r\n\r\n:global(.role-info-popover) {\r\n  padding: 0 !important;\r\n  background: transparent;\r\n  box-shadow: none;\r\n  border: none;\r\n  font-size: 12px;\r\n}\r\n\r\n:global(.role-info-popover .tabCont) {\r\n  padding: 0 !important;\r\n  background: none;\r\n}\r\n\r\n:global(.role-info-popover .tabCont) {\r\n  padding: 0 !important;\r\n}\r\n\r\n:global(.role-info-popover .el-tabs__header) {\r\n  margin-bottom: 0 !important;\r\n  border-bottom: 2px solid #fff;\r\n}\r\n\r\n:global(.role-info-popover .el-tabs__content) {\r\n  padding: 12px;\r\n  background: url(~@/../public/assets/images/areabg.webp) repeat-y -100px;\r\n  min-height: 510px;\r\n}\r\n\r\n:global(.role-info-popover .el-tabs__active-bar) {\r\n  display: none !important;\r\n}\r\n\r\n:global(.shenqi-modal) {\r\n  position: relative;\r\n  top: unset;\r\n  left: unset;\r\n  margin-left: unset;\r\n}\r\n\r\n:global(.shenqi-info-popover) {\r\n  padding: 0 !important;\r\n  background: #0a1f28;\r\n  border-color: #0a1f28;\r\n}\r\n\r\n:global(.shenqi-info-popover .popper__arrow::after) {\r\n  border-bottom-color: #0a1f28 !important;\r\n}\r\n\r\n:global(.role-info-popover .popper__arrow::after) {\r\n  border-right-color: #0a1f28 !important;\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css":
+/*!********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css ***!
+  \********************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.similar-header[data-v-8b22c0ec] {\r\n  margin-bottom: 16px;\r\n  padding-bottom: 12px;\r\n  border-bottom: 1px solid #ebeef5;\n}\n.similar-header h4[data-v-8b22c0ec] {\r\n  margin: 0 0 8px 0;\r\n  color: #303133;\r\n  font-size: 16px;\n}\n.similar-header p[data-v-8b22c0ec] {\r\n  margin: 0 0 8px 0;\r\n  color: #606266;\r\n  font-size: 14px;\n}\n.stats[data-v-8b22c0ec] {\r\n  display: flex;\r\n  gap: 20px;\r\n  font-size: 12px;\r\n  color: #909399;\n}\n.error-info[data-v-8b22c0ec] {\r\n  padding: 20px 0;\n}\n.loading-info[data-v-8b22c0ec] {\r\n  padding: 20px;\n}\n.loading-status[data-v-8b22c0ec] {\r\n  margin-bottom: 16px;\n}\n.loading-item[data-v-8b22c0ec] {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-bottom: 8px;\r\n  color: #409eff;\r\n  font-size: 14px;\n}\n.loading-item i[data-v-8b22c0ec] {\r\n  margin-right: 8px;\r\n  animation: rotating-8b22c0ec 2s linear infinite;\n}\n@keyframes rotating-8b22c0ec {\nfrom {\r\n    transform: rotate(0deg);\n}\nto {\r\n    transform: rotate(360deg);\n}\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/SimilarEquipmentModal.vue"],"names":[],"mappings":";AA+NA;EACA,mBAAA;EACA,oBAAA;EACA,gCAAA;AACA;AAEA;EACA,iBAAA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,iBAAA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,SAAA;EACA,eAAA;EACA,cAAA;AACA;AAEA;EACA,eAAA;AACA;AAEA;EACA,aAAA;AACA;AAEA;EACA,mBAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,kBAAA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,iBAAA;EACA,+CAAA;AACA;AAEA;AACA;IACA,uBAAA;AACA;AAEA;IACA,yBAAA;AACA;AACA","sourcesContent":["<template>\r\n  <el-popover :data-equip-sn=\"equipment.equip_sn\" :placement=\"placement\" width=\"720\" trigger=\"click\"\r\n    popper-class=\"similar-equip-popper\" v-model=\"visible\" @show=\"handleShow\">\r\n    <template #reference>\r\n      <slot>\r\n        <el-link type=\"primary\" style=\"font-size: 12px;\">查看相似</el-link>\r\n      </slot>\r\n    </template>\r\n\r\n    <!-- 相似装备内容 -->\r\n    <div v-if=\"visible\">\r\n      <!-- 加载状态 -->\r\n      <div v-if=\"valuationLoading\" class=\"loading-info\">\r\n        <el-skeleton :rows=\"12\" animated />\r\n      </div>\r\n      <div v-else-if=\"similarData\">\r\n        <div class=\"similar-header\">\r\n          <h4>相似装备 (共{{ similarData.anchor_count }}个) <el-divider direction=\"vertical\" />\r\n            <el-tag type=\"info\" size=\"mini\">相似度阈值: {{ similarData.similarity_threshold }}</el-tag>\r\n            <el-divider direction=\"vertical\" />\r\n            <el-tag type=\"info\" size=\"mini\">最大锚点数: {{ similarData.max_anchors }}</el-tag>\r\n          </h4>\r\n          <!-- 装备估价信息 -->\r\n          <EquipmentValuation :valuation=\"equipmentValuation\" :target-equipment=\"getEquipImageProps(equipment)\"\r\n            @refresh=\"refresh\" />\r\n          <div v-if=\"similarData.statistics\" class=\"stats\">\r\n            <span>\r\n              价格范围:\r\n              <span v-html=\"formatPrice(similarData.statistics.price_range.min)\"></span>\r\n              -\r\n              <span v-html=\"formatPrice(similarData.statistics.price_range.max)\"></span>\r\n            </span>\r\n            <span> 平均相似度: {{ similarData.statistics.similarity_range.avg.toFixed(3) }} </span>\r\n          </div>\r\n        </div>\r\n\r\n        <!-- 相似装备表格 -->\r\n        <el-empty v-if=\"!anchorsLoading && !similarData?.anchors?.length\" description=\"暂无数据\"></el-empty>\r\n        <SimilarEquipmentTable v-else :anchors=\"similarData.anchors\" v-loading=\"anchorsLoading\" element-loading-text=\"正在加载相似装备\"/>\r\n      </div>\r\n    </div>\r\n  </el-popover>\r\n</template>\r\n\r\n<script>\r\nimport EquipmentValuation from './EquipmentValuation.vue'\r\nimport SimilarEquipmentTable from './SimilarEquipmentTable.vue'\r\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\r\nimport { commonMixin } from '@/utils/mixins/commonMixin'\r\n\r\nexport default {\r\n  name: 'SimilarEquipmentModal',\r\n  components: {\r\n    EquipmentValuation,\r\n    SimilarEquipmentTable\r\n  },\r\n  mixins: [equipmentMixin, commonMixin],\r\n  props: {\r\n    equipment: {\r\n      type: Object,\r\n      required: true\r\n    },\r\n    placement: {\r\n      type: String,\r\n      default: 'left-end'\r\n    },\r\n    similarityThreshold: {\r\n      type: Number,\r\n      default: 0.8\r\n    },\r\n    maxAnchors: {\r\n      type: Number,\r\n      default: 30\r\n    },\r\n  },\r\n  data() {\r\n    return {\r\n      visible: false,\r\n      valuationLoading: false,  // 装备估价接口加载状态\r\n      anchorsLoading: false,    // 相似装备锚点接口加载状态\r\n      error: false,\r\n      similarData: null,\r\n      equipmentValuation: {}\r\n    }\r\n  },\r\n  computed: {\r\n    // 整体加载状态\r\n    loading() {\r\n      return this.valuationLoading || this.anchorsLoading\r\n    }\r\n  },\r\n  methods: {\r\n    async handleShow() {\r\n      if (!this.similarData) {\r\n        await this.loadSimilarEquipments()\r\n      }\r\n    },\r\n\r\n    async refresh() {\r\n      await this.loadSimilarEquipments()\r\n    },\r\n\r\n    // 加载相似装备\r\n    async loadSimilarEquipments() {\r\n      this.error = false\r\n      this.equipmentValuation = {}\r\n      this.similarData = null\r\n\r\n      try {\r\n        await this.loadEquipmentValuation(this.equipment, this.similarityThreshold)\r\n      } catch (error) {\r\n        console.error('加载相似装备失败:', error)\r\n        this.error = true\r\n      }\r\n    },\r\n\r\n    // 统一的装备估价加载方法\r\n    async loadEquipmentValuation(equipment, similarityThreshold) {\r\n      try {\r\n        // 第一个接口：获取装备估价信息\r\n        this.valuationLoading = true\r\n        if (window.is_pet_equip(equipment.kindid)) {\r\n          equipment = {\r\n            kindid: 29,\r\n            desc: equipment.desc\r\n          }\r\n        }\r\n        const response = await this.$api.equipment.getEquipmentValuation({\r\n          equipment_data: equipment,\r\n          strategy: 'fair_value',\r\n          similarity_threshold: similarityThreshold,\r\n          max_anchors: this.maxAnchors\r\n        })\r\n\r\n        const result = response.data\r\n        this.equipmentValuation = result\r\n\r\n        // 向父组件发出估价结果更新事件\r\n        this.$emit('valuation-updated', result)\r\n\r\n        // 初始化相似装备数据\r\n        this.similarData = {\r\n          anchor_count: result.anchor_count,\r\n          similarity_threshold: result.similarity_threshold || similarityThreshold,\r\n          max_anchors: result.max_anchors || this.maxAnchors,\r\n          anchors: [],\r\n          statistics: {\r\n            price_range: result.anchor_count?{\r\n              min: Math.min(...result.anchors.map((a) => a.price || 0)),\r\n              max: Math.max(...result.anchors.map((a) => a.price || 0)),\r\n              avg: result.anchors.reduce((sum, a) => sum + (a.price || 0), 0) / result.anchors.length\r\n            }:{\r\n              min:0,\r\n              max:0,\r\n              avg:0\r\n            },\r\n            similarity_range: result.anchor_count?{\r\n              min: Math.min(...result.anchors.map((a) => a.similarity || 0)),\r\n              max: Math.max(...result.anchors.map((a) => a.similarity || 0)),\r\n              avg: result.anchors.reduce((sum, a) => sum + (a.similarity || 0), 0) / result.anchors.length\r\n            }:{\r\n              min:0,\r\n              max:0,\r\n              avg:0\r\n            }\r\n          }\r\n        }\r\n\r\n        this.valuationLoading = false\r\n\r\n        // 处理估价响应，如果有锚点数据则加载详细信息\r\n        if (result?.anchor_count > 0 && result?.anchors?.length > 0) {\r\n          // 第二个接口：获取相似装备锚点详细数据\r\n          this.anchorsLoading = true\r\n\r\n          try {\r\n            // 使用估价结果中的equip_sn_list直接获取相似装备列表，避免重复计算\r\n            const anchorsResponse = await this.$api.equipment.getEquipmentList({\r\n              page_size: 99,\r\n              equip_sn_list: result.anchors.map(item => item.equip_sn)\r\n            })\r\n\r\n            this.anchorsLoading = false\r\n            // 合并相似度和数据\r\n            if (anchorsResponse.code === 200 && anchorsResponse.data?.data) {\r\n              const anchorsData = anchorsResponse.data.data\r\n              const parsedAnchors = anchorsData.map((item, index) => {\r\n                // 添加相似度信息\r\n                item.similarity = result.anchors[index].similarity\r\n                item.features = result.anchors[index].features\r\n                return item\r\n              })\r\n\r\n              // 更新相似装备数据\r\n              this.$set(this.similarData, 'anchors', parsedAnchors)\r\n            } else {\r\n              console.warn('未获取到相似装备锚点数据:', anchorsResponse.message)\r\n            }\r\n          } catch (error) {\r\n            console.error('查询相似装备锚点失败:', error)\r\n            // 锚点查询失败不影响估价结果显示\r\n          }\r\n        }\r\n\r\n      } catch (error) {\r\n        console.error('装备估价失败:', error)\r\n        this.$notify.error({\r\n          title: '估价请求失败',\r\n          message: '网络请求异常，请稍后重试',\r\n          duration: 3000\r\n        })\r\n        throw error\r\n      } finally {\r\n        // 确保在出现异常时也重置加载状态\r\n        this.valuationLoading = false\r\n        this.anchorsLoading = false\r\n      }\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n.similar-header {\r\n  margin-bottom: 16px;\r\n  padding-bottom: 12px;\r\n  border-bottom: 1px solid #ebeef5;\r\n}\r\n\r\n.similar-header h4 {\r\n  margin: 0 0 8px 0;\r\n  color: #303133;\r\n  font-size: 16px;\r\n}\r\n\r\n.similar-header p {\r\n  margin: 0 0 8px 0;\r\n  color: #606266;\r\n  font-size: 14px;\r\n}\r\n\r\n.stats {\r\n  display: flex;\r\n  gap: 20px;\r\n  font-size: 12px;\r\n  color: #909399;\r\n}\r\n\r\n.error-info {\r\n  padding: 20px 0;\r\n}\r\n\r\n.loading-info {\r\n  padding: 20px;\r\n}\r\n\r\n.loading-status {\r\n  margin-bottom: 16px;\r\n}\r\n\r\n.loading-item {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-bottom: 8px;\r\n  color: #409eff;\r\n  font-size: 14px;\r\n}\r\n\r\n.loading-item i {\r\n  margin-right: 8px;\r\n  animation: rotating 2s linear infinite;\r\n}\r\n\r\n@keyframes rotating {\r\n  from {\r\n    transform: rotate(0deg);\r\n  }\r\n\r\n  to {\r\n    transform: rotate(360deg);\r\n  }\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css":
+/*!********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css ***!
+  \********************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.special-info[data-v-7ad92faa] {\r\n  font-size: 12px;\r\n  color: #409eff;\n}\n.special-info .skill[data-v-7ad92faa] {\r\n  margin-bottom: 2px;\n}\n.cbg-link[data-v-7ad92faa] {\r\n  color: #409eff;\r\n  padding: 0;\n}\n.cbg-link[data-v-7ad92faa]:hover {\r\n  color: #66b1ff;\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/SimilarEquipmentTable.vue"],"names":[],"mappings":";AA8FA;EACA,eAAA;EACA,cAAA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;EACA,cAAA;EACA,UAAA;AACA;AAEA;EACA,cAAA;AACA","sourcesContent":["<template>\r\n  <el-table\r\n    v-loading=\"loading\"\r\n    :data=\"anchors\"\r\n    stripe\r\n    max-height=\"300\"\r\n    style=\"width: 100%\"\r\n    sortable\r\n    :sort-by=\"['price', 'similarity']\"\r\n    :sort-order=\"['ascending', 'descending']\"\r\n  >\r\n    <el-table-column fixed prop=\"price\" label=\"价格 (元)\" width=\"100\" sortable>\r\n      <template #default=\"scope\">\r\n        <div v-html=\"formatFullPrice(scope.row,true)\"></div>\r\n      </template>\r\n    </el-table-column>\r\n    <el-table-column fixed label=\"装备\" width=\"70\">\r\n      <template #default=\"scope\">\r\n        <equipment-image :equipment=\"scope.row\" />\r\n      </template>\r\n    </el-table-column>\r\n    <el-table-column prop=\"similarity\" label=\"相似度\" width=\"80\" sortable>\r\n      <template #default=\"scope\">\r\n        <el-tag :type=\"getSimilarityTagType(scope.row.similarity)\">\r\n          {{ scope.row.similarity }}\r\n        </el-tag>\r\n      </template>\r\n    </el-table-column>\r\n    <el-table-column prop=\"equip_level\" label=\"等级\" width=\"60\"></el-table-column>\r\n    <el-table-column label=\"特技/特效/套装\" min-width=\"120\">\r\n      <template #default=\"scope\">\r\n        <div class=\"special-info\">\r\n          <div\r\n            class=\"equip_desc_blue\"\r\n            :data-specia-effet=\"scope.row.special_effect\"\r\n            :data-special-skill=\"scope.row.special_skill\"\r\n          ></div>\r\n         <p v-html=\"formatSpecialSkillsAndEffects(scope.row)\"></p>\r\n          <p>  {{ formatSuitEffect(scope.row) }}</p>\r\n        </div>\r\n      </template>\r\n    </el-table-column>\r\n    <el-table-column prop=\"server_name\" label=\"服务器\" width=\"80\">\r\n      <template #default=\"scope\">\r\n        <span>{{ scope.row.server_name }}</span>\r\n        <div v-html=\"formatFullPrice(scope.row,'cross')\"></div>\r\n      </template>\r\n    </el-table-column>\r\n    <el-table-column label=\"操作\" width=\"80\">\r\n      <template #default=\"scope\">\r\n        <el-link :href=\"getCBGLinkByType(scope.row.eid, 'equip')\" type=\"danger\" target=\"_blank\">藏宝阁</el-link>\r\n      </template>\r\n    </el-table-column>\r\n  </el-table>\r\n</template>\r\n\r\n<script>\r\nimport EquipmentImage from './EquipmentImage/EquipmentImage.vue'\r\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\r\nimport { commonMixin } from '@/utils/mixins/commonMixin'\r\n\r\nexport default {\r\n  name: 'SimilarEquipmentTable',\r\n  components: {\r\n    EquipmentImage\r\n  },\r\n  mixins: [equipmentMixin, commonMixin],\r\n  props: {\r\n    anchors: {\r\n      type: Array,\r\n      default: () => []\r\n    },\r\n    loading: {\r\n      type: Boolean,\r\n      default: false\r\n    }\r\n  },\r\n  methods: {\r\n\r\n    // 获取特效名称\r\n    getSpecialEffectName(id) {\r\n      // 直接使用全局变量\r\n      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_effect) {\r\n        const effectName = window.AUTO_SEARCH_CONFIG.equip_special_effect[id.toString()]\r\n        if (effectName) return effectName\r\n      }\r\n\r\n      return `特效${id}`\r\n    },\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n.special-info {\r\n  font-size: 12px;\r\n  color: #409eff;\r\n}\r\n\r\n.special-info .skill {\r\n  margin-bottom: 2px;\r\n}\r\n\r\n.cbg-link {\r\n  color: #409eff;\r\n  padding: 0;\r\n}\r\n\r\n.cbg-link:hover {\r\n  color: #66b1ff;\r\n}\r\n</style> "],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
 
@@ -5342,6 +7051,28 @@ if(false) // removed by dead control flow
 
 /***/ }),
 
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("4093e1a9", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
 /***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentImage/EquipmentDesc.vue?vue&type=style&index=0&id=26200cad&scoped=true&lang=css":
 /*!********************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentImage/EquipmentDesc.vue?vue&type=style&index=0&id=26200cad&scoped=true&lang=css ***!
@@ -5386,6 +7117,28 @@ if(false) // removed by dead control flow
 
 /***/ }),
 
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css":
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("37edbc6a", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
 /***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/RoleInfo/RoleImage.vue?vue&type=style&index=0&id=8c1934ec&scoped=true&lang=css":
 /*!**********************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/RoleInfo/RoleImage.vue?vue&type=style&index=0&id=8c1934ec&scoped=true&lang=css ***!
@@ -5402,6 +7155,50 @@ if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = (__webpack_require__(/*! !../../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
 var update = add("600b2cec", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("98e9a8b6", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("241b3dfa", content, false, {});
 // Hot Module Replacement
 if(false) // removed by dead control flow
 {}
@@ -5652,68 +7449,12 @@ const equipmentApi = {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/equipment/valuation', data);
   },
   /**
-   * 通过装备SN查找锚点（便捷接口）
-   * @param {string} equipSn - 装备序列号
-   * @param {Object} params - 查询参数
-   * @returns {Promise}
-   */
-  findAnchorsBySn(equipSn, params = {}) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get(`/equipment/anchors/${equipSn}`, params);
-  },
-  /**
-   * 通过装备SN获取估价（便捷接口）
-   * @param {string} equipSn - 装备序列号
-   * @param {Object} params - 估价参数
-   * @returns {Promise}
-   */
-  getValuationBySn(equipSn, params = {}) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get(`/equipment/valuation/${equipSn}`, params);
-  },
-  /**
-   * 健康检查
-   * @returns {Promise}
-   */
-  healthCheck() {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/equipment/health');
-  },
-  /**
    * 批量装备估价
    * @param {Object} data - 装备列表和估价参数
    * @returns {Promise}
    */
   batchEquipmentValuation(data) {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/equipment/batch-valuation', data);
-  },
-  /**
-   * 提取装备特征
-   * @param {Object} data - 装备数据和参数
-   * @returns {Promise}
-   */
-  extractFeatures(data) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/equipment/extract-features', data);
-  },
-  /**
-   * 批量提取装备特征
-   * @param {Object} data - 装备列表和参数
-   * @returns {Promise}
-   */
-  extractFeaturesBatch(data) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/equipment/extract-features-batch', data);
-  },
-  /**
-   * 获取支持的kindid列表
-   * @returns {Promise}
-   */
-  getSupportedKindids() {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/equipment/supported-kindids');
-  },
-  /**
-   * 获取指定kindid的提取器信息
-   * @param {number} kindid - 装备类型ID
-   * @returns {Promise}
-   */
-  getExtractorInfo(kindid) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get(`/equipment/extractor-info/${kindid}`);
   },
   /**
    * 删除装备
@@ -5784,6 +7525,22 @@ const equipmentApi = {
    */
   deleteAbnormalEquipment(equipSn) {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.delete(`/equipment/abnormal/${equipSn}`);
+  },
+  /**
+   * 提取装备特征
+   * @param {Object} data - 装备数据和参数
+   * @returns {Promise}
+   */
+  extractFeatures(data) {
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/equipment/extract-features', data);
+  },
+  /**
+   * 获取装备统计数据
+   * @param {Object} params - 查询参数
+   * @returns {Promise}
+   */
+  getEquipmentStats(params = {}) {
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/equipment/stats', params);
   }
 };
 
@@ -5892,37 +7649,12 @@ const petApi = {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/pet/batch-valuation', data);
   },
   /**
-   * 通过召唤兽SN查找锚点（便捷接口）
-   * @param {string} petSn - 召唤兽序列号
-   * @param {Object} params - 查询参数
+   * 更新召唤兽装备价格
+   * @param {Object} data - 召唤兽数据和估价参数
    * @returns {Promise}
    */
-  findAnchorsBySn(petSn, params = {}) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get(`/pet/anchors/${petSn}`, params);
-  },
-  /**
-   * 通过召唤兽SN获取估价（便捷接口）
-   * @param {string} petSn - 召唤兽序列号
-   * @param {Object} params - 估价参数
-   * @returns {Promise}
-   */
-  getValuationBySn(petSn, params = {}) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get(`/pet/valuation/${petSn}`, params);
-  },
-  /**
-  * 更新召唤兽装备价格
-  * @param {Object} data - 召唤兽数据和估价参数
-  * @returns {Promise}
-  */
   updatePetEquipmentsPrice(data) {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/pet/update-equipments-price', data);
-  },
-  /**
-   * 健康检查
-   * @returns {Promise}
-   */
-  healthCheck() {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/pet/health');
   },
   /**
    * 获取当前年月携带装备但未估价的召唤兽数量
@@ -5981,6 +7713,14 @@ const petApi = {
    */
   getPetByEquipSn(year, month, equipSn) {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get(`/pet/${year}/${month}/${equipSn}`);
+  },
+  /**
+   * 获取召唤兽统计数据
+   * @param {Object} params - 查询参数
+   * @returns {Promise}
+   */
+  getPetStats(params = {}) {
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/pet/stats', params);
   }
 };
 
@@ -6115,6 +7855,14 @@ const roleApi = {
    */
   healthCheck() {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/role/health');
+  },
+  /**
+   * 获取角色统计数据
+   * @param {Object} params - 查询参数
+   * @returns {Promise}
+   */
+  getRoleStats(params = {}) {
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/role/stats', params);
   }
 };
 
@@ -6415,6 +8163,13 @@ const systemApi = {
     });
   },
   /**
+   * 获取角色刷新进度状态
+   * @returns {Promise}
+   */
+  getRoleRefreshStatus() {
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/system/market-data/role/refresh-status');
+  },
+  /**
    * 获取缓存状态
    * @returns {Promise}
    */
@@ -6466,26 +8221,11 @@ const systemApi = {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/system/market-data/equipment/refresh-status');
   },
   /**
-   * 获取装备增量更新状态
+   * 获取召唤兽缓存状态
    * @returns {Promise}
    */
-  getEquipmentIncrementalUpdateStatus() {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/equipment/cache/incremental-status');
-  },
-  /**
-   * 装备增量更新
-   * @param {Object} data - 更新参数
-   * @returns {Promise}
-   */
-  incrementalUpdateEquipment(data = {}) {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/equipment/cache/incremental-update', data);
-  },
-  /**
-   * 装备强制增量更新
-   * @returns {Promise}
-   */
-  forceIncrementalUpdateEquipment() {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/equipment/cache/force-update');
+  getPetCacheStatus() {
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/system/market-data/pet/cache-status');
   },
   /**
    * 获取召唤兽市场数据状态
@@ -6499,14 +8239,20 @@ const systemApi = {
    * @returns {Promise}
    */
   refreshPetData() {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/system/market-data/pet/refresh');
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/system/market-data/pet/refresh', {
+      force_refresh: false,
+      use_cache: true
+    });
   },
   /**
    * 刷新召唤兽全量缓存（不使用缓存，完全重新加载）
    * @returns {Promise}
    */
   refreshPetFullCache() {
-    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/system/market-data/pet/refresh-full-cache');
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.post('/system/market-data/pet/refresh', {
+      force_refresh: true,
+      use_cache: true
+    });
   },
   /**
    * 获取召唤兽刷新进度状态
@@ -6514,6 +8260,13 @@ const systemApi = {
    */
   getPetRefreshStatus() {
     return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/system/market-data/pet/refresh-status');
+  },
+  /**
+   * 获取系统统计数据
+   * @returns {Promise}
+   */
+  getSystemStats() {
+    return _utils_request__WEBPACK_IMPORTED_MODULE_0__.api.get('/system/stats');
   }
 };
 
@@ -6647,6 +8400,92 @@ vue__WEBPACK_IMPORTED_MODULE_4__["default"].use((element_ui__WEBPACK_IMPORTED_MO
 new vue__WEBPACK_IMPORTED_MODULE_4__["default"]({
   render: h => h(_DevToolsPanel_vue__WEBPACK_IMPORTED_MODULE_0__["default"])
 }).$mount('#app');
+
+/***/ }),
+
+/***/ "./src/components/EquipBatchValuationResult.vue":
+/*!******************************************************!*\
+  !*** ./src/components/EquipBatchValuationResult.vue ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _EquipBatchValuationResult_vue_vue_type_template_id_3e1e2d34_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true */ "./src/components/EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true");
+/* harmony import */ var _EquipBatchValuationResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EquipBatchValuationResult.vue?vue&type=script&lang=js */ "./src/components/EquipBatchValuationResult.vue?vue&type=script&lang=js");
+/* harmony import */ var _EquipBatchValuationResult_vue_vue_type_style_index_0_id_3e1e2d34_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css */ "./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _EquipBatchValuationResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _EquipBatchValuationResult_vue_vue_type_template_id_3e1e2d34_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _EquipBatchValuationResult_vue_vue_type_template_id_3e1e2d34_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "3e1e2d34",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/EquipBatchValuationResult.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/EquipBatchValuationResult.vue?vue&type=script&lang=js":
+/*!******************************************************************************!*\
+  !*** ./src/components/EquipBatchValuationResult.vue?vue&type=script&lang=js ***!
+  \******************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipBatchValuationResult.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css":
+/*!**************************************************************************************************************!*\
+  !*** ./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css ***!
+  \**************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_style_index_0_id_3e1e2d34_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_style_index_0_id_3e1e2d34_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_style_index_0_id_3e1e2d34_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_style_index_0_id_3e1e2d34_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_style_index_0_id_3e1e2d34_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true":
+/*!************************************************************************************************!*\
+  !*** ./src/components/EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true ***!
+  \************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_template_id_3e1e2d34_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_template_id_3e1e2d34_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipBatchValuationResult_vue_vue_type_template_id_3e1e2d34_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=template&id=3e1e2d34&scoped=true");
+
 
 /***/ }),
 
@@ -6818,6 +8657,92 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentImage_vue_vue_type_template_id_13caaaef_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentImage_vue_vue_type_template_id_13caaaef_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipmentImage.vue?vue&type=template&id=13caaaef&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentImage/EquipmentImage.vue?vue&type=template&id=13caaaef&scoped=true");
+
+
+/***/ }),
+
+/***/ "./src/components/EquipmentValuation.vue":
+/*!***********************************************!*\
+  !*** ./src/components/EquipmentValuation.vue ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true */ "./src/components/EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true");
+/* harmony import */ var _EquipmentValuation_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./EquipmentValuation.vue?vue&type=script&lang=js */ "./src/components/EquipmentValuation.vue?vue&type=script&lang=js");
+/* harmony import */ var _EquipmentValuation_vue_vue_type_style_index_0_id_b3167e7a_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css */ "./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _EquipmentValuation_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "b3167e7a",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/EquipmentValuation.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/EquipmentValuation.vue?vue&type=script&lang=js":
+/*!***********************************************************************!*\
+  !*** ./src/components/EquipmentValuation.vue?vue&type=script&lang=js ***!
+  \***********************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipmentValuation.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css":
+/*!*******************************************************************************************************!*\
+  !*** ./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css ***!
+  \*******************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_style_index_0_id_b3167e7a_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=style&index=0&id=b3167e7a&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_style_index_0_id_b3167e7a_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_style_index_0_id_b3167e7a_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_style_index_0_id_b3167e7a_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_style_index_0_id_b3167e7a_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true":
+/*!*****************************************************************************************!*\
+  !*** ./src/components/EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true ***!
+  \*****************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true");
 
 
 /***/ }),
@@ -7038,6 +8963,245 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_RoleImage_vue_vue_type_template_id_8c1934ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_RoleImage_vue_vue_type_template_id_8c1934ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./RoleImage.vue?vue&type=template&id=8c1934ec&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/RoleInfo/RoleImage.vue?vue&type=template&id=8c1934ec&scoped=true");
+
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentModal.vue":
+/*!**************************************************!*\
+  !*** ./src/components/SimilarEquipmentModal.vue ***!
+  \**************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _SimilarEquipmentModal_vue_vue_type_template_id_8b22c0ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true */ "./src/components/SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true");
+/* harmony import */ var _SimilarEquipmentModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SimilarEquipmentModal.vue?vue&type=script&lang=js */ "./src/components/SimilarEquipmentModal.vue?vue&type=script&lang=js");
+/* harmony import */ var _SimilarEquipmentModal_vue_vue_type_style_index_0_id_8b22c0ec_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css */ "./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _SimilarEquipmentModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _SimilarEquipmentModal_vue_vue_type_template_id_8b22c0ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _SimilarEquipmentModal_vue_vue_type_template_id_8b22c0ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "8b22c0ec",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/SimilarEquipmentModal.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentModal.vue?vue&type=script&lang=js":
+/*!**************************************************************************!*\
+  !*** ./src/components/SimilarEquipmentModal.vue?vue&type=script&lang=js ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentModal.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css":
+/*!**********************************************************************************************************!*\
+  !*** ./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css ***!
+  \**********************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_style_index_0_id_8b22c0ec_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=style&index=0&id=8b22c0ec&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_style_index_0_id_8b22c0ec_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_style_index_0_id_8b22c0ec_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_style_index_0_id_8b22c0ec_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_style_index_0_id_8b22c0ec_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true":
+/*!********************************************************************************************!*\
+  !*** ./src/components/SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true ***!
+  \********************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_template_id_8b22c0ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_template_id_8b22c0ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentModal_vue_vue_type_template_id_8b22c0ec_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentModal.vue?vue&type=template&id=8b22c0ec&scoped=true");
+
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentTable.vue":
+/*!**************************************************!*\
+  !*** ./src/components/SimilarEquipmentTable.vue ***!
+  \**************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _SimilarEquipmentTable_vue_vue_type_template_id_7ad92faa_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true */ "./src/components/SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true");
+/* harmony import */ var _SimilarEquipmentTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SimilarEquipmentTable.vue?vue&type=script&lang=js */ "./src/components/SimilarEquipmentTable.vue?vue&type=script&lang=js");
+/* harmony import */ var _SimilarEquipmentTable_vue_vue_type_style_index_0_id_7ad92faa_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css */ "./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _SimilarEquipmentTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _SimilarEquipmentTable_vue_vue_type_template_id_7ad92faa_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _SimilarEquipmentTable_vue_vue_type_template_id_7ad92faa_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "7ad92faa",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/SimilarEquipmentTable.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentTable.vue?vue&type=script&lang=js":
+/*!**************************************************************************!*\
+  !*** ./src/components/SimilarEquipmentTable.vue?vue&type=script&lang=js ***!
+  \**************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentTable.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css":
+/*!**********************************************************************************************************!*\
+  !*** ./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css ***!
+  \**********************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_style_index_0_id_7ad92faa_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=style&index=0&id=7ad92faa&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_style_index_0_id_7ad92faa_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_style_index_0_id_7ad92faa_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_style_index_0_id_7ad92faa_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_style_index_0_id_7ad92faa_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true":
+/*!********************************************************************************************!*\
+  !*** ./src/components/SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true ***!
+  \********************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_template_id_7ad92faa_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_template_id_7ad92faa_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarEquipmentTable_vue_vue_type_template_id_7ad92faa_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarEquipmentTable.vue?vue&type=template&id=7ad92faa&scoped=true");
+
+
+/***/ }),
+
+/***/ "./src/components/SimilarGetMore.vue":
+/*!*******************************************!*\
+  !*** ./src/components/SimilarGetMore.vue ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _SimilarGetMore_vue_vue_type_template_id_c65454e0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SimilarGetMore.vue?vue&type=template&id=c65454e0 */ "./src/components/SimilarGetMore.vue?vue&type=template&id=c65454e0");
+/* harmony import */ var _SimilarGetMore_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SimilarGetMore.vue?vue&type=script&lang=js */ "./src/components/SimilarGetMore.vue?vue&type=script&lang=js");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _SimilarGetMore_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _SimilarGetMore_vue_vue_type_template_id_c65454e0__WEBPACK_IMPORTED_MODULE_0__.render,
+  _SimilarGetMore_vue_vue_type_template_id_c65454e0__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/SimilarGetMore.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/SimilarGetMore.vue?vue&type=script&lang=js":
+/*!*******************************************************************!*\
+  !*** ./src/components/SimilarGetMore.vue?vue&type=script&lang=js ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarGetMore_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarGetMore.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarGetMore.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarGetMore_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/SimilarGetMore.vue?vue&type=template&id=c65454e0":
+/*!*************************************************************************!*\
+  !*** ./src/components/SimilarGetMore.vue?vue&type=template&id=c65454e0 ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarGetMore_vue_vue_type_template_id_c65454e0__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarGetMore_vue_vue_type_template_id_c65454e0__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SimilarGetMore_vue_vue_type_template_id_c65454e0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./SimilarGetMore.vue?vue&type=template&id=c65454e0 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/SimilarGetMore.vue?vue&type=template&id=c65454e0");
 
 
 /***/ }),
@@ -7486,6 +9650,352 @@ const commonMixin = {
 
 /***/ }),
 
+/***/ "./src/utils/mixins/equipmentMixin.js":
+/*!********************************************!*\
+  !*** ./src/utils/mixins/equipmentMixin.js ***!
+  \********************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   equipmentMixin: function() { return /* binding */ equipmentMixin; }
+/* harmony export */ });
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.push.js */ "./node_modules/core-js/modules/es.array.push.js");
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.constructor.js */ "./node_modules/core-js/modules/es.iterator.constructor.js");
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_iterator_filter_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.iterator.filter.js */ "./node_modules/core-js/modules/es.iterator.filter.js");
+/* harmony import */ var core_js_modules_es_iterator_filter_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_filter_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_iterator_find_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.iterator.find.js */ "./node_modules/core-js/modules/es.iterator.find.js");
+/* harmony import */ var core_js_modules_es_iterator_find_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_find_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.iterator.for-each.js */ "./node_modules/core-js/modules/es.iterator.for-each.js");
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.iterator.map.js */ "./node_modules/core-js/modules/es.iterator.map.js");
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.iterator.some.js */ "./node_modules/core-js/modules/es.iterator.some.js");
+/* harmony import */ var core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_6__);
+
+
+
+
+
+
+
+/**
+ * 装备相关公用方法Mixin
+ */
+const equipmentMixin = {
+  data() {
+    return {
+      lingshiKinds: window.lingshiKinds
+    };
+  },
+  methods: {
+    getEquipGemInfoAndBlueBlock(desc, default_style = '#Y') {
+      if (!desc) return {};
+      if (typeof window.parse_style_info === 'function') {
+        let htmlStr = window.parse_style_info(desc, default_style);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlStr;
+        const blueBlock = tempDiv.querySelectorAll('[style="color:#4DBAF4"]');
+        tempDiv.innerHTML = '';
+        const blueBlockList = [];
+        blueBlock.forEach(item => {
+          if (item.innerHTML.indexOf('特技') === -1 && item.innerHTML.indexOf('特效') === -1 && item.innerHTML.indexOf('<br>') === -1 && item.innerHTML.indexOf('+') === -1) {
+            blueBlockList.push(item.innerHTML.replace(/套装效果：附加状态|套装效果：追加法术|套装效果：变身术之|套装效果：变化咒之/g, '').replace(/<span>/g, '<div>'));
+          }
+        });
+        const gemInfo = desc.match(/#r锻炼等级 (\d+) /);
+        let gemLevel = gemInfo ? gemInfo[1] : 0;
+        if (gemLevel === 0) {
+          const levelInfo = desc.match(/#r精炼等级 (\d+)/);
+          gemLevel = levelInfo ? levelInfo[1] : 0;
+        }
+        return {
+          blueBlock: blueBlockList,
+          gemLevel: gemLevel
+        };
+      }
+      return {};
+    },
+    // 初始化套装选项
+    initSuitOptions() {
+      const suitOptions = [];
+      if (window.AUTO_SEARCH_CONFIG) {
+        // 附加状态
+        if (window.AUTO_SEARCH_CONFIG.suit_added_status) {
+          const addedStatusOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_added_status).map(([value, label]) => ({
+            value: `added_status_${value}`,
+            label: label
+          }));
+          if (addedStatusOptions.length > 0) {
+            suitOptions.push({
+              value: 'added_status',
+              label: '附加状态',
+              children: addedStatusOptions
+            });
+          }
+        }
+
+        // 追加法术
+        if (window.AUTO_SEARCH_CONFIG.suit_effects) {
+          const suitEffectsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_effects).map(([value, label]) => ({
+            value: `suit_effects_${value}`,
+            label: label
+          }));
+          if (suitEffectsOptions.length > 0) {
+            suitOptions.push({
+              value: 'suit_effects',
+              label: '追加法术',
+              children: suitEffectsOptions
+            });
+          }
+        }
+
+        // 变身术
+        if (window.AUTO_SEARCH_CONFIG.suit_transform_skills) {
+          const transformSkillsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_transform_skills).map(([value, label]) => ({
+            value: `transform_skills_${value}`,
+            label: label
+          }));
+          if (transformSkillsOptions.length > 0) {
+            suitOptions.push({
+              value: 'transform_skills',
+              label: '变身术',
+              children: transformSkillsOptions
+            });
+          }
+        }
+
+        // 变化咒
+        if (window.AUTO_SEARCH_CONFIG.suit_transform_charms) {
+          const transformCharmsOptions = Object.entries(window.AUTO_SEARCH_CONFIG.suit_transform_charms).map(([value, label]) => ({
+            value: `transform_charms_${value}`,
+            label: label
+          }));
+          if (transformCharmsOptions.length > 0) {
+            suitOptions.push({
+              value: 'transform_charms',
+              label: '变化咒',
+              children: transformCharmsOptions
+            });
+          }
+        }
+      }
+      this.suitOptions = suitOptions;
+    },
+    /**
+     * 获取装备图片属性
+     * @param {Object} eItem - 装备项
+     * @returns {Object} 装备图片属性
+     */
+    getEquipImageProps(eItem) {
+      if (!eItem) {
+        return {};
+      }
+      //标准
+      if (eItem.large_equip_desc && eItem.equip_name && eItem.equip_face_img && eItem.equip_type_desc) {
+        return eItem;
+      }
+      //召唤兽
+      return {
+        ...eItem,
+        equip_face_img: eItem.icon || eItem.small_icon || eItem.big_icon,
+        equip_type_desc: eItem.static_desc,
+        large_equip_desc: eItem.desc,
+        equip_name: eItem.name
+      };
+    },
+    /**
+     * 获取装备套装效果
+     * @param {string} equipList - 装备列表JSON字符串
+     * @returns {string} 套装效果描述
+     */
+    getEquipSuitEffect(equipList) {
+      if (!equipList) return '';
+      try {
+        const equipArray = JSON.parse(equipList).filter(equip => equip);
+
+        // 用于存储套装效果及其出现次数
+        const suitEffects = {};
+
+        // 遍历装备数组，提取套装效果
+        equipArray.forEach(equip => {
+          if (equip.desc) {
+            // 匹配套装效果：套装效果：附加状态 + 技能名称
+            const suitMatch = equip.desc.match(/#c4DBAF4套装效果：附加状态#c4DBAF4([^#]+)/);
+            if (suitMatch && suitMatch[1]) {
+              const suitName = suitMatch[1].trim();
+              suitEffects[suitName] = (suitEffects[suitName] || 0) + 1;
+            }
+          }
+        });
+
+        // 检查是否有达到3件套的效果
+        for (const [suitName, count] of Object.entries(suitEffects)) {
+          if (count >= 3) {
+            return suitName;
+          }
+          // 如果没有达到3件套，返回装备数量
+          return suitName + `(${count}/3)`;
+        }
+        return '';
+      } catch (error) {
+        console.error('解析装备列表失败:', error);
+        return '';
+      }
+    },
+    isLingshi(kindid) {
+      return this.lingshiKinds.some(([id]) => id === kindid);
+    },
+    // 获取特效名称
+    getSpecialEffectName(id, isLingshi = false) {
+      if (isLingshi) {
+        if (id === 1) {
+          return '超级简易';
+        }
+      } else {
+        // 直接使用全局变量
+        if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_effect) {
+          const effectName = window.AUTO_SEARCH_CONFIG.equip_special_effect[id.toString()];
+          if (effectName) return effectName;
+        }
+      }
+      return `特效${id}`;
+    },
+    // 解析特技特效
+    formatSpecialSkillsAndEffects({
+      special_effect: specialEffect,
+      special_skill: specialSkill,
+      kindid,
+      large_equip_desc
+    }) {
+      const specials = [];
+      if (specialEffect && specialEffect !== '') {
+        try {
+          const effects = JSON.parse(specialEffect);
+          const isLingshi = this.isLingshi(kindid);
+          if (Array.isArray(effects)) {
+            effects.forEach(effect => {
+              if (isLingshi) {
+                // 在large_equip_desc中提取特效
+                // 支持两种格式：
+                // 1. #c4DBAF4特效：超级简易#r (无等级)
+                // 2. #c4DBAF4特效：锐不可当（3级）#r (有等级)
+
+                // 先尝试匹配有等级的特效
+                const effectWithLevelMatch = large_equip_desc.match(/#c4DBAF4特效：([^#]+)（(\d+)级）#r/);
+                if (effectWithLevelMatch) {
+                  const effectName = effectWithLevelMatch[1];
+                  const effectLevel = effectWithLevelMatch[2];
+                  specials.push(`${effectName}（${effectLevel}级）`);
+                } else {
+                  // 再尝试匹配无等级的特效
+                  const effectWithoutLevelMatch = large_equip_desc.match(/#c4DBAF4特效：([^#]+)#r/);
+                  if (effectWithoutLevelMatch) {
+                    const effectName = effectWithoutLevelMatch[1];
+                    specials.push(`${effectName}`);
+                  } else {
+                    // 如果都没有匹配到特效，使用默认处理方式
+                    const effectName = this.getSpecialEffectName(parseInt(effect), isLingshi);
+                    if (effectName) specials.push(`${effectName}`);
+                  }
+                }
+              } else {
+                const effectName = this.getSpecialEffectName(parseInt(effect), isLingshi);
+                if (effectName) specials.push(`${effectName}`);
+              }
+            });
+          }
+        } catch (e) {
+          console.warn('解析特效JSON失败:', e, specialEffect);
+        }
+      }
+
+      // 处理特技
+      if (specialSkill && specialSkill !== 0) {
+        const skillName = this.getSpecialSkillName(specialSkill);
+        if (skillName) specials.push(`${skillName}`);
+      }
+      return specials.join('<br />');
+    },
+    // 获取特技名称
+    getSpecialSkillName(id) {
+      // 直接使用全局变量
+      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.equip_special_skills) {
+        const skills = window.AUTO_SEARCH_CONFIG.equip_special_skills;
+        if (Array.isArray(skills)) {
+          const skill = skills.find(item => item[0] === parseInt(id));
+          if (skill) return skill[1];
+        }
+      }
+      return `特技${id}`;
+    },
+    /**
+     * 格式化套装效果
+     * @param {number} suitEffect - 套装效果ID
+     * @returns {string} 套装效果名称
+     */
+    // 解析套装信息
+    formatSuitEffect({
+      suit_effect: suitEffect,
+      addon_status,
+      kindid
+    }) {
+      if (kindid === 29) {
+        return addon_status;
+      }
+      if (!suitEffect) return '';
+      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_added_status) {
+        const suitName = window.AUTO_SEARCH_CONFIG.suit_added_status[suitEffect.toString()];
+        if (suitName) return `附加状态${suitName}`;
+      }
+      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_append_skills) {
+        const suitName = window.AUTO_SEARCH_CONFIG.suit_append_skills[suitEffect.toString()];
+        if (suitName) return `追加法术${suitName}`;
+      }
+      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_transform_skills) {
+        const suitName = window.AUTO_SEARCH_CONFIG.suit_transform_skills[suitEffect.toString()];
+        if (suitName) return `变身术之${suitName}`;
+      }
+      if (window.AUTO_SEARCH_CONFIG && window.AUTO_SEARCH_CONFIG.suit_transform_charms) {
+        const suitName = window.AUTO_SEARCH_CONFIG.suit_transform_charms[suitEffect.toString()];
+        if (suitName) return `变化咒之${suitName}`;
+      }
+      return `套装${suitEffect}`;
+    },
+    /**
+     * 获取宝石图片
+     * @param {Object} equipment - 装备对象
+     * @returns {Array} 宝石图片URL数组
+     */
+    getGemImageByGemValue(equipment) {
+      const gemImages = [];
+
+      // 处理宝石数据
+      if (equipment.gem_value) {
+        try {
+          const gemData = JSON.parse(equipment.gem_value);
+          if (Array.isArray(gemData)) {
+            gemData.forEach(gemId => {
+              if (gemId && this.gem_image && this.gem_image[gemId]) {
+                const gemImg = this.gem_image[gemId];
+                gemImages.push(this.getImageUrl(`${gemImg}.gif`, 'small'));
+              }
+            });
+          }
+        } catch (e) {
+          console.error('解析宝石数据失败:', e);
+        }
+      }
+      return gemImages;
+    }
+  }
+};
+
+/***/ }),
+
 /***/ "./src/utils/request.js":
 /*!******************************!*\
   !*** ./src/utils/request.js ***!
@@ -7507,7 +10017,7 @@ __webpack_require__.r(__webpack_exports__);
 const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
 
 // 根据环境设置不同的baseURL
-const baseURL = isChromeExtension ? 'http://xyq.lingtong.xyz/cbg/api/v1' : '/api/v1';
+const baseURL = isChromeExtension ? 'http://xyq.lingtong.xyz/api/v1' : '/api/v1';
 
 // 创建axios实例
 const request = axios__WEBPACK_IMPORTED_MODULE_1__["default"].create({
@@ -7621,6 +10131,383 @@ const api = {
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (request);
+
+/***/ }),
+
+/***/ "./src/utils/windowReuseManager.js":
+/*!*****************************************!*\
+  !*** ./src/utils/windowReuseManager.js ***!
+  \*****************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.iterator.constructor.js */ "./node_modules/core-js/modules/es.iterator.constructor.js");
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.for-each.js */ "./node_modules/core-js/modules/es.iterator.for-each.js");
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_1__);
+
+
+/**
+ * 窗口复用管理器
+ * 用于管理相似窗口的复用，避免重复打开相同功能的窗口
+ */
+class WindowReuseManager {
+  constructor() {
+    this.channelName = 'similar-window-reuse';
+    this.channel = null;
+    this.windowId = null;
+    this.isSetup = false;
+    this.setup();
+  }
+  setup() {
+    try {
+      this.channel = new BroadcastChannel(this.channelName);
+      this.windowId = this.generateWindowId();
+      this.setupMessageListener();
+      this.isSetup = true;
+
+      // 设置窗口关闭时的清理
+      window.addEventListener('beforeunload', () => {
+        this.cleanup();
+      });
+      console.log('WindowReuseManager setup completed, windowId:', this.windowId);
+    } catch (error) {
+      console.warn('Failed to setup WindowReuseManager:', error);
+    }
+  }
+  generateWindowId() {
+    return `window_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+  setupMessageListener() {
+    if (!this.channel) return;
+    this.channel.onmessage = event => {
+      const {
+        type,
+        params,
+        windowId,
+        timestamp
+      } = event.data;
+      switch (type) {
+        case 'check-window':
+          this.handleCheckWindow(params, timestamp);
+          break;
+        case 'focus-window':
+          this.handleFocusWindow(windowId, timestamp);
+          break;
+        case 'update-params':
+          this.handleUpdateParams(params, timestamp);
+          break;
+        default:
+          console.log('Unknown message type:', type);
+      }
+    };
+  }
+  handleCheckWindow(params, timestamp) {
+    console.log('🔍 收到窗口检查请求，当前窗口ID:', this.windowId);
+    console.log('🔍 检查参数:', params);
+
+    // 检查当前窗口是否兼容请求的参数
+    if (this.isWindowCompatible(params)) {
+      console.log('✅ 当前窗口兼容，发送可用消息');
+      this.channel.postMessage({
+        type: 'window-available',
+        windowId: this.windowId,
+        params: params,
+        timestamp: Date.now()
+      });
+    } else {
+      console.log('❌ 当前窗口不兼容，忽略请求');
+    }
+  }
+  handleFocusWindow(targetWindowId, timestamp) {
+    // 如果目标窗口ID匹配，则聚焦当前窗口
+    if (targetWindowId === this.windowId) {
+      this.focusWindow();
+    }
+  }
+  handleUpdateParams(params, timestamp) {
+    console.log('📨 收到参数更新请求:', params);
+
+    // 先检查窗口兼容性，只有兼容的窗口才能更新参数
+    if (this.isWindowCompatible(params)) {
+      console.log('✅ 窗口兼容，开始更新参数...');
+      this.refreshWithNewUrl(params);
+    } else {
+      console.log('❌ 窗口不兼容，忽略参数更新请求');
+      console.log('当前窗口参数与请求参数不匹配，无法更新');
+    }
+  }
+  isWindowCompatible(params) {
+    try {
+      const currentUrl = window.location.href;
+      console.log('🔍 检查窗口兼容性，当前URL:', currentUrl);
+
+      // 检查是否是auto-params页面（支持hash路由）
+      if (!currentUrl.includes('/auto-params') && !currentUrl.includes('#/auto-params')) {
+        console.log('❌ 不是auto-params页面');
+        return false;
+      }
+
+      // 检查action是否匹配（支持hash路由）
+      let urlParams;
+      if (window.location.hash && window.location.hash.includes('?')) {
+        // hash路由：从hash中提取查询参数
+        const hashQuery = window.location.hash.split('?')[1];
+        console.log('🔍 从hash中提取查询参数:', hashQuery);
+        urlParams = new URLSearchParams(hashQuery);
+      } else {
+        // 普通路由：从search中获取参数
+        console.log('🔍 从search中获取参数:', window.location.search);
+        urlParams = new URLSearchParams(window.location.search);
+      }
+      const currentAction = urlParams.get('action');
+      const currentEquipType = urlParams.get('equip_type');
+      console.log('🔍 当前页面参数 - action:', currentAction, 'equip_type:', currentEquipType);
+      console.log('🔍 请求参数 - action:', params.action, 'equip_type:', params.equip_type);
+
+      // 基本匹配：action必须相同
+      if (currentAction !== params.action) {
+        console.log('❌ action不匹配');
+        return false;
+      }
+
+      // 装备类型匹配（如果指定了的话）
+      if (params.equip_type && currentEquipType !== params.equip_type) {
+        console.log('❌ equip_type不匹配');
+        return false;
+      }
+      console.log('✅ 窗口兼容性检查通过');
+      // 注意：即使窗口兼容，如果具体装备信息不同，仍然需要更新参数
+      return true;
+    } catch (error) {
+      console.warn('Error checking window compatibility:', error);
+      return false;
+    }
+  }
+  focusWindow() {
+    try {
+      // 尝试多种聚焦方式
+      if (window.focus) {
+        window.focus();
+      }
+
+      // 如果窗口被最小化，尝试恢复
+      if (window.screen && window.screen.orientation) {
+        // 现代浏览器支持
+        window.focus();
+      }
+
+      // 滚动到顶部
+      window.scrollTo(0, 0);
+      console.log('Window focused:', this.windowId);
+    } catch (error) {
+      console.warn('Failed to focus window:', error);
+    }
+  }
+  updateWindowParams(params) {
+    try {
+      // 更新URL参数（支持hash路由）
+      let newUrl;
+      if (window.location.hash && window.location.hash.includes('?')) {
+        // hash路由：更新hash中的查询参数
+        const [hashPath, hashQuery] = window.location.hash.split('?');
+        const urlParams = new URLSearchParams(hashQuery);
+        Object.keys(params).forEach(key => {
+          if (params[key] !== undefined && params[key] !== null) {
+            urlParams.set(key, params[key]);
+          }
+        });
+        newUrl = `${hashPath}?${urlParams.toString()}`;
+      } else {
+        // 普通路由：更新search参数
+        const url = new URL(window.location);
+        Object.keys(params).forEach(key => {
+          if (params[key] !== undefined && params[key] !== null) {
+            url.searchParams.set(key, params[key]);
+          }
+        });
+        newUrl = url.toString();
+      }
+
+      // 使用replaceState更新URL，不刷新页面
+      window.history.replaceState({}, '', newUrl);
+
+      // 触发自定义事件，通知页面内容更新
+      const event = new CustomEvent('params-updated', {
+        detail: {
+          params,
+          timestamp: Date.now()
+        }
+      });
+      window.dispatchEvent(event);
+      console.log('📢 已触发参数更新事件:', event);
+      console.log('Window params updated:', params);
+    } catch (error) {
+      console.warn('Failed to update window params:', error);
+    }
+  }
+  refreshWithNewUrl(params) {
+    try {
+      // 构建新的URL（支持hash路由）
+      let newUrl;
+      if (window.location.hash && window.location.hash.includes('?')) {
+        // hash路由：更新hash中的查询参数
+        const [hashPath, hashQuery] = window.location.hash.split('?');
+        const urlParams = new URLSearchParams(hashQuery);
+        Object.keys(params).forEach(key => {
+          if (params[key] !== undefined && params[key] !== null) {
+            urlParams.set(key, params[key]);
+          }
+        });
+        newUrl = `${hashPath}?${urlParams.toString()}`;
+      } else {
+        // 普通路由：更新search参数
+        const url = new URL(window.location);
+        Object.keys(params).forEach(key => {
+          if (params[key] !== undefined && params[key] !== null) {
+            url.searchParams.set(key, params[key]);
+          }
+        });
+        newUrl = url.toString();
+      }
+      console.log('🔄 准备用新URL刷新页面:', newUrl);
+
+      // 直接用新URL刷新页面
+      window.location.href = newUrl;
+      window.location.reload();
+    } catch (error) {
+      console.warn('Failed to refresh with new URL:', error);
+      // 如果出错，回退到普通刷新
+      window.location.reload();
+    }
+  }
+  checkForExistingWindow(params, timeout = 1000) {
+    return new Promise(resolve => {
+      if (!this.channel) {
+        console.warn('❌ 广播通道未初始化，无法检查窗口复用');
+        resolve(false);
+        return;
+      }
+      const message = {
+        type: 'check-window',
+        params: params,
+        timestamp: Date.now()
+      };
+      console.log('📡 发送窗口检查消息:', message);
+
+      // 设置超时
+      const timeoutId = setTimeout(() => {
+        this.channel.removeEventListener('message', messageHandler);
+        console.log('⏰ 窗口检查超时，未找到可复用窗口');
+        resolve(false);
+      }, timeout);
+
+      // 消息处理器
+      const messageHandler = event => {
+        console.log('📨 收到响应消息:', event.data);
+        if (event.data.type === 'window-available' && event.data.params.action === params.action) {
+          clearTimeout(timeoutId);
+          this.channel.removeEventListener('message', messageHandler);
+          console.log('✅ 找到可复用窗口:', event.data);
+          resolve({
+            windowId: event.data.windowId,
+            params: event.data.params
+          });
+        }
+      };
+
+      // 添加消息监听器
+      this.channel.addEventListener('message', messageHandler);
+
+      // 发送检查消息
+      this.channel.postMessage(message);
+    });
+  }
+  requestFocus(targetWindowId) {
+    if (!this.channel) return;
+    this.channel.postMessage({
+      type: 'focus-window',
+      windowId: targetWindowId,
+      timestamp: Date.now()
+    });
+  }
+  requestUpdateParams(targetWindowId, params) {
+    if (!this.channel) {
+      console.warn('❌ 广播通道未初始化，无法发送参数更新请求');
+      return;
+    }
+    const message = {
+      type: 'update-params',
+      windowId: targetWindowId,
+      params: params,
+      timestamp: Date.now()
+    };
+    console.log('📡 发送参数更新请求到窗口:', targetWindowId);
+    console.log('📡 更新参数:', params);
+    this.channel.postMessage(message);
+  }
+  extractParamsFromUrl(url) {
+    try {
+      if (!url) return {};
+
+      // 支持hash路由
+      let queryString = '';
+      if (url.includes('#')) {
+        const hashPart = url.split('#')[1];
+        if (hashPart.includes('?')) {
+          queryString = hashPart.split('?')[1];
+        }
+      } else if (url.includes('?')) {
+        queryString = url.split('?')[1];
+      }
+      if (!queryString) return {};
+      const urlParams = new URLSearchParams(queryString);
+      const params = {};
+
+      // 提取所有参数
+      for (const [key, value] of urlParams.entries()) {
+        params[key] = value;
+      }
+      console.log('🔍 从URL解析参数:', params);
+      return params;
+    } catch (error) {
+      console.warn('解析URL参数失败:', error);
+      return {};
+    }
+  }
+  cleanup() {
+    if (this.channel) {
+      this.channel.close();
+      this.channel = null;
+    }
+    this.isSetup = false;
+  }
+
+  // 获取当前状态信息
+  getStatus() {
+    return {
+      channelName: this.channelName,
+      channel: !!this.channel,
+      windowId: this.windowId,
+      isSetup: this.isSetup
+    };
+  }
+}
+
+// 创建全局实例
+const windowReuseManager = new WindowReuseManager();
+/* harmony default export */ __webpack_exports__["default"] = (windowReuseManager);
+
+/***/ }),
+
+/***/ "?4f7e":
+/*!********************************!*\
+  !*** ./util.inspect (ignored) ***!
+  \********************************/
+/***/ (function() {
+
+/* (ignored) */
 
 /***/ }),
 

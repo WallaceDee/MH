@@ -72,8 +72,12 @@
                       <div>
                         <el-tag type="danger" v-if="isEmptyRole(parserRoleData(role))">空号</el-tag>
                         <template v-else>
-                          <el-tag>⚔️ {{ get_equip_num(parserRoleData(role)) }}</el-tag>
-                          <el-tag type="success">🐲 {{ get_pet_num(parserRoleData(role)) }}</el-tag>
+                          <el-tag @click="handleEquipPrice(role)" style="cursor: pointer;" v-if="get_equip_num(parserRoleData(role)) > 0">
+                            ⚔️ {{ get_equip_num(parserRoleData(role)) }}
+                          </el-tag>
+                          <el-tag type="success" @click="handlePetPrice(role)" style="cursor: pointer;" v-if="get_pet_num(parserRoleData(role)) > 0">
+                            🐲 {{ get_pet_num(parserRoleData(role)) }}
+                          </el-tag>
                         </template>
                       </div>
 
@@ -100,12 +104,28 @@
         </div>
       </div>
     </div>
+
+    <!-- 装备估价结果对话框 -->
+    <el-dialog :visible.sync="valuationDialogVisible" width="1000px" :close-on-click-modal="false"
+      :close-on-press-escape="false" custom-class="batch-valuation-dialog">
+      <span slot="title" class="el-dialog__title">
+        <el-tag size="mini">{{ valuationDialogTitle.server_name }}</el-tag>
+        /
+        <el-tag type="info" size="mini">{{ valuationDialogTitle.school }}</el-tag>/
+        <el-link :href="getCBGLinkByType(valuationDialogTitle.eid)" target="_blank">{{ valuationDialogTitle.nickname
+        }}</el-link>
+      </span>
+      <EquipBatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
+        :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
+        @close="closeValuationDialog" />
+    </el-dialog>
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
+import EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 export default {
   name: 'DevToolsPanel',
@@ -125,13 +145,26 @@ export default {
       devtoolsConnected: false, // 数据监听连接状态
       connectionStatus: '检查中...', // 连接状态描述
       connectionCheckTimer: null, // 连接检查定时器
-      isInNewWindow: false // 是否在新窗口中打开
+      isInNewWindow: false, // 是否在新窗口中打开
+      
+      // 装备估价相关数据
+      valuationDialogVisible: false,
+      valuationResults: [],
+      valuationTotalValue: 0,
+      valuationEquipmentList: [],
+      valuationLoading: false,
+      valuationDialogTitle: {},
+      batchValuateParams: {
+        similarity_threshold: 0.7,
+        max_anchors: 30
+      }
     }
   },
   mixins: [commonMixin],
   components: {
     RoleImage,
-    SimilarRoleModal
+    SimilarRoleModal,
+    EquipBatchValuationResult
   },
   computed: {
 
@@ -884,6 +917,89 @@ export default {
         }
       }
     },
+    
+    // 装备估价相关方法
+    async handleEquipPrice(role) {
+      const roleData = this.parserRoleData(role)
+      const { using_equips, not_using_equips, split_equips, basic_info } = roleData
+      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ 
+        ...item, 
+        iType: item.type, 
+        cDesc: item.desc, 
+        serverid: role.serverid, 
+        server_name: role.server_name 
+      }))
+      
+      this.valuationDialogTitle = {
+        nickname: basic_info.nickname,
+        school: basic_info.school,
+        server_name: role.server_name,
+        eid: role.eid
+      }
+
+      try {
+        // 先显示弹窗和骨架屏
+        this.valuationDialogVisible = true
+        this.valuationLoading = true
+        this.valuationResults = []
+        this.valuationTotalValue = 0
+        this.valuationEquipmentList = equip_list
+        
+        // 调用批量估价API
+        const response = await this.$api.equipment.batchEquipmentValuation({
+          eid: role.eid,
+          equipment_list: equip_list,
+          strategy: 'fair_value',
+          similarity_threshold: this.batchValuateParams.similarity_threshold,
+          max_anchors: this.batchValuateParams.max_anchors
+        })
+
+        if (response.code === 200) {
+          const data = response.data
+          const results = data.results || []
+          const totalValue = results.reduce((sum, result) => {
+            return sum + (result.estimated_price || 0)
+          }, 0)
+          
+          // 更新弹窗内容，显示实际数据
+          this.valuationResults = results
+          this.valuationTotalValue = totalValue
+          this.valuationLoading = false
+        } else {
+          this.$notify.error({
+            title: '错误',
+            message: response.message || '装备估价失败'
+          })
+          this.closeValuationDialog()
+        }
+      } catch (error) {
+        console.error('装备估价失败:', error)
+        this.$notify.error({
+          title: '错误',
+          message: '装备估价失败'
+        })
+        this.closeValuationDialog()
+      } finally {
+        this.valuationLoading = false
+      }
+    },
+    
+    // 关闭装备估价结果对话框
+    closeValuationDialog() {
+      this.valuationDialogVisible = false
+      this.valuationResults = []
+      this.valuationTotalValue = 0
+      this.valuationEquipmentList = []
+      this.valuationDialogTitle = {}
+    },
+    
+    // 宠物估价方法（占位符）
+    handlePetPrice(role) {
+      this.$notify.info({
+        title: '提示',
+        message: '宠物估价功能暂未实现'
+      })
+    }
   }
 }
 </script>
