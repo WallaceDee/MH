@@ -109,7 +109,7 @@ export default {
     createNewWindow(params) {
       // 使用qs库将参数转换为URL查询字符串
       const queryString = qs.stringify(params)
-      const url = `/#/auto-params?${queryString}`
+      const url = `/admin/#/auto-params?${queryString}`
 
       // 计算窗口位置，使其显示在右下角
       const screenWidth = window.screen.availWidth

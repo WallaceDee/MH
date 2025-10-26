@@ -401,3 +401,26 @@ def get_equipment_stats():
         return error_response(f"获取装备统计失败: {str(e)}")
 
 
+@equipment_bp.route('/extract-features', methods=['POST'])
+def extract_equipment_features():
+    """提取装备特征"""
+    try:
+        data = request.get_json()
+        if not data:
+            return error_response("请提供装备数据")
+        
+        equipment_data = data.get('equipment_data')
+        if not equipment_data:
+            return error_response("请提供装备数据")
+        
+        data_type = data.get('data_type', 'equipment')  # 'equipment' 或 'pet'
+        
+        result = controller.extract_features(equipment_data, data_type)
+        
+        if "error" in result:
+            return error_response(result["error"])
+        
+        return success_response(data=result, message="特征提取成功")
+        
+    except Exception as e:
+        return error_response(f"特征提取失败: {str(e)}")

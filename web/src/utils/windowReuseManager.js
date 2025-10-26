@@ -99,7 +99,7 @@ class WindowReuseManager {
       console.log('🔍 检查窗口兼容性，当前URL:', currentUrl)
       
       // 检查是否是auto-params页面（支持hash路由）
-      if (!currentUrl.includes('/auto-params') && !currentUrl.includes('#/auto-params')) {
+      if (!currentUrl.includes('/admin/#/auto-params') && !currentUrl.includes('#/admin/auto-params')) {
         console.log('❌ 不是auto-params页面')
         return false
       }
