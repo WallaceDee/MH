@@ -1356,23 +1356,29 @@ class SpiderService:
             # 创建PlaywrightAutoCollector实例
             collector = PlaywrightAutoCollector()
             
-            # 调用_parse_and_save_response方法
+            # 调用_parse_and_save_response方法，返回数据类型
             import asyncio
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                result = loop.run_until_complete(collector._parse_and_save_response(url, response_text))
+                data_type = loop.run_until_complete(collector._parse_and_save_response(url, response_text))
+                
+                logger.info(f"解析完成，识别到数据类型: {data_type}, URL: {url}")
+                
                 return {
                     "success": True,
                     "message": "响应数据解析完成",
                     "url": url,
-                    "data_length": len(response_text)
+                    "data_length": len(response_text),
+                    "type": data_type
                 }
             finally:
                 loop.close()
                 
         except Exception as e:
             logger.error(f"解析响应数据失败: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return {
                 "success": False,
                 "message": f"解析响应数据失败: {str(e)}",

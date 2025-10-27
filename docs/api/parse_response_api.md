@@ -37,12 +37,23 @@
         "success": true,
         "message": "响应数据解析完成",
         "url": "https://xyq.cbg.163.com/cgi-bin/query.py?act=overall_search_role&server_id=9&page=1&order_by=price%20ASC&count=15&search_type=overall_search_role",
-        "data_length": 161
+        "data_length": 161,
+        "type": "role"
     },
     "message": "响应数据解析完成",
     "timestamp": 1757429624
 }
 ```
+
+**data字段说明：**
+- `success`: 是否成功
+- `message`: 响应消息
+- `url`: 原始请求URL
+- `data_length`: 响应文本长度
+- `type`: 识别的数据类型，可能的值包括：
+  - `role`: 角色数据
+  - `pet`: 召唤兽数据
+  - `equipment`: 装备数据（包括灵饰和召唤兽装备）
 
 ### 错误响应
 

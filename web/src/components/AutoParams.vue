@@ -25,13 +25,9 @@
                     <template v-if="externalParams.action">
                         <!-- <el-cascader :options="server_data" size="mini" filterable v-model="server_data_value" clearable /> -->
                         <div style="display: inline-block; margin-left: 8px">
-                            <el-link @click="openCBGSearch" :type="isCookieValid ? 'danger' : 'info'"
-                                :style="cbgLinkStyle" :disabled="!isCookieValid">
+                            <el-link @click="openCBGSearch">
                                 藏宝阁
                             </el-link>
-                            <el-tooltip v-if="!isCookieValid" content="请先登录藏宝阁，确保Cookies有效后再使用此功能" placement="top">
-                                <i class="el-icon-warning" style="color: #e6a23c; margin-left: 4px"></i>
-                            </el-tooltip>
                         </div>
                     </template>
 
@@ -521,14 +517,7 @@ export default {
         isCookieValid() {
             return this.$store.getters['cookie/isCookieCacheValid']
         },
-        // 藏宝阁链接样式
-        cbgLinkStyle() {
-            return {
-                color: this.isCookieValid ? '#f56c6c' : '#c0c4cc',
-                cursor: this.isCookieValid ? 'pointer' : 'not-allowed',
-                textDecoration: this.isCookieValid ? 'underline' : 'none'
-            }
-        },
+
         cached_params() {
             try {
                 let diyParams = JSON.parse(this.equipParamsJson)
@@ -1101,19 +1090,7 @@ export default {
             this.externalSearchParams = JSON.stringify(query, null, 2)
         },
         async openCBGSearch() {
-            // 检查cookies是否有效
-            const isCookieValid = this.$store.getters['cookie/isCookieCacheValid']
-
-            if (!isCookieValid) {
-                // Cookies无效，提示用户先登录
-                this.$notify.warning({
-                    message: '请先登录藏宝阁，确保Cookies有效后再使用此功能',
-                    duration: 3000,
-                    showClose: true
-                })
-                return
-            }
-
+     
             let prefix = ''
             let search_type = 'search_role_equip'
             let query = {}
@@ -1138,10 +1115,10 @@ export default {
 
             let target_url = prefix + qs.stringify(query)
             console.log(target_url, 'target_url')
-            this.$api.spider.startPlaywright({
-                headless: false,
-                target_url
-            })
+            // this.$api.spider.startPlaywright({
+            //     headless: false,
+            //     target_url
+            // })
         },
         /**
         * GBK编码的URL编码

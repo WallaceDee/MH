@@ -344,7 +344,11 @@ class PlaywrightAutoCollector:
             logger.error(f"处理浏览器上下文关闭事件失败: {e}")
 
     async def _parse_and_save_response(self, url: str, response_text: str):
-        """解析并保存响应数据"""
+        """解析并保存响应数据
+        
+        Returns:
+            str: 数据类型 (role, pet, equipment等)，如果处理失败或无法分类则返回空字符串
+        """
         try:
             # 分类数据类型
             parsed_url = urlparse(url)
@@ -353,7 +357,7 @@ class PlaywrightAutoCollector:
             logger.info(f"捕获到类型（{data_type}）的响应: {url} ")
 
             if not data_type:
-                return
+                return ''
 
             # 调用对应的解析方法
             parsed_data = await self._parse_response_data(data_type, response_text)
@@ -362,9 +366,12 @@ class PlaywrightAutoCollector:
                 # 保存到数据库
                 await self._save_parsed_data(data_type, parsed_data, {'url': url})
                 logger.info(f"响应数据已保存: {data_type} - {len(parsed_data)} 条记录")
+            
+            return data_type
 
         except Exception as e:
             logger.error(f"解析响应数据失败: {e}")
+            return ''
 
     async def _parse_response_data(self, data_type: str, response_text: str):
         """解析响应数据"""
@@ -483,13 +490,22 @@ class PlaywrightAutoCollector:
         &query_order=price%20ASC&view_loc=search_cond&count=15&search_type=&kindid=20&level_min=80&level_max=89&suit_effect=3011&init_defense=34&init_hp=160
         """
         try:
-            # 全区搜索
+            # 优先检查search_type参数（最直接的方式）
             if 'search_type=overall_search_role' in url:
                 return 'role'
             elif 'search_type=overall_search_pet' in url:
                 return 'pet'
-            elif any(search_type in url for search_type in ['overall_search_equip', 'overall_search_pet_equip', 'overall_search_lingshi']):
+            elif any(search_type in url for search_type in ['search_type=overall_search_equip', 'search_type=overall_search_pet_equip', 'search_type=overall_search_lingshi']):
                 return 'equipment'
+            # 全区搜索（带view_loc=overall_search的情况）
+            elif 'view_loc=overall_search' in url:
+                # 在view_loc=overall_search的情况下，还要检查search_type参数
+                if 'search_type=overall_search_role' in url:
+                    return 'role'
+                elif 'search_type=overall_search_pet' in url:
+                    return 'pet'
+                elif any(search_type in url for search_type in ['search_type=overall_search_equip', 'search_type=overall_search_pet_equip', 'search_type=overall_search_lingshi']):
+                    return 'equipment'
             # 区内推荐搜索 view_loc=reco_left
             elif 'view_loc=reco_left' in url:
                 if 'recommend_type=1' in url:
@@ -519,7 +535,7 @@ class PlaywrightAutoCollector:
                 if 'search_type=search_role' in url:
                     return 'role'
             else:
-                logger.error(f"无效分类: {url}")
+                logger.warning(f"无法分类: {url}")
                 return ''
 
         except Exception as e:

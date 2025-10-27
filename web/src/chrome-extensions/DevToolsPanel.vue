@@ -46,11 +46,15 @@
                   <i class="el-icon-error"></i> 解析失败
                 </template>
               </span>
+              <el-tag v-if="item.dataType" size="mini" type="info" style="margin-left: 5px;">
+                {{ getDataTypeLabel(item.dataType) }}
+              </el-tag>
               <span class="timestamp">{{ formatTime(item.timestamp) }}</span>
             </div>
           </div>
-          <div v-if="item.responseData" class="response-data">
-            <el-row :gutter="4">
+          <div v-if="item.responseData && item.dataType" class="response-data">
+            <!-- 角色数据渲染 -->
+            <el-row :gutter="4" v-if="item.dataType === 'role'">
               <el-col v-for="role in parseListData(item.responseData)?.equip_list" :key="role.eid"
                 style="width: 20%;margin-bottom: 2px;margin-top: 2px;">
                 <el-card class="role-card" :class="{ 'empty-role': isEmptyRole(parserRoleData(role)) }">
@@ -94,6 +98,65 @@
                 </el-card>
               </el-col>
             </el-row>
+            
+            <!-- 装备数据渲染 -->
+            <el-row :gutter="4" v-else-if="item.dataType === 'equipment'">
+              <el-col v-for="equip in parseListData(item.responseData)?.equip_list" :key="equip.eid"
+                style="width: 20%;margin-bottom: 2px;margin-top: 2px;">
+                <el-card class="role-card">
+                  <el-row type="flex" justify="space-between">
+                    <el-col style="width:50px;flex-shrink: 0;margin-right: 4px;">
+                      <EquipmentImage :equipment="equip" />
+                      <el-link :href="getCBGLinkByType(equip.eid, 'equip')" type="danger" target="_blank"
+                        style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;">
+                        {{ equip.equip_name }}
+                      </el-link>
+                    </el-col>
+                    <el-col>
+                      <div style="padding: 5px 0;">
+                        <span v-html="formatFullPrice(equip)"></span>
+                      </div>
+                      <div v-if="equip.highlight" class="equip-desc-content" v-html="gen_highlight(equip.highlight)"></div>
+                      <div v-if="equip.equip_level" style="font-size: 12px;">
+                        等级: {{ equip.equip_level }}
+                      </div>
+                      <div v-if="equip.server_name" style="font-size: 12px; color: #909399;">
+                        {{ equip.server_name }}
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-card>
+              </el-col>
+            </el-row>
+            
+            <!-- 召唤兽数据渲染 -->
+            <el-row :gutter="4" v-else-if="item.dataType === 'pet'">
+              <el-col v-for="pet in parseListData(item.responseData)?.equip_list" :key="pet.eid"
+                style="width: 20%;margin-bottom: 2px;margin-top: 2px;">
+                <el-card class="role-card">
+                  <el-row type="flex" justify="space-between">
+                    <el-col style="width:50px;flex-shrink: 0;margin-right: 4px;">
+                      <el-image v-if="pet.avatar_url" :src="pet.avatar_url" style="width: 50px;height: 50px;" fit="cover"></el-image>
+                      <el-link :href="getCBGLinkByType(pet.eid, 'pet')" type="danger" target="_blank"
+                        style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;">
+                        {{ pet.seller_nickname || pet.name || pet.nickname }}
+                      </el-link>
+                    </el-col>
+                    <el-col>
+                      <div style="padding: 5px 0;">
+                        <span v-html="formatFullPrice(pet.price, true)"></span>
+                      </div>
+                      <div v-if="pet.grade" style="font-size: 12px;">
+                        等级: {{ pet.grade }}
+                      </div>
+                      <div v-if="pet.server_name" style="font-size: 12px; color: #909399;">
+                        {{ pet.server_name }}
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-card>
+              </el-col>
+            </el-row>
             <!-- <el-button @click="toggleResponse(index)" size="mini" type="text">
               {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据
             </el-button>
@@ -126,7 +189,9 @@ import dayjs from 'dayjs'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
 import EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'
+import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
+import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 export default {
   name: 'DevToolsPanel',
   data() {
@@ -160,11 +225,12 @@ export default {
       }
     }
   },
-  mixins: [commonMixin],
+  mixins: [commonMixin, equipmentMixin],
   components: {
     RoleImage,
     SimilarRoleModal,
-    EquipBatchValuationResult
+    EquipBatchValuationResult,
+    EquipmentImage
   },
   computed: {
 
@@ -247,6 +313,14 @@ export default {
         }
       }
       return noEquip && noPet
+    },
+    getDataTypeLabel(type) {
+      const typeMap = {
+        'role': '角色',
+        'pet': '召唤兽',
+        'equipment': '装备'
+      }
+      return typeMap[type] || type
     },
     get_pet_num(roleInfo) {
       return roleInfo.pet_info.length + roleInfo.split_pets.length
@@ -651,14 +725,26 @@ export default {
         this.connectionStatus = 'Chrome环境不可用'
       }
     },
-    changeRecommendDataStatus({ requestId, status }) {
+    changeRecommendDataStatus({ requestId, status, data }) {
       const targetIndex = this.recommendData.findIndex(item => item.requestId === requestId)
       if (targetIndex !== -1) {
-        // this.recommendData[targetIndex].status = status
         this.$set(this.recommendData[targetIndex], 'status', status)
+        // 如果提供了data，更新相关字段
+        if (data) {
+          if (data.type) {
+            this.$set(this.recommendData[targetIndex], 'dataType', data.type)
+          }
+        }
       }
     },
     processNewData(dataArray) {
+      // 类型映射
+      const typeMap = {
+        'role': '角色',
+        'pet': '召唤兽',
+        'equipment': '装备'
+      }
+      
       // 只处理新完成的请求，避免重复处理
       if (dataArray && dataArray.length > 0) {
         dataArray.forEach(item => {
@@ -678,8 +764,9 @@ export default {
             }).then(res => {
               console.log(`请求 ${item.requestId} 解析结果:`, res)
               if (res.code === 200) {
-                console.log(`请求 ${item.requestId} 数据解析成功:`, res.data)
-                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed' })
+                const typeName = typeMap[res.data.type] || res.data.type
+                console.log(`请求 ${item.requestId} 数据类型: ${typeName}`, res.data)
+                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed', data: res.data })
               } else {
                 console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)
                 this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })

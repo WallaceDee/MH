@@ -29,6 +29,35 @@ class DevToolsListener {
       
       if (changeInfo.status === 'complete' && tab.url && tab.url.includes('cbg.163.com')) {
         console.log('检测到CBG页面加载完成:', tab.url);
+        
+        // 如果tab.url就是监听的API请求URL（isCbgApiUrl返回true）
+        if (this.isCbgApiUrl && this.isCbgApiUrl(tab.url)) {
+          console.log('检测到API请求URL:', tab.url);
+          
+          // 获取页面返回内容并发送到side panel
+          chrome.tabs.sendMessage(tabId, { action: 'getPageContent' }, (response) => {
+            if (response && response.content) {
+              // 构造请求数据
+              const requestData = {
+                requestId: 'page_' + Date.now(),
+                url: tab.url,
+                method: 'GET',
+                timestamp: Date.now(),
+                status: 'completed',
+                responseData: response.content
+              };
+              
+              // 添加到推荐数据数组
+              this.recommendData.push(requestData);
+              
+              // 发送更新到side panel
+              this.updateUI();
+              
+              console.log('✅ API内容已发送到side panel');
+            }
+          });
+        }
+        
         this.activeCbgTabs.add(tabId)
         
         // 如果当前没有监听任何标签页，或者激活的是当前监听的标签页，则开始监听
