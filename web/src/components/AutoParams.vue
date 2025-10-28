@@ -317,6 +317,10 @@ export default {
         log: {
             type: Boolean,
             default: true
+        },
+        externalParamsProp: {
+            type: Object,
+            default: () => ({})
         }
     },
     mixins: [equipmentMixin],
@@ -491,10 +495,24 @@ export default {
             }
         },
         currentServerData() {
+            // 如果store不可用，返回默认值
+            if (!this.$store || !this.$store.getters) {
+                return { server_id: 0, areaid: 0, server_name: '' }
+            }
             const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
             return { server_id, areaid, server_name }
         },
         externalParams() {
+            // 优先使用props中的externalParams，如果没有则使用路由参数
+            if (this.externalParamsProp && Object.keys(this.externalParamsProp).length > 0) {
+                return this.externalParamsProp
+            }
+            
+            // 如果路由和store不可用，返回空对象
+            if (!this.$route || !this.$route.query) {
+                return {}
+            }
+            
             const query = JSON.parse(JSON.stringify(this.$route.query))
             if (query.action === 'similar_pet') {
                 query.evol_skill_list = JSON.parse(query.evol_skill_list || '{}')
@@ -608,13 +626,15 @@ export default {
     },
     async mounted() {
         // 等待Vuex状态恢复后再执行其他操作
-        // 自动清理过期缓存
-        this.$store.dispatch('cookie/cleanExpiredCache')
-
-        // 启动缓存清理定时器（每分钟检查一次）
-        this.cacheCleanupTimer = setInterval(() => {
+        // 自动清理过期缓存（如果store可用）
+        if (this.$store && this.$store.dispatch) {
             this.$store.dispatch('cookie/cleanExpiredCache')
-        }, 60 * 1000)
+
+            // 启动缓存清理定时器（每分钟检查一次）
+            this.cacheCleanupTimer = setInterval(() => {
+                this.$store.dispatch('cookie/cleanExpiredCache')
+            }, 60 * 1000)
+        }
 
         this.loadHotServers()
         await this.loadSearchParams()
@@ -627,6 +647,7 @@ export default {
         // 初始化时设置默认的server_data_value（如果store中没有的话）
         if (
             this.externalParams.action &&
+            this.$store && 
             (!this.$store?.state.server_data_value || this.$store?.state.server_data_value.length === 0)
         ) {
             this.$store.dispatch('setServerDataValue', [43, 77])

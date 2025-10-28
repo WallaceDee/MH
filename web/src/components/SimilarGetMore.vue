@@ -1,15 +1,38 @@
 <template>
-  <el-button type="success" @click="goToMoreSimilar">
-    查看更多相似
-  </el-button>
+  <div>
+    <el-button type="success" @click="goToMoreSimilar">
+      查看更多相似
+    </el-button>
+    
+    <!-- AutoParams Modal -->
+    <el-dialog :visible.sync="autoParamsDialogVisible" width="1200px" :close-on-click-modal="false"
+      :close-on-press-escape="false" custom-class="auto-params-dialog" append-to-body>
+      <span slot="title" class="el-dialog__title">
+        <span class="emoji-icon">⚙️</span> 自动参数配置
+      </span>
+      <AutoParams v-if="autoParamsDialogVisible" :external-params="autoParamsExternalParams" 
+        @close="closeAutoParamsDialog" />
+    </el-dialog>
+  </div>
 </template>
 
 <script>
 import qs from 'qs'
 import windowReuseManager from '@/utils/windowReuseManager'
+import AutoParams from '@/components/AutoParams.vue'
 
 export default {
   name: 'SimilarGetMore',
+  components: {
+    AutoParams
+  },
+  data() {
+    return {
+      // AutoParams Modal相关数据
+      autoParamsDialogVisible: false,
+      autoParamsExternalParams: {}
+    }
+  },
   props: {
     message: {
       type: String,
@@ -102,8 +125,28 @@ export default {
       }
 
       console.log('❌ 没有找到可复用的窗口，创建新窗口')
-      // 如果没有可复用的窗口，则创建新窗口
-      this.createNewWindow(externalParams)
+      // 判断是否为Chrome插件环境
+      const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
+
+      if (isChromeExtension) {
+        // 如果是Chrome插件环境，则打开Modal加载AutoParams组件，并传递参数
+        this.openAutoParamsModal(externalParams)
+      } else {
+        // 如果不是Chrome插件环境，则打开新窗口
+        this.createNewWindow(externalParams)
+      }
+    },
+
+    openAutoParamsModal(params) {
+      // 直接在当前页面打开AutoParams Modal
+      console.log('打开AutoParams Modal，参数:', params)
+      this.autoParamsExternalParams = params
+      this.autoParamsDialogVisible = true
+    },
+
+    closeAutoParamsDialog() {
+      this.autoParamsDialogVisible = false
+      this.autoParamsExternalParams = {}
     },
 
     createNewWindow(params) {

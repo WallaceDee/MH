@@ -39,8 +39,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_SimilarRoleModal_vue__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @/components/SimilarRoleModal.vue */ "./src/components/SimilarRoleModal.vue");
 /* harmony import */ var _components_EquipBatchValuationResult_vue__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @/components/EquipBatchValuationResult.vue */ "./src/components/EquipBatchValuationResult.vue");
 /* harmony import */ var _components_EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @/components/EquipmentImage/EquipmentImage.vue */ "./src/components/EquipmentImage/EquipmentImage.vue");
-/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
-/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+/* harmony import */ var _components_AutoParams_vue__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @/components/AutoParams.vue */ "./src/components/AutoParams.vue");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+
 
 
 
@@ -95,15 +97,19 @@ __webpack_require__.r(__webpack_exports__);
       batchValuateParams: {
         similarity_threshold: 0.7,
         max_anchors: 30
-      }
+      },
+      // AutoParams Modal相关数据
+      autoParamsDialogVisible: false,
+      autoParamsExternalParams: {}
     };
   },
-  mixins: [_utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_17__.commonMixin, _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_18__.equipmentMixin],
+  mixins: [_utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_18__.commonMixin, _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_19__.equipmentMixin],
   components: {
     RoleImage: _components_RoleInfo_RoleImage_vue__WEBPACK_IMPORTED_MODULE_13__["default"],
     SimilarRoleModal: _components_SimilarRoleModal_vue__WEBPACK_IMPORTED_MODULE_14__["default"],
     EquipBatchValuationResult: _components_EquipBatchValuationResult_vue__WEBPACK_IMPORTED_MODULE_15__["default"],
-    EquipmentImage: _components_EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_16__["default"]
+    EquipmentImage: _components_EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_16__["default"],
+    AutoParams: _components_AutoParams_vue__WEBPACK_IMPORTED_MODULE_17__["default"]
   },
   computed: {},
   mounted() {
@@ -704,6 +710,10 @@ __webpack_require__.r(__webpack_exports__);
           this.processedRequests.clear();
           console.log('清空推荐数据和处理记录');
           break;
+        case 'openAutoParamsModal':
+          console.log('接收到打开AutoParams Modal请求:', request.params);
+          this.openAutoParamsModal(request.params);
+          break;
       }
     },
     clearData() {
@@ -945,6 +955,1398 @@ __webpack_require__.r(__webpack_exports__);
         title: '提示',
         message: '宠物估价功能暂未实现'
       });
+    },
+    // AutoParams Modal相关方法
+    openAutoParamsModal(params) {
+      console.log('打开AutoParams Modal，参数:', params);
+      this.autoParamsExternalParams = params;
+      this.autoParamsDialogVisible = true;
+    },
+    closeAutoParamsDialog() {
+      this.autoParamsDialogVisible = false;
+      this.autoParamsExternalParams = {};
+    },
+    // 测试添加iframe方法
+    async testAddIframe() {
+      try {
+        // 获取当前活动标签页
+        const [activeTab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true
+        });
+        if (!activeTab) {
+          this.$notify.warning('未找到活动标签页');
+          return;
+        }
+
+        // 检查数据监听连接状态
+        if (!this.devtoolsConnected) {
+          this.$notify.warning('数据监听连接已断开，请重新加载页面');
+          return;
+        }
+
+        // 通过Chrome调试API执行页面JavaScript代码添加iframe
+        const result = await chrome.debugger.sendCommand({
+          tabId: activeTab.id
+        }, 'Runtime.evaluate', {
+          expression: `
+              (function() {
+                try {
+                  // 创建iframe元素
+                  const iframe = document.createElement('iframe')
+                  iframe.src = 'https://xyq.cbg.163.com/'
+                  iframe.style.width = '400px'
+                  iframe.style.height = '300px'
+                  iframe.style.border = '2px solid #1890ff'
+                  iframe.style.borderRadius = '8px'
+                  iframe.style.position = 'fixed'
+                  iframe.style.top = '50px'
+                  iframe.style.right = '20px'
+                  iframe.style.zIndex = '9999'
+                  iframe.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'
+                  
+                  // 添加关闭按钮
+                  const closeBtn = document.createElement('div')
+                  closeBtn.innerHTML = '×'
+                  closeBtn.style.position = 'absolute'
+                  closeBtn.style.top = '-10px'
+                  closeBtn.style.right = '-10px'
+                  closeBtn.style.width = '20px'
+                  closeBtn.style.height = '20px'
+                  closeBtn.style.backgroundColor = '#ff4d4f'
+                  closeBtn.style.color = 'white'
+                  closeBtn.style.borderRadius = '50%'
+                  closeBtn.style.display = 'flex'
+                  closeBtn.style.alignItems = 'center'
+                  closeBtn.style.justifyContent = 'center'
+                  closeBtn.style.cursor = 'pointer'
+                  closeBtn.style.fontSize = '14px'
+                  closeBtn.style.fontWeight = 'bold'
+                  closeBtn.style.zIndex = '10000'
+                  
+                  // 创建容器
+                  const container = document.createElement('div')
+                  container.style.position = 'relative'
+                  container.appendChild(iframe)
+                  container.appendChild(closeBtn)
+                  
+                  // 添加关闭事件
+                  closeBtn.onclick = function() {
+                    document.body.removeChild(container)
+                  }
+                  
+                  // 添加到页面
+                  document.body.appendChild(container)
+                  
+                  return 'SUCCESS:已添加百度iframe到页面'
+                } catch (error) {
+                  return 'ERROR:添加iframe失败 - ' + error.message
+                }
+              })()
+            `
+        });
+
+        // 处理Chrome调试API的返回结果
+        if (result && result.result && result.result.value) {
+          const message = result.result.value;
+          if (message.startsWith('SUCCESS:')) {
+            this.$notify.success(message.substring(8)); // 移除"SUCCESS:"前缀
+            console.log('iframe添加成功');
+          } else if (message.startsWith('ERROR:')) {
+            this.$notify.warning(message.substring(6)); // 移除"ERROR:"前缀
+            console.warn('iframe添加失败:', message);
+          } else {
+            this.$notify.error('添加iframe失败：未知返回结果');
+            console.error('iframe操作结果异常:', result);
+          }
+        } else {
+          this.$notify.error('添加iframe失败');
+          console.error('iframe操作结果异常:', result);
+        }
+      } catch (error) {
+        console.error('添加iframe失败:', error);
+
+        // 检查是否是连接断开错误
+        if (error.message && error.message.includes('Could not establish connection')) {
+          this.devtoolsConnected = false;
+          this.connectionStatus = '连接断开';
+          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展');
+        } else {
+          this.$notify.error('操作失败: ' + error.message);
+        }
+      }
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=script&lang=js":
+/*!************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=script&lang=js ***!
+  \************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.push.js */ "./node_modules/core-js/modules/es.array.push.js");
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.constructor.js */ "./node_modules/core-js/modules/es.iterator.constructor.js");
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.iterator.for-each.js */ "./node_modules/core-js/modules/es.iterator.for-each.js");
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.iterator.map.js */ "./node_modules/core-js/modules/es.iterator.map.js");
+/* harmony import */ var core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_map_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.set.difference.v2.js */ "./node_modules/core-js/modules/es.set.difference.v2.js");
+/* harmony import */ var core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_difference_v2_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.set.intersection.v2.js */ "./node_modules/core-js/modules/es.set.intersection.v2.js");
+/* harmony import */ var core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_intersection_v2_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.set.is-disjoint-from.v2.js */ "./node_modules/core-js/modules/es.set.is-disjoint-from.v2.js");
+/* harmony import */ var core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_disjoint_from_v2_js__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.set.is-subset-of.v2.js */ "./node_modules/core-js/modules/es.set.is-subset-of.v2.js");
+/* harmony import */ var core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_subset_of_v2_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.set.is-superset-of.v2.js */ "./node_modules/core-js/modules/es.set.is-superset-of.v2.js");
+/* harmony import */ var core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_is_superset_of_v2_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.set.symmetric-difference.v2.js */ "./node_modules/core-js/modules/es.set.symmetric-difference.v2.js");
+/* harmony import */ var core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_symmetric_difference_v2_js__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/es.set.union.v2.js */ "./node_modules/core-js/modules/es.set.union.v2.js");
+/* harmony import */ var core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_set_union_v2_js__WEBPACK_IMPORTED_MODULE_10__);
+/* harmony import */ var str2gbk__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! str2gbk */ "./node_modules/str2gbk/index.js");
+/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! qs */ "./node_modules/qs/lib/index.js");
+/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_17___default = /*#__PURE__*/__webpack_require__.n(qs__WEBPACK_IMPORTED_MODULE_17__);
+/* harmony import */ var _components_EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @/components/EquipmentImage/EquipmentImage.vue */ "./src/components/EquipmentImage/EquipmentImage.vue");
+/* harmony import */ var _components_PetImage_vue__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @/components/PetImage.vue */ "./src/components/PetImage.vue");
+/* harmony import */ var _components_LogMonitor_vue__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @/components/LogMonitor.vue */ "./src/components/LogMonitor.vue");
+/* harmony import */ var _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @/utils/windowReuseManager */ "./src/utils/windowReuseManager.js");
+/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const server_data_list = [];
+for (let key in window.server_data) {
+  let [parent, children] = window.server_data[key];
+  const [label,,,, value] = parent;
+  children = children.map(([value, label]) => ({
+    value,
+    label
+  }));
+  server_data_list.push({
+    label,
+    value,
+    children
+  });
+}
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'AutoParams',
+  props: {
+    log: {
+      type: Boolean,
+      default: true
+    },
+    externalParamsProp: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+  mixins: [_utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_16__.equipmentMixin],
+  components: {
+    EquipmentImage: _components_EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_12__["default"],
+    LogMonitor: _components_LogMonitor_vue__WEBPACK_IMPORTED_MODULE_14__["default"],
+    PetImage: _components_PetImage_vue__WEBPACK_IMPORTED_MODULE_13__["default"]
+  },
+  data() {
+    return {
+      sum_attr_with_melt: true,
+      select_sum_attr_type: [],
+      price_min: 1,
+      price_min_trigger: false,
+      suit_transform_skills: window.AUTO_SEARCH_CONFIG.suit_transform_skills,
+      suitOptions: [],
+      suit_effect_type: '',
+      select_suit_effect: '',
+      equipConfig: {},
+      hotServers: [],
+      server_data: server_data_list,
+      target_server_list: [],
+      // 存储server_id的数组（用于el-cascader的v-model）
+      target_server_objects: [],
+      // 存储完整服务器对象的数组
+      // 全局设置
+      globalSettings: {
+        max_pages: 5,
+        delay_min: 8,
+        delay_max: 20,
+        overall: false,
+        multi: false
+      },
+      // 延迟范围滑块
+      delayRange: [8, 20],
+      // 角色爬虫表单
+      roleForm: {},
+      // 装备爬虫表单
+      equipForm: {
+        equip_type: 'normal'
+      },
+      // 召唤兽爬虫表单
+      petForm: {},
+      // 代理爬虫表单
+      proxyForm: {},
+      // Playwright收集表单
+      playwrightForm: {
+        headless: false,
+        target_url: 'role_recommend',
+        custom_url: ''
+      },
+      // JSON参数字符串
+      roleParamsJson: '',
+      equipParamsJson: '{}',
+      petParamsJson: '',
+      // JSON验证错误
+      roleJsonError: '',
+      equipJsonError: '',
+      petJsonError: '',
+      // 默认参数模板（将从API动态加载）
+      defaultParams: {
+        role: {},
+        equip_normal: {},
+        equip_lingshi: {},
+        equip_pet: {},
+        equip_pet_equip: {},
+        pet: {}
+      },
+      // 加载状态
+      isRunning: false,
+      paramsLoading: false,
+      // Tab相关
+      activeTab: 'playwright',
+      // 状态监控
+      statusMonitor: null,
+      // 保存状态
+      roleSaving: false,
+      equipSaving: false,
+      petSaving: false,
+      // 缓存清理定时器
+      cacheCleanupTimer: null,
+      // 外部参数
+      externalSearchParams: '{}',
+      targetFeatures: {},
+      // 参数管理器配置 - 统一管理所有参数类型
+      paramManager: {
+        role: {
+          jsonKey: 'roleParamsJson',
+          errorKey: 'roleJsonError',
+          savingKey: 'roleSaving',
+          paramType: 'role',
+          successMessage: '角色参数配置保存成功',
+          spiderType: 'role',
+          spiderName: '角色爬虫',
+          getParams: () => ({
+            ...this.globalSettings,
+            ...this.roleForm,
+            cached_params: JSON.parse(this.roleParamsJson)
+          })
+        },
+        equip: {
+          jsonKey: 'equipParamsJson',
+          errorKey: 'equipJsonError',
+          savingKey: 'equipSaving',
+          paramType: 'equip',
+          successMessage: '装备参数配置保存成功',
+          spiderType: 'equip',
+          spiderName: '装备爬虫',
+          getParamType: () => this.getEquipParamKey(this.equipForm.equip_type),
+          getSuccessMessage: () => `${this.getEquipTypeName(this.equipForm.equip_type)}参数配置保存成功`,
+          getParams: () => {
+            //TODO:target_server_objects要把this.cached_params.server_id排序到第一个
+            const params = {
+              target_server_list: this.target_server_objects,
+              ...this.equipForm,
+              ...this.globalSettings,
+              cached_params: JSON.parse(this.cached_params)
+            };
+            if (params.overall) {
+              params.multi = false;
+              params.target_server_list = undefined;
+            }
+            return params;
+          }
+        },
+        pet: {
+          jsonKey: 'petParamsJson',
+          errorKey: 'petJsonError',
+          savingKey: 'petSaving',
+          paramType: 'pet',
+          successMessage: '召唤兽参数配置保存成功',
+          spiderType: 'pet',
+          spiderName: '召唤兽爬虫',
+          getParams: () => ({
+            target_server_list: this.target_server_objects,
+            ...this.petForm,
+            ...this.globalSettings,
+            cached_params: JSON.parse(this.cached_params)
+          })
+        }
+      }
+    };
+  },
+  computed: {
+    lingshiTips() {
+      const labels = {
+        1: '固伤',
+        2: '伤害',
+        3: '速度',
+        4: '法伤',
+        5: '狂暴',
+        6: '物理暴击',
+        7: '法术暴击',
+        8: '封印',
+        9: '法伤结果',
+        10: '穿刺',
+        11: '治疗',
+        12: '气血',
+        13: '防御',
+        14: '法防',
+        15: '抗物理暴击',
+        16: '抗法术暴击',
+        17: '抗封',
+        18: '格挡',
+        19: '回复'
+      };
+      const highlighted = new Set();
+      for (let key in JSON.parse(this.externalSearchParams)) {
+        if (key.startsWith('added_attr.')) {
+          const typeId = Number(key.replace('added_attr.', ''));
+          if (!Number.isNaN(typeId)) highlighted.add(typeId);
+        }
+      }
+      const parts = [];
+      for (let i = 1; i <= 19; i++) {
+        const name = labels[i];
+        const text = highlighted.has(i) ? `<b style="color:#F56C6C;">${name}</b>` : name;
+        parts.push(`<b ${highlighted.has(i) ? 'style="color:#F56C6C;"' : ''}>${i}:</b> ${text}`);
+      }
+      return parts.join(', ');
+    },
+    view_loc() {
+      return {
+        view_loc: this.globalSettings.overall ? 'overall_search' : 'search_cond'
+      };
+    },
+    currentServerData() {
+      // 如果store不可用，返回默认值
+      if (!this.$store || !this.$store.getters) {
+        return {
+          server_id: 0,
+          areaid: 0,
+          server_name: ''
+        };
+      }
+      const {
+        server_id,
+        areaid,
+        server_name
+      } = this.$store.getters.getCurrentServerData;
+      return {
+        server_id,
+        areaid,
+        server_name
+      };
+    },
+    externalParams() {
+      // 优先使用props中的externalParams，如果没有则使用路由参数
+      if (this.externalParamsProp && Object.keys(this.externalParamsProp).length > 0) {
+        return this.externalParamsProp;
+      }
+
+      // 如果路由和store不可用，返回空对象
+      if (!this.$route || !this.$route.query) {
+        return {};
+      }
+      const query = JSON.parse(JSON.stringify(this.$route.query));
+      if (query.action === 'similar_pet') {
+        query.evol_skill_list = JSON.parse(query.evol_skill_list || '{}');
+        query.neidan = JSON.parse(query.neidan || '{}');
+        query.equip_list = JSON.parse(query.equip_list || '{}');
+        query.texing = JSON.parse(query.texing || '{}');
+      }
+      return query;
+    },
+    // 从Vuex store获取server_data_valueTODO:::::
+    server_data_value: {
+      get() {
+        return this.$store?.state.server_data_value || {};
+      },
+      set(value) {
+        this.$store.dispatch('setServerDataValue', value);
+      }
+    },
+    // 检查cookies是否有效
+    isCookieValid() {
+      return this.$store.getters['cookie/isCookieCacheValid'];
+    },
+    cached_params() {
+      try {
+        let diyParams = JSON.parse(this.equipParamsJson);
+        if (this.activeTab === 'pet') {
+          diyParams = JSON.parse(this.petParamsJson);
+        }
+        const mode_params = {
+          ...this.view_loc,
+          hide_lingshi: this.activeTab === 'equip' && this.equipForm.equip_type === 'normal' ? 1 : undefined
+        };
+        const currentServerData = this.globalSettings.overall ? {
+          server_id: undefined,
+          server_name: undefined,
+          areaid: undefined
+        } : this.currentServerData;
+        return JSON.stringify(Object.assign(JSON.parse(this.externalSearchParams), diyParams, currentServerData, mode_params), null, 2);
+      } catch (error) {
+        return '{}';
+      }
+    }
+  },
+  watch: {
+    sum_attr_with_melt(newVal) {
+      const params = JSON.parse(this.equipParamsJson);
+      params.sum_attr_with_melt = newVal ? 1 : undefined;
+      params.sum_attr_without_melt = !newVal ? 1 : undefined;
+      this.equipParamsJson = JSON.stringify(params, null, 2);
+    },
+    price_min(newVal) {
+      if (this.price_min_trigger) {
+        const params = JSON.parse(this.equipParamsJson);
+        params.price_min = this.price_min_trigger ? newVal * 100 : undefined;
+        this.equipParamsJson = JSON.stringify(params, null, 2);
+      }
+    },
+    price_min_trigger(newVal) {
+      const params = JSON.parse(this.equipParamsJson);
+      params.price_min = newVal ? this.price_min * 100 : undefined;
+      this.equipParamsJson = JSON.stringify(params, null, 2);
+    },
+    select_suit_effect(newVal) {
+      const params = JSON.parse(this.equipParamsJson);
+      params.suit_effect = newVal ? newVal : undefined;
+      this.equipParamsJson = JSON.stringify(params, null, 2);
+    },
+    suit_effect_type(newVal) {
+      if (!newVal) {
+        this.select_suit_effect = '';
+      }
+    },
+    select_sum_attr_type(newVal) {
+      let changed = false
+      //判断newVal数组包含的项是否在targetFeatures中
+      ;
+      [['liliang', 'power'], ['minjie', 'dex'], ['moli', 'magic'], ['naili', 'endurance'], ['tizhi', 'physique']].forEach(([attr, key]) => {
+        if (this.targetFeatures[`addon_${attr}`] > 0) {
+          if (!newVal.includes(key)) {
+            changed = true;
+          }
+        } else {
+          if (newVal.includes(key)) {
+            changed = true;
+          }
+        }
+      });
+      const params = JSON.parse(this.equipParamsJson);
+      params.sum_attr_type = newVal.length > 0 && changed ? newVal.join(',') : undefined;
+      this.equipParamsJson = JSON.stringify(params, null, 2);
+    },
+    isRunning(newVal) {
+      this.$emit('update:isRunning', newVal);
+      if (newVal) {
+        this.startStatusMonitor();
+      } else {
+        this.stopStatusMonitor();
+      }
+    },
+    'globalSettings.multi'(val) {
+      if (val) {
+        // 多服务器模式开启时，自动设置同级别服务器
+        const server_id = Number(this.externalParams.serverid);
+        console.log('开启多服务器模式，当前服务器ID:', server_id);
+        this.globalSettings.max_pages = 1;
+        // 根据server_id在hotServers中找到对应的同级别的服务器
+        this.setTargetServersByLevel(server_id);
+      } else {
+        // 多服务器模式关闭时，清空目标服务器列表
+        this.target_server_list = [];
+        this.target_server_objects = [];
+        console.log('关闭多服务器模式，清空目标服务器列表');
+      }
+    }
+  },
+  async mounted() {
+    // 等待Vuex状态恢复后再执行其他操作
+    // 自动清理过期缓存（如果store可用）
+    if (this.$store && this.$store.dispatch) {
+      this.$store.dispatch('cookie/cleanExpiredCache');
+
+      // 启动缓存清理定时器（每分钟检查一次）
+      this.cacheCleanupTimer = setInterval(() => {
+        this.$store.dispatch('cookie/cleanExpiredCache');
+      }, 60 * 1000);
+    }
+    this.loadHotServers();
+    await this.loadSearchParams();
+    // 页面加载时请求一次状态
+    this.checkTaskStatus();
+    // 初始化延迟范围滑块
+    this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max];
+    this.loadExternalParams();
+    // 初始化时设置默认的server_data_value（如果store中没有的话）
+    if (this.externalParams.action && this.$store && (!this.$store?.state.server_data_value || this.$store?.state.server_data_value.length === 0)) {
+      this.$store.dispatch('setServerDataValue', [43, 77]);
+    }
+    if (this.externalParams.action) {
+      this.getFeatures().then(() => {
+        this.loadEquipConfig();
+      });
+    }
+    this.initSuitOptions();
+    // 初始化窗口复用管理器
+    this.initWindowReuseManager();
+  },
+  beforeDestroy() {
+    this.stopStatusMonitor();
+    // 清理缓存清理定时器
+    if (this.cacheCleanupTimer) {
+      clearInterval(this.cacheCleanupTimer);
+    }
+  },
+  methods: {
+    handleSuitChange(value) {
+      const [, suitValue] = value;
+      const actualValue = suitValue?.split('_').pop(); // 提取真实的套装ID
+      this.select_suit_effect = actualValue || '';
+    },
+    onServerDataChange() {
+      const {
+        server_id,
+        areaid,
+        server_name
+      } = this.$store.getters.getCurrentServerData;
+      console.log('server_data_value', {
+        server_id,
+        areaid,
+        server_name
+      });
+    },
+    // 处理目标服务器选择变化
+    onTargetServerChange(selectedServerIds) {
+      // 当服务器选择发生变化时，根据server_id查找完整的服务器对象
+      this.target_server_objects = [];
+      if (selectedServerIds && selectedServerIds.length > 0) {
+        // 遍历所有选中的server_id
+        selectedServerIds.forEach(serverId => {
+          // 在hotServers中查找对应的完整服务器对象
+          this.findServerInHotServers(serverId);
+        });
+      }
+    },
+    // 在hotServers嵌套结构中查找服务器
+    findServerInHotServers(serverId) {
+      for (const area of this.hotServers) {
+        if (area.children) {
+          for (const server of area.children) {
+            if (server.server_id === serverId) {
+              this.target_server_objects.push({
+                server_id: server.server_id,
+                areaid: area.areaid || server.areaid,
+                server_name: server.server_name
+              });
+              return;
+            }
+          }
+        }
+      }
+    },
+    // 根据服务器ID找到同级别的服务器并设置为目标服务器
+    setTargetServersByLevel(serverId) {
+      if (!this.hotServers || this.hotServers.length === 0) {
+        console.warn('hotServers数据未加载，无法设置目标服务器');
+        return;
+      }
+
+      // 查找当前服务器所在的烟花等级组
+      let currentLevel = null;
+      let currentServer = null;
+      for (const level of this.hotServers) {
+        if (level.children) {
+          for (const server of level.children) {
+            if (server.server_id === serverId) {
+              currentLevel = level;
+              currentServer = server;
+              break;
+            }
+          }
+          if (currentLevel) break;
+        }
+      }
+      if (!currentLevel || !currentServer) {
+        console.warn(`未找到服务器ID ${serverId} 对应的烟花等级组`);
+        return;
+      }
+      console.log(`找到服务器 ${currentServer.server_name} 在烟花等级组: ${currentLevel.server_name}`);
+
+      // 设置同级别服务器的目标列表
+      this.target_server_objects = [];
+      this.target_server_list = [];
+
+      // 遍历同级别的所有服务器
+      currentLevel.children.forEach(server => {
+        const serverObject = {
+          server_id: server.server_id,
+          areaid: currentLevel.areaid || server.areaid,
+          server_name: server.server_name
+        };
+        this.target_server_objects.push(serverObject);
+        this.target_server_list.push(server.server_id);
+      });
+      console.log(`已设置 ${this.target_server_objects.length} 个同级别服务器为目标服务器:`, this.target_server_objects);
+    },
+    // 初始化窗口复用管理器
+    initWindowReuseManager() {
+      try {
+        // 确保窗口复用管理器已正确初始化
+        if (_utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_15__["default"] && _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_15__["default"].isSetup) {
+          console.log('窗口复用管理器已初始化，状态:', _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_15__["default"].getStatus());
+        } else {
+          console.log('窗口复用管理器正在初始化...');
+          // 等待初始化完成
+          setTimeout(() => {
+            if (_utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_15__["default"] && _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_15__["default"].isSetup) {
+              console.log('窗口复用管理器初始化完成，状态:', _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_15__["default"].getStatus());
+            } else {
+              console.warn('窗口复用管理器初始化失败');
+            }
+          }, 1000);
+        }
+
+        // 监听参数更新事件
+        window.addEventListener('params-updated', event => {
+          const {
+            params,
+            timestamp
+          } = event.detail;
+          console.log('窗口参数已更新:', params);
+
+          // 强制刷新组件数据
+          this.$forceUpdate();
+
+          // 重新加载外部参数
+          this.loadExternalParams();
+
+          // 重新获取特征
+          if (params.action) {
+            this.getFeatures();
+          }
+
+          // 重新初始化装备类型相关的配置
+          if (params.equip_type) {
+            this.equipForm.equip_type = params.equip_type;
+            // 重新加载装备参数配置
+            this.loadSearchParams();
+          }
+
+          // 重新设置activeTab
+          if (params.activeTab) {
+            this.activeTab = params.activeTab;
+          }
+          console.log('✅ 页面数据已刷新');
+        });
+      } catch (error) {
+        console.warn('初始化窗口复用管理器失败:', error);
+      }
+    },
+    // 停止任务
+    async stopTask() {
+      try {
+        const response = await this.$api.spider.stopTask();
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '任务状态',
+            message: response.data?.message || '任务已停止'
+          });
+          this.isRunning = false;
+        } else {
+          this.$notify.error({
+            title: '任务状态',
+            message: response.message || '停止失败'
+          });
+        }
+      } catch (error) {
+        this.$notify.error({
+          title: '任务状态',
+          message: error.message
+        });
+      }
+    },
+    // 重置任务状态
+    async resetTask() {
+      try {
+        const response = await this.$api.spider.resetTask();
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '任务状态',
+            message: response.data?.message || '任务状态已重置'
+          });
+          this.isRunning = false;
+        } else {
+          this.$notify.error({
+            title: '任务状态',
+            message: response.message || '重置失败'
+          });
+        }
+      } catch (error) {
+        this.$notify.error({
+          title: '任务状态',
+          message: error.message
+        });
+      }
+    },
+    genaratePetSearchParams() {
+      const searchParams = {};
+      searchParams.skill = this.externalParams.all_skill.replace(/\|/g, ',');
+      searchParams.texing = this.externalParams.texing?.id;
+      searchParams.lingxing = this.externalParams.lx;
+      searchParams.growth = this.externalParams.growth * 1000;
+      return searchParams;
+    },
+    genarateEquipmentSearchParams({
+      kindid,
+      ...features
+    }) {
+      const searchParams = {};
+      if (window.is_pet_equip(kindid)) {
+        this.equipForm.equip_type = 'pet';
+        searchParams.level = features.equip_level;
+        searchParams.speed = features.speed > 0 ? features.speed : undefined;
+        searchParams.shanghai = features.shanghai > 0 ? features.shanghai : undefined;
+        searchParams.hp = features.qixue > 0 ? features.qixue : undefined;
+        searchParams.fangyu = features.fangyu > 0 ? features.fangyu : undefined;
+        searchParams.xiang_qian_level = features.xiang_qian_level > 0 ? features.xiang_qian_level : undefined;
+        let addon_sum = 0;
+        ['fali', 'liliang', 'lingli', 'minjie', 'naili'].forEach(item => {
+          searchParams[`addon_${item}`] = this.targetFeatures[`addon_${item}`] > 0 ? 1 : undefined;
+          if (item === 'minjie' && this.targetFeatures[`addon_${item}`] < 0) {
+            searchParams.addon_minjie_reduce = this.targetFeatures[`addon_${item}`] * -1;
+          } else {
+            addon_sum += this.targetFeatures[`addon_${item}`];
+          }
+        });
+        searchParams.addon_sum = addon_sum > 0 ? addon_sum : undefined;
+        searchParams.addon_sum_min = searchParams.addon_sum;
+        searchParams.addon_status = features.addon_status;
+        if (features.fangyu > 0) {
+          searchParams.equip_pos = 1;
+        } else if (features.speed > 0) {
+          searchParams.equip_pos = 2;
+        } else {
+          searchParams.equip_pos = 3;
+        }
+      } else if (window.is_lingshi_equip(kindid)) {
+        searchParams.kindid = kindid;
+        this.equipForm.equip_type = 'lingshi';
+        if (features.equip_level) {
+          searchParams.equip_level_min = features.equip_level;
+          searchParams.equip_level_max = features.equip_level * 1 + 9;
+        }
+        // 灵饰附加属性配置
+        const {
+          lingshi_added_attr1,
+          lingshi_added_attr2
+        } = window.AUTO_SEARCH_CONFIG;
+
+        // 属性名称映射表 - 前端显示名称到后端字段名的映射
+        const attr_name_map = {
+          '法伤结果': '法术伤害结果',
+          '法伤': '法术伤害',
+          '固伤': '固定伤害',
+          '法术暴击': '法术暴击等级',
+          '物理暴击': '物理暴击等级',
+          '封印': '封印命中等级',
+          '狂暴': '狂暴等级',
+          '穿刺': '穿刺等级',
+          '治疗': '治疗能力',
+          '伤害': '伤害',
+          '速度': '速度',
+          '抗法术暴击': '抗法术暴击等级',
+          '抗物理暴击': '抗物理暴击等级',
+          '抗封': '抵抗封印等级',
+          '回复': '气血回复效果',
+          '法防': '法术防御',
+          '防御': '防御',
+          '格挡': '格挡值',
+          '气血': '气血'
+        };
+
+        // 构建属性值到搜索参数的映射
+        const buildAttrValueMapping = () => {
+          const mapping = {};
+
+          // 合并两个属性配置
+          const allAttrs = {
+            ...lingshi_added_attr1,
+            ...lingshi_added_attr2
+          };
+
+          // 遍历所有属性，建立映射关系
+          Object.entries(allAttrs).forEach(([value, displayName]) => {
+            const backendFieldName = attr_name_map[displayName];
+            if (backendFieldName) {
+              mapping[backendFieldName] = value;
+            }
+          });
+          return mapping;
+        };
+
+        // 处理主属性
+        const processMainAttributes = () => {
+          const mainAttrs = ['damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed'];
+          mainAttrs.forEach(attr => {
+            if (features[attr] && features[attr] > 0) {
+              searchParams[attr] = features[attr];
+            }
+          });
+        };
+
+        // 处理精炼等级
+        const processGemLevel = () => {
+          if (features.gem_level && features.gem_level > 0) {
+            searchParams.jinglian_level = features.gem_level;
+          }
+        };
+
+        // 处理附加属性
+        const processAddedAttributes = () => {
+          if (!features.attrs || !Array.isArray(features.attrs)) {
+            return;
+          }
+          const attrValueMapping = buildAttrValueMapping();
+          const addedAttrsCount = {};
+
+          // 统计每种附加属性的出现次数
+          features.attrs.forEach(({
+            attr_type
+          }) => {
+            const searchValue = attrValueMapping[attr_type];
+            if (searchValue) {
+              addedAttrsCount[searchValue] = (addedAttrsCount[searchValue] || 0) + 1;
+            }
+          });
+
+          // 将统计结果添加到搜索参数
+          Object.entries(addedAttrsCount).forEach(([value, count]) => {
+            searchParams[`added_attr.${value}`] = count;
+          });
+        };
+
+        // 执行处理
+        processMainAttributes();
+        processGemLevel();
+        processAddedAttributes();
+      } else {
+        searchParams.kindid = kindid;
+        let sum_attr_value = 0;
+        const sum_attr_type_list = [];
+        [['moli', 'magic'], ['liliang', 'power'], ['tizhi', 'physique'], ['minjie', 'dex'], ['naili', 'endurance']].forEach(([featureKey, searchKey]) => {
+          if (this.targetFeatures[`addon_${featureKey}`] > 0) {
+            sum_attr_type_list.push(searchKey);
+          }
+          sum_attr_value += this.targetFeatures[`addon_${featureKey}`];
+        });
+        if (sum_attr_value > 0) {
+          searchParams.sum_attr_type = sum_attr_type_list.join(',');
+          searchParams.sum_attr_value = sum_attr_value;
+        }
+        if (features.gem_level > 0) {
+          searchParams.gem_level = features.gem_level;
+          searchParams.gem_value = features.gem_value.join(',');
+        }
+        if (features.equip_level) {
+          searchParams.level_min = features.equip_level;
+          searchParams.level_max = features.equip_level * 1 + 9;
+        }
+        if (features.special_effect && features.special_effect.length > 0) {
+          searchParams.special_mode = 'and';
+          searchParams.special_effect = features.special_effect.join(',');
+        }
+        if (features.suit_effect) {
+          searchParams.suit_effect = features.suit_effect;
+        }
+        if (features.special_skill) {
+          searchParams.special_skill = features.special_skill;
+        }
+        if (features.hole_num) {
+          searchParams.hole_num = features.hole_num;
+        }
+        const paramsKey = [
+        // 'init_damage', //all_damage已经包含init_damage
+        'init_damage_raw', 'init_defense', 'init_hp', 'init_dex', 'init_wakan', 'all_wakan', 'all_damage', 'damage'];
+        //如果是武器打只太阳石，则忽略all_damage
+        if (searchParams.gem_value === '2') {
+          paramsKey.splice(paramsKey.indexOf('all_damage'), 1);
+        } else if (searchParams.gem_value === '1') {
+          //如果是武器打只红玛瑙，则忽略init_damage
+          paramsKey.splice(paramsKey.indexOf('init_damage'), 1);
+        }
+        paramsKey.forEach(value => {
+          if (features[value]) {
+            searchParams[value] = features[value];
+          }
+        });
+      }
+      return searchParams;
+    },
+    // 通过server_id在window.server_data中反查对应的areaid
+    getAreaIdByServerId(serverId) {
+      if (!window || !window.server_data) return undefined;
+      const sid = Number(serverId);
+      for (let key in window.server_data) {
+        const [parent, children] = window.server_data[key];
+        const areaValue = parent && parent.length >= 5 ? parent[4] : undefined;
+        if (!Array.isArray(children)) continue;
+        for (const child of children) {
+          if (Array.isArray(child) && child[0] === sid) {
+            return areaValue;
+          }
+        }
+      }
+      return undefined;
+    },
+    async getFeatures() {
+      let query = {};
+      if (this.externalParams.action === 'similar_equip') {
+        await this.$api.equipment.extractFeatures({
+          equipment_data: {
+            kindid: this.externalParams.kindid * 1 || undefined,
+            type: this.externalParams.type * 1 || undefined,
+            large_equip_desc: this.externalParams.large_equip_desc
+          },
+          data_type: 'equipment'
+        }).then(res => {
+          if (res.code === 200 && res.data.features) {
+            this.targetFeatures = res.data.features;
+            // 使用equip_name,large_equip_desc改变当前title
+            document.title = this.targetFeatures.equip_level + '级' + this.externalParams.equip_name + ' - ' + this.externalParams.large_equip_desc.replace(/#r|#Y|#G|#c4DBAF4|#W|#cEE82EE|#c7D7E82/g, '');
+            //使用 this.externalParams.equip_face_img动态改变网页的favicon.ico
+            document.querySelector('link[rel="icon"]').href = this.externalParams.equip_face_img;
+            query = this.genarateEquipmentSearchParams(res.data.features);
+          }
+        });
+      } else if (this.externalParams.action === 'similar_pet') {
+        query = this.genaratePetSearchParams();
+      }
+      if (this.externalParams.serverid) {
+        // 如果serverid存在，则设置server_id，并根据server_data计算areaid
+        const server_id = Number(this.externalParams.serverid);
+        const areaid = this.getAreaIdByServerId(server_id);
+        query.server_id = server_id;
+        if (areaid !== undefined) {
+          query.areaid = areaid;
+        }
+        this.server_data_value = [areaid, server_id];
+        query.server_name = this.externalParams.server_name;
+      }
+      this.externalSearchParams = JSON.stringify(query, null, 2);
+    },
+    async openCBGSearch() {
+      let prefix = '';
+      let search_type = 'search_role_equip';
+      let query = {};
+      if (this.externalParams.action === 'similar_equip') {
+        if (window.is_pet_equip(this.targetFeatures.kindid)) {
+          // 使用Vuex store中的服务器数据
+          search_type = 'search_pet_equip';
+        } else if (window.is_lingshi_equip(this.targetFeatures.kindid)) {
+          search_type = 'search_lingshi';
+        } else {
+          search_type += '&hide_lingshi=1';
+        }
+        query = this.genarateEquipmentSearchParams(this.targetFeatures);
+      } else {
+        search_type = 'search_pet';
+        query = this.genaratePetSearchParams();
+      }
+      const serverData = this.$store.getters.getCurrentServerData;
+      prefix = `https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=${new Date().getTime()}&act=recommd_by_role&server_id=${serverData.server_id}&areaid=${serverData.areaid}&server_name=${serverData.server_name}&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=${search_type}&`;
+      let target_url = prefix + qs__WEBPACK_IMPORTED_MODULE_17___default().stringify(query);
+      console.log(target_url, 'target_url');
+      // this.$api.spider.startPlaywright({
+      //     headless: false,
+      //     target_url
+      // })
+    },
+    /**
+    * GBK编码的URL编码
+    * @param {string} str - 要编码的字符串
+    * @returns {Promise<string>} - GBK编码的URL编码字符串
+    */
+    encodeGBK(str) {
+      if (!str) return '';
+      try {
+        const gbkBytes = (0,str2gbk__WEBPACK_IMPORTED_MODULE_11__["default"])(str);
+        // 将字节数组转换为URL编码格式
+        return Array.from(gbkBytes).map(b => `%${b.toString(16).toUpperCase().padStart(2, '0')}`).join('');
+      } catch (error) {
+        console.warn('GBK编码失败，使用UTF-8编码作为降级方案:', error);
+        // 降级到UTF-8编码
+        return window.encodeURI(str);
+      }
+    },
+    async loadExternalParams() {
+      if (this.externalParams.activeTab) {
+        this.activeTab = this.externalParams.activeTab;
+      }
+      if (this.externalParams.equip_type) {
+        this.equipForm.equip_type = this.externalParams.equip_type;
+      }
+    },
+    // 快速配置方法 - 根据当前activeTab配置
+    quickConfig(size) {
+      const configs = {
+        small: {
+          max_pages: 10,
+          delay_min: 10,
+          delay_max: 15
+        },
+        medium: {
+          max_pages: 50,
+          delay_min: 15,
+          delay_max: 20
+        },
+        large: {
+          max_pages: 100,
+          delay_min: 20,
+          delay_max: 30
+        }
+      };
+      const system = configs[size];
+      Object.assign(this.globalSettings, system);
+      // 同步更新滑块值
+      this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max];
+    },
+    // 延迟范围滑块变化处理
+    onDelayRangeChange(value) {
+      this.globalSettings.delay_min = value[0];
+      this.globalSettings.delay_max = value[1];
+    },
+    async loadEquipConfig() {
+      const response = await this.$api.equipment.getEquipConfig();
+      this.equipConfig = response.data;
+      if (this.targetFeatures.suit_effect) {
+        this.suit_effect_type = '';
+      }
+      if (this.targetFeatures.addon_total > 0) {
+        [['liliang', 'power'], ['minjie', 'dex'], ['moli', 'magic'], ['naili', 'endurance'], ['tizhi', 'physique']].forEach(([attr, key]) => {
+          if (this.targetFeatures[`addon_${attr}`] > 0) {
+            this.select_sum_attr_type.push(key);
+          }
+        });
+      }
+    },
+    async loadHotServers() {
+      try {
+        const response = await this.$api.system.getHotServers();
+        this.hotServers = response;
+        console.log('热门服务器数据加载完成:', this.hotServers);
+
+        // 在热门服务器数据加载完成后，处理可能已存在的target_server_list
+        if (this.target_server_list && this.target_server_list.length > 0) {
+          this.onTargetServerChange(this.target_server_list);
+        }
+
+        // 如果多服务器模式已开启，自动设置同级别服务器
+        if (this.globalSettings.multi && this.externalParams.serverid) {
+          const server_id = Number(this.externalParams.serverid);
+          console.log('数据加载完成后，自动设置多服务器模式的目标服务器:', server_id);
+          this.setTargetServersByLevel(server_id);
+        }
+      } catch (error) {
+        console.error('加载热门服务器数据失败:', error);
+        this.$notify.error('加载热门服务器数据失败: ' + error.message);
+      }
+    },
+    // 加载搜索参数配置
+    async loadSearchParams() {
+      try {
+        this.paramsLoading = true;
+        const response = await this.$api.system.getSearchParams();
+        if (response.code === 200) {
+          // 更新默认参数
+          this.defaultParams = {
+            role: response.data.role || {},
+            equip_normal: response.data.equip_normal || {},
+            equip_lingshi: response.data.equip_lingshi || {},
+            equip_pet: response.data.equip_pet || {},
+            equip_pet_equip: response.data.equip_pet_equip || {},
+            pet: response.data.pet || {}
+          };
+
+          // 初始化JSON编辑器
+          this.initializeDefaultParams();
+        } else {
+          this.$notify.error(response.message || '加载搜索参数配置失败');
+          // 使用默认值
+          this.initializeDefaultParams();
+        }
+      } catch (error) {
+        console.error('加载搜索参数配置失败:', error);
+        this.$notify.error('加载搜索参数配置失败: ' + error.message);
+        // 使用默认值
+        this.initializeDefaultParams();
+      } finally {
+        this.paramsLoading = false;
+      }
+    },
+    // 初始化默认参数
+    initializeDefaultParams() {
+      this.roleParamsJson = JSON.stringify(this.defaultParams.role, null, 2);
+      // 根据当前装备类型初始化装备参数
+      const equipParamKey = this.getEquipParamKey(this.equipForm.equip_type);
+      this.equipParamsJson = JSON.stringify(this.defaultParams[equipParamKey], null, 2);
+      this.petParamsJson = JSON.stringify(this.defaultParams.pet, null, 2);
+    },
+    // Playwright收集相关方法
+    onHeadlessToggle(headless) {
+      if (headless) {
+        this.$notify.info({
+          title: '无头模式',
+          message: '浏览器将在后台运行，不会显示界面'
+        });
+      } else {
+        this.$notify.info({
+          title: '有头模式',
+          message: '浏览器将显示界面，可以看到操作过程'
+        });
+      }
+    },
+    onTargetUrlChange(value) {
+      if (value === 'custom') {
+        this.playwrightForm.custom_url = '';
+      }
+    },
+    onEquipTypeChange() {
+      // 装备类型改变时切换对应的默认参数
+      this.resetParam('equip');
+    },
+    // 获取装备参数键
+    getEquipParamKey(equipType) {
+      const paramKeyMap = {
+        normal: 'equip_normal',
+        lingshi: 'equip_lingshi',
+        pet: 'equip_pet_equip' // 修复：召唤兽装备应该使用equip_pet_equip
+      };
+      return paramKeyMap[equipType] || 'equip_normal';
+    },
+    // 通用参数操作方法
+    getParamConfig(type) {
+      return this.paramManager[type];
+    },
+    // 验证指定类型的参数
+    validateParam(type) {
+      const config = this.getParamConfig(type);
+      if (!config) return false;
+      this[config.errorKey] = this.validateJson(this[config.jsonKey], type);
+      return !this[config.errorKey];
+    },
+    // 重置参数方法 - 统一处理所有类型的参数重置
+    resetParam(type) {
+      const config = this.getParamConfig(type);
+      if (!config) return;
+      const paramKey = config.getParamType ? config.getParamType() : config.paramType;
+      this[config.jsonKey] = JSON.stringify(this.defaultParams[paramKey], null, 2);
+      this[config.errorKey] = '';
+    },
+    // 保存参数方法 - 统一处理所有类型的参数保存
+    async saveParam(type) {
+      const config = this.getParamConfig(type);
+      if (!config) return false;
+
+      // 检查JSON错误
+      if (!this.validateParam(type)) {
+        this.$notify.error('请先修复JSON格式错误');
+        return false;
+      }
+      this[config.savingKey] = true;
+      try {
+        const params = JSON.parse(this[config.jsonKey]);
+        const paramType = config.getParamType ? config.getParamType() : config.paramType;
+        const response = await this.$api.system.updateSearchParam(paramType, params);
+        if (response.code === 200) {
+          const successMessage = config.getSuccessMessage ? config.getSuccessMessage() : config.successMessage;
+          this.$notify.success(successMessage);
+          // 更新本地默认参数
+          this.defaultParams[paramType] = params;
+          return true;
+        } else {
+          this.$notify.error({
+            title: '保存失败',
+            message: response.message || '保存失败'
+          });
+          return false;
+        }
+      } catch (error) {
+        console.error(`保存${type}参数失败:`, error);
+        this.$notify.error({
+          title: '保存失败',
+          message: '保存失败: ' + error.message
+        });
+        return false;
+      } finally {
+        this[config.savingKey] = false;
+      }
+    },
+    // JSON验证方法 - 统一处理所有类型的JSON验证
+    validateJson(jsonStr, type) {
+      try {
+        if (!jsonStr.trim()) {
+          return `${type}参数不能为空`;
+        }
+        const parsed = JSON.parse(jsonStr);
+        if (typeof parsed !== 'object' || parsed === null) {
+          return 'JSON必须是一个对象';
+        }
+        return '';
+      } catch (e) {
+        return `JSON格式错误: ${e.message}`;
+      }
+    },
+    // 加载缓存参数
+    async loadCachedParams() {
+      try {
+        await this.loadSearchParams();
+        this.$notify.success({
+          title: '缓存参数',
+          message: '缓存参数已刷新'
+        });
+      } catch (error) {
+        this.$notify.error({
+          title: '获取失败',
+          message: '获取缓存参数失败: ' + error.message
+        });
+      }
+    },
+    // 通用启动爬虫方法
+    async startSpiderByType(type) {
+      if (this.isRunning) return;
+      const config = this.paramManager[type];
+      if (!config) return;
+
+      // 检查JSON错误
+      if (this[config.errorKey]) {
+        this.$notify.error('请先修复JSON格式错误');
+        return;
+      }
+      try {
+        const params = config.getParams();
+        const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params);
+        if (response.code === 200) {
+          this.$notify.success({
+            title: '爬虫启动',
+            message: `${config.spiderName}已启动`
+          });
+          this.activeTab = type; // 确保切换到对应tab
+          this.isRunning = true; // 立即设置运行状态
+        } else {
+          this.$notify.error({
+            title: '启动失败',
+            message: response.message || '启动失败'
+          });
+        }
+      } catch (error) {
+        this.$notify.error({
+          title: '启动失败',
+          message: '启动失败: ' + error.message
+        });
+      }
+    },
+    // 启动Playwright收集
+    async startPlaywrightCollector() {
+      if (this.isRunning) return;
+      try {
+        const params = {
+          headless: this.playwrightForm.headless
+          // 不传递target_url，使用后端默认值
+        };
+        console.log('启动Playwright收集，参数:', params);
+        const response = await this.$api.spider.startPlaywright(params);
+        if (response.code === 200) {
+          this.$notify.success('Playwright收集已启动');
+          this.activeTab = 'playwright';
+          this.isRunning = true;
+        } else {
+          this.$notify.error(response.message || '启动失败');
+        }
+      } catch (error) {
+        this.$notify.error('启动失败: ' + error.message);
+      }
+    },
+    // 获取装备类型名称
+    getEquipTypeName(type) {
+      const names = {
+        normal: '普通装备',
+        lingshi: '灵饰装备',
+        pet: '召唤兽装备'
+      };
+      return names[type] || '装备';
+    },
+    // 检查任务状态
+    async checkTaskStatus() {
+      try {
+        const response = await this.$api.spider.getStatus();
+        if (response.code === 200) {
+          const status = response.data.status;
+
+          // 更新运行状态
+          this.isRunning = status === 'running';
+
+          // 如果任务完成或出错，显示消息并停止监控
+          if (status === 'completed' || status === 'error' || status === 'stopped') {
+            if (status === 'error') {
+              this.$notify.error(response.data.message || '任务执行出错');
+            } else if (status === 'stopped') {
+              this.$notify.info(response.data.message || '任务已停止');
+            }
+            this.isRunning = false;
+          }
+        }
+      } catch (error) {
+        console.error('状态监控错误:', error);
+      }
+    },
+    // 状态监控方法
+    startStatusMonitor() {
+      // 清除可能存在的旧定时器
+      this.stopStatusMonitor();
+
+      // 启动状态监控定时器
+      this.statusMonitor = setInterval(async () => {
+        await this.checkTaskStatus();
+      }, 5000); // 每2秒检查一次状态
+    },
+    stopStatusMonitor() {
+      if (this.statusMonitor) {
+        clearInterval(this.statusMonitor);
+        this.statusMonitor = null;
+      }
     }
   }
 });
@@ -1499,6 +2901,536 @@ __webpack_require__.r(__webpack_exports__);
   mounted() {
     if (this.isWeapon) {
       this.getWeaponConfig();
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=script&lang=js":
+/*!************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=script&lang=js ***!
+  \************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.push.js */ "./node_modules/core-js/modules/es.array.push.js");
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__);
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'LogMonitor',
+  props: {
+    //简易模式
+    simpleMode: {
+      type: Boolean,
+      default: false
+    },
+    maxLines: {
+      type: Number,
+      default: 100
+    },
+    isRunning: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data() {
+    return {
+      // 加载状态
+      logsLoading: false,
+      // 日志相关
+      logs: [],
+      logsInfo: null,
+      isLogStreaming: false,
+      logEventSource: null
+    };
+  },
+  watch: {
+    isRunning(newVal) {
+      if (newVal) {
+        this.startLogStream();
+      } else {
+        this.stopLogStream();
+      }
+    }
+  },
+  mounted() {
+    // 默认加载当前日志
+    this.refreshLogs();
+  },
+  beforeDestroy() {
+    this.stopLogStream();
+  },
+  methods: {
+    // 日志相关方法
+    async refreshLogs() {
+      this.logsLoading = true;
+      try {
+        const params = {
+          lines: this.maxLines,
+          type: 'current'
+        };
+        const response = await this.$api.spider.getLogs(params);
+        if (response.code === 200) {
+          this.logs = response.data.logs || [];
+          this.logsInfo = response.data;
+          this.scrollToBottom();
+        } else {
+          this.$notify.error(response.message || '获取日志失败');
+        }
+      } catch (error) {
+        this.$notify.error('获取日志失败: ' + error.message);
+      } finally {
+        this.logsLoading = false;
+      }
+    },
+    toggleLogStream() {
+      if (this.isLogStreaming) {
+        this.stopLogStream();
+      } else {
+        this.startLogStream();
+      }
+    },
+    startLogStream() {
+      if (this.isLogStreaming) return;
+      try {
+        this.logEventSource = this.$api.spider.streamLogs();
+        this.isLogStreaming = true;
+        this.logEventSource.onmessage = event => {
+          if (event.data) {
+            try {
+              // 尝试解析JSON数据
+              const data = JSON.parse(event.data);
+              if (data.log) {
+                this.logs.push(data.log);
+              } else if (typeof data === 'string') {
+                this.logs.push(data);
+              }
+            } catch (e) {
+              // 如果不是JSON，直接作为字符串处理
+              this.logs.push(event.data);
+            }
+
+            // 保持最多100行日志
+            if (this.logs.length > this.maxLines) {
+              this.logs = this.logs.slice(-this.maxLines);
+            }
+            this.scrollToBottom();
+          }
+        };
+        this.logEventSource.onerror = error => {
+          console.error('日志流错误:', error);
+          // 错误时不停止流，而是尝试重新连接
+          setTimeout(() => {
+            if (this.isLogStreaming) {
+              this.stopLogStream();
+              this.startLogStream();
+            }
+          }, 5000);
+        };
+        this.logEventSource.onopen = () => {
+          console.log('日志流连接已建立');
+        };
+
+        // 只在手动启动时显示成功消息，避免页面加载时显示
+        if (this.logs.length === 0) {
+          this.logs.push('实时日志监控已启动，等待日志数据...');
+        }
+      } catch (error) {
+        console.error('启动实时日志监控失败:', error);
+        // 静默处理错误，避免显示错误消息
+      }
+    },
+    stopLogStream() {
+      if (this.logEventSource) {
+        try {
+          this.logEventSource.close();
+        } catch (e) {
+          console.log('关闭日志流连接:', e);
+        }
+        this.logEventSource = null;
+      }
+      this.isLogStreaming = false;
+    },
+    clearLogs() {
+      this.logs = [];
+      this.logsInfo = null;
+    },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.logsContainer;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+    },
+    getLogLevel(log) {
+      if (log.includes('ERROR') || log.includes('错误')) return 'log-error';
+      if (log.includes('WARNING') || log.includes('警告')) return 'log-warning';
+      if (log.includes('INFO') || log.includes('信息')) return 'log-info';
+      return 'log-default';
+    },
+    getLogTime(log) {
+      // 提取日志时间戳
+      const timeMatch = log.match(/(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+      return timeMatch ? timeMatch[1] : '';
+    },
+    getLogContent(log) {
+      // 移除时间戳，返回日志内容
+      return log.replace(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}[,\d]*\s*/, '');
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=script&lang=js":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=script&lang=js ***!
+  \**********************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _PetInfoPopover_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PetInfoPopover.vue */ "./src/components/PetInfoPopover.vue");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'PetImage',
+  components: {
+    PetInfoPopover: _PetInfoPopover_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  mixins: [_utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_1__.commonMixin],
+  props: {
+    size: {
+      type: String,
+      default: 'small'
+    },
+    width: {
+      type: String,
+      default: '50px'
+    },
+    height: {
+      type: String,
+      default: '50px'
+    },
+    cursor: {
+      type: String,
+      default: 'pointer'
+    },
+    placement: {
+      type: String,
+      default: 'right'
+    },
+    popoverWidth: {
+      type: String,
+      default: '400px'
+    },
+    pet: Object,
+    enhanceInfo: {
+      type: Object,
+      default: () => ({})
+    },
+    equipFaceImg: {
+      type: String,
+      default: ''
+    }
+  },
+  computed: {
+    imageUrl() {
+      const petId = this.equipFaceImg;
+      return this.getImageUrl(`${petId}`);
+    },
+    imageStyle() {
+      return {
+        display: 'inline-block',
+        width: this.width,
+        height: this.height,
+        cursor: this.cursor
+      };
+    }
+  },
+  mounted() {
+    console.log(this.pet);
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=script&lang=js":
+/*!****************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=script&lang=js ***!
+  \****************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.push.js */ "./node_modules/core-js/modules/es.array.push.js");
+/* harmony import */ var core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_push_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.constructor.js */ "./node_modules/core-js/modules/es.iterator.constructor.js");
+/* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.iterator.for-each.js */ "./node_modules/core-js/modules/es.iterator.for-each.js");
+/* harmony import */ var core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_for_each_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./EquipmentImage/EquipmentImage.vue */ "./src/components/EquipmentImage/EquipmentImage.vue");
+/* harmony import */ var _utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/utils/mixins/commonMixin */ "./src/utils/mixins/commonMixin.js");
+/* harmony import */ var _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/utils/mixins/equipmentMixin */ "./src/utils/mixins/equipmentMixin.js");
+/* harmony import */ var _RoleInfo_PetDetail_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./RoleInfo/PetDetail.vue */ "./src/components/RoleInfo/PetDetail.vue");
+
+
+
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: 'PetInfoPopover',
+  mixins: [_utils_mixins_commonMixin__WEBPACK_IMPORTED_MODULE_4__.commonMixin, _utils_mixins_equipmentMixin__WEBPACK_IMPORTED_MODULE_5__.equipmentMixin],
+  components: {
+    EquipmentImage: _EquipmentImage_EquipmentImage_vue__WEBPACK_IMPORTED_MODULE_3__["default"],
+    PetDetail: _RoleInfo_PetDetail_vue__WEBPACK_IMPORTED_MODULE_6__["default"]
+  },
+  props: {
+    trigger: {
+      type: String,
+      default: 'click'
+    },
+    equipFaceImg: {
+      type: String,
+      default: ''
+    },
+    pet: {
+      type: Object,
+      required: true
+    },
+    enhanceInfo: {
+      type: Object,
+      default: () => ({})
+    }
+  },
+  data() {
+    return {
+      visible: false,
+      conf: {
+        pet_skill_url: 'https://cbg-xyq.res.netease.com/images/skill/',
+        notice_node_name: 'pet_tip_notice_msg',
+        skill_panel_name: 'pet_tip_skill_grid',
+        table_class: 'tb03',
+        enhance_skills: this.enhanceInfo.skill_id_list || []
+      }
+    };
+  },
+  emits: ['show', 'hide', 'click'],
+  computed: {
+    // 判断是否显示新版灵力
+    isShowNewLingli() {
+      return this.pet.iMagDam !== undefined && this.pet.iMagDef !== undefined;
+    },
+    // 赐福技能列表
+    evolSkillList() {
+      return this.pet.evol_skill_list || [];
+    },
+    // 技能网格布局
+    skillRows() {
+      const numPerLine = 4;
+      const skillNum = this.evolSkillList.length;
+      let loopTimes = Math.floor(skillNum / numPerLine) + (skillNum % numPerLine ? 1 : 0);
+      loopTimes = loopTimes < 3 ? 3 : loopTimes;
+
+      // 如果是天才宝宝且技能数量正好填满，增加一行
+      if (this.pet.genius && skillNum === numPerLine * loopTimes) {
+        loopTimes += 1;
+      }
+      const rows = [];
+      for (let i = 0; i < loopTimes; i++) {
+        const items = this.evolSkillList.slice(i * numPerLine, (i + 1) * numPerLine);
+        rows.push(items);
+      }
+      return rows;
+    }
+  },
+  beforeDestroy() {
+    // 清理动态绑定的事件监听器
+    this.cleanupDynamicEvents();
+  },
+  methods: {
+    show_pet_skill_in_grade: window.show_pet_skill_in_grade,
+    // 获取五行名称
+    getWuxingName(fiveAptitude) {
+      const wuxingInfo = {
+        0: '未知',
+        1: '金',
+        2: '木',
+        4: '土',
+        8: '水',
+        16: '火'
+      };
+      return wuxingInfo[fiveAptitude] || '未知';
+    },
+    // 解析样式信息
+    parseStyleInfo(text) {
+      if (!text) return '';
+      // 这里可以添加样式解析逻辑，暂时直接返回文本
+      return window.parse_style_info(text, '#Y');
+    },
+    // 获取召唤兽颜色描述
+    getSummonColorDesc(summonColor) {
+      if (!summonColor) return '无';
+      // 这里可以添加颜色描述逻辑，暂时直接返回颜色值
+      return summonColor.toString();
+    },
+    // 处理点击事件
+    handleClick() {
+      this.$emit('click');
+    },
+    // 处理显示事件
+    handleShow() {
+      this.$emit('show');
+    },
+    // 处理隐藏事件
+    handleHide() {
+      this.$emit('hide');
+    },
+    showSkillTip(event, skill) {
+      // 组装tip内容
+      const tipData = {
+        name: skill.name,
+        desc: skill.desc || '',
+        icon: skill.cifuIcon || skill.heightCifuIcon || skill.icon,
+        isCifu: skill.cifuIcon || skill.heightCifuIcon ? true : false
+      };
+      // 渲染内容
+      const box = this.$refs.SkillTipsBox;
+      if (!box) return;
+      box.innerHTML = `<img class="tip-skill-icon" src="${tipData.icon}" referrerpolicy="no-referrer"><div class="skill-text"><p class="cYellow${tipData.isCifu ? ' cifu-name' : ''}">${tipData.name}</p>${window.parse_style_info ? window.parse_style_info(tipData.desc, '#Y') : tipData.desc}`;
+      // 定位
+      box.style.display = 'block';
+      box.style.position = 'fixed';
+
+      // 获取图标元素的位置信息
+      const iconRect = event.target.getBoundingClientRect();
+
+      // 计算tooltip的位置（图标正下方）
+      let left = iconRect.left;
+      let top = iconRect.bottom + 5; // 图标下方5px的位置
+
+      // 处理超出窗口情况
+      const boxWidth = 320;
+      const boxHeight = 120;
+
+      // 右边界检查
+      if (left + boxWidth > window.innerWidth) {
+        left = window.innerWidth - boxWidth - 10;
+      }
+
+      // 下边界检查，如果超出则显示在图标上方
+      if (top + boxHeight > window.innerHeight) {
+        top = iconRect.top - boxHeight - 5;
+      }
+
+      // 左边界检查
+      if (left < 0) {
+        left = 10;
+      }
+
+      // 上边界检查
+      if (top < 0) {
+        top = 10;
+      }
+      box.style.left = left + 'px';
+      box.style.top = top + 'px';
+      box.style.zIndex = 9999;
+    },
+    hideSkillTip() {
+      const box = this.$refs.SkillTipsBox;
+      if (box) box.style.display = 'none';
+    },
+    // 专门处理内丹的tooltip
+    showNeidanTip(event, item) {
+      const neidanData = {
+        name: item.name,
+        desc: item.desc + (item.level ? `<br/><span style="color: #ccc; font-size: 12px;">${item.level}层</span>` : ''),
+        icon: item.icon,
+        isCifu: false
+      };
+      this.showSkillTip(event, neidanData);
+    },
+    // 为动态生成的技能节点绑定事件
+    bindEventsForDynamicNodes() {
+      const container = this.$refs.pet_skill_grid_con;
+      if (!container) return;
+
+      // 查找所有带有技能数据的img元素
+      const skillImages = container.querySelectorAll('img[data_store_name]');
+      skillImages.forEach(img => {
+        // 检查是否已经绑定过事件
+        if (img.dataset.eventBound) return;
+        const skillName = img.getAttribute('data_store_name');
+        const skillDesc = img.getAttribute('data_store_desc');
+        const skillIcon = img.src;
+        if (skillName) {
+          // 创建技能对象，模拟原有的skill结构
+          const skillData = {
+            name: skillName,
+            desc: skillDesc,
+            icon: skillIcon,
+            isCifu: false
+          };
+
+          // 绑定鼠标事件
+          img.addEventListener('mouseenter', event => {
+            this.showSkillTip(event, skillData);
+          });
+          img.addEventListener('mouseleave', () => {
+            this.hideSkillTip();
+          });
+
+          // 标记已绑定事件
+          img.dataset.eventBound = 'true';
+        }
+      });
+    },
+    // 清理动态绑定的事件监听器
+    cleanupDynamicEvents() {
+      // 当组件销毁时，DOM节点也会被销毁，事件监听器会自动被清理
+      // 这里主要是为了防止内存泄漏，将引用置空
+      const container = this.$refs.pet_skill_grid_con;
+      if (container) {
+        container.innerHTML = '';
+      }
+    }
+  },
+  watch: {
+    visible(val) {
+      if (val) {
+        this.$nextTick(() => {
+          if (this.pet.all_skill && this.show_pet_skill_in_grade) {
+            const skillNode = this.show_pet_skill_in_grade(this.pet.all_skill, this.pet.sp_skill, 6, 4, this.conf, this.pet);
+            const {
+              skill_panel_name,
+              notice_node_name
+            } = this.conf;
+            const skillPanelNode = skillNode[skill_panel_name];
+            const noticeNode = skillNode[notice_node_name];
+            if (skillPanelNode && this.$refs.pet_skill_grid_con) {
+              skillPanelNode.forEach(node => {
+                if (node) {
+                  this.$refs.pet_skill_grid_con.appendChild(node);
+                }
+              });
+
+              // 为动态生成的技能节点绑定事件
+              this.$nextTick(() => {
+                this.bindEventsForDynamicNodes();
+              });
+            }
+            if (noticeNode && this.$refs.pet_tip_notice_msg) {
+              this.$refs.pet_tip_notice_msg.style.display = 'block';
+            }
+          }
+        });
+      }
     }
   }
 });
@@ -2512,15 +4444,27 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_constructor_js__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.iterator.some.js */ "./node_modules/core-js/modules/es.iterator.some.js");
 /* harmony import */ var core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_iterator_some_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! qs */ "./node_modules/qs/lib/index.js");
-/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(qs__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! qs */ "./node_modules/qs/lib/index.js");
+/* harmony import */ var qs__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(qs__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var _utils_windowReuseManager__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/utils/windowReuseManager */ "./src/utils/windowReuseManager.js");
+/* harmony import */ var _components_AutoParams_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/components/AutoParams.vue */ "./src/components/AutoParams.vue");
+
 
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'SimilarGetMore',
+  components: {
+    AutoParams: _components_AutoParams_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
+  },
+  data() {
+    return {
+      // AutoParams Modal相关数据
+      autoParamsDialogVisible: false,
+      autoParamsExternalParams: {}
+    };
+  },
   props: {
     message: {
       type: String,
@@ -2636,12 +4580,29 @@ __webpack_require__.r(__webpack_exports__);
         return;
       }
       console.log('❌ 没有找到可复用的窗口，创建新窗口');
-      // 如果没有可复用的窗口，则创建新窗口
-      this.createNewWindow(externalParams);
+      // 判断是否为Chrome插件环境
+      const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id;
+      if (isChromeExtension) {
+        // 如果是Chrome插件环境，则打开Modal加载AutoParams组件，并传递参数
+        this.openAutoParamsModal(externalParams);
+      } else {
+        // 如果不是Chrome插件环境，则打开新窗口
+        this.createNewWindow(externalParams);
+      }
+    },
+    openAutoParamsModal(params) {
+      // 直接在当前页面打开AutoParams Modal
+      console.log('打开AutoParams Modal，参数:', params);
+      this.autoParamsExternalParams = params;
+      this.autoParamsDialogVisible = true;
+    },
+    closeAutoParamsDialog() {
+      this.autoParamsDialogVisible = false;
+      this.autoParamsExternalParams = {};
     },
     createNewWindow(params) {
       // 使用qs库将参数转换为URL查询字符串
-      const queryString = qs__WEBPACK_IMPORTED_MODULE_3___default().stringify(params);
+      const queryString = qs__WEBPACK_IMPORTED_MODULE_4___default().stringify(params);
       const url = `/admin/#/auto-params?${queryString}`;
 
       // 计算窗口位置，使其显示在右下角
@@ -3151,7 +5112,21 @@ var render = function render() {
         return _vm.clearData.apply(null, arguments);
       }
     }
-  }, [_vm._v("清空数据")]) : _vm._e()])], 1), _vm._v(" "), _c("div", {
+  }, [_vm._v("清空数据")]) : _vm._e(), _vm._v(" "), _c("a", {
+    staticClass: "btn1 js_alert_btn_0",
+    staticStyle: {
+      background: "#f56c6c"
+    },
+    attrs: {
+      href: "javascript:void 0;"
+    },
+    on: {
+      click: function ($event) {
+        $event.preventDefault();
+        return _vm.testAddIframe.apply(null, arguments);
+      }
+    }
+  }, [_vm._v("测试iframe")])])], 1), _vm._v(" "), _c("div", {
     staticClass: "data-section"
   }, [_vm.recommendData.length === 0 ? _c("el-empty", {
     staticClass: "empty-state",
@@ -3434,7 +5409,7 @@ var render = function render() {
         }
       }, [_vm._v("\n                      " + _vm._s(pet.server_name) + "\n                    ")]) : _vm._e()])], 1)], 1)], 1);
     }), 1) : _vm._e()], 1) : _vm._e()]);
-  }), 0)], 1), _vm._v(" "), _c("el-dialog", {
+  }), 0)], 1), _vm._v(" "), _vm._m(0), _vm._v(" "), _c("el-dialog", {
     attrs: {
       visible: _vm.valuationDialogVisible,
       width: "1000px",
@@ -3478,7 +5453,954 @@ var render = function render() {
     on: {
       close: _vm.closeValuationDialog
     }
-  })], 1)], 1);
+  })], 1), _vm._v(" "), _c("el-dialog", {
+    attrs: {
+      visible: _vm.autoParamsDialogVisible,
+      width: "1200px",
+      "close-on-click-modal": false,
+      "close-on-press-escape": false,
+      "custom-class": "auto-params-dialog"
+    },
+    on: {
+      "update:visible": function ($event) {
+        _vm.autoParamsDialogVisible = $event;
+      }
+    }
+  }, [_c("span", {
+    staticClass: "el-dialog__title",
+    attrs: {
+      slot: "title"
+    },
+    slot: "title"
+  }, [_c("span", {
+    staticClass: "emoji-icon"
+  }, [_vm._v("⚙️")]), _vm._v(" 自动参数配置\n    ")]), _vm._v(" "), _vm.autoParamsDialogVisible ? _c("AutoParams", {
+    attrs: {
+      "external-params": _vm.autoParamsExternalParams
+    },
+    on: {
+      close: _vm.closeAutoParamsDialog
+    }
+  }) : _vm._e()], 1)], 1);
+};
+var staticRenderFns = [function () {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "version-footer"
+  }, [_c("span", {
+    staticClass: "version-text"
+  }, [_vm._v("版本 v0.0.1")])]);
+}];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("el-card", {
+    staticClass: "spider-system-card",
+    attrs: {
+      shadow: "never"
+    }
+  }, [_c("el-row", {
+    staticClass: "card-header",
+    attrs: {
+      slot: "header",
+      type: "flex",
+      justify: "space-between",
+      align: "middle"
+    },
+    slot: "header"
+  }, [_c("div", [_c("span", {
+    staticClass: "emoji-icon"
+  }, [_vm._v("⚙️")]), _vm._v(" 配置")]), _vm._v(" "), _c("div", {
+    staticClass: "tool-buttons"
+  }, [_c("el-dropdown", {
+    attrs: {
+      "split-button": "",
+      type: "danger"
+    },
+    on: {
+      click: _vm.stopTask
+    }
+  }, [_vm._v("\n                🛑 停止\n                "), _c("el-dropdown-menu", {
+    attrs: {
+      slot: "dropdown"
+    },
+    slot: "dropdown"
+  }, [_c("el-dropdown-item", {
+    nativeOn: {
+      click: function ($event) {
+        return _vm.resetTask.apply(null, arguments);
+      }
+    }
+  }, [_vm._v("🛑 重置任务")])], 1)], 1)], 1)]), _vm._v(" "), _c("el-row", {
+    attrs: {
+      type: "flex"
+    }
+  }, [_c("div", {
+    staticStyle: {
+      width: "140px",
+      "text-align": "center"
+    }
+  }, [_vm.externalParams.action ? [_c("el-col", {
+    attrs: {
+      span: 24
+    }
+  }, [_c("p", {
+    staticClass: "cBlue",
+    staticStyle: {
+      "margin-bottom": "5px"
+    }
+  }, [_vm._v("🎯目标：")])]), _vm._v(" "), _vm.externalParams.action === "similar_equip" ? _c("EquipmentImage", {
+    staticStyle: {
+      display: "flex",
+      "flex-direction": "column",
+      height: "50px",
+      width: "100%",
+      "align-items": "center"
+    },
+    attrs: {
+      equipment: _vm.externalParams,
+      popoverWidth: 450
+    }
+  }) : _vm._e(), _vm._v(" "), _vm.externalParams.action === "similar_pet" ? _c("PetImage", {
+    attrs: {
+      pet: _vm.externalParams,
+      equipFaceImg: _vm.externalParams.equip_face_img
+    }
+  }) : _vm._e(), _vm._v(" "), _vm.externalParams.action ? [_c("div", {
+    staticStyle: {
+      display: "inline-block",
+      "margin-left": "8px"
+    }
+  }, [_c("el-link", {
+    on: {
+      click: _vm.openCBGSearch
+    }
+  }, [_vm._v("\n                            藏宝阁\n                        ")])], 1)] : _vm._e()] : _vm._e()], 2), _vm._v(" "), _c("el-form", {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: _vm.activeTab !== "playwright",
+      expression: "activeTab !== 'playwright'"
+    }],
+    staticStyle: {
+      width: "100%",
+      "flex-shrink": "1"
+    },
+    attrs: {
+      model: _vm.globalSettings
+    }
+  }, [_c("el-row", {
+    attrs: {
+      gutter: 40
+    }
+  }, [_c("el-col", {
+    attrs: {
+      span: 6
+    }
+  }, [_c("el-form-item", {
+    attrs: {
+      label: "📄 爬取页数",
+      size: "small"
+    }
+  }, [_c("el-input-number", {
+    staticStyle: {
+      width: "100%"
+    },
+    attrs: {
+      min: 1,
+      max: 100,
+      "controls-position": "right"
+    },
+    model: {
+      value: _vm.globalSettings.max_pages,
+      callback: function ($$v) {
+        _vm.$set(_vm.globalSettings, "max_pages", $$v);
+      },
+      expression: "globalSettings.max_pages"
+    }
+  })], 1)], 1), _vm._v(" "), _c("el-col", {
+    attrs: {
+      span: 8
+    }
+  }, [_c("el-form-item", {
+    attrs: {
+      label: `⏱️ 延迟范围(秒) 当前：${_vm.globalSettings.delay_min} - ${_vm.globalSettings.delay_max} 秒`,
+      size: "small"
+    }
+  }, [_c("el-slider", {
+    staticStyle: {
+      width: "100%",
+      display: "inline-block"
+    },
+    attrs: {
+      range: "",
+      "show-stops": "",
+      min: 8,
+      max: 30,
+      step: 1
+    },
+    on: {
+      change: _vm.onDelayRangeChange
+    },
+    model: {
+      value: _vm.delayRange,
+      callback: function ($$v) {
+        _vm.delayRange = $$v;
+      },
+      expression: "delayRange"
+    }
+  })], 1)], 1), _vm._v(" "), _c("el-col", {
+    attrs: {
+      span: 10
+    }
+  }, [_c("el-form-item", {
+    staticStyle: {
+      width: "100%"
+    },
+    attrs: {
+      label: "⚡ 快速配置",
+      size: "small"
+    }
+  }, [_c("br"), _vm._v(" "), _c("el-row", {
+    staticStyle: {
+      height: "32px"
+    },
+    attrs: {
+      type: "flex",
+      align: "middle"
+    }
+  }, [_c("el-tag", {
+    staticStyle: {
+      cursor: "pointer"
+    },
+    attrs: {
+      size: "mini"
+    },
+    on: {
+      click: function ($event) {
+        return _vm.quickConfig("small");
+      }
+    }
+  }, [_vm._v("10页")]), _vm._v(" "), _c("el-divider", {
+    attrs: {
+      direction: "vertical"
+    }
+  }), _vm._v(" "), _c("el-tag", {
+    staticStyle: {
+      cursor: "pointer"
+    },
+    attrs: {
+      size: "mini"
+    },
+    on: {
+      click: function ($event) {
+        return _vm.quickConfig("medium");
+      }
+    }
+  }, [_vm._v("50页")]), _vm._v(" "), _c("el-divider", {
+    attrs: {
+      direction: "vertical"
+    }
+  }), _vm._v(" "), _c("el-tag", {
+    staticStyle: {
+      cursor: "pointer"
+    },
+    attrs: {
+      size: "mini"
+    },
+    on: {
+      click: function ($event) {
+        return _vm.quickConfig("large");
+      }
+    }
+  }, [_vm._v("100页")])], 1)], 1)], 1)], 1), _vm._v(" "), _vm.activeTab !== "role" ? _c("el-row", {
+    attrs: {
+      type: "flex",
+      align: "middle"
+    }
+  }, [_c("el-col", {
+    attrs: {
+      span: 12
+    }
+  }, [_c("el-row", {
+    attrs: {
+      type: "flex"
+    }
+  }, [_c("el-form-item", {
+    staticStyle: {
+      width: "150px"
+    },
+    attrs: {
+      label: "🌎 全服搜索",
+      size: "small"
+    }
+  }, [_c("el-switch", {
+    model: {
+      value: _vm.globalSettings.overall,
+      callback: function ($$v) {
+        _vm.$set(_vm.globalSettings, "overall", $$v);
+      },
+      expression: "globalSettings.overall"
+    }
+  })], 1), _vm._v(" "), !_vm.globalSettings.overall ? _c("el-form-item", {
+    staticStyle: {
+      width: "150px"
+    },
+    attrs: {
+      label: " 多区搜索",
+      size: "small"
+    }
+  }, [_c("el-switch", {
+    model: {
+      value: _vm.globalSettings.multi,
+      callback: function ($$v) {
+        _vm.$set(_vm.globalSettings, "multi", $$v);
+      },
+      expression: "globalSettings.multi"
+    }
+  })], 1) : _vm._e()], 1)], 1), _vm._v(" "), !_vm.globalSettings.overall ? _c("el-col", {
+    attrs: {
+      span: 12
+    }
+  }, [_c("el-form-item", {
+    attrs: {
+      label: "🎯 目标服务器",
+      size: "small"
+    }
+  }, [_c("el-cascader", {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: _vm.globalSettings.multi,
+      expression: "globalSettings.multi"
+    }],
+    attrs: {
+      options: _vm.hotServers,
+      props: {
+        value: "server_id",
+        label: "server_name",
+        multiple: true,
+        emitPath: false
+      },
+      "collapse-tags": "",
+      size: "mini",
+      filterable: ""
+    },
+    on: {
+      change: _vm.onTargetServerChange
+    },
+    model: {
+      value: _vm.target_server_list,
+      callback: function ($$v) {
+        _vm.target_server_list = $$v;
+      },
+      expression: "target_server_list"
+    }
+  }), _vm._v(" "), _c("el-cascader", {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: !_vm.globalSettings.multi,
+      expression: "!globalSettings.multi"
+    }],
+    attrs: {
+      options: _vm.server_data,
+      size: "mini",
+      filterable: "",
+      clearable: ""
+    },
+    on: {
+      change: _vm.onServerDataChange
+    },
+    model: {
+      value: _vm.server_data_value,
+      callback: function ($$v) {
+        _vm.server_data_value = $$v;
+      },
+      expression: "server_data_value"
+    }
+  })], 1)], 1) : _vm._e()], 1) : _vm._e(), _vm._v(" "), _c("el-row", {
+    attrs: {
+      type: "flex",
+      align: "middle"
+    }
+  }, [_c("el-form-item", {
+    attrs: {
+      label: "最低价格",
+      size: "small"
+    }
+  }, [_c("el-checkbox", {
+    model: {
+      value: _vm.price_min_trigger,
+      callback: function ($$v) {
+        _vm.price_min_trigger = $$v;
+      },
+      expression: "price_min_trigger"
+    }
+  }), _vm._v(" "), _c("el-input-number", {
+    staticStyle: {
+      "margin-left": "5px"
+    },
+    attrs: {
+      min: 10,
+      controls: false
+    },
+    model: {
+      value: _vm.price_min,
+      callback: function ($$v) {
+        _vm.price_min = $$v;
+      },
+      expression: "price_min"
+    }
+  })], 1)], 1)], 1)], 1), _vm._v(" "), _c("el-tabs", {
+    attrs: {
+      "tab-position": "left"
+    },
+    model: {
+      value: _vm.activeTab,
+      callback: function ($$v) {
+        _vm.activeTab = $$v;
+      },
+      expression: "activeTab"
+    }
+  }, [_c("el-tab-pane", {
+    attrs: {
+      label: "🖐️ 手动抓取",
+      name: "playwright",
+      disabled: !!_vm.externalParams.action
+    }
+  }, [_c("el-form", {
+    attrs: {
+      model: _vm.playwrightForm,
+      "label-width": "120px",
+      size: "small"
+    }
+  }, [_c("el-form-item", {
+    attrs: {
+      label: "无头模式"
+    }
+  }, [_c("el-switch", {
+    on: {
+      change: _vm.onHeadlessToggle
+    },
+    model: {
+      value: _vm.playwrightForm.headless,
+      callback: function ($$v) {
+        _vm.$set(_vm.playwrightForm, "headless", $$v);
+      },
+      expression: "playwrightForm.headless"
+    }
+  }), _vm._v(" "), _c("span", {
+    staticClass: "form-tip"
+  }, [_vm._v("关闭后可以看到浏览器操作过程")])], 1), _vm._v(" "), _c("el-form-item", {
+    attrs: {
+      label: "目标URL"
+    }
+  }, [_c("el-select", {
+    staticStyle: {
+      width: "100%"
+    },
+    on: {
+      change: _vm.onTargetUrlChange
+    },
+    model: {
+      value: _vm.playwrightForm.target_url,
+      callback: function ($$v) {
+        _vm.$set(_vm.playwrightForm, "target_url", $$v);
+      },
+      expression: "playwrightForm.target_url"
+    }
+  }, [_c("el-option", {
+    attrs: {
+      label: "角色推荐搜索",
+      value: "role_recommend"
+    }
+  }), _vm._v(" "), _c("el-option", {
+    attrs: {
+      label: "装备推荐搜索",
+      value: "equip_recommend"
+    }
+  }), _vm._v(" "), _c("el-option", {
+    attrs: {
+      label: "召唤兽推荐搜索",
+      value: "pet_recommend"
+    }
+  }), _vm._v(" "), _c("el-option", {
+    attrs: {
+      label: "自定义URL",
+      value: "custom"
+    }
+  })], 1)], 1), _vm._v(" "), _vm.playwrightForm.target_url === "custom" ? _c("el-form-item", {
+    attrs: {
+      label: "自定义URL"
+    }
+  }, [_c("el-input", {
+    staticStyle: {
+      width: "100%"
+    },
+    attrs: {
+      placeholder: "请输入完整的CBG URL"
+    },
+    model: {
+      value: _vm.playwrightForm.custom_url,
+      callback: function ($$v) {
+        _vm.$set(_vm.playwrightForm, "custom_url", $$v);
+      },
+      expression: "playwrightForm.custom_url"
+    }
+  }, [_c("template", {
+    slot: "prepend"
+  }, [_vm._v("https://")])], 2)], 1) : _vm._e(), _vm._v(" "), _c("el-form-item", [_c("el-button", {
+    attrs: {
+      type: "primary",
+      loading: _vm.isRunning
+    },
+    on: {
+      click: _vm.startPlaywrightCollector
+    }
+  }, [_vm._v("\n                        🚀 启动\n                    ")])], 1)], 1)], 1), _vm._v(" "), _c("el-tab-pane", {
+    attrs: {
+      label: "👤 角色",
+      name: "role",
+      disabled: !!_vm.externalParams.action
+    }
+  }, [_c("el-form", {
+    attrs: {
+      model: _vm.roleForm,
+      "label-width": "100px",
+      size: "small"
+    }
+  }, [_c("div", {
+    staticClass: "params-editor"
+  }, [_c("div", {
+    staticClass: "params-actions"
+  }, [_c("el-button", {
+    attrs: {
+      type: "text",
+      size: "mini"
+    },
+    on: {
+      click: () => _vm.resetParam("role")
+    }
+  }, [_vm._v("重置")]), _vm._v(" "), _c("el-button", {
+    attrs: {
+      type: "primary",
+      size: "mini",
+      loading: _vm.roleSaving,
+      disabled: !!_vm.roleJsonError
+    },
+    on: {
+      click: () => _vm.saveParam("role")
+    }
+  }, [_vm._v("\n                            保存配置\n                        ")])], 1), _vm._v(" "), _c("div", {
+    staticClass: "json-editor-wrapper"
+  }, [_c("el-input", {
+    staticClass: "json-editor",
+    attrs: {
+      type: "textarea",
+      placeholder: "请输入角色爬虫参数JSON",
+      rows: 8
+    },
+    on: {
+      blur: () => _vm.validateParam("role")
+    },
+    model: {
+      value: _vm.roleParamsJson,
+      callback: function ($$v) {
+        _vm.roleParamsJson = $$v;
+      },
+      expression: "roleParamsJson"
+    }
+  }), _vm._v(" "), _vm.roleJsonError ? _c("div", {
+    staticClass: "json-error"
+  }, [_c("i", {
+    staticClass: "el-icon-warning"
+  }), _vm._v(" " + _vm._s(_vm.roleJsonError) + "\n                        ")]) : _vm._e()], 1)]), _vm._v(" "), _c("el-form-item", [_c("el-button", {
+    attrs: {
+      type: "primary",
+      loading: _vm.isRunning
+    },
+    on: {
+      click: () => _vm.startSpiderByType("role")
+    }
+  }, [_vm._v("\n                        🚀 启动\n                    ")])], 1)], 1)], 1), _vm._v(" "), _c("el-tab-pane", {
+    attrs: {
+      label: "⚔️ 装备",
+      name: "equip",
+      disabled: _vm.externalParams.action && _vm.externalParams.action !== "similar_equip"
+    }
+  }, [_c("el-form", {
+    attrs: {
+      model: _vm.equipForm,
+      "label-width": "100px",
+      size: "small"
+    }
+  }, [_c("el-form-item", {
+    attrs: {
+      label: "装备类型"
+    }
+  }, [_c("el-select", {
+    staticStyle: {
+      width: "100%"
+    },
+    attrs: {
+      disabled: _vm.externalParams.action === "similar_equip"
+    },
+    on: {
+      change: _vm.onEquipTypeChange
+    },
+    model: {
+      value: _vm.equipForm.equip_type,
+      callback: function ($$v) {
+        _vm.$set(_vm.equipForm, "equip_type", $$v);
+      },
+      expression: "equipForm.equip_type"
+    }
+  }, [_c("el-option", {
+    attrs: {
+      label: "普通装备",
+      value: "normal"
+    }
+  }), _vm._v(" "), _c("el-option", {
+    attrs: {
+      label: "灵饰装备",
+      value: "lingshi"
+    }
+  }), _vm._v(" "), _c("el-option", {
+    attrs: {
+      label: "召唤兽装备",
+      value: "pet"
+    }
+  })], 1)], 1), _vm._v(" "), _vm.equipForm.equip_type === "normal" && _vm.targetFeatures.suit_effect ? _c("el-form-item", {
+    attrs: {
+      label: "套装效果"
+    }
+  }, [_c("el-radio-group", {
+    model: {
+      value: _vm.suit_effect_type,
+      callback: function ($$v) {
+        _vm.suit_effect_type = $$v;
+      },
+      expression: "suit_effect_type"
+    }
+  }, [_c("el-radio", {
+    attrs: {
+      label: ""
+    }
+  }, [_c("span", {
+    domProps: {
+      innerHTML: _vm._s(_vm.formatSuitEffect({
+        suit_effect: _vm.targetFeatures.suit_effect
+      }))
+    }
+  })]), _vm._v(" "), _c("el-radio", {
+    attrs: {
+      label: "select"
+    }
+  }, [_vm._v("自选")]), _vm._v(" "), _c("el-radio", {
+    attrs: {
+      label: "agility_detailed.A"
+    }
+  }, [_vm._v("敏捷A套")]), _vm._v(" "), _c("el-radio", {
+    attrs: {
+      label: "agility_detailed.B"
+    }
+  }, [_vm._v("敏捷B套")]), _vm._v(" "), _c("el-radio", {
+    attrs: {
+      label: "magic_detailed.A"
+    }
+  }, [_vm._v("魔力A套")]), _vm._v(" "), _c("el-radio", {
+    attrs: {
+      label: "magic_detailed.B"
+    }
+  }, [_vm._v("魔力B套")])], 1), _vm._v(" "), _vm.suit_effect_type === "select" ? _c("el-cascader", {
+    attrs: {
+      options: _vm.suitOptions,
+      placeholder: "请选择套装效果",
+      separator: "",
+      clearable: "",
+      filterable: ""
+    },
+    on: {
+      change: _vm.handleSuitChange
+    }
+  }) : _vm._e(), _vm._v(" "), _vm.suit_effect_type?.split(".").length > 1 ? _c("el-radio-group", {
+    model: {
+      value: _vm.select_suit_effect,
+      callback: function ($$v) {
+        _vm.select_suit_effect = $$v;
+      },
+      expression: "select_suit_effect"
+    }
+  }, _vm._l(_vm.equipConfig?.suits[_vm.suit_effect_type.split(".")[0]][_vm.suit_effect_type.split(".")[1]], function (itemId) {
+    return _c("el-radio", {
+      key: itemId,
+      attrs: {
+        label: itemId.toString()
+      }
+    }, [_vm._v(_vm._s(_vm.suit_transform_skills[itemId]))]);
+  }), 1) : _vm._e()], 1) : _vm._e(), _vm._v(" "), _vm.equipForm.equip_type === "normal" && _vm.targetFeatures.addon_total > 0 ? _c("el-form-item", {
+    attrs: {
+      label: "属性加成"
+    }
+  }, [_c("el-checkbox-group", {
+    model: {
+      value: _vm.select_sum_attr_type,
+      callback: function ($$v) {
+        _vm.select_sum_attr_type = $$v;
+      },
+      expression: "select_sum_attr_type"
+    }
+  }, [_c("el-checkbox", {
+    attrs: {
+      label: "dex"
+    }
+  }, [_vm._v("敏捷")]), _vm._v(" "), _c("el-checkbox", {
+    attrs: {
+      label: "endurance"
+    }
+  }, [_vm._v("耐力")]), _vm._v(" "), _c("el-checkbox", {
+    attrs: {
+      label: "magic"
+    }
+  }, [_vm._v("魔力")]), _vm._v(" "), _c("el-checkbox", {
+    attrs: {
+      label: "physique"
+    }
+  }, [_vm._v("体质")]), _vm._v(" "), _c("el-checkbox", {
+    attrs: {
+      label: "power"
+    }
+  }, [_vm._v("力量")])], 1), _vm._v(" "), _c("el-checkbox", {
+    model: {
+      value: _vm.sum_attr_with_melt,
+      callback: function ($$v) {
+        _vm.sum_attr_with_melt = $$v;
+      },
+      expression: "sum_attr_with_melt"
+    }
+  }, [_vm._v("计算熔炼效果")])], 1) : _vm._e(), _vm._v(" "), _vm.equipForm.equip_type === "lingshi" ? _c("el-alert", {
+    staticStyle: {
+      "margin-bottom": "10px"
+    },
+    attrs: {
+      "show-icon": "",
+      closable: false
+    }
+  }, [_c("span", {
+    attrs: {
+      slot: "title"
+    },
+    domProps: {
+      innerHTML: _vm._s(_vm.lingshiTips)
+    },
+    slot: "title"
+  })]) : _vm._e(), _vm._v(" "), _c("div", {
+    staticClass: "params-editor"
+  }, [_c("div", {
+    staticClass: "params-actions"
+  }, [_c("el-button", {
+    attrs: {
+      type: "text",
+      size: "mini"
+    },
+    on: {
+      click: () => _vm.resetParam("equip")
+    }
+  }, [_vm._v("重置")]), _vm._v(" "), _c("el-button", {
+    attrs: {
+      type: "primary",
+      size: "mini",
+      loading: _vm.equipSaving,
+      disabled: !!_vm.equipJsonError
+    },
+    on: {
+      click: () => _vm.saveParam("equip")
+    }
+  }, [_vm._v("\n                            保存配置\n                        ")])], 1), _vm._v(" "), _c("el-row", {
+    attrs: {
+      type: "flex"
+    }
+  }, [_vm.externalParams.action === "similar_equip" ? _c("div", {
+    staticClass: "json-editor-wrapper"
+  }, [_c("el-input", {
+    staticClass: "json-editor",
+    attrs: {
+      type: "textarea",
+      placeholder: "搜索指定参数",
+      rows: 10
+    },
+    model: {
+      value: _vm.externalSearchParams,
+      callback: function ($$v) {
+        _vm.externalSearchParams = $$v;
+      },
+      expression: "externalSearchParams"
+    }
+  }), _vm._v(" "), _vm.equipJsonError ? _c("div", {
+    staticClass: "json-error"
+  }, [_c("i", {
+    staticClass: "el-icon-warning"
+  }), _vm._v(" " + _vm._s(_vm.equipJsonError) + "\n                            ")]) : _vm._e()], 1) : _vm._e(), _vm._v(" "), _c("div", {
+    staticClass: "json-editor-wrapper"
+  }, [_c("el-input", {
+    staticClass: "json-editor",
+    attrs: {
+      type: "textarea",
+      placeholder: "请输入装备爬虫参数JSON",
+      rows: 10
+    },
+    on: {
+      blur: () => _vm.validateParam("equip")
+    },
+    model: {
+      value: _vm.equipParamsJson,
+      callback: function ($$v) {
+        _vm.equipParamsJson = $$v;
+      },
+      expression: "equipParamsJson"
+    }
+  }), _vm._v(" "), _vm.equipJsonError ? _c("div", {
+    staticClass: "json-error"
+  }, [_c("i", {
+    staticClass: "el-icon-warning"
+  }), _vm._v(" " + _vm._s(_vm.equipJsonError) + "\n                            ")]) : _vm._e()], 1), _vm._v(" "), _c("div", {
+    staticClass: "json-editor-wrapper"
+  }, [_c("el-input", {
+    staticClass: "json-editor",
+    attrs: {
+      type: "textarea",
+      readonly: "",
+      value: _vm.cached_params,
+      rows: 10
+    }
+  })], 1)])], 1), _vm._v(" "), _c("el-form-item", [_c("el-button", {
+    attrs: {
+      type: "primary",
+      loading: _vm.isRunning
+    },
+    on: {
+      click: () => _vm.startSpiderByType("equip")
+    }
+  }, [_vm._v("\n                        🚀 启动\n                    ")])], 1)], 1)], 1), _vm._v(" "), _c("el-tab-pane", {
+    attrs: {
+      label: "🐲 召唤兽",
+      name: "pet",
+      disabled: _vm.externalParams.action && _vm.externalParams.action !== "similar_pet"
+    }
+  }, [_c("el-form", {
+    attrs: {
+      model: _vm.petForm,
+      "label-width": "100px",
+      size: "small"
+    }
+  }, [_c("div", {
+    staticClass: "params-editor"
+  }, [_c("div", {
+    staticClass: "params-actions"
+  }, [_c("el-button", {
+    attrs: {
+      type: "mini",
+      size: "mini"
+    },
+    on: {
+      click: () => _vm.resetParam("pet")
+    }
+  }, [_vm._v("重置")]), _vm._v(" "), _c("el-button", {
+    attrs: {
+      type: "primary",
+      size: "mini",
+      loading: _vm.petSaving,
+      disabled: !!_vm.petJsonError
+    },
+    on: {
+      click: () => _vm.saveParam("pet")
+    }
+  }, [_vm._v("\n                            保存配置\n                        ")])], 1), _vm._v(" "), _c("el-row", {
+    attrs: {
+      type: "flex"
+    }
+  }, [_vm.externalParams.action === "similar_pet" ? _c("div", {
+    staticClass: "json-editor-wrapper"
+  }, [_c("el-input", {
+    staticClass: "json-editor",
+    attrs: {
+      type: "textarea",
+      rows: 10
+    },
+    model: {
+      value: _vm.externalSearchParams,
+      callback: function ($$v) {
+        _vm.externalSearchParams = $$v;
+      },
+      expression: "externalSearchParams"
+    }
+  })], 1) : _vm._e(), _vm._v(" "), _c("div", {
+    staticClass: "json-editor-wrapper"
+  }, [_c("el-input", {
+    staticClass: "json-editor",
+    attrs: {
+      type: "textarea",
+      placeholder: "请输入召唤兽爬虫参数JSON",
+      rows: 10
+    },
+    on: {
+      blur: () => _vm.validateParam("pet")
+    },
+    model: {
+      value: _vm.petParamsJson,
+      callback: function ($$v) {
+        _vm.petParamsJson = $$v;
+      },
+      expression: "petParamsJson"
+    }
+  }), _vm._v(" "), _vm.petJsonError ? _c("div", {
+    staticClass: "json-error"
+  }, [_c("i", {
+    staticClass: "el-icon-warning"
+  }), _vm._v(" " + _vm._s(_vm.petJsonError) + "\n                            ")]) : _vm._e()], 1), _vm._v(" "), _c("div", {
+    staticClass: "json-editor-wrapper"
+  }, [_c("el-input", {
+    staticClass: "json-editor",
+    attrs: {
+      type: "textarea",
+      readonly: "",
+      value: _vm.cached_params,
+      rows: 10
+    }
+  })], 1)])], 1), _vm._v(" "), _c("el-form-item", [_c("el-button", {
+    attrs: {
+      type: "primary",
+      loading: _vm.isRunning
+    },
+    on: {
+      click: () => _vm.startSpiderByType("pet")
+    }
+  }, [_vm._v("\n                        🚀 启动\n                    ")])], 1)], 1)], 1)], 1), _vm._v(" "), _vm.log ? _c("LogMonitor", {
+    attrs: {
+      maxLines: 8,
+      simpleMode: "",
+      isRunning: _vm.isRunning
+    }
+  }) : _vm._e()], 1);
 };
 var staticRenderFns = [];
 render._withStripped = true;
@@ -4005,6 +6927,611 @@ var render = function render() {
   }), _vm._v("\n      置信度: " + _vm._s(_vm.valuation ? (_vm.valuation.confidence * 100).toFixed(1) + "%" : "-") + "\n      "), _c("span", {
     staticClass: "confidence-level"
   }, [_vm._v(_vm._s(_vm.confidenceLevel))])]), _vm._v(" "), _c("span", [_vm._v("基于" + _vm._s(_vm.valuation.anchor_count) + "个锚点")]), _vm._v(" "), _vm.priceRatio ? _c("span", [_vm._v("估价比率: " + _vm._s((_vm.priceRatio * 100).toFixed(1)) + "%")]) : _vm._e()])], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("el-card", {
+    staticClass: "logs-card",
+    class: {
+      "simple-mode": _vm.simpleMode
+    }
+  }, [!_vm.simpleMode ? _c("div", {
+    staticClass: "card-header",
+    attrs: {
+      slot: "header"
+    },
+    slot: "header"
+  }, [_c("span", [_vm._v("📝 实时日志")]), _vm._v(" "), _c("div", [_c("el-button", {
+    attrs: {
+      type: "text",
+      loading: _vm.logsLoading,
+      size: "small"
+    },
+    on: {
+      click: _vm.refreshLogs
+    }
+  }, [_vm._v("刷新")]), _vm._v(" "), _c("el-button", {
+    attrs: {
+      type: "text",
+      size: "small"
+    },
+    on: {
+      click: _vm.toggleLogStream
+    }
+  }, [_vm._v("\n        " + _vm._s(_vm.isLogStreaming ? "停止" : "开始") + "实时监控\n      ")]), _vm._v(" "), _c("el-button", {
+    attrs: {
+      type: "text",
+      size: "small"
+    },
+    on: {
+      click: _vm.clearLogs
+    }
+  }, [_vm._v("清空")])], 1)]) : _vm._e(), _vm._v(" "), _c("div", {
+    staticClass: "logs-content"
+  }, [_c("div", {
+    ref: "logsContainer",
+    staticClass: "logs-container"
+  }, [_vm.logs.length === 0 ? _c("div", {
+    staticClass: "no-logs"
+  }, [_c("i", {
+    staticClass: "el-icon-document"
+  }), _vm._v(" "), _c("p", [_vm._v("暂无日志数据")])]) : _c("div", {
+    staticClass: "log-lines"
+  }, _vm._l(_vm.logs, function (log, index) {
+    return _c("div", {
+      key: index,
+      staticClass: "log-line",
+      class: _vm.getLogLevel(log)
+    }, [_c("span", {
+      staticClass: "log-time"
+    }, [_vm._v(_vm._s(_vm.getLogTime(log)))]), _vm._v(" "), _c("span", {
+      staticClass: "log-content"
+    }, [_vm._v(_vm._s(_vm.getLogContent(log)))])]);
+  }), 0)])])]);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=template&id=3824e5ac&scoped=true":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=template&id=3824e5ac&scoped=true ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("PetInfoPopover", _vm._b({
+    staticStyle: {
+      position: "relative",
+      display: "block"
+    },
+    attrs: {
+      pet: _vm.pet,
+      equipFaceImg: _vm.equipFaceImg,
+      enhanceInfo: _vm.enhanceInfo
+    },
+    scopedSlots: _vm._u([{
+      key: "trigger",
+      fn: function () {
+        return [_c("el-image", {
+          style: _vm.imageStyle,
+          attrs: {
+            src: _vm.imageUrl,
+            fit: "cover",
+            referrerpolicy: "no-referrer"
+          }
+        }, [_c("div", {
+          staticClass: "image-slot",
+          attrs: {
+            slot: "error"
+          },
+          slot: "error"
+        }, [_c("i", {
+          staticClass: "el-icon-picture-outline"
+        })])])];
+      },
+      proxy: true
+    }])
+  }, "PetInfoPopover", _vm.$attrs, false));
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true":
+/*!***************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* binding */ render; },
+/* harmony export */   staticRenderFns: function() { return /* binding */ staticRenderFns; }
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("el-popover", {
+    attrs: {
+      "data-equip-sn": _vm.$attrs.equip_sn,
+      placement: "right",
+      trigger: _vm.trigger,
+      "popper-class": "pet-info-popover"
+    },
+    on: {
+      show: _vm.handleShow,
+      hide: _vm.handleHide
+    },
+    scopedSlots: _vm._u([{
+      key: "reference",
+      fn: function () {
+        return [_c("div", {
+          staticClass: "pet-trigger",
+          on: {
+            click: _vm.handleClick
+          }
+        }, [_vm._t("trigger")], 2)];
+      },
+      proxy: true
+    }], null, true),
+    model: {
+      value: _vm.visible,
+      callback: function ($$v) {
+        _vm.visible = $$v;
+      },
+      expression: "visible"
+    }
+  }, [_vm._v(" "), _vm.pet && _vm.visible && _vm.pet.icon ? _c("div", {
+    staticClass: "tabCont"
+  }, [_c("PetDetail", {
+    attrs: {
+      current_pet: _vm.pet
+    }
+  })], 1) : _vm.pet && _vm.visible && !_vm.pet.icon ? _c("div", {
+    staticClass: "tabCont"
+  }, [_c("div", {
+    ref: "SkillTipsBox",
+    staticClass: "soldDetail",
+    staticStyle: {
+      width: "320px",
+      display: "none"
+    },
+    attrs: {
+      id: "SkillTipsBox"
+    }
+  }), _vm._v(" "), _c("div", {
+    staticClass: "cols",
+    staticStyle: {
+      width: "280px",
+      "margin-left": "-2px",
+      "margin-right": "2px"
+    }
+  }, [_vm.pet.action ? [_c("div", {
+    staticClass: "thum",
+    staticStyle: {
+      "text-align": "center"
+    }
+  }, [_c("div", {
+    staticClass: "time-key-wap"
+  }, [_c("el-image", {
+    staticStyle: {
+      width: "100px",
+      height: "100px"
+    },
+    attrs: {
+      src: _vm.getImageUrl(_vm.equipFaceImg, "big"),
+      referrerpolicy: "no-referrer"
+    }
+  })], 1), _vm._v(" "), _c("p", {
+    staticClass: "f14px cWhite"
+  }, [_vm._v("等级："), _c("span", {
+    staticClass: "cYellow"
+  }, [_vm._v(_vm._s(_vm.pet.equip_level))]), _vm._v(" 携带等级：" + _vm._s(_vm.pet.role_grade_limit))])]), _vm._v(" "), _c("div", {
+    staticClass: "blank12"
+  }), _vm._v(" "), _c("h4", [_vm._v("资质")]), _vm._v(" "), _c("table", {
+    staticClass: "tb02 petZiZhiTb petAttrInfo",
+    attrs: {
+      width: "100%",
+      cellspacing: "0",
+      cellpadding: "0"
+    }
+  }, [_c("tr", [_c("th", [_vm._v("历史灵性值：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.lx))]), _vm._v(" "), _c("th", [_vm._v("成长：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.growth))])]), _vm._v(" "), _c("tr", [_c("th", {
+    class: {
+      enhance: _vm.enhanceInfo.is_baobao
+    }
+  }, [_vm._v("是否宝宝：")]), _vm._v(" "), _c("td", {
+    class: {
+      enhance: _vm.enhanceInfo.is_baobao
+    }
+  }, [_c("span", {
+    style: `color:${_vm.pet.is_baobao === "否" ? "#FF0000" : "#00FF00"}`
+  }, [_vm._v("\n                " + _vm._s(_vm.pet.is_baobao) + "\n              ")])])])])] : [_c("div", {
+    staticClass: "thum",
+    staticStyle: {
+      "text-align": "center"
+    }
+  }, [_c("div", {
+    staticClass: "time-key-wap"
+  }, [_c("el-image", {
+    staticStyle: {
+      width: "100px",
+      height: "100px"
+    },
+    attrs: {
+      src: _vm.getImageUrl(_vm.equipFaceImg, "big"),
+      referrerpolicy: "no-referrer"
+    }
+  })], 1), _vm._v(" "), _c("p", {
+    staticClass: "f14px cWhite"
+  }, [_vm._v("名字："), _c("span", {
+    staticClass: "cYellow"
+  }, [_vm._v(_vm._s(_vm.pet.pet_name))]), _vm._v(" 等级：" + _vm._s(_vm.pet.pet_grade))])]), _vm._v(" "), _c("h4", [_vm._v("\n        属性"), _vm.pet.other.color_str && _vm.pet.other.current_on_avt ? _c("span", [_vm._v("(已包含梦影穿戴属性)")]) : _vm._e()]), _vm._v(" "), _c("table", {
+    staticClass: "tb02",
+    attrs: {
+      width: "100%",
+      cellspacing: "0",
+      cellpadding: "0"
+    }
+  }, [_c("tr", [_c("th", [_vm._v("气血：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.blood) + "/" + _vm._s(_vm.pet.max_blood))]), _vm._v(" "), _c("th", [_vm._v("体质：")]), _vm._v(" "), _c("td", [_vm._v("\n            " + _vm._s(_vm.pet.soma) + "\n            "), _vm.pet.ti_zhi_add ? _c("span", {
+    staticClass: "color-pink"
+  }, [_vm._v("+" + _vm._s(_vm.pet.ti_zhi_add))]) : _vm._e()])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("魔法：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.magic) + "/" + _vm._s(_vm.pet.max_magic))]), _vm._v(" "), _c("th", [_vm._v("法力：")]), _vm._v(" "), _c("td", [_vm._v("\n            " + _vm._s(_vm.pet.magic_powner) + "\n            "), _vm.pet.fa_li_add ? _c("span", {
+    staticClass: "color-pink"
+  }, [_vm._v("+" + _vm._s(_vm.pet.fa_li_add))]) : _vm._e()])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("攻击：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.attack))]), _vm._v(" "), _c("th", [_vm._v("力量：")]), _vm._v(" "), _c("td", [_vm._v("\n            " + _vm._s(_vm.pet.strength) + "\n            "), _vm.pet.li_liang_add ? _c("span", {
+    staticClass: "color-pink"
+  }, [_vm._v("+" + _vm._s(_vm.pet.li_liang_add))]) : _vm._e()])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("防御：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.defence))]), _vm._v(" "), _c("th", [_vm._v("耐力：")]), _vm._v(" "), _c("td", [_vm._v("\n            " + _vm._s(_vm.pet.endurance) + "\n            "), _vm.pet.nai_li_add ? _c("span", {
+    staticClass: "color-pink"
+  }, [_vm._v("+" + _vm._s(_vm.pet.nai_li_add))]) : _vm._e()])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("速度：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.speed))]), _vm._v(" "), _c("th", [_vm._v("敏捷：")]), _vm._v(" "), _c("td", [_vm._v("\n            " + _vm._s(_vm.pet.smartness) + "\n            "), _vm.pet.min_jie_add ? _c("span", {
+    staticClass: "color-pink"
+  }, [_vm._v("+" + _vm._s(_vm.pet.min_jie_add))]) : _vm._e()])]), _vm._v(" "), _c("tr", [_vm.isShowNewLingli ? [_c("th", [_vm._v("法伤：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.iMagDam))])] : [_c("th", [_vm._v("灵力：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.wakan))])], _vm._v(" "), _c("th", [_vm._v("潜能：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.potential))])], 2), _vm._v(" "), _vm.isShowNewLingli ? _c("tr", [_c("th", [_vm._v("法防：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.iMagDef))])]) : _vm._e()]), _vm._v(" "), _c("div", {
+    staticClass: "blank12"
+  }), _vm._v(" "), _c("h4", [_vm._v("资质")]), _vm._v(" "), _c("table", {
+    staticClass: "tb02 petZiZhiTb petAttrInfo",
+    attrs: {
+      width: "100%",
+      cellspacing: "0",
+      cellpadding: "0"
+    }
+  }, [_c("tr", [_c("th", [_vm._v("攻击资质：")]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "added_attr_wrap"
+  }, [_vm._v("\n              " + _vm._s(_vm.pet.attack_aptitude) + "\n              "), _vm.pet.attack_ext ? _c("span", {
+    staticClass: "added_attr"
+  }, [_vm._v("+" + _vm._s(_vm.pet.attack_ext))]) : _vm._e()])]), _vm._v(" "), _c("th", [_vm._v("寿命：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.lifetime))])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("防御资质：")]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "added_attr_wrap"
+  }, [_vm._v("\n              " + _vm._s(_vm.pet.defence_aptitude) + "\n              "), _vm.pet.defence_ext ? _c("span", {
+    staticClass: "added_attr"
+  }, [_vm._v("+" + _vm._s(_vm.pet.defence_ext))]) : _vm._e()])]), _vm._v(" "), _c("th", [_vm._v("成长：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.growth))])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("体力资质：")]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "added_attr_wrap"
+  }, [_vm._v("\n              " + _vm._s(_vm.pet.physical_aptitude) + "\n              "), _vm.pet.physical_ext ? _c("span", {
+    staticClass: "added_attr"
+  }, [_vm._v("+" + _vm._s(_vm.pet.physical_ext))]) : _vm._e()])]), _vm._v(" "), _c("th", [_vm._v("五行：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.getWuxingName(_vm.pet.five_aptitude)))])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("法力资质：")]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "added_attr_wrap"
+  }, [_vm._v("\n              " + _vm._s(_vm.pet.magic_aptitude) + "\n              "), _vm.pet.magic_ext ? _c("span", {
+    staticClass: "added_attr"
+  }, [_vm._v("+" + _vm._s(_vm.pet.magic_ext))]) : _vm._e()])]), _vm._v(" "), _c("th", [_vm._v("已用元宵：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.used_yuanxiao))])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("速度资质：")]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "added_attr_wrap"
+  }, [_vm._v("\n              " + _vm._s(_vm.pet.speed_aptitude) + "\n              "), _vm.pet.speed_ext ? _c("span", {
+    staticClass: "added_attr"
+  }, [_vm._v("+" + _vm._s(_vm.pet.speed_ext))]) : _vm._e()])]), _vm._v(" "), _c("th", [_vm._v("已用千金露：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.used_qianjinlu))])]), _vm._v(" "), _c("tr", [_c("th", [_vm._v("躲闪资质：")]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "added_attr_wrap"
+  }, [_vm._v("\n              " + _vm._s(_vm.pet.avoid_aptitude) + "\n              "), _vm.pet.avoid_ext ? _c("span", {
+    staticClass: "added_attr"
+  }, [_vm._v("+" + _vm._s(_vm.pet.avoid_ext))]) : _vm._e()])]), _vm._v(" "), _c("th", [_vm._v("已用炼兽珍经：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.used_lianshou))])]), _vm._v(" "), _c("tr", {
+    attrs: {
+      "data-enhance": '{"dir":"top","x":"auto","y":-6}',
+      "data-enhance-index": "2"
+    }
+  }, [_vm.pet.color ? [_c("th", [_vm._v("变异类型：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.color))])] : [_c("th", {
+    class: {
+      enhance: _vm.enhanceInfo.is_baobao
+    }
+  }, [_vm._v("是否宝宝：")]), _vm._v(" "), _c("td", {
+    class: {
+      enhance: _vm.enhanceInfo.is_baobao
+    }
+  }, [_c("span", {
+    style: `color:${_vm.pet.is_baobao === "否" ? "#FF0000" : "#00FF00"}`
+  }, [_vm._v("\n                " + _vm._s(_vm.pet.is_baobao) + "\n              ")])])], _vm._v(" "), _c("th", [_vm._v("已用清灵仙露：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.jinjie_cnt))])], 2), _vm._v(" "), _c("tr", [_c("th", [_vm._v("历史灵性值：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.pet.lx))])])])]], 2), _vm._v(" "), _c("div", {
+    staticClass: "cols",
+    staticStyle: {
+      width: "182px"
+    },
+    attrs: {
+      "data-enhance": '{"dir":"top","x":"auto","y":-34}',
+      "data-enhance-index": "1"
+    }
+  }, [_vm.evolSkillList.length > 0 ? _c("div", [_c("h4", [_vm._v("赐福技能")]), _vm._v(" "), _c("table", {
+    staticClass: "tb03",
+    attrs: {
+      cellspacing: "0",
+      cellpadding: "0",
+      id: "evol_skill_grid"
+    }
+  }, _vm._l(_vm.skillRows, function (row, rowIndex) {
+    return _c("tr", {
+      key: rowIndex
+    }, _vm._l(row, function (skill, skillIndex) {
+      return _c("td", {
+        key: skillIndex,
+        staticStyle: {
+          position: "relative"
+        }
+      }, [skill.hlightLight ? [_c("img", {
+        attrs: {
+          src: skill.icon,
+          width: "40",
+          height: "40",
+          data_equip_name: skill.name,
+          data_equip_desc: skill.desc,
+          data_tip_box: "SkillTipsBox",
+          data_cifu_icon: skill.cifuIcon,
+          data_height_icon: skill.heightCifuIcon,
+          referrerpolicy: "no-referrer"
+        },
+        on: {
+          mouseenter: function ($event) {
+            return _vm.showSkillTip($event, skill);
+          },
+          mouseleave: _vm.hideSkillTip
+        }
+      }), _vm._v(" "), _c("div", {
+        staticClass: "evol_skill_icon",
+        attrs: {
+          data_equip_name: skill.name,
+          data_equip_desc: skill.desc,
+          data_tip_box: "SkillTipsBox",
+          data_cifu_icon: skill.cifuIcon,
+          data_height_icon: skill.heightCifuIcon
+        }
+      })] : [_c("img", {
+        staticStyle: {
+          filter: "grayscale(100%)"
+        },
+        attrs: {
+          src: skill.icon,
+          width: "40",
+          height: "40",
+          data_equip_name: skill.name,
+          data_equip_desc: skill.desc,
+          data_tip_box: "SkillTipsBox",
+          data_cifu_icon: skill.cifuIcon,
+          data_height_icon: skill.heightCifuIcon,
+          referrerpolicy: "no-referrer"
+        },
+        on: {
+          mouseenter: function ($event) {
+            return _vm.showSkillTip($event, skill);
+          },
+          mouseleave: _vm.hideSkillTip
+        }
+      }), _vm._v(" "), _c("div", {
+        staticClass: "evol_skill_icon",
+        staticStyle: {
+          filter: "grayscale(100%)"
+        },
+        attrs: {
+          data_equip_name: skill.name,
+          data_equip_desc: skill.desc,
+          data_tip_box: "SkillTipsBox",
+          data_cifu_icon: skill.cifuIcon,
+          data_height_icon: skill.heightCifuIcon
+        }
+      })]], 2);
+    }), 0);
+  }), 0), _vm._v(" "), _c("div", {
+    staticClass: "blank12",
+    staticStyle: {
+      clear: "both"
+    }
+  })]) : _vm._e(), _vm._v(" "), _c("h4", [_vm._v("技能")]), _vm._v(" "), _c("div", {
+    staticClass: "blank6"
+  }), _vm._v(" "), _c("div", {
+    ref: "pet_skill_grid_con",
+    attrs: {
+      id: "pet_skill_grid_con"
+    }
+  }), _vm._v(" "), _c("table", {
+    staticClass: "tb03",
+    attrs: {
+      cellspacing: "0",
+      cellpadding: "0"
+    }
+  }), _vm._v(" "), _c("div", {
+    staticClass: "blank12"
+  }), _vm._v(" "), _vm.pet.core_close && _vm.pet.texing && _vm.pet.texing.id !== undefined ? _c("h4", [_vm._v("\n        特性:" + _vm._s(_vm.pet.core_close) + "\n      ")]) : _c("h4", [_vm._v("特性")]), _vm._v(" "), _vm.pet.texing && _vm.pet.texing.id !== undefined ? _c("div", {
+    staticStyle: {
+      "text-align": "left",
+      "font-size": "12px"
+    }
+  }, [_c("span", [_vm._v(_vm._s(_vm.pet.texing.name) + "："), _c("span", {
+    domProps: {
+      innerHTML: _vm._s(_vm.parseStyleInfo(_vm.pet.texing.effect))
+    }
+  })])]) : _c("div", {
+    staticStyle: {
+      "text-align": "center"
+    }
+  }, [_vm._v("无")])]), _vm._v(" "), _c("div", {
+    staticClass: "cols",
+    staticStyle: {
+      width: "218px",
+      "margin-right": "-2px",
+      "margin-left": "2px"
+    }
+  }, [_c("div", {
+    staticClass: "cols",
+    staticStyle: {
+      width: "158px",
+      margin: "0"
+    }
+  }, [_c("h4", [_vm._v("装备")]), _vm._v(" "), _c("div", {
+    staticClass: "blank6"
+  }), _vm._v(" "), _c("table", {
+    staticClass: "tb03 size50",
+    attrs: {
+      cellspacing: "0",
+      cellpadding: "0",
+      id: "pet_equip_con"
+    }
+  }, [_c("tr", _vm._l(_vm.pet.equip_list, function (eItem, index) {
+    return _c("td", {
+      key: index
+    }, [eItem && index < 3 ? _c("EquipmentImage", {
+      attrs: {
+        placement: "bottom",
+        image: false,
+        equipment: _vm.getEquipImageProps(eItem),
+        size: "small",
+        popoverWidth: 300
+      }
+    }) : _c("span", [_vm._v(" ")])], 1);
+  }), 0)])]), _vm._v(" "), _c("div", {
+    staticClass: "cols",
+    staticStyle: {
+      float: "right",
+      width: "58px",
+      margin: "0"
+    }
+  }, [_c("h4", [_vm._v("饰品")]), _vm._v(" "), _c("div", {
+    staticClass: "blank6"
+  }), _vm._v(" "), _c("table", {
+    staticClass: "tb03 size50",
+    attrs: {
+      cellspacing: "0",
+      cellpadding: "0",
+      id: "pet_shipin_con"
+    }
+  }, [_c("tr", [_c("td", [_vm.pet.equip_list && _vm.pet.equip_list[3] ? _c("EquipmentImage", {
+    attrs: {
+      placement: "bottom",
+      image: false,
+      equipment: _vm.getEquipImageProps(_vm.pet.equip_list[3]),
+      size: "small"
+    }
+  }) : _c("span", [_vm._v(" ")])], 1)])])]), _vm._v(" "), _c("div", {
+    staticClass: "blank12",
+    staticStyle: {
+      clear: "both"
+    }
+  }), _vm._v(" "), _c("h4", [_vm._v("内丹")]), _vm._v(" "), _c("div", {
+    staticClass: "blank6"
+  }), _vm._v(" "), !_vm.pet.neidan || _vm.pet.neidan.length === 0 ? _c("p", {
+    staticClass: "textCenter"
+  }, [_vm._v("无")]) : _c("table", {
+    attrs: {
+      width: "100%",
+      cellspacing: "3",
+      cellpadding: "3",
+      id: "RolePetNeidan"
+    }
+  }, _vm._l(_vm.pet.neidan, function (item, index) {
+    return _c("tr", {
+      key: index
+    }, [_c("td", [_c("img", {
+      attrs: {
+        src: item.icon,
+        data_equip_name: item.name,
+        data_skill_type: "neidan",
+        data_equip_desc: item.desc,
+        data_equip_level: item.level,
+        data_tip_box: "SkillTipsBox",
+        referrerpolicy: "no-referrer"
+      },
+      on: {
+        mouseenter: function ($event) {
+          return _vm.showNeidanTip($event, item);
+        },
+        mouseleave: _vm.hideSkillTip
+      }
+    })]), _vm._v(" "), _c("th", [_vm._v(_vm._s(item.name))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(item.level) + "层")])]);
+  }), 0), _vm._v(" "), _c("div", {
+    staticClass: "blank12"
+  }), _vm._v(" "), _vm.pet.other && _vm.pet.other.avt_list && _vm.pet.other.avt_list.length ? _c("div", [_c("h4", [_vm._v("梦影")]), _vm._v(" "), _c("table", {
+    staticClass: "tb02",
+    attrs: {
+      width: "100%",
+      cellspacing: "0",
+      cellpadding: "0"
+    }
+  }, [_c("tr", [_c("th", {
+    attrs: {
+      width: "40%"
+    }
+  }, [_vm._v("梦影数量：")]), _vm._v(" "), _c("td", [_c("p", {
+    staticClass: "fl",
+    staticStyle: {
+      "line-height": "24px"
+    }
+  }, [_vm._v(_vm._s(_vm.pet.other.avt_list.length))])])]), _vm._v(" "), _vm.pet.other.color_str && _vm.pet.other.current_on_avt ? _c("tr", [_c("th", {
+    staticStyle: {
+      "vertical-align": "top"
+    },
+    attrs: {
+      width: "40%"
+    }
+  }, [_vm._v("当前穿戴：")]), _vm._v(" "), _c("td", {
+    staticStyle: {
+      "vertical-align": "top"
+    }
+  }, [_c("p", [_vm._v(_vm._s(_vm.pet.other.current_on_avt.name))]), _vm._v(" "), _vm.pet.other.current_on_avt.sumavt_propsk ? _c("p", {
+    staticStyle: {
+      color: "#00ff00"
+    }
+  }, [_vm._v("\n                (" + _vm._s(_vm.pet.other.current_on_avt.sumavt_propsk) + "+1)\n              ")]) : _vm._e()])]) : _c("tr", [_c("th", {
+    staticStyle: {
+      "padding-right": "20px"
+    },
+    attrs: {
+      width: "40%"
+    }
+  }, [_vm._v("未穿戴")])])]), _vm._v(" "), _c("div", {
+    staticClass: "blank12"
+  })]) : _vm._e(), _vm._v(" "), !_vm.pet.action ? [_c("h4", [_vm._v("其它")]), _vm._v(" "), _c("div", {
+    staticClass: "blank6"
+  }), _vm._v(" "), _c("table", {
+    staticClass: "tb02",
+    attrs: {
+      width: "100%",
+      cellspacing: "0",
+      cellpadding: "0"
+    }
+  }, [_c("tr", [_c("th", {
+    attrs: {
+      width: "50%"
+    }
+  }, [_vm._v("已用幻色丹：")]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.getSummonColorDesc(_vm.pet.summon_color, _vm.pet.type_id)))])])])] : _vm._e()], 2)]) : _vm._e()]);
 };
 var staticRenderFns = [];
 render._withStripped = true;
@@ -6519,14 +10046,43 @@ __webpack_require__.r(__webpack_exports__);
 var render = function render() {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("el-button", {
+  return _c("div", [_c("el-button", {
     attrs: {
       type: "success"
     },
     on: {
       click: _vm.goToMoreSimilar
     }
-  }, [_vm._v("\n  查看更多相似\n")]);
+  }, [_vm._v("\n    查看更多相似\n  ")]), _vm._v(" "), _c("el-dialog", {
+    attrs: {
+      visible: _vm.autoParamsDialogVisible,
+      width: "1200px",
+      "close-on-click-modal": false,
+      "close-on-press-escape": false,
+      "custom-class": "auto-params-dialog",
+      "append-to-body": ""
+    },
+    on: {
+      "update:visible": function ($event) {
+        _vm.autoParamsDialogVisible = $event;
+      }
+    }
+  }, [_c("span", {
+    staticClass: "el-dialog__title",
+    attrs: {
+      slot: "title"
+    },
+    slot: "title"
+  }, [_c("span", {
+    staticClass: "emoji-icon"
+  }, [_vm._v("⚙️")]), _vm._v(" 自动参数配置\n    ")]), _vm._v(" "), _vm.autoParamsDialogVisible ? _c("AutoParams", {
+    attrs: {
+      "external-params": _vm.autoParamsExternalParams
+    },
+    on: {
+      close: _vm.closeAutoParamsDialog
+    }
+  }) : _vm._e()], 1)], 1);
 };
 var staticRenderFns = [];
 render._withStripped = true;
@@ -6963,7 +10519,31 @@ var ___CSS_LOADER_URL_IMPORT_0___ = new URL(/* asset import */ __webpack_require
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 var ___CSS_LOADER_URL_REPLACEMENT_0___ = _node_modules_css_loader_dist_runtime_getUrl_js__WEBPACK_IMPORTED_MODULE_2___default()(___CSS_LOADER_URL_IMPORT_0___);
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.panel[data-v-42c7142d] {\n  box-sizing: border-box;\n  padding: 16px;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ") repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n.panel-header[data-v-42c7142d] {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n.panel-header h3[data-v-42c7142d] {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n.connection-status[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n.status-indicator[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.status-dot[data-v-42c7142d] {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n.status-dot.connected[data-v-42c7142d] {\n  background-color: #52c41a;\n  animation: pulse-green-strong-42c7142d 1.5s infinite;\n}\n.status-dot.disconnected[data-v-42c7142d] {\n  background-color: #faad14;\n  animation: pulse-orange-strong-42c7142d 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n}\n75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n}\n.status-text[data-v-42c7142d] {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n.mode-indicator[data-v-42c7142d] {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n.mode-indicator.sidepanel[data-v-42c7142d] {\n  background-color: #1890ff;\n  color: white;\n}\n.mode-indicator.new-window[data-v-42c7142d] {\n  background-color: #52c41a;\n  color: white;\n}\n.new-window-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.new-window-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.sidebar-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.sidebar-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.data-section h4[data-v-42c7142d] {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n.empty-state[data-v-42c7142d] {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n.request-list[data-v-42c7142d] {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n.request-item[data-v-42c7142d] {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n.request-item[data-v-42c7142d]:last-child {\n  border-bottom: none;\n}\n.request-item[data-v-42c7142d]:hover {\n  background-color: #fafafa;\n}\n.request-item.parsing[data-v-42c7142d] {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse-42c7142d 2s ease-in-out infinite;\n}\n@keyframes pulse-42c7142d {\n0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n}\n100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n}\n.request-info[data-v-42c7142d] {\n  margin-bottom: 8px;\n}\n.request-url[data-v-42c7142d] {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n.request-meta[data-v-42c7142d] {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n.method[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status[data-v-42c7142d] {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status.pending[data-v-42c7142d] {\n  background: #faad14;\n  color: white;\n}\n.status.completed[data-v-42c7142d] {\n  background: #52c41a;\n  color: white;\n}\n.status.parsing[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n}\n.status.parsing .el-icon-loading[data-v-42c7142d] {\n  animation: rotating-42c7142d 2s linear infinite;\n}\n@keyframes rotating-42c7142d {\n0% {\n    transform: rotate(0deg);\n}\n100% {\n    transform: rotate(360deg);\n}\n}\n.status.failed[data-v-42c7142d] {\n  background: #ff4d4f;\n  color: white;\n}\n.timestamp[data-v-42c7142d] {\n  color: #999;\n}\n.response-data[data-v-42c7142d] {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n.response-content[data-v-42c7142d] {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n.response-content pre[data-v-42c7142d] {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n.role-card[data-v-42c7142d] .el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role[data-v-42c7142d] {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n.role-card.empty-role[data-v-42c7142d]:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n.role-card.empty-role[data-v-42c7142d] .el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role .el-link[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role span[data-v-42c7142d] {\n  opacity: 0.7;\n}\n", "",{"version":3,"sources":["webpack://./src/chrome-extensions/DevToolsPanel.vue"],"names":[],"mappings":";AAskCA;EACA,sBAAA;EACA,aAAA;EACA,gFAAA;EACA,mBAAA;EACA,iBAAA;EACA,4DAAA;EACA,YAAA;EACA,cAAA;AACA;AAEA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,mBAAA;EACA,oBAAA;EACA,gCAAA;AACA;AAEA;EACA,SAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,SAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,QAAA;AACA;AAEA;EACA,kBAAA;EACA,QAAA;EACA,SAAA;EACA,gCAAA;EACA,UAAA;EACA,WAAA;EACA,kBAAA;EACA,qBAAA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,oDAAA;AACA;AAEA;EACA,yBAAA;EACA,mDAAA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,2CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,4CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AACA;AAEA;EACA,eAAA;EACA,WAAA;EACA,gBAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,kBAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,kBAAA;EACA,kBAAA;EACA,WAAA;EACA,iBAAA;EACA,kBAAA;EACA,uBAAA;AACA;AAEA;EACA,iBAAA;EACA,kBAAA;EACA,yBAAA;EACA,gBAAA;AACA;AAEA;EACA,gCAAA;EACA,kBAAA;EACA,iCAAA;AACA;AAEA;EACA,mBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,6CAAA;EACA,iDAAA;AACA;AAEA;AACA;IACA,6CAAA;AACA;AAEA;IACA,8CAAA;AACA;AAEA;IACA,6CAAA;AACA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;EACA,wDAAA;EACA,eAAA;EACA,WAAA;EACA,qBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,SAAA;EACA,eAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,+CAAA;AACA;AAEA;AACA;IACA,uBAAA;AACA;AAEA;IACA,yBAAA;AACA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,WAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,6BAAA;AACA;AAEA;EACA,eAAA;EACA,mBAAA;EACA,kBAAA;EACA,YAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,SAAA;EACA,wDAAA;EACA,eAAA;EACA,gBAAA;EACA,WAAA;EACA,qBAAA;EACA,sBAAA;AACA;AAEA;EACA,YAAA;AACA;;AAEA,aAAA;AACA;EACA,YAAA;EACA,sBAAA;EACA,yBAAA;EACA,yBAAA;EACA,yBAAA;AACA;AAEA;EACA,YAAA;EACA,sBAAA;AACA;AAEA;EACA,yBAAA;AACA;;AAEA,gBAAA;AACA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA","sourcesContent":["<template>\n  <div class=\"panel\">\n    <div class=\"panel-header\">\n      <el-row type=\"flex\" align=\"middle\">\n        <div style=\"width: 32px;height: 32px;margin-right: 10px;position: relative;\">\n          <img src=\"~@/assets/logo.png\" alt=\"梦幻灵瞳\" style=\"width: 32px;height: 32px;\">\n          <span class=\"status-dot\"\n            :class=\"{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }\"></span>\n        </div>\n        <h3 style=\"color: #fff;\">梦幻灵瞳</h3>\n      </el-row>\n      <div class=\"connection-status\">\n        <div id=\"pager\" class=\"fr\" v-if=\"pageInfo.hasPager\">\n          <el-row class=\"pages\" type=\"flex\" align=\"middle\">\n            <span style=\"color: #fff;margin-right: 10px;\"> 第{{ pageInfo.currentPage }}页, 共{{ pageInfo.total }}页 </span>\n            <a v-if=\"pageInfo.hasPrev\" href=\"javascript:void 0;\" @click.prevent=\"prevPage\"\n              style=\"line-height: 1.2em;\">上一页</a>\n            <a v-if=\"pageInfo.hasNext\" href=\"javascript:void 0;\" @click.prevent=\"nextPage\"\n              style=\"line-height: 1.2em;\">下一页</a>\n          </el-row>\n        </div>\n        <a v-if=\"!devtoolsConnected\" href=\"javascript:void 0;\" @click=\"reconnectDevTools\">重新连接</a>\n        <a v-if=\"!isInNewWindow\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"openInNewTab\">新窗口打开</a>\n        <a v-if=\"!pageInfo.hasPager\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"refreshCurrentPage\">刷新页面</a>\n        <a v-if=\"recommendData.length > 0\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"clearData\">清空数据</a>\n      </div>\n    </div>\n    <div class=\"data-section\">\n      <el-empty v-if=\"recommendData.length === 0\" class=\"empty-state\" description=\"暂无数据，请访问梦幻西游藏宝阁页面\"></el-empty>\n      <div v-else class=\"request-list\">\n        <div v-for=\"(item, index) in recommendData\" :key=\"item.requestId\" class=\"request-item\"\n          :class=\"{ 'parsing': item.status === 'parsing' }\">\n          <div class=\"request-info\">\n            <div class=\"request-meta\">\n              <span class=\"status\" :class=\"item.status\">\n                <template v-if=\"item.status === 'parsing'\">\n                  <i class=\"el-icon-loading\"></i> 解析中...\n                </template>\n                <template v-else-if=\"item.status === 'completed'\">\n                  <i class=\"el-icon-success\"></i> 解析完成\n                </template>\n                <template v-else>\n                  <i class=\"el-icon-error\"></i> 解析失败\n                </template>\n              </span>\n              <el-tag v-if=\"item.dataType\" size=\"mini\" type=\"info\" style=\"margin-left: 5px;\">\n                {{ getDataTypeLabel(item.dataType) }}\n              </el-tag>\n              <span class=\"timestamp\">{{ formatTime(item.timestamp) }}</span>\n            </div>\n          </div>\n          <div v-if=\"item.responseData && item.dataType\" class=\"response-data\">\n            <!-- 角色数据渲染 -->\n            <el-row :gutter=\"4\" v-if=\"item.dataType === 'role'\">\n              <el-col v-for=\"role in parseListData(item.responseData)?.equip_list\" :key=\"role.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\" :class=\"{ 'empty-role': isEmptyRole(parserRoleData(role)) }\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <RoleImage :key=\"role.eid\" :other_info=\"role.other_info\" :roleInfo=\"parserRoleData(role)\" />\n                      <el-link :href=\"getCBGLinkByType(role.eid, 'role')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ role.seller_nickname }}</el-link>\n                    </el-col>\n                    <el-col>\n                      <div>\n                        <el-tag type=\"success\" v-if=\"role.accept_bargain == 1\">接受还价</el-tag>\n                        <el-tag type=\"danger\" v-else>拒绝还价</el-tag>\n                      </div>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(role.price, true)\"></span>\n                      </div>\n                      <div>\n                        <el-tag type=\"danger\" v-if=\"isEmptyRole(parserRoleData(role))\">空号</el-tag>\n                        <template v-else>\n                          <el-tag @click=\"handleEquipPrice(role)\" style=\"cursor: pointer;\" v-if=\"get_equip_num(parserRoleData(role)) > 0\">\n                            ⚔️ {{ get_equip_num(parserRoleData(role)) }}\n                          </el-tag>\n                          <el-tag type=\"success\" @click=\"handlePetPrice(role)\" style=\"cursor: pointer;\" v-if=\"get_pet_num(parserRoleData(role)) > 0\">\n                            🐲 {{ get_pet_num(parserRoleData(role)) }}\n                          </el-tag>\n                        </template>\n                      </div>\n\n                    </el-col>\n                  </el-row>\n                  <div>\n                    <SimilarRoleModal :role=\"{ ...role, roleInfo: parserRoleData(role) }\"\n                      :search-params=\"{ selectedDate: selectedDate, roleType: 'normal' }\">\n                      <div> <el-link type=\"primary\" href=\"javascript:void 0;\" @click.prevent\n                          :disabled=\"item.status !== 'completed'\">👤\n                          裸号</el-link></div>\n                    </SimilarRoleModal>\n                  </div>\n                </el-card>\n              </el-col>\n            </el-row>\n            \n            <!-- 装备数据渲染 -->\n            <el-row :gutter=\"4\" v-else-if=\"item.dataType === 'equipment'\">\n              <el-col v-for=\"equip in parseListData(item.responseData)?.equip_list\" :key=\"equip.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <EquipmentImage :equipment=\"equip\" />\n                      <el-link :href=\"getCBGLinkByType(equip.eid, 'equip')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ equip.equip_name }}\n                      </el-link>\n                    </el-col>\n                    <el-col>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(equip)\"></span>\n                      </div>\n                      <div v-if=\"equip.highlight\" class=\"equip-desc-content\" v-html=\"gen_highlight(equip.highlight)\"></div>\n                      <div v-if=\"equip.equip_level\" style=\"font-size: 12px;\">\n                        等级: {{ equip.equip_level }}\n                      </div>\n                      <div v-if=\"equip.server_name\" style=\"font-size: 12px; color: #909399;\">\n                        {{ equip.server_name }}\n                      </div>\n                    </el-col>\n                  </el-row>\n                </el-card>\n              </el-col>\n            </el-row>\n            \n            <!-- 召唤兽数据渲染 -->\n            <el-row :gutter=\"4\" v-else-if=\"item.dataType === 'pet'\">\n              <el-col v-for=\"pet in parseListData(item.responseData)?.equip_list\" :key=\"pet.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <el-image v-if=\"pet.avatar_url\" :src=\"pet.avatar_url\" style=\"width: 50px;height: 50px;\" fit=\"cover\"></el-image>\n                      <el-link :href=\"getCBGLinkByType(pet.eid, 'pet')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ pet.seller_nickname || pet.name || pet.nickname }}\n                      </el-link>\n                    </el-col>\n                    <el-col>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(pet.price, true)\"></span>\n                      </div>\n                      <div v-if=\"pet.grade\" style=\"font-size: 12px;\">\n                        等级: {{ pet.grade }}\n                      </div>\n                      <div v-if=\"pet.server_name\" style=\"font-size: 12px; color: #909399;\">\n                        {{ pet.server_name }}\n                      </div>\n                    </el-col>\n                  </el-row>\n                </el-card>\n              </el-col>\n            </el-row>\n            <!-- <el-button @click=\"toggleResponse(index)\" size=\"mini\" type=\"text\">\n              {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据\n            </el-button>\n            <div v-if=\"expandedItems.includes(index)\" class=\"response-content\">\n              <pre>{{ JSON.stringify(item.responseData, null, 2) }}</pre>\n            </div> -->\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <!-- 装备估价结果对话框 -->\n    <el-dialog :visible.sync=\"valuationDialogVisible\" width=\"1000px\" :close-on-click-modal=\"false\"\n      :close-on-press-escape=\"false\" custom-class=\"batch-valuation-dialog\">\n      <span slot=\"title\" class=\"el-dialog__title\">\n        <el-tag size=\"mini\">{{ valuationDialogTitle.server_name }}</el-tag>\n        /\n        <el-tag type=\"info\" size=\"mini\">{{ valuationDialogTitle.school }}</el-tag>/\n        <el-link :href=\"getCBGLinkByType(valuationDialogTitle.eid)\" target=\"_blank\">{{ valuationDialogTitle.nickname\n        }}</el-link>\n      </span>\n      <EquipBatchValuationResult :results=\"valuationResults\" :total-value=\"valuationTotalValue\"\n        :equipment-list=\"valuationEquipmentList\" :valuate-params=\"batchValuateParams\" :loading=\"valuationLoading\"\n        @close=\"closeValuationDialog\" />\n    </el-dialog>\n  </div>\n</template>\n<script>\nimport dayjs from 'dayjs'\nimport RoleImage from '@/components/RoleInfo/RoleImage.vue'\nimport SimilarRoleModal from '@/components/SimilarRoleModal.vue'\nimport EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'\nimport EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'\nimport { commonMixin } from '@/utils/mixins/commonMixin'\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\nexport default {\n  name: 'DevToolsPanel',\n  data() {\n    return {\n      pageInfo: {\n        hasPager: false,\n        currentPage: 0,\n        total: 0,\n        hasPrev: false,\n        hasNext: false\n      },\n      selectedDate: dayjs().format('YYYY-MM'),\n      recommendData: [],\n      expandedItems: [],\n      processedRequests: new Set(), // 记录已处理的请求ID\n      devtoolsConnected: false, // 数据监听连接状态\n      connectionStatus: '检查中...', // 连接状态描述\n      connectionCheckTimer: null, // 连接检查定时器\n      isInNewWindow: false, // 是否在新窗口中打开\n      \n      // 装备估价相关数据\n      valuationDialogVisible: false,\n      valuationResults: [],\n      valuationTotalValue: 0,\n      valuationEquipmentList: [],\n      valuationLoading: false,\n      valuationDialogTitle: {},\n      batchValuateParams: {\n        similarity_threshold: 0.7,\n        max_anchors: 30\n      }\n    }\n  },\n  mixins: [commonMixin, equipmentMixin],\n  components: {\n    RoleImage,\n    SimilarRoleModal,\n    EquipBatchValuationResult,\n    EquipmentImage\n  },\n  computed: {\n\n  },\n  mounted() {\n    // 通知background script侧边栏已打开\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelOpened'\n      })\n    }\n\n    // 监听页面可见性变化，当页面不可见时通知关闭\n    document.addEventListener('visibilitychange', this.handleVisibilityChange)\n\n    this.initMessageListener()\n    this.checkConnectionStatus()\n    this.checkIfInNewWindow()\n\n    // // 设置定时检查（每5秒检查一次）\n    // this.connectionCheckTimer = setInterval(() => {\n    //   this.checkConnectionStatus()\n    // }, 5000)\n  },\n  beforeDestroy() {\n    // 通知background script侧边栏已关闭\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelClosed'\n      })\n    }\n\n    // 移除可见性变化监听器\n    document.removeEventListener('visibilitychange', this.handleVisibilityChange)\n\n    // 移除Chrome消息监听器\n    this.removeMessageListener()\n    // 清理定时器\n    if (this.connectionCheckTimer) {\n      clearInterval(this.connectionCheckTimer)\n      this.connectionCheckTimer = null\n    }\n    // 清理组件状态\n    this.recommendData = []\n    this.expandedItems = []\n  },\n  methods: {\n    handleVisibilityChange() {\n      // 当页面不可见时，通知background script侧边栏已关闭\n      if (document.hidden) {\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelClosed'\n          })\n        }\n      } else {\n        this.getPagerInfo().then(res => {\n          this.pageInfo = res\n        })\n        // 当页面重新可见时，通知background script侧边栏已打开\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelOpened'\n          })\n        }\n      }\n    },\n\n    isEmptyRole(roleInfo) {\n      const noEquip = this.get_equip_num(roleInfo) === 0\n      let noPet = true\n      for (let pet of roleInfo.pet_info) {\n        if (pet.pet_grade > 100 && pet.is_baobao === '是') {\n          noPet = false\n          break\n        }\n        if (pet.pet_grade > 100 && pet.is_baobao === '否' && pet.all_skills.length > 4) {\n          noPet = false\n          break\n        }\n      }\n      return noEquip && noPet\n    },\n    getDataTypeLabel(type) {\n      const typeMap = {\n        'role': '角色',\n        'pet': '召唤兽',\n        'equipment': '装备'\n      }\n      return typeMap[type] || type\n    },\n    get_pet_num(roleInfo) {\n      return roleInfo.pet_info.length + roleInfo.split_pets.length\n    },\n    get_equip_num(roleInfo) {\n      return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length\n    },\n    nextPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('next')\n    },\n\n    prevPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('prev')\n    },\n\n    reconnectDevTools() {\n      // 重新连接数据监听\n      this.connectionStatus = '重连中...'\n      this.checkConnectionStatus()\n      this.$notify.info('正在尝试重新连接数据监听...')\n    },\n\n    async clickPageButton(direction) {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  \n                  let targetButton = null\n                  const isNext = '${direction}' === 'next'\n                  \n                  if (isNext) {\n                    // 查找下一页按钮 - 根据实际HTML格式优化\n                    // 1. 优先查找包含\"下一页\"文本的链接\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '下一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"下一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码大于当前页码，说明是下一页\n                            if (!isNaN(linkPage) && linkPage > currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  } else {\n                    // 查找上一页按钮\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    \n                    // 1. 优先查找包含\"上一页\"文本的链接\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '上一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"上一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码小于当前页码，说明是上一页\n                            if (!isNaN(linkPage) && linkPage < currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  }\n                  \n                  if (!targetButton) {\n                    return 'ERROR:未找到${direction === 'next' ? '下一页' : '上一页'}按钮'\n                  }\n                  \n                  // 检查按钮是否可点击\n                  if (targetButton.disabled || targetButton.classList.contains('disabled')) {\n                    return 'ERROR:${direction === 'next' ? '下一页' : '上一页'}按钮不可点击，可能已到${direction === 'next' ? '最后一页' : '第一页'}'\n                  }\n                  \n                  // 获取当前页码信息用于日志\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPageInfo = ''\n                  if (currentPageLink) {\n                    const currentPageText = currentPageLink.textContent.trim()\n                    currentPageInfo = ' (当前第' + currentPageText + '页)'\n                  }\n                  \n                  // 点击按钮\n                  targetButton.click()\n                  return 'SUCCESS:已点击${direction === 'next' ? '下一页' : '上一页'}按钮' + currentPageInfo\n                } catch (error) {\n                  return 'ERROR:执行失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        this.pageInfo = await this.getPagerInfo()\n        // 处理Chrome调试API的返回结果\n        if (result && result.result && result.result.value) {\n          const message = result.result.value\n\n          if (message.startsWith('SUCCESS:')) {\n            this.$notify.success(message.substring(8)) // 移除\"SUCCESS:\"前缀\n            console.log(`${direction === 'next' ? '下一页' : '上一页'}按钮点击成功`)\n          } else if (message.startsWith('ERROR:')) {\n            this.$notify.warning(message.substring(6)) // 移除\"ERROR:\"前缀\n            console.warn(`${direction === 'next' ? '下一页' : '上一页'}按钮点击失败:`, message)\n          } else {\n            this.$notify.error('执行页面操作失败：未知返回结果')\n            console.error('页面操作结果异常:', result)\n          }\n        } else {\n          this.$notify.error('执行页面操作失败')\n          console.error('页面操作结果异常:', result)\n        }\n\n      } catch (error) {\n        console.error(`点击${direction === 'next' ? '下一页' : '上一页'}按钮失败:`, error)\n\n        // 检查是否是连接断开错误\n        if (error.message && error.message.includes('Could not establish connection')) {\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接断开'\n          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')\n        } else {\n          this.$notify.error('操作失败: ' + error.message)\n        }\n      }\n    },\n\n    async getPagerInfo() {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码获取分页器信息\n        //在pagerDiv的innerText中查找 `共100页`，获取100\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                let hasPager = false\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  hasPager = true\n                  // 获取当前页码\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPage = 0\n                  if (currentPageLink) {\n                    currentPage = currentPageLink.textContent.trim()\n                  }\n                  \n                  // 从innerText中查找\"共X页\"模式\n                  let total = 0\n                  const innerText = pagerDiv.innerText || pagerDiv.textContent || ''\n                  \n                  // 手动查找\"共\"和\"页\"之间的数字\n                  const gongIndex = innerText.indexOf('共')\n                  const yeIndex = innerText.indexOf('页', gongIndex)\n                  \n                  if (gongIndex !== -1 && yeIndex !== -1) {\n                    const textBetween = innerText.substring(gongIndex + 1, yeIndex).trim()\n                    total = textBetween\n                    console.log('textBetween:', textBetween)\n                    const numberMatch = textBetween.match(/(\\d+)/)\n                    if (numberMatch) {\n                      total = numberMatch[1]\n                    }\n                  }\n                  \n                  // 检查是否有上一页/下一页按钮\n                  const hasPrev = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('上一页')\n                  const hasNext = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('下一页')\n                  \n                  // return 'SUCCESS:第' + currentPage + '页，共' + total + '页 (上一页:' + (hasPrev ? '有' : '无') + ', 下一页:' + (hasNext ? '有' : '无') + ')'\n                  return JSON.stringify({\n                    hasPager: hasPager,\n                    currentPage: currentPage*1,\n                    total: total*1,\n                    hasPrev: hasPrev,\n                    hasNext: hasNext\n                  })\n                } catch (error) {\n                  return 'ERROR:获取分页器信息失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        console.log('resultresultresultresult:', result)\n        // 处理返回结果\n        if (result && result.result && result.result.value) {\n          return JSON.parse(result.result.value)\n        } else {\n          return {\n            hasPager: false,\n            currentPage: 0,\n            total: 0,\n            hasPrev: false,\n            hasNext: false\n          }\n        }\n      } catch (error) {\n        console.error('获取分页器信息失败:', error)\n        return {\n          hasPager: false,\n          currentPage: 0,\n          total: 0,\n          hasPrev: false,\n          hasNext: false\n        }\n      }\n    },\n    parserRoleData(data) {\n      const roleInfo = new window.RoleInfoParser(data.large_equip_desc, { equip_level: data.equip_level })\n      return roleInfo.result\n      // return {\n      //   RoleInfoParser: roleInfo,\n      //   roleInfo: roleInfo.result,\n      //   accept_bargain: data.accept_bargain,\n      //   collect_num: data.collect_num,\n      //   dynamic_tags: data.dynamic_tags,\n      //   eid: data.eid,\n      //   highlight: data.highlight,\n      //   is_split_independent_role: data.is_split_independent_role,\n      //   is_split_main_role: data.is_split_main_role,\n      //   large_equip_desc: data.large_equip_desc,\n      //   level: data.level,\n      //   other_info: data.other_info,\n      //   school: data.school,\n      //   seller_nickname: data.seller_nickname,\n      //   server_name: data.server_name,\n      //   serverid: data.serverid,\n      //   price: data.price,\n      //   sum_exp: data.sum_exp,\n      //   create_time: data.create_time,\n      //   update_time: data.create_time,\n      //   all_equip_json: '',\n      //   all_summon_json: '',\n      //   split_price_desc: '',\n      //   pet_price: '',\n      //   equip_price: '',\n      //   base_price: '',\n      //   history_price: '',\n      // }\n    },\n    parseListData(responseDataStr) {\n      // 解析响应数据 Request.JSONP.request_map.request_数字(xxxx) 中的xxxx\n      const match = responseDataStr.match(/Request\\.JSONP\\.request_map\\.request_\\d+\\((.*)\\)/)\n      let templateJSONStr = '{}'\n      if (match) {\n        templateJSONStr = match[1]\n      } else {\n        templateJSONStr = responseDataStr\n      }\n      try {\n        let templateJSON = {}\n        if (typeof templateJSONStr === 'string') {\n          templateJSON = JSON.parse(templateJSONStr)\n        } else {\n          // h5\n          templateJSON = templateJSONStr\n        }\n        return templateJSON\n      } catch (error) {\n        console.error('解析响应数据失败:', error)\n        return {}\n      }\n    },\n    initMessageListener() {\n      console.log('DevToolsPanel mounted, initializing listener')\n\n      // 使用单例模式确保只有一个监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 如果已经有全局监听器，先移除\n        if (window.cbgDevToolsListener) {\n          chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        }\n\n        // 创建全局监听器\n        window.cbgDevToolsListener = (request, sender, sendResponse) => {\n          console.log('DevToolsPanel received Chrome message:', request.action)\n          this.handleChromeMessage(request, sender, sendResponse)\n          sendResponse({ success: true })\n        }\n\n        // 注册监听器\n        chrome.runtime.onMessage.addListener(window.cbgDevToolsListener)\n        console.log('Chrome message listener registered for DevToolsPanel')\n      }\n    },\n\n    removeMessageListener() {\n      // 移除Chrome消息监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime && window.cbgDevToolsListener) {\n        chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        delete window.cbgDevToolsListener\n        console.log('Chrome message listener removed for DevToolsPanel')\n      }\n    },\n\n    checkConnectionStatus() {\n      // 检查Chrome扩展连接状态\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 尝试发送ping消息检查连接\n        chrome.runtime.sendMessage({ action: 'ping' }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.log('Chrome extension connection check failed:', chrome.runtime.lastError)\n            this.devtoolsConnected = false\n            this.connectionStatus = '未连接'\n          } else if (response && response.success) {\n            console.log('Chrome extension connection check successful:', response)\n            this.devtoolsConnected = true\n            this.connectionStatus = '已连接'\n          } else {\n            console.log('Chrome extension connection check failed: invalid response')\n            this.devtoolsConnected = false\n            this.connectionStatus = '连接异常'\n          }\n        })\n      } else {\n        console.log('Chrome runtime not available')\n        this.devtoolsConnected = false\n        this.connectionStatus = 'Chrome环境不可用'\n      }\n    },\n    changeRecommendDataStatus({ requestId, status, data }) {\n      const targetIndex = this.recommendData.findIndex(item => item.requestId === requestId)\n      if (targetIndex !== -1) {\n        this.$set(this.recommendData[targetIndex], 'status', status)\n        // 如果提供了data，更新相关字段\n        if (data) {\n          if (data.type) {\n            this.$set(this.recommendData[targetIndex], 'dataType', data.type)\n          }\n        }\n      }\n    },\n    processNewData(dataArray) {\n      // 类型映射\n      const typeMap = {\n        'role': '角色',\n        'pet': '召唤兽',\n        'equipment': '装备'\n      }\n      \n      // 只处理新完成的请求，避免重复处理\n      if (dataArray && dataArray.length > 0) {\n        dataArray.forEach(item => {\n          if (item.responseData &&\n            item.url &&\n            item.requestId &&\n            !this.processedRequests.has(item.requestId)) {\n\n            // 标记为已处理\n            this.processedRequests.add(item.requestId)\n            console.log(`开始处理新请求: ${item.requestId}`)\n\n            // 调用解析响应数据接口\n            this.$api.spider.parseResponse({\n              url: item.url,\n              response_text: item.responseData\n            }).then(res => {\n              console.log(`请求 ${item.requestId} 解析结果:`, res)\n              if (res.code === 200) {\n                const typeName = typeMap[res.data.type] || res.data.type\n                console.log(`请求 ${item.requestId} 数据类型: ${typeName}`, res.data)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed', data: res.data })\n              } else {\n                console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n              }\n            }).catch(error => {\n              console.error(`请求 ${item.requestId} 解析请求失败:`, error)\n              // 解析失败时移除标记，允许重试\n              this.processedRequests.delete(item.requestId)\n              this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n            })\n          }\n        })\n      }\n    },\n\n    handleChromeMessage(request, sender, sendResponse) {\n      switch (request.action) {\n        case 'addRecommendData':\n          console.log('接收到增量数据:', request)\n          // 处理增量数据\n          const newData = request.data.map(item => {\n            return {\n              ...item,\n              status: 'parsing'\n            }\n          }) || []\n          if (newData.length > 0) {\n            // 将新数据添加到现有数组中\n            this.recommendData.unshift(...newData)\n            \n            // 控制最大长度为10，移除最旧的数据\n            const maxLength = 10\n            if (this.recommendData.length > maxLength) {\n              const removedCount = this.recommendData.length - maxLength\n              this.recommendData = this.recommendData.slice(0, maxLength)\n              console.log(`📊 前端数据长度超过限制，已移除 ${removedCount} 条旧数据`)\n            }\n            \n            this.getPagerInfo().then(res => {\n              this.pageInfo = res\n            })\n            console.log('📥 接收到增量数据，新增:', newData.length, '总计:', this.recommendData.length)\n            // 处理新数据\n            this.processNewData(newData)\n          }\n          break\n\n        case 'devtoolsConnected':\n          this.devtoolsConnected = true\n          this.connectionStatus = '已连接'\n          this.$notify.success(request.message)\n          break\n\n        case 'showDebuggerWarning':\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接冲突'\n          this.$notify.warning(request.message)\n          break\n\n        case 'clearRecommendData':\n          this.recommendData = []\n          this.expandedItems = []\n          this.processedRequests.clear()\n          console.log('清空推荐数据和处理记录')\n          break\n      }\n    },\n\n\n    clearData() {\n      this.recommendData = []\n      this.expandedItems = []\n      this.processedRequests.clear() // 清空已处理请求记录\n      // 通知background script清空数据\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'clearRecommendData'\n        })\n      }\n    },\n\n    // 刷新当前页面\n    refreshCurrentPage() {\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'refreshCurrentPage'\n        }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.error('刷新页面失败:', chrome.runtime.lastError)\n            this.$notify.error({\n              title: '刷新失败',\n              message: '无法刷新页面，请检查扩展权限'\n            })\n          } else if (response && response.success) {\n            console.log('页面刷新成功:', response.message)\n            this.$notify.success({\n              title: '刷新成功',\n              message: '页面正在刷新...'\n            })\n          } else {\n            console.error('刷新页面失败:', response.error)\n            this.$notify.error({\n              title: '刷新失败',\n              message: response.error || '未知错误'\n            })\n          }\n        })\n      } else {\n        this.$notify.error({\n          title: '刷新失败',\n          message: 'Chrome扩展环境不可用'\n        })\n      }\n    },\n\n    toggleResponse(index) {\n      const expandedIndex = this.expandedItems.indexOf(index)\n      if (expandedIndex > -1) {\n        this.expandedItems.splice(expandedIndex, 1)\n      } else {\n        this.expandedItems.push(index)\n      }\n    },\n\n    formatTime(timestamp) {\n      if (!timestamp) return ''\n      \n      // 直接使用当前系统时间，避免复杂的时间戳转换\n      const now = new Date()\n      \n      return now.toLocaleTimeString('zh-CN', { \n        hour12: false,\n        hour: '2-digit',\n        minute: '2-digit',\n        second: '2-digit'\n      })\n    },\n\n    checkIfInNewWindow() {\n      // 检测是否在新窗口中打开\n      try {\n\n        // 方法1: 检查chrome.devtools API是否存在（最可靠的方法）\n        if (typeof chrome !== 'undefined' && chrome.devtools && chrome.devtools.inspectedWindow) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过API检测）')\n          return\n        }\n\n        // 方法2: 检查URL模式 - 区分SidePanel和新窗口\n        const currentUrl = window.location.href\n        if (currentUrl.includes('chrome-extension://')) {\n          // 检查是否是SidePanel页面\n          if (currentUrl.includes('panel.html')) {\n            // panel.html是SidePanel页面\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过URL检测）')\n            return\n          } else if (currentUrl.includes('panel.html')) {\n            // panel.html是新窗口页面\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过URL检测）')\n            return\n          }\n        }\n\n        // 方法3: 检查页面标题\n        if (document.title === '梦幻灵瞳') {\n          // 需要进一步区分是SidePanel还是新窗口\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过标题+URL检测）')\n            return\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过标题检测）')\n            return\n          }\n        }\n\n        // 方法4: 检查是否在iframe中\n        if (window.self !== window.top) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过iframe检测）')\n          return\n        }\n\n        // 方法5: 检查parent窗口\n        if (window.parent === window) {\n          // 顶级窗口，需要进一步判断\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过parent+URL检测）')\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过parent检测）')\n          }\n        } else {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过parent检测）')\n        }\n\n      } catch (error) {\n        console.error('检测窗口环境失败:', error)\n        // 默认假设在新窗口中\n        this.isInNewWindow = true\n        console.log('检测失败，默认在新窗口中打开')\n      }\n    },\n\n    async openInNewTab() {\n      try {\n        // 直接创建新标签页打开扩展页面\n        const extensionUrl = chrome.runtime.getURL('panel.html')\n\n        // 使用chrome.tabs.create在新标签页中打开\n        await chrome.tabs.create({\n          url: extensionUrl,\n          active: true // 激活新标签页\n        })\n\n        this.$notify.success('已在新标签页中打开扩展面板')\n\n      } catch (error) {\n        console.error('打开新标签页失败:', error)\n\n        // 如果chrome.tabs.create失败，尝试使用window.open\n        try {\n          const extensionUrl = chrome.runtime.getURL('panel.html')\n          window.open(extensionUrl, '_blank')\n          this.$notify.success('已在新窗口中打开扩展面板')\n        } catch (fallbackError) {\n          console.error('备用方法也失败:', fallbackError)\n          this.$notify.error('打开新窗口失败: ' + error.message)\n        }\n      }\n    },\n    \n    // 装备估价相关方法\n    async handleEquipPrice(role) {\n      const roleData = this.parserRoleData(role)\n      const { using_equips, not_using_equips, split_equips, basic_info } = roleData\n      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ \n        ...item, \n        iType: item.type, \n        cDesc: item.desc, \n        serverid: role.serverid, \n        server_name: role.server_name \n      }))\n      \n      this.valuationDialogTitle = {\n        nickname: basic_info.nickname,\n        school: basic_info.school,\n        server_name: role.server_name,\n        eid: role.eid\n      }\n\n      try {\n        // 先显示弹窗和骨架屏\n        this.valuationDialogVisible = true\n        this.valuationLoading = true\n        this.valuationResults = []\n        this.valuationTotalValue = 0\n        this.valuationEquipmentList = equip_list\n        \n        // 调用批量估价API\n        const response = await this.$api.equipment.batchEquipmentValuation({\n          eid: role.eid,\n          equipment_list: equip_list,\n          strategy: 'fair_value',\n          similarity_threshold: this.batchValuateParams.similarity_threshold,\n          max_anchors: this.batchValuateParams.max_anchors\n        })\n\n        if (response.code === 200) {\n          const data = response.data\n          const results = data.results || []\n          const totalValue = results.reduce((sum, result) => {\n            return sum + (result.estimated_price || 0)\n          }, 0)\n          \n          // 更新弹窗内容，显示实际数据\n          this.valuationResults = results\n          this.valuationTotalValue = totalValue\n          this.valuationLoading = false\n        } else {\n          this.$notify.error({\n            title: '错误',\n            message: response.message || '装备估价失败'\n          })\n          this.closeValuationDialog()\n        }\n      } catch (error) {\n        console.error('装备估价失败:', error)\n        this.$notify.error({\n          title: '错误',\n          message: '装备估价失败'\n        })\n        this.closeValuationDialog()\n      } finally {\n        this.valuationLoading = false\n      }\n    },\n    \n    // 关闭装备估价结果对话框\n    closeValuationDialog() {\n      this.valuationDialogVisible = false\n      this.valuationResults = []\n      this.valuationTotalValue = 0\n      this.valuationEquipmentList = []\n      this.valuationDialogTitle = {}\n    },\n    \n    // 宠物估价方法（占位符）\n    handlePetPrice(role) {\n      this.$notify.info({\n        title: '提示',\n        message: '宠物估价功能暂未实现'\n      })\n    }\n  }\n}\n</script>\n\n<style scoped>\n.panel {\n  box-sizing: border-box;\n  padding: 16px;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(~@/../public/assets/images/areabg.webp) repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n\n.panel-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n\n.panel-header h3 {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n\n.connection-status {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n\n.status-indicator {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.status-dot {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n\n.status-dot.connected {\n  background-color: #52c41a;\n  animation: pulse-green-strong 1.5s infinite;\n}\n\n.status-dot.disconnected {\n  background-color: #faad14;\n  animation: pulse-orange-strong 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n\n  25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n  }\n\n  75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n}\n\n.status-text {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n\n.mode-indicator {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n\n.mode-indicator.sidepanel {\n  background-color: #1890ff;\n  color: white;\n}\n\n.mode-indicator.new-window {\n  background-color: #52c41a;\n  color: white;\n}\n\n.new-window-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.new-window-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.sidebar-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.sidebar-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.data-section h4 {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n\n.empty-state {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n\n.request-list {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n\n.request-item {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n\n.request-item:last-child {\n  border-bottom: none;\n}\n\n.request-item:hover {\n  background-color: #fafafa;\n}\n\n.request-item.parsing {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse 2s ease-in-out infinite;\n}\n\n@keyframes pulse {\n  0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n\n  50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n  }\n\n  100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n}\n\n.request-info {\n  margin-bottom: 8px;\n}\n\n.request-url {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n\n.request-meta {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n\n.method {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status.pending {\n  background: #faad14;\n  color: white;\n}\n\n.status.completed {\n  background: #52c41a;\n  color: white;\n}\n\n.status.parsing {\n  background: #1890ff;\n  color: white;\n}\n\n.status.parsing .el-icon-loading {\n  animation: rotating 2s linear infinite;\n}\n\n@keyframes rotating {\n  0% {\n    transform: rotate(0deg);\n  }\n\n  100% {\n    transform: rotate(360deg);\n  }\n}\n\n.status.failed {\n  background: #ff4d4f;\n  color: white;\n}\n\n.timestamp {\n  color: #999;\n}\n\n.response-data {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n\n.response-content {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n\n.response-content pre {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n\n.role-card /deep/.el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n\n.role-card.empty-role:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n\n.role-card.empty-role /deep/.el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag {\n  opacity: 0.7;\n}\n\n.role-card.empty-role .el-link {\n  opacity: 0.7;\n}\n\n.role-card.empty-role span {\n  opacity: 0.7;\n}\n</style>\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.panel[data-v-42c7142d] {\n  box-sizing: border-box;\n  padding: 16px;\n  padding-bottom: 40px; /* 为底部版本栏留出空间 */\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(" + ___CSS_LOADER_URL_REPLACEMENT_0___ + ") repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n.panel-header[data-v-42c7142d] {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n.panel-header h3[data-v-42c7142d] {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n.connection-status[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n.status-indicator[data-v-42c7142d] {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n.status-dot[data-v-42c7142d] {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n.status-dot.connected[data-v-42c7142d] {\n  background-color: #52c41a;\n  animation: pulse-green-strong-42c7142d 1.5s infinite;\n}\n.status-dot.disconnected[data-v-42c7142d] {\n  background-color: #faad14;\n  animation: pulse-orange-strong-42c7142d 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n}\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong-42c7142d {\n0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n}\n50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n}\n75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n}\n100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n}\n}\n.status-text[data-v-42c7142d] {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n.mode-indicator[data-v-42c7142d] {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n.mode-indicator.sidepanel[data-v-42c7142d] {\n  background-color: #1890ff;\n  color: white;\n}\n.mode-indicator.new-window[data-v-42c7142d] {\n  background-color: #52c41a;\n  color: white;\n}\n.new-window-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.new-window-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.sidebar-tip[data-v-42c7142d] {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n.sidebar-tip p[data-v-42c7142d] {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n.data-section h4[data-v-42c7142d] {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n.empty-state[data-v-42c7142d] {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n.request-list[data-v-42c7142d] {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n.request-item[data-v-42c7142d] {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n.request-item[data-v-42c7142d]:last-child {\n  border-bottom: none;\n}\n.request-item[data-v-42c7142d]:hover {\n  background-color: #fafafa;\n}\n.request-item.parsing[data-v-42c7142d] {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse-42c7142d 2s ease-in-out infinite;\n}\n@keyframes pulse-42c7142d {\n0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n}\n100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n}\n}\n.request-info[data-v-42c7142d] {\n  margin-bottom: 8px;\n}\n.request-url[data-v-42c7142d] {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n.request-meta[data-v-42c7142d] {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n.method[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status[data-v-42c7142d] {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n.status.pending[data-v-42c7142d] {\n  background: #faad14;\n  color: white;\n}\n.status.completed[data-v-42c7142d] {\n  background: #52c41a;\n  color: white;\n}\n.status.parsing[data-v-42c7142d] {\n  background: #1890ff;\n  color: white;\n}\n.status.parsing .el-icon-loading[data-v-42c7142d] {\n  animation: rotating-42c7142d 2s linear infinite;\n}\n@keyframes rotating-42c7142d {\n0% {\n    transform: rotate(0deg);\n}\n100% {\n    transform: rotate(360deg);\n}\n}\n.status.failed[data-v-42c7142d] {\n  background: #ff4d4f;\n  color: white;\n}\n.timestamp[data-v-42c7142d] {\n  color: #999;\n}\n.response-data[data-v-42c7142d] {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n.response-content[data-v-42c7142d] {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n.response-content pre[data-v-42c7142d] {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n.role-card[data-v-42c7142d] .el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role[data-v-42c7142d] {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n.role-card.empty-role[data-v-42c7142d]:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n.role-card.empty-role[data-v-42c7142d] .el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role .el-link[data-v-42c7142d] {\n  opacity: 0.7;\n}\n.role-card.empty-role span[data-v-42c7142d] {\n  opacity: 0.7;\n}\n\n/* 版本信息底部样式 */\n.version-footer[data-v-42c7142d] {\n  position: fixed;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  background: rgba(0, 0, 0, 0.8);\n  color: #fff;\n  text-align: center;\n  padding: 8px 0;\n  font-size: 12px;\n  z-index: 1000;\n  border-top: 1px solid #333;\n}\n.version-text[data-v-42c7142d] {\n  color: #ccc;\n  font-weight: 500;\n}\n", "",{"version":3,"sources":["webpack://./src/chrome-extensions/DevToolsPanel.vue"],"names":[],"mappings":";AA+tCA;EACA,sBAAA;EACA,aAAA;EACA,oBAAA,EAAA,eAAA;EACA,gFAAA;EACA,mBAAA;EACA,iBAAA;EACA,4DAAA;EACA,YAAA;EACA,cAAA;AACA;AAEA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,mBAAA;EACA,oBAAA;EACA,gCAAA;AACA;AAEA;EACA,SAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,SAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,QAAA;AACA;AAEA;EACA,kBAAA;EACA,QAAA;EACA,SAAA;EACA,gCAAA;EACA,UAAA;EACA,WAAA;EACA,kBAAA;EACA,qBAAA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,oDAAA;AACA;AAEA;EACA,yBAAA;EACA,mDAAA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,2CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,0CAAA;IACA,UAAA;AACA;AACA;;AAEA,aAAA;AACA;AACA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,4CAAA;IACA,YAAA;AACA;AAEA;IACA,2CAAA;IACA,6CAAA;IACA,YAAA;AACA;AAEA;IACA,yCAAA;IACA,2CAAA;IACA,UAAA;AACA;AACA;AAEA;EACA,eAAA;EACA,WAAA;EACA,gBAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,yBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,kBAAA;EACA,WAAA;EACA,eAAA;AACA;AAEA;EACA,kBAAA;EACA,kBAAA;EACA,WAAA;EACA,iBAAA;EACA,kBAAA;EACA,uBAAA;AACA;AAEA;EACA,iBAAA;EACA,kBAAA;EACA,yBAAA;EACA,gBAAA;AACA;AAEA;EACA,gCAAA;EACA,kBAAA;EACA,iCAAA;AACA;AAEA;EACA,mBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;EACA,6CAAA;EACA,iDAAA;AACA;AAEA;AACA;IACA,6CAAA;AACA;AAEA;IACA,8CAAA;AACA;AAEA;IACA,6CAAA;AACA;AACA;AAEA;EACA,kBAAA;AACA;AAEA;EACA,wDAAA;EACA,eAAA;EACA,WAAA;EACA,qBAAA;EACA,kBAAA;AACA;AAEA;EACA,aAAA;EACA,SAAA;EACA,eAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,gBAAA;EACA,kBAAA;EACA,iBAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,+CAAA;AACA;AAEA;AACA;IACA,uBAAA;AACA;AAEA;IACA,yBAAA;AACA;AACA;AAEA;EACA,mBAAA;EACA,YAAA;AACA;AAEA;EACA,WAAA;AACA;AAEA;EACA,eAAA;EACA,gBAAA;EACA,6BAAA;AACA;AAEA;EACA,eAAA;EACA,mBAAA;EACA,kBAAA;EACA,YAAA;EACA,iBAAA;EACA,gBAAA;AACA;AAEA;EACA,SAAA;EACA,wDAAA;EACA,eAAA;EACA,gBAAA;EACA,WAAA;EACA,qBAAA;EACA,sBAAA;AACA;AAEA;EACA,YAAA;AACA;;AAEA,aAAA;AACA;EACA,YAAA;EACA,sBAAA;EACA,yBAAA;EACA,yBAAA;EACA,yBAAA;AACA;AAEA;EACA,YAAA;EACA,sBAAA;AACA;AAEA;EACA,yBAAA;AACA;;AAEA,gBAAA;AACA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA;AAEA;EACA,YAAA;AACA;;AAEA,aAAA;AACA;EACA,eAAA;EACA,SAAA;EACA,OAAA;EACA,QAAA;EACA,8BAAA;EACA,WAAA;EACA,kBAAA;EACA,cAAA;EACA,eAAA;EACA,aAAA;EACA,0BAAA;AACA;AAEA;EACA,WAAA;EACA,gBAAA;AACA","sourcesContent":["<template>\n  <div class=\"panel\">\n    <div class=\"panel-header\">\n      <el-row type=\"flex\" align=\"middle\">\n        <div style=\"width: 32px;height: 32px;margin-right: 10px;position: relative;\">\n          <img src=\"~@/assets/logo.png\" alt=\"梦幻灵瞳\" style=\"width: 32px;height: 32px;\">\n          <span class=\"status-dot\"\n            :class=\"{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }\"></span>\n        </div>\n        <h3 style=\"color: #fff;\">梦幻灵瞳</h3>\n      </el-row>\n      <div class=\"connection-status\">\n        <div id=\"pager\" class=\"fr\" v-if=\"pageInfo.hasPager\">\n          <el-row class=\"pages\" type=\"flex\" align=\"middle\">\n            <span style=\"color: #fff;margin-right: 10px;\"> 第{{ pageInfo.currentPage }}页, 共{{ pageInfo.total }}页 </span>\n            <a v-if=\"pageInfo.hasPrev\" href=\"javascript:void 0;\" @click.prevent=\"prevPage\"\n              style=\"line-height: 1.2em;\">上一页</a>\n            <a v-if=\"pageInfo.hasNext\" href=\"javascript:void 0;\" @click.prevent=\"nextPage\"\n              style=\"line-height: 1.2em;\">下一页</a>\n          </el-row>\n        </div>\n        <a v-if=\"!devtoolsConnected\" href=\"javascript:void 0;\" @click=\"reconnectDevTools\">重新连接</a>\n        <a v-if=\"!isInNewWindow\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"openInNewTab\">新窗口打开</a>\n        <a v-if=\"!pageInfo.hasPager\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"refreshCurrentPage\">刷新页面</a>\n        <a v-if=\"recommendData.length > 0\" href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"clearData\">清空数据</a>\n        <a href=\"javascript:void 0;\" class=\" btn1 js_alert_btn_0\"\n          @click.prevent=\"testAddIframe\" style=\"background: #f56c6c;\">测试iframe</a>\n      </div>\n    </div>\n    <div class=\"data-section\">\n      <el-empty v-if=\"recommendData.length === 0\" class=\"empty-state\" description=\"暂无数据，请访问梦幻西游藏宝阁页面\"></el-empty>\n      <div v-else class=\"request-list\">\n        <div v-for=\"(item, index) in recommendData\" :key=\"item.requestId\" class=\"request-item\"\n          :class=\"{ 'parsing': item.status === 'parsing' }\">\n          <div class=\"request-info\">\n            <div class=\"request-meta\">\n              <span class=\"status\" :class=\"item.status\">\n                <template v-if=\"item.status === 'parsing'\">\n                  <i class=\"el-icon-loading\"></i> 解析中...\n                </template>\n                <template v-else-if=\"item.status === 'completed'\">\n                  <i class=\"el-icon-success\"></i> 解析完成\n                </template>\n                <template v-else>\n                  <i class=\"el-icon-error\"></i> 解析失败\n                </template>\n              </span>\n              <el-tag v-if=\"item.dataType\" size=\"mini\" type=\"info\" style=\"margin-left: 5px;\">\n                {{ getDataTypeLabel(item.dataType) }}\n              </el-tag>\n              <span class=\"timestamp\">{{ formatTime(item.timestamp) }}</span>\n            </div>\n          </div>\n          <div v-if=\"item.responseData && item.dataType\" class=\"response-data\">\n            <!-- 角色数据渲染 -->\n            <el-row :gutter=\"4\" v-if=\"item.dataType === 'role'\">\n              <el-col v-for=\"role in parseListData(item.responseData)?.equip_list\" :key=\"role.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\" :class=\"{ 'empty-role': isEmptyRole(parserRoleData(role)) }\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <RoleImage :key=\"role.eid\" :other_info=\"role.other_info\" :roleInfo=\"parserRoleData(role)\" />\n                      <el-link :href=\"getCBGLinkByType(role.eid, 'role')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ role.seller_nickname }}</el-link>\n                    </el-col>\n                    <el-col>\n                      <div>\n                        <el-tag type=\"success\" v-if=\"role.accept_bargain == 1\">接受还价</el-tag>\n                        <el-tag type=\"danger\" v-else>拒绝还价</el-tag>\n                      </div>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(role.price, true)\"></span>\n                      </div>\n                      <div>\n                        <el-tag type=\"danger\" v-if=\"isEmptyRole(parserRoleData(role))\">空号</el-tag>\n                        <template v-else>\n                          <el-tag @click=\"handleEquipPrice(role)\" style=\"cursor: pointer;\" v-if=\"get_equip_num(parserRoleData(role)) > 0\">\n                            ⚔️ {{ get_equip_num(parserRoleData(role)) }}\n                          </el-tag>\n                          <el-tag type=\"success\" @click=\"handlePetPrice(role)\" style=\"cursor: pointer;\" v-if=\"get_pet_num(parserRoleData(role)) > 0\">\n                            🐲 {{ get_pet_num(parserRoleData(role)) }}\n                          </el-tag>\n                        </template>\n                      </div>\n\n                    </el-col>\n                  </el-row>\n                  <div>\n                    <SimilarRoleModal :role=\"{ ...role, roleInfo: parserRoleData(role) }\"\n                      :search-params=\"{ selectedDate: selectedDate, roleType: 'normal' }\">\n                      <div> <el-link type=\"primary\" href=\"javascript:void 0;\" @click.prevent\n                          :disabled=\"item.status !== 'completed'\">👤\n                          裸号</el-link></div>\n                    </SimilarRoleModal>\n                  </div>\n                </el-card>\n              </el-col>\n            </el-row>\n            \n            <!-- 装备数据渲染 -->\n            <el-row :gutter=\"4\" v-else-if=\"item.dataType === 'equipment'\">\n              <el-col v-for=\"equip in parseListData(item.responseData)?.equip_list\" :key=\"equip.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <EquipmentImage :equipment=\"equip\" />\n                      <el-link :href=\"getCBGLinkByType(equip.eid, 'equip')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ equip.equip_name }}\n                      </el-link>\n                    </el-col>\n                    <el-col>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(equip)\"></span>\n                      </div>\n                      <div v-if=\"equip.highlight\" class=\"equip-desc-content\" v-html=\"gen_highlight(equip.highlight)\"></div>\n                      <div v-if=\"equip.equip_level\" style=\"font-size: 12px;\">\n                        等级: {{ equip.equip_level }}\n                      </div>\n                      <div v-if=\"equip.server_name\" style=\"font-size: 12px; color: #909399;\">\n                        {{ equip.server_name }}\n                      </div>\n                    </el-col>\n                  </el-row>\n                </el-card>\n              </el-col>\n            </el-row>\n            \n            <!-- 召唤兽数据渲染 -->\n            <el-row :gutter=\"4\" v-else-if=\"item.dataType === 'pet'\">\n              <el-col v-for=\"pet in parseListData(item.responseData)?.equip_list\" :key=\"pet.eid\"\n                style=\"width: 20%;margin-bottom: 2px;margin-top: 2px;\">\n                <el-card class=\"role-card\">\n                  <el-row type=\"flex\" justify=\"space-between\">\n                    <el-col style=\"width:50px;flex-shrink: 0;margin-right: 4px;\">\n                      <el-image v-if=\"pet.avatar_url\" :src=\"pet.avatar_url\" style=\"width: 50px;height: 50px;\" fit=\"cover\"></el-image>\n                      <el-link :href=\"getCBGLinkByType(pet.eid, 'pet')\" type=\"danger\" target=\"_blank\"\n                        style=\"white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;\">\n                        {{ pet.seller_nickname || pet.name || pet.nickname }}\n                      </el-link>\n                    </el-col>\n                    <el-col>\n                      <div style=\"padding: 5px 0;\">\n                        <span v-html=\"formatFullPrice(pet.price, true)\"></span>\n                      </div>\n                      <div v-if=\"pet.grade\" style=\"font-size: 12px;\">\n                        等级: {{ pet.grade }}\n                      </div>\n                      <div v-if=\"pet.server_name\" style=\"font-size: 12px; color: #909399;\">\n                        {{ pet.server_name }}\n                      </div>\n                    </el-col>\n                  </el-row>\n                </el-card>\n              </el-col>\n            </el-row>\n            <!-- <el-button @click=\"toggleResponse(index)\" size=\"mini\" type=\"text\">\n              {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据\n            </el-button>\n            <div v-if=\"expandedItems.includes(index)\" class=\"response-content\">\n              <pre>{{ JSON.stringify(item.responseData, null, 2) }}</pre>\n            </div> -->\n          </div>\n        </div>\n      </div>\n    </div>\n\n    <!-- 页面底部版本信息 -->\n    <div class=\"version-footer\">\n      <span class=\"version-text\">版本 v0.0.1</span>\n    </div>\n\n    <!-- 装备估价结果对话框 -->\n    <el-dialog :visible.sync=\"valuationDialogVisible\" width=\"1000px\" :close-on-click-modal=\"false\"\n      :close-on-press-escape=\"false\" custom-class=\"batch-valuation-dialog\">\n      <span slot=\"title\" class=\"el-dialog__title\">\n        <el-tag size=\"mini\">{{ valuationDialogTitle.server_name }}</el-tag>\n        /\n        <el-tag type=\"info\" size=\"mini\">{{ valuationDialogTitle.school }}</el-tag>/\n        <el-link :href=\"getCBGLinkByType(valuationDialogTitle.eid)\" target=\"_blank\">{{ valuationDialogTitle.nickname\n        }}</el-link>\n      </span>\n      <EquipBatchValuationResult :results=\"valuationResults\" :total-value=\"valuationTotalValue\"\n        :equipment-list=\"valuationEquipmentList\" :valuate-params=\"batchValuateParams\" :loading=\"valuationLoading\"\n        @close=\"closeValuationDialog\" />\n    </el-dialog>\n\n    <!-- AutoParams配置对话框 -->\n    <el-dialog :visible.sync=\"autoParamsDialogVisible\" width=\"1200px\" :close-on-click-modal=\"false\"\n      :close-on-press-escape=\"false\" custom-class=\"auto-params-dialog\">\n      <span slot=\"title\" class=\"el-dialog__title\">\n        <span class=\"emoji-icon\">⚙️</span> 自动参数配置\n      </span>\n      <AutoParams v-if=\"autoParamsDialogVisible\" :external-params=\"autoParamsExternalParams\" \n        @close=\"closeAutoParamsDialog\" />\n    </el-dialog>\n  </div>\n</template>\n<script>\nimport dayjs from 'dayjs'\nimport RoleImage from '@/components/RoleInfo/RoleImage.vue'\nimport SimilarRoleModal from '@/components/SimilarRoleModal.vue'\nimport EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'\nimport EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'\nimport AutoParams from '@/components/AutoParams.vue'\nimport { commonMixin } from '@/utils/mixins/commonMixin'\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\nexport default {\n  name: 'DevToolsPanel',\n  data() {\n    return {\n      pageInfo: {\n        hasPager: false,\n        currentPage: 0,\n        total: 0,\n        hasPrev: false,\n        hasNext: false\n      },\n      selectedDate: dayjs().format('YYYY-MM'),\n      recommendData: [],\n      expandedItems: [],\n      processedRequests: new Set(), // 记录已处理的请求ID\n      devtoolsConnected: false, // 数据监听连接状态\n      connectionStatus: '检查中...', // 连接状态描述\n      connectionCheckTimer: null, // 连接检查定时器\n      isInNewWindow: false, // 是否在新窗口中打开\n      \n      // 装备估价相关数据\n      valuationDialogVisible: false,\n      valuationResults: [],\n      valuationTotalValue: 0,\n      valuationEquipmentList: [],\n      valuationLoading: false,\n      valuationDialogTitle: {},\n      batchValuateParams: {\n        similarity_threshold: 0.7,\n        max_anchors: 30\n      },\n      \n      // AutoParams Modal相关数据\n      autoParamsDialogVisible: false,\n      autoParamsExternalParams: {}\n    }\n  },\n  mixins: [commonMixin, equipmentMixin],\n  components: {\n    RoleImage,\n    SimilarRoleModal,\n    EquipBatchValuationResult,\n    EquipmentImage,\n    AutoParams\n  },\n  computed: {\n\n  },\n  mounted() {\n    // 通知background script侧边栏已打开\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelOpened'\n      })\n    }\n\n    // 监听页面可见性变化，当页面不可见时通知关闭\n    document.addEventListener('visibilitychange', this.handleVisibilityChange)\n\n    this.initMessageListener()\n    this.checkConnectionStatus()\n    this.checkIfInNewWindow()\n\n    // // 设置定时检查（每5秒检查一次）\n    // this.connectionCheckTimer = setInterval(() => {\n    //   this.checkConnectionStatus()\n    // }, 5000)\n  },\n  beforeDestroy() {\n    // 通知background script侧边栏已关闭\n    if (typeof chrome !== 'undefined' && chrome.runtime) {\n      chrome.runtime.sendMessage({\n        action: 'sidePanelClosed'\n      })\n    }\n\n    // 移除可见性变化监听器\n    document.removeEventListener('visibilitychange', this.handleVisibilityChange)\n\n    // 移除Chrome消息监听器\n    this.removeMessageListener()\n    // 清理定时器\n    if (this.connectionCheckTimer) {\n      clearInterval(this.connectionCheckTimer)\n      this.connectionCheckTimer = null\n    }\n    // 清理组件状态\n    this.recommendData = []\n    this.expandedItems = []\n  },\n  methods: {\n    handleVisibilityChange() {\n      // 当页面不可见时，通知background script侧边栏已关闭\n      if (document.hidden) {\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelClosed'\n          })\n        }\n      } else {\n        this.getPagerInfo().then(res => {\n          this.pageInfo = res\n        })\n        // 当页面重新可见时，通知background script侧边栏已打开\n        if (typeof chrome !== 'undefined' && chrome.runtime) {\n          chrome.runtime.sendMessage({\n            action: 'sidePanelOpened'\n          })\n        }\n      }\n    },\n\n    isEmptyRole(roleInfo) {\n      const noEquip = this.get_equip_num(roleInfo) === 0\n      let noPet = true\n      for (let pet of roleInfo.pet_info) {\n        if (pet.pet_grade > 100 && pet.is_baobao === '是') {\n          noPet = false\n          break\n        }\n        if (pet.pet_grade > 100 && pet.is_baobao === '否' && pet.all_skills.length > 4) {\n          noPet = false\n          break\n        }\n      }\n      return noEquip && noPet\n    },\n    getDataTypeLabel(type) {\n      const typeMap = {\n        'role': '角色',\n        'pet': '召唤兽',\n        'equipment': '装备'\n      }\n      return typeMap[type] || type\n    },\n    get_pet_num(roleInfo) {\n      return roleInfo.pet_info.length + roleInfo.split_pets.length\n    },\n    get_equip_num(roleInfo) {\n      return roleInfo.using_equips.length + roleInfo.not_using_equips.length + roleInfo.split_equips.length\n    },\n    nextPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('next')\n    },\n\n    prevPage() {\n      // 通过Chrome调试API查找并点击页面上的分页器\n      this.clickPageButton('prev')\n    },\n\n    reconnectDevTools() {\n      // 重新连接数据监听\n      this.connectionStatus = '重连中...'\n      this.checkConnectionStatus()\n      this.$notify.info('正在尝试重新连接数据监听...')\n    },\n\n    async clickPageButton(direction) {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  \n                  let targetButton = null\n                  const isNext = '${direction}' === 'next'\n                  \n                  if (isNext) {\n                    // 查找下一页按钮 - 根据实际HTML格式优化\n                    // 1. 优先查找包含\"下一页\"文本的链接\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '下一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"下一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码大于当前页码，说明是下一页\n                            if (!isNaN(linkPage) && linkPage > currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  } else {\n                    // 查找上一页按钮\n                    const allLinks = pagerDiv.querySelectorAll('a')\n                    \n                    // 1. 优先查找包含\"上一页\"文本的链接\n                    for (let link of allLinks) {\n                      const text = link.textContent.trim()\n                      if (text === '上一页') {\n                        targetButton = link\n                        break\n                      }\n                    }\n                    \n                    // 2. 如果没找到\"上一页\"，查找包含goto函数的链接（排除当前页）\n                    if (!targetButton) {\n                      for (let link of allLinks) {\n                        const href = link.getAttribute('href')\n                        const text = link.textContent.trim()\n                        // 查找包含goto且不是当前页的链接\n                        if (href && href.includes('goto(') && !link.classList.contains('on')) {\n                          // 获取当前页码\n                          const currentPageLink = pagerDiv.querySelector('a.on')\n                          if (currentPageLink) {\n                            const currentPageText = currentPageLink.textContent.trim()\n                            const currentPage = parseInt(currentPageText)\n                            const linkPage = parseInt(text)\n                            // 如果链接页码小于当前页码，说明是上一页\n                            if (!isNaN(linkPage) && linkPage < currentPage) {\n                              targetButton = link\n                              break\n                            }\n                          }\n                        }\n                      }\n                    }\n                  }\n                  \n                  if (!targetButton) {\n                    return 'ERROR:未找到${direction === 'next' ? '下一页' : '上一页'}按钮'\n                  }\n                  \n                  // 检查按钮是否可点击\n                  if (targetButton.disabled || targetButton.classList.contains('disabled')) {\n                    return 'ERROR:${direction === 'next' ? '下一页' : '上一页'}按钮不可点击，可能已到${direction === 'next' ? '最后一页' : '第一页'}'\n                  }\n                  \n                  // 获取当前页码信息用于日志\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPageInfo = ''\n                  if (currentPageLink) {\n                    const currentPageText = currentPageLink.textContent.trim()\n                    currentPageInfo = ' (当前第' + currentPageText + '页)'\n                  }\n                  \n                  // 点击按钮\n                  targetButton.click()\n                  return 'SUCCESS:已点击${direction === 'next' ? '下一页' : '上一页'}按钮' + currentPageInfo\n                } catch (error) {\n                  return 'ERROR:执行失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        this.pageInfo = await this.getPagerInfo()\n        // 处理Chrome调试API的返回结果\n        if (result && result.result && result.result.value) {\n          const message = result.result.value\n\n          if (message.startsWith('SUCCESS:')) {\n            this.$notify.success(message.substring(8)) // 移除\"SUCCESS:\"前缀\n            console.log(`${direction === 'next' ? '下一页' : '上一页'}按钮点击成功`)\n          } else if (message.startsWith('ERROR:')) {\n            this.$notify.warning(message.substring(6)) // 移除\"ERROR:\"前缀\n            console.warn(`${direction === 'next' ? '下一页' : '上一页'}按钮点击失败:`, message)\n          } else {\n            this.$notify.error('执行页面操作失败：未知返回结果')\n            console.error('页面操作结果异常:', result)\n          }\n        } else {\n          this.$notify.error('执行页面操作失败')\n          console.error('页面操作结果异常:', result)\n        }\n\n      } catch (error) {\n        console.error(`点击${direction === 'next' ? '下一页' : '上一页'}按钮失败:`, error)\n\n        // 检查是否是连接断开错误\n        if (error.message && error.message.includes('Could not establish connection')) {\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接断开'\n          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')\n        } else {\n          this.$notify.error('操作失败: ' + error.message)\n        }\n      }\n    },\n\n    async getPagerInfo() {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab || !activeTab.url.includes('cbg.163.com')) {\n          this.$notify.warning('请先访问梦幻西游藏宝阁页面')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码获取分页器信息\n        //在pagerDiv的innerText中查找 `共100页`，获取100\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                let hasPager = false\n                try {\n                  // 查找id为pager的div\n                  const pagerDiv = document.getElementById('pager')\n                  if (!pagerDiv) {\n                    return 'ERROR:未找到分页器元素'\n                  }\n                  hasPager = true\n                  // 获取当前页码\n                  const currentPageLink = pagerDiv.querySelector('a.on')\n                  let currentPage = 0\n                  if (currentPageLink) {\n                    currentPage = currentPageLink.textContent.trim()\n                  }\n                  \n                  // 从innerText中查找\"共X页\"模式\n                  let total = 0\n                  const innerText = pagerDiv.innerText || pagerDiv.textContent || ''\n                  \n                  // 手动查找\"共\"和\"页\"之间的数字\n                  const gongIndex = innerText.indexOf('共')\n                  const yeIndex = innerText.indexOf('页', gongIndex)\n                  \n                  if (gongIndex !== -1 && yeIndex !== -1) {\n                    const textBetween = innerText.substring(gongIndex + 1, yeIndex).trim()\n                    total = textBetween\n                    console.log('textBetween:', textBetween)\n                    const numberMatch = textBetween.match(/(\\d+)/)\n                    if (numberMatch) {\n                      total = numberMatch[1]\n                    }\n                  }\n                  \n                  // 检查是否有上一页/下一页按钮\n                  const hasPrev = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('上一页')\n                  const hasNext = pagerDiv.querySelector('a[href*=\"goto(\"]') && \n                                 pagerDiv.textContent.includes('下一页')\n                  \n                  // return 'SUCCESS:第' + currentPage + '页，共' + total + '页 (上一页:' + (hasPrev ? '有' : '无') + ', 下一页:' + (hasNext ? '有' : '无') + ')'\n                  return JSON.stringify({\n                    hasPager: hasPager,\n                    currentPage: currentPage*1,\n                    total: total*1,\n                    hasPrev: hasPrev,\n                    hasNext: hasNext\n                  })\n                } catch (error) {\n                  return 'ERROR:获取分页器信息失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n        console.log('resultresultresultresult:', result)\n        // 处理返回结果\n        if (result && result.result && result.result.value) {\n          return JSON.parse(result.result.value)\n        } else {\n          return {\n            hasPager: false,\n            currentPage: 0,\n            total: 0,\n            hasPrev: false,\n            hasNext: false\n          }\n        }\n      } catch (error) {\n        console.error('获取分页器信息失败:', error)\n        return {\n          hasPager: false,\n          currentPage: 0,\n          total: 0,\n          hasPrev: false,\n          hasNext: false\n        }\n      }\n    },\n    parserRoleData(data) {\n      const roleInfo = new window.RoleInfoParser(data.large_equip_desc, { equip_level: data.equip_level })\n      return roleInfo.result\n      // return {\n      //   RoleInfoParser: roleInfo,\n      //   roleInfo: roleInfo.result,\n      //   accept_bargain: data.accept_bargain,\n      //   collect_num: data.collect_num,\n      //   dynamic_tags: data.dynamic_tags,\n      //   eid: data.eid,\n      //   highlight: data.highlight,\n      //   is_split_independent_role: data.is_split_independent_role,\n      //   is_split_main_role: data.is_split_main_role,\n      //   large_equip_desc: data.large_equip_desc,\n      //   level: data.level,\n      //   other_info: data.other_info,\n      //   school: data.school,\n      //   seller_nickname: data.seller_nickname,\n      //   server_name: data.server_name,\n      //   serverid: data.serverid,\n      //   price: data.price,\n      //   sum_exp: data.sum_exp,\n      //   create_time: data.create_time,\n      //   update_time: data.create_time,\n      //   all_equip_json: '',\n      //   all_summon_json: '',\n      //   split_price_desc: '',\n      //   pet_price: '',\n      //   equip_price: '',\n      //   base_price: '',\n      //   history_price: '',\n      // }\n    },\n    parseListData(responseDataStr) {\n      // 解析响应数据 Request.JSONP.request_map.request_数字(xxxx) 中的xxxx\n      const match = responseDataStr.match(/Request\\.JSONP\\.request_map\\.request_\\d+\\((.*)\\)/)\n      let templateJSONStr = '{}'\n      if (match) {\n        templateJSONStr = match[1]\n      } else {\n        templateJSONStr = responseDataStr\n      }\n      try {\n        let templateJSON = {}\n        if (typeof templateJSONStr === 'string') {\n          templateJSON = JSON.parse(templateJSONStr)\n        } else {\n          // h5\n          templateJSON = templateJSONStr\n        }\n        return templateJSON\n      } catch (error) {\n        console.error('解析响应数据失败:', error)\n        return {}\n      }\n    },\n    initMessageListener() {\n      console.log('DevToolsPanel mounted, initializing listener')\n\n      // 使用单例模式确保只有一个监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 如果已经有全局监听器，先移除\n        if (window.cbgDevToolsListener) {\n          chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        }\n\n        // 创建全局监听器\n        window.cbgDevToolsListener = (request, sender, sendResponse) => {\n          console.log('DevToolsPanel received Chrome message:', request.action)\n          this.handleChromeMessage(request, sender, sendResponse)\n          sendResponse({ success: true })\n        }\n\n        // 注册监听器\n        chrome.runtime.onMessage.addListener(window.cbgDevToolsListener)\n        console.log('Chrome message listener registered for DevToolsPanel')\n      }\n    },\n\n    removeMessageListener() {\n      // 移除Chrome消息监听器\n      if (typeof chrome !== 'undefined' && chrome.runtime && window.cbgDevToolsListener) {\n        chrome.runtime.onMessage.removeListener(window.cbgDevToolsListener)\n        delete window.cbgDevToolsListener\n        console.log('Chrome message listener removed for DevToolsPanel')\n      }\n    },\n\n    checkConnectionStatus() {\n      // 检查Chrome扩展连接状态\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        // 尝试发送ping消息检查连接\n        chrome.runtime.sendMessage({ action: 'ping' }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.log('Chrome extension connection check failed:', chrome.runtime.lastError)\n            this.devtoolsConnected = false\n            this.connectionStatus = '未连接'\n          } else if (response && response.success) {\n            console.log('Chrome extension connection check successful:', response)\n            this.devtoolsConnected = true\n            this.connectionStatus = '已连接'\n          } else {\n            console.log('Chrome extension connection check failed: invalid response')\n            this.devtoolsConnected = false\n            this.connectionStatus = '连接异常'\n          }\n        })\n      } else {\n        console.log('Chrome runtime not available')\n        this.devtoolsConnected = false\n        this.connectionStatus = 'Chrome环境不可用'\n      }\n    },\n    changeRecommendDataStatus({ requestId, status, data }) {\n      const targetIndex = this.recommendData.findIndex(item => item.requestId === requestId)\n      if (targetIndex !== -1) {\n        this.$set(this.recommendData[targetIndex], 'status', status)\n        // 如果提供了data，更新相关字段\n        if (data) {\n          if (data.type) {\n            this.$set(this.recommendData[targetIndex], 'dataType', data.type)\n          }\n        }\n      }\n    },\n    processNewData(dataArray) {\n      // 类型映射\n      const typeMap = {\n        'role': '角色',\n        'pet': '召唤兽',\n        'equipment': '装备'\n      }\n      \n      // 只处理新完成的请求，避免重复处理\n      if (dataArray && dataArray.length > 0) {\n        dataArray.forEach(item => {\n          if (item.responseData &&\n            item.url &&\n            item.requestId &&\n            !this.processedRequests.has(item.requestId)) {\n\n            // 标记为已处理\n            this.processedRequests.add(item.requestId)\n            console.log(`开始处理新请求: ${item.requestId}`)\n\n            // 调用解析响应数据接口\n            this.$api.spider.parseResponse({\n              url: item.url,\n              response_text: item.responseData\n            }).then(res => {\n              console.log(`请求 ${item.requestId} 解析结果:`, res)\n              if (res.code === 200) {\n                const typeName = typeMap[res.data.type] || res.data.type\n                console.log(`请求 ${item.requestId} 数据类型: ${typeName}`, res.data)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed', data: res.data })\n              } else {\n                console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)\n                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n              }\n            }).catch(error => {\n              console.error(`请求 ${item.requestId} 解析请求失败:`, error)\n              // 解析失败时移除标记，允许重试\n              this.processedRequests.delete(item.requestId)\n              this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })\n            })\n          }\n        })\n      }\n    },\n\n    handleChromeMessage(request, sender, sendResponse) {\n      switch (request.action) {\n        case 'addRecommendData':\n          console.log('接收到增量数据:', request)\n          // 处理增量数据\n          const newData = request.data.map(item => {\n            return {\n              ...item,\n              status: 'parsing'\n            }\n          }) || []\n          if (newData.length > 0) {\n            // 将新数据添加到现有数组中\n            this.recommendData.unshift(...newData)\n            \n            // 控制最大长度为10，移除最旧的数据\n            const maxLength = 10\n            if (this.recommendData.length > maxLength) {\n              const removedCount = this.recommendData.length - maxLength\n              this.recommendData = this.recommendData.slice(0, maxLength)\n              console.log(`📊 前端数据长度超过限制，已移除 ${removedCount} 条旧数据`)\n            }\n            \n            this.getPagerInfo().then(res => {\n              this.pageInfo = res\n            })\n            console.log('📥 接收到增量数据，新增:', newData.length, '总计:', this.recommendData.length)\n            // 处理新数据\n            this.processNewData(newData)\n          }\n          break\n\n        case 'devtoolsConnected':\n          this.devtoolsConnected = true\n          this.connectionStatus = '已连接'\n          this.$notify.success(request.message)\n          break\n\n        case 'showDebuggerWarning':\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接冲突'\n          this.$notify.warning(request.message)\n          break\n\n        case 'clearRecommendData':\n          this.recommendData = []\n          this.expandedItems = []\n          this.processedRequests.clear()\n          console.log('清空推荐数据和处理记录')\n          break\n\n        case 'openAutoParamsModal':\n          console.log('接收到打开AutoParams Modal请求:', request.params)\n          this.openAutoParamsModal(request.params)\n          break\n      }\n    },\n\n\n    clearData() {\n      this.recommendData = []\n      this.expandedItems = []\n      this.processedRequests.clear() // 清空已处理请求记录\n      // 通知background script清空数据\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'clearRecommendData'\n        })\n      }\n    },\n\n    // 刷新当前页面\n    refreshCurrentPage() {\n      if (typeof chrome !== 'undefined' && chrome.runtime) {\n        chrome.runtime.sendMessage({\n          action: 'refreshCurrentPage'\n        }, (response) => {\n          if (chrome.runtime.lastError) {\n            console.error('刷新页面失败:', chrome.runtime.lastError)\n            this.$notify.error({\n              title: '刷新失败',\n              message: '无法刷新页面，请检查扩展权限'\n            })\n          } else if (response && response.success) {\n            console.log('页面刷新成功:', response.message)\n            this.$notify.success({\n              title: '刷新成功',\n              message: '页面正在刷新...'\n            })\n          } else {\n            console.error('刷新页面失败:', response.error)\n            this.$notify.error({\n              title: '刷新失败',\n              message: response.error || '未知错误'\n            })\n          }\n        })\n      } else {\n        this.$notify.error({\n          title: '刷新失败',\n          message: 'Chrome扩展环境不可用'\n        })\n      }\n    },\n\n    toggleResponse(index) {\n      const expandedIndex = this.expandedItems.indexOf(index)\n      if (expandedIndex > -1) {\n        this.expandedItems.splice(expandedIndex, 1)\n      } else {\n        this.expandedItems.push(index)\n      }\n    },\n\n    formatTime(timestamp) {\n      if (!timestamp) return ''\n      \n      // 直接使用当前系统时间，避免复杂的时间戳转换\n      const now = new Date()\n      \n      return now.toLocaleTimeString('zh-CN', { \n        hour12: false,\n        hour: '2-digit',\n        minute: '2-digit',\n        second: '2-digit'\n      })\n    },\n\n    checkIfInNewWindow() {\n      // 检测是否在新窗口中打开\n      try {\n\n        // 方法1: 检查chrome.devtools API是否存在（最可靠的方法）\n        if (typeof chrome !== 'undefined' && chrome.devtools && chrome.devtools.inspectedWindow) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过API检测）')\n          return\n        }\n\n        // 方法2: 检查URL模式 - 区分SidePanel和新窗口\n        const currentUrl = window.location.href\n        if (currentUrl.includes('chrome-extension://')) {\n          // 检查是否是SidePanel页面\n          if (currentUrl.includes('panel.html')) {\n            // panel.html是SidePanel页面\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过URL检测）')\n            return\n          } else if (currentUrl.includes('panel.html')) {\n            // panel.html是新窗口页面\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过URL检测）')\n            return\n          }\n        }\n\n        // 方法3: 检查页面标题\n        if (document.title === '梦幻灵瞳') {\n          // 需要进一步区分是SidePanel还是新窗口\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过标题+URL检测）')\n            return\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过标题检测）')\n            return\n          }\n        }\n\n        // 方法4: 检查是否在iframe中\n        if (window.self !== window.top) {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过iframe检测）')\n          return\n        }\n\n        // 方法5: 检查parent窗口\n        if (window.parent === window) {\n          // 顶级窗口，需要进一步判断\n          if (currentUrl.includes('panel.html')) {\n            this.isInNewWindow = false\n            console.log('在Chrome扩展SidePanel中打开（通过parent+URL检测）')\n          } else {\n            this.isInNewWindow = true\n            console.log('在新窗口中打开（通过parent检测）')\n          }\n        } else {\n          this.isInNewWindow = false\n          console.log('在Chrome扩展SidePanel中打开（通过parent检测）')\n        }\n\n      } catch (error) {\n        console.error('检测窗口环境失败:', error)\n        // 默认假设在新窗口中\n        this.isInNewWindow = true\n        console.log('检测失败，默认在新窗口中打开')\n      }\n    },\n\n    async openInNewTab() {\n      try {\n        // 直接创建新标签页打开扩展页面\n        const extensionUrl = chrome.runtime.getURL('panel.html')\n\n        // 使用chrome.tabs.create在新标签页中打开\n        await chrome.tabs.create({\n          url: extensionUrl,\n          active: true // 激活新标签页\n        })\n\n        this.$notify.success('已在新标签页中打开扩展面板')\n\n      } catch (error) {\n        console.error('打开新标签页失败:', error)\n\n        // 如果chrome.tabs.create失败，尝试使用window.open\n        try {\n          const extensionUrl = chrome.runtime.getURL('panel.html')\n          window.open(extensionUrl, '_blank')\n          this.$notify.success('已在新窗口中打开扩展面板')\n        } catch (fallbackError) {\n          console.error('备用方法也失败:', fallbackError)\n          this.$notify.error('打开新窗口失败: ' + error.message)\n        }\n      }\n    },\n    \n    // 装备估价相关方法\n    async handleEquipPrice(role) {\n      const roleData = this.parserRoleData(role)\n      const { using_equips, not_using_equips, split_equips, basic_info } = roleData\n      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ \n        ...item, \n        iType: item.type, \n        cDesc: item.desc, \n        serverid: role.serverid, \n        server_name: role.server_name \n      }))\n      \n      this.valuationDialogTitle = {\n        nickname: basic_info.nickname,\n        school: basic_info.school,\n        server_name: role.server_name,\n        eid: role.eid\n      }\n\n      try {\n        // 先显示弹窗和骨架屏\n        this.valuationDialogVisible = true\n        this.valuationLoading = true\n        this.valuationResults = []\n        this.valuationTotalValue = 0\n        this.valuationEquipmentList = equip_list\n        \n        // 调用批量估价API\n        const response = await this.$api.equipment.batchEquipmentValuation({\n          eid: role.eid,\n          equipment_list: equip_list,\n          strategy: 'fair_value',\n          similarity_threshold: this.batchValuateParams.similarity_threshold,\n          max_anchors: this.batchValuateParams.max_anchors\n        })\n\n        if (response.code === 200) {\n          const data = response.data\n          const results = data.results || []\n          const totalValue = results.reduce((sum, result) => {\n            return sum + (result.estimated_price || 0)\n          }, 0)\n          \n          // 更新弹窗内容，显示实际数据\n          this.valuationResults = results\n          this.valuationTotalValue = totalValue\n          this.valuationLoading = false\n        } else {\n          this.$notify.error({\n            title: '错误',\n            message: response.message || '装备估价失败'\n          })\n          this.closeValuationDialog()\n        }\n      } catch (error) {\n        console.error('装备估价失败:', error)\n        this.$notify.error({\n          title: '错误',\n          message: '装备估价失败'\n        })\n        this.closeValuationDialog()\n      } finally {\n        this.valuationLoading = false\n      }\n    },\n    \n    // 关闭装备估价结果对话框\n    closeValuationDialog() {\n      this.valuationDialogVisible = false\n      this.valuationResults = []\n      this.valuationTotalValue = 0\n      this.valuationEquipmentList = []\n      this.valuationDialogTitle = {}\n    },\n    \n    // 宠物估价方法（占位符）\n    handlePetPrice(role) {\n      this.$notify.info({\n        title: '提示',\n        message: '宠物估价功能暂未实现'\n      })\n    },\n\n    // AutoParams Modal相关方法\n    openAutoParamsModal(params) {\n      console.log('打开AutoParams Modal，参数:', params)\n      this.autoParamsExternalParams = params\n      this.autoParamsDialogVisible = true\n    },\n\n    closeAutoParamsDialog() {\n      this.autoParamsDialogVisible = false\n      this.autoParamsExternalParams = {}\n    },\n\n    // 测试添加iframe方法\n    async testAddIframe() {\n      try {\n        // 获取当前活动标签页\n        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })\n\n        if (!activeTab) {\n          this.$notify.warning('未找到活动标签页')\n          return\n        }\n\n        // 检查数据监听连接状态\n        if (!this.devtoolsConnected) {\n          this.$notify.warning('数据监听连接已断开，请重新加载页面')\n          return\n        }\n\n        // 通过Chrome调试API执行页面JavaScript代码添加iframe\n        const result = await chrome.debugger.sendCommand(\n          { tabId: activeTab.id },\n          'Runtime.evaluate',\n          {\n            expression: `\n              (function() {\n                try {\n                  // 创建iframe元素\n                  const iframe = document.createElement('iframe')\n                  iframe.src = 'https://xyq.cbg.163.com/'\n                  iframe.style.width = '400px'\n                  iframe.style.height = '300px'\n                  iframe.style.border = '2px solid #1890ff'\n                  iframe.style.borderRadius = '8px'\n                  iframe.style.position = 'fixed'\n                  iframe.style.top = '50px'\n                  iframe.style.right = '20px'\n                  iframe.style.zIndex = '9999'\n                  iframe.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'\n                  \n                  // 添加关闭按钮\n                  const closeBtn = document.createElement('div')\n                  closeBtn.innerHTML = '×'\n                  closeBtn.style.position = 'absolute'\n                  closeBtn.style.top = '-10px'\n                  closeBtn.style.right = '-10px'\n                  closeBtn.style.width = '20px'\n                  closeBtn.style.height = '20px'\n                  closeBtn.style.backgroundColor = '#ff4d4f'\n                  closeBtn.style.color = 'white'\n                  closeBtn.style.borderRadius = '50%'\n                  closeBtn.style.display = 'flex'\n                  closeBtn.style.alignItems = 'center'\n                  closeBtn.style.justifyContent = 'center'\n                  closeBtn.style.cursor = 'pointer'\n                  closeBtn.style.fontSize = '14px'\n                  closeBtn.style.fontWeight = 'bold'\n                  closeBtn.style.zIndex = '10000'\n                  \n                  // 创建容器\n                  const container = document.createElement('div')\n                  container.style.position = 'relative'\n                  container.appendChild(iframe)\n                  container.appendChild(closeBtn)\n                  \n                  // 添加关闭事件\n                  closeBtn.onclick = function() {\n                    document.body.removeChild(container)\n                  }\n                  \n                  // 添加到页面\n                  document.body.appendChild(container)\n                  \n                  return 'SUCCESS:已添加百度iframe到页面'\n                } catch (error) {\n                  return 'ERROR:添加iframe失败 - ' + error.message\n                }\n              })()\n            `\n          }\n        )\n\n        // 处理Chrome调试API的返回结果\n        if (result && result.result && result.result.value) {\n          const message = result.result.value\n\n          if (message.startsWith('SUCCESS:')) {\n            this.$notify.success(message.substring(8)) // 移除\"SUCCESS:\"前缀\n            console.log('iframe添加成功')\n          } else if (message.startsWith('ERROR:')) {\n            this.$notify.warning(message.substring(6)) // 移除\"ERROR:\"前缀\n            console.warn('iframe添加失败:', message)\n          } else {\n            this.$notify.error('添加iframe失败：未知返回结果')\n            console.error('iframe操作结果异常:', result)\n          }\n        } else {\n          this.$notify.error('添加iframe失败')\n          console.error('iframe操作结果异常:', result)\n        }\n\n      } catch (error) {\n        console.error('添加iframe失败:', error)\n\n        // 检查是否是连接断开错误\n        if (error.message && error.message.includes('Could not establish connection')) {\n          this.devtoolsConnected = false\n          this.connectionStatus = '连接断开'\n          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')\n        } else {\n          this.$notify.error('操作失败: ' + error.message)\n        }\n      }\n    }\n  }\n}\n</script>\n\n<style scoped>\n.panel {\n  box-sizing: border-box;\n  padding: 16px;\n  padding-bottom: 40px; /* 为底部版本栏留出空间 */\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;\n  background: #f5f5f5;\n  min-height: 100vh;\n  background: url(~@/../public/assets/images/areabg.webp) repeat-y;\n  width: 960px;\n  margin: 0 auto;\n}\n\n.panel-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 20px;\n  padding-bottom: 12px;\n  border-bottom: 1px solid #e0e0e0;\n}\n\n.panel-header h3 {\n  margin: 0;\n  color: #333;\n  font-size: 18px;\n}\n\n.connection-status {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n}\n\n.status-indicator {\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.status-dot {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 4px;\n  height: 4px;\n  border-radius: 50%;\n  display: inline-block;\n  transition: all 0.3s ease;\n}\n\n.status-dot.connected {\n  background-color: #52c41a;\n  animation: pulse-green-strong 1.5s infinite;\n}\n\n.status-dot.disconnected {\n  background-color: #faad14;\n  animation: pulse-orange-strong 1s infinite;\n}\n\n/* 绿色强烈闪烁动画 */\n@keyframes pulse-green-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 10px rgba(82, 196, 26, 0);\n    opacity: 0.8;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.7);\n    opacity: 1;\n  }\n}\n\n/* 橙色强烈闪烁动画 */\n@keyframes pulse-orange-strong {\n  0% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n\n  25% {\n    transform: translate(-50%, -50%) scale(1.3);\n    box-shadow: 0 0 0 8px rgba(250, 173, 20, 0.4);\n    opacity: 0.6;\n  }\n\n  50% {\n    transform: translate(-50%, -50%) scale(1.1);\n    box-shadow: 0 0 0 15px rgba(250, 173, 20, 0);\n    opacity: 0.8;\n  }\n\n  75% {\n    transform: translate(-50%, -50%) scale(1.2);\n    box-shadow: 0 0 0 5px rgba(250, 173, 20, 0.2);\n    opacity: 0.7;\n  }\n\n  100% {\n    transform: translate(-50%, -50%) scale(1);\n    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);\n    opacity: 1;\n  }\n}\n\n.status-text {\n  font-size: 12px;\n  color: #666;\n  font-weight: 500;\n}\n\n.mode-indicator {\n  font-size: 10px;\n  padding: 2px 6px;\n  border-radius: 3px;\n  font-weight: bold;\n  margin-left: 8px;\n}\n\n.mode-indicator.sidepanel {\n  background-color: #1890ff;\n  color: white;\n}\n\n.mode-indicator.new-window {\n  background-color: #52c41a;\n  color: white;\n}\n\n.new-window-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.new-window-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.sidebar-tip {\n  margin-bottom: 16px;\n  border-radius: 6px;\n}\n\n.sidebar-tip p {\n  margin: 4px 0;\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.data-section h4 {\n  margin: 0 0 12px 0;\n  color: #666;\n  font-size: 14px;\n}\n\n.empty-state {\n  text-align: center;\n  padding: 40px 20px;\n  color: #999;\n  background: white;\n  border-radius: 4px;\n  border: 1px dashed #ddd;\n}\n\n.request-list {\n  background: white;\n  border-radius: 4px;\n  border: 1px solid #e0e0e0;\n  overflow: hidden;\n}\n\n.request-item {\n  border-bottom: 1px solid #f0f0f0;\n  padding: 12px 16px;\n  transition: background-color 0.2s;\n}\n\n.request-item:last-child {\n  border-bottom: none;\n}\n\n.request-item:hover {\n  background-color: #fafafa;\n}\n\n.request-item.parsing {\n  background-color: #f0f9ff;\n  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  animation: pulse 2s ease-in-out infinite;\n}\n\n@keyframes pulse {\n  0% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n\n  50% {\n    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.2);\n  }\n\n  100% {\n    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);\n  }\n}\n\n.request-info {\n  margin-bottom: 8px;\n}\n\n.request-url {\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 12px;\n  color: #333;\n  word-break: break-all;\n  margin-bottom: 4px;\n}\n\n.request-meta {\n  display: flex;\n  gap: 12px;\n  font-size: 11px;\n}\n\n.method {\n  background: #1890ff;\n  color: white;\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status {\n  padding: 2px 6px;\n  border-radius: 2px;\n  font-weight: bold;\n}\n\n.status.pending {\n  background: #faad14;\n  color: white;\n}\n\n.status.completed {\n  background: #52c41a;\n  color: white;\n}\n\n.status.parsing {\n  background: #1890ff;\n  color: white;\n}\n\n.status.parsing .el-icon-loading {\n  animation: rotating 2s linear infinite;\n}\n\n@keyframes rotating {\n  0% {\n    transform: rotate(0deg);\n  }\n\n  100% {\n    transform: rotate(360deg);\n  }\n}\n\n.status.failed {\n  background: #ff4d4f;\n  color: white;\n}\n\n.timestamp {\n  color: #999;\n}\n\n.response-data {\n  margin-top: 8px;\n  padding-top: 8px;\n  border-top: 1px solid #f0f0f0;\n}\n\n.response-content {\n  margin-top: 8px;\n  background: #f8f8f8;\n  border-radius: 4px;\n  padding: 8px;\n  max-height: 300px;\n  overflow-y: auto;\n}\n\n.response-content pre {\n  margin: 0;\n  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;\n  font-size: 11px;\n  line-height: 1.4;\n  color: #333;\n  white-space: pre-wrap;\n  word-break: break-word;\n}\n\n.role-card /deep/.el-card__body {\n  padding: 8px;\n}\n\n/* 空号卡片置灰样式 */\n.role-card.empty-role {\n  opacity: 0.6;\n  filter: grayscale(0.8);\n  background-color: #f5f5f5;\n  border: 1px solid #d9d9d9;\n  transition: all 0.3s ease;\n}\n\n.role-card.empty-role:hover {\n  opacity: 0.8;\n  filter: grayscale(0.6);\n}\n\n.role-card.empty-role /deep/.el-card__body {\n  background-color: #fafafa;\n}\n\n/* 空号卡片内的元素也置灰 */\n.role-card.empty-role .el-tag {\n  opacity: 0.7;\n}\n\n.role-card.empty-role .el-link {\n  opacity: 0.7;\n}\n\n.role-card.empty-role span {\n  opacity: 0.7;\n}\n\n/* 版本信息底部样式 */\n.version-footer {\n  position: fixed;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  background: rgba(0, 0, 0, 0.8);\n  color: #fff;\n  text-align: center;\n  padding: 8px 0;\n  font-size: 12px;\n  z-index: 1000;\n  border-top: 1px solid #333;\n}\n\n.version-text {\n  color: #ccc;\n  font-weight: 500;\n}\n</style>\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css":
+/*!*********************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css ***!
+  \*********************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.auto-params-view[data-v-2ac0e876] {}\r\n\r\n/* 参数编辑器样式 */\n.params-editor[data-v-2ac0e876] {\r\n    background-color: #f9f9f9;\r\n    padding: 15px;\r\n    border-radius: 6px;\r\n    margin: 15px 0;\r\n    border-left: 4px solid #409eff;\n}\n.params-actions[data-v-2ac0e876] {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    margin-bottom: 10px;\r\n    padding-bottom: 10px;\r\n    border-bottom: 1px solid #e4e7ed;\n}\n.json-editor-wrapper[data-v-2ac0e876] {\r\n    position: relative;\r\n    width: 100%;\n}\n.json-editor[data-v-2ac0e876] {\r\n    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;\r\n    font-size: 13px;\r\n    line-height: 1.4;\n}\n.json-editor textarea[data-v-2ac0e876] {\r\n    background-color: #2d3748;\r\n    color: #e2e8f0;\r\n    border: 1px solid #4a5568;\r\n    border-radius: 4px;\r\n    padding: 12px;\n}\n.json-editor textarea[data-v-2ac0e876]:focus {\r\n    border-color: #409eff;\r\n    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);\n}\n.json-error[data-v-2ac0e876] {\r\n    margin-top: 8px;\r\n    padding: 8px 12px;\r\n    background-color: #fef0f0;\r\n    border: 1px solid #fbc4c4;\r\n    border-radius: 4px;\r\n    color: #f56c6c;\r\n    font-size: 12px;\r\n    line-height: 1.4;\n}\n.json-error i[data-v-2ac0e876] {\r\n    margin-right: 4px;\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/AutoParams.vue"],"names":[],"mappings":";AAk/CA,oCAAA;;AAEA,YAAA;AACA;IACA,yBAAA;IACA,aAAA;IACA,kBAAA;IACA,cAAA;IACA,8BAAA;AACA;AAEA;IACA,aAAA;IACA,8BAAA;IACA,mBAAA;IACA,mBAAA;IACA,oBAAA;IACA,gCAAA;AACA;AAEA;IACA,kBAAA;IACA,WAAA;AACA;AAEA;IACA,2DAAA;IACA,eAAA;IACA,gBAAA;AACA;AAEA;IACA,yBAAA;IACA,cAAA;IACA,yBAAA;IACA,kBAAA;IACA,aAAA;AACA;AAEA;IACA,qBAAA;IACA,6CAAA;AACA;AAEA;IACA,eAAA;IACA,iBAAA;IACA,yBAAA;IACA,yBAAA;IACA,kBAAA;IACA,cAAA;IACA,eAAA;IACA,gBAAA;AACA;AAEA;IACA,iBAAA;AACA","sourcesContent":["<template>\r\n    <el-card class=\"spider-system-card\" shadow=\"never\">\r\n        <el-row slot=\"header\" class=\"card-header\" type=\"flex\" justify=\"space-between\" align=\"middle\">\r\n            <div><span class=\"emoji-icon\">⚙️</span> 配置</div>\r\n            <div class=\"tool-buttons\">\r\n                <el-dropdown split-button type=\"danger\" @click=\"stopTask\">\r\n                    🛑 停止\r\n                    <el-dropdown-menu slot=\"dropdown\">\r\n                        <el-dropdown-item @click.native=\"resetTask\">🛑 重置任务</el-dropdown-item>\r\n                    </el-dropdown-menu>\r\n                </el-dropdown>\r\n            </div>\r\n        </el-row>\r\n        <el-row type=\"flex\">\r\n            <div style=\"width: 140px;text-align: center;\">\r\n                <template v-if=\"externalParams.action\">\r\n                    <el-col :span=\"24\">\r\n                        <p class=\"cBlue\" style=\"margin-bottom: 5px;\">🎯目标：</p>\r\n                    </el-col>\r\n                    <EquipmentImage v-if=\"externalParams.action === 'similar_equip'\" :equipment=\"externalParams\"\r\n                        :popoverWidth=\"450\"\r\n                        style=\"display: flex;flex-direction: column;height: 50px;width: 100%;align-items: center;\" />\r\n                    <PetImage v-if=\"externalParams.action === 'similar_pet'\" :pet=\"externalParams\"\r\n                        :equipFaceImg=\"externalParams.equip_face_img\" />\r\n                    <template v-if=\"externalParams.action\">\r\n                        <!-- <el-cascader :options=\"server_data\" size=\"mini\" filterable v-model=\"server_data_value\" clearable /> -->\r\n                        <div style=\"display: inline-block; margin-left: 8px\">\r\n                            <el-link @click=\"openCBGSearch\">\r\n                                藏宝阁\r\n                            </el-link>\r\n                        </div>\r\n                    </template>\r\n\r\n                </template>\r\n            </div>\r\n            <!-- 全局设置 -->\r\n            <el-form style=\"width: 100%;flex-shrink: 1;\" :model=\"globalSettings\" v-show=\"activeTab !== 'playwright'\">\r\n                <el-row :gutter=\"40\">\r\n                    <el-col :span=\"6\">\r\n                        <el-form-item label=\"📄 爬取页数\" size=\"small\">\r\n                            <el-input-number v-model=\"globalSettings.max_pages\" :min=\"1\" :max=\"100\"\r\n                                controls-position=\"right\" style=\"width: 100%\"></el-input-number>\r\n                        </el-form-item>\r\n                    </el-col>\r\n                    <el-col :span=\"8\">\r\n                        <el-form-item\r\n                            :label=\"`⏱️ 延迟范围(秒) 当前：${globalSettings.delay_min} - ${globalSettings.delay_max} 秒`\"\r\n                            size=\"small\">\r\n                            <el-slider v-model=\"delayRange\" range show-stops :min=\"8\" :max=\"30\" :step=\"1\"\r\n                                @change=\"onDelayRangeChange\" style=\"width: 100%;display: inline-block;\">\r\n                            </el-slider>\r\n                        </el-form-item>\r\n                    </el-col>\r\n                    <el-col :span=\"10\">\r\n                        <el-form-item label=\"⚡ 快速配置\" size=\"small\" style=\"width: 100%;\">\r\n                            <br>\r\n                            <el-row type=\"flex\" align=\"middle\" style=\"height:32px;\">\r\n                                <el-tag size=\"mini\" @click=\"quickConfig('small')\" style=\"cursor: pointer;\">10页</el-tag>\r\n                                <el-divider direction=\"vertical\"></el-divider>\r\n                                <el-tag size=\"mini\" @click=\"quickConfig('medium')\" style=\"cursor: pointer;\">50页</el-tag>\r\n                                <el-divider direction=\"vertical\"></el-divider>\r\n                                <el-tag size=\"mini\" @click=\"quickConfig('large')\" style=\"cursor: pointer;\">100页</el-tag>\r\n                            </el-row>\r\n                        </el-form-item></el-col>\r\n                </el-row>\r\n                <el-row type=\"flex\" align=\"middle\" v-if=\"activeTab !== 'role'\">\r\n                    <el-col :span=\"12\">\r\n                        <el-row type=\"flex\">\r\n                            <el-form-item label=\"🌎 全服搜索\" size=\"small\" style=\"width: 150px;\">\r\n                                <el-switch v-model=\"globalSettings.overall\"></el-switch>\r\n                            </el-form-item>\r\n                            <el-form-item v-if=\"!globalSettings.overall\" label=\" 多区搜索\" size=\"small\"\r\n                                style=\"width: 150px;\">\r\n                                <el-switch v-model=\"globalSettings.multi\"></el-switch>\r\n                            </el-form-item>\r\n                        </el-row>\r\n                    </el-col>\r\n                    <el-col v-if=\"!globalSettings.overall\" :span=\"12\">\r\n                        <el-form-item label=\"🎯 目标服务器\" size=\"small\">\r\n                            <el-cascader v-show=\"globalSettings.multi\" :options=\"hotServers\" :props=\"{\r\n                                value: 'server_id', label: 'server_name', multiple: true,\r\n                                emitPath: false\r\n                            }\" collapse-tags size=\"mini\" filterable v-model=\"target_server_list\"\r\n                                @change=\"onTargetServerChange\" />\r\n                            <el-cascader v-show=\"!globalSettings.multi\" :options=\"server_data\" size=\"mini\" filterable\r\n                                v-model=\"server_data_value\" clearable @change=\"onServerDataChange\" />\r\n                        </el-form-item>\r\n                    </el-col>\r\n                </el-row>\r\n                <el-row type=\"flex\" align=\"middle\">\r\n                    <el-form-item label=\"最低价格\" size=\"small\">\r\n                        <el-checkbox v-model=\"price_min_trigger\"> </el-checkbox>\r\n                        <el-input-number v-model=\"price_min\" :min=\"10\" :controls=\"false\"\r\n                            style=\"margin-left: 5px;\"></el-input-number>\r\n                    </el-form-item>\r\n                </el-row>\r\n            </el-form>\r\n        </el-row>\r\n        <el-tabs v-model=\"activeTab\" tab-position=\"left\">\r\n            <!-- Playwright半自动收集器 -->\r\n            <el-tab-pane label=\"🖐️ 手动抓取\" name=\"playwright\" :disabled=\"!!externalParams.action\">\r\n                <el-form :model=\"playwrightForm\" label-width=\"120px\" size=\"small\">\r\n                    <el-form-item label=\"无头模式\">\r\n                        <el-switch v-model=\"playwrightForm.headless\" @change=\"onHeadlessToggle\"></el-switch>\r\n                        <span class=\"form-tip\">关闭后可以看到浏览器操作过程</span>\r\n                    </el-form-item>\r\n\r\n                    <el-form-item label=\"目标URL\">\r\n                        <el-select v-model=\"playwrightForm.target_url\" style=\"width: 100%\" @change=\"onTargetUrlChange\">\r\n                            <el-option label=\"角色推荐搜索\" value=\"role_recommend\"></el-option>\r\n                            <el-option label=\"装备推荐搜索\" value=\"equip_recommend\"></el-option>\r\n                            <el-option label=\"召唤兽推荐搜索\" value=\"pet_recommend\"></el-option>\r\n                            <el-option label=\"自定义URL\" value=\"custom\"></el-option>\r\n                        </el-select>\r\n                    </el-form-item>\r\n\r\n                    <el-form-item label=\"自定义URL\" v-if=\"playwrightForm.target_url === 'custom'\">\r\n                        <el-input v-model=\"playwrightForm.custom_url\" placeholder=\"请输入完整的CBG URL\" style=\"width: 100%\">\r\n                            <template slot=\"prepend\">https://</template>\r\n                        </el-input>\r\n                    </el-form-item>\r\n                    <el-form-item>\r\n                        <el-button type=\"primary\" @click=\"startPlaywrightCollector\" :loading=\"isRunning\">\r\n                            🚀 启动\r\n                        </el-button>\r\n                    </el-form-item>\r\n                </el-form>\r\n            </el-tab-pane>\r\n            <!-- 角色爬虫 -->\r\n            <el-tab-pane label=\"👤 角色\" name=\"role\" :disabled=\"!!externalParams.action\">\r\n                <el-form :model=\"roleForm\" label-width=\"100px\" size=\"small\">\r\n                    <!-- JSON参数编辑器 -->\r\n                    <div class=\"params-editor\">\r\n                        <div class=\"params-actions\">\r\n                            <el-button type=\"text\" size=\"mini\" @click=\"() => resetParam('role')\">重置</el-button>\r\n                            <el-button type=\"primary\" size=\"mini\" @click=\"() => saveParam('role')\" :loading=\"roleSaving\"\r\n                                :disabled=\"!!roleJsonError\">\r\n                                保存配置\r\n                            </el-button>\r\n                        </div>\r\n                        <div class=\"json-editor-wrapper\">\r\n                            <el-input type=\"textarea\" v-model=\"roleParamsJson\" placeholder=\"请输入角色爬虫参数JSON\" :rows=\"8\"\r\n                                @blur=\"() => validateParam('role')\" class=\"json-editor\">\r\n                            </el-input>\r\n                            <div v-if=\"roleJsonError\" class=\"json-error\">\r\n                                <i class=\"el-icon-warning\"></i> {{ roleJsonError }}\r\n                            </div>\r\n                        </div>\r\n                    </div>\r\n\r\n                    <el-form-item>\r\n                        <el-button type=\"primary\" @click=\"() => startSpiderByType('role')\" :loading=\"isRunning\">\r\n                            🚀 启动\r\n                        </el-button>\r\n                    </el-form-item>\r\n                </el-form>\r\n            </el-tab-pane>\r\n\r\n            <!-- 装备爬虫 -->\r\n            <el-tab-pane label=\"⚔️ 装备\" name=\"equip\"\r\n                :disabled=\"externalParams.action && externalParams.action !== 'similar_equip'\">\r\n                <el-form :model=\"equipForm\" label-width=\"100px\" size=\"small\">\r\n                    <el-form-item label=\"装备类型\">\r\n                        <el-select v-model=\"equipForm.equip_type\" :disabled=\"externalParams.action === 'similar_equip'\"\r\n                            @change=\"onEquipTypeChange\" style=\"width: 100%\">\r\n                            <el-option label=\"普通装备\" value=\"normal\"></el-option>\r\n                            <el-option label=\"灵饰装备\" value=\"lingshi\"></el-option>\r\n                            <el-option label=\"召唤兽装备\" value=\"pet\"></el-option>\r\n                        </el-select>\r\n                    </el-form-item>\r\n                    <el-form-item label=\"套装效果\" v-if=\"equipForm.equip_type === 'normal' && targetFeatures.suit_effect\">\r\n                        <el-radio-group v-model=\"suit_effect_type\">\r\n                            <el-radio label=\"\"><span\r\n                                    v-html=\"formatSuitEffect({ suit_effect: targetFeatures.suit_effect })\"></span>\r\n                            </el-radio>\r\n                            <el-radio label=\"select\">自选</el-radio>\r\n                            <el-radio label=\"agility_detailed.A\">敏捷A套</el-radio>\r\n                            <el-radio label=\"agility_detailed.B\">敏捷B套</el-radio>\r\n                            <el-radio label=\"magic_detailed.A\">魔力A套</el-radio>\r\n                            <el-radio label=\"magic_detailed.B\">魔力B套</el-radio>\r\n                        </el-radio-group>\r\n                        <el-cascader v-if=\"suit_effect_type === 'select'\" :options=\"suitOptions\" placeholder=\"请选择套装效果\"\r\n                            separator=\"\" clearable filterable @change=\"handleSuitChange\" />\r\n                        <el-radio-group v-if=\"suit_effect_type?.split('.').length > 1\" v-model=\"select_suit_effect\">\r\n                            <el-radio\r\n                                v-for=\"itemId in equipConfig?.suits[suit_effect_type.split('.')[0]][suit_effect_type.split('.')[1]]\"\r\n                                :label=\"itemId.toString()\" :key=\"itemId\">{{ suit_transform_skills[itemId] }}</el-radio>\r\n                        </el-radio-group>\r\n                    </el-form-item>\r\n                    <el-form-item label=\"属性加成\"\r\n                        v-if=\"equipForm.equip_type === 'normal' && targetFeatures.addon_total > 0\">\r\n                        <el-checkbox-group v-model=\"select_sum_attr_type\">\r\n                            <el-checkbox label=\"dex\">敏捷</el-checkbox>\r\n                            <el-checkbox label=\"endurance\">耐力</el-checkbox>\r\n                            <el-checkbox label=\"magic\">魔力</el-checkbox>\r\n                            <el-checkbox label=\"physique\">体质</el-checkbox>\r\n                            <el-checkbox label=\"power\">力量</el-checkbox>\r\n                        </el-checkbox-group>\r\n                        <el-checkbox v-model=\"sum_attr_with_melt\">计算熔炼效果</el-checkbox>\r\n                    </el-form-item>\r\n                    <el-alert v-if=\"equipForm.equip_type === 'lingshi'\" show-icon :closable=\"false\"\r\n                        style=\"margin-bottom: 10px;\">\r\n                        <span slot=\"title\" v-html=\"lingshiTips\"></span>\r\n                    </el-alert>\r\n                    <!-- JSON参数编辑器 -->\r\n                    <div class=\"params-editor\">\r\n                        <div class=\"params-actions\">\r\n                            <el-button type=\"text\" size=\"mini\" @click=\"() => resetParam('equip')\">重置</el-button>\r\n                            <el-button type=\"primary\" size=\"mini\" @click=\"() => saveParam('equip')\"\r\n                                :loading=\"equipSaving\" :disabled=\"!!equipJsonError\">\r\n                                保存配置\r\n                            </el-button>\r\n                        </div>\r\n                        <el-row type=\"flex\">\r\n                            <div class=\"json-editor-wrapper\" v-if=\"externalParams.action === 'similar_equip'\">\r\n                                <el-input type=\"textarea\" v-model=\"externalSearchParams\" placeholder=\"搜索指定参数\" :rows=\"10\"\r\n                                    class=\"json-editor\">\r\n                                </el-input>\r\n                                <div v-if=\"equipJsonError\" class=\"json-error\">\r\n                                    <i class=\"el-icon-warning\"></i> {{ equipJsonError }}\r\n                                </div>\r\n                            </div>\r\n                            <div class=\"json-editor-wrapper\">\r\n                                <el-input type=\"textarea\" v-model=\"equipParamsJson\" placeholder=\"请输入装备爬虫参数JSON\"\r\n                                    :rows=\"10\" @blur=\"() => validateParam('equip')\" class=\"json-editor\">\r\n                                </el-input>\r\n                                <div v-if=\"equipJsonError\" class=\"json-error\">\r\n                                    <i class=\"el-icon-warning\"></i> {{ equipJsonError }}\r\n                                </div>\r\n                            </div>\r\n                            <div class=\"json-editor-wrapper\">\r\n                                <el-input type=\"textarea\" readonly :value=\"cached_params\" :rows=\"10\"\r\n                                    class=\"json-editor\">\r\n                                </el-input>\r\n                            </div>\r\n                        </el-row>\r\n                    </div>\r\n\r\n                    <el-form-item>\r\n                        <el-button type=\"primary\" @click=\"() => startSpiderByType('equip')\" :loading=\"isRunning\">\r\n                            🚀 启动\r\n                        </el-button>\r\n                    </el-form-item>\r\n                </el-form>\r\n            </el-tab-pane>\r\n\r\n            <!-- 召唤兽爬虫 -->\r\n            <el-tab-pane label=\"🐲 召唤兽\" name=\"pet\"\r\n                :disabled=\"externalParams.action && externalParams.action !== 'similar_pet'\">\r\n                <el-form :model=\"petForm\" label-width=\"100px\" size=\"small\">\r\n                    <!-- JSON参数编辑器 -->\r\n                    <div class=\"params-editor\">\r\n                        <div class=\"params-actions\">\r\n                            <el-button type=\"mini\" size=\"mini\" @click=\"() => resetParam('pet')\">重置</el-button>\r\n                            <el-button type=\"primary\" size=\"mini\" @click=\"() => saveParam('pet')\" :loading=\"petSaving\"\r\n                                :disabled=\"!!petJsonError\">\r\n                                保存配置\r\n                            </el-button>\r\n                        </div>\r\n                        <el-row type=\"flex\">\r\n                            <div class=\"json-editor-wrapper\" v-if=\"externalParams.action === 'similar_pet'\">\r\n                                <el-input type=\"textarea\" v-model=\"externalSearchParams\" :rows=\"10\" class=\"json-editor\">\r\n                                </el-input>\r\n                            </div>\r\n                            <div class=\"json-editor-wrapper\">\r\n                                <el-input type=\"textarea\" v-model=\"petParamsJson\" placeholder=\"请输入召唤兽爬虫参数JSON\"\r\n                                    :rows=\"10\" @blur=\"() => validateParam('pet')\" class=\"json-editor\">\r\n                                </el-input>\r\n                                <div v-if=\"petJsonError\" class=\"json-error\">\r\n                                    <i class=\"el-icon-warning\"></i> {{ petJsonError }}\r\n                                </div>\r\n                            </div>\r\n                            <div class=\"json-editor-wrapper\">\r\n                                <el-input type=\"textarea\" readonly :value=\"cached_params\" :rows=\"10\"\r\n                                    class=\"json-editor\">\r\n                                </el-input>\r\n                            </div>\r\n                        </el-row>\r\n                    </div>\r\n\r\n                    <el-form-item>\r\n                        <el-button type=\"primary\" @click=\"() => startSpiderByType('pet')\" :loading=\"isRunning\">\r\n                            🚀 启动\r\n                        </el-button>\r\n                    </el-form-item>\r\n                </el-form>\r\n            </el-tab-pane>\r\n\r\n        </el-tabs>\r\n        <LogMonitor :maxLines=\"8\" simpleMode :isRunning=\"isRunning\" v-if=\"log\" />\r\n    </el-card>\r\n</template>\r\n\r\n<script>\r\nimport str2gbk from 'str2gbk'\r\nimport qs from 'qs'\r\nimport EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'\r\nimport PetImage from '@/components/PetImage.vue'\r\nimport LogMonitor from '@/components/LogMonitor.vue'\r\nimport windowReuseManager from '@/utils/windowReuseManager'\r\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\r\n\r\nconst server_data_list = []\r\nfor (let key in window.server_data) {\r\n    let [parent, children] = window.server_data[key]\r\n    const [label, , , , value] = parent\r\n    children = children.map(([value, label]) => ({ value, label }))\r\n    server_data_list.push({\r\n        label,\r\n        value,\r\n        children\r\n    })\r\n}\r\nexport default {\r\n    name: 'AutoParams',\r\n    props: {\r\n        log: {\r\n            type: Boolean,\r\n            default: true\r\n        },\r\n        externalParamsProp: {\r\n            type: Object,\r\n            default: () => ({})\r\n        }\r\n    },\r\n    mixins: [equipmentMixin],\r\n    components: {\r\n        EquipmentImage,\r\n        LogMonitor,\r\n        PetImage\r\n    },\r\n    data() {\r\n        return {\r\n            sum_attr_with_melt: true,\r\n            select_sum_attr_type: [],\r\n            price_min: 1,\r\n            price_min_trigger: false,\r\n            suit_transform_skills: window.AUTO_SEARCH_CONFIG.suit_transform_skills,\r\n            suitOptions: [],\r\n            suit_effect_type: '',\r\n            select_suit_effect: '',\r\n            equipConfig: {},\r\n            hotServers: [],\r\n            server_data: server_data_list,\r\n            target_server_list: [], // 存储server_id的数组（用于el-cascader的v-model）\r\n            target_server_objects: [], // 存储完整服务器对象的数组\r\n            // 全局设置\r\n            globalSettings: {\r\n                max_pages: 5,\r\n                delay_min: 8,\r\n                delay_max: 20,\r\n                overall: false,\r\n                multi: false,\r\n            },\r\n            // 延迟范围滑块\r\n            delayRange: [8, 20],\r\n            // 角色爬虫表单\r\n            roleForm: {\r\n            },\r\n            // 装备爬虫表单\r\n            equipForm: {\r\n                equip_type: 'normal',\r\n            },\r\n            // 召唤兽爬虫表单\r\n            petForm: {\r\n            },\r\n            // 代理爬虫表单\r\n            proxyForm: {},\r\n            // Playwright收集表单\r\n            playwrightForm: {\r\n                headless: false,\r\n                target_url: 'role_recommend',\r\n                custom_url: ''\r\n            },\r\n            // JSON参数字符串\r\n            roleParamsJson: '',\r\n            equipParamsJson: '{}',\r\n            petParamsJson: '',\r\n            // JSON验证错误\r\n            roleJsonError: '',\r\n            equipJsonError: '',\r\n            petJsonError: '',\r\n            // 默认参数模板（将从API动态加载）\r\n            defaultParams: {\r\n                role: {},\r\n                equip_normal: {},\r\n                equip_lingshi: {},\r\n                equip_pet: {},\r\n                equip_pet_equip: {},\r\n                pet: {}\r\n            },\r\n            // 加载状态\r\n            isRunning: false,\r\n            paramsLoading: false,\r\n\r\n            // Tab相关\r\n            activeTab: 'playwright',\r\n            // 状态监控\r\n            statusMonitor: null,\r\n            // 保存状态\r\n            roleSaving: false,\r\n            equipSaving: false,\r\n            petSaving: false,\r\n            // 缓存清理定时器\r\n            cacheCleanupTimer: null,\r\n\r\n            // 外部参数\r\n            externalSearchParams: '{}',\r\n            targetFeatures: {},\r\n\r\n            // 参数管理器配置 - 统一管理所有参数类型\r\n            paramManager: {\r\n                role: {\r\n                    jsonKey: 'roleParamsJson',\r\n                    errorKey: 'roleJsonError',\r\n                    savingKey: 'roleSaving',\r\n                    paramType: 'role',\r\n                    successMessage: '角色参数配置保存成功',\r\n                    spiderType: 'role',\r\n                    spiderName: '角色爬虫',\r\n                    getParams: () => ({\r\n                        ...this.globalSettings,\r\n                        ...this.roleForm,\r\n                        cached_params: JSON.parse(this.roleParamsJson)\r\n                    })\r\n                },\r\n                equip: {\r\n                    jsonKey: 'equipParamsJson',\r\n                    errorKey: 'equipJsonError',\r\n                    savingKey: 'equipSaving',\r\n                    paramType: 'equip',\r\n                    successMessage: '装备参数配置保存成功',\r\n                    spiderType: 'equip',\r\n                    spiderName: '装备爬虫',\r\n                    getParamType: () => this.getEquipParamKey(this.equipForm.equip_type),\r\n                    getSuccessMessage: () => `${this.getEquipTypeName(this.equipForm.equip_type)}参数配置保存成功`,\r\n                    getParams: () => {\r\n                        //TODO:target_server_objects要把this.cached_params.server_id排序到第一个\r\n                        const params = {\r\n                            target_server_list: this.target_server_objects,\r\n                            ...this.equipForm,\r\n                            ...this.globalSettings,\r\n                            cached_params: JSON.parse(this.cached_params)\r\n                        }\r\n                        if (params.overall) {\r\n                            params.multi = false\r\n                            params.target_server_list = undefined\r\n                        }\r\n                        return params\r\n                    }\r\n                },\r\n                pet: {\r\n                    jsonKey: 'petParamsJson',\r\n                    errorKey: 'petJsonError',\r\n                    savingKey: 'petSaving',\r\n                    paramType: 'pet',\r\n                    successMessage: '召唤兽参数配置保存成功',\r\n                    spiderType: 'pet',\r\n                    spiderName: '召唤兽爬虫',\r\n                    getParams: () => ({\r\n                        target_server_list: this.target_server_objects,\r\n                        ...this.petForm,\r\n                        ...this.globalSettings,\r\n                        cached_params: JSON.parse(this.cached_params)\r\n                    })\r\n                }\r\n            }\r\n        }\r\n    },\r\n    computed: {\r\n        lingshiTips() {\r\n            const labels = {\r\n                1: '固伤', 2: '伤害', 3: '速度', 4: '法伤', 5: '狂暴', 6: '物理暴击', 7: '法术暴击',\r\n                8: '封印', 9: '法伤结果', 10: '穿刺', 11: '治疗', 12: '气血', 13: '防御', 14: '法防',\r\n                15: '抗物理暴击', 16: '抗法术暴击', 17: '抗封', 18: '格挡', 19: '回复'\r\n            }\r\n            const highlighted = new Set()\r\n            for (let key in JSON.parse(this.externalSearchParams)) {\r\n                if (key.startsWith('added_attr.')) {\r\n                    const typeId = Number(key.replace('added_attr.', ''))\r\n                    if (!Number.isNaN(typeId)) highlighted.add(typeId)\r\n                }\r\n            }\r\n            const parts = []\r\n            for (let i = 1; i <= 19; i++) {\r\n                const name = labels[i]\r\n                const text = highlighted.has(i) ? `<b style=\"color:#F56C6C;\">${name}</b>` : name\r\n                parts.push(`<b ${highlighted.has(i) ? 'style=\"color:#F56C6C;\"' : ''}>${i}:</b> ${text}`)\r\n            }\r\n            return parts.join(', ')\r\n        },\r\n        view_loc() {\r\n            return {\r\n                view_loc: this.globalSettings.overall ? 'overall_search' : 'search_cond'\r\n            }\r\n        },\r\n        currentServerData() {\r\n            // 如果store不可用，返回默认值\r\n            if (!this.$store || !this.$store.getters) {\r\n                return { server_id: 0, areaid: 0, server_name: '' }\r\n            }\r\n            const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData\r\n            return { server_id, areaid, server_name }\r\n        },\r\n        externalParams() {\r\n            // 优先使用props中的externalParams，如果没有则使用路由参数\r\n            if (this.externalParamsProp && Object.keys(this.externalParamsProp).length > 0) {\r\n                return this.externalParamsProp\r\n            }\r\n            \r\n            // 如果路由和store不可用，返回空对象\r\n            if (!this.$route || !this.$route.query) {\r\n                return {}\r\n            }\r\n            \r\n            const query = JSON.parse(JSON.stringify(this.$route.query))\r\n            if (query.action === 'similar_pet') {\r\n                query.evol_skill_list = JSON.parse(query.evol_skill_list || '{}')\r\n                query.neidan = JSON.parse(query.neidan || '{}')\r\n                query.equip_list = JSON.parse(query.equip_list || '{}')\r\n                query.texing = JSON.parse(query.texing || '{}')\r\n            }\r\n            return query\r\n        },\r\n        // 从Vuex store获取server_data_valueTODO:::::\r\n        server_data_value: {\r\n            get() {\r\n                return this.$store?.state.server_data_value || {}\r\n            },\r\n            set(value) {\r\n                this.$store.dispatch('setServerDataValue', value)\r\n            }\r\n        },\r\n        // 检查cookies是否有效\r\n        isCookieValid() {\r\n            return this.$store.getters['cookie/isCookieCacheValid']\r\n        },\r\n\r\n        cached_params() {\r\n            try {\r\n                let diyParams = JSON.parse(this.equipParamsJson)\r\n                if (this.activeTab === 'pet') {\r\n                    diyParams = JSON.parse(this.petParamsJson)\r\n                }\r\n                const mode_params = {\r\n                    ...this.view_loc,\r\n                    hide_lingshi: this.activeTab === 'equip' && this.equipForm.equip_type === 'normal' ? 1 : undefined\r\n                }\r\n                const currentServerData = this.globalSettings.overall ? { server_id: undefined, server_name: undefined, areaid: undefined } : this.currentServerData\r\n                return JSON.stringify(Object.assign(JSON.parse(this.externalSearchParams), diyParams, currentServerData, mode_params), null, 2)\r\n            } catch (error) {\r\n                return '{}'\r\n            }\r\n        }\r\n    },\r\n    watch: {\r\n        sum_attr_with_melt(newVal) {\r\n            const params = JSON.parse(this.equipParamsJson)\r\n            params.sum_attr_with_melt = newVal ? 1 : undefined\r\n            params.sum_attr_without_melt = !newVal ? 1 : undefined\r\n            this.equipParamsJson = JSON.stringify(params, null, 2)\r\n        },\r\n        price_min(newVal) {\r\n            if (this.price_min_trigger) {\r\n                const params = JSON.parse(this.equipParamsJson)\r\n                params.price_min = this.price_min_trigger ? newVal * 100 : undefined\r\n                this.equipParamsJson = JSON.stringify(params, null, 2)\r\n            }\r\n        },\r\n        price_min_trigger(newVal) {\r\n            const params = JSON.parse(this.equipParamsJson)\r\n            params.price_min = newVal ? this.price_min * 100 : undefined\r\n            this.equipParamsJson = JSON.stringify(params, null, 2)\r\n        },\r\n        select_suit_effect(newVal) {\r\n            const params = JSON.parse(this.equipParamsJson)\r\n            params.suit_effect = newVal ? newVal : undefined\r\n            this.equipParamsJson = JSON.stringify(params, null, 2)\r\n        },\r\n        suit_effect_type(newVal) {\r\n            if (!newVal) {\r\n                this.select_suit_effect = ''\r\n            }\r\n        },\r\n        select_sum_attr_type(newVal) {\r\n            let changed = false\r\n                //判断newVal数组包含的项是否在targetFeatures中\r\n                ;[['liliang', 'power'], ['minjie', 'dex'], ['moli', 'magic'], ['naili', 'endurance'], ['tizhi', 'physique']].forEach(([attr, key]) => {\r\n                    if (this.targetFeatures[`addon_${attr}`] > 0) {\r\n                        if (!newVal.includes(key)) {\r\n                            changed = true\r\n                        }\r\n                    } else {\r\n                        if (newVal.includes(key)) {\r\n                            changed = true\r\n                        }\r\n                    }\r\n                })\r\n            const params = JSON.parse(this.equipParamsJson)\r\n            params.sum_attr_type = newVal.length > 0 && changed ? newVal.join(',') : undefined\r\n            this.equipParamsJson = JSON.stringify(params, null, 2)\r\n        },\r\n        isRunning(newVal) {\r\n            this.$emit('update:isRunning', newVal)\r\n            if (newVal) {\r\n                this.startStatusMonitor()\r\n            } else {\r\n                this.stopStatusMonitor()\r\n            }\r\n        },\r\n        'globalSettings.multi'(val) {\r\n            if (val) {\r\n                // 多服务器模式开启时，自动设置同级别服务器\r\n                const server_id = Number(this.externalParams.serverid)\r\n                console.log('开启多服务器模式，当前服务器ID:', server_id)\r\n                this.globalSettings.max_pages = 1\r\n                // 根据server_id在hotServers中找到对应的同级别的服务器\r\n                this.setTargetServersByLevel(server_id)\r\n            } else {\r\n                // 多服务器模式关闭时，清空目标服务器列表\r\n                this.target_server_list = []\r\n                this.target_server_objects = []\r\n                console.log('关闭多服务器模式，清空目标服务器列表')\r\n            }\r\n        }\r\n    },\r\n    async mounted() {\r\n        // 等待Vuex状态恢复后再执行其他操作\r\n        // 自动清理过期缓存（如果store可用）\r\n        if (this.$store && this.$store.dispatch) {\r\n            this.$store.dispatch('cookie/cleanExpiredCache')\r\n\r\n            // 启动缓存清理定时器（每分钟检查一次）\r\n            this.cacheCleanupTimer = setInterval(() => {\r\n                this.$store.dispatch('cookie/cleanExpiredCache')\r\n            }, 60 * 1000)\r\n        }\r\n\r\n        this.loadHotServers()\r\n        await this.loadSearchParams()\r\n        // 页面加载时请求一次状态\r\n        this.checkTaskStatus()\r\n        // 初始化延迟范围滑块\r\n        this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]\r\n\r\n        this.loadExternalParams()\r\n        // 初始化时设置默认的server_data_value（如果store中没有的话）\r\n        if (\r\n            this.externalParams.action &&\r\n            this.$store && \r\n            (!this.$store?.state.server_data_value || this.$store?.state.server_data_value.length === 0)\r\n        ) {\r\n            this.$store.dispatch('setServerDataValue', [43, 77])\r\n        }\r\n        if (this.externalParams.action) {\r\n            this.getFeatures().then(() => {\r\n                this.loadEquipConfig()\r\n            })\r\n        }\r\n        this.initSuitOptions()\r\n        // 初始化窗口复用管理器\r\n        this.initWindowReuseManager()\r\n    },\r\n    beforeDestroy() {\r\n        this.stopStatusMonitor()\r\n        // 清理缓存清理定时器\r\n        if (this.cacheCleanupTimer) {\r\n            clearInterval(this.cacheCleanupTimer)\r\n        }\r\n    },\r\n    methods: {\r\n        handleSuitChange(value) {\r\n            const [, suitValue] = value\r\n            const actualValue = suitValue?.split('_').pop() // 提取真实的套装ID\r\n            this.select_suit_effect = actualValue || ''\r\n        },\r\n        onServerDataChange() {\r\n            const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData\r\n            console.log('server_data_value', { server_id, areaid, server_name })\r\n        },\r\n        // 处理目标服务器选择变化\r\n        onTargetServerChange(selectedServerIds) {\r\n            // 当服务器选择发生变化时，根据server_id查找完整的服务器对象\r\n            this.target_server_objects = []\r\n\r\n            if (selectedServerIds && selectedServerIds.length > 0) {\r\n                // 遍历所有选中的server_id\r\n                selectedServerIds.forEach(serverId => {\r\n                    // 在hotServers中查找对应的完整服务器对象\r\n                    this.findServerInHotServers(serverId)\r\n                })\r\n            }\r\n        },\r\n        // 在hotServers嵌套结构中查找服务器\r\n        findServerInHotServers(serverId) {\r\n            for (const area of this.hotServers) {\r\n                if (area.children) {\r\n                    for (const server of area.children) {\r\n                        if (server.server_id === serverId) {\r\n                            this.target_server_objects.push({\r\n                                server_id: server.server_id,\r\n                                areaid: area.areaid || server.areaid,\r\n                                server_name: server.server_name\r\n                            })\r\n                            return\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        },\r\n\r\n        // 根据服务器ID找到同级别的服务器并设置为目标服务器\r\n        setTargetServersByLevel(serverId) {\r\n            if (!this.hotServers || this.hotServers.length === 0) {\r\n                console.warn('hotServers数据未加载，无法设置目标服务器')\r\n                return\r\n            }\r\n\r\n            // 查找当前服务器所在的烟花等级组\r\n            let currentLevel = null\r\n            let currentServer = null\r\n\r\n            for (const level of this.hotServers) {\r\n                if (level.children) {\r\n                    for (const server of level.children) {\r\n                        if (server.server_id === serverId) {\r\n                            currentLevel = level\r\n                            currentServer = server\r\n                            break\r\n                        }\r\n                    }\r\n                    if (currentLevel) break\r\n                }\r\n            }\r\n\r\n            if (!currentLevel || !currentServer) {\r\n                console.warn(`未找到服务器ID ${serverId} 对应的烟花等级组`)\r\n                return\r\n            }\r\n\r\n            console.log(`找到服务器 ${currentServer.server_name} 在烟花等级组: ${currentLevel.server_name}`)\r\n\r\n            // 设置同级别服务器的目标列表\r\n            this.target_server_objects = []\r\n            this.target_server_list = []\r\n\r\n            // 遍历同级别的所有服务器\r\n            currentLevel.children.forEach(server => {\r\n                const serverObject = {\r\n                    server_id: server.server_id,\r\n                    areaid: currentLevel.areaid || server.areaid,\r\n                    server_name: server.server_name\r\n                }\r\n\r\n                this.target_server_objects.push(serverObject)\r\n                this.target_server_list.push(server.server_id)\r\n            })\r\n\r\n            console.log(`已设置 ${this.target_server_objects.length} 个同级别服务器为目标服务器:`, this.target_server_objects)\r\n\r\n        },\r\n        // 初始化窗口复用管理器\r\n        initWindowReuseManager() {\r\n            try {\r\n                // 确保窗口复用管理器已正确初始化\r\n                if (windowReuseManager && windowReuseManager.isSetup) {\r\n                    console.log('窗口复用管理器已初始化，状态:', windowReuseManager.getStatus())\r\n                } else {\r\n                    console.log('窗口复用管理器正在初始化...')\r\n                    // 等待初始化完成\r\n                    setTimeout(() => {\r\n                        if (windowReuseManager && windowReuseManager.isSetup) {\r\n                            console.log('窗口复用管理器初始化完成，状态:', windowReuseManager.getStatus())\r\n                        } else {\r\n                            console.warn('窗口复用管理器初始化失败')\r\n                        }\r\n                    }, 1000)\r\n                }\r\n\r\n                // 监听参数更新事件\r\n                window.addEventListener('params-updated', (event) => {\r\n                    const { params, timestamp } = event.detail\r\n                    console.log('窗口参数已更新:', params)\r\n\r\n                    // 强制刷新组件数据\r\n                    this.$forceUpdate()\r\n\r\n                    // 重新加载外部参数\r\n                    this.loadExternalParams()\r\n\r\n                    // 重新获取特征\r\n                    if (params.action) {\r\n                        this.getFeatures()\r\n                    }\r\n\r\n                    // 重新初始化装备类型相关的配置\r\n                    if (params.equip_type) {\r\n                        this.equipForm.equip_type = params.equip_type\r\n                        // 重新加载装备参数配置\r\n                        this.loadSearchParams()\r\n                    }\r\n\r\n                    // 重新设置activeTab\r\n                    if (params.activeTab) {\r\n                        this.activeTab = params.activeTab\r\n                    }\r\n\r\n                    console.log('✅ 页面数据已刷新')\r\n                })\r\n            } catch (error) {\r\n                console.warn('初始化窗口复用管理器失败:', error)\r\n            }\r\n        },\r\n\r\n        // 停止任务\r\n        async stopTask() {\r\n            try {\r\n                const response = await this.$api.spider.stopTask()\r\n                if (response.code === 200) {\r\n                    this.$notify.success({\r\n                        title: '任务状态',\r\n                        message: response.data?.message || '任务已停止'\r\n                    })\r\n                    this.isRunning = false\r\n                } else {\r\n                    this.$notify.error({\r\n                        title: '任务状态',\r\n                        message: response.message || '停止失败'\r\n                    })\r\n                }\r\n            } catch (error) {\r\n                this.$notify.error({\r\n                    title: '任务状态',\r\n                    message: error.message\r\n                })\r\n            }\r\n        },\r\n\r\n        // 重置任务状态\r\n        async resetTask() {\r\n            try {\r\n                const response = await this.$api.spider.resetTask()\r\n                if (response.code === 200) {\r\n                    this.$notify.success({\r\n                        title: '任务状态',\r\n                        message: response.data?.message || '任务状态已重置'\r\n                    })\r\n                    this.isRunning = false\r\n                } else {\r\n                    this.$notify.error({\r\n                        title: '任务状态',\r\n                        message: response.message || '重置失败'\r\n                    })\r\n                }\r\n            } catch (error) {\r\n                this.$notify.error({\r\n                    title: '任务状态',\r\n                    message: error.message\r\n                })\r\n            }\r\n        },\r\n\r\n        genaratePetSearchParams() {\r\n            const searchParams = {}\r\n            searchParams.skill = this.externalParams.all_skill.replace(/\\|/g, ',')\r\n            searchParams.texing = this.externalParams.texing?.id\r\n            searchParams.lingxing = this.externalParams.lx\r\n            searchParams.growth = this.externalParams.growth * 1000\r\n            return searchParams\r\n        },\r\n        genarateEquipmentSearchParams({ kindid, ...features }) {\r\n            const searchParams = {}\r\n            if (window.is_pet_equip(kindid)) {\r\n                this.equipForm.equip_type = 'pet'\r\n                searchParams.level = features.equip_level\r\n                searchParams.speed = features.speed > 0 ? features.speed : undefined\r\n                searchParams.shanghai = features.shanghai > 0 ? features.shanghai : undefined\r\n                searchParams.hp = features.qixue > 0 ? features.qixue : undefined\r\n                searchParams.fangyu = features.fangyu > 0 ? features.fangyu : undefined\r\n                searchParams.xiang_qian_level = features.xiang_qian_level > 0 ? features.xiang_qian_level : undefined\r\n                let addon_sum = 0\r\n                    ;['fali', 'liliang', 'lingli', 'minjie', 'naili'].forEach((item) => {\r\n                        searchParams[`addon_${item}`] = this.targetFeatures[`addon_${item}`] > 0 ? 1 : undefined\r\n                        if (item === 'minjie' && this.targetFeatures[`addon_${item}`] < 0) {\r\n                            searchParams.addon_minjie_reduce = this.targetFeatures[`addon_${item}`] * -1\r\n                        } else {\r\n                            addon_sum += this.targetFeatures[`addon_${item}`]\r\n                        }\r\n                    })\r\n                searchParams.addon_sum = addon_sum > 0 ? addon_sum : undefined\r\n                searchParams.addon_sum_min = searchParams.addon_sum\r\n                searchParams.addon_status = features.addon_status\r\n                if (features.fangyu > 0) {\r\n                    searchParams.equip_pos = 1\r\n                } else if (features.speed > 0) {\r\n                    searchParams.equip_pos = 2\r\n                } else {\r\n                    searchParams.equip_pos = 3\r\n                }\r\n            } else if (window.is_lingshi_equip(kindid)) {\r\n                searchParams.kindid = kindid\r\n                this.equipForm.equip_type = 'lingshi'\r\n                if (features.equip_level) {\r\n                    searchParams.equip_level_min = features.equip_level\r\n                    searchParams.equip_level_max = features.equip_level * 1 + 9\r\n                }\r\n                // 灵饰附加属性配置\r\n                const { lingshi_added_attr1, lingshi_added_attr2 } = window.AUTO_SEARCH_CONFIG\r\n\r\n                // 属性名称映射表 - 前端显示名称到后端字段名的映射\r\n                const attr_name_map = {\r\n                    '法伤结果': '法术伤害结果',\r\n                    '法伤': '法术伤害',\r\n                    '固伤': '固定伤害',\r\n                    '法术暴击': '法术暴击等级',\r\n                    '物理暴击': '物理暴击等级',\r\n                    '封印': '封印命中等级',\r\n                    '狂暴': '狂暴等级',\r\n                    '穿刺': '穿刺等级',\r\n                    '治疗': '治疗能力',\r\n                    '伤害': '伤害',\r\n                    '速度': '速度',\r\n                    '抗法术暴击': '抗法术暴击等级',\r\n                    '抗物理暴击': '抗物理暴击等级',\r\n                    '抗封': '抵抗封印等级',\r\n                    '回复': '气血回复效果',\r\n                    '法防': '法术防御',\r\n                    '防御': '防御',\r\n                    '格挡': '格挡值',\r\n                    '气血': '气血'\r\n                }\r\n\r\n                // 构建属性值到搜索参数的映射\r\n                const buildAttrValueMapping = () => {\r\n                    const mapping = {}\r\n\r\n                    // 合并两个属性配置\r\n                    const allAttrs = { ...lingshi_added_attr1, ...lingshi_added_attr2 }\r\n\r\n                    // 遍历所有属性，建立映射关系\r\n                    Object.entries(allAttrs).forEach(([value, displayName]) => {\r\n                        const backendFieldName = attr_name_map[displayName]\r\n                        if (backendFieldName) {\r\n                            mapping[backendFieldName] = value\r\n                        }\r\n                    })\r\n\r\n                    return mapping\r\n                }\r\n\r\n                // 处理主属性\r\n                const processMainAttributes = () => {\r\n                    const mainAttrs = ['damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed']\r\n                    mainAttrs.forEach(attr => {\r\n                        if (features[attr] && features[attr] > 0) {\r\n                            searchParams[attr] = features[attr]\r\n                        }\r\n                    })\r\n                }\r\n\r\n                // 处理精炼等级\r\n                const processGemLevel = () => {\r\n                    if (features.gem_level && features.gem_level > 0) {\r\n                        searchParams.jinglian_level = features.gem_level\r\n                    }\r\n                }\r\n\r\n                // 处理附加属性\r\n                const processAddedAttributes = () => {\r\n                    if (!features.attrs || !Array.isArray(features.attrs)) {\r\n                        return\r\n                    }\r\n\r\n                    const attrValueMapping = buildAttrValueMapping()\r\n                    const addedAttrsCount = {}\r\n\r\n                    // 统计每种附加属性的出现次数\r\n                    features.attrs.forEach(({ attr_type }) => {\r\n                        const searchValue = attrValueMapping[attr_type]\r\n                        if (searchValue) {\r\n                            addedAttrsCount[searchValue] = (addedAttrsCount[searchValue] || 0) + 1\r\n                        }\r\n                    })\r\n\r\n                    // 将统计结果添加到搜索参数\r\n                    Object.entries(addedAttrsCount).forEach(([value, count]) => {\r\n                        searchParams[`added_attr.${value}`] = count\r\n                    })\r\n                }\r\n\r\n                // 执行处理\r\n                processMainAttributes()\r\n                processGemLevel()\r\n                processAddedAttributes()\r\n            } else {\r\n                searchParams.kindid = kindid\r\n                let sum_attr_value = 0\r\n                const sum_attr_type_list = []\r\n                    ;[['moli', 'magic'], ['liliang', 'power'], ['tizhi', 'physique'], ['minjie', 'dex'], ['naili', 'endurance']].forEach(([featureKey, searchKey]) => {\r\n                        if (this.targetFeatures[`addon_${featureKey}`] > 0) {\r\n                            sum_attr_type_list.push(searchKey)\r\n                        }\r\n                        sum_attr_value += this.targetFeatures[`addon_${featureKey}`]\r\n                    })\r\n                if (sum_attr_value > 0) {\r\n                    searchParams.sum_attr_type = sum_attr_type_list.join(',')\r\n                    searchParams.sum_attr_value = sum_attr_value\r\n                }\r\n                if (features.gem_level > 0) {\r\n                    searchParams.gem_level = features.gem_level\r\n                    searchParams.gem_value = features.gem_value.join(',')\r\n                }\r\n                if (features.equip_level) {\r\n                    searchParams.level_min = features.equip_level\r\n                    searchParams.level_max = features.equip_level * 1 + 9\r\n                }\r\n                if (features.special_effect && features.special_effect.length > 0) {\r\n                    searchParams.special_mode = 'and'\r\n                    searchParams.special_effect = features.special_effect.join(',')\r\n                }\r\n                if (features.suit_effect) {\r\n                    searchParams.suit_effect = features.suit_effect\r\n                }\r\n                if (features.special_skill) {\r\n                    searchParams.special_skill = features.special_skill\r\n                }\r\n                if (features.hole_num) {\r\n                    searchParams.hole_num = features.hole_num\r\n                }\r\n\r\n                const paramsKey = [\r\n                    // 'init_damage', //all_damage已经包含init_damage\r\n                    'init_damage_raw',\r\n                    'init_defense',\r\n                    'init_hp',\r\n                    'init_dex',\r\n                    'init_wakan',\r\n                    'all_wakan',\r\n                    'all_damage',\r\n                    'damage'\r\n                ]\r\n                //如果是武器打只太阳石，则忽略all_damage\r\n                if (searchParams.gem_value === '2') {\r\n                    paramsKey.splice(paramsKey.indexOf('all_damage'), 1)\r\n                } else if (searchParams.gem_value === '1') {\r\n                    //如果是武器打只红玛瑙，则忽略init_damage\r\n                    paramsKey.splice(paramsKey.indexOf('init_damage'), 1)\r\n                }\r\n\r\n                paramsKey.forEach((value) => {\r\n                    if (features[value]) {\r\n                        searchParams[value] = features[value]\r\n                    }\r\n                })\r\n            }\r\n            return searchParams\r\n        },\r\n        // 通过server_id在window.server_data中反查对应的areaid\r\n        getAreaIdByServerId(serverId) {\r\n            if (!window || !window.server_data) return undefined\r\n            const sid = Number(serverId)\r\n            for (let key in window.server_data) {\r\n                const [parent, children] = window.server_data[key]\r\n                const areaValue = parent && parent.length >= 5 ? parent[4] : undefined\r\n                if (!Array.isArray(children)) continue\r\n                for (const child of children) {\r\n                    if (Array.isArray(child) && child[0] === sid) {\r\n                        return areaValue\r\n                    }\r\n                }\r\n            }\r\n            return undefined\r\n        },\r\n        async getFeatures() {\r\n            let query = {}\r\n            if (this.externalParams.action === 'similar_equip') {\r\n\r\n                await this.$api.equipment\r\n                    .extractFeatures({\r\n                        equipment_data: {\r\n                            kindid: this.externalParams.kindid * 1 || undefined,\r\n                            type: this.externalParams.type * 1 || undefined,\r\n                            large_equip_desc: this.externalParams.large_equip_desc\r\n                        },\r\n                        data_type: 'equipment'\r\n                    })\r\n                    .then((res) => {\r\n                        if (res.code === 200 && res.data.features) {\r\n                            this.targetFeatures = res.data.features\r\n                            // 使用equip_name,large_equip_desc改变当前title\r\n                            document.title = this.targetFeatures.equip_level + '级' + this.externalParams.equip_name + ' - ' + this.externalParams.large_equip_desc.replace(/#r|#Y|#G|#c4DBAF4|#W|#cEE82EE|#c7D7E82/g, '')\r\n                            //使用 this.externalParams.equip_face_img动态改变网页的favicon.ico\r\n                            document.querySelector('link[rel=\"icon\"]').href = this.externalParams.equip_face_img\r\n                            query = this.genarateEquipmentSearchParams(res.data.features)\r\n                        }\r\n                    })\r\n            } else if (this.externalParams.action === 'similar_pet') {\r\n                query = this.genaratePetSearchParams()\r\n            }\r\n            if (this.externalParams.serverid) {\r\n                // 如果serverid存在，则设置server_id，并根据server_data计算areaid\r\n                const server_id = Number(this.externalParams.serverid)\r\n                const areaid = this.getAreaIdByServerId(server_id)\r\n                query.server_id = server_id\r\n                if (areaid !== undefined) {\r\n                    query.areaid = areaid\r\n                }\r\n                this.server_data_value = [areaid, server_id]\r\n                query.server_name = this.externalParams.server_name\r\n            }\r\n            this.externalSearchParams = JSON.stringify(query, null, 2)\r\n        },\r\n        async openCBGSearch() {\r\n     \r\n            let prefix = ''\r\n            let search_type = 'search_role_equip'\r\n            let query = {}\r\n            if (this.externalParams.action === 'similar_equip') {\r\n                if (window.is_pet_equip(this.targetFeatures.kindid)) {\r\n                    // 使用Vuex store中的服务器数据\r\n                    search_type = 'search_pet_equip'\r\n                } else if (window.is_lingshi_equip(this.targetFeatures.kindid)) {\r\n                    search_type = 'search_lingshi'\r\n                } else {\r\n                    search_type += '&hide_lingshi=1'\r\n                }\r\n                query = this.genarateEquipmentSearchParams(this.targetFeatures)\r\n            } else {\r\n                search_type = 'search_pet'\r\n                query = this.genaratePetSearchParams()\r\n            }\r\n            const serverData = this.$store.getters.getCurrentServerData\r\n            prefix = `https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=${new Date().getTime()}&act=recommd_by_role&server_id=${serverData.server_id\r\n                }&areaid=${serverData.areaid}&server_name=${serverData.server_name\r\n                }&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=${search_type}&`\r\n\r\n            let target_url = prefix + qs.stringify(query)\r\n            console.log(target_url, 'target_url')\r\n            // this.$api.spider.startPlaywright({\r\n            //     headless: false,\r\n            //     target_url\r\n            // })\r\n        },\r\n        /**\r\n        * GBK编码的URL编码\r\n        * @param {string} str - 要编码的字符串\r\n        * @returns {Promise<string>} - GBK编码的URL编码字符串\r\n        */\r\n        encodeGBK(str) {\r\n            if (!str) return ''\r\n\r\n            try {\r\n                const gbkBytes = str2gbk(str)\r\n                // 将字节数组转换为URL编码格式\r\n                return Array.from(gbkBytes)\r\n                    .map((b) => `%${b.toString(16).toUpperCase().padStart(2, '0')}`)\r\n                    .join('')\r\n            } catch (error) {\r\n                console.warn('GBK编码失败，使用UTF-8编码作为降级方案:', error)\r\n                // 降级到UTF-8编码\r\n                return window.encodeURI(str)\r\n            }\r\n        },\r\n        async loadExternalParams() {\r\n            if (this.externalParams.activeTab) {\r\n                this.activeTab = this.externalParams.activeTab\r\n            }\r\n            if (this.externalParams.equip_type) {\r\n                this.equipForm.equip_type = this.externalParams.equip_type\r\n            }\r\n        },\r\n        // 快速配置方法 - 根据当前activeTab配置\r\n        quickConfig(size) {\r\n            const configs = {\r\n                small: { max_pages: 10, delay_min: 10, delay_max: 15 },\r\n                medium: { max_pages: 50, delay_min: 15, delay_max: 20 },\r\n                large: { max_pages: 100, delay_min: 20, delay_max: 30 }\r\n            }\r\n            const system = configs[size]\r\n            Object.assign(this.globalSettings, system)\r\n            // 同步更新滑块值\r\n            this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]\r\n        },\r\n\r\n        // 延迟范围滑块变化处理\r\n        onDelayRangeChange(value) {\r\n            this.globalSettings.delay_min = value[0]\r\n            this.globalSettings.delay_max = value[1]\r\n        },\r\n        async loadEquipConfig() {\r\n            const response = await this.$api.equipment.getEquipConfig()\r\n            this.equipConfig = response.data\r\n            if (this.targetFeatures.suit_effect) {\r\n                this.suit_effect_type = ''\r\n            }\r\n            if (this.targetFeatures.addon_total > 0) {\r\n                [['liliang', 'power'], ['minjie', 'dex'], ['moli', 'magic'], ['naili', 'endurance'], ['tizhi', 'physique']].forEach(([attr, key]) => {\r\n                    if (this.targetFeatures[`addon_${attr}`] > 0) {\r\n                        this.select_sum_attr_type.push(key)\r\n                    }\r\n                })\r\n            }\r\n        },\r\n        async loadHotServers() {\r\n            try {\r\n                const response = await this.$api.system.getHotServers()\r\n                this.hotServers = response\r\n                console.log('热门服务器数据加载完成:', this.hotServers)\r\n\r\n                // 在热门服务器数据加载完成后，处理可能已存在的target_server_list\r\n                if (this.target_server_list && this.target_server_list.length > 0) {\r\n                    this.onTargetServerChange(this.target_server_list)\r\n                }\r\n\r\n                // 如果多服务器模式已开启，自动设置同级别服务器\r\n                if (this.globalSettings.multi && this.externalParams.serverid) {\r\n                    const server_id = Number(this.externalParams.serverid)\r\n                    console.log('数据加载完成后，自动设置多服务器模式的目标服务器:', server_id)\r\n                    this.setTargetServersByLevel(server_id)\r\n                }\r\n            } catch (error) {\r\n                console.error('加载热门服务器数据失败:', error)\r\n                this.$notify.error('加载热门服务器数据失败: ' + error.message)\r\n            }\r\n        },\r\n        // 加载搜索参数配置\r\n        async loadSearchParams() {\r\n            try {\r\n                this.paramsLoading = true\r\n                const response = await this.$api.system.getSearchParams()\r\n\r\n                if (response.code === 200) {\r\n                    // 更新默认参数\r\n                    this.defaultParams = {\r\n                        role: response.data.role || {},\r\n                        equip_normal: response.data.equip_normal || {},\r\n                        equip_lingshi: response.data.equip_lingshi || {},\r\n                        equip_pet: response.data.equip_pet || {},\r\n                        equip_pet_equip: response.data.equip_pet_equip || {},\r\n                        pet: response.data.pet || {}\r\n                    }\r\n\r\n                    // 初始化JSON编辑器\r\n                    this.initializeDefaultParams()\r\n                } else {\r\n                    this.$notify.error(response.message || '加载搜索参数配置失败')\r\n                    // 使用默认值\r\n                    this.initializeDefaultParams()\r\n                }\r\n            } catch (error) {\r\n                console.error('加载搜索参数配置失败:', error)\r\n                this.$notify.error('加载搜索参数配置失败: ' + error.message)\r\n                // 使用默认值\r\n                this.initializeDefaultParams()\r\n            } finally {\r\n                this.paramsLoading = false\r\n            }\r\n        },\r\n\r\n        // 初始化默认参数\r\n        initializeDefaultParams() {\r\n            this.roleParamsJson = JSON.stringify(this.defaultParams.role, null, 2)\r\n            // 根据当前装备类型初始化装备参数\r\n            const equipParamKey = this.getEquipParamKey(this.equipForm.equip_type)\r\n            this.equipParamsJson = JSON.stringify(this.defaultParams[equipParamKey], null, 2)\r\n            this.petParamsJson = JSON.stringify(this.defaultParams.pet, null, 2)\r\n        },\r\n        // Playwright收集相关方法\r\n        onHeadlessToggle(headless) {\r\n            if (headless) {\r\n                this.$notify.info({\r\n                    title: '无头模式',\r\n                    message: '浏览器将在后台运行，不会显示界面'\r\n                })\r\n            } else {\r\n                this.$notify.info({\r\n                    title: '有头模式',\r\n                    message: '浏览器将显示界面，可以看到操作过程'\r\n                })\r\n            }\r\n        },\r\n\r\n        onTargetUrlChange(value) {\r\n            if (value === 'custom') {\r\n                this.playwrightForm.custom_url = ''\r\n            }\r\n        },\r\n\r\n        onEquipTypeChange() {\r\n            // 装备类型改变时切换对应的默认参数\r\n            this.resetParam('equip')\r\n        },\r\n\r\n        // 获取装备参数键\r\n        getEquipParamKey(equipType) {\r\n            const paramKeyMap = {\r\n                normal: 'equip_normal',\r\n                lingshi: 'equip_lingshi',\r\n                pet: 'equip_pet_equip'  // 修复：召唤兽装备应该使用equip_pet_equip\r\n            }\r\n            return paramKeyMap[equipType] || 'equip_normal'\r\n        },\r\n\r\n        // 通用参数操作方法\r\n        getParamConfig(type) {\r\n            return this.paramManager[type]\r\n        },\r\n\r\n        // 验证指定类型的参数\r\n        validateParam(type) {\r\n            const config = this.getParamConfig(type)\r\n            if (!config) return false\r\n\r\n            this[config.errorKey] = this.validateJson(this[config.jsonKey], type)\r\n            return !this[config.errorKey]\r\n        },\r\n\r\n        // 重置参数方法 - 统一处理所有类型的参数重置\r\n        resetParam(type) {\r\n            const config = this.getParamConfig(type)\r\n            if (!config) return\r\n\r\n            const paramKey = config.getParamType ? config.getParamType() : config.paramType\r\n            this[config.jsonKey] = JSON.stringify(this.defaultParams[paramKey], null, 2)\r\n            this[config.errorKey] = ''\r\n        },\r\n\r\n        // 保存参数方法 - 统一处理所有类型的参数保存\r\n        async saveParam(type) {\r\n            const config = this.getParamConfig(type)\r\n            if (!config) return false\r\n\r\n            // 检查JSON错误\r\n            if (!this.validateParam(type)) {\r\n                this.$notify.error('请先修复JSON格式错误')\r\n                return false\r\n            }\r\n\r\n            this[config.savingKey] = true\r\n            try {\r\n                const params = JSON.parse(this[config.jsonKey])\r\n                const paramType = config.getParamType ? config.getParamType() : config.paramType\r\n                const response = await this.$api.system.updateSearchParam(paramType, params)\r\n\r\n                if (response.code === 200) {\r\n                    const successMessage = config.getSuccessMessage ? config.getSuccessMessage() : config.successMessage\r\n                    this.$notify.success(successMessage)\r\n                    // 更新本地默认参数\r\n                    this.defaultParams[paramType] = params\r\n                    return true\r\n                } else {\r\n                    this.$notify.error({\r\n                        title: '保存失败',\r\n                        message: response.message || '保存失败'\r\n                    })\r\n                    return false\r\n                }\r\n            } catch (error) {\r\n                console.error(`保存${type}参数失败:`, error)\r\n                this.$notify.error({\r\n                    title: '保存失败',\r\n                    message: '保存失败: ' + error.message\r\n                })\r\n                return false\r\n            } finally {\r\n                this[config.savingKey] = false\r\n            }\r\n        },\r\n\r\n        // JSON验证方法 - 统一处理所有类型的JSON验证\r\n        validateJson(jsonStr, type) {\r\n            try {\r\n                if (!jsonStr.trim()) {\r\n                    return `${type}参数不能为空`\r\n                }\r\n                const parsed = JSON.parse(jsonStr)\r\n                if (typeof parsed !== 'object' || parsed === null) {\r\n                    return 'JSON必须是一个对象'\r\n                }\r\n                return ''\r\n            } catch (e) {\r\n                return `JSON格式错误: ${e.message}`\r\n            }\r\n        },\r\n\r\n\r\n\r\n        // 加载缓存参数\r\n        async loadCachedParams() {\r\n            try {\r\n                await this.loadSearchParams()\r\n                this.$notify.success({\r\n                    title: '缓存参数',\r\n                    message: '缓存参数已刷新'\r\n                })\r\n            } catch (error) {\r\n                this.$notify.error({\r\n                    title: '获取失败',\r\n                    message: '获取缓存参数失败: ' + error.message\r\n                })\r\n            }\r\n        },\r\n\r\n        // 通用启动爬虫方法\r\n        async startSpiderByType(type) {\r\n            if (this.isRunning) return\r\n\r\n            const config = this.paramManager[type]\r\n            if (!config) return\r\n\r\n            // 检查JSON错误\r\n            if (this[config.errorKey]) {\r\n                this.$notify.error('请先修复JSON格式错误')\r\n                return\r\n            }\r\n\r\n            try {\r\n                const params = config.getParams()\r\n                const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params)\r\n\r\n                if (response.code === 200) {\r\n                    this.$notify.success({\r\n                        title: '爬虫启动',\r\n                        message: `${config.spiderName}已启动`\r\n                    })\r\n                    this.activeTab = type // 确保切换到对应tab\r\n                    this.isRunning = true // 立即设置运行状态\r\n                } else {\r\n                    this.$notify.error({\r\n                        title: '启动失败',\r\n                        message: response.message || '启动失败'\r\n                    })\r\n                }\r\n            } catch (error) {\r\n                this.$notify.error({\r\n                    title: '启动失败',\r\n                    message: '启动失败: ' + error.message\r\n                })\r\n            }\r\n        },\r\n\r\n\r\n\r\n        // 启动Playwright收集\r\n        async startPlaywrightCollector() {\r\n            if (this.isRunning) return\r\n\r\n            try {\r\n                const params = {\r\n                    headless: this.playwrightForm.headless\r\n                    // 不传递target_url，使用后端默认值\r\n                }\r\n\r\n                console.log('启动Playwright收集，参数:', params)\r\n\r\n                const response = await this.$api.spider.startPlaywright(params)\r\n                if (response.code === 200) {\r\n                    this.$notify.success('Playwright收集已启动')\r\n                    this.activeTab = 'playwright'\r\n                    this.isRunning = true\r\n                } else {\r\n                    this.$notify.error(response.message || '启动失败')\r\n                }\r\n            } catch (error) {\r\n                this.$notify.error('启动失败: ' + error.message)\r\n            }\r\n        },\r\n\r\n        // 获取装备类型名称\r\n        getEquipTypeName(type) {\r\n            const names = {\r\n                normal: '普通装备',\r\n                lingshi: '灵饰装备',\r\n                pet: '召唤兽装备'\r\n            }\r\n            return names[type] || '装备'\r\n        },\r\n        // 检查任务状态\r\n        async checkTaskStatus() {\r\n            try {\r\n                const response = await this.$api.spider.getStatus()\r\n                if (response.code === 200) {\r\n                    const status = response.data.status\r\n\r\n                    // 更新运行状态\r\n                    this.isRunning = (status === 'running')\r\n\r\n                    // 如果任务完成或出错，显示消息并停止监控\r\n                    if (status === 'completed' || status === 'error' || status === 'stopped') {\r\n                        if (status === 'error') {\r\n                            this.$notify.error(response.data.message || '任务执行出错')\r\n                        } else if (status === 'stopped') {\r\n                            this.$notify.info(response.data.message || '任务已停止')\r\n                        }\r\n                        this.isRunning = false\r\n                    }\r\n                }\r\n            } catch (error) {\r\n                console.error('状态监控错误:', error)\r\n            }\r\n        },\r\n        // 状态监控方法\r\n        startStatusMonitor() {\r\n            // 清除可能存在的旧定时器\r\n            this.stopStatusMonitor()\r\n\r\n            // 启动状态监控定时器\r\n            this.statusMonitor = setInterval(async () => {\r\n                await this.checkTaskStatus()\r\n            }, 5000) // 每2秒检查一次状态\r\n        },\r\n        stopStatusMonitor() {\r\n            if (this.statusMonitor) {\r\n                clearInterval(this.statusMonitor)\r\n                this.statusMonitor = null\r\n            }\r\n        },\r\n    }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n.auto-params-view {}\r\n\r\n/* 参数编辑器样式 */\r\n.params-editor {\r\n    background-color: #f9f9f9;\r\n    padding: 15px;\r\n    border-radius: 6px;\r\n    margin: 15px 0;\r\n    border-left: 4px solid #409eff;\r\n}\r\n\r\n.params-actions {\r\n    display: flex;\r\n    justify-content: space-between;\r\n    align-items: center;\r\n    margin-bottom: 10px;\r\n    padding-bottom: 10px;\r\n    border-bottom: 1px solid #e4e7ed;\r\n}\r\n\r\n.json-editor-wrapper {\r\n    position: relative;\r\n    width: 100%;\r\n}\r\n\r\n.json-editor {\r\n    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;\r\n    font-size: 13px;\r\n    line-height: 1.4;\r\n}\r\n\r\n.json-editor textarea {\r\n    background-color: #2d3748;\r\n    color: #e2e8f0;\r\n    border: 1px solid #4a5568;\r\n    border-radius: 4px;\r\n    padding: 12px;\r\n}\r\n\r\n.json-editor textarea:focus {\r\n    border-color: #409eff;\r\n    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);\r\n}\r\n\r\n.json-error {\r\n    margin-top: 8px;\r\n    padding: 8px 12px;\r\n    background-color: #fef0f0;\r\n    border: 1px solid #fbc4c4;\r\n    border-radius: 4px;\r\n    color: #f56c6c;\r\n    font-size: 12px;\r\n    line-height: 1.4;\r\n}\r\n\r\n.json-error i {\r\n    margin-right: 4px;\r\n}\r\n</style>"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
 
@@ -7060,6 +10640,78 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, "\n.valuation-info[data-v-b3167e7a] {\r\n  margin: 12px 0;\r\n  padding: 12px;\r\n  background-color: #f8f9fa;\r\n  border-radius: 6px;\r\n  border-left: 4px solid #409eff;\r\n  display: flex;\r\n  flex-direction: column;\r\n  gap: 8px;\n}\n.valuation-main[data-v-b3167e7a] {\r\n  font-size: 14px;\r\n  display: flex;\r\n  align-items: center;\r\n  flex-wrap: wrap;\r\n  gap: 8px;\n}\n.valuation-label[data-v-b3167e7a] {\r\n  color: #606266;\r\n  font-weight: 500;\n}\n.valuation-price[data-v-b3167e7a] {\r\n  color: #e6a23c;\r\n  font-weight: 600;\r\n  font-size: 16px;\n}\n.valuation-strategy[data-v-b3167e7a] {\r\n  color: #909399;\r\n  font-size: 12px;\n}\n.valuation-details[data-v-b3167e7a] {\r\n  display: flex;\r\n  gap: 15px;\r\n  font-size: 12px;\r\n  color: #909399;\r\n  flex-wrap: wrap;\n}\n.confidence-display[data-v-b3167e7a] {\r\n  display: flex;\r\n  align-items: center;\r\n  gap: 4px;\r\n  font-weight: 500;\n}\n.confidence-display i[data-v-b3167e7a] {\r\n  font-size: 14px;\n}\n.confidence-level[data-v-b3167e7a] {\r\n  font-size: 11px;\r\n  opacity: 0.8;\n}\r\n\r\n/* 置信度文本颜色 */\n.text-success[data-v-b3167e7a] {\r\n  color: #67c23a !important;\n}\n.text-primary[data-v-b3167e7a] {\r\n  color: #409eff !important;\n}\n.text-info[data-v-b3167e7a] {\r\n  color: #909399 !important;\n}\n.text-warning[data-v-b3167e7a] {\r\n  color: #e6a23c !important;\n}\n.text-danger[data-v-b3167e7a] {\r\n  color: #f56c6c !important;\n}\r\n/* 根据置信度的颜色变化 */\n.valuation-info.confidence-high[data-v-b3167e7a] {\r\n  border-left: 4px solid #67c23a;\r\n  /* 绿色 - 高置信度 */\r\n  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);\n}\n.valuation-info.confidence-medium[data-v-b3167e7a] {\r\n  border-left: 4px solid #409eff;\r\n  /* 蓝色 - 中等置信度 */\r\n  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);\n}\n.valuation-info.confidence-low[data-v-b3167e7a] {\r\n  border-left: 4px solid #909399;\r\n  /* 灰色 - 较低置信度 */\r\n  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);\n}\n.valuation-info.confidence-very-low[data-v-b3167e7a] {\r\n  border-left: 4px solid #e6a23c;\r\n  /* 橙色 - 很低置信度 */\r\n  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);\n}\n.valuation-info.confidence-extremely-low[data-v-b3167e7a] {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/EquipmentValuation.vue"],"names":[],"mappings":";AAgRA;EACA,cAAA;EACA,aAAA;EACA,yBAAA;EACA,kBAAA;EACA,8BAAA;EACA,aAAA;EACA,sBAAA;EACA,QAAA;AACA;AAEA;EACA,eAAA;EACA,aAAA;EACA,mBAAA;EACA,eAAA;EACA,QAAA;AACA;AAEA;EACA,cAAA;EACA,gBAAA;AACA;AAEA;EACA,cAAA;EACA,gBAAA;EACA,eAAA;AACA;AAEA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,SAAA;EACA,eAAA;EACA,cAAA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,QAAA;EACA,gBAAA;AACA;AAEA;EACA,eAAA;AACA;AAEA;EACA,eAAA;EACA,YAAA;AACA;;AAEA,YAAA;AACA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AAEA;EACA,yBAAA;AACA;AACA,eAAA;AACA;EACA,8BAAA;EACA,cAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA;AAEA;EACA,8BAAA;EACA,eAAA;EACA,6DAAA;AACA","sourcesContent":["<template>\r\n  <div class=\"valuation-info\" :class=\"confidenceClass\">\r\n    <el-row type=\"flex\" align=\"middle\" justify=\"space-between\">\r\n      <el-row type=\"flex\" align=\"middle\">\r\n        <EquipmentImage :equipment=\"targetEquipment\" width=\"50px\" height=\"50px\" placement=\"left\" />\r\n        <span v-if=\"targetEquipment.price\" v-html=\"formatFullPrice(targetEquipment)\" style=\"margin-left: 10px\"></span>\r\n        <div v-if=\"isWeapon\" style=\"margin-left: 10px\">\r\n          <div style=\"margin-bottom: 5px\"> <el-tag type=\"success\">属性：+{{ valuation.feature.addon_total }}点{{\r\n            addon_total_standards?.[valuation.feature.equip_level] }}</el-tag>\r\n            <el-divider direction=\"vertical\" />\r\n            <el-tag type=\"primary\">总伤：{{ valuation.feature.all_damage }}/{{\r\n              parseInt(all_damage_standards?.[valuation.feature.equip_level][1]\r\n                + (25 * valuation.feature.equip_level / 30)) }}</el-tag>\r\n          </div>\r\n          <div>\r\n            <el-tag type=\"danger\">初伤：{{ valuation.feature.init_damage_raw }}点{{\r\n              init_damage_raw_standards?.[valuation.feature.equip_level] }}</el-tag>\r\n            <el-divider direction=\"vertical\" />\r\n            <el-tag type=\"danger\">初总伤：{{ valuation.feature.init_damage }}点{{\r\n              all_damage_standards?.[valuation.feature.equip_level] }}</el-tag>\r\n          </div>\r\n        </div>\r\n      </el-row>\r\n      <!-- 刷新和相似装备界面 -->\r\n      <div style=\"width: 170px;flex-shrink: 0;\">\r\n        <el-button type=\"primary\" @click=\"$emit('refresh')\" size=\"mini\">刷新</el-button>\r\n        <SimilarGetMore :target-equipment=\"targetEquipment\" />\r\n      </div>\r\n    </el-row>\r\n    <div class=\"valuation-main\">\r\n      <span class=\"valuation-label\">装备估价:</span>\r\n      <span class=\"valuation-price\">{{ valuation?.estimated_price_yuan || '-' }}元</span>\r\n      <span class=\"valuation-strategy\">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>\r\n      <el-link type=\"danger\" @click.native=\"markAsAbnormal\" size=\"mini\">标记为异常</el-link>\r\n\r\n      <!-- 价格比率显示 -->\r\n      <span v-if=\"priceRatio\" class=\"price-ratio\">\r\n        <el-tag :type=\"priceRatioTagType\" disable-transitions>\r\n          {{ priceRatioText }}\r\n        </el-tag>\r\n      </span>\r\n    </div>\r\n    <div class=\"valuation-details\">\r\n      <span class=\"confidence-display\" :class=\"confidenceTextClass\">\r\n        <i :class=\"confidenceIcon\"></i>\r\n        置信度: {{ valuation ? (valuation.confidence * 100).toFixed(1) + '%' : '-' }}\r\n        <span class=\"confidence-level\">{{ confidenceLevel }}</span>\r\n      </span>\r\n      <span>基于{{ valuation.anchor_count }}个锚点</span>\r\n      <span v-if=\"priceRatio\">估价比率: {{ (priceRatio * 100).toFixed(1) }}%</span>\r\n    </div>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport EquipmentImage from './EquipmentImage/EquipmentImage.vue'\r\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\r\nimport { commonMixin } from '@/utils/mixins/commonMixin'\r\nimport SimilarGetMore from './SimilarGetMore.vue'\r\n\r\nexport default {\r\n  name: 'EquipmentValuation',\r\n  components: {\r\n    EquipmentImage,\r\n    SimilarGetMore\r\n  },\r\n  mixins: [equipmentMixin, commonMixin],\r\n  props: {\r\n    valuation: {\r\n      type: Object,\r\n      default: null\r\n    },\r\n    targetEquipment: {\r\n      type: Object,\r\n      required: true\r\n    }\r\n  },\r\n  data() {\r\n    return {\r\n      weaponConfig: null,\r\n      addon_total_standards: null,\r\n      all_damage_standards: null,\r\n      init_damage_raw_standards: null,\r\n    }\r\n  },\r\n  computed: {\r\n    isWeapon() {\r\n      return window.is_weapon_equip(this.valuation?.feature?.kindid)\r\n    },\r\n    // 计算估价与售价的比率\r\n    priceRatio() {\r\n      if (!this.valuation || !this.valuation.estimated_price_yuan || !this.targetEquipment.price) {\r\n        return null\r\n      }\r\n\r\n      const estimatedPrice = parseFloat(this.valuation.estimated_price_yuan)\r\n      const sellingPrice = parseFloat(this.targetEquipment.price) / 100 // 转换为元\r\n\r\n      if (sellingPrice === 0) return null\r\n\r\n      return estimatedPrice / sellingPrice\r\n    },\r\n    priceRatioTagType() {\r\n      if (!this.priceRatio) return ''\r\n      const ratio = this.priceRatio\r\n      const deviation = Math.abs(ratio - 1) * 100\r\n      if (deviation < 5) {\r\n        return 'success'\r\n      } else if (deviation < 10) {\r\n        return 'info'\r\n      } else if (deviation < 20) {\r\n        return 'warning'\r\n      } else {\r\n        return 'danger'\r\n      }\r\n    },\r\n    priceRatioText() {\r\n      if (!this.priceRatio) return ''\r\n      const ratio = this.priceRatio\r\n      const deviation = Math.abs(ratio - 1) * 100\r\n      if (deviation < 5) {\r\n        return `估价极为贴合市场（±${deviation.toFixed(1)}%）`\r\n      } else if (deviation < 10) {\r\n        return `估价较为贴合（±${deviation.toFixed(1)}%）`\r\n      } else if (deviation < 20) {\r\n        return `估价有一定偏差（±${deviation.toFixed(1)}%）`\r\n      } else if (ratio > 1) {\r\n        return `估价高于市场（+${((ratio - 1) * 100).toFixed(1)}%）`\r\n      } else {\r\n        return `估价低于市场（-${((1 - ratio) * 100).toFixed(1)}%）`\r\n      }\r\n    },\r\n    // 根据置信度返回对应的CSS类\r\n    confidenceClass() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return 'confidence-extremely-low'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return 'confidence-high'        // >= 80%: 高置信度 (绿色)\r\n      } else if (confidence >= 0.6) {\r\n        return 'confidence-medium'      // 60-79%: 中等置信度 (蓝色)\r\n      } else if (confidence >= 0.4) {\r\n        return 'confidence-low'         // 40-59%: 较低置信度 (灰色)\r\n      } else if (confidence >= 0.2) {\r\n        return 'confidence-very-low'    // 20-39%: 很低置信度 (橙色)\r\n      } else {\r\n        return 'confidence-extremely-low' // < 20%: 极低置信度 (红色)\r\n      }\r\n    },\r\n    // 置信度文本颜色类\r\n    confidenceTextClass() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return 'text-danger'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return 'text-success'\r\n      } else if (confidence >= 0.6) {\r\n        return 'text-primary'\r\n      } else if (confidence >= 0.4) {\r\n        return 'text-info'\r\n      } else if (confidence >= 0.2) {\r\n        return 'text-warning'\r\n      } else {\r\n        return 'text-danger'\r\n      }\r\n    },\r\n    // 置信度图标\r\n    confidenceIcon() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return 'el-icon-warning'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return 'el-icon-success'\r\n      } else if (confidence >= 0.6) {\r\n        return 'el-icon-info'\r\n      } else if (confidence >= 0.4) {\r\n        return 'el-icon-question'\r\n      } else if (confidence >= 0.2) {\r\n        return 'el-icon-warning'\r\n      } else {\r\n        return 'el-icon-error'\r\n      }\r\n    },\r\n    // 置信度等级描述\r\n    confidenceLevel() {\r\n      if (!this.valuation || !this.valuation.confidence) {\r\n        return '(数据缺失)'\r\n      }\r\n      \r\n      const confidence = this.valuation.confidence\r\n      \r\n      if (confidence >= 0.8) {\r\n        return '(高)'\r\n      } else if (confidence >= 0.6) {\r\n        return '(中)'\r\n      } else if (confidence >= 0.4) {\r\n        return '(偏低)'\r\n      } else if (confidence >= 0.2) {\r\n        return '(很低)'\r\n      } else {\r\n        return '(极低)'\r\n      }\r\n    },\r\n  },\r\n  methods: {\r\n    getWeaponConfig() {\r\n      this.$api.equipment.getWeaponConfig().then(res => {\r\n        if (res.code === 200) {\r\n          this.weaponConfig = res.data\r\n          this.addon_total_standards = res.data.addon_total_standards\r\n          this.all_damage_standards = res.data.all_damage_standards\r\n          this.init_damage_raw_standards = res.data.init_damage_raw_standards\r\n        }\r\n      })\r\n    },\r\n    async markAsAbnormal() {\r\n      try {\r\n        // 调用API标记装备为异常\r\n        const response = await this.$api.equipment.markEquipmentAsAbnormal({\r\n          equipment_data: this.targetEquipment,\r\n          reason: '标记异常',\r\n          notes: '用户手动标记的异常装备'\r\n        })\r\n\r\n        if (response.code === 200) {\r\n          this.$notify.success({\r\n            title: '提示',\r\n            message: '装备已标记为异常'\r\n          })\r\n          // 可以触发父组件刷新或其他操作\r\n          this.$emit('abnormal-marked', this.targetEquipment)\r\n        } else {\r\n          this.$notify.error({\r\n            title: '提示',\r\n            message: response.message || '标记异常失败'\r\n          })\r\n        }\r\n      } catch (error) {\r\n        console.error('标记异常失败:', error)\r\n        this.$notify.error({\r\n          title: '提示',\r\n          message: '标记异常失败，请稍后重试'\r\n        })\r\n      }\r\n    },\r\n    getStrategyName(strategy) {\r\n      const strategyNames = {\r\n        fair_value: '公允价值',\r\n        competitive: '竞争价格',\r\n        premium: '溢价估值'\r\n      }\r\n      return strategyNames[strategy] || strategy\r\n    },\r\n  },\r\n  mounted() {\r\n    if (this.isWeapon) {\r\n      this.getWeaponConfig()\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n.valuation-info {\r\n  margin: 12px 0;\r\n  padding: 12px;\r\n  background-color: #f8f9fa;\r\n  border-radius: 6px;\r\n  border-left: 4px solid #409eff;\r\n  display: flex;\r\n  flex-direction: column;\r\n  gap: 8px;\r\n}\r\n\r\n.valuation-main {\r\n  font-size: 14px;\r\n  display: flex;\r\n  align-items: center;\r\n  flex-wrap: wrap;\r\n  gap: 8px;\r\n}\r\n\r\n.valuation-label {\r\n  color: #606266;\r\n  font-weight: 500;\r\n}\r\n\r\n.valuation-price {\r\n  color: #e6a23c;\r\n  font-weight: 600;\r\n  font-size: 16px;\r\n}\r\n\r\n.valuation-strategy {\r\n  color: #909399;\r\n  font-size: 12px;\r\n}\r\n\r\n.valuation-details {\r\n  display: flex;\r\n  gap: 15px;\r\n  font-size: 12px;\r\n  color: #909399;\r\n  flex-wrap: wrap;\r\n}\r\n\r\n.confidence-display {\r\n  display: flex;\r\n  align-items: center;\r\n  gap: 4px;\r\n  font-weight: 500;\r\n}\r\n\r\n.confidence-display i {\r\n  font-size: 14px;\r\n}\r\n\r\n.confidence-level {\r\n  font-size: 11px;\r\n  opacity: 0.8;\r\n}\r\n\r\n/* 置信度文本颜色 */\r\n.text-success {\r\n  color: #67c23a !important;\r\n}\r\n\r\n.text-primary {\r\n  color: #409eff !important;\r\n}\r\n\r\n.text-info {\r\n  color: #909399 !important;\r\n}\r\n\r\n.text-warning {\r\n  color: #e6a23c !important;\r\n}\r\n\r\n.text-danger {\r\n  color: #f56c6c !important;\r\n}\r\n/* 根据置信度的颜色变化 */\r\n.valuation-info.confidence-high {\r\n  border-left: 4px solid #67c23a;\r\n  /* 绿色 - 高置信度 */\r\n  background: linear-gradient(270deg, #f0f9ff 0%, #e1f3d8 100%);\r\n}\r\n\r\n.valuation-info.confidence-medium {\r\n  border-left: 4px solid #409eff;\r\n  /* 蓝色 - 中等置信度 */\r\n  background: linear-gradient(270deg, #f0f8ff 0%, #e1f5fe 100%);\r\n}\r\n\r\n.valuation-info.confidence-low {\r\n  border-left: 4px solid #909399;\r\n  /* 灰色 - 较低置信度 */\r\n  background: linear-gradient(270deg, #f8f9fa 0%, #e9ecef 100%);\r\n}\r\n\r\n.valuation-info.confidence-very-low {\r\n  border-left: 4px solid #e6a23c;\r\n  /* 橙色 - 很低置信度 */\r\n  background: linear-gradient(270deg, #fdf6ec 0%, #fdf2e9 100%);\r\n}\r\n\r\n.valuation-info.confidence-extremely-low {\r\n  border-left: 4px solid #f56c6c;\r\n  /* 红色 - 极低置信度 */\r\n  background: linear-gradient(270deg, #fef0f0 0%, #fde2e2 100%);\r\n}\r\n</style>\r\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css":
+/*!*********************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css ***!
+  \*********************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\r\n/* 卡片样式 */\n.logs-card[data-v-4395aca6] {\r\n  margin-bottom: 20px;\n&.simple-mode[data-v-4395aca6] {\r\n    margin-bottom: 0;\n}\n}\n.logs-card.simple-mode[data-v-4395aca6] .el-card__body  {\r\n    padding: 0 !important;\n}\n.logs-card.simple-mode .logs-content[data-v-4395aca6],.logs-card.simple-mode .logs-content .logs-container[data-v-4395aca6]  {\r\n    height: 200px;\r\n    padding: 0 !important;\n}\n.card-header[data-v-4395aca6] {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  font-weight: bold;\r\n  font-size: 16px;\n}\r\n\r\n/* 日志相关样式 */\n.logs-content[data-v-4395aca6] {\r\n  padding: 10px 0;\n}\n.logs-container[data-v-4395aca6] {\r\n  height: 400px;\r\n  overflow-y: auto;\r\n  background-color: #1e1e1e;\r\n  border-radius: 6px;\r\n  padding: 15px;\r\n  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;\r\n  font-size: 13px;\r\n  line-height: 1.4;\n}\n.no-logs[data-v-4395aca6] {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: center;\r\n  justify-content: center;\r\n  height: 100%;\r\n  color: #666;\n}\n.no-logs i[data-v-4395aca6] {\r\n  font-size: 48px;\r\n  margin-bottom: 10px;\n}\n.log-lines[data-v-4395aca6] {\r\n  display: flex;\r\n  flex-direction: column;\n}\n.log-line[data-v-4395aca6] {\r\n  padding: 2px 0;\r\n  display: flex;\r\n  align-items: flex-start;\r\n  word-break: break-all;\n}\n.log-time[data-v-4395aca6] {\r\n  font-size: 12px;\r\n  color: #888;\r\n  min-width: 130px;\r\n  flex-shrink: 0;\n}\n.log-content[data-v-4395aca6] {\r\n  color: #e2e8f0;\r\n  flex: 1;\r\n  font-size: 12px;\n}\n.log-error[data-v-4395aca6] {\r\n  background-color: rgba(245, 108, 108, 0.1);\r\n  border-left: 3px solid #f56c6c;\r\n  padding-left: 10px;\n}\n.log-error .log-content[data-v-4395aca6] {\r\n  color: #f56c6c;\n}\n.log-warning[data-v-4395aca6] {\r\n  background-color: rgba(230, 162, 60, 0.1);\r\n  border-left: 3px solid #e6a23c;\r\n  padding-left: 10px;\n}\n.log-warning .log-content[data-v-4395aca6] {\r\n  color: #e6a23c;\n}\n.log-info[data-v-4395aca6] {\r\n  background-color: rgba(64, 158, 255, 0.1);\r\n  border-left: 3px solid #409eff;\r\n  padding-left: 10px;\n}\n.log-info .log-content[data-v-4395aca6] {\r\n  color: #409eff;\n}\n.log-default .log-content[data-v-4395aca6] {\r\n  color: #e2e8f0;\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/LogMonitor.vue"],"names":[],"mappings":";AAkNA,SAAA;AACA;EACA,mBAAA;AACA;IACA,gBAAA;AACA;AACA;AACA;IACA,qBAAA;AACA;AAEA;IACA,aAAA;IACA,qBAAA;AACA;AACA;EACA,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,iBAAA;EACA,eAAA;AACA;;AAEA,WAAA;AACA;EACA,eAAA;AACA;AAEA;EACA,aAAA;EACA,gBAAA;EACA,yBAAA;EACA,kBAAA;EACA,aAAA;EACA,2DAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,aAAA;EACA,sBAAA;EACA,mBAAA;EACA,uBAAA;EACA,YAAA;EACA,WAAA;AACA;AAEA;EACA,eAAA;EACA,mBAAA;AACA;AAEA;EACA,aAAA;EACA,sBAAA;AACA;AAEA;EACA,cAAA;EACA,aAAA;EACA,uBAAA;EACA,qBAAA;AACA;AAEA;EACA,eAAA;EACA,WAAA;EACA,gBAAA;EACA,cAAA;AACA;AAEA;EACA,cAAA;EACA,OAAA;EACA,eAAA;AACA;AAEA;EACA,0CAAA;EACA,8BAAA;EACA,kBAAA;AACA;AAEA;EACA,cAAA;AACA;AAEA;EACA,yCAAA;EACA,8BAAA;EACA,kBAAA;AACA;AAEA;EACA,cAAA;AACA;AAEA;EACA,yCAAA;EACA,8BAAA;EACA,kBAAA;AACA;AAEA;EACA,cAAA;AACA;AAEA;EACA,cAAA;AACA","sourcesContent":["<template>\r\n  <el-card class=\"logs-card\" :class=\"{ 'simple-mode': simpleMode }\">\r\n    <div slot=\"header\" class=\"card-header\" v-if=\"!simpleMode\">\r\n      <span>📝 实时日志</span>\r\n      <div>\r\n        <el-button type=\"text\" @click=\"refreshLogs\" :loading=\"logsLoading\" size=\"small\">刷新</el-button>\r\n        <el-button type=\"text\" @click=\"toggleLogStream\" size=\"small\">\r\n          {{ isLogStreaming ? '停止' : '开始' }}实时监控\r\n        </el-button>\r\n        <el-button type=\"text\" @click=\"clearLogs\" size=\"small\">清空</el-button>\r\n      </div>\r\n    </div>\r\n    <div class=\"logs-content\">\r\n      <div class=\"logs-container\" ref=\"logsContainer\">\r\n        <div v-if=\"logs.length === 0\" class=\"no-logs\">\r\n          <i class=\"el-icon-document\"></i>\r\n          <p>暂无日志数据</p>\r\n        </div>\r\n        <div v-else class=\"log-lines\">\r\n          <div v-for=\"(log, index) in logs\" :key=\"index\" class=\"log-line\" :class=\"getLogLevel(log)\">\r\n            <span class=\"log-time\">{{ getLogTime(log) }}</span>\r\n            <span class=\"log-content\">{{ getLogContent(log) }}</span>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </div>\r\n  </el-card>\r\n</template>\r\n\r\n<script>\r\nexport default {\r\n  name: 'LogMonitor',\r\n  props: {\r\n    //简易模式\r\n    simpleMode: {\r\n      type: Boolean,\r\n      default: false\r\n    },\r\n    maxLines: {\r\n      type: Number,\r\n      default: 100\r\n    },\r\n    isRunning: {\r\n      type: Boolean,\r\n      default: false\r\n    }\r\n  },\r\n  data() {\r\n    return {\r\n      // 加载状态\r\n      logsLoading: false,\r\n      // 日志相关\r\n      logs: [],\r\n      logsInfo: null,\r\n      isLogStreaming: false,\r\n      logEventSource: null\r\n    }\r\n  },\r\n  watch: {\r\n    isRunning(newVal) {\r\n      if (newVal) {\r\n        this.startLogStream()\r\n      } else {\r\n        this.stopLogStream()\r\n      }\r\n    }\r\n  },\r\n  mounted() {\r\n    // 默认加载当前日志\r\n    this.refreshLogs()\r\n  },\r\n  beforeDestroy() {\r\n    this.stopLogStream()\r\n  },\r\n  methods: {\r\n    // 日志相关方法\r\n    async refreshLogs() {\r\n      this.logsLoading = true\r\n      try {\r\n        const params = {\r\n          lines: this.maxLines,\r\n          type: 'current'\r\n        }\r\n\r\n        const response = await this.$api.spider.getLogs(params)\r\n        if (response.code === 200) {\r\n          this.logs = response.data.logs || []\r\n          this.logsInfo = response.data\r\n          this.scrollToBottom()\r\n        } else {\r\n          this.$notify.error(response.message || '获取日志失败')\r\n        }\r\n      } catch (error) {\r\n        this.$notify.error('获取日志失败: ' + error.message)\r\n      } finally {\r\n        this.logsLoading = false\r\n      }\r\n    },\r\n\r\n    toggleLogStream() {\r\n      if (this.isLogStreaming) {\r\n        this.stopLogStream()\r\n      } else {\r\n        this.startLogStream()\r\n      }\r\n    },\r\n\r\n    startLogStream() {\r\n      if (this.isLogStreaming) return\r\n\r\n      try {\r\n        this.logEventSource = this.$api.spider.streamLogs()\r\n        this.isLogStreaming = true\r\n\r\n        this.logEventSource.onmessage = (event) => {\r\n          if (event.data) {\r\n            try {\r\n              // 尝试解析JSON数据\r\n              const data = JSON.parse(event.data)\r\n              if (data.log) {\r\n                this.logs.push(data.log)\r\n              } else if (typeof data === 'string') {\r\n                this.logs.push(data)\r\n              }\r\n            } catch (e) {\r\n              // 如果不是JSON，直接作为字符串处理\r\n              this.logs.push(event.data)\r\n            }\r\n\r\n            // 保持最多100行日志\r\n            if (this.logs.length > this.maxLines) {\r\n              this.logs = this.logs.slice(-this.maxLines)\r\n            }\r\n            this.scrollToBottom()\r\n          }\r\n        }\r\n\r\n        this.logEventSource.onerror = (error) => {\r\n          console.error('日志流错误:', error)\r\n          // 错误时不停止流，而是尝试重新连接\r\n          setTimeout(() => {\r\n            if (this.isLogStreaming) {\r\n              this.stopLogStream()\r\n              this.startLogStream()\r\n            }\r\n          }, 5000)\r\n        }\r\n\r\n        this.logEventSource.onopen = () => {\r\n          console.log('日志流连接已建立')\r\n        }\r\n\r\n        // 只在手动启动时显示成功消息，避免页面加载时显示\r\n        if (this.logs.length === 0) {\r\n          this.logs.push('实时日志监控已启动，等待日志数据...')\r\n        }\r\n      } catch (error) {\r\n        console.error('启动实时日志监控失败:', error)\r\n        // 静默处理错误，避免显示错误消息\r\n      }\r\n    },\r\n\r\n    stopLogStream() {\r\n      if (this.logEventSource) {\r\n        try {\r\n          this.logEventSource.close()\r\n        } catch (e) {\r\n          console.log('关闭日志流连接:', e)\r\n        }\r\n        this.logEventSource = null\r\n      }\r\n      this.isLogStreaming = false\r\n    },\r\n\r\n    clearLogs() {\r\n      this.logs = []\r\n      this.logsInfo = null\r\n    },\r\n\r\n    scrollToBottom() {\r\n      this.$nextTick(() => {\r\n        const container = this.$refs.logsContainer\r\n        if (container) {\r\n          container.scrollTop = container.scrollHeight\r\n        }\r\n      })\r\n    },\r\n\r\n    getLogLevel(log) {\r\n      if (log.includes('ERROR') || log.includes('错误')) return 'log-error'\r\n      if (log.includes('WARNING') || log.includes('警告')) return 'log-warning'\r\n      if (log.includes('INFO') || log.includes('信息')) return 'log-info'\r\n      return 'log-default'\r\n    },\r\n\r\n    getLogTime(log) {\r\n      // 提取日志时间戳\r\n      const timeMatch = log.match(/(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2})/)\r\n      return timeMatch ? timeMatch[1] : ''\r\n    },\r\n\r\n    getLogContent(log) {\r\n      // 移除时间戳，返回日志内容\r\n      return log.replace(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}[,\\d]*\\s*/, '')\r\n    }\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n/* 卡片样式 */\r\n.logs-card {\r\n  margin-bottom: 20px;\r\n  &.simple-mode {\r\n    margin-bottom: 0;\r\n  }\r\n}\r\n.logs-card.simple-mode :deep(.el-card__body)  {\r\n    padding: 0 !important;\r\n}\r\n\r\n.logs-card.simple-mode .logs-content,.logs-card.simple-mode .logs-content .logs-container  {\r\n    height: 200px;\r\n    padding: 0 !important;\r\n}\r\n.card-header {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  font-weight: bold;\r\n  font-size: 16px;\r\n}\r\n\r\n/* 日志相关样式 */\r\n.logs-content {\r\n  padding: 10px 0;\r\n}\r\n\r\n.logs-container {\r\n  height: 400px;\r\n  overflow-y: auto;\r\n  background-color: #1e1e1e;\r\n  border-radius: 6px;\r\n  padding: 15px;\r\n  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;\r\n  font-size: 13px;\r\n  line-height: 1.4;\r\n}\r\n\r\n.no-logs {\r\n  display: flex;\r\n  flex-direction: column;\r\n  align-items: center;\r\n  justify-content: center;\r\n  height: 100%;\r\n  color: #666;\r\n}\r\n\r\n.no-logs i {\r\n  font-size: 48px;\r\n  margin-bottom: 10px;\r\n}\r\n\r\n.log-lines {\r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n.log-line {\r\n  padding: 2px 0;\r\n  display: flex;\r\n  align-items: flex-start;\r\n  word-break: break-all;\r\n}\r\n\r\n.log-time {\r\n  font-size: 12px;\r\n  color: #888;\r\n  min-width: 130px;\r\n  flex-shrink: 0;\r\n}\r\n\r\n.log-content {\r\n  color: #e2e8f0;\r\n  flex: 1;\r\n  font-size: 12px;\r\n}\r\n\r\n.log-error {\r\n  background-color: rgba(245, 108, 108, 0.1);\r\n  border-left: 3px solid #f56c6c;\r\n  padding-left: 10px;\r\n}\r\n\r\n.log-error .log-content {\r\n  color: #f56c6c;\r\n}\r\n\r\n.log-warning {\r\n  background-color: rgba(230, 162, 60, 0.1);\r\n  border-left: 3px solid #e6a23c;\r\n  padding-left: 10px;\r\n}\r\n\r\n.log-warning .log-content {\r\n  color: #e6a23c;\r\n}\r\n\r\n.log-info {\r\n  background-color: rgba(64, 158, 255, 0.1);\r\n  border-left: 3px solid #409eff;\r\n  padding-left: 10px;\r\n}\r\n\r\n.log-info .log-content {\r\n  color: #409eff;\r\n}\r\n\r\n.log-default .log-content {\r\n  color: #e2e8f0;\r\n}\r\n</style> "],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css":
+/*!*******************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css ***!
+  \*******************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.pet-info-content[data-v-3824e5ac] {\r\n  padding: 10px;\r\n  min-width: 320px;\r\n  max-width: 400px;\n}\n.pet-header[data-v-3824e5ac] {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-bottom: 8px;\n}\n.pet-basic[data-v-3824e5ac] {\r\n  margin-left: 12px;\n}\n.pet-name[data-v-3824e5ac] {\r\n  color: #ffd700;\r\n  font-weight: bold;\r\n  font-size: 16px;\n}\n.pet-attrs[data-v-3824e5ac] {\r\n  font-size: 13px;\r\n  color: #eee;\r\n  margin-bottom: 8px;\n}\n.pet-skills[data-v-3824e5ac],\r\n.pet-texing[data-v-3824e5ac] {\r\n  margin-bottom: 8px;\n}\r\n", "",{"version":3,"sources":["webpack://./src/components/PetImage.vue"],"names":[],"mappings":";AA0DA;EACA,aAAA;EACA,gBAAA;EACA,gBAAA;AACA;AAEA;EACA,aAAA;EACA,mBAAA;EACA,kBAAA;AACA;AAEA;EACA,iBAAA;AACA;AAEA;EACA,cAAA;EACA,iBAAA;EACA,eAAA;AACA;AAEA;EACA,eAAA;EACA,WAAA;EACA,kBAAA;AACA;AAEA;;EAEA,kBAAA;AACA","sourcesContent":["<template>\r\n  <PetInfoPopover v-bind=\"$attrs\" :pet=\"pet\" :equipFaceImg=\"equipFaceImg\" :enhanceInfo=\"enhanceInfo\" style=\"position: relative;display: block;\">\r\n    <template #trigger>\r\n      <el-image :src=\"imageUrl\" fit=\"cover\" :style=\"imageStyle\" referrerpolicy=\"no-referrer\">\r\n        <div slot=\"error\" class=\"image-slot\">\r\n          <i class=\"el-icon-picture-outline\"></i>\r\n        </div>\r\n      </el-image>\r\n    </template>\r\n  </PetInfoPopover>\r\n</template>\r\n\r\n<script>\r\nimport PetInfoPopover from './PetInfoPopover.vue'\r\nimport { commonMixin } from '@/utils/mixins/commonMixin'\r\n\r\nexport default {\r\n  name: 'PetImage',\r\n  components: { PetInfoPopover },\r\n  mixins: [commonMixin],\r\n  props: {\r\n    size: { type: String, default: 'small' },\r\n    width: { type: String, default: '50px' },\r\n    height: { type: String, default: '50px' },\r\n    cursor: { type: String, default: 'pointer' },\r\n    placement: { type: String, default: 'right' },\r\n    popoverWidth: { type: String, default: '400px' },\r\n    pet: Object,\r\n    enhanceInfo: {\r\n      type: Object,\r\n      default: () => ({})\r\n    },\r\n    equipFaceImg: {\r\n      type: String,\r\n      default: ''\r\n    }\r\n  },\r\n  computed: {\r\n    imageUrl() {\r\n      const petId = this.equipFaceImg\r\n      return this.getImageUrl(`${petId}`)\r\n    },\r\n    imageStyle() {\r\n      return {\r\n        display: 'inline-block',\r\n        width: this.width,\r\n        height: this.height,\r\n        cursor: this.cursor\r\n      }\r\n    },\r\n  },\r\n  mounted() {\r\n    console.log(this.pet)\r\n  }\r\n}\r\n</script>\r\n\r\n<style scoped>\r\n.pet-info-content {\r\n  padding: 10px;\r\n  min-width: 320px;\r\n  max-width: 400px;\r\n}\r\n\r\n.pet-header {\r\n  display: flex;\r\n  align-items: center;\r\n  margin-bottom: 8px;\r\n}\r\n\r\n.pet-basic {\r\n  margin-left: 12px;\r\n}\r\n\r\n.pet-name {\r\n  color: #ffd700;\r\n  font-weight: bold;\r\n  font-size: 16px;\r\n}\r\n\r\n.pet-attrs {\r\n  font-size: 13px;\r\n  color: #eee;\r\n  margin-bottom: 8px;\r\n}\r\n\r\n.pet-skills,\r\n.pet-texing {\r\n  margin-bottom: 8px;\r\n}\r\n</style>"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css":
+/*!*************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n/* 触发器样式 */\n.pet-trigger[data-v-205dfcb0] {\n  cursor: pointer;\n}\n.default-trigger[data-v-205dfcb0] {\n  display: inline-block;\n}\n.pet-info-popover {\n  padding: 0 !important;\n  border: 2px solid #184a5e !important;\n}\n.pet-info-popover .popper__arrow::after {\n  border-right-color: #184a5e !important;\n}\n\n/* 技能tooltip样式 */\n.soldDetail[data-v-205dfcb0] {\n  display: flex;\n  align-items: flex-start;\n  gap: 8px;\n  padding: 8px;\n  background: #303133;\n  color: #fff;\n  border-radius: 4px;\n  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);\n  font-size: 12px;\n  line-height: 1.4;\n}\n.tip-skill-icon[data-v-205dfcb0] {\n  width: 40px;\n  height: 40px;\n  flex-shrink: 0;\n}\n.skill-text[data-v-205dfcb0] {\n  flex: 1;\n}\n.cYellow[data-v-205dfcb0] {\n  color: #ffff00;\n}\n.cifu-name[data-v-205dfcb0] {\n  margin: 0 0 4px 0;\n  font-weight: bold;\n}\n", "",{"version":3,"sources":["webpack://./src/components/PetInfoPopover.vue"],"names":[],"mappings":";AAqnBA,UAAA;AACA;EACA,eAAA;AACA;AAEA;EACA,qBAAA;AACA;AAEA;EACA,qBAAA;EACA,oCAAA;AACA;AAEA;EACA,sCAAA;AACA;;AAEA,gBAAA;AACA;EACA,aAAA;EACA,uBAAA;EACA,QAAA;EACA,YAAA;EACA,mBAAA;EACA,WAAA;EACA,kBAAA;EACA,2CAAA;EACA,eAAA;EACA,gBAAA;AACA;AAEA;EACA,WAAA;EACA,YAAA;EACA,cAAA;AACA;AAEA;EACA,OAAA;AACA;AAEA;EACA,cAAA;AACA;AAEA;EACA,iBAAA;EACA,iBAAA;AACA","sourcesContent":["<template>\n  <el-popover :data-equip-sn=\"$attrs.equip_sn\" placement=\"right\" :trigger=\"trigger\" popper-class=\"pet-info-popover\"\n    v-model=\"visible\" @show=\"handleShow\" @hide=\"handleHide\">\n    <template #reference>\n      <div class=\"pet-trigger\" @click=\"handleClick\">\n        <slot name=\"trigger\"></slot>\n      </div>\n    </template>\n\n    <div class=\"tabCont\" v-if=\"pet && visible&&pet.icon\">\n      <PetDetail :current_pet=\"pet\" />\n    </div>\n    <div class=\"tabCont\" v-else-if=\"pet && visible&&!pet.icon\">\n      <div class=\"soldDetail\" id=\"SkillTipsBox\" ref=\"SkillTipsBox\" style=\"width: 320px; display: none\"></div>\n      <div class=\"cols\" style=\"width: 280px; margin-left: -2px; margin-right: 2px\">\n        <template v-if=\"pet.action\">\n          <div class=\"thum\" style=\"text-align: center;\">\n          <div class=\"time-key-wap\"><el-image :src=\"getImageUrl(equipFaceImg, 'big')\"\n              style=\"width: 100px; height: 100px\" referrerpolicy=\"no-referrer\"></el-image></div>\n          <p class=\"f14px cWhite\">等级：<span class=\"cYellow\">{{ pet.equip_level }}</span> 携带等级：{{ pet.role_grade_limit }}</p>\n        </div>\n        <div class=\"blank12\"></div>\n        <h4>资质</h4>\n        <table class=\"tb02 petZiZhiTb petAttrInfo\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n          <tr>\n            <th>历史灵性值：</th>\n            <td>{{ pet.lx }}</td>\n            <th>成长：</th>\n            <td>{{ pet.growth }}</td>\n          </tr>\n          <tr>\n            <th :class=\"{ enhance: enhanceInfo.is_baobao }\">是否宝宝：</th>\n              <td :class=\"{ enhance: enhanceInfo.is_baobao }\">\n                <span :style=\"`color:${pet.is_baobao === '否' ? '#FF0000' : '#00FF00'}`\">\n                  {{ pet.is_baobao }}\n                </span>\n              </td>\n          </tr>\n        </table>\n        </template>\n        <template v-else>\n          <div class=\"thum\" style=\"text-align: center;\">\n          <div class=\"time-key-wap\"><el-image :src=\"getImageUrl(equipFaceImg, 'big')\"\n              style=\"width: 100px; height: 100px\" referrerpolicy=\"no-referrer\"></el-image></div>\n          <p class=\"f14px cWhite\">名字：<span class=\"cYellow\">{{ pet.pet_name }}</span> 等级：{{ pet.pet_grade }}</p>\n        </div>\n        <h4>\n          属性<span v-if=\"pet.other.color_str && pet.other.current_on_avt\">(已包含梦影穿戴属性)</span>\n        </h4>\n        <table class=\"tb02\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n          <tr>\n            <th>气血：</th>\n            <td>{{ pet.blood }}/{{ pet.max_blood }}</td>\n            <th>体质：</th>\n            <td>\n              {{ pet.soma }}\n              <span v-if=\"pet.ti_zhi_add\" class=\"color-pink\">+{{ pet.ti_zhi_add }}</span>\n            </td>\n          </tr>\n          <tr>\n            <th>魔法：</th>\n            <td>{{ pet.magic }}/{{ pet.max_magic }}</td>\n            <th>法力：</th>\n            <td>\n              {{ pet.magic_powner }}\n              <span v-if=\"pet.fa_li_add\" class=\"color-pink\">+{{ pet.fa_li_add }}</span>\n            </td>\n          </tr>\n          <tr>\n            <th>攻击：</th>\n            <td>{{ pet.attack }}</td>\n            <th>力量：</th>\n            <td>\n              {{ pet.strength }}\n              <span v-if=\"pet.li_liang_add\" class=\"color-pink\">+{{ pet.li_liang_add }}</span>\n            </td>\n          </tr>\n          <tr>\n            <th>防御：</th>\n            <td>{{ pet.defence }}</td>\n            <th>耐力：</th>\n            <td>\n              {{ pet.endurance }}\n              <span v-if=\"pet.nai_li_add\" class=\"color-pink\">+{{ pet.nai_li_add }}</span>\n            </td>\n          </tr>\n          <tr>\n            <th>速度：</th>\n            <td>{{ pet.speed }}</td>\n            <th>敏捷：</th>\n            <td>\n              {{ pet.smartness }}\n              <span v-if=\"pet.min_jie_add\" class=\"color-pink\">+{{ pet.min_jie_add }}</span>\n            </td>\n          </tr>\n          <tr>\n            <template v-if=\"isShowNewLingli\">\n              <th>法伤：</th>\n              <td>{{ pet.iMagDam }}</td>\n            </template>\n            <template v-else>\n              <th>灵力：</th>\n              <td>{{ pet.wakan }}</td>\n            </template>\n            <th>潜能：</th>\n            <td>{{ pet.potential }}</td>\n          </tr>\n          <tr v-if=\"isShowNewLingli\">\n            <th>法防：</th>\n            <td>{{ pet.iMagDef }}</td>\n          </tr>\n        </table>\n        <div class=\"blank12\"></div>\n        <h4>资质</h4>\n        <!-- <button v-if=\"!is_shenshou\" class=\"identify-pet-btn\" id=\"identify-pet-btn\"\n          onclick=\"window.petCalcInstance.display()\">鉴定召唤兽</button> -->\n        <table class=\"tb02 petZiZhiTb petAttrInfo\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n          <tr>\n            <th>攻击资质：</th>\n            <td>\n              <span class=\"added_attr_wrap\">\n                {{ pet.attack_aptitude }}\n                <span class=\"added_attr\" v-if=\"pet.attack_ext\">+{{ pet.attack_ext }}</span>\n              </span>\n            </td>\n            <th>寿命：</th>\n            <td>{{ pet.lifetime }}</td>\n          </tr>\n          <tr>\n            <th>防御资质：</th>\n            <td>\n              <span class=\"added_attr_wrap\">\n                {{ pet.defence_aptitude }}\n                <span v-if=\"pet.defence_ext\" class=\"added_attr\">+{{ pet.defence_ext }}</span>\n              </span>\n            </td>\n            <th>成长：</th>\n            <td>{{ pet.growth }}</td>\n          </tr>\n          <tr>\n            <th>体力资质：</th>\n            <td>\n              <span class=\"added_attr_wrap\">\n                {{ pet.physical_aptitude }}\n                <span v-if=\"pet.physical_ext\" class=\"added_attr\">+{{ pet.physical_ext }}</span>\n              </span>\n            </td>\n            <th>五行：</th>\n            <td>{{ getWuxingName(pet.five_aptitude) }}</td>\n          </tr>\n          <tr>\n            <th>法力资质：</th>\n            <td>\n              <span class=\"added_attr_wrap\">\n                {{ pet.magic_aptitude }}\n                <span v-if=\"pet.magic_ext\" class=\"added_attr\">+{{ pet.magic_ext }}</span>\n              </span>\n            </td>\n            <th>已用元宵：</th>\n            <td>{{ pet.used_yuanxiao }}</td>\n          </tr>\n          <tr>\n            <th>速度资质：</th>\n            <td>\n              <span class=\"added_attr_wrap\">\n                {{ pet.speed_aptitude }}\n                <span v-if=\"pet.speed_ext\" class=\"added_attr\">+{{ pet.speed_ext }}</span>\n              </span>\n            </td>\n            <th>已用千金露：</th>\n            <td>{{ pet.used_qianjinlu }}</td>\n          </tr>\n          <tr>\n            <th>躲闪资质：</th>\n            <td>\n              <span class=\"added_attr_wrap\">\n                {{ pet.avoid_aptitude }}\n                <span v-if=\"pet.avoid_ext\" class=\"added_attr\">+{{ pet.avoid_ext }}</span>\n              </span>\n            </td>\n            <th>已用炼兽珍经：</th>\n            <td>{{ pet.used_lianshou }}</td>\n          </tr>\n          <tr data-enhance='{\"dir\":\"top\",\"x\":\"auto\",\"y\":-6}' data-enhance-index=\"2\">\n            <template v-if=\"pet.color\">\n              <th>变异类型：</th>\n              <td>{{ pet.color }}</td>\n            </template>\n            <template v-else>\n              <th :class=\"{ enhance: enhanceInfo.is_baobao }\">是否宝宝：</th>\n              <td :class=\"{ enhance: enhanceInfo.is_baobao }\">\n                <span :style=\"`color:${pet.is_baobao === '否' ? '#FF0000' : '#00FF00'}`\">\n                  {{ pet.is_baobao }}\n                </span>\n              </td>\n            </template>\n            <th>已用清灵仙露：</th>\n            <td>{{ pet.jinjie_cnt }}</td>\n          </tr>\n          <tr>\n            <th>历史灵性值：</th>\n            <td>{{ pet.lx }}</td>\n          </tr>\n        </table>\n        </template>\n      </div>\n\n      <!-- 技能和特性部分 -->\n      <div class=\"cols\" style=\"width: 182px\" data-enhance='{\"dir\":\"top\",\"x\":\"auto\",\"y\":-34}' data-enhance-index=\"1\">\n        <!-- 赐福技能 -->\n        <div v-if=\"evolSkillList.length > 0\">\n          <h4>赐福技能</h4>\n          <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03\" id=\"evol_skill_grid\">\n            <tr v-for=\"(row, rowIndex) in skillRows\" :key=\"rowIndex\">\n              <td v-for=\"(skill, skillIndex) in row\" :key=\"skillIndex\" style=\"position: relative\">\n                <template v-if=\"skill.hlightLight\">\n                  <img :src=\"skill.icon\" width=\"40\" height=\"40\" :data_equip_name=\"skill.name\"\n                    :data_equip_desc=\"skill.desc\" data_tip_box=\"SkillTipsBox\" :data_cifu_icon=\"skill.cifuIcon\"\n                    :data_height_icon=\"skill.heightCifuIcon\" referrerpolicy=\"no-referrer\"\n                    @mouseenter=\"showSkillTip($event, skill)\" @mouseleave=\"hideSkillTip\" />\n                  <div class=\"evol_skill_icon\" :data_equip_name=\"skill.name\" :data_equip_desc=\"skill.desc\"\n                    data_tip_box=\"SkillTipsBox\" :data_cifu_icon=\"skill.cifuIcon\"\n                    :data_height_icon=\"skill.heightCifuIcon\"></div>\n                </template>\n                <template v-else>\n                  <img style=\"filter: grayscale(100%)\" :src=\"skill.icon\" width=\"40\" height=\"40\"\n                    :data_equip_name=\"skill.name\" :data_equip_desc=\"skill.desc\" data_tip_box=\"SkillTipsBox\"\n                    :data_cifu_icon=\"skill.cifuIcon\" :data_height_icon=\"skill.heightCifuIcon\"\n                    referrerpolicy=\"no-referrer\" @mouseenter=\"showSkillTip($event, skill)\" @mouseleave=\"hideSkillTip\" />\n                  <div style=\"filter: grayscale(100%)\" class=\"evol_skill_icon\" :data_equip_name=\"skill.name\"\n                    :data_equip_desc=\"skill.desc\" data_tip_box=\"SkillTipsBox\" :data_cifu_icon=\"skill.cifuIcon\"\n                    :data_height_icon=\"skill.heightCifuIcon\"></div>\n                </template>\n              </td>\n            </tr>\n          </table>\n          <div class=\"blank12\" style=\"clear: both\"></div>\n        </div>\n\n        <!-- 技能 -->\n        <h4>技能</h4>\n        <div class=\"blank6\"></div>\n        <div id=\"pet_skill_grid_con\" ref=\"pet_skill_grid_con\"></div>\n        <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03\"></table>\n\n        <!-- 特性 -->\n        <div class=\"blank12\"></div>\n        <h4 v-if=\"pet.core_close && pet.texing && pet.texing.id !== undefined\">\n          特性:{{ pet.core_close }}\n        </h4>\n        <h4 v-else>特性</h4>\n\n        <div v-if=\"pet.texing && pet.texing.id !== undefined\" style=\"text-align: left; font-size: 12px\">\n          <span>{{ pet.texing.name }}：<span v-html=\"parseStyleInfo(pet.texing.effect)\"></span></span>\n        </div>\n        <div v-else style=\"text-align: center\">无</div>\n      </div>\n\n      <!-- 装备和内丹部分 -->\n      <div class=\"cols\" style=\"width: 218px; margin-right: -2px; margin-left: 2px\">\n        <div class=\"cols\" style=\"width: 158px; margin: 0\">\n          <h4>装备</h4>\n          <div class=\"blank6\"></div>\n          <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"pet_equip_con\">\n            <tr>\n              <td v-for=\"(eItem, index) in pet.equip_list\" :key=\"index\">\n                <EquipmentImage v-if=\"eItem && index < 3\" :placement=\"'bottom'\" :image=\"false\"\n                  :equipment=\"getEquipImageProps(eItem)\" size=\"small\" :popoverWidth=\"300\" />\n                <span v-else>&nbsp;</span>\n              </td>\n            </tr>\n          </table>\n        </div>\n        <div class=\"cols\" style=\"float: right; width: 58px; margin: 0\">\n          <h4>饰品</h4>\n          <div class=\"blank6\"></div>\n          <table cellspacing=\"0\" cellpadding=\"0\" class=\"tb03 size50\" id=\"pet_shipin_con\">\n            <tr>\n              <td>\n                <EquipmentImage v-if=\"pet.equip_list && pet.equip_list[3]\" :placement=\"'bottom'\" :image=\"false\"\n                  :equipment=\"getEquipImageProps(pet.equip_list[3])\" :size=\"'small'\" />\n                <span v-else>&nbsp;</span>\n              </td>\n            </tr>\n          </table>\n        </div>\n\n        <div class=\"blank12\" style=\"clear: both\"></div>\n        <h4>内丹</h4>\n        <div class=\"blank6\"></div>\n        <p v-if=\"!pet.neidan || pet.neidan.length === 0\" class=\"textCenter\">无</p>\n        <table v-else width=\"100%\" cellspacing=\"3\" cellpadding=\"3\" id=\"RolePetNeidan\">\n          <tr v-for=\"(item, index) in pet.neidan\" :key=\"index\">\n            <td>\n              <img :src=\"item.icon\" :data_equip_name=\"item.name\" data_skill_type=\"neidan\" :data_equip_desc=\"item.desc\"\n                :data_equip_level=\"item.level\" data_tip_box=\"SkillTipsBox\" referrerpolicy=\"no-referrer\"\n                @mouseenter=\"showNeidanTip($event, item)\" @mouseleave=\"hideSkillTip\" />\n            </td>\n            <th>{{ item.name }}</th>\n            <td>{{ item.level }}层</td>\n          </tr>\n        </table>\n\n        <div class=\"blank12\"></div>\n        <!-- 梦影部分 -->\n        <div v-if=\"pet.other && pet.other.avt_list && pet.other.avt_list.length\">\n          <h4>梦影</h4>\n          <table class=\"tb02\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n            <tr>\n              <th width=\"40%\">梦影数量：</th>\n              <td>\n                <p class=\"fl\" style=\"line-height: 24px\">{{ pet.other.avt_list.length }}</p>\n                <!-- <button v-if=\"pet.other.color_str\" class=\"identify-pet-btn fr\" id=\"identify-pet-btn\"\n                  @click=\"window.petClothEffect && window.petClothEffect.display()\">穿戴效果</button> -->\n              </td>\n            </tr>\n            <tr v-if=\"pet.other.color_str && pet.other.current_on_avt\">\n              <th width=\"40%\" style=\"vertical-align: top\">当前穿戴：</th>\n              <td style=\"vertical-align: top\">\n                <p>{{ pet.other.current_on_avt.name }}</p>\n                <p v-if=\"pet.other.current_on_avt.sumavt_propsk\" style=\"color: #00ff00\">\n                  ({{ pet.other.current_on_avt.sumavt_propsk }}+1)\n                </p>\n              </td>\n            </tr>\n            <tr v-else>\n              <th width=\"40%\" style=\"padding-right: 20px\">未穿戴</th>\n            </tr>\n          </table>\n          <div class=\"blank12\"></div>\n        </div>\n\n        <template v-if=\"!pet.action\">\n          <h4>其它</h4>\n        <div class=\"blank6\"></div>\n        <table class=\"tb02\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n          <tr>\n            <th width=\"50%\">已用幻色丹：</th>\n            <td>{{ getSummonColorDesc(pet.summon_color, pet.type_id) }}</td>\n          </tr>\n        </table>\n        </template>\n      </div>\n    </div>\n  </el-popover>\n</template>\n\n<script>\nimport EquipmentImage from './EquipmentImage/EquipmentImage.vue'\nimport { commonMixin } from '@/utils/mixins/commonMixin'\nimport { equipmentMixin } from '@/utils/mixins/equipmentMixin'\nimport PetDetail from './RoleInfo/PetDetail.vue'\n\nexport default {\n  name: 'PetInfoPopover',\n  mixins: [commonMixin, equipmentMixin],\n  components: {\n    EquipmentImage,\n    PetDetail\n  },\n  props: {\n    trigger: {\n      type: String,\n      default: 'click'\n    },\n    equipFaceImg: {\n      type: String,\n      default: ''\n    },\n    pet: {\n      type: Object,\n      required: true\n    },\n    enhanceInfo: {\n      type: Object,\n      default: () => ({})\n    }\n  },\n  data() {\n    return {\n      visible: false,\n      conf: {\n        pet_skill_url: 'https://cbg-xyq.res.netease.com/images/skill/',\n        notice_node_name: 'pet_tip_notice_msg',\n        skill_panel_name: 'pet_tip_skill_grid',\n        table_class: 'tb03',\n        enhance_skills: this.enhanceInfo.skill_id_list || []\n      }\n    }\n  },\n  emits: ['show', 'hide', 'click'],\n  computed: {\n    // 判断是否显示新版灵力\n    isShowNewLingli() {\n      return this.pet.iMagDam !== undefined && this.pet.iMagDef !== undefined\n    },\n\n    // 赐福技能列表\n    evolSkillList() {\n      return this.pet.evol_skill_list || []\n    },\n\n    // 技能网格布局\n    skillRows() {\n      const numPerLine = 4\n      const skillNum = this.evolSkillList.length\n      let loopTimes = Math.floor(skillNum / numPerLine) + (skillNum % numPerLine ? 1 : 0)\n      loopTimes = loopTimes < 3 ? 3 : loopTimes\n\n      // 如果是天才宝宝且技能数量正好填满，增加一行\n      if (this.pet.genius && skillNum === numPerLine * loopTimes) {\n        loopTimes += 1\n      }\n\n      const rows = []\n      for (let i = 0; i < loopTimes; i++) {\n        const items = this.evolSkillList.slice(i * numPerLine, (i + 1) * numPerLine)\n        rows.push(items)\n      }\n\n      return rows\n    }\n  },\n  beforeDestroy() {\n    // 清理动态绑定的事件监听器\n    this.cleanupDynamicEvents()\n  },\n  methods: {\n    show_pet_skill_in_grade: window.show_pet_skill_in_grade,\n    // 获取五行名称\n    getWuxingName(fiveAptitude) {\n      const wuxingInfo = {\n        0: '未知',\n        1: '金',\n        2: '木',\n        4: '土',\n        8: '水',\n        16: '火'\n      }\n      return wuxingInfo[fiveAptitude] || '未知'\n    },\n\n    // 解析样式信息\n    parseStyleInfo(text) {\n      if (!text) return ''\n      // 这里可以添加样式解析逻辑，暂时直接返回文本\n      return window.parse_style_info(text, '#Y')\n    },\n\n    // 获取召唤兽颜色描述\n    getSummonColorDesc(summonColor) {\n      if (!summonColor) return '无'\n      // 这里可以添加颜色描述逻辑，暂时直接返回颜色值\n      return summonColor.toString()\n    },\n\n    // 处理点击事件\n    handleClick() {\n      this.$emit('click')\n    },\n\n    // 处理显示事件\n    handleShow() {\n      this.$emit('show')\n    },\n\n    // 处理隐藏事件\n    handleHide() {\n      this.$emit('hide')\n    },\n    showSkillTip(event, skill) {\n      // 组装tip内容\n      const tipData = {\n        name: skill.name,\n        desc: skill.desc || '',\n        icon: skill.cifuIcon || skill.heightCifuIcon || skill.icon,\n        isCifu: (skill.cifuIcon || skill.heightCifuIcon) ? true : false\n      }\n      // 渲染内容\n      const box = this.$refs.SkillTipsBox\n      if (!box) return\n      box.innerHTML = `<img class=\"tip-skill-icon\" src=\"${tipData.icon}\" referrerpolicy=\"no-referrer\"><div class=\"skill-text\"><p class=\"cYellow${tipData.isCifu ? ' cifu-name' : ''}\">${tipData.name}</p>${window.parse_style_info ? window.parse_style_info(tipData.desc, '#Y') : tipData.desc}`\n      // 定位\n      box.style.display = 'block'\n      box.style.position = 'fixed'\n\n      // 获取图标元素的位置信息\n      const iconRect = event.target.getBoundingClientRect()\n\n      // 计算tooltip的位置（图标正下方）\n      let left = iconRect.left\n      let top = iconRect.bottom + 5  // 图标下方5px的位置\n\n      // 处理超出窗口情况\n      const boxWidth = 320\n      const boxHeight = 120\n\n      // 右边界检查\n      if (left + boxWidth > window.innerWidth) {\n        left = window.innerWidth - boxWidth - 10\n      }\n\n      // 下边界检查，如果超出则显示在图标上方\n      if (top + boxHeight > window.innerHeight) {\n        top = iconRect.top - boxHeight - 5\n      }\n\n      // 左边界检查\n      if (left < 0) {\n        left = 10\n      }\n\n      // 上边界检查\n      if (top < 0) {\n        top = 10\n      }\n\n      box.style.left = left + 'px'\n      box.style.top = top + 'px'\n      box.style.zIndex = 9999\n    },\n    hideSkillTip() {\n      const box = this.$refs.SkillTipsBox\n      if (box) box.style.display = 'none'\n    },\n\n    // 专门处理内丹的tooltip\n    showNeidanTip(event, item) {\n      const neidanData = {\n        name: item.name,\n        desc: item.desc + (item.level ? `<br/><span style=\"color: #ccc; font-size: 12px;\">${item.level}层</span>` : ''),\n        icon: item.icon,\n        isCifu: false\n      }\n      this.showSkillTip(event, neidanData)\n    },\n\n    // 为动态生成的技能节点绑定事件\n    bindEventsForDynamicNodes() {\n      const container = this.$refs.pet_skill_grid_con\n      if (!container) return\n\n      // 查找所有带有技能数据的img元素\n      const skillImages = container.querySelectorAll('img[data_store_name]')\n      skillImages.forEach((img) => {\n        // 检查是否已经绑定过事件\n        if (img.dataset.eventBound) return\n\n        const skillName = img.getAttribute('data_store_name')\n        const skillDesc = img.getAttribute('data_store_desc')\n        const skillIcon = img.src\n\n        if (skillName) {\n          // 创建技能对象，模拟原有的skill结构\n          const skillData = {\n            name: skillName,\n            desc: skillDesc,\n            icon: skillIcon,\n            isCifu: false\n          }\n\n          // 绑定鼠标事件\n          img.addEventListener('mouseenter', (event) => {\n            this.showSkillTip(event, skillData)\n          })\n\n          img.addEventListener('mouseleave', () => {\n            this.hideSkillTip()\n          })\n\n          // 标记已绑定事件\n          img.dataset.eventBound = 'true'\n        }\n      })\n    },\n\n    // 清理动态绑定的事件监听器\n    cleanupDynamicEvents() {\n      // 当组件销毁时，DOM节点也会被销毁，事件监听器会自动被清理\n      // 这里主要是为了防止内存泄漏，将引用置空\n      const container = this.$refs.pet_skill_grid_con\n      if (container) {\n        container.innerHTML = ''\n      }\n    }\n  },\n  watch: {\n    visible(val) {\n      if (val) {\n        this.$nextTick(() => {\n          if (this.pet.all_skill && this.show_pet_skill_in_grade ) {\n            const skillNode = this.show_pet_skill_in_grade(\n              this.pet.all_skill,\n              this.pet.sp_skill,\n              6,\n              4,\n              this.conf,\n              this.pet\n            )\n            const { skill_panel_name, notice_node_name } = this.conf\n            const skillPanelNode = skillNode[skill_panel_name]\n            const noticeNode = skillNode[notice_node_name]\n\n            if (skillPanelNode && this.$refs.pet_skill_grid_con) {\n              skillPanelNode.forEach((node) => {\n                if (node) {\n                  this.$refs.pet_skill_grid_con.appendChild(node)\n                }\n              })\n\n              // 为动态生成的技能节点绑定事件\n              this.$nextTick(() => {\n                this.bindEventsForDynamicNodes()\n              })\n            }\n\n            if (noticeNode && this.$refs.pet_tip_notice_msg) {\n              this.$refs.pet_tip_notice_msg.style.display = 'block'\n            }\n          }\n        })\n      }\n    }\n\n  }\n}\n</script>\n\n<style scoped>\n/* 触发器样式 */\n.pet-trigger {\n  cursor: pointer;\n}\n\n.default-trigger {\n  display: inline-block;\n}\n\n:global(.pet-info-popover) {\n  padding: 0 !important;\n  border: 2px solid #184a5e !important;\n}\n\n:global(.pet-info-popover .popper__arrow::after) {\n  border-right-color: #184a5e !important;\n}\n\n/* 技能tooltip样式 */\n.soldDetail {\n  display: flex;\n  align-items: flex-start;\n  gap: 8px;\n  padding: 8px;\n  background: #303133;\n  color: #fff;\n  border-radius: 4px;\n  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);\n  font-size: 12px;\n  line-height: 1.4;\n}\n\n.tip-skill-icon {\n  width: 40px;\n  height: 40px;\n  flex-shrink: 0;\n}\n\n.skill-text {\n  flex: 1;\n}\n\n.cYellow {\n  color: #ffff00;\n}\n\n.cifu-name {\n  margin: 0 0 4px 0;\n  font-weight: bold;\n}\n</style>\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ __webpack_exports__["default"] = (___CSS_LOADER_EXPORT___);
 
@@ -7217,6 +10869,28 @@ if(false) // removed by dead control flow
 
 /***/ }),
 
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("1097918e", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
 /***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css":
 /*!*****************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipBatchValuationResult.vue?vue&type=style&index=0&id=3e1e2d34&scoped=true&lang=css ***!
@@ -7299,6 +10973,72 @@ if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
 var update = add("37edbc6a", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("cde5d068", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("2a5e53b1", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ }),
+
+/***/ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css");
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(/*! !../../node_modules/vue-style-loader/lib/addStylesClient.js */ "./node_modules/vue-style-loader/lib/addStylesClient.js")["default"])
+var update = add("68ed976a", content, false, {});
 // Hot Module Replacement
 if(false) // removed by dead control flow
 {}
@@ -8569,6 +12309,92 @@ new vue__WEBPACK_IMPORTED_MODULE_4__["default"]({
 
 /***/ }),
 
+/***/ "./src/components/AutoParams.vue":
+/*!***************************************!*\
+  !*** ./src/components/AutoParams.vue ***!
+  \***************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _AutoParams_vue_vue_type_template_id_2ac0e876_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true */ "./src/components/AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true");
+/* harmony import */ var _AutoParams_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AutoParams.vue?vue&type=script&lang=js */ "./src/components/AutoParams.vue?vue&type=script&lang=js");
+/* harmony import */ var _AutoParams_vue_vue_type_style_index_0_id_2ac0e876_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css */ "./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _AutoParams_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _AutoParams_vue_vue_type_template_id_2ac0e876_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _AutoParams_vue_vue_type_template_id_2ac0e876_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "2ac0e876",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/AutoParams.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/AutoParams.vue?vue&type=script&lang=js":
+/*!***************************************************************!*\
+  !*** ./src/components/AutoParams.vue?vue&type=script&lang=js ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./AutoParams.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css":
+/*!***********************************************************************************************!*\
+  !*** ./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css ***!
+  \***********************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_style_index_0_id_2ac0e876_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=style&index=0&id=2ac0e876&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_style_index_0_id_2ac0e876_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_style_index_0_id_2ac0e876_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_style_index_0_id_2ac0e876_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_style_index_0_id_2ac0e876_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true":
+/*!*********************************************************************************!*\
+  !*** ./src/components/AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_template_id_2ac0e876_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_template_id_2ac0e876_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_AutoParams_vue_vue_type_template_id_2ac0e876_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AutoParams.vue?vue&type=template&id=2ac0e876&scoped=true");
+
+
+/***/ }),
+
 /***/ "./src/components/EquipBatchValuationResult.vue":
 /*!******************************************************!*\
   !*** ./src/components/EquipBatchValuationResult.vue ***!
@@ -8909,6 +12735,264 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_EquipmentValuation_vue_vue_type_template_id_b3167e7a_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/EquipmentValuation.vue?vue&type=template&id=b3167e7a&scoped=true");
+
+
+/***/ }),
+
+/***/ "./src/components/LogMonitor.vue":
+/*!***************************************!*\
+  !*** ./src/components/LogMonitor.vue ***!
+  \***************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _LogMonitor_vue_vue_type_template_id_4395aca6_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true */ "./src/components/LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true");
+/* harmony import */ var _LogMonitor_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./LogMonitor.vue?vue&type=script&lang=js */ "./src/components/LogMonitor.vue?vue&type=script&lang=js");
+/* harmony import */ var _LogMonitor_vue_vue_type_style_index_0_id_4395aca6_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css */ "./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _LogMonitor_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _LogMonitor_vue_vue_type_template_id_4395aca6_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _LogMonitor_vue_vue_type_template_id_4395aca6_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "4395aca6",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/LogMonitor.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/LogMonitor.vue?vue&type=script&lang=js":
+/*!***************************************************************!*\
+  !*** ./src/components/LogMonitor.vue?vue&type=script&lang=js ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./LogMonitor.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css":
+/*!***********************************************************************************************!*\
+  !*** ./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css ***!
+  \***********************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_style_index_0_id_4395aca6_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=style&index=0&id=4395aca6&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_style_index_0_id_4395aca6_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_style_index_0_id_4395aca6_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_style_index_0_id_4395aca6_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_style_index_0_id_4395aca6_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true":
+/*!*********************************************************************************!*\
+  !*** ./src/components/LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_template_id_4395aca6_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_template_id_4395aca6_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_LogMonitor_vue_vue_type_template_id_4395aca6_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/LogMonitor.vue?vue&type=template&id=4395aca6&scoped=true");
+
+
+/***/ }),
+
+/***/ "./src/components/PetImage.vue":
+/*!*************************************!*\
+  !*** ./src/components/PetImage.vue ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _PetImage_vue_vue_type_template_id_3824e5ac_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PetImage.vue?vue&type=template&id=3824e5ac&scoped=true */ "./src/components/PetImage.vue?vue&type=template&id=3824e5ac&scoped=true");
+/* harmony import */ var _PetImage_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PetImage.vue?vue&type=script&lang=js */ "./src/components/PetImage.vue?vue&type=script&lang=js");
+/* harmony import */ var _PetImage_vue_vue_type_style_index_0_id_3824e5ac_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css */ "./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _PetImage_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _PetImage_vue_vue_type_template_id_3824e5ac_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _PetImage_vue_vue_type_template_id_3824e5ac_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "3824e5ac",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/PetImage.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/PetImage.vue?vue&type=script&lang=js":
+/*!*************************************************************!*\
+  !*** ./src/components/PetImage.vue?vue&type=script&lang=js ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetImage.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css":
+/*!*********************************************************************************************!*\
+  !*** ./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css ***!
+  \*********************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_style_index_0_id_3824e5ac_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=style&index=0&id=3824e5ac&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_style_index_0_id_3824e5ac_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_style_index_0_id_3824e5ac_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_style_index_0_id_3824e5ac_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_style_index_0_id_3824e5ac_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/PetImage.vue?vue&type=template&id=3824e5ac&scoped=true":
+/*!*******************************************************************************!*\
+  !*** ./src/components/PetImage.vue?vue&type=template&id=3824e5ac&scoped=true ***!
+  \*******************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_template_id_3824e5ac_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_template_id_3824e5ac_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PetImage_vue_vue_type_template_id_3824e5ac_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetImage.vue?vue&type=template&id=3824e5ac&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetImage.vue?vue&type=template&id=3824e5ac&scoped=true");
+
+
+/***/ }),
+
+/***/ "./src/components/PetInfoPopover.vue":
+/*!*******************************************!*\
+  !*** ./src/components/PetInfoPopover.vue ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _PetInfoPopover_vue_vue_type_template_id_205dfcb0_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true */ "./src/components/PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true");
+/* harmony import */ var _PetInfoPopover_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PetInfoPopover.vue?vue&type=script&lang=js */ "./src/components/PetInfoPopover.vue?vue&type=script&lang=js");
+/* harmony import */ var _PetInfoPopover_vue_vue_type_style_index_0_id_205dfcb0_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css */ "./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _PetInfoPopover_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _PetInfoPopover_vue_vue_type_template_id_205dfcb0_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _PetInfoPopover_vue_vue_type_template_id_205dfcb0_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "205dfcb0",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "src/components/PetInfoPopover.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./src/components/PetInfoPopover.vue?vue&type=script&lang=js":
+/*!*******************************************************************!*\
+  !*** ./src/components/PetInfoPopover.vue?vue&type=script&lang=js ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetInfoPopover.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=script&lang=js");
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css":
+/*!***************************************************************************************************!*\
+  !*** ./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css ***!
+  \***************************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_style_index_0_id_205dfcb0_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/vue-style-loader/index.js!../../node_modules/css-loader/dist/cjs.js!../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css */ "./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=style&index=0&id=205dfcb0&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_style_index_0_id_205dfcb0_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_style_index_0_id_205dfcb0_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_style_index_0_id_205dfcb0_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== "default") __WEBPACK_REEXPORT_OBJECT__[__WEBPACK_IMPORT_KEY__] = function(key) { return _node_modules_vue_style_loader_index_js_node_modules_css_loader_dist_cjs_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_style_index_0_id_205dfcb0_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__[key]; }.bind(0, __WEBPACK_IMPORT_KEY__)
+/* harmony reexport (unknown) */ __webpack_require__.d(__webpack_exports__, __WEBPACK_REEXPORT_OBJECT__);
+
+
+/***/ }),
+
+/***/ "./src/components/PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true":
+/*!*************************************************************************************!*\
+  !*** ./src/components/PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true ***!
+  \*************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_template_id_205dfcb0_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render; },
+/* harmony export */   staticRenderFns: function() { return /* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_template_id_205dfcb0_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns; }
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_1_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_PetInfoPopover_vue_vue_type_template_id_205dfcb0_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/babel-loader/lib/index.js??clonedRuleSet-1!../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-1!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/PetInfoPopover.vue?vue&type=template&id=205dfcb0&scoped=true");
 
 
 /***/ }),

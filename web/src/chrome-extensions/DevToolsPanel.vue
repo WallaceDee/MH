@@ -26,6 +26,8 @@
           @click.prevent="refreshCurrentPage">刷新页面</a>
         <a v-if="recommendData.length > 0" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
           @click.prevent="clearData">清空数据</a>
+        <a href="javascript:void 0;" class=" btn1 js_alert_btn_0"
+          @click.prevent="testAddIframe" style="background: #f56c6c;">测试iframe</a>
       </div>
     </div>
     <div class="data-section">
@@ -168,6 +170,11 @@
       </div>
     </div>
 
+    <!-- 页面底部版本信息 -->
+    <div class="version-footer">
+      <span class="version-text">版本 v0.0.1</span>
+    </div>
+
     <!-- 装备估价结果对话框 -->
     <el-dialog :visible.sync="valuationDialogVisible" width="1000px" :close-on-click-modal="false"
       :close-on-press-escape="false" custom-class="batch-valuation-dialog">
@@ -182,6 +189,16 @@
         :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
         @close="closeValuationDialog" />
     </el-dialog>
+
+    <!-- AutoParams配置对话框 -->
+    <el-dialog :visible.sync="autoParamsDialogVisible" width="1200px" :close-on-click-modal="false"
+      :close-on-press-escape="false" custom-class="auto-params-dialog">
+      <span slot="title" class="el-dialog__title">
+        <span class="emoji-icon">⚙️</span> 自动参数配置
+      </span>
+      <AutoParams v-if="autoParamsDialogVisible" :external-params="autoParamsExternalParams" 
+        @close="closeAutoParamsDialog" />
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -190,6 +207,7 @@ import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
 import EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'
 import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
+import AutoParams from '@/components/AutoParams.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 export default {
@@ -222,7 +240,11 @@ export default {
       batchValuateParams: {
         similarity_threshold: 0.7,
         max_anchors: 30
-      }
+      },
+      
+      // AutoParams Modal相关数据
+      autoParamsDialogVisible: false,
+      autoParamsExternalParams: {}
     }
   },
   mixins: [commonMixin, equipmentMixin],
@@ -230,7 +252,8 @@ export default {
     RoleImage,
     SimilarRoleModal,
     EquipBatchValuationResult,
-    EquipmentImage
+    EquipmentImage,
+    AutoParams
   },
   computed: {
 
@@ -832,6 +855,11 @@ export default {
           this.processedRequests.clear()
           console.log('清空推荐数据和处理记录')
           break
+
+        case 'openAutoParamsModal':
+          console.log('接收到打开AutoParams Modal请求:', request.params)
+          this.openAutoParamsModal(request.params)
+          break
       }
     },
 
@@ -1086,6 +1114,131 @@ export default {
         title: '提示',
         message: '宠物估价功能暂未实现'
       })
+    },
+
+    // AutoParams Modal相关方法
+    openAutoParamsModal(params) {
+      console.log('打开AutoParams Modal，参数:', params)
+      this.autoParamsExternalParams = params
+      this.autoParamsDialogVisible = true
+    },
+
+    closeAutoParamsDialog() {
+      this.autoParamsDialogVisible = false
+      this.autoParamsExternalParams = {}
+    },
+
+    // 测试添加iframe方法
+    async testAddIframe() {
+      try {
+        // 获取当前活动标签页
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+
+        if (!activeTab) {
+          this.$notify.warning('未找到活动标签页')
+          return
+        }
+
+        // 检查数据监听连接状态
+        if (!this.devtoolsConnected) {
+          this.$notify.warning('数据监听连接已断开，请重新加载页面')
+          return
+        }
+
+        // 通过Chrome调试API执行页面JavaScript代码添加iframe
+        const result = await chrome.debugger.sendCommand(
+          { tabId: activeTab.id },
+          'Runtime.evaluate',
+          {
+            expression: `
+              (function() {
+                try {
+                  // 创建iframe元素
+                  const iframe = document.createElement('iframe')
+                  iframe.src = 'https://xyq.cbg.163.com/'
+                  iframe.style.width = '400px'
+                  iframe.style.height = '300px'
+                  iframe.style.border = '2px solid #1890ff'
+                  iframe.style.borderRadius = '8px'
+                  iframe.style.position = 'fixed'
+                  iframe.style.top = '50px'
+                  iframe.style.right = '20px'
+                  iframe.style.zIndex = '9999'
+                  iframe.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'
+                  
+                  // 添加关闭按钮
+                  const closeBtn = document.createElement('div')
+                  closeBtn.innerHTML = '×'
+                  closeBtn.style.position = 'absolute'
+                  closeBtn.style.top = '-10px'
+                  closeBtn.style.right = '-10px'
+                  closeBtn.style.width = '20px'
+                  closeBtn.style.height = '20px'
+                  closeBtn.style.backgroundColor = '#ff4d4f'
+                  closeBtn.style.color = 'white'
+                  closeBtn.style.borderRadius = '50%'
+                  closeBtn.style.display = 'flex'
+                  closeBtn.style.alignItems = 'center'
+                  closeBtn.style.justifyContent = 'center'
+                  closeBtn.style.cursor = 'pointer'
+                  closeBtn.style.fontSize = '14px'
+                  closeBtn.style.fontWeight = 'bold'
+                  closeBtn.style.zIndex = '10000'
+                  
+                  // 创建容器
+                  const container = document.createElement('div')
+                  container.style.position = 'relative'
+                  container.appendChild(iframe)
+                  container.appendChild(closeBtn)
+                  
+                  // 添加关闭事件
+                  closeBtn.onclick = function() {
+                    document.body.removeChild(container)
+                  }
+                  
+                  // 添加到页面
+                  document.body.appendChild(container)
+                  
+                  return 'SUCCESS:已添加百度iframe到页面'
+                } catch (error) {
+                  return 'ERROR:添加iframe失败 - ' + error.message
+                }
+              })()
+            `
+          }
+        )
+
+        // 处理Chrome调试API的返回结果
+        if (result && result.result && result.result.value) {
+          const message = result.result.value
+
+          if (message.startsWith('SUCCESS:')) {
+            this.$notify.success(message.substring(8)) // 移除"SUCCESS:"前缀
+            console.log('iframe添加成功')
+          } else if (message.startsWith('ERROR:')) {
+            this.$notify.warning(message.substring(6)) // 移除"ERROR:"前缀
+            console.warn('iframe添加失败:', message)
+          } else {
+            this.$notify.error('添加iframe失败：未知返回结果')
+            console.error('iframe操作结果异常:', result)
+          }
+        } else {
+          this.$notify.error('添加iframe失败')
+          console.error('iframe操作结果异常:', result)
+        }
+
+      } catch (error) {
+        console.error('添加iframe失败:', error)
+
+        // 检查是否是连接断开错误
+        if (error.message && error.message.includes('Could not establish connection')) {
+          this.devtoolsConnected = false
+          this.connectionStatus = '连接断开'
+          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')
+        } else {
+          this.$notify.error('操作失败: ' + error.message)
+        }
+      }
     }
   }
 }
@@ -1095,6 +1248,7 @@ export default {
 .panel {
   box-sizing: border-box;
   padding: 16px;
+  padding-bottom: 40px; /* 为底部版本栏留出空间 */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: #f5f5f5;
   min-height: 100vh;
@@ -1436,5 +1590,25 @@ export default {
 
 .role-card.empty-role span {
   opacity: 0.7;
+}
+
+/* 版本信息底部样式 */
+.version-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 12px;
+  z-index: 1000;
+  border-top: 1px solid #333;
+}
+
+.version-text {
+  color: #ccc;
+  font-weight: 500;
 }
 </style>
