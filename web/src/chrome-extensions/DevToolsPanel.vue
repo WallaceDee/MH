@@ -191,7 +191,7 @@
     </el-dialog>
 
     <!-- AutoParams配置对话框 -->
-    <el-dialog :visible.sync="autoParamsDialogVisible" width="1200px" :close-on-click-modal="false"
+    <el-dialog :visible.sync="autoParamsDialogVisible" width="640px" :close-on-click-modal="false"
       :close-on-press-escape="false" custom-class="auto-params-dialog">
       <span slot="title" class="el-dialog__title">
         <span class="emoji-icon">⚙️</span> 自动参数配置
@@ -856,10 +856,7 @@ export default {
           console.log('清空推荐数据和处理记录')
           break
 
-        case 'openAutoParamsModal':
-          console.log('接收到打开AutoParams Modal请求:', request.params)
-          this.openAutoParamsModal(request.params)
-          break
+        
       }
     },
 
@@ -1116,12 +1113,7 @@ export default {
       })
     },
 
-    // AutoParams Modal相关方法
-    openAutoParamsModal(params) {
-      console.log('打开AutoParams Modal，参数:', params)
-      this.autoParamsExternalParams = params
-      this.autoParamsDialogVisible = true
-    },
+    // AutoParams Modal相关方法（background未触发，移除打开方法）
 
     closeAutoParamsDialog() {
       this.autoParamsDialogVisible = false

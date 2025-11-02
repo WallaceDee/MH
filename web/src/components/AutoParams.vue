@@ -2,7 +2,7 @@
     <el-card class="spider-system-card" shadow="never">
         <el-row slot="header" class="card-header" type="flex" justify="space-between" align="middle">
             <div><span class="emoji-icon">⚙️</span> 配置</div>
-            <div class="tool-buttons">
+            <div class="tool-buttons" v-if="!isChrome">
                 <el-dropdown split-button type="danger" @click="stopTask">
                     🛑 停止
                     <el-dropdown-menu slot="dropdown">
@@ -13,16 +13,16 @@
         </el-row>
         <el-row type="flex">
             <div style="width: 140px;text-align: center;">
-                <template v-if="externalParams.action">
+                <template v-if="externalParamsState.action">
                     <el-col :span="24">
                         <p class="cBlue" style="margin-bottom: 5px;">🎯目标：</p>
                     </el-col>
-                    <EquipmentImage v-if="externalParams.action === 'similar_equip'" :equipment="externalParams"
+                    <EquipmentImage v-if="externalParamsState.action === 'similar_equip'" :equipment="externalParamsState"
                         :popoverWidth="450"
                         style="display: flex;flex-direction: column;height: 50px;width: 100%;align-items: center;" />
-                    <PetImage v-if="externalParams.action === 'similar_pet'" :pet="externalParams"
-                        :equipFaceImg="externalParams.equip_face_img" />
-                    <template v-if="externalParams.action">
+                    <PetImage v-if="externalParamsState.action === 'similar_pet'" :pet="externalParamsState"
+                        :equipFaceImg="externalParamsState.equip_face_img" />
+                    <template v-if="externalParamsState.action">
                         <!-- <el-cascader :options="server_data" size="mini" filterable v-model="server_data_value" clearable /> -->
                         <div style="display: inline-block; margin-left: 8px">
                             <el-link @click="openCBGSearch">
@@ -35,7 +35,7 @@
             </div>
             <!-- 全局设置 -->
             <el-form style="width: 100%;flex-shrink: 1;" :model="globalSettings" v-show="activeTab !== 'playwright'">
-                <el-row :gutter="40">
+                <el-row :gutter="40" v-if="!isChrome">
                     <el-col :span="6">
                         <el-form-item label="📄 爬取页数" size="small">
                             <el-input-number v-model="globalSettings.max_pages" :min="1" :max="100"
@@ -98,7 +98,7 @@
         </el-row>
         <el-tabs v-model="activeTab" tab-position="left">
             <!-- Playwright半自动收集器 -->
-            <el-tab-pane label="🖐️ 手动抓取" name="playwright" :disabled="!!externalParams.action">
+            <el-tab-pane label="🖐️ 手动抓取" name="playwright" :disabled="!!externalParamsState.action">
                 <el-form :model="playwrightForm" label-width="120px" size="small">
                     <el-form-item label="无头模式">
                         <el-switch v-model="playwrightForm.headless" @change="onHeadlessToggle"></el-switch>
@@ -127,7 +127,7 @@
                 </el-form>
             </el-tab-pane>
             <!-- 角色爬虫 -->
-            <el-tab-pane label="👤 角色" name="role" :disabled="!!externalParams.action">
+            <el-tab-pane label="👤 角色" name="role" :disabled="!!externalParamsState.action">
                 <el-form :model="roleForm" label-width="100px" size="small">
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
@@ -158,10 +158,10 @@
 
             <!-- 装备爬虫 -->
             <el-tab-pane label="⚔️ 装备" name="equip"
-                :disabled="externalParams.action && externalParams.action !== 'similar_equip'">
+                :disabled="externalParamsState.action && externalParamsState.action !== 'similar_equip'">
                 <el-form :model="equipForm" label-width="100px" size="small">
                     <el-form-item label="装备类型">
-                        <el-select v-model="equipForm.equip_type" :disabled="externalParams.action === 'similar_equip'"
+                        <el-select v-model="equipForm.equip_type" :disabled="externalParamsState.action === 'similar_equip'"
                             @change="onEquipTypeChange" style="width: 100%">
                             <el-option label="普通装备" value="normal"></el-option>
                             <el-option label="灵饰装备" value="lingshi"></el-option>
@@ -181,9 +181,9 @@
                         </el-radio-group>
                         <el-cascader v-if="suit_effect_type === 'select'" :options="suitOptions" placeholder="请选择套装效果"
                             separator="" clearable filterable @change="handleSuitChange" />
-                        <el-radio-group v-if="suit_effect_type?.split('.').length > 1" v-model="select_suit_effect">
+                        <el-radio-group v-if="suit_effect_type?.split('.').length > 1 && equipConfig?.suits?.[suit_effect_type.split('.')[0]]?.[suit_effect_type.split('.')[1]]" v-model="select_suit_effect">
                             <el-radio
-                                v-for="itemId in equipConfig?.suits[suit_effect_type.split('.')[0]][suit_effect_type.split('.')[1]]"
+                                v-for="itemId in equipConfig.suits[suit_effect_type.split('.')[0]][suit_effect_type.split('.')[1]]"
                                 :label="itemId.toString()" :key="itemId">{{ suit_transform_skills[itemId] }}</el-radio>
                         </el-radio-group>
                     </el-form-item>
@@ -203,7 +203,7 @@
                         <span slot="title" v-html="lingshiTips"></span>
                     </el-alert>
                     <!-- JSON参数编辑器 -->
-                    <div class="params-editor">
+                    <div class="params-editor" v-if="!isChrome">
                         <div class="params-actions">
                             <el-button type="text" size="mini" @click="() => resetParam('equip')">重置</el-button>
                             <el-button type="primary" size="mini" @click="() => saveParam('equip')"
@@ -212,7 +212,7 @@
                             </el-button>
                         </div>
                         <el-row type="flex">
-                            <div class="json-editor-wrapper" v-if="externalParams.action === 'similar_equip'">
+                            <div class="json-editor-wrapper" v-if="externalParamsState.action === 'similar_equip'">
                                 <el-input type="textarea" v-model="externalSearchParams" placeholder="搜索指定参数" :rows="10"
                                     class="json-editor">
                                 </el-input>
@@ -246,7 +246,7 @@
 
             <!-- 召唤兽爬虫 -->
             <el-tab-pane label="🐲 召唤兽" name="pet"
-                :disabled="externalParams.action && externalParams.action !== 'similar_pet'">
+                :disabled="externalParamsState.action && externalParamsState.action !== 'similar_pet'">
                 <el-form :model="petForm" label-width="100px" size="small">
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
@@ -258,7 +258,7 @@
                             </el-button>
                         </div>
                         <el-row type="flex">
-                            <div class="json-editor-wrapper" v-if="externalParams.action === 'similar_pet'">
+                            <div class="json-editor-wrapper" v-if="externalParamsState.action === 'similar_pet'">
                                 <el-input type="textarea" v-model="externalSearchParams" :rows="10" class="json-editor">
                                 </el-input>
                             </div>
@@ -318,9 +318,17 @@ export default {
             type: Boolean,
             default: true
         },
-        externalParamsProp: {
+        externalParams: {
             type: Object,
             default: () => ({})
+        },
+        server_id: {
+            type: [Number, String],
+            default: null
+        },
+        server_name: {
+            type: String,
+            default: null
         }
     },
     mixins: [equipmentMixin],
@@ -331,6 +339,7 @@ export default {
     },
     data() {
         return {
+            isChrome:typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
             select_sum_attr_type: [],
             price_min: 1,
@@ -407,6 +416,8 @@ export default {
             // 外部参数
             externalSearchParams: '{}',
             targetFeatures: {},
+            // 内部存储的外部参数（从props或路由获取）
+            internalExternalParams: {},
 
             // 参数管理器配置 - 统一管理所有参数类型
             paramManager: {
@@ -495,37 +506,66 @@ export default {
             }
         },
         currentServerData() {
-            // 如果store不可用，返回默认值
-            if (!this.$store || !this.$store.getters) {
-                return { server_id: 0, areaid: 0, server_name: '' }
+            // 优先使用props传入的数据，如果没有则从externalParams中获取
+            let server_id = this.server_id !== null && this.server_id !== undefined 
+                ? this.server_id 
+                : (this.externalParams?.serverid || this.externalParams?.server_id || this.externalParamsState?.serverid || this.externalParamsState?.server_id)
+            
+            let server_name = this.server_name !== null && this.server_name !== undefined 
+                ? this.server_name 
+                : (this.externalParams?.server_name || this.externalParamsState?.server_name)
+            
+            const hasServerId = server_id !== null && server_id !== undefined && server_id !== ''
+            const hasServerName = server_name !== null && server_name !== undefined && server_name !== ''
+            
+            if (hasServerId || hasServerName) {
+                let areaid = null
+                
+                // 如果传入了server_id，查找对应的areaid
+                if (hasServerId && window.server_data) {
+                    areaid = this.getAreaIdByServerId(Number(server_id))
+                }
+                
+                // 只要有server_id或server_name，就返回结果
+                return {
+                    server_id: hasServerId ? Number(server_id) : 0,
+                    areaid: areaid !== null && areaid !== undefined ? areaid : 0,
+                    server_name: hasServerName ? server_name : ''
+                }
             }
-            const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
-            return { server_id, areaid, server_name }
+            
+            // 如果没有props或props不完整，从store获取
+            if (this.$store && this.$store.getters) {
+                const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
+                return { server_id, areaid, server_name }
+            }
+            
+            // store也不可用，返回默认值
+            return { server_id: 0, areaid: 0, server_name: '' }
         },
-        externalParams() {
-            // 优先使用props中的externalParams，如果没有则使用路由参数
-            if (this.externalParamsProp && Object.keys(this.externalParamsProp).length > 0) {
-                return this.externalParamsProp
-            }
-            
-            // 如果路由和store不可用，返回空对象
-            if (!this.$route || !this.$route.query) {
-                return {}
-            }
-            
-            const query = JSON.parse(JSON.stringify(this.$route.query))
-            if (query.action === 'similar_pet') {
-                query.evol_skill_list = JSON.parse(query.evol_skill_list || '{}')
-                query.neidan = JSON.parse(query.neidan || '{}')
-                query.equip_list = JSON.parse(query.equip_list || '{}')
-                query.texing = JSON.parse(query.texing || '{}')
-            }
-            return query
+        // 用于watch的props值（避免与computed同名冲突）
+        externalParamsFromProps() {
+            return this.$props.externalParams
+        },
+        externalParamsState() {
+            // 返回内部存储的外部参数
+            return this.internalExternalParams
         },
         // 从Vuex store获取server_data_valueTODO:::::
         server_data_value: {
             get() {
-                return this.$store?.state.server_data_value || {}
+                // 优先使用currentServerData中的数据
+                const serverData = this.currentServerData
+                if (serverData && serverData.areaid && serverData.server_id) {
+                    return [serverData.areaid, serverData.server_id]
+                }
+                // 如果没有，从store获取
+                const storeValue = this.$store?.state.server_data_value
+                if (storeValue && Array.isArray(storeValue) && storeValue.length > 0) {
+                    return storeValue
+                }
+                // 默认返回空数组，而不是空对象
+                return []
             },
             set(value) {
                 this.$store.dispatch('setServerDataValue', value)
@@ -611,7 +651,7 @@ export default {
         'globalSettings.multi'(val) {
             if (val) {
                 // 多服务器模式开启时，自动设置同级别服务器
-                const server_id = Number(this.externalParams.serverid)
+                const server_id = Number(this.externalParamsState.serverid)
                 console.log('开启多服务器模式，当前服务器ID:', server_id)
                 this.globalSettings.max_pages = 1
                 // 根据server_id在hotServers中找到对应的同级别的服务器
@@ -621,6 +661,20 @@ export default {
                 this.target_server_list = []
                 this.target_server_objects = []
                 console.log('关闭多服务器模式，清空目标服务器列表')
+            }
+        },
+        // 监听props中的externalParams变化（Modal模式）
+        externalParamsFromProps: {
+            handler(newVal) {
+                this.syncExternalParams()
+            },
+            immediate: true,
+            deep: true
+        },
+        // 监听路由参数变化（页面模式）
+        '$route.query'(newVal) {
+            if (newVal && Object.keys(newVal).length > 0) {
+                this.syncExternalParams()
             }
         }
     },
@@ -643,16 +697,74 @@ export default {
         // 初始化延迟范围滑块
         this.delayRange = [this.globalSettings.delay_min, this.globalSettings.delay_max]
 
+        // 同步外部参数（会先初始化internalExternalParams）
+        this.syncExternalParams()
+        // 然后加载并应用外部参数
         this.loadExternalParams()
-        // 初始化时设置默认的server_data_value（如果store中没有的话）
-        if (
-            this.externalParams.action &&
+        
+        // 调试：检查props的值
+        console.log('AutoParams mounted - props:', {
+            server_id: this.server_id,
+            server_name: this.server_name,
+            externalParams: this.externalParams
+        })
+        
+        // 如果通过props传入了server_id和server_name，优先使用props的值
+        // 或者从externalParams中获取（作为备用）
+        const serverIdFromProps = this.server_id !== null && this.server_id !== undefined ? this.server_id : (this.externalParams.serverid || this.externalParams.server_id)
+        const serverNameFromProps = this.server_name !== null && this.server_name !== undefined ? this.server_name : this.externalParams.server_name
+        
+        if (this.$store && (serverIdFromProps || serverNameFromProps)) {
+                // 如果传入了server_id，需要查找对应的areaid
+            const serverIdToUse = serverIdFromProps || this.currentServerData.server_id
+            if (serverIdToUse && window.server_data) {
+                let foundAreaid = null
+                // 在server_data中查找对应的server_id，获取areaid
+                for (let key in window.server_data) {
+                    let [parent, children] = window.server_data[key]
+                    const [label, , , , areaid] = parent
+                    for (let child of children) {
+                        const [serverId, serverName] = child
+                        if (Number(serverId) === Number(serverIdToUse)) {
+                            foundAreaid = areaid
+                            break
+                        }
+                    }
+                    if (foundAreaid) break
+                }
+                // 如果找到了areaid，更新store
+                if (foundAreaid) {
+                    const serverName = serverNameFromProps || this.currentServerData.server_name || ''
+                    this.$store.dispatch('setServerDataValue', [foundAreaid, Number(serverIdToUse)])
+                    // 同时直接设置server_data_value，确保选择器能回显
+                    this.server_data_value = [foundAreaid, Number(serverIdToUse)]
+                    if (serverName) {
+                        this.$store.dispatch('setServerData', { 
+                            areaid: foundAreaid, 
+                            server_id: Number(serverIdToUse), 
+                            server_name: serverName 
+                        })
+                    }
+                }
+            } else if (serverNameFromProps && !serverIdToUse) {
+                // 如果只传入了server_name，尝试从currentServerData获取server_id
+                if (this.currentServerData.server_id) {
+                    this.$store.dispatch('setServerData', {
+                        areaid: this.currentServerData.areaid,
+                        server_id: this.currentServerData.server_id,
+                        server_name: this.server_name
+                    })
+                }
+            }
+        } else if (
+            // 初始化时设置默认的server_data_value（如果store中没有的话）
+            this.externalParamsState.action &&
             this.$store && 
             (!this.$store?.state.server_data_value || this.$store?.state.server_data_value.length === 0)
         ) {
             this.$store.dispatch('setServerDataValue', [43, 77])
         }
-        if (this.externalParams.action) {
+        if (this.externalParamsState.action) {
             this.getFeatures().then(() => {
                 this.loadEquipConfig()
             })
@@ -862,10 +974,10 @@ export default {
 
         genaratePetSearchParams() {
             const searchParams = {}
-            searchParams.skill = this.externalParams.all_skill.replace(/\|/g, ',')
-            searchParams.texing = this.externalParams.texing?.id
-            searchParams.lingxing = this.externalParams.lx
-            searchParams.growth = this.externalParams.growth * 1000
+            searchParams.skill = this.externalParamsState.all_skill.replace(/\|/g, ',')
+            searchParams.texing = this.externalParamsState.texing?.id
+            searchParams.lingxing = this.externalParamsState.lx
+            searchParams.growth = this.externalParamsState.growth * 1000
             return searchParams
         },
         genarateEquipmentSearchParams({ kindid, ...features }) {
@@ -1073,51 +1185,59 @@ export default {
         },
         async getFeatures() {
             let query = {}
-            if (this.externalParams.action === 'similar_equip') {
+            if (this.externalParamsState.action === 'similar_equip') {
 
                 await this.$api.equipment
                     .extractFeatures({
                         equipment_data: {
-                            kindid: this.externalParams.kindid * 1 || undefined,
-                            type: this.externalParams.type * 1 || undefined,
-                            large_equip_desc: this.externalParams.large_equip_desc
+                            kindid: this.externalParamsState.kindid * 1 || undefined,
+                            type: this.externalParamsState.type * 1 || undefined,
+                            large_equip_desc: this.externalParamsState.large_equip_desc
                         },
                         data_type: 'equipment'
                     })
                     .then((res) => {
                         if (res.code === 200 && res.data.features) {
+                            // 在所有环境下都设置 targetFeatures（包括组件形式）
                             this.targetFeatures = res.data.features
-                            // 使用equip_name,large_equip_desc改变当前title
-                            document.title = this.targetFeatures.equip_level + '级' + this.externalParams.equip_name + ' - ' + this.externalParams.large_equip_desc.replace(/#r|#Y|#G|#c4DBAF4|#W|#cEE82EE|#c7D7E82/g, '')
-                            //使用 this.externalParams.equip_face_img动态改变网页的favicon.ico
-                            document.querySelector('link[rel="icon"]').href = this.externalParams.equip_face_img
                             query = this.genarateEquipmentSearchParams(res.data.features)
+                            
+                            // 只在非Chrome环境下修改页面title和favicon（组件形式不需要）
+                            if (!this.isChrome) {
+                                // 使用equip_name,large_equip_desc改变当前title
+                                if (this.targetFeatures && this.targetFeatures.equip_level) {
+                                    document.title = this.targetFeatures.equip_level + '级' + this.externalParamsState.equip_name + ' - ' + this.externalParamsState.large_equip_desc.replace(/#r|#Y|#G|#c4DBAF4|#W|#cEE82EE|#c7D7E82/g, '')
+                                }
+                                //使用 this.externalParamsState.equip_face_img动态改变网页的favicon.ico
+                                const faviconLink = document.querySelector('link[rel="icon"]')
+                                if (faviconLink && this.externalParamsState.equip_face_img) {
+                                    faviconLink.href = this.externalParamsState.equip_face_img
+                                }
+                            }
                         }
                     })
-            } else if (this.externalParams.action === 'similar_pet') {
+            } else if (this.externalParamsState.action === 'similar_pet') {
                 query = this.genaratePetSearchParams()
             }
-            if (this.externalParams.serverid) {
+            if (this.externalParamsState.serverid) {
                 // 如果serverid存在，则设置server_id，并根据server_data计算areaid
-                const server_id = Number(this.externalParams.serverid)
+                const server_id = Number(this.externalParamsState.serverid)
                 const areaid = this.getAreaIdByServerId(server_id)
                 query.server_id = server_id
                 if (areaid !== undefined) {
                     query.areaid = areaid
                 }
                 this.server_data_value = [areaid, server_id]
-                query.server_name = this.externalParams.server_name
+                query.server_name = this.externalParamsState.server_name
             }
             this.externalSearchParams = JSON.stringify(query, null, 2)
         },
         async openCBGSearch() {
-     
             let prefix = ''
             let search_type = 'search_role_equip'
             let query = {}
-            if (this.externalParams.action === 'similar_equip') {
+            if (this.externalParamsState.action === 'similar_equip') {
                 if (window.is_pet_equip(this.targetFeatures.kindid)) {
-                    // 使用Vuex store中的服务器数据
                     search_type = 'search_pet_equip'
                 } else if (window.is_lingshi_equip(this.targetFeatures.kindid)) {
                     search_type = 'search_lingshi'
@@ -1129,17 +1249,93 @@ export default {
                 search_type = 'search_pet'
                 query = this.genaratePetSearchParams()
             }
-            const serverData = this.$store.getters.getCurrentServerData
-            prefix = `https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=${new Date().getTime()}&act=recommd_by_role&server_id=${serverData.server_id
-                }&areaid=${serverData.areaid}&server_name=${serverData.server_name
-                }&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=${search_type}&`
+            const serverData = this.currentServerData
+            prefix = `https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=${new Date().getTime()}&act=recommd_by_role&server_id=${serverData.server_id}&areaid=${serverData.areaid}&server_name=${serverData.server_name}&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=${search_type}&`
+            const target_url = prefix + qs.stringify(query)
 
-            let target_url = prefix + qs.stringify(query)
-            console.log(target_url, 'target_url')
-            // this.$api.spider.startPlaywright({
-            //     headless: false,
-            //     target_url
-            // })
+            // Chrome 扩展环境：通过 DevTools Protocol 在当前页面注入 iframe
+            try {
+                if (typeof chrome !== 'undefined' && chrome.tabs && chrome.debugger) {
+                    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+                    if (!activeTab) {
+                        this.$notify && this.$notify.warning('未找到活动标签页')
+                        return
+                    }
+                    if (!this.devtoolsConnected && chrome.runtime) {
+                        // 尝试提示，但不强制依赖
+                        console.warn('数据监听连接可能未建立，仍尝试注入iframe')
+                    }
+                    const result = await chrome.debugger.sendCommand(
+                        { tabId: activeTab.id },
+                        'Runtime.evaluate',
+                        {
+                            expression: `
+                              (function() {
+                                try {
+                                  var old = document.getElementById('cbg_auto_iframe');
+                                  if (old && old.parentElement) { old.parentElement.remove(); }
+                                  const iframe = document.createElement('iframe');
+                                  iframe.id = 'cbg_auto_iframe';
+                                  iframe.src = '${target_url.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}';
+                                  iframe.style.width = '1000px';
+                                  iframe.style.height = '680px';
+                                  iframe.style.border = '2px solid #1890ff';
+                                  iframe.style.borderRadius = '8px';
+                                  iframe.style.position = 'fixed';
+                                  iframe.style.top = '50px';
+                                  iframe.style.right = '20px';
+                                  iframe.style.zIndex = '9999';
+                                  iframe.style.background = '#fff';
+                                  const closeBtn = document.createElement('div');
+                                  closeBtn.innerHTML = '×';
+                                  closeBtn.style.position = 'absolute';
+                                  closeBtn.style.top = '-10px';
+                                  closeBtn.style.right = '-10px';
+                                  closeBtn.style.width = '20px';
+                                  closeBtn.style.height = '20px';
+                                  closeBtn.style.backgroundColor = '#ff4d4f';
+                                  closeBtn.style.color = 'white';
+                                  closeBtn.style.borderRadius = '50%';
+                                  closeBtn.style.display = 'flex';
+                                  closeBtn.style.alignItems = 'center';
+                                  closeBtn.style.justifyContent = 'center';
+                                  closeBtn.style.cursor = 'pointer';
+                                  closeBtn.style.fontSize = '14px';
+                                  closeBtn.style.fontWeight = 'bold';
+                                  closeBtn.style.zIndex = '10000';
+                                  const container = document.createElement('div');
+                                  container.style.position = 'relative';
+                                  container.appendChild(iframe);
+                                  container.appendChild(closeBtn);
+                                  // 加载完成后自动移除
+                                  iframe.addEventListener('load', function() {
+                                    try { document.body.removeChild(container); } catch (e) {}
+                                  });
+                                  closeBtn.onclick = function() { document.body.removeChild(container); };
+                                  document.body.appendChild(container);
+                                  return 'SUCCESS:iframe added';
+                                } catch (e) {
+                                  return 'ERROR:' + e.message;
+                                }
+                              })()
+                            `
+                        }
+                    )
+                    if (result && result.result && typeof result.result.value === 'string') {
+                        const msg = result.result.value
+                        if (msg.startsWith('ERROR:')) {
+                            this.$notify && this.$notify.warning(msg.substring(6))
+                        } else {
+                            this.$notify && this.$notify.success('已在页面注入搜索iframe')
+                        }
+                    }
+                    return
+                }
+            } catch (error) {
+                console.error('注入iframe失败:', error)
+            }
+
+
         },
         /**
         * GBK编码的URL编码
@@ -1161,12 +1357,77 @@ export default {
                 return window.encodeURI(str)
             }
         },
-        async loadExternalParams() {
-            if (this.externalParams.activeTab) {
-                this.activeTab = this.externalParams.activeTab
+        /**
+         * 同步外部参数（从props或路由）
+         * 优先使用props中的externalParams（Modal模式），否则使用路由参数（页面模式）
+         */
+        syncExternalParams() {
+            let params = {}
+            
+            // 优先使用props中的externalParams（从Modal传递）
+            const propsParams = this.$props.externalParams
+            if (propsParams && typeof propsParams === 'object' && Object.keys(propsParams).length > 0) {
+                params = JSON.parse(JSON.stringify(propsParams))
+            } else if (this.$route && this.$route.query) {
+                // 使用路由参数（页面模式）
+                params = JSON.parse(JSON.stringify(this.$route.query))
             }
-            if (this.externalParams.equip_type) {
-                this.equipForm.equip_type = this.externalParams.equip_type
+            
+            // 处理similar_pet的JSON字符串参数
+            if (params.action === 'similar_pet') {
+                if (typeof params.evol_skill_list === 'string') {
+                    try {
+                        params.evol_skill_list = JSON.parse(params.evol_skill_list || '{}')
+                    } catch (e) {
+                        params.evol_skill_list = {}
+                    }
+                }
+                if (typeof params.neidan === 'string') {
+                    try {
+                        params.neidan = JSON.parse(params.neidan || '{}')
+                    } catch (e) {
+                        params.neidan = {}
+                    }
+                }
+                if (typeof params.equip_list === 'string') {
+                    try {
+                        params.equip_list = JSON.parse(params.equip_list || '{}')
+                    } catch (e) {
+                        params.equip_list = {}
+                    }
+                }
+                if (typeof params.texing === 'string') {
+                    try {
+                        params.texing = JSON.parse(params.texing || '{}')
+                    } catch (e) {
+                        params.texing = {}
+                    }
+                }
+            }
+            
+            // 更新内部存储的外部参数
+            this.internalExternalParams = params
+            
+            // 如果参数中有activeTab，更新activeTab
+            if (params.activeTab) {
+                this.activeTab = params.activeTab
+            }
+            // 如果参数中有equip_type，更新equipForm.equip_type
+            if (params.equip_type) {
+                this.equipForm.equip_type = params.equip_type
+            }
+        },
+        
+        async loadExternalParams() {
+            // 先同步参数
+            this.syncExternalParams()
+            
+            // 然后应用参数到组件状态
+            if (this.externalParamsState.activeTab) {
+                this.activeTab = this.externalParamsState.activeTab
+            }
+            if (this.externalParamsState.equip_type) {
+                this.equipForm.equip_type = this.externalParamsState.equip_type
             }
         },
         // 快速配置方法 - 根据当前activeTab配置
@@ -1213,8 +1474,8 @@ export default {
                 }
 
                 // 如果多服务器模式已开启，自动设置同级别服务器
-                if (this.globalSettings.multi && this.externalParams.serverid) {
-                    const server_id = Number(this.externalParams.serverid)
+                if (this.globalSettings.multi && this.externalParamsState.serverid) {
+                    const server_id = Number(this.externalParamsState.serverid)
                     console.log('数据加载完成后，自动设置多服务器模式的目标服务器:', server_id)
                     this.setTargetServersByLevel(server_id)
                 }

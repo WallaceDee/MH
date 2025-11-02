@@ -1,19 +1,38 @@
 <template>
-  <div>
+  <span>
     <el-button type="success" @click="goToMoreSimilar">
       查看更多相似
     </el-button>
     
     <!-- AutoParams Modal -->
-    <el-dialog :visible.sync="autoParamsDialogVisible" width="1200px" :close-on-click-modal="false"
-      :close-on-press-escape="false" custom-class="auto-params-dialog" append-to-body>
-      <span slot="title" class="el-dialog__title">
-        <span class="emoji-icon">⚙️</span> 自动参数配置
-      </span>
-      <AutoParams v-if="autoParamsDialogVisible" :external-params="autoParamsExternalParams" 
-        @close="closeAutoParamsDialog" />
+    <!-- 
+      Bug原因分析：
+      1. 事件冒泡：点击内层对话框内容时，事件会冒泡到外层对话框的遮罩层
+      2. Element UI 关闭机制：外层对话框接收到点击遮罩事件，即使设置了 close-on-click-modal="false"，
+         但如果事件路径包含遮罩层，仍可能触发关闭
+      3. 嵌套对话框的特殊情况：当对话框嵌套时，DOM层级和事件传播路径更复杂，
+         容易导致误判点击位置
+      
+      解决方案：
+      - @click.native.stop: 阻止原生DOM事件冒泡，防止事件传播到外层
+      - @mousedown.native.stop: 阻止鼠标按下事件冒泡
+      - @click.stop: 阻止Vue事件冒泡
+      - before-close: 完全控制关闭逻辑，只允许通过明确的方法关闭
+    -->
+    <el-dialog 
+      :visible.sync="autoParamsDialogVisible" 
+      width="720px" 
+      :close-on-click-modal="false"
+      :close-on-press-escape="false" 
+      custom-class="auto-params-dialog" 
+      append-to-body
+      @click.native.stop 
+      @mousedown.native.stop>
+        <AutoParams v-if="autoParamsDialogVisible" :external-params="autoParamsExternalParams" :log="false"
+          :server-id="modalServerId" :server-name="modalServerName"
+          @close="closeAutoParamsDialog" />
     </el-dialog>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -30,7 +49,12 @@ export default {
     return {
       // AutoParams Modal相关数据
       autoParamsDialogVisible: false,
-      autoParamsExternalParams: {}
+      autoParamsExternalParams: {},
+      // 服务器信息（从externalParams中提取）
+      modalServerId: undefined,
+      modalServerName: undefined,
+      // 标记是否允许关闭对话框
+      allowDialogClose: false
     }
   },
   props: {
@@ -140,13 +164,33 @@ export default {
     openAutoParamsModal(params) {
       // 直接在当前页面打开AutoParams Modal
       console.log('打开AutoParams Modal，参数:', params)
+      
+      // 先提取服务器信息（在设置visible之前）
+      this.modalServerId = params.serverid || params.server_id || null
+      this.modalServerName = params.server_name || null
+      
+      console.log('提取的服务器信息:', { 
+        modalServerId: this.modalServerId, 
+        modalServerName: this.modalServerName,
+        paramsServerid: params.serverid,
+        paramsServer_id: params.server_id,
+        paramsServer_name: params.server_name
+      })
+      
+      // 先设置externalParams
       this.autoParamsExternalParams = params
-      this.autoParamsDialogVisible = true
+      
+      // 使用$nextTick确保props值已经更新后再显示组件
+      this.$nextTick(() => {
+        this.autoParamsDialogVisible = true
+      })
     },
 
     closeAutoParamsDialog() {
       this.autoParamsDialogVisible = false
       this.autoParamsExternalParams = {}
+      this.modalServerId = null
+      this.modalServerName = null
     },
 
     createNewWindow(params) {
