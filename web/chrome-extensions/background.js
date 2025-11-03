@@ -521,30 +521,73 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // 切换到指定标签页
       handleSwitchToTab(request.tabId, sendResponse);
       return true; // 保持消息通道开放
+      
+    case 'closeSidePanel':
+      // 关闭SidePanel
+      handleCloseSidePanel(request.tabId, sendResponse);
+      return true; // 保持消息通道开放
   }
 });
 
 // 处理刷新当前页面的请求
 async function handleRefreshCurrentPage(sendResponse) {
   try {
-    // 获取当前活动标签页
+    // 优先使用被监控的CBG标签页ID
+    const monitoredTabId = devToolsListener.currentTabId;
+    
+    if (monitoredTabId) {
+      // 获取被监控的标签页信息
+      try {
+        const monitoredTab = await chrome.tabs.get(monitoredTabId);
+        
+        if (!monitoredTab) {
+          sendResponse({ success: false, error: '无法获取被监控的标签页' });
+          return;
+        }
+        
+        // 检查是否是插件页面（不应该发生，但做安全检查）
+        if (monitoredTab.url && monitoredTab.url.startsWith('chrome-extension://')) {
+          sendResponse({ success: false, error: '被监控的标签页是插件页面，无法刷新' });
+          return;
+        }
+        
+        // 刷新被监控的标签页
+        await chrome.tabs.reload(monitoredTabId);
+        
+        console.log('✅ 刷新被监控的CBG页面成功:', monitoredTab.url);
+        sendResponse({ 
+          success: true, 
+          message: '页面刷新成功',
+          url: monitoredTab.url
+        });
+        return;
+      } catch (tabError) {
+        console.warn('获取被监控标签页失败，尝试使用当前活动标签页:', tabError);
+        // 如果获取被监控标签页失败，继续使用备用方案
+      }
+    }
+    
+    // 备用方案：如果没有正在监控的标签页，尝试使用当前活动标签页
     const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
     if (!activeTab) {
-      sendResponse({ success: false, error: '无法获取当前活动标签页' });
+      sendResponse({ success: false, error: '无法获取当前活动标签页，且没有正在监控的标签页' });
       return;
     }
     
     // 检查是否是插件页面
-    if (activeTab.url.startsWith('chrome-extension://')) {
-      sendResponse({ success: false, error: '无法刷新插件页面' });
+    if (activeTab.url && activeTab.url.startsWith('chrome-extension://')) {
+      sendResponse({ 
+        success: false, 
+        error: '当前活动标签页是插件页面，无法刷新。请切换到CBG页面后再试，或者等待监控连接建立。' 
+      });
       return;
     }
     
-    // 刷新页面
+    // 刷新当前活动标签页（备用方案）
     await chrome.tabs.reload(activeTab.id);
     
-    console.log('✅ 页面刷新成功:', activeTab.url);
+    console.log('✅ 刷新当前活动标签页成功:', activeTab.url);
     sendResponse({ 
       success: true, 
       message: '页面刷新成功',
@@ -570,6 +613,76 @@ async function handleSwitchToTab(tabId, sendResponse) {
     sendResponse({ 
       success: false, 
       error: `切换标签页失败: ${error.message}` 
+    });
+  }
+}
+
+// 处理关闭SidePanel的请求
+// 注意：chrome.sidePanel.close() API不存在，需要通过消息发送给SidePanel让其调用window.close()
+async function handleCloseSidePanel(tabId, sendResponse) {
+  try {
+    // chrome.sidePanel.close() API不存在，需要通过消息传递
+    // 发送消息给SidePanel，让它自己调用window.close()
+    
+    // 获取所有CBG标签页，向它们的SidePanel发送关闭消息
+    const cbgTabs = await chrome.tabs.query({ 
+      url: ['https://xyq.cbg.163.com/*'] 
+    });
+    
+    if (cbgTabs && cbgTabs.length > 0) {
+      // 向所有CBG标签页的SidePanel发送关闭消息
+      const messagePromises = cbgTabs.map(tab => {
+        if (tab.id) {
+          return chrome.runtime.sendMessage({
+            action: 'closeSidePanel'
+          }).catch(err => {
+            // 忽略消息发送失败（可能SidePanel未打开）
+            console.log(`向标签页 ${tab.id} 的SidePanel发送关闭消息失败:`, err.message);
+            return null;
+          });
+        }
+        return Promise.resolve(null);
+      });
+      
+      await Promise.all(messagePromises);
+      console.log('✅ 已向所有CBG标签页的SidePanel发送关闭消息');
+      sendResponse({ 
+        success: true, 
+        message: '已发送关闭消息给SidePanel' 
+      });
+    } else {
+      // 如果没有CBG标签页，尝试向当前活动标签页发送消息
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (activeTab && activeTab.id) {
+        try {
+          await chrome.runtime.sendMessage({
+            action: 'closeSidePanel'
+          });
+          console.log('✅ 已向当前活动标签页的SidePanel发送关闭消息');
+          sendResponse({ 
+            success: true, 
+            message: '已发送关闭消息给SidePanel' 
+          });
+        } catch (error) {
+          console.warn('发送关闭消息失败:', error);
+          sendResponse({ 
+            success: false, 
+            error: `发送关闭消息失败: ${error.message}` 
+          });
+        }
+      } else {
+        console.warn('⚠️ 无法发送关闭消息: 没有找到CBG标签页或活动标签页');
+        sendResponse({ 
+          success: false, 
+          error: '无法发送关闭消息: 没有找到CBG标签页或活动标签页' 
+        });
+      }
+    }
+  } catch (error) {
+    console.error('❌ 发送关闭SidePanel消息失败:', error);
+    sendResponse({ 
+      success: false, 
+      error: `发送关闭消息失败: ${error.message}` 
     });
   }
 }

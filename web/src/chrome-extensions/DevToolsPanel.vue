@@ -8,6 +8,8 @@
             :class="{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }"></span>
         </div>
         <h3 style="color: #fff;">梦幻灵瞳</h3>
+        <i class="el-icon-full-screen  btn1 js_alert_btn_0" style="color:#fff;line-height: 26px;" v-if="!isInNewWindow" href="javascript:void 0;"
+        @click.prevent="openInNewTab"></i>
       </el-row>
       <div class="connection-status">
         <div id="pager" class="fr" v-if="pageInfo.hasPager">
@@ -20,14 +22,10 @@
           </el-row>
         </div>
         <a v-if="!devtoolsConnected" href="javascript:void 0;" @click="reconnectDevTools">重新连接</a>
-        <a v-if="!isInNewWindow" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
-          @click.prevent="openInNewTab">新窗口打开</a>
         <a v-if="!pageInfo.hasPager" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
           @click.prevent="refreshCurrentPage">刷新页面</a>
         <a v-if="recommendData.length > 0" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
           @click.prevent="clearData">清空数据</a>
-        <a href="javascript:void 0;" class=" btn1 js_alert_btn_0"
-          @click.prevent="testAddIframe" style="background: #f56c6c;">测试iframe</a>
       </div>
     </div>
     <div class="data-section">
@@ -214,6 +212,7 @@ export default {
   name: 'DevToolsPanel',
   data() {
     return {
+      isSidePanel: true,
       pageInfo: {
         hasPager: false,
         currentPage: 0,
@@ -228,7 +227,7 @@ export default {
       devtoolsConnected: false, // 数据监听连接状态
       connectionStatus: '检查中...', // 连接状态描述
       connectionCheckTimer: null, // 连接检查定时器
-      isInNewWindow: false, // 是否在新窗口中打开
+      windowWidth: 0, // 窗口宽度，用于响应式判断
       
       // 装备估价相关数据
       valuationDialogVisible: false,
@@ -256,7 +255,12 @@ export default {
     AutoParams
   },
   computed: {
-
+    // 判断是否在新窗口中打开（基于窗口宽度）
+    // 宽度 > 960：新窗口/标签页
+    // 宽度 <= 960：SidePanel
+    isInNewWindow() {
+      return this.windowWidth > 960
+    }
   },
   mounted() {
     // 通知background script侧边栏已打开
@@ -271,7 +275,12 @@ export default {
 
     this.initMessageListener()
     this.checkConnectionStatus()
-    this.checkIfInNewWindow()
+    
+    // 初始化窗口宽度
+    this.updateWindowWidth()
+    
+    // 监听窗口大小变化
+    window.addEventListener('resize', this.handleWindowResize)
 
     // // 设置定时检查（每5秒检查一次）
     // this.connectionCheckTimer = setInterval(() => {
@@ -288,6 +297,9 @@ export default {
 
     // 移除可见性变化监听器
     document.removeEventListener('visibilitychange', this.handleVisibilityChange)
+    
+    // 移除窗口大小变化监听器
+    window.removeEventListener('resize', this.handleWindowResize)
 
     // 移除Chrome消息监听器
     this.removeMessageListener()
@@ -301,6 +313,18 @@ export default {
     this.expandedItems = []
   },
   methods: {
+    // 更新窗口宽度
+    updateWindowWidth() {
+      if (typeof window !== 'undefined') {
+        this.windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 0
+      }
+    },
+    
+    // 处理窗口大小变化
+    handleWindowResize() {
+      this.updateWindowWidth()
+    },
+    
     handleVisibilityChange() {
       // 当页面不可见时，通知background script侧边栏已关闭
       if (document.hidden) {
@@ -807,6 +831,16 @@ export default {
 
     handleChromeMessage(request, sender, sendResponse) {
       switch (request.action) {
+        case 'closeSidePanel':
+          // 关闭SidePanel（只能在SidePanel上下文中调用）
+          if (!this.isInNewWindow) {
+            try {
+              window.close()
+            } catch (error) {
+              console.error('关闭SidePanel失败:', error)
+            }
+          }
+          break
         case 'addRecommendData':
           console.log('接收到增量数据:', request)
           // 处理增量数据
@@ -930,78 +964,6 @@ export default {
       })
     },
 
-    checkIfInNewWindow() {
-      // 检测是否在新窗口中打开
-      try {
-
-        // 方法1: 检查chrome.devtools API是否存在（最可靠的方法）
-        if (typeof chrome !== 'undefined' && chrome.devtools && chrome.devtools.inspectedWindow) {
-          this.isInNewWindow = false
-          console.log('在Chrome扩展SidePanel中打开（通过API检测）')
-          return
-        }
-
-        // 方法2: 检查URL模式 - 区分SidePanel和新窗口
-        const currentUrl = window.location.href
-        if (currentUrl.includes('chrome-extension://')) {
-          // 检查是否是SidePanel页面
-          if (currentUrl.includes('panel.html')) {
-            // panel.html是SidePanel页面
-            this.isInNewWindow = false
-            console.log('在Chrome扩展SidePanel中打开（通过URL检测）')
-            return
-          } else if (currentUrl.includes('panel.html')) {
-            // panel.html是新窗口页面
-            this.isInNewWindow = true
-            console.log('在新窗口中打开（通过URL检测）')
-            return
-          }
-        }
-
-        // 方法3: 检查页面标题
-        if (document.title === '梦幻灵瞳') {
-          // 需要进一步区分是SidePanel还是新窗口
-          if (currentUrl.includes('panel.html')) {
-            this.isInNewWindow = false
-            console.log('在Chrome扩展SidePanel中打开（通过标题+URL检测）')
-            return
-          } else {
-            this.isInNewWindow = true
-            console.log('在新窗口中打开（通过标题检测）')
-            return
-          }
-        }
-
-        // 方法4: 检查是否在iframe中
-        if (window.self !== window.top) {
-          this.isInNewWindow = false
-          console.log('在Chrome扩展SidePanel中打开（通过iframe检测）')
-          return
-        }
-
-        // 方法5: 检查parent窗口
-        if (window.parent === window) {
-          // 顶级窗口，需要进一步判断
-          if (currentUrl.includes('panel.html')) {
-            this.isInNewWindow = false
-            console.log('在Chrome扩展SidePanel中打开（通过parent+URL检测）')
-          } else {
-            this.isInNewWindow = true
-            console.log('在新窗口中打开（通过parent检测）')
-          }
-        } else {
-          this.isInNewWindow = false
-          console.log('在Chrome扩展SidePanel中打开（通过parent检测）')
-        }
-
-      } catch (error) {
-        console.error('检测窗口环境失败:', error)
-        // 默认假设在新窗口中
-        this.isInNewWindow = true
-        console.log('检测失败，默认在新窗口中打开')
-      }
-    },
-
     async openInNewTab() {
       try {
         // 直接创建新标签页打开扩展页面
@@ -1015,6 +977,19 @@ export default {
 
         this.$notify.success('已在新标签页中打开扩展面板')
 
+        // 如果当前在SidePanel中，关闭SidePanel
+        // 注意：只能在SidePanel上下文中调用window.close()
+        if (!this.isInNewWindow) {
+          try {
+            // 延迟一下，确保新标签页已经完全打开
+            setTimeout(() => {
+              window.close()
+            }, 100)
+          } catch (closeError) {
+            console.error('关闭SidePanel失败:', closeError)
+          }
+        }
+
       } catch (error) {
         console.error('打开新标签页失败:', error)
 
@@ -1023,6 +998,19 @@ export default {
           const extensionUrl = chrome.runtime.getURL('panel.html')
           window.open(extensionUrl, '_blank')
           this.$notify.success('已在新窗口中打开扩展面板')
+
+          // 如果当前在SidePanel中，关闭SidePanel
+          // 注意：只能在SidePanel上下文中调用window.close()
+          if (!this.isInNewWindow) {
+            try {
+              // 延迟一下，确保新窗口已经完全打开
+              setTimeout(() => {
+                window.close()
+              }, 100)
+            } catch (closeError) {
+              console.error('关闭SidePanel失败:', closeError)
+            }
+          }
         } catch (fallbackError) {
           console.error('备用方法也失败:', fallbackError)
           this.$notify.error('打开新窗口失败: ' + error.message)
@@ -1119,119 +1107,6 @@ export default {
       this.autoParamsDialogVisible = false
       this.autoParamsExternalParams = {}
     },
-
-    // 测试添加iframe方法
-    async testAddIframe() {
-      try {
-        // 获取当前活动标签页
-        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
-
-        if (!activeTab) {
-          this.$notify.warning('未找到活动标签页')
-          return
-        }
-
-        // 检查数据监听连接状态
-        if (!this.devtoolsConnected) {
-          this.$notify.warning('数据监听连接已断开，请重新加载页面')
-          return
-        }
-
-        // 通过Chrome调试API执行页面JavaScript代码添加iframe
-        const result = await chrome.debugger.sendCommand(
-          { tabId: activeTab.id },
-          'Runtime.evaluate',
-          {
-            expression: `
-              (function() {
-                try {
-                  // 创建iframe元素
-                  const iframe = document.createElement('iframe')
-                  iframe.src = 'https://xyq.cbg.163.com/'
-                  iframe.style.width = '400px'
-                  iframe.style.height = '300px'
-                  iframe.style.border = '2px solid #1890ff'
-                  iframe.style.borderRadius = '8px'
-                  iframe.style.position = 'fixed'
-                  iframe.style.top = '50px'
-                  iframe.style.right = '20px'
-                  iframe.style.zIndex = '9999'
-                  iframe.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'
-                  
-                  // 添加关闭按钮
-                  const closeBtn = document.createElement('div')
-                  closeBtn.innerHTML = '×'
-                  closeBtn.style.position = 'absolute'
-                  closeBtn.style.top = '-10px'
-                  closeBtn.style.right = '-10px'
-                  closeBtn.style.width = '20px'
-                  closeBtn.style.height = '20px'
-                  closeBtn.style.backgroundColor = '#ff4d4f'
-                  closeBtn.style.color = 'white'
-                  closeBtn.style.borderRadius = '50%'
-                  closeBtn.style.display = 'flex'
-                  closeBtn.style.alignItems = 'center'
-                  closeBtn.style.justifyContent = 'center'
-                  closeBtn.style.cursor = 'pointer'
-                  closeBtn.style.fontSize = '14px'
-                  closeBtn.style.fontWeight = 'bold'
-                  closeBtn.style.zIndex = '10000'
-                  
-                  // 创建容器
-                  const container = document.createElement('div')
-                  container.style.position = 'relative'
-                  container.appendChild(iframe)
-                  container.appendChild(closeBtn)
-                  
-                  // 添加关闭事件
-                  closeBtn.onclick = function() {
-                    document.body.removeChild(container)
-                  }
-                  
-                  // 添加到页面
-                  document.body.appendChild(container)
-                  
-                  return 'SUCCESS:已添加百度iframe到页面'
-                } catch (error) {
-                  return 'ERROR:添加iframe失败 - ' + error.message
-                }
-              })()
-            `
-          }
-        )
-
-        // 处理Chrome调试API的返回结果
-        if (result && result.result && result.result.value) {
-          const message = result.result.value
-
-          if (message.startsWith('SUCCESS:')) {
-            this.$notify.success(message.substring(8)) // 移除"SUCCESS:"前缀
-            console.log('iframe添加成功')
-          } else if (message.startsWith('ERROR:')) {
-            this.$notify.warning(message.substring(6)) // 移除"ERROR:"前缀
-            console.warn('iframe添加失败:', message)
-          } else {
-            this.$notify.error('添加iframe失败：未知返回结果')
-            console.error('iframe操作结果异常:', result)
-          }
-        } else {
-          this.$notify.error('添加iframe失败')
-          console.error('iframe操作结果异常:', result)
-        }
-
-      } catch (error) {
-        console.error('添加iframe失败:', error)
-
-        // 检查是否是连接断开错误
-        if (error.message && error.message.includes('Could not establish connection')) {
-          this.devtoolsConnected = false
-          this.connectionStatus = '连接断开'
-          this.$notify.error('数据监听连接已断开，请重新加载页面或刷新扩展')
-        } else {
-          this.$notify.error('操作失败: ' + error.message)
-        }
-      }
-    }
   }
 }
 </script>

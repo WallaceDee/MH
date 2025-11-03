@@ -17,8 +17,8 @@
                     <el-col :span="24">
                         <p class="cBlue" style="margin-bottom: 5px;">🎯目标：</p>
                     </el-col>
-                    <EquipmentImage v-if="externalParamsState.action === 'similar_equip'" :equipment="externalParamsState"
-                        :popoverWidth="450"
+                    <EquipmentImage v-if="externalParamsState.action === 'similar_equip'"
+                        :equipment="externalParamsState" :popoverWidth="450"
                         style="display: flex;flex-direction: column;height: 50px;width: 100%;align-items: center;" />
                     <PetImage v-if="externalParamsState.action === 'similar_pet'" :pet="externalParamsState"
                         :equipFaceImg="externalParamsState.equip_face_img" />
@@ -161,8 +161,9 @@
                 :disabled="externalParamsState.action && externalParamsState.action !== 'similar_equip'">
                 <el-form :model="equipForm" label-width="100px" size="small">
                     <el-form-item label="装备类型">
-                        <el-select v-model="equipForm.equip_type" :disabled="externalParamsState.action === 'similar_equip'"
-                            @change="onEquipTypeChange" style="width: 100%">
+                        <el-select v-model="equipForm.equip_type"
+                            :disabled="externalParamsState.action === 'similar_equip'" @change="onEquipTypeChange"
+                            style="width: 100%">
                             <el-option label="普通装备" value="normal"></el-option>
                             <el-option label="灵饰装备" value="lingshi"></el-option>
                             <el-option label="召唤兽装备" value="pet"></el-option>
@@ -181,7 +182,9 @@
                         </el-radio-group>
                         <el-cascader v-if="suit_effect_type === 'select'" :options="suitOptions" placeholder="请选择套装效果"
                             separator="" clearable filterable @change="handleSuitChange" />
-                        <el-radio-group v-if="suit_effect_type?.split('.').length > 1 && equipConfig?.suits?.[suit_effect_type.split('.')[0]]?.[suit_effect_type.split('.')[1]]" v-model="select_suit_effect">
+                        <el-radio-group
+                            v-if="suit_effect_type?.split('.').length > 1 && equipConfig?.suits?.[suit_effect_type.split('.')[0]]?.[suit_effect_type.split('.')[1]]"
+                            v-model="select_suit_effect">
                             <el-radio
                                 v-for="itemId in equipConfig.suits[suit_effect_type.split('.')[0]][suit_effect_type.split('.')[1]]"
                                 :label="itemId.toString()" :key="itemId">{{ suit_transform_skills[itemId] }}</el-radio>
@@ -203,7 +206,7 @@
                         <span slot="title" v-html="lingshiTips"></span>
                     </el-alert>
                     <!-- JSON参数编辑器 -->
-                    <div class="params-editor" v-if="!isChrome">
+                    <div class="params-editor" >
                         <div class="params-actions">
                             <el-button type="text" size="mini" @click="() => resetParam('equip')">重置</el-button>
                             <el-button type="primary" size="mini" @click="() => saveParam('equip')"
@@ -339,7 +342,7 @@ export default {
     },
     data() {
         return {
-            isChrome:typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
+            isChrome: typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
             select_sum_attr_type: [],
             price_min: 1,
@@ -507,25 +510,25 @@ export default {
         },
         currentServerData() {
             // 优先使用props传入的数据，如果没有则从externalParams中获取
-            let server_id = this.server_id !== null && this.server_id !== undefined 
-                ? this.server_id 
+            let server_id = this.server_id !== null && this.server_id !== undefined
+                ? this.server_id
                 : (this.externalParams?.serverid || this.externalParams?.server_id || this.externalParamsState?.serverid || this.externalParamsState?.server_id)
-            
-            let server_name = this.server_name !== null && this.server_name !== undefined 
-                ? this.server_name 
+
+            let server_name = this.server_name !== null && this.server_name !== undefined
+                ? this.server_name
                 : (this.externalParams?.server_name || this.externalParamsState?.server_name)
-            
+
             const hasServerId = server_id !== null && server_id !== undefined && server_id !== ''
             const hasServerName = server_name !== null && server_name !== undefined && server_name !== ''
-            
+
             if (hasServerId || hasServerName) {
                 let areaid = null
-                
+
                 // 如果传入了server_id，查找对应的areaid
                 if (hasServerId && window.server_data) {
                     areaid = this.getAreaIdByServerId(Number(server_id))
                 }
-                
+
                 // 只要有server_id或server_name，就返回结果
                 return {
                     server_id: hasServerId ? Number(server_id) : 0,
@@ -533,13 +536,13 @@ export default {
                     server_name: hasServerName ? server_name : ''
                 }
             }
-            
+
             // 如果没有props或props不完整，从store获取
             if (this.$store && this.$store.getters) {
                 const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
                 return { server_id, areaid, server_name }
             }
-            
+
             // store也不可用，返回默认值
             return { server_id: 0, areaid: 0, server_name: '' }
         },
@@ -568,12 +571,17 @@ export default {
                 return []
             },
             set(value) {
-                this.$store.dispatch('setServerDataValue', value)
+                if (this.$store && this.$store.dispatch) {
+                    this.$store.dispatch('setServerDataValue', value)
+                }
             }
         },
         // 检查cookies是否有效
         isCookieValid() {
-            return this.$store.getters['cookie/isCookieCacheValid']
+            if (this.$store && this.$store.getters) {
+                return this.$store.getters['cookie/isCookieCacheValid']
+            }
+            return false
         },
 
         cached_params() {
@@ -701,21 +709,21 @@ export default {
         this.syncExternalParams()
         // 然后加载并应用外部参数
         this.loadExternalParams()
-        
+
         // 调试：检查props的值
         console.log('AutoParams mounted - props:', {
             server_id: this.server_id,
             server_name: this.server_name,
             externalParams: this.externalParams
         })
-        
+
         // 如果通过props传入了server_id和server_name，优先使用props的值
         // 或者从externalParams中获取（作为备用）
         const serverIdFromProps = this.server_id !== null && this.server_id !== undefined ? this.server_id : (this.externalParams.serverid || this.externalParams.server_id)
         const serverNameFromProps = this.server_name !== null && this.server_name !== undefined ? this.server_name : this.externalParams.server_name
-        
+
         if (this.$store && (serverIdFromProps || serverNameFromProps)) {
-                // 如果传入了server_id，需要查找对应的areaid
+            // 如果传入了server_id，需要查找对应的areaid
             const serverIdToUse = serverIdFromProps || this.currentServerData.server_id
             if (serverIdToUse && window.server_data) {
                 let foundAreaid = null
@@ -739,10 +747,10 @@ export default {
                     // 同时直接设置server_data_value，确保选择器能回显
                     this.server_data_value = [foundAreaid, Number(serverIdToUse)]
                     if (serverName) {
-                        this.$store.dispatch('setServerData', { 
-                            areaid: foundAreaid, 
-                            server_id: Number(serverIdToUse), 
-                            server_name: serverName 
+                        this.$store.dispatch('setServerData', {
+                            areaid: foundAreaid,
+                            server_id: Number(serverIdToUse),
+                            server_name: serverName
                         })
                     }
                 }
@@ -759,7 +767,7 @@ export default {
         } else if (
             // 初始化时设置默认的server_data_value（如果store中没有的话）
             this.externalParamsState.action &&
-            this.$store && 
+            this.$store &&
             (!this.$store?.state.server_data_value || this.$store?.state.server_data_value.length === 0)
         ) {
             this.$store.dispatch('setServerDataValue', [43, 77])
@@ -1197,11 +1205,12 @@ export default {
                         data_type: 'equipment'
                     })
                     .then((res) => {
+                        console.log('res008989898989', res)
                         if (res.code === 200 && res.data.features) {
                             // 在所有环境下都设置 targetFeatures（包括组件形式）
                             this.targetFeatures = res.data.features
                             query = this.genarateEquipmentSearchParams(res.data.features)
-                            
+
                             // 只在非Chrome环境下修改页面title和favicon（组件形式不需要）
                             if (!this.isChrome) {
                                 // 使用equip_name,large_equip_desc改变当前title
@@ -1363,7 +1372,7 @@ export default {
          */
         syncExternalParams() {
             let params = {}
-            
+
             // 优先使用props中的externalParams（从Modal传递）
             const propsParams = this.$props.externalParams
             if (propsParams && typeof propsParams === 'object' && Object.keys(propsParams).length > 0) {
@@ -1372,7 +1381,7 @@ export default {
                 // 使用路由参数（页面模式）
                 params = JSON.parse(JSON.stringify(this.$route.query))
             }
-            
+
             // 处理similar_pet的JSON字符串参数
             if (params.action === 'similar_pet') {
                 if (typeof params.evol_skill_list === 'string') {
@@ -1404,10 +1413,10 @@ export default {
                     }
                 }
             }
-            
+
             // 更新内部存储的外部参数
             this.internalExternalParams = params
-            
+
             // 如果参数中有activeTab，更新activeTab
             if (params.activeTab) {
                 this.activeTab = params.activeTab
@@ -1417,11 +1426,11 @@ export default {
                 this.equipForm.equip_type = params.equip_type
             }
         },
-        
+
         async loadExternalParams() {
             // 先同步参数
             this.syncExternalParams()
-            
+
             // 然后应用参数到组件状态
             if (this.externalParamsState.activeTab) {
                 this.activeTab = this.externalParamsState.activeTab
@@ -1677,21 +1686,56 @@ export default {
 
             try {
                 const params = config.getParams()
-                const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params)
-
-                if (response.code === 200) {
-                    this.$notify.success({
-                        title: '爬虫启动',
-                        message: `${config.spiderName}已启动`
-                    })
-                    this.activeTab = type // 确保切换到对应tab
-                    this.isRunning = true // 立即设置运行状态
+                if (this.isChrome) {
+                    // Chrome 扩展环境：通过 DevTools Protocol 在当前页面注入 iframe
+                    try {
+                        if (typeof chrome !== 'undefined' && chrome.tabs && chrome.debugger) {
+                            const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+                            if (!activeTab) {
+                                this.$notify && this.$notify.warning('未找到活动标签页')
+                                return
+                            }
+                            const chromeParams = {
+                                act: 'recommd_by_role',
+                                page: 1,
+                                count: 15,
+                                server_type: 3,
+                                ...params.cached_params
+                            }
+                            const result = await chrome.debugger.sendCommand(
+                                { tabId: activeTab.id },
+                                'Runtime.evaluate',
+                                {
+                                    expression: `
+                                                (function() {
+                                                    console.log('启动爬虫', ${JSON.stringify(params)})
+                                                    ApiRecommd.queryList(${JSON.stringify(chromeParams)})
+                                                })()
+                                                `
+                                }
+                            )
+                        }
+                    } catch (error) {
+                        console.error('启动爬虫失败:', error)
+                    }
                 } else {
-                    this.$notify.error({
-                        title: '启动失败',
-                        message: response.message || '启动失败'
-                    })
+                    const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params)
+
+                    if (response.code === 200) {
+                        this.$notify.success({
+                            title: '爬虫启动',
+                            message: `${config.spiderName}已启动`
+                        })
+                        this.activeTab = type // 确保切换到对应tab
+                        this.isRunning = true // 立即设置运行状态
+                    } else {
+                        this.$notify.error({
+                            title: '启动失败',
+                            message: response.message || '启动失败'
+                        })
+                    }
                 }
+
             } catch (error) {
                 this.$notify.error({
                     title: '启动失败',
