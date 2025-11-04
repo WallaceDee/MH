@@ -23,7 +23,7 @@
       </el-row>
       <!-- 刷新和相似装备界面 -->
       <div style="width: 170px;flex-shrink: 0;">
-        <el-button type="primary" @click="$emit('refresh')" size="mini">刷新</el-button>
+        <el-button type="primary" @click="$emit('refresh')" size="mini" style="margin-right: 5px;">刷新</el-button>
         <SimilarGetMore :target-equipment="targetEquipment" />
       </div>
     </el-row>

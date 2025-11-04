@@ -150,7 +150,7 @@ export default {
 
       console.log('❌ 没有找到可复用的窗口，创建新窗口')
       // 判断是否为Chrome插件环境
-      const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
+      const isChromeExtension =true|| typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
 
       if (isChromeExtension) {
         // 如果是Chrome插件环境，则打开Modal加载AutoParams组件，并传递参数

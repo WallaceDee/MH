@@ -1,8 +1,8 @@
 <template>
     <el-card class="spider-system-card" shadow="never">
         <el-row slot="header" class="card-header" type="flex" justify="space-between" align="middle">
-            <div><span class="emoji-icon">⚙️</span> 配置</div>
-            <div class="tool-buttons" v-if="!isChrome">
+            <div><span class="emoji-icon">⚙️</span> 搜索配置</div>
+            <div class="tool-buttons">
                 <el-dropdown split-button type="danger" @click="stopTask">
                     🛑 停止
                     <el-dropdown-menu slot="dropdown">
@@ -22,22 +22,13 @@
                         style="display: flex;flex-direction: column;height: 50px;width: 100%;align-items: center;" />
                     <PetImage v-if="externalParamsState.action === 'similar_pet'" :pet="externalParamsState"
                         :equipFaceImg="externalParamsState.equip_face_img" />
-                    <template v-if="externalParamsState.action">
-                        <!-- <el-cascader :options="server_data" size="mini" filterable v-model="server_data_value" clearable /> -->
-                        <div style="display: inline-block; margin-left: 8px">
-                            <el-link @click="openCBGSearch">
-                                藏宝阁
-                            </el-link>
-                        </div>
-                    </template>
-
                 </template>
             </div>
             <!-- 全局设置 -->
             <el-form style="width: 100%;flex-shrink: 1;" :model="globalSettings" v-show="activeTab !== 'playwright'">
-                <el-row :gutter="40" v-if="!isChrome">
+                <el-row :gutter="40">
                     <el-col :span="6">
-                        <el-form-item label="📄 爬取页数" size="small">
+                        <el-form-item label="📄 搜索页数" size="small">
                             <el-input-number v-model="globalSettings.max_pages" :min="1" :max="100"
                                 controls-position="right" style="width: 100%"></el-input-number>
                         </el-form-item>
@@ -121,7 +112,7 @@
                     </el-form-item>
                     <el-form-item>
                         <el-button type="primary" @click="startPlaywrightCollector" :loading="isRunning">
-                            🚀 启动
+                            🚀 搜索
                         </el-button>
                     </el-form-item>
                 </el-form>
@@ -150,7 +141,7 @@
 
                     <el-form-item>
                         <el-button type="primary" @click="() => startSpiderByType('role')" :loading="isRunning">
-                            🚀 启动
+                            🚀 搜索
                         </el-button>
                     </el-form-item>
                 </el-form>
@@ -206,7 +197,7 @@
                         <span slot="title" v-html="lingshiTips"></span>
                     </el-alert>
                     <!-- JSON参数编辑器 -->
-                    <div class="params-editor" >
+                    <div v-if="!isChrome" class="params-editor">
                         <div class="params-actions">
                             <el-button type="text" size="mini" @click="() => resetParam('equip')">重置</el-button>
                             <el-button type="primary" size="mini" @click="() => saveParam('equip')"
@@ -241,7 +232,7 @@
 
                     <el-form-item>
                         <el-button type="primary" @click="() => startSpiderByType('equip')" :loading="isRunning">
-                            🚀 启动
+                            🚀 搜索
                         </el-button>
                     </el-form-item>
                 </el-form>
@@ -283,7 +274,7 @@
 
                     <el-form-item>
                         <el-button type="primary" @click="() => startSpiderByType('pet')" :loading="isRunning">
-                            🚀 启动
+                            🚀 搜索
                         </el-button>
                     </el-form-item>
                 </el-form>
@@ -342,7 +333,7 @@ export default {
     },
     data() {
         return {
-            isChrome: typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
+            isChrome: true || typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
             select_sum_attr_type: [],
             price_min: 1,
@@ -509,7 +500,36 @@ export default {
             }
         },
         currentServerData() {
-            // 优先使用props传入的数据，如果没有则从externalParams中获取
+            // 优先级：1. 用户选择的（store中的server_data_value） 2. props传入的 3. store中的getCurrentServerData
+            
+            // 1. 优先使用用户选择的（store中的server_data_value）
+            if (this.$store && this.$store.state && this.$store.state.server_data_value) {
+                const storeValue = this.$store.state.server_data_value
+                if (Array.isArray(storeValue) && storeValue.length >= 2) {
+                    const [areaid, server_id] = storeValue
+                    if (server_id && areaid) {
+                        // 从store中获取server_name（如果存在）
+                        let server_name = ''
+                        if (this.$store.getters && this.$store.getters.getCurrentServerData) {
+                            const storeData = this.$store.getters.getCurrentServerData
+                            if (storeData && storeData.server_id === server_id) {
+                                server_name = storeData.server_name || ''
+                            }
+                        }
+                        // 如果store中没有server_name，尝试从server_data中查找
+                        if (!server_name && window.server_data) {
+                            server_name = this.getServerNameByServerId(Number(server_id)) || ''
+                        }
+                        return {
+                            server_id: Number(server_id),
+                            areaid: Number(areaid),
+                            server_name: server_name
+                        }
+                    }
+                }
+            }
+            
+            // 2. 其次使用props传入的数据
             let server_id = this.server_id !== null && this.server_id !== undefined
                 ? this.server_id
                 : (this.externalParams?.serverid || this.externalParams?.server_id || this.externalParamsState?.serverid || this.externalParamsState?.server_id)
@@ -537,10 +557,12 @@ export default {
                 }
             }
 
-            // 如果没有props或props不完整，从store获取
-            if (this.$store && this.$store.getters) {
+            // 3. 最后从store的getCurrentServerData获取（备用）
+            if (this.$store && this.$store.getters && this.$store.getters.getCurrentServerData) {
                 const { server_id, areaid, server_name } = this.$store.getters.getCurrentServerData
-                return { server_id, areaid, server_name }
+                if (server_id && areaid) {
+                    return { server_id, areaid, server_name: server_name || '' }
+                }
             }
 
             // store也不可用，返回默认值
@@ -692,7 +714,7 @@ export default {
         if (this.$store && this.$store.dispatch) {
             this.$store.dispatch('cookie/cleanExpiredCache')
 
-            // 启动缓存清理定时器（每分钟检查一次）
+            // 搜索缓存清理定时器（每分钟检查一次）
             this.cacheCleanupTimer = setInterval(() => {
                 this.$store.dispatch('cookie/cleanExpiredCache')
             }, 60 * 1000)
@@ -1191,6 +1213,21 @@ export default {
             }
             return undefined
         },
+        getServerNameByServerId(serverId) {
+            if (!window || !window.server_data) return undefined
+            const sid = Number(serverId)
+            for (let key in window.server_data) {
+                const [parent, children] = window.server_data[key]
+                if (!Array.isArray(children)) continue
+                for (const child of children) {
+                    if (Array.isArray(child) && child[0] === sid) {
+                        // child[0]是server_id, child[1]是server_name
+                        return child[1] || undefined
+                    }
+                }
+            }
+            return undefined
+        },
         async getFeatures() {
             let query = {}
             if (this.externalParamsState.action === 'similar_equip') {
@@ -1240,131 +1277,6 @@ export default {
                 query.server_name = this.externalParamsState.server_name
             }
             this.externalSearchParams = JSON.stringify(query, null, 2)
-        },
-        async openCBGSearch() {
-            let prefix = ''
-            let search_type = 'search_role_equip'
-            let query = {}
-            if (this.externalParamsState.action === 'similar_equip') {
-                if (window.is_pet_equip(this.targetFeatures.kindid)) {
-                    search_type = 'search_pet_equip'
-                } else if (window.is_lingshi_equip(this.targetFeatures.kindid)) {
-                    search_type = 'search_lingshi'
-                } else {
-                    search_type += '&hide_lingshi=1'
-                }
-                query = this.genarateEquipmentSearchParams(this.targetFeatures)
-            } else {
-                search_type = 'search_pet'
-                query = this.genaratePetSearchParams()
-            }
-            const serverData = this.currentServerData
-            prefix = `https://xyq.cbg.163.com/cgi-bin/recommend.py?callback=Request.JSONP.request_map.request_0&_=${new Date().getTime()}&act=recommd_by_role&server_id=${serverData.server_id}&areaid=${serverData.areaid}&server_name=${serverData.server_name}&page=1&query_order=price%20ASC&view_loc=search_cond&count=15&search_type=${search_type}&`
-            const target_url = prefix + qs.stringify(query)
-
-            // Chrome 扩展环境：通过 DevTools Protocol 在当前页面注入 iframe
-            try {
-                if (typeof chrome !== 'undefined' && chrome.tabs && chrome.debugger) {
-                    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
-                    if (!activeTab) {
-                        this.$notify && this.$notify.warning('未找到活动标签页')
-                        return
-                    }
-                    if (!this.devtoolsConnected && chrome.runtime) {
-                        // 尝试提示，但不强制依赖
-                        console.warn('数据监听连接可能未建立，仍尝试注入iframe')
-                    }
-                    const result = await chrome.debugger.sendCommand(
-                        { tabId: activeTab.id },
-                        'Runtime.evaluate',
-                        {
-                            expression: `
-                              (function() {
-                                try {
-                                  var old = document.getElementById('cbg_auto_iframe');
-                                  if (old && old.parentElement) { old.parentElement.remove(); }
-                                  const iframe = document.createElement('iframe');
-                                  iframe.id = 'cbg_auto_iframe';
-                                  iframe.src = '${target_url.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}';
-                                  iframe.style.width = '1000px';
-                                  iframe.style.height = '680px';
-                                  iframe.style.border = '2px solid #1890ff';
-                                  iframe.style.borderRadius = '8px';
-                                  iframe.style.position = 'fixed';
-                                  iframe.style.top = '50px';
-                                  iframe.style.right = '20px';
-                                  iframe.style.zIndex = '9999';
-                                  iframe.style.background = '#fff';
-                                  const closeBtn = document.createElement('div');
-                                  closeBtn.innerHTML = '×';
-                                  closeBtn.style.position = 'absolute';
-                                  closeBtn.style.top = '-10px';
-                                  closeBtn.style.right = '-10px';
-                                  closeBtn.style.width = '20px';
-                                  closeBtn.style.height = '20px';
-                                  closeBtn.style.backgroundColor = '#ff4d4f';
-                                  closeBtn.style.color = 'white';
-                                  closeBtn.style.borderRadius = '50%';
-                                  closeBtn.style.display = 'flex';
-                                  closeBtn.style.alignItems = 'center';
-                                  closeBtn.style.justifyContent = 'center';
-                                  closeBtn.style.cursor = 'pointer';
-                                  closeBtn.style.fontSize = '14px';
-                                  closeBtn.style.fontWeight = 'bold';
-                                  closeBtn.style.zIndex = '10000';
-                                  const container = document.createElement('div');
-                                  container.style.position = 'relative';
-                                  container.appendChild(iframe);
-                                  container.appendChild(closeBtn);
-                                  // 加载完成后自动移除
-                                  iframe.addEventListener('load', function() {
-                                    try { document.body.removeChild(container); } catch (e) {}
-                                  });
-                                  closeBtn.onclick = function() { document.body.removeChild(container); };
-                                  document.body.appendChild(container);
-                                  return 'SUCCESS:iframe added';
-                                } catch (e) {
-                                  return 'ERROR:' + e.message;
-                                }
-                              })()
-                            `
-                        }
-                    )
-                    if (result && result.result && typeof result.result.value === 'string') {
-                        const msg = result.result.value
-                        if (msg.startsWith('ERROR:')) {
-                            this.$notify && this.$notify.warning(msg.substring(6))
-                        } else {
-                            this.$notify && this.$notify.success('已在页面注入搜索iframe')
-                        }
-                    }
-                    return
-                }
-            } catch (error) {
-                console.error('注入iframe失败:', error)
-            }
-
-
-        },
-        /**
-        * GBK编码的URL编码
-        * @param {string} str - 要编码的字符串
-        * @returns {Promise<string>} - GBK编码的URL编码字符串
-        */
-        encodeGBK(str) {
-            if (!str) return ''
-
-            try {
-                const gbkBytes = str2gbk(str)
-                // 将字节数组转换为URL编码格式
-                return Array.from(gbkBytes)
-                    .map((b) => `%${b.toString(16).toUpperCase().padStart(2, '0')}`)
-                    .join('')
-            } catch (error) {
-                console.warn('GBK编码失败，使用UTF-8编码作为降级方案:', error)
-                // 降级到UTF-8编码
-                return window.encodeURI(str)
-            }
         },
         /**
          * 同步外部参数（从props或路由）
@@ -1671,7 +1583,7 @@ export default {
             }
         },
 
-        // 通用启动爬虫方法
+        // 通用搜索爬虫方法
         async startSpiderByType(type) {
             if (this.isRunning) return
 
@@ -1686,8 +1598,16 @@ export default {
 
             try {
                 const params = config.getParams()
+                console.log('搜索爬虫参数:',params, {
+                                act: 'recommd_by_role',
+                                page: 1,
+                                count: 15,
+                                server_type: 3,
+                                search_type: 'search_role_equip',//search_pet,search_pet_equip,search_lingshi
+                                //overall_search_pet,overall_search_equip,overall_search_pet_equip,overall_search_lingshi
+                                ...params.cached_params
+                            })
                 if (this.isChrome) {
-                    // Chrome 扩展环境：通过 DevTools Protocol 在当前页面注入 iframe
                     try {
                         if (typeof chrome !== 'undefined' && chrome.tabs && chrome.debugger) {
                             const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
@@ -1700,6 +1620,9 @@ export default {
                                 page: 1,
                                 count: 15,
                                 server_type: 3,
+                                view_loc: 'search_cond',//overall_search
+                                search_type: 'search_role_equip',//search_pet,search_pet_equip,search_lingshi
+                                //overall_search_pet,overall_search_equip,overall_search_pet_equip,overall_search_lingshi
                                 ...params.cached_params
                             }
                             const result = await chrome.debugger.sendCommand(
@@ -1708,7 +1631,7 @@ export default {
                                 {
                                     expression: `
                                                 (function() {
-                                                    console.log('启动爬虫', ${JSON.stringify(params)})
+                                                    console.log('搜索爬虫', ${JSON.stringify(params)})
                                                     ApiRecommd.queryList(${JSON.stringify(chromeParams)})
                                                 })()
                                                 `
@@ -1716,37 +1639,36 @@ export default {
                             )
                         }
                     } catch (error) {
-                        console.error('启动爬虫失败:', error)
+                        console.error('搜索爬虫失败:', error)
                     }
                 } else {
                     const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params)
-
                     if (response.code === 200) {
                         this.$notify.success({
-                            title: '爬虫启动',
-                            message: `${config.spiderName}已启动`
+                            title: '爬虫搜索',
+                            message: `${config.spiderName}已搜索`
                         })
                         this.activeTab = type // 确保切换到对应tab
                         this.isRunning = true // 立即设置运行状态
                     } else {
                         this.$notify.error({
-                            title: '启动失败',
-                            message: response.message || '启动失败'
+                            title: '搜索失败',
+                            message: response.message || '搜索失败'
                         })
                     }
                 }
 
             } catch (error) {
                 this.$notify.error({
-                    title: '启动失败',
-                    message: '启动失败: ' + error.message
+                    title: '搜索失败',
+                    message: '搜索失败: ' + error.message
                 })
             }
         },
 
 
 
-        // 启动Playwright收集
+        // 搜索Playwright收集
         async startPlaywrightCollector() {
             if (this.isRunning) return
 
@@ -1756,18 +1678,18 @@ export default {
                     // 不传递target_url，使用后端默认值
                 }
 
-                console.log('启动Playwright收集，参数:', params)
+                console.log('搜索Playwright收集，参数:', params)
 
                 const response = await this.$api.spider.startPlaywright(params)
                 if (response.code === 200) {
-                    this.$notify.success('Playwright收集已启动')
+                    this.$notify.success('Playwright收集已搜索')
                     this.activeTab = 'playwright'
                     this.isRunning = true
                 } else {
-                    this.$notify.error(response.message || '启动失败')
+                    this.$notify.error(response.message || '搜索失败')
                 }
             } catch (error) {
-                this.$notify.error('启动失败: ' + error.message)
+                this.$notify.error('搜索失败: ' + error.message)
             }
         },
 
@@ -1809,7 +1731,7 @@ export default {
             // 清除可能存在的旧定时器
             this.stopStatusMonitor()
 
-            // 启动状态监控定时器
+            // 搜索状态监控定时器
             this.statusMonitor = setInterval(async () => {
                 await this.checkTaskStatus()
             }, 5000) // 每2秒检查一次状态
