@@ -406,6 +406,8 @@ export default {
             petSaving: false,
             // 缓存清理定时器
             cacheCleanupTimer: null,
+            // 延时定时器（用于取消延时）
+            sleepTimer: null,
 
             // 外部参数
             externalSearchParams: '{}',
@@ -809,6 +811,8 @@ export default {
         if (this.cacheCleanupTimer) {
             clearInterval(this.cacheCleanupTimer)
         }
+        // 清理延时定时器
+        this.cancelSleep()
     },
     methods: {
         handleSuitChange(value) {
@@ -957,6 +961,22 @@ export default {
         // 停止任务
         async stopTask() {
             try {
+                // 如果是Chrome插件模式，直接停止循环请求
+                if (this.isChrome && this.isRunning) {
+                    // 设置停止标志
+                    this.isRunning = false
+                    // 取消正在执行的延时
+                    this.cancelSleep()
+                    // 显示停止提示
+                    this.$notify.success({
+                        title: '任务状态',
+                        message: '循环请求已停止'
+                    })
+                    console.log('Chrome插件模式：循环请求已停止')
+                    return
+                }
+                
+                // 非Chrome模式或API模式，调用后端API停止
                 const response = await this.$api.spider.stopTask()
                 if (response.code === 200) {
                     this.$notify.success({
@@ -975,6 +995,11 @@ export default {
                     title: '任务状态',
                     message: error.message
                 })
+                // 即使API调用失败，也尝试停止本地循环
+                if (this.isChrome) {
+                    this.isRunning = false
+                    this.cancelSleep()
+                }
             }
         },
 
@@ -1583,6 +1608,31 @@ export default {
             }
         },
 
+        // 根据activeTab和equipForm.equip_type计算search_type
+        //'search_role_equip',search_pet,search_pet_equip,search_lingshi
+        //overall_search_pet,overall_search_equip,overall_search_pet_equip,overall_search_lingshi
+        getSearchType() {
+            const prefix = this.globalSettings.overall ? 'overall_' : ''
+            
+            if (this.activeTab === 'equip') {
+                switch (this.equipForm.equip_type) {
+                    case 'normal':
+                        return `${prefix}search_${prefix?'':'role_'}equip`
+                    case 'lingshi':
+                        return `${prefix}search_lingshi`
+                    case 'pet':
+                        return `${prefix}search_pet_equip`
+                    default:
+                        return `${prefix}search_equip`
+                }
+            } else if (this.activeTab === 'pet') {
+                return `${prefix}search_pet`
+            } else {
+                // 默认值
+               return `${prefix}search_${prefix?'':'role_'}equip`
+            }
+        },
+
         // 通用搜索爬虫方法
         async startSpiderByType(type) {
             if (this.isRunning) return
@@ -1598,15 +1648,8 @@ export default {
 
             try {
                 const params = config.getParams()
-                console.log('搜索爬虫参数:',params, {
-                                act: 'recommd_by_role',
-                                page: 1,
-                                count: 15,
-                                server_type: 3,
-                                search_type: 'search_role_equip',//search_pet,search_pet_equip,search_lingshi
-                                //overall_search_pet,overall_search_equip,overall_search_pet_equip,overall_search_lingshi
-                                ...params.cached_params
-                            })
+                const searchType = this.getSearchType()
+
                 if (this.isChrome) {
                     try {
                         if (typeof chrome !== 'undefined' && chrome.tabs && chrome.debugger) {
@@ -1615,31 +1658,16 @@ export default {
                                 this.$notify && this.$notify.warning('未找到活动标签页')
                                 return
                             }
-                            const chromeParams = {
-                                act: 'recommd_by_role',
-                                page: 1,
-                                count: 15,
-                                server_type: 3,
-                                view_loc: 'search_cond',//overall_search
-                                search_type: 'search_role_equip',//search_pet,search_pet_equip,search_lingshi
-                                //overall_search_pet,overall_search_equip,overall_search_pet_equip,overall_search_lingshi
-                                ...params.cached_params
-                            }
-                            const result = await chrome.debugger.sendCommand(
-                                { tabId: activeTab.id },
-                                'Runtime.evaluate',
-                                {
-                                    expression: `
-                                                (function() {
-                                                    console.log('搜索爬虫', ${JSON.stringify(params)})
-                                                    ApiRecommd.queryList(${JSON.stringify(chromeParams)})
-                                                })()
-                                                `
-                                }
-                            )
+                            // 设置运行状态
+                            this.isRunning = true
+                            this.activeTab = type
+                            
+                            // 开始多页随机延时请求
+                            await this.doMultiPageRequest(activeTab.id, searchType, params.cached_params)
                         }
                     } catch (error) {
                         console.error('搜索爬虫失败:', error)
+                        this.isRunning = false
                     }
                 } else {
                     const response = await this.$api.spider[`start${config.spiderType.charAt(0).toUpperCase() + config.spiderType.slice(1)}`](params)
@@ -1665,9 +1693,115 @@ export default {
                 })
             }
         },
-
-
-
+        // 单页请求方法
+        async doRequestInCBG(tabId, params) {
+            return await chrome.debugger.sendCommand(
+                { tabId: tabId },
+                'Runtime.evaluate',
+                {
+                    expression: `(function() {ApiRecommd.queryList(${JSON.stringify(params)})})()`
+                }
+            )
+        },
+        // 多页随机延时请求
+        async doMultiPageRequest(tabId, searchType, cachedParams) {
+            const maxPages = this.globalSettings.max_pages || 5
+            const delayMin = this.globalSettings.delay_min || 8
+            const delayMax = this.globalSettings.delay_max || 20
+            
+            console.log(`开始多页请求，总共 ${maxPages} 页，延时范围：${delayMin}-${delayMax} 秒`)
+            
+            let completedPages = 0
+            try {
+                for (let page = 1; page <= maxPages; page++) {
+                    // 检查是否被停止
+                    if (!this.isRunning) {
+                        completedPages = page - 1
+                        console.log(`请求已停止，已完成 ${completedPages}/${maxPages} 页`)
+                        break
+                    }
+                    
+                    // 构建请求参数
+                    const chromeParams = {
+                        act: 'recommd_by_role',
+                        page: page,
+                        count: 15,
+                        server_type: 3,
+                        view_loc: this.view_loc.view_loc,
+                        search_type: searchType,
+                        ...cachedParams
+                    }
+                    
+                    // 发送请求
+                    console.log(`[${page}/${maxPages}] 正在请求第 ${page} 页...`)
+                    try {
+                        await this.doRequestInCBG(tabId, chromeParams)
+                        console.log(`[${page}/${maxPages}] 第 ${page} 页请求已发送`)
+                        completedPages = page
+                    } catch (requestError) {
+                        console.error(`[${page}/${maxPages}] 第 ${page} 页请求失败:`, requestError)
+                        // 请求失败不中断循环，继续下一页
+                        // 可以选择是否继续或中断
+                        // 这里选择继续，只记录错误
+                        completedPages = page
+                    }
+                    
+                    // 如果不是最后一页，等待随机延时
+                    if (page < maxPages) {
+                        // 再次检查是否被停止
+                        if (!this.isRunning) {
+                            console.log(`请求已停止（延时前），已完成 ${completedPages}/${maxPages} 页`)
+                            break
+                        }
+                        const delay = Math.floor(Math.random() * (delayMax - delayMin + 1)) + delayMin
+                        console.log(`[${page}/${maxPages}] 等待 ${delay} 秒后请求下一页...`)
+                        await this.sleep(delay * 1000)
+                        // 延时后再次检查是否被停止
+                        if (!this.isRunning) {
+                            console.log(`请求已停止（延时后），已完成 ${completedPages}/${maxPages} 页`)
+                            break
+                        }
+                    }
+                }
+                
+                console.log(`所有页面请求完成，共完成 ${completedPages}/${maxPages} 页`)
+                this.$notify.success({
+                    title: '爬虫搜索',
+                    message: `已完成 ${completedPages}/${maxPages} 页请求`
+                })
+            } catch (error) {
+                console.error('多页请求失败:', error)
+                this.$notify.error({
+                    title: '请求失败',
+                    message: '多页请求失败: ' + error.message
+                })
+            } finally {
+                this.isRunning = false
+                console.log('多页请求任务结束')
+            }
+        },
+        // 延时工具方法（可取消）
+        sleep(ms) {
+            return new Promise((resolve) => {
+                // 清除之前的定时器
+                if (this.sleepTimer) {
+                    clearTimeout(this.sleepTimer)
+                }
+                // 创建新的定时器
+                this.sleepTimer = setTimeout(() => {
+                    this.sleepTimer = null
+                    resolve()
+                }, ms)
+            })
+        },
+        // 取消延时
+        cancelSleep() {
+            if (this.sleepTimer) {
+                clearTimeout(this.sleepTimer)
+                this.sleepTimer = null
+                console.log('延时已取消')
+            }
+        },
         // 搜索Playwright收集
         async startPlaywrightCollector() {
             if (this.isRunning) return
@@ -1704,6 +1838,11 @@ export default {
         },
         // 检查任务状态
         async checkTaskStatus() {
+            // Chrome插件模式下，不通过API检查状态，由本地循环控制
+            if (this.isChrome) {
+                return
+            }
+            
             try {
                 const response = await this.$api.spider.getStatus()
                 if (response.code === 200) {
