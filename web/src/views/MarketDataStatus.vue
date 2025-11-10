@@ -196,6 +196,14 @@
                     <span class="value">{{ equipmentMarketDataStatus.redis_data_count || 0 | numberFormat }} 条</span>
                   </div>
                   <div class="status-item">
+                    <span class="label">灵饰缓存数据:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.cached_lingshi_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
+                    <span class="label">宠装缓存数据:</span>
+                    <span class="value">{{ equipmentMarketDataStatus.cached_pet_equip_count || 0 | numberFormat }} 条</span>
+                  </div>
+                  <div class="status-item">
                     <span class="label">Redis内存占用:</span>
                     <span class="value">{{ (equipmentMarketDataStatus.memory_usage_mb || 0).toFixed(2) }} MB</span>
                   </div>

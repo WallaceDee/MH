@@ -45,7 +45,7 @@
           </el-row>
           <div class="result-footer">
             <SimilarEquipmentModal :key="item.equip_sn" :equipment="item" :similar-data="similarData" 
-              @valuation-updated="(data) => handleValuationUpdated(data, index)">
+              @valuation-updated="(data) => handleValuationUpdated(data, item.resultIndex)">
               <el-link href="javascript:void(0)" type="primary" style="font-weight: bold;">{{ item.name || `装备 ${index +
                 1}`
               }}</el-link>
@@ -122,10 +122,35 @@ export default {
       this.currentTotalValue = newVal
     },
     results(newVal) {
+      // 当 results 变化时，重新初始化 currentList
+      if (newVal && newVal.length > 0) {
+        this.initializeCurrentList()
+      }
+    }
+  },
+  computed: {
+    totalCount() {
+      return this.results.length
+    },
+    successCount() {
+      return this.results.filter((result) => !result.error).length
+    }
+  },
+  mounted() {
+    this.currentTotalValue = this.totalValue
+    
+    // 初始化 currentList
+    if (this.results && this.results.length > 0) {
+      this.initializeCurrentList()
+    }
+  },
+  methods: {
+    // 初始化 currentList
+    initializeCurrentList() {
       // 为每个结果添加对应的装备信息
-      const resultsWithEquipment = newVal.map((result, index) => ({
-        ...result,
-        ...this.equipmentList[index],
+      const resultsWithEquipment = this.results.map((result, index) => ({
+        ...this.equipmentList[index],  // 先展开装备列表信息（基础信息）
+        ...result,  // 再展开估价结果（让新的估价数据覆盖旧数据）
         resultIndex: index
       }))
 
@@ -139,31 +164,41 @@ export default {
 
       // 合并：低置信度在前，高置信度在后
       this.currentList = [...lowConfidenceResults, ...highConfidenceResults]
-    }
-  },
-  computed: {
-    totalCount() {
-      return this.results.length
     },
-    successCount() {
-      return this.results.filter((result) => !result.error).length
-    }
-  },
-  mounted() {
-    this.currentTotalValue = this.totalValue
-  },
-  methods: {
+    
     // 处理估价结果更新
     handleValuationUpdated(data, resultIndex) {
-      // 更新总价值
-      if (this.results[resultIndex]) {
-        this.currentTotalValue = this.currentTotalValue - this.results[resultIndex].estimated_price + data.estimated_price
+      console.log('收到估价更新事件, resultIndex:', resultIndex, 'data:', data)
+      
+      // 验证索引是否有效
+      if (resultIndex === undefined || resultIndex < 0 || resultIndex >= this.results.length) {
+        console.error('无效的resultIndex:', resultIndex)
+        return
       }
       
-      // 更新结果数据 - 这是必须保留的操作
-      this.$set(this.results, resultIndex, data)
+      const oldResult = this.results[resultIndex]
+      if (!oldResult) {
+        console.error('未找到原始结果数据, resultIndex:', resultIndex)
+        return
+      }
       
-      console.log('估价数据更新完成:', data)
+      // 更新总价值（使用旧的estimated_price与新的estimated_price计算差值）
+      const oldPrice = oldResult.estimated_price || 0
+      const newPrice = data.estimated_price || 0
+      this.currentTotalValue = this.currentTotalValue - oldPrice + newPrice
+      
+      // 更新结果数据
+      // 注意：data 包含最新的估价信息（confidence, estimated_price, anchor_count等）
+      // 直接用 data 更新，watch 会自动处理与 equipmentList 的合并
+      this.$set(this.results, resultIndex, {
+        ...this.equipmentList[resultIndex],  // 保留装备基础信息
+        ...data  // 更新估价结果（覆盖旧的估价数据）
+      })
+      
+      console.log('估价数据更新完成, 新置信度:', data.confidence)
+      
+      // 通知父组件数据已更新
+      this.$emit('valuation-updated', data, resultIndex)
     },
 
     // 根据置信度获取标签类型

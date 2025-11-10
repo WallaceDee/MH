@@ -688,6 +688,37 @@ def get_equipment_market_data_status():
             logger.warning(f"获取Redis全量缓存状态失败: {e}")
             status_info["redis_full_cache"] = {"available": False, "error": str(e)}
         
+        # 获取灵饰和宠装的缓存数据统计
+        # 注意：灵饰和宠装采集器没有实现单例模式，它们依赖装备采集器的缓存
+        # 我们可以直接从装备采集器的缓存中统计灵饰和宠装数据
+        try:
+            lingshi_cache_count = 0
+            pet_equip_cache_count = 0
+            
+            # 从装备采集器的缓存中统计灵饰和宠装数据
+            if collector._full_data_cache is not None and not collector._full_data_cache.empty:
+                # 灵饰数据 (kindid: 61-64)
+                if 'kindid' in collector._full_data_cache.columns:
+                    lingshi_data = collector._full_data_cache[collector._full_data_cache['kindid'].isin([61, 62, 63, 64])]
+                    lingshi_cache_count = len(lingshi_data)
+                
+                # 宠装数据 (kindid: 70)
+                from src.evaluator.constants.equipment_types import PET_EQUIP_KINDID
+                if 'kindid' in collector._full_data_cache.columns:
+                    pet_equip_data = collector._full_data_cache[collector._full_data_cache['kindid'] == PET_EQUIP_KINDID]
+                    pet_equip_cache_count = len(pet_equip_data)
+            
+            status_info["cached_lingshi_count"] = lingshi_cache_count
+            status_info["cached_pet_equip_count"] = pet_equip_cache_count
+            
+            print(f"🔍 灵饰缓存数据: {lingshi_cache_count} 条")
+            print(f"🔍 宠装缓存数据: {pet_equip_cache_count} 条")
+            
+        except Exception as e:
+            logger.warning(f"获取灵饰和宠装缓存统计失败: {e}")
+            status_info["cached_lingshi_count"] = 0
+            status_info["cached_pet_equip_count"] = 0
+        
         return success_response(data=status_info, message="获取装备市场数据状态成功")
         
     except Exception as e:
