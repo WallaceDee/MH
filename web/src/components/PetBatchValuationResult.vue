@@ -284,7 +284,44 @@ export default {
       this.valuationDialogTitle = ''
     },
     genPetData(pet) {
-      return { ...pet, petData: pet.pet_detail, equip_face_img: pet.pet_detail.icon }
+      // 确保保留 pet 对象中的关键字段，避免被 pet_detail 覆盖
+      // 优先使用 pet 顶层的字段，如果不存在再尝试从 pet_detail 中获取
+      const petData = { 
+        ...pet, 
+        petData: pet.pet_detail, 
+        equip_face_img: pet.equip_face_img || pet.pet_detail?.icon || pet.icon,
+        // 明确保留这些字段（优先使用pet顶层的，而不是pet_detail的）
+        role_grade_limit: pet.role_grade_limit || pet.pet_detail?.role_grade_limit || pet.equip_level || pet.pet_detail?.equip_level,
+        equip_level: pet.equip_level || pet.pet_detail?.equip_level,
+        growth: pet.growth || pet.cheng_zhang ||pet.pet_detail?.growth,
+        is_baobao: pet.is_baobao || pet.pet_detail?.is_baobao,
+        all_skill: pet.all_skill || pet.pet_detail?.all_skill,
+        sp_skill: pet.sp_skill || pet.pet_detail?.sp_skill || pet.genius || pet.pet_detail?.genius || '0',
+        evol_skill_list: pet.evol_skill_list || pet.pet_detail?.evol_skill_list || [],
+        texing: pet.texing || pet.pet_detail?.texing || {},
+        lx: pet.lx || pet.pet_detail?.lx || '0',
+        equip_list: pet.equip_list || pet.pet_detail?.equip_list || [null, null, null],
+        neidan: pet.neidan || pet.pet_detail?.neidan || [],
+        equip_sn: pet.equip_sn || pet.pet_detail?.equip_sn,
+        serverid: pet.serverid || pet.pet_detail?.serverid,
+        server_name: pet.server_name || pet.pet_detail?.server_name
+      }
+      
+      console.log('PetBatchValuationResult - genPetData - 原始pet:', pet)
+      console.log('PetBatchValuationResult - genPetData - 生成的petData:', petData)
+      console.log('PetBatchValuationResult - genPetData - 关键字段检查:', {
+        role_grade_limit: petData.role_grade_limit,
+        equip_level: petData.equip_level,
+        growth: petData.growth,
+        texing: petData.texing,
+        lx: petData.lx,
+        sp_skill: petData.sp_skill,
+        evol_skill_list: petData.evol_skill_list,
+        all_skill: petData.all_skill,
+        is_baobao: petData.is_baobao
+      })
+      
+      return petData
     },
     // 处理宠物估价结果更新
     handlePetValuationUpdated(data, resultIndex) {

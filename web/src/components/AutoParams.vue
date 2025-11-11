@@ -333,7 +333,7 @@ export default {
     },
     data() {
         return {
-            isChrome: true || typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
+            isChrome: typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
             select_sum_attr_type: [],
             price_min: 1,
@@ -815,6 +815,30 @@ export default {
         this.cancelSleep()
     },
     methods: {
+        // 解析列表数据
+        parseListData(responseDataStr) {
+            // 解析响应数据 Request.JSONP.request_map.request_数字(xxxx) 中的xxxx
+            const match = responseDataStr.match(/Request\.JSONP\.request_map\.request_\d+\((.*)\)/)
+            let templateJSONStr = '{}'
+            if (match) {
+                templateJSONStr = match[1]
+            } else {
+                templateJSONStr = responseDataStr
+            }
+            try {
+                let templateJSON = {}
+                if (typeof templateJSONStr === 'string') {
+                    templateJSON = JSON.parse(templateJSONStr)
+                } else {
+                    // h5
+                    templateJSON = templateJSONStr
+                }
+                return templateJSON
+            } catch (error) {
+                console.error('解析响应数据失败:', error)
+                return {}
+            }
+        },
         handleSuitChange(value) {
             const [, suitValue] = value
             const actualValue = suitValue?.split('_').pop() // 提取真实的套装ID
@@ -1028,11 +1052,23 @@ export default {
         },
 
         genaratePetSearchParams() {
+            console.log('生成宠物搜索参数, externalParamsState:', this.externalParamsState)
             const searchParams = {}
-            searchParams.skill = this.externalParamsState.all_skill.replace(/\|/g, ',')
+            
+            // 检查必要的参数是否存在
+            if (!this.externalParamsState.all_skill) {
+                console.warn('缺少 all_skill 参数')
+            }
+            if (!this.externalParamsState.growth) {
+                console.warn('缺少 growth 参数')
+            }
+            
+            searchParams.skill = this.externalParamsState.all_skill?.replace(/\|/g, ',') || ''
             searchParams.texing = this.externalParamsState.texing?.id
             searchParams.lingxing = this.externalParamsState.lx
-            searchParams.growth = this.externalParamsState.growth * 1000
+            searchParams.growth = this.externalParamsState.growth ? this.externalParamsState.growth * 1000 : undefined
+            
+            console.log('生成的宠物搜索参数:', searchParams)
             return searchParams
         },
         genarateEquipmentSearchParams({ kindid, ...features }) {
@@ -1314,9 +1350,11 @@ export default {
             const propsParams = this.$props.externalParams
             if (propsParams && typeof propsParams === 'object' && Object.keys(propsParams).length > 0) {
                 params = JSON.parse(JSON.stringify(propsParams))
+                console.log('从props获取参数:', params)
             } else if (this.$route && this.$route.query) {
                 // 使用路由参数（页面模式）
                 params = JSON.parse(JSON.stringify(this.$route.query))
+                console.log('从路由获取参数:', params)
             }
 
             // 处理similar_pet的JSON字符串参数
@@ -1662,8 +1700,14 @@ export default {
                             this.isRunning = true
                             this.activeTab = type
                             
-                            // 开始多页随机延时请求
-                            await this.doMultiPageRequest(activeTab.id, searchType, params.cached_params)
+                            // 开始多页随机延时请求（支持多区搜索）
+                            await this.doMultiPageRequest(
+                                activeTab.id, 
+                                searchType, 
+                                params.cached_params,
+                                params.multi,
+                                params.target_server_list
+                            )
                         }
                     } catch (error) {
                         console.error('搜索爬虫失败:', error)
@@ -1703,21 +1747,94 @@ export default {
                 }
             )
         },
-        // 多页随机延时请求
-        async doMultiPageRequest(tabId, searchType, cachedParams) {
-            const maxPages = this.globalSettings.max_pages || 5
+        // 多页随机延时请求（支持多区搜索）
+        async doMultiPageRequest(tabId, searchType, cachedParams, multi = false, targetServerList = []) {
+            let maxPages = this.globalSettings.max_pages || 5
             const delayMin = this.globalSettings.delay_min || 8
             const delayMax = this.globalSettings.delay_max || 20
             
-            console.log(`开始多页请求，总共 ${maxPages} 页，延时范围：${delayMin}-${delayMax} 秒`)
+            // 如果启用多区搜索且有目标服务器列表
+            if (multi && targetServerList && targetServerList.length > 0) {
+                console.log(`🌍 多区搜索模式，共 ${targetServerList.length} 个服务器，每个服务器 ${maxPages} 页`)
+                
+                let totalCompleted = 0
+                for (let i = 0; i < targetServerList.length; i++) {
+                    const server = targetServerList[i]
+                    
+                    // 检查是否被停止
+                    if (!this.isRunning) {
+                        console.log(`请求已停止，已完成 ${i}/${targetServerList.length} 个服务器`)
+                        break
+                    }
+                    
+                    console.log(`\n📍 [${i + 1}/${targetServerList.length}] 开始请求服务器: ${server.server_name} (ID: ${server.server_id})`)
+                    
+                    // 合并服务器参数到 cached_params
+                    const serverParams = {
+                        ...cachedParams,
+                        server_id: server.server_id,
+                        areaid: server.areaid,
+                        server_name: server.server_name
+                    }
+                    
+                    // 为当前服务器执行多页请求
+                    const completed = await this.doSingleServerMultiPageRequest(
+                        tabId, 
+                        searchType, 
+                        serverParams,
+                        maxPages,
+                        delayMin,
+                        delayMax,
+                        `[${i + 1}/${targetServerList.length}]`
+                    )
+                    
+                    totalCompleted += completed
+                    console.log(`✅ 服务器 ${server.server_name} 完成 ${completed} 页请求`)
+                    
+                    // 如果不是最后一个服务器，等待随机延时
+                    if (i < targetServerList.length - 1 && this.isRunning) {
+                        const serverDelay = Math.floor(Math.random() * (delayMax - delayMin + 1)) + delayMin
+                        console.log(`⏱️ 等待 ${serverDelay} 秒后请求下一个服务器...`)
+                        await this.sleep(serverDelay * 1000)
+                    }
+                }
+                
+                console.log(`\n🎉 多区搜索完成，共处理 ${targetServerList.length} 个服务器，总计 ${totalCompleted} 页`)
+                this.$notify.success({
+                    title: '多区搜索完成',
+                    message: `已完成 ${targetServerList.length} 个服务器的搜索，共 ${totalCompleted} 页数据`
+                })
+                this.isRunning = false
+                
+                // Chrome插件模式下，发出搜索完成事件，触发相似装备模态框刷新
+                if (this.isChrome) {
+                    this.$root.$emit('search-task-completed')
+                    console.log('已发出搜索完成事件')
+                }
+                return
+            }
             
+            // 单区搜索模式
+            console.log(`开始多页请求，总共 ${maxPages} 页，延时范围：${delayMin}-${delayMax} 秒`)
+            await this.doSingleServerMultiPageRequest(tabId, searchType, cachedParams, maxPages, delayMin, delayMax)
+        },
+        
+        // 单个服务器的多页请求
+        async doSingleServerMultiPageRequest(tabId, searchType, cachedParams, maxPages, delayMin, delayMax, prefix = '') {
             let completedPages = 0
+            let actualTotalPages = null // 实际总页数
             try {
                 for (let page = 1; page <= maxPages; page++) {
                     // 检查是否被停止
                     if (!this.isRunning) {
                         completedPages = page - 1
-                        console.log(`请求已停止，已完成 ${completedPages}/${maxPages} 页`)
+                        console.log(`请求已停止，已完成 ${completedPages}/${actualTotalPages || maxPages} 页`)
+                        break
+                    }
+                    
+                    // 如果已经知道实际总页数，且当前页超过了总页数，则停止
+                    if (actualTotalPages !== null && page > actualTotalPages) {
+                        console.log(`⏭️ 跳过第 ${page} 页（超出实际总页数 ${actualTotalPages}）`)
                         break
                     }
                     
@@ -1733,16 +1850,57 @@ export default {
                     }
                     
                     // 发送请求
-                    console.log(`[${page}/${maxPages}] 正在请求第 ${page} 页...`)
+                    const displayMaxPages = actualTotalPages !== null ? actualTotalPages : maxPages
+                    console.log(`${prefix}[${page}/${displayMaxPages}] 正在请求第 ${page} 页...`)
                     try {
-                        await this.doRequestInCBG(tabId, chromeParams)
-                        console.log(`[${page}/${maxPages}] 第 ${page} 页请求已发送`)
+                        const result = await this.doRequestInCBG(tabId, chromeParams)
+                        console.log(`${prefix}[${page}/${displayMaxPages}] 第 ${page} 页请求已发送`)
                         completedPages = page
+                        
+                        // 等待一段时间让响应数据被处理（1秒，给足够的时间）
+                        await this.sleep(1000)
+                        
+                        // 尝试从 Vuex 获取最新的响应数据并检查 pager 信息
+                        if (this.$store && this.$store.getters['chromeDevtools/getEquipsAndPetsData']) {
+                            const latestData = this.$store.getters['chromeDevtools/getEquipsAndPetsData']
+                            if (latestData && latestData.length > 0) {
+                                // 获取最新的一条数据
+                                const latestItem = latestData[0]
+                                if (latestItem.responseData && latestItem.status === 'completed') {
+                                    try {
+                                        // 解析响应数据
+                                        const parsedData = this.parseListData(latestItem.responseData)
+                                        if (parsedData && parsedData.pager) {
+                                            const { cur_page, total_pages } = parsedData.pager
+                                            
+                                            // 第一次获取到 total_pages 时，更新 actualTotalPages
+                                            if (actualTotalPages === null) {
+                                                actualTotalPages = total_pages
+                                                console.log(`${prefix}📊 检测到实际总页数：${total_pages}`)
+                                                // 如果实际页数小于设置的页数，更新 maxPages
+                                                if (total_pages < maxPages) {
+                                                    maxPages = total_pages
+                                                    console.log(`${prefix}📉 调整请求页数从原始设置到 ${total_pages}`)
+                                                }
+                                            }
+                                            
+                                            console.log(`${prefix}📄 页码信息：当前页 ${cur_page}/${total_pages}`)
+                                            
+                                            // 如果当前页已经是最后一页，停止请求
+                                            if (cur_page >= total_pages) {
+                                                console.log(`${prefix}✅ 已到达最后一页 (${cur_page}/${total_pages})，停止继续请求`)
+                                                break
+                                            }
+                                        }
+                                    } catch (parseError) {
+                                        console.warn('解析 pager 信息失败:', parseError)
+                                    }
+                                }
+                            }
+                        }
                     } catch (requestError) {
-                        console.error(`[${page}/${maxPages}] 第 ${page} 页请求失败:`, requestError)
+                        console.error(`[${page}/${displayMaxPages}] 第 ${page} 页请求失败:`, requestError)
                         // 请求失败不中断循环，继续下一页
-                        // 可以选择是否继续或中断
-                        // 这里选择继续，只记录错误
                         completedPages = page
                     }
                     
@@ -1750,34 +1908,53 @@ export default {
                     if (page < maxPages) {
                         // 再次检查是否被停止
                         if (!this.isRunning) {
-                            console.log(`请求已停止（延时前），已完成 ${completedPages}/${maxPages} 页`)
+                            console.log(`请求已停止（延时前），已完成 ${completedPages}/${actualTotalPages || maxPages} 页`)
                             break
                         }
                         const delay = Math.floor(Math.random() * (delayMax - delayMin + 1)) + delayMin
-                        console.log(`[${page}/${maxPages}] 等待 ${delay} 秒后请求下一页...`)
+                        console.log(`${prefix}[${page}/${actualTotalPages || maxPages}] 等待 ${delay} 秒后请求下一页...`)
                         await this.sleep(delay * 1000)
                         // 延时后再次检查是否被停止
                         if (!this.isRunning) {
-                            console.log(`请求已停止（延时后），已完成 ${completedPages}/${maxPages} 页`)
+                            console.log(`请求已停止（延时后），已完成 ${completedPages}/${actualTotalPages || maxPages} 页`)
                             break
                         }
                     }
                 }
                 
-                console.log(`所有页面请求完成，共完成 ${completedPages}/${maxPages} 页`)
-                this.$notify.success({
-                    title: '爬虫搜索',
-                    message: `已完成 ${completedPages}/${maxPages} 页请求`
-                })
+                const finalTotalPages = actualTotalPages || completedPages
+                console.log(`${prefix}所有页面请求完成，共完成 ${completedPages}/${finalTotalPages} 页`)
+                
+                // 只在单区模式下显示通知（多区模式在外层显示）
+                if (!prefix) {
+                    this.$notify.success({
+                        title: '爬虫搜索',
+                        message: `已完成 ${completedPages}/${finalTotalPages} 页请求`
+                    })
+                    
+                    // Chrome插件模式下，发出搜索完成事件，触发相似装备模态框刷新
+                    if (this.isChrome) {
+                        this.$root.$emit('search-task-completed')
+                        console.log('已发出搜索完成事件')
+                    }
+                }
+                
+                return completedPages
             } catch (error) {
-                console.error('多页请求失败:', error)
-                this.$notify.error({
-                    title: '请求失败',
-                    message: '多页请求失败: ' + error.message
-                })
+                console.error(`${prefix}多页请求失败:`, error)
+                if (!prefix) {
+                    this.$notify.error({
+                        title: '请求失败',
+                        message: '多页请求失败: ' + error.message
+                    })
+                }
+                return 0
             } finally {
-                this.isRunning = false
-                console.log('多页请求任务结束')
+                // 只在单区模式下重置运行状态（多区模式在外层重置）
+                if (!prefix) {
+                    this.isRunning = false
+                    console.log('多页请求任务结束')
+                }
             }
         },
         // 延时工具方法（可取消）
@@ -1886,8 +2063,6 @@ export default {
 </script>
 
 <style scoped>
-.auto-params-view {}
-
 /* 参数编辑器样式 */
 .params-editor {
     background-color: #f9f9f9;

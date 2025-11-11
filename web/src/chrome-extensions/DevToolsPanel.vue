@@ -1,5 +1,6 @@
 <template>
   <div class="panel">
+  
     <div class="panel-header">
       <el-row type="flex" align="middle">
         <div style="width: 32px;height: 32px;margin-right: 10px;position: relative;">
@@ -8,8 +9,8 @@
             :class="{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }"></span>
         </div>
         <h3 style="color: #fff;">梦幻灵瞳</h3>
-        <i class="el-icon-full-screen  btn1 js_alert_btn_0" style="color:#fff;line-height: 26px;" v-if="!isInNewWindow" href="javascript:void 0;"
-        @click.prevent="openInNewTab"></i>
+        <i class="el-icon-full-screen  btn1 js_alert_btn_0" style="color:#fff;line-height: 26px;" v-if="!isInNewWindow"
+          href="javascript:void 0;" @click.prevent="openInNewTab"></i>
       </el-row>
       <div class="connection-status">
         <div id="pager" class="fr" v-if="pageInfo.hasPager">
@@ -24,12 +25,12 @@
         <a v-if="!devtoolsConnected" href="javascript:void 0;" @click="reconnectDevTools">重新连接</a>
         <a v-if="!pageInfo.hasPager" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
           @click.prevent="refreshCurrentPage">刷新页面</a>
-        <a v-if="recommendData.length > 0" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
+        <a v-if="hasAnyRequestData" href="javascript:void 0;" class=" btn1 js_alert_btn_0"
           @click.prevent="clearData">清空数据</a>
       </div>
     </div>
     <div class="data-section">
-      <el-empty v-if="recommendData.length === 0" class="empty-state" description="暂无数据，请访问梦幻西游藏宝阁页面"></el-empty>
+      <el-empty v-if="!hasAnyRequestData" class="empty-state" description="暂无数据，请访问梦幻西游藏宝阁页面"></el-empty>
       <div v-else class="request-list">
         <div v-for="(item, index) in recommendData" :key="item.requestId" class="request-item"
           :class="{ 'parsing': item.status === 'parsing' }">
@@ -46,15 +47,12 @@
                   <i class="el-icon-error"></i> 解析失败
                 </template>
               </span>
-              <el-tag v-if="item.dataType" size="mini" type="info" style="margin-left: 5px;">
-                {{ getDataTypeLabel(item.dataType) }}
-              </el-tag>
-              <span class="timestamp">{{ formatTime(item.timestamp) }}</span>
+              <span class="timestamp">{{ formatTime(item.receivedTime || item.timestamp) }}</span>
             </div>
           </div>
-          <div v-if="item.responseData && item.dataType" class="response-data">
+          <div class="response-data">
             <!-- 角色数据渲染 -->
-            <el-row :gutter="4" v-if="item.dataType === 'role'">
+            <el-row :gutter="4">
               <el-col v-for="role in parseListData(item.responseData)?.equip_list" :key="role.eid"
                 style="width: 20%;margin-bottom: 2px;margin-top: 2px;">
                 <el-card class="role-card" :class="{ 'empty-role': isEmptyRole(parserRoleData(role)) }">
@@ -76,10 +74,12 @@
                       <div>
                         <el-tag type="danger" v-if="isEmptyRole(parserRoleData(role))">空号</el-tag>
                         <template v-else>
-                          <el-tag @click="handleEquipPrice(role)" style="cursor: pointer;" v-if="get_equip_num(parserRoleData(role)) > 0">
+                          <el-tag @click="handleEquipPrice(role)" style="cursor: pointer;"
+                            v-if="get_equip_num(parserRoleData(role)) > 0">
                             ⚔️ {{ get_equip_num(parserRoleData(role)) }}
                           </el-tag>
-                          <el-tag type="success" @click="handlePetPrice(role)" style="cursor: pointer;" v-if="get_pet_num(parserRoleData(role)) > 0">
+                          <el-tag type="success" @click="handlePetPrice(role)" style="cursor: pointer;"
+                            v-if="get_pet_num(parserRoleData(role)) > 0">
                             🐲 {{ get_pet_num(parserRoleData(role)) }}
                           </el-tag>
                         </template>
@@ -98,65 +98,7 @@
                 </el-card>
               </el-col>
             </el-row>
-            
-            <!-- 装备数据渲染 -->
-            <el-row :gutter="4" v-else-if="item.dataType === 'equipment'">
-              <el-col v-for="equip in parseListData(item.responseData)?.equip_list" :key="equip.eid"
-                style="width: 20%;margin-bottom: 2px;margin-top: 2px;">
-                <el-card class="role-card">
-                  <el-row type="flex" justify="space-between">
-                    <el-col style="width:50px;flex-shrink: 0;margin-right: 4px;">
-                      <EquipmentImage :equipment="equip" />
-                      <el-link :href="getCBGLinkByType(equip.eid, 'equip')" type="danger" target="_blank"
-                        style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;">
-                        {{ equip.equip_name }}
-                      </el-link>
-                    </el-col>
-                    <el-col>
-                      <div style="padding: 5px 0;">
-                        <span v-html="formatFullPrice(equip)"></span>
-                      </div>
-                      <div v-if="equip.highlight" class="equip-desc-content" v-html="gen_highlight(equip.highlight)"></div>
-                      <div v-if="equip.equip_level" style="font-size: 12px;">
-                        等级: {{ equip.equip_level }}
-                      </div>
-                      <div v-if="equip.server_name" style="font-size: 12px; color: #909399;">
-                        {{ equip.server_name }}
-                      </div>
-                    </el-col>
-                  </el-row>
-                </el-card>
-              </el-col>
-            </el-row>
-            
-            <!-- 召唤兽数据渲染 -->
-            <el-row :gutter="4" v-else-if="item.dataType === 'pet'">
-              <el-col v-for="pet in parseListData(item.responseData)?.equip_list" :key="pet.eid"
-                style="width: 20%;margin-bottom: 2px;margin-top: 2px;">
-                <el-card class="role-card">
-                  <el-row type="flex" justify="space-between">
-                    <el-col style="width:50px;flex-shrink: 0;margin-right: 4px;">
-                      <el-image v-if="pet.avatar_url" :src="pet.avatar_url" style="width: 50px;height: 50px;" fit="cover"></el-image>
-                      <el-link :href="getCBGLinkByType(pet.eid, 'pet')" type="danger" target="_blank"
-                        style="white-space: nowrap;text-overflow: ellipsis;overflow: hidden;display: block;font-size: 12px;">
-                        {{ pet.seller_nickname || pet.name || pet.nickname }}
-                      </el-link>
-                    </el-col>
-                    <el-col>
-                      <div style="padding: 5px 0;">
-                        <span v-html="formatFullPrice(pet.price, true)"></span>
-                      </div>
-                      <div v-if="pet.grade" style="font-size: 12px;">
-                        等级: {{ pet.grade }}
-                      </div>
-                      <div v-if="pet.server_name" style="font-size: 12px; color: #909399;">
-                        {{ pet.server_name }}
-                      </div>
-                    </el-col>
-                  </el-row>
-                </el-card>
-              </el-col>
-            </el-row>
+           
             <!-- <el-button @click="toggleResponse(index)" size="mini" type="text">
               {{ expandedItems.includes(index) ? '收起' : '展开' }}响应数据
             </el-button>
@@ -165,14 +107,9 @@
             </div> -->
           </div>
         </div>
+
       </div>
     </div>
-
-    <!-- 页面底部版本信息 -->
-    <div class="version-footer">
-      <span class="version-text">版本 v0.0.1</span>
-    </div>
-
     <!-- 装备估价结果对话框 -->
     <el-dialog :visible.sync="valuationDialogVisible" width="1000px" :close-on-click-modal="false"
       :close-on-press-escape="false" custom-class="batch-valuation-dialog">
@@ -181,21 +118,26 @@
         /
         <el-tag type="info" size="mini">{{ valuationDialogTitle.school }}</el-tag>/
         <el-link :href="getCBGLinkByType(valuationDialogTitle.eid)" target="_blank">{{ valuationDialogTitle.nickname
-        }}</el-link>
+          }}</el-link>
       </span>
       <EquipBatchValuationResult :results="valuationResults" :total-value="valuationTotalValue"
         :equipment-list="valuationEquipmentList" :valuate-params="batchValuateParams" :loading="valuationLoading"
         @close="closeValuationDialog" />
     </el-dialog>
 
-    <!-- AutoParams配置对话框 -->
-    <el-dialog :visible.sync="autoParamsDialogVisible" width="640px" :close-on-click-modal="false"
-      :close-on-press-escape="false" custom-class="auto-params-dialog">
+    <!-- 宠物估价结果对话框 -->
+    <el-dialog :visible.sync="petValuationDialogVisible" width="1000px" :close-on-click-modal="false"
+      :close-on-press-escape="false" custom-class="batch-valuation-dialog">
       <span slot="title" class="el-dialog__title">
-        <span class="emoji-icon">⚙️</span> 自动参数配置
+        <el-tag size="mini">{{ petValuationDialogTitle.server_name }}</el-tag>
+        /
+        <el-tag type="info" size="mini">{{ petValuationDialogTitle.school }}</el-tag>/
+        <el-link :href="getCBGLinkByType(petValuationDialogTitle.eid)" target="_blank">{{ petValuationDialogTitle.nickname
+          }}</el-link>
       </span>
-      <AutoParams v-if="autoParamsDialogVisible" :external-params="autoParamsExternalParams" 
-        @close="closeAutoParamsDialog" />
+      <PetBatchValuationResult :results="petValuationResults" :total-value="petValuationTotalValue"
+        :pet-list="petValuationPetList" :loading="petValuationLoading"
+        @close="closePetValuationDialog" />
     </el-dialog>
   </div>
 </template>
@@ -204,10 +146,14 @@ import dayjs from 'dayjs'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
 import EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'
+import PetBatchValuationResult from '@/components/PetBatchValuationResult.vue'
 import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
-import AutoParams from '@/components/AutoParams.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+
+const ROLE_KINDIDS = ['27', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '49', '51', '50', '77', '78', '79', '81', '82']
+const PET_KINDIDS = ['1', '65', '66', '67', '68', '69', '70', '71', '75', '80']
+const EQUIP_KINDIDS = ['2', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '17', '18', '19', '20', '21', '26', '28', '29', '42', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '72', '73', '74', '83']
 export default {
   name: 'DevToolsPanel',
   data() {
@@ -221,6 +167,7 @@ export default {
         hasNext: false
       },
       selectedDate: dayjs().format('YYYY-MM'),
+      equipsAndPets: [],
       recommendData: [],
       expandedItems: [],
       processedRequests: new Set(), // 记录已处理的请求ID
@@ -228,7 +175,7 @@ export default {
       connectionStatus: '检查中...', // 连接状态描述
       connectionCheckTimer: null, // 连接检查定时器
       windowWidth: 0, // 窗口宽度，用于响应式判断
-      
+
       // 装备估价相关数据
       valuationDialogVisible: false,
       valuationResults: [],
@@ -240,10 +187,18 @@ export default {
         similarity_threshold: 0.7,
         max_anchors: 30
       },
-      
-      // AutoParams Modal相关数据
-      autoParamsDialogVisible: false,
-      autoParamsExternalParams: {}
+
+      // 宠物估价相关数据
+      petValuationDialogVisible: false,
+      petValuationResults: [],
+      petValuationTotalValue: 0,
+      petValuationPetList: [],
+      petValuationLoading: false,
+      petValuationDialogTitle: {},
+      batchPetValuateParams: {
+        similarity_threshold: 0.7,
+        max_anchors: 30
+      },
     }
   },
   mixins: [commonMixin, equipmentMixin],
@@ -251,8 +206,8 @@ export default {
     RoleImage,
     SimilarRoleModal,
     EquipBatchValuationResult,
-    EquipmentImage,
-    AutoParams
+    PetBatchValuationResult,
+    EquipmentImage
   },
   computed: {
     // 判断是否在新窗口中打开（基于窗口宽度）
@@ -260,6 +215,21 @@ export default {
     // 宽度 <= 960：SidePanel
     isInNewWindow() {
       return this.windowWidth > 960
+    },
+    hasAnyRequestData() {
+      return this.recommendData.length > 0
+    }
+  },
+  watch: {
+    // 监听 equipsAndPets 数据变化，同步到 Vuex
+    // DevToolsPanel 只在 Chrome 插件环境下运行，因此可以直接使用 Vuex
+    equipsAndPets: {
+      handler(newVal) {
+        this.$store.dispatch('chromeDevtools/updateEquipsAndPetsData', newVal)
+        console.log('DevToolsPanel: equipsAndPets 数据已同步到 Vuex, 数量:', newVal.length)
+      },
+      deep: true,
+      immediate: true
     }
   },
   mounted() {
@@ -275,10 +245,10 @@ export default {
 
     this.initMessageListener()
     this.checkConnectionStatus()
-    
+
     // 初始化窗口宽度
     this.updateWindowWidth()
-    
+
     // 监听窗口大小变化
     window.addEventListener('resize', this.handleWindowResize)
 
@@ -297,7 +267,7 @@ export default {
 
     // 移除可见性变化监听器
     document.removeEventListener('visibilitychange', this.handleVisibilityChange)
-    
+
     // 移除窗口大小变化监听器
     window.removeEventListener('resize', this.handleWindowResize)
 
@@ -319,12 +289,12 @@ export default {
         this.windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 0
       }
     },
-    
+
     // 处理窗口大小变化
     handleWindowResize() {
       this.updateWindowWidth()
     },
-    
+
     handleVisibilityChange() {
       // 当页面不可见时，通知background script侧边栏已关闭
       if (document.hidden) {
@@ -360,14 +330,6 @@ export default {
         }
       }
       return noEquip && noPet
-    },
-    getDataTypeLabel(type) {
-      const typeMap = {
-        'role': '角色',
-        'pet': '召唤兽',
-        'equipment': '装备'
-      }
-      return typeMap[type] || type
     },
     get_pet_num(roleInfo) {
       return roleInfo.pet_info.length + roleInfo.split_pets.length
@@ -773,15 +735,111 @@ export default {
       }
     },
     changeRecommendDataStatus({ requestId, status, data }) {
-      const targetIndex = this.recommendData.findIndex(item => item.requestId === requestId)
-      if (targetIndex !== -1) {
-        this.$set(this.recommendData[targetIndex], 'status', status)
-        // 如果提供了data，更新相关字段
-        if (data) {
-          if (data.type) {
-            this.$set(this.recommendData[targetIndex], 'dataType', data.type)
+      const applyUpdate = (list) => {
+        const targetIndex = list.findIndex(item => item.requestId === requestId)
+        if (targetIndex !== -1) {
+          this.$set(list[targetIndex], 'status', status)
+          if (data && data.type) {
+            this.$set(list[targetIndex], 'dataType', data.type)
+            this.$set(list[targetIndex], 'requestCategory', data.type)
+          }
+          if (data && Object.prototype.hasOwnProperty.call(data, 'payload')) {
+            this.$set(list[targetIndex], 'parsedPayload', data.payload)
+          }
+          return true
+        }
+        return false
+      }
+
+      if (applyUpdate(this.recommendData)) {
+        return
+      }
+      applyUpdate(this.equipsAndPets)
+    },
+    getRequestCategoryByUrl(url) {
+      if (!url || typeof url !== 'string') {
+        return 'unknown'
+      }
+      try {
+        const decodedUrl = decodeURIComponent(url)
+        const lowerUrl = decodedUrl.toLowerCase()
+        const contains = (value) => lowerUrl.includes(value)
+        const containsAny = (values) => values.some(value => contains(value))
+
+        if (contains('search_type=overall_search_role')) {
+          return 'role'
+        }
+        if (contains('search_type=overall_search_pet')) {
+          return 'pet'
+        }
+        if (containsAny(['search_type=overall_search_equip', 'search_type=overall_search_pet_equip', 'search_type=overall_search_lingshi'])) {
+          return 'equipment'
+        }
+
+        if (contains('view_loc=overall_search')) {
+          if (contains('search_type=overall_search_role')) {
+            return 'role'
+          }
+          if (contains('search_type=overall_search_pet')) {
+            return 'pet'
+          }
+          if (containsAny(['search_type=overall_search_equip', 'search_type=overall_search_pet_equip', 'search_type=overall_search_lingshi'])) {
+            return 'equipment'
           }
         }
+
+        if (contains('view_loc=reco_left')) {
+          if (contains('recommend_type=1')) {
+            return 'role'
+          }
+          if (contains('recommend_type=3')) {
+            return 'pet'
+          }
+          if (containsAny(['recommend_type=2', 'recommend_type=4'])) {
+            return 'equipment'
+          }
+        }
+
+        if (contains('view_loc=equip_list')) {
+          const hasKindId = (kindIds) => kindIds.some(kindid => new RegExp(`kindid=${kindid}(?:&|$)`).test(lowerUrl))
+          if (hasKindId(ROLE_KINDIDS)) {
+            return 'role'
+          }
+          if (hasKindId(PET_KINDIDS)) {
+            return 'pet'
+          }
+          if (hasKindId(EQUIP_KINDIDS)) {
+            return 'equipment'
+          }
+        }
+
+        if (contains('view_loc=search_cond')) {
+          if (containsAny(['search_role_equip', 'search_pet_equip', 'search_lingshi'])) {
+            return 'equipment'
+          }
+          if (contains('search_type=search_pet')) {
+            return 'pet'
+          }
+          if (contains('search_type=search_role')) {
+            return 'role'
+          }
+        }
+
+        if (contains('act=recommd_by_role')) {
+          return 'role'
+        }
+        if (containsAny(['act=recommd_pet', 'act=recommd_by_pet'])) {
+          return 'pet'
+        }
+        if (containsAny(['act=recommd_by_equip', 'act=recommd_lingshi', 'act=recommd_pet_equip'])) {
+          return 'equipment'
+        }
+
+        console.warn('未识别的请求类型:', url)
+        return 'unknown'
+      } catch (error) {
+        console.warn('无法解析请求类型:', url, error)
+        return 'unknown'
       }
     },
     processNewData(dataArray) {
@@ -791,7 +849,7 @@ export default {
         'pet': '召唤兽',
         'equipment': '装备'
       }
-      
+
       // 只处理新完成的请求，避免重复处理
       if (dataArray && dataArray.length > 0) {
         dataArray.forEach(item => {
@@ -804,16 +862,20 @@ export default {
             this.processedRequests.add(item.requestId)
             console.log(`开始处理新请求: ${item.requestId}`)
 
-            // 调用解析响应数据接口
+            const requestType = item.requestCategory && item.requestCategory !== 'unknown'
+              ? item.requestCategory
+              : this.getRequestCategoryByUrl(item.url)
+
             this.$api.spider.parseResponse({
               url: item.url,
               response_text: item.responseData
             }).then(res => {
               console.log(`请求 ${item.requestId} 解析结果:`, res)
               if (res.code === 200) {
-                const typeName = typeMap[res.data.type] || res.data.type
+                const typeKey = requestType && requestType !== 'unknown' ? requestType : 'unknown'
+                const typeName = typeMap[typeKey] || typeKey
                 console.log(`请求 ${item.requestId} 数据类型: ${typeName}`, res.data)
-                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed', data: res.data })
+                this.changeRecommendDataStatus({ requestId: item.requestId, status: 'completed', data: { type: typeKey, payload: res.data } })
               } else {
                 console.error(`请求 ${item.requestId} 数据解析失败:`, res.message)
                 this.changeRecommendDataStatus({ requestId: item.requestId, status: 'failed' })
@@ -844,30 +906,49 @@ export default {
         case 'addRecommendData':
           console.log('接收到增量数据:', request)
           // 处理增量数据
-          const newData = request.data.map(item => {
+          const categorizedData = (request.data || []).map(item => {
+            const category = this.getRequestCategoryByUrl(item.url)
             return {
               ...item,
-              status: 'parsing'
+              status: 'parsing',
+              requestCategory: category,
+              receivedTime: Date.now() // 添加接收时间，用于显示
             }
-          }) || []
-          if (newData.length > 0) {
-            // 将新数据添加到现有数组中
-            this.recommendData.unshift(...newData)
-            
-            // 控制最大长度为10，移除最旧的数据
-            const maxLength = 10
-            if (this.recommendData.length > maxLength) {
-              const removedCount = this.recommendData.length - maxLength
-              this.recommendData = this.recommendData.slice(0, maxLength)
-              console.log(`📊 前端数据长度超过限制，已移除 ${removedCount} 条旧数据`)
+          })
+
+          if (categorizedData.length > 0) {
+            const roleData = categorizedData.filter(item => item.requestCategory === 'role')
+            const otherData = categorizedData.filter(item => item.requestCategory !== 'role')
+
+            if (roleData.length > 0) {
+              this.recommendData.unshift(...roleData)
+              const maxLength = 10
+              if (this.recommendData.length > maxLength) {
+                const removedCount = this.recommendData.length - maxLength
+                this.recommendData = this.recommendData.slice(0, maxLength)
+                console.log(`📊 角色数据长度超过限制，已移除 ${removedCount} 条旧数据`)
+              }
+              this.getPagerInfo().then(res => {
+                this.pageInfo = res
+              })
+              console.log('📥 接收到角色增量数据，新增:', roleData.length, '总计:', this.recommendData.length)
             }
-            
-            this.getPagerInfo().then(res => {
-              this.pageInfo = res
-            })
-            console.log('📥 接收到增量数据，新增:', newData.length, '总计:', this.recommendData.length)
-            // 处理新数据
-            this.processNewData(newData)
+
+            if (otherData.length > 0) {
+              this.equipsAndPets.unshift(...otherData)
+              const maxLength = 20
+              if (this.equipsAndPets.length > maxLength) {
+                const removedCount = this.equipsAndPets.length - maxLength
+                this.equipsAndPets = this.equipsAndPets.slice(0, maxLength)
+                console.log(`📊 装备/召唤兽数据超过限制，已移除 ${removedCount} 条旧数据`)
+              }
+              console.log('📥 接收到装备/召唤兽增量数据，新增:', otherData.length, '总计:', this.equipsAndPets.length)
+            }
+
+            const allNewData = [...roleData, ...otherData]
+            if (allNewData.length > 0) {
+              this.processNewData(allNewData)
+            }
           }
           break
 
@@ -885,19 +966,19 @@ export default {
 
         case 'clearRecommendData':
           this.recommendData = []
-          this.expandedItems = []
+          this.equipsAndPets = []
           this.processedRequests.clear()
           console.log('清空推荐数据和处理记录')
           break
 
-        
+
       }
     },
 
 
     clearData() {
       this.recommendData = []
-      this.expandedItems = []
+      this.equipsAndPets = []
       this.processedRequests.clear() // 清空已处理请求记录
       // 通知background script清空数据
       if (typeof chrome !== 'undefined' && chrome.runtime) {
@@ -952,18 +1033,28 @@ export default {
 
     formatTime(timestamp) {
       if (!timestamp) return ''
-      
-      // 直接使用当前系统时间，避免复杂的时间戳转换
-      const now = new Date()
-      
-      return now.toLocaleTimeString('zh-CN', { 
+
+      // Chrome DevTools Protocol 的 timestamp 是相对于进程启动时间的单调时间戳（秒）
+      // 为了显示准确时间，我们在接收数据时添加了 receivedTime 字段（标准毫秒时间戳）
+      // 这里优先使用 receivedTime，如果不存在则尝试处理 timestamp
+      let milliseconds
+      if (timestamp < 10000000000) {
+        // DevTools Protocol 的时间戳（秒），转换为毫秒
+        // 由于是相对时间，我们转换为绝对时间显示
+        milliseconds = timestamp * 1000
+      } else {
+        // 标准毫秒时间戳（Date.now()）
+        milliseconds = timestamp
+      }
+
+      const date = new Date(milliseconds)
+      return date.toLocaleTimeString('zh-CN', {
         hour12: false,
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit'
       })
     },
-
     async openInNewTab() {
       try {
         // 直接创建新标签页打开扩展页面
@@ -1017,19 +1108,19 @@ export default {
         }
       }
     },
-    
+
     // 装备估价相关方法
     async handleEquipPrice(role) {
       const roleData = this.parserRoleData(role)
       const { using_equips, not_using_equips, split_equips, basic_info } = roleData
-      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({ 
-        ...item, 
-        iType: item.type, 
-        cDesc: item.desc, 
-        serverid: role.serverid, 
-        server_name: role.server_name 
+      const equip_list = [...using_equips, ...not_using_equips, ...split_equips].map((item) => ({
+        ...item,
+        iType: item.type,
+        cDesc: item.desc,
+        serverid: role.serverid,
+        server_name: role.server_name
       }))
-      
+
       this.valuationDialogTitle = {
         nickname: basic_info.nickname,
         school: basic_info.school,
@@ -1044,7 +1135,7 @@ export default {
         this.valuationResults = []
         this.valuationTotalValue = 0
         this.valuationEquipmentList = equip_list
-        
+
         // 调用批量估价API
         const response = await this.$api.equipment.batchEquipmentValuation({
           eid: role.eid,
@@ -1060,7 +1151,7 @@ export default {
           const totalValue = results.reduce((sum, result) => {
             return sum + (result.estimated_price || 0)
           }, 0)
-          
+
           // 更新弹窗内容，显示实际数据
           this.valuationResults = results
           this.valuationTotalValue = totalValue
@@ -1083,7 +1174,7 @@ export default {
         this.valuationLoading = false
       }
     },
-    
+
     // 关闭装备估价结果对话框
     closeValuationDialog() {
       this.valuationDialogVisible = false
@@ -1092,20 +1183,105 @@ export default {
       this.valuationEquipmentList = []
       this.valuationDialogTitle = {}
     },
-    
-    // 宠物估价方法（占位符）
-    handlePetPrice(role) {
-      this.$notify.info({
-        title: '提示',
-        message: '宠物估价功能暂未实现'
+
+    // 宠物估价方法
+    async handlePetPrice(role) {
+      const roleData = this.parserRoleData(role)
+      const { pet_info, split_pets, basic_info } = roleData
+      
+      // 合并宠物数据并格式化
+      const pet_list = [...pet_info, ...split_pets].map((pet) => {
+        console.log('DevToolsPanel - 原始宠物数据:', pet)
+        
+        const formattedPet = {
+          ...pet,
+          pet_detail: pet,
+          serverid: role.serverid,
+          server_name: role.server_name,
+          // 确保这些关键字段存在（从 pet 或 pet 的子属性中提取）
+          role_grade_limit: pet.role_grade_limit || pet.equip_level || pet.pet_grade,
+          equip_level: pet.equip_level || pet.pet_grade,
+          growth: pet.growth,
+          is_baobao: pet.is_baobao,
+          all_skill: pet.all_skill,
+          sp_skill: pet.sp_skill || pet.genius || '0',
+          evol_skill_list: pet.evol_skill_list || [],
+          texing: pet.texing || {},
+          lx: pet.lx || '0',
+          equip_list: pet.equip_list || [null, null, null],
+          neidan: pet.neidan || [],
+          equip_sn: pet.equip_sn,
+          equip_face_img: pet.icon || pet.equip_face_img
+        }
+        
+        console.log('DevToolsPanel - 格式化后宠物数据:', formattedPet)
+        console.log('DevToolsPanel - 关键字段检查:', {
+          growth: formattedPet.growth,
+          texing: formattedPet.texing,
+          lx: formattedPet.lx,
+          sp_skill: formattedPet.sp_skill,
+          evol_skill_list: formattedPet.evol_skill_list,
+          role_grade_limit: formattedPet.role_grade_limit,
+          equip_level: formattedPet.equip_level
+        })
+        
+        return formattedPet
       })
+
+      this.petValuationDialogTitle = {
+        nickname: basic_info.nickname,
+        school: basic_info.school,
+        server_name: role.server_name,
+        eid: role.eid
+      }
+
+      try {
+        // 先显示弹窗和骨架屏
+        this.petValuationDialogVisible = true
+        this.petValuationLoading = true
+        this.petValuationResults = []
+        this.petValuationTotalValue = 0
+        this.petValuationPetList = pet_list
+
+        // 调用批量宠物估价API
+        const response = await this.$api.pet.batchPetValuation({
+          eid: role.eid,
+          pet_list: pet_list,
+          strategy: 'fair_value',
+          similarity_threshold: this.batchPetValuateParams.similarity_threshold,
+          max_anchors: this.batchPetValuateParams.max_anchors
+        })
+
+        if (response.code === 200) {
+          this.petValuationResults = response.data.results || []
+          this.petValuationTotalValue = response.data.total_value || 0
+          this.petValuationLoading = false
+        } else {
+          this.$notify.error({
+            title: '错误',
+            message: response.message || '宠物估价失败'
+          })
+          this.closePetValuationDialog()
+        }
+      } catch (error) {
+        console.error('宠物估价失败:', error)
+        this.$notify.error({
+          title: '错误',
+          message: '宠物估价失败'
+        })
+        this.closePetValuationDialog()
+      } finally {
+        this.petValuationLoading = false
+      }
     },
 
-    // AutoParams Modal相关方法（background未触发，移除打开方法）
-
-    closeAutoParamsDialog() {
-      this.autoParamsDialogVisible = false
-      this.autoParamsExternalParams = {}
+    // 关闭宠物估价结果对话框
+    closePetValuationDialog() {
+      this.petValuationDialogVisible = false
+      this.petValuationResults = []
+      this.petValuationTotalValue = 0
+      this.petValuationPetList = []
+      this.petValuationDialogTitle = {}
     },
   }
 }
@@ -1115,7 +1291,8 @@ export default {
 .panel {
   box-sizing: border-box;
   padding: 16px;
-  padding-bottom: 40px; /* 为底部版本栏留出空间 */
+  padding-bottom: 40px;
+  /* 为底部版本栏留出空间 */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   background: #f5f5f5;
   min-height: 100vh;
@@ -1459,23 +1636,4 @@ export default {
   opacity: 0.7;
 }
 
-/* 版本信息底部样式 */
-.version-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  text-align: center;
-  padding: 8px 0;
-  font-size: 12px;
-  z-index: 1000;
-  border-top: 1px solid #333;
-}
-
-.version-text {
-  color: #ccc;
-  font-weight: 500;
-}
 </style>
