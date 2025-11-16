@@ -212,7 +212,23 @@ export default {
       immediate: true
     }
   },
+  mounted() {
+    // 监听搜索任务完成事件（Chrome插件模式）
+    this.$root.$on('search-task-completed', this.handleSearchCompleted)
+  },
+  beforeDestroy() {
+    // 移除事件监听
+    this.$root.$off('search-task-completed', this.handleSearchCompleted)
+  },
   methods: {
+    // 处理搜索完成事件
+    handleSearchCompleted() {
+      // 只有在弹窗可见且已有数据时才自动刷新
+      if (this.visible && this.similarData) {
+        console.log('检测到搜索任务完成，自动刷新相似角色数据')
+        this.refresh()
+      }
+    },
     getServerHeatLabel(serverid) {
       const serverHeat = this.hotServersConfig.find(item => item.children.find(child => child.server_id === serverid))
       return serverHeat?.server_name || ''

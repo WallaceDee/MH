@@ -218,18 +218,7 @@ import { petMixin } from '@/utils/mixins/petMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import { petApi } from '@/api/pet'
-const skillOptions = []
-const pet_skill_classification = window.AUTO_SEARCH_CONFIG.pet_skill_classification
-for (const lowOrHightKey in pet_skill_classification) {
-  for (const label in pet_skill_classification[lowOrHightKey]) {
-    skillOptions.push({
-      value: '',
-      label: lowOrHightKey.replace('技能', '') + label,
-      children: pet_skill_classification[lowOrHightKey][label]
-    })
-  }
-}
-skillOptions.reverse()
+
 export default {
   name: 'PetList',
   components: {
@@ -253,7 +242,7 @@ export default {
         emitPath: false       // 只返回最后一级的值（技能ID），而不是完整路径
       },
       texing_type_list: window.AUTO_SEARCH_CONFIG.texing_type_list,
-      skillOptions,
+      skillOptions:window.skillOptions,
       pets: [],
       filters: {
         equip_sn: '',
@@ -264,8 +253,8 @@ export default {
         skills: [],
         price_min: undefined,
         price_max: undefined,
-        sort_by: 'price',
-        sort_order: 'asc',
+        sort_by: '',
+        sort_order: '',
         equip_list_amount_warning: 0,
         warning_rate: 0.4
       },

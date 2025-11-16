@@ -1268,7 +1268,7 @@ export default {
         this.$notify.error({
           title: '错误',
           message: '宠物估价失败'
-        })
+      })
         this.closePetValuationDialog()
       } finally {
         this.petValuationLoading = false

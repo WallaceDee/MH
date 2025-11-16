@@ -34,8 +34,7 @@
                         </el-form-item>
                     </el-col>
                     <el-col :span="8">
-                        <el-form-item
-                            :label="`⏱️ 延迟范围(秒) 当前：${globalSettings.delay_min} - ${globalSettings.delay_max} 秒`"
+                        <el-form-item :label="`⏱️ 延迟范围：${globalSettings.delay_min} - ${globalSettings.delay_max} 秒`"
                             size="small">
                             <el-slider v-model="delayRange" range show-stops :min="8" :max="30" :step="1"
                                 @change="onDelayRangeChange" style="width: 100%;display: inline-block;">
@@ -79,10 +78,10 @@
                     </el-col>
                 </el-row>
                 <el-row type="flex" align="middle">
-                    <el-form-item label="最低价格" size="small">
-                        <el-checkbox v-model="price_min_trigger"> </el-checkbox>
-                        <el-input-number v-model="price_min" :min="10" :controls="false"
-                            style="margin-left: 5px;"></el-input-number>
+                    <el-form-item label="最低价格" size="small" inline>
+                        <el-switch v-model="price_min_trigger"> </el-switch>
+                        <el-input-number v-model="price_min" :min="10" :controls="false" style="margin-left: 5px;">
+                        </el-input-number>
                     </el-form-item>
                 </el-row>
             </el-form>
@@ -151,19 +150,18 @@
             <el-tab-pane label="⚔️ 装备" name="equip"
                 :disabled="externalParamsState.action && externalParamsState.action !== 'similar_equip'">
                 <el-form :model="equipForm" label-width="100px" size="small">
-                    <el-form-item label="装备类型">
-                        <el-select v-model="equipForm.equip_type"
-                            :disabled="externalParamsState.action === 'similar_equip'" @change="onEquipTypeChange"
-                            style="width: 100%">
+                    <el-form-item label="装备类型" v-if="externalParamsState.action !== 'similar_equip'">
+                        <el-select v-model="equipForm.equip_type" @change="onEquipTypeChange" style="width: 100%">
                             <el-option label="普通装备" value="normal"></el-option>
                             <el-option label="灵饰装备" value="lingshi"></el-option>
                             <el-option label="召唤兽装备" value="pet"></el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="套装效果" v-if="equipForm.equip_type === 'normal' && targetFeatures.suit_effect">
+                    <el-form-item label="套装效果"
+                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.suit_effect">
                         <el-radio-group v-model="suit_effect_type">
                             <el-radio label=""><span
-                                    v-html="formatSuitEffect({ suit_effect: targetFeatures.suit_effect })"></span>
+                                    v-html="formatSuitEffect({ suit_effect: externalSearchParams.suit_effect })"></span>
                             </el-radio>
                             <el-radio label="select">自选</el-radio>
                             <el-radio label="agility_detailed.A">敏捷A套</el-radio>
@@ -182,7 +180,7 @@
                         </el-radio-group>
                     </el-form-item>
                     <el-form-item label="属性加成"
-                        v-if="equipForm.equip_type === 'normal' && targetFeatures.addon_total > 0">
+                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.sum_attr_value > 0">
                         <el-checkbox-group v-model="select_sum_attr_type">
                             <el-checkbox label="dex">敏捷</el-checkbox>
                             <el-checkbox label="endurance">耐力</el-checkbox>
@@ -192,6 +190,26 @@
                         </el-checkbox-group>
                         <el-checkbox v-model="sum_attr_with_melt">计算熔炼效果</el-checkbox>
                     </el-form-item>
+                    <el-form-item label="属性加成值"
+                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.sum_attr_value > 0">
+                        <el-input-number v-model="select_equip_addon_sum" placeholder="请输入属性加成值"
+                            controls-position="right" style="width: 100px;"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="开运"
+                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.hole_num !== undefined">
+                        <el-input-number v-model="select_equip_hole_num" :min="0" :max="5" :step="1"
+                            placeholder="请输入开运等级" controls-position="right" style="width: 100px;"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="特效"
+                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.special_effect !== undefined">
+                        <el-select v-model="select_equip_special_effect" placeholder="请选择特效" multiple clearable
+                            filterable>
+                            <el-option v-for="(label, value) in equip_special_effect" :key="value"
+                                :label="value === '1' ? label + '/超级简易' : label" :value="value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
                     <el-alert v-if="equipForm.equip_type === 'lingshi'" show-icon :closable="false"
                         style="margin-bottom: 10px;">
                         <span slot="title" v-html="lingshiTips"></span>
@@ -207,8 +225,8 @@
                         </div>
                         <el-row type="flex">
                             <div class="json-editor-wrapper" v-if="externalParamsState.action === 'similar_equip'">
-                                <el-input type="textarea" v-model="externalSearchParams" placeholder="搜索指定参数" :rows="10"
-                                    class="json-editor">
+                                <el-input type="textarea" v-model="externalSearchParamsJsonStr" placeholder="搜索指定参数"
+                                    :rows="10" class="json-editor">
                                 </el-input>
                                 <div v-if="equipJsonError" class="json-error">
                                     <i class="el-icon-warning"></i> {{ equipJsonError }}
@@ -241,7 +259,46 @@
             <!-- 召唤兽爬虫 -->
             <el-tab-pane label="🐲 召唤兽" name="pet"
                 :disabled="externalParamsState.action && externalParamsState.action !== 'similar_pet'">
-                <el-form :model="petForm" label-width="100px" size="small">
+                <el-form :model="petForm" label-width="100px" size="small" inline>
+                    <el-form-item label="技能" v-if="petForm.skill !== ''">
+                        <el-cascader v-model="select_pet_skill" :options="skillOptions" :props="{
+                            multiple: true,
+                            checkStrictly: false, // 不允许选择非叶子节点，只能选择叶子节点
+                            emitPath: false       // 只返回最后一级的值（技能ID），而不是完整路径
+                        }" :show-all-levels="false" placeholder="🔧请选择技能" multiple clearable filterable
+                            style="width:150px">
+                            <template slot-scope="{ data }">
+                                <el-row type="flex" align="middle">
+                                    <el-image v-if="data.value" :src="getSkillImage(data.value)" fit="cover"
+                                        referrerpolicy="no-referrer"
+                                        style="display: block;width: 24px;height: 24px;margin-right: 4px;"></el-image>
+                                    <span>{{ data.label }}</span>
+                                </el-row>
+                            </template>
+                        </el-cascader>
+                    </el-form-item>
+
+                    <el-form-item label="成长">
+                        <el-input-number v-model="select_pet_growth" :min="0" :max="2" :step="0.01" :precision="3"
+                            placeholder="请输入成长值" controls-position="right" style="width: 100px;"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="灵性">
+                        <el-input-number v-model="select_pet_lingxing" :min="0" :max="110" :step="1" placeholder="请选择灵性"
+                            controls-position="right" style="width: 100px;"></el-input-number>
+                    </el-form-item>
+                    <el-form-item label="是否宝宝">
+                        <el-switch v-model="select_pet_is_baobao" :active-value="1" :inactive-value="0"></el-switch>
+                    </el-form-item>
+                    <el-form-item>
+                        <div slot="label"> <el-switch v-model="select_pet_level_enable"></el-switch>
+                            等级</div>
+                        <el-input-number :disabled="!select_pet_level_enable" v-model="select_pet_level[0]" :min="0"
+                            :max="180" :step="1" placeholder="请输入最低等级" controls-position="right"
+                            style="width: 90px;"></el-input-number>
+                        <el-input-number :disabled="!select_pet_level_enable" v-model="select_pet_level[1]"
+                            :min="select_pet_level[0]" :max="180" :step="1" placeholder="请输入最高等级"
+                            controls-position="right" style="width: 90px;"></el-input-number>
+                    </el-form-item>
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
                         <div class="params-actions">
@@ -253,7 +310,8 @@
                         </div>
                         <el-row type="flex">
                             <div class="json-editor-wrapper" v-if="externalParamsState.action === 'similar_pet'">
-                                <el-input type="textarea" v-model="externalSearchParams" :rows="10" class="json-editor">
+                                <el-input type="textarea" v-model="externalSearchParamsJsonStr" :rows="10"
+                                    class="json-editor">
                                 </el-input>
                             </div>
                             <div class="json-editor-wrapper">
@@ -286,8 +344,7 @@
 </template>
 
 <script>
-import str2gbk from 'str2gbk'
-import qs from 'qs'
+import { petMixin } from '@/utils/mixins/petMixin'
 import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import PetImage from '@/components/PetImage.vue'
 import LogMonitor from '@/components/LogMonitor.vue'
@@ -325,7 +382,7 @@ export default {
             default: null
         }
     },
-    mixins: [equipmentMixin],
+    mixins: [equipmentMixin, petMixin],
     components: {
         EquipmentImage,
         LogMonitor,
@@ -333,11 +390,18 @@ export default {
     },
     data() {
         return {
+            skillOptions: window.skillOptions,
             isChrome: typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
-            select_sum_attr_type: [],
+            select_pet_skill: [],
+            select_pet_lingxing: 0,
+            select_pet_growth: 1,
+            select_pet_is_baobao: 1,
+            select_pet_level_enable: false,
+            select_pet_level: [0, 180],
             price_min: 1,
             price_min_trigger: false,
+            equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
             suit_transform_skills: window.AUTO_SEARCH_CONFIG.suit_transform_skills,
             suitOptions: [],
             suit_effect_type: '',
@@ -410,7 +474,7 @@ export default {
             sleepTimer: null,
 
             // 外部参数
-            externalSearchParams: '{}',
+            externalSearchParamsJsonStr: '{}',
             targetFeatures: {},
             // 内部存储的外部参数（从props或路由获取）
             internalExternalParams: {},
@@ -475,6 +539,63 @@ export default {
         }
     },
     computed: {
+        select_equip_hole_num: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                return params.hole_num !== undefined
+                    ? params.hole_num
+                    : (this.externalSearchParams.hole_num ? parseInt(this.externalSearchParams.hole_num) : 0)
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                params.hole_num = value !== undefined ? value : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        select_equip_addon_sum: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                return params.sum_attr_value !== undefined
+                    ? params.sum_attr_value
+                    : (this.externalSearchParams.sum_attr_value ? parseInt(this.externalSearchParams.sum_attr_value) : 0)
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                params.sum_attr_value = value !== undefined ? value : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        select_sum_attr_type: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                if (params.sum_attr_type !== undefined) {
+                    return params.sum_attr_type === '' ? [] : String(params.sum_attr_type).split(',')
+                }
+                const ext = this.externalSearchParams.sum_attr_type
+                return ext ? String(ext).split(',') : []
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                params.sum_attr_type = Array.isArray(value) && value.length > 0 ? value.join(',') : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        select_equip_special_effect: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                return params.special_effect !== undefined
+                    ? (params.special_effect===''?[]:params.special_effect.split(','))
+                    : (this.externalSearchParams.special_effect ? this.externalSearchParams.special_effect.split(',') : [])
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                params.special_effect = value !== undefined ? value.join(',') : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        externalSearchParams() {
+            return JSON.parse(this.externalSearchParamsJsonStr)
+        },
         lingshiTips() {
             const labels = {
                 1: '固伤', 2: '伤害', 3: '速度', 4: '法伤', 5: '狂暴', 6: '物理暴击', 7: '法术暴击',
@@ -482,7 +603,7 @@ export default {
                 15: '抗物理暴击', 16: '抗法术暴击', 17: '抗封', 18: '格挡', 19: '回复'
             }
             const highlighted = new Set()
-            for (let key in JSON.parse(this.externalSearchParams)) {
+            for (let key in JSON.parse(this.externalSearchParamsJsonStr)) {
                 if (key.startsWith('added_attr.')) {
                     const typeId = Number(key.replace('added_attr.', ''))
                     if (!Number.isNaN(typeId)) highlighted.add(typeId)
@@ -503,7 +624,7 @@ export default {
         },
         currentServerData() {
             // 优先级：1. 用户选择的（store中的server_data_value） 2. props传入的 3. store中的getCurrentServerData
-            
+
             // 1. 优先使用用户选择的（store中的server_data_value）
             if (this.$store && this.$store.state && this.$store.state.server_data_value) {
                 const storeValue = this.$store.state.server_data_value
@@ -530,7 +651,7 @@ export default {
                     }
                 }
             }
-            
+
             // 2. 其次使用props传入的数据
             let server_id = this.server_id !== null && this.server_id !== undefined
                 ? this.server_id
@@ -619,7 +740,7 @@ export default {
                     hide_lingshi: this.activeTab === 'equip' && this.equipForm.equip_type === 'normal' ? 1 : undefined
                 }
                 const currentServerData = this.globalSettings.overall ? { server_id: undefined, server_name: undefined, areaid: undefined } : this.currentServerData
-                return JSON.stringify(Object.assign(JSON.parse(this.externalSearchParams), diyParams, currentServerData, mode_params), null, 2)
+                return JSON.stringify(Object.assign(JSON.parse(this.externalSearchParamsJsonStr), diyParams, currentServerData, mode_params), null, 2)
             } catch (error) {
                 return '{}'
             }
@@ -654,23 +775,49 @@ export default {
                 this.select_suit_effect = ''
             }
         },
-        select_sum_attr_type(newVal) {
-            let changed = false
-                //判断newVal数组包含的项是否在targetFeatures中
-                ;[['liliang', 'power'], ['minjie', 'dex'], ['moli', 'magic'], ['naili', 'endurance'], ['tizhi', 'physique']].forEach(([attr, key]) => {
-                    if (this.targetFeatures[`addon_${attr}`] > 0) {
-                        if (!newVal.includes(key)) {
-                            changed = true
-                        }
-                    } else {
-                        if (newVal.includes(key)) {
-                            changed = true
-                        }
-                    }
-                })
-            const params = JSON.parse(this.equipParamsJson)
-            params.sum_attr_type = newVal.length > 0 && changed ? newVal.join(',') : undefined
-            this.equipParamsJson = JSON.stringify(params, null, 2)
+        select_pet_skill(newVal) {
+            console.log(newVal)
+            const params = JSON.parse(this.petParamsJson)
+            params.skill = newVal.join(',')
+            this.petParamsJson = JSON.stringify(params, null, 2)
+        },
+        select_pet_lingxing(newVal) {
+            const params = JSON.parse(this.petParamsJson)
+            // el-input-number 返回的是数字类型或null
+            params.lingxing = (newVal !== null && newVal !== undefined) ? String(newVal) : undefined
+            this.petParamsJson = JSON.stringify(params, null, 2)
+        },
+        select_pet_growth(newVal) {
+            const params = JSON.parse(this.petParamsJson)
+            // CBG使用千分比，所以需要乘以1000
+            if (newVal !== null && newVal !== undefined && !isNaN(newVal)) {
+                params.growth = Math.floor(newVal * 1000)
+            } else {
+                params.growth = undefined
+            }
+            this.petParamsJson = JSON.stringify(params, null, 2)
+        },
+        select_pet_is_baobao(newVal) {
+            const params = JSON.parse(this.petParamsJson)
+            params.is_baobao = newVal ? 1 : 0
+            this.petParamsJson = JSON.stringify(params, null, 2)
+        },
+        select_pet_level_enable(newVal) {
+            const params = JSON.parse(this.petParamsJson)
+            if (newVal) {
+                params.level_min = this.select_pet_level[0]
+                params.level_max = this.select_pet_level[1]
+            } else {
+                params.level = undefined
+                params.level_max = undefined
+            }
+            this.petParamsJson = JSON.stringify(params, null, 2)
+        },
+        select_pet_level(newVal) {
+            const params = JSON.parse(this.petParamsJson)
+            params.level_min = newVal[0]
+            params.level_max = newVal[1]
+            this.petParamsJson = JSON.stringify(params, null, 2)
         },
         isRunning(newVal) {
             this.$emit('update:isRunning', newVal)
@@ -797,8 +944,13 @@ export default {
             this.$store.dispatch('setServerDataValue', [43, 77])
         }
         if (this.externalParamsState.action) {
+            const { action } = this.externalParamsState
             this.getFeatures().then(() => {
-                this.loadEquipConfig()
+                if (action === 'similar_equip') {
+                    this.loadEquipConfig()
+                } else if (action === 'similar_pet') {
+                    this.loadPetConfig()
+                }
             })
         }
         this.initSuitOptions()
@@ -999,7 +1151,7 @@ export default {
                     console.log('Chrome插件模式：循环请求已停止')
                     return
                 }
-                
+
                 // 非Chrome模式或API模式，调用后端API停止
                 const response = await this.$api.spider.stopTask()
                 if (response.code === 200) {
@@ -1054,7 +1206,7 @@ export default {
         genaratePetSearchParams() {
             console.log('生成宠物搜索参数, externalParamsState:', this.externalParamsState)
             const searchParams = {}
-            
+
             // 检查必要的参数是否存在
             if (!this.externalParamsState.all_skill) {
                 console.warn('缺少 all_skill 参数')
@@ -1062,12 +1214,12 @@ export default {
             if (!this.externalParamsState.growth) {
                 console.warn('缺少 growth 参数')
             }
-            
+
             searchParams.skill = this.externalParamsState.all_skill?.replace(/\|/g, ',') || ''
             searchParams.texing = this.externalParamsState.texing?.id
             searchParams.lingxing = this.externalParamsState.lx
             searchParams.growth = this.externalParamsState.growth ? this.externalParamsState.growth * 1000 : undefined
-            
+
             console.log('生成的宠物搜索参数:', searchParams)
             return searchParams
         },
@@ -1303,7 +1455,6 @@ export default {
                         data_type: 'equipment'
                     })
                     .then((res) => {
-                        console.log('res008989898989', res)
                         if (res.code === 200 && res.data.features) {
                             // 在所有环境下都设置 targetFeatures（包括组件形式）
                             this.targetFeatures = res.data.features
@@ -1337,7 +1488,7 @@ export default {
                 this.server_data_value = [areaid, server_id]
                 query.server_name = this.externalParamsState.server_name
             }
-            this.externalSearchParams = JSON.stringify(query, null, 2)
+            this.externalSearchParamsJsonStr = JSON.stringify(query, null, 2)
         },
         /**
          * 同步外部参数（从props或路由）
@@ -1359,34 +1510,18 @@ export default {
 
             // 处理similar_pet的JSON字符串参数
             if (params.action === 'similar_pet') {
-                if (typeof params.evol_skill_list === 'string') {
-                    try {
-                        params.evol_skill_list = JSON.parse(params.evol_skill_list || '{}')
-                    } catch (e) {
-                        params.evol_skill_list = {}
+                // 需要解析为JSON对象的字段列表
+                const jsonFields = ['evol_skill_list', 'neidan', 'equip_list', 'texing']
+
+                jsonFields.forEach(field => {
+                    if (typeof params[field] === 'string') {
+                        try {
+                            params[field] = JSON.parse(params[field] || '{}')
+                        } catch (e) {
+                            params[field] = {}
+                        }
                     }
-                }
-                if (typeof params.neidan === 'string') {
-                    try {
-                        params.neidan = JSON.parse(params.neidan || '{}')
-                    } catch (e) {
-                        params.neidan = {}
-                    }
-                }
-                if (typeof params.equip_list === 'string') {
-                    try {
-                        params.equip_list = JSON.parse(params.equip_list || '{}')
-                    } catch (e) {
-                        params.equip_list = {}
-                    }
-                }
-                if (typeof params.texing === 'string') {
-                    try {
-                        params.texing = JSON.parse(params.texing || '{}')
-                    } catch (e) {
-                        params.texing = {}
-                    }
-                }
+                })
             }
 
             // 更新内部存储的外部参数
@@ -1444,7 +1579,23 @@ export default {
                         this.select_sum_attr_type.push(key)
                     }
                 })
+                // 通过设置equipParamsJson来更新select_equip_addon_sum
+                if (this.targetFeatures.addon_total > 0) {
+                    const params = JSON.parse(this.equipParamsJson)
+                    params.sum_attr_value = this.targetFeatures.addon_total
+                    this.equipParamsJson = JSON.stringify(params, null, 2)
+                }
             }
+        },
+        loadPetConfig() {
+            console.log(this.externalParamsState)
+            this.select_pet_skill = this.externalParamsState.all_skill.split('|')
+            // 灵性转换为数字类型
+            this.select_pet_lingxing = this.externalParamsState.lx ? parseInt(this.externalParamsState.lx) : null
+            // 成长值从 externalParamsState 中获取，不需要除以1000因为外部传入的就是原始值，转换为数字类型
+            this.select_pet_growth = this.externalParamsState.growth ? parseFloat(this.externalParamsState.growth) : null
+            this.select_pet_is_baobao = this.externalParamsState.is_baobao === '是' ? 1 : 0
+            this.select_pet_level = [this.externalParamsState.equip_level, this.externalParamsState.equip_level]
         },
         async loadHotServers() {
             try {
@@ -1651,11 +1802,11 @@ export default {
         //overall_search_pet,overall_search_equip,overall_search_pet_equip,overall_search_lingshi
         getSearchType() {
             const prefix = this.globalSettings.overall ? 'overall_' : ''
-            
+
             if (this.activeTab === 'equip') {
                 switch (this.equipForm.equip_type) {
                     case 'normal':
-                        return `${prefix}search_${prefix?'':'role_'}equip`
+                        return `${prefix}search_${prefix ? '' : 'role_'}equip`
                     case 'lingshi':
                         return `${prefix}search_lingshi`
                     case 'pet':
@@ -1667,7 +1818,7 @@ export default {
                 return `${prefix}search_pet`
             } else {
                 // 默认值
-               return `${prefix}search_${prefix?'':'role_'}equip`
+                return `${prefix}search_${prefix ? '' : 'role_'}equip`
             }
         },
 
@@ -1699,11 +1850,11 @@ export default {
                             // 设置运行状态
                             this.isRunning = true
                             this.activeTab = type
-                            
+
                             // 开始多页随机延时请求（支持多区搜索）
                             await this.doMultiPageRequest(
-                                activeTab.id, 
-                                searchType, 
+                                activeTab.id,
+                                searchType,
                                 params.cached_params,
                                 params.multi,
                                 params.target_server_list
@@ -1752,23 +1903,23 @@ export default {
             let maxPages = this.globalSettings.max_pages || 5
             const delayMin = this.globalSettings.delay_min || 8
             const delayMax = this.globalSettings.delay_max || 20
-            
+
             // 如果启用多区搜索且有目标服务器列表
             if (multi && targetServerList && targetServerList.length > 0) {
                 console.log(`🌍 多区搜索模式，共 ${targetServerList.length} 个服务器，每个服务器 ${maxPages} 页`)
-                
+
                 let totalCompleted = 0
                 for (let i = 0; i < targetServerList.length; i++) {
                     const server = targetServerList[i]
-                    
+
                     // 检查是否被停止
                     if (!this.isRunning) {
                         console.log(`请求已停止，已完成 ${i}/${targetServerList.length} 个服务器`)
                         break
                     }
-                    
+
                     console.log(`\n📍 [${i + 1}/${targetServerList.length}] 开始请求服务器: ${server.server_name} (ID: ${server.server_id})`)
-                    
+
                     // 合并服务器参数到 cached_params
                     const serverParams = {
                         ...cachedParams,
@@ -1776,21 +1927,21 @@ export default {
                         areaid: server.areaid,
                         server_name: server.server_name
                     }
-                    
+
                     // 为当前服务器执行多页请求
                     const completed = await this.doSingleServerMultiPageRequest(
-                        tabId, 
-                        searchType, 
+                        tabId,
+                        searchType,
                         serverParams,
                         maxPages,
                         delayMin,
                         delayMax,
                         `[${i + 1}/${targetServerList.length}]`
                     )
-                    
+
                     totalCompleted += completed
                     console.log(`✅ 服务器 ${server.server_name} 完成 ${completed} 页请求`)
-                    
+
                     // 如果不是最后一个服务器，等待随机延时
                     if (i < targetServerList.length - 1 && this.isRunning) {
                         const serverDelay = Math.floor(Math.random() * (delayMax - delayMin + 1)) + delayMin
@@ -1798,14 +1949,14 @@ export default {
                         await this.sleep(serverDelay * 1000)
                     }
                 }
-                
+
                 console.log(`\n🎉 多区搜索完成，共处理 ${targetServerList.length} 个服务器，总计 ${totalCompleted} 页`)
                 this.$notify.success({
                     title: '多区搜索完成',
                     message: `已完成 ${targetServerList.length} 个服务器的搜索，共 ${totalCompleted} 页数据`
                 })
                 this.isRunning = false
-                
+
                 // Chrome插件模式下，发出搜索完成事件，触发相似装备模态框刷新
                 if (this.isChrome) {
                     this.$root.$emit('search-task-completed')
@@ -1813,12 +1964,12 @@ export default {
                 }
                 return
             }
-            
+
             // 单区搜索模式
             console.log(`开始多页请求，总共 ${maxPages} 页，延时范围：${delayMin}-${delayMax} 秒`)
             await this.doSingleServerMultiPageRequest(tabId, searchType, cachedParams, maxPages, delayMin, delayMax)
         },
-        
+
         // 单个服务器的多页请求
         async doSingleServerMultiPageRequest(tabId, searchType, cachedParams, maxPages, delayMin, delayMax, prefix = '') {
             let completedPages = 0
@@ -1831,13 +1982,13 @@ export default {
                         console.log(`请求已停止，已完成 ${completedPages}/${actualTotalPages || maxPages} 页`)
                         break
                     }
-                    
+
                     // 如果已经知道实际总页数，且当前页超过了总页数，则停止
                     if (actualTotalPages !== null && page > actualTotalPages) {
                         console.log(`⏭️ 跳过第 ${page} 页（超出实际总页数 ${actualTotalPages}）`)
                         break
                     }
-                    
+
                     // 构建请求参数
                     const chromeParams = {
                         act: 'recommd_by_role',
@@ -1848,7 +1999,7 @@ export default {
                         search_type: searchType,
                         ...cachedParams
                     }
-                    
+
                     // 发送请求
                     const displayMaxPages = actualTotalPages !== null ? actualTotalPages : maxPages
                     console.log(`${prefix}[${page}/${displayMaxPages}] 正在请求第 ${page} 页...`)
@@ -1856,10 +2007,10 @@ export default {
                         const result = await this.doRequestInCBG(tabId, chromeParams)
                         console.log(`${prefix}[${page}/${displayMaxPages}] 第 ${page} 页请求已发送`)
                         completedPages = page
-                        
+
                         // 等待一段时间让响应数据被处理（1秒，给足够的时间）
                         await this.sleep(1000)
-                        
+
                         // 尝试从 Vuex 获取最新的响应数据并检查 pager 信息
                         if (this.$store && this.$store.getters['chromeDevtools/getEquipsAndPetsData']) {
                             const latestData = this.$store.getters['chromeDevtools/getEquipsAndPetsData']
@@ -1872,7 +2023,7 @@ export default {
                                         const parsedData = this.parseListData(latestItem.responseData)
                                         if (parsedData && parsedData.pager) {
                                             const { cur_page, total_pages } = parsedData.pager
-                                            
+
                                             // 第一次获取到 total_pages 时，更新 actualTotalPages
                                             if (actualTotalPages === null) {
                                                 actualTotalPages = total_pages
@@ -1883,9 +2034,9 @@ export default {
                                                     console.log(`${prefix}📉 调整请求页数从原始设置到 ${total_pages}`)
                                                 }
                                             }
-                                            
+
                                             console.log(`${prefix}📄 页码信息：当前页 ${cur_page}/${total_pages}`)
-                                            
+
                                             // 如果当前页已经是最后一页，停止请求
                                             if (cur_page >= total_pages) {
                                                 console.log(`${prefix}✅ 已到达最后一页 (${cur_page}/${total_pages})，停止继续请求`)
@@ -1903,7 +2054,7 @@ export default {
                         // 请求失败不中断循环，继续下一页
                         completedPages = page
                     }
-                    
+
                     // 如果不是最后一页，等待随机延时
                     if (page < maxPages) {
                         // 再次检查是否被停止
@@ -1921,24 +2072,24 @@ export default {
                         }
                     }
                 }
-                
+
                 const finalTotalPages = actualTotalPages || completedPages
                 console.log(`${prefix}所有页面请求完成，共完成 ${completedPages}/${finalTotalPages} 页`)
-                
+
                 // 只在单区模式下显示通知（多区模式在外层显示）
                 if (!prefix) {
                     this.$notify.success({
                         title: '爬虫搜索',
                         message: `已完成 ${completedPages}/${finalTotalPages} 页请求`
                     })
-                    
+
                     // Chrome插件模式下，发出搜索完成事件，触发相似装备模态框刷新
                     if (this.isChrome) {
                         this.$root.$emit('search-task-completed')
                         console.log('已发出搜索完成事件')
                     }
                 }
-                
+
                 return completedPages
             } catch (error) {
                 console.error(`${prefix}多页请求失败:`, error)
@@ -2019,7 +2170,7 @@ export default {
             if (this.isChrome) {
                 return
             }
-            
+
             try {
                 const response = await this.$api.spider.getStatus()
                 if (response.code === 200) {

@@ -7,13 +7,14 @@
       </el-row>
       <!-- 刷新和相似界面 -->
       <div style="width: 170px;flex-shrink: 0;">
-      <el-button type="primary" @click="$emit('refresh')" size="mini">刷新</el-button>
+        <el-button type="primary" @click="$emit('refresh')" size="mini" style="margin-right: 5px;">刷新</el-button>
         <SimilarGetMore :target-equipment="targetPet" type="pet" />
       </div>
     </el-row>
     <div class="valuation-main">
       <span class="valuation-label">召唤兽估价:</span>
-      <span class="valuation-price">{{ valuation ? (valuation.estimated_price_yuan+valuation.equip_estimated_price/100 ).toFixed(2) + '元' : '-' }} </span>
+      <span class="valuation-price">{{ valuation ? (valuation.estimated_price_yuan + valuation.equip_estimated_price / 100
+      ).toFixed(2) + '元' : '-' }} </span>
       <span class="valuation-strategy">({{ valuation ? getStrategyName(valuation.strategy) : '-' }})</span>
 
       <!-- 价格比率显示 -->
@@ -25,7 +26,7 @@
     </div>
     <div class="valuation-equip">
       <el-tag>裸宠:￥{{ valuation.estimated_price_yuan }}</el-tag> <el-divider direction="vertical" />
-      <el-tag type="success">装备:￥{{ valuation.equip_estimated_price/100 }}</el-tag>
+      <el-tag type="success">装备:￥{{ valuation.equip_estimated_price / 100 }}</el-tag>
     </div>
     <div class="valuation-details">
       <span class="confidence-display" :class="confidenceTextClass">
@@ -127,9 +128,9 @@ export default {
       if (!this.valuation || !this.valuation.confidence) {
         return 'confidence-extremely-low'
       }
-      
+
       const confidence = this.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return 'confidence-high'        // >= 80%: 高置信度 (绿色)
       } else if (confidence >= 0.6) {
@@ -148,9 +149,9 @@ export default {
       if (!this.valuation || !this.valuation.confidence) {
         return 'text-danger'
       }
-      
+
       const confidence = this.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return 'text-success'
       } else if (confidence >= 0.6) {
@@ -169,9 +170,9 @@ export default {
       if (!this.valuation || !this.valuation.confidence) {
         return 'el-icon-warning'
       }
-      
+
       const confidence = this.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return 'el-icon-success'
       } else if (confidence >= 0.6) {
@@ -188,9 +189,9 @@ export default {
       if (!this.valuation || !this.valuation.confidence) {
         return '极低'
       }
-      
+
       const confidence = this.valuation.confidence
-      
+
       if (confidence >= 0.8) {
         return '高'
       } else if (confidence >= 0.6) {

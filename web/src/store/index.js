@@ -95,6 +95,57 @@ const cookieModule = {
   }
 }
 
+// Chrome Devtools 数据模块
+const chromeDevtoolsModule = {
+  namespaced: true,
+  state: {
+    equipsAndPetsData: [] // 装备和召唤兽数据列表
+  },
+  getters: {
+    // 获取装备和召唤兽数据
+    getEquipsAndPetsData: (state) => {
+      return state.equipsAndPetsData
+    },
+    // 获取数据数量
+    getDataCount: (state) => {
+      return state.equipsAndPetsData.length
+    }
+  },
+  mutations: {
+    // 设置装备和召唤兽数据
+    setEquipsAndPetsData(state, data) {
+      state.equipsAndPetsData = Array.isArray(data) ? data : []
+      console.log('Vuex: 装备和召唤兽数据已更新, 数量:', state.equipsAndPetsData.length)
+    },
+    // 追加数据到列表开头
+    unshiftEquipsAndPetsData(state, data) {
+      if (Array.isArray(data)) {
+        state.equipsAndPetsData.unshift(...data)
+        console.log('Vuex: 追加装备和召唤兽数据, 新增:', data.length, '总计:', state.equipsAndPetsData.length)
+      }
+    },
+    // 清空数据
+    clearEquipsAndPetsData(state) {
+      state.equipsAndPetsData = []
+      console.log('Vuex: 装备和召唤兽数据已清空')
+    }
+  },
+  actions: {
+    // 更新装备和召唤兽数据
+    updateEquipsAndPetsData({ commit }, data) {
+      commit('setEquipsAndPetsData', data)
+    },
+    // 追加装备和召唤兽数据
+    appendEquipsAndPetsData({ commit }, data) {
+      commit('unshiftEquipsAndPetsData', data)
+    },
+    // 清空数据
+    clearData({ commit }) {
+      commit('clearEquipsAndPetsData')
+    }
+  }
+}
+
 export default new Vuex.Store({
   state: {
     areaid: 43,
@@ -165,7 +216,8 @@ export default new Vuex.Store({
     }
   },
   modules: {
-    cookie: cookieModule
+    cookie: cookieModule,
+    chromeDevtools: chromeDevtoolsModule
   },
   plugins: [
     createPersistedState({

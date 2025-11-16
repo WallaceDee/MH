@@ -723,6 +723,13 @@ class RoleService:
                     verbose=True
                 )
                 
+                # 确保role_features中不包含eid，避免混淆
+                if isinstance(role_features, dict) and 'eid' in role_features:
+                    # 创建role_features的副本，移除eid字段
+                    clean_role_features = {k: v for k, v in role_features.items() if k != 'eid'}
+                else:
+                    clean_role_features = role_features
+                
                 # 检查是否有错误（如未找到anchor）
                 if "error" in result:
                     return {
@@ -732,8 +739,8 @@ class RoleService:
                         "confidence": 0.0,
                         "market_value": 0,
                         "anchor_count": 0,
-                        "feature": role_features,
-                        "eid": eid,
+                        "feature": clean_role_features,
+                        "eid": eid,  # 确保使用传入的eid参数，而不是从role_features中提取
                         "anchors": [],
                         "strategy": strategy,
                         "similarity_threshold": similarity_threshold,
@@ -743,6 +750,13 @@ class RoleService:
                 # 格式化返回结果
                 estimated_price = result.get('estimated_price', 0)
                 estimated_price_yuan = estimated_price / 100.0  # 转换为元
+                
+                # 确保role_features中不包含eid，避免混淆
+                if isinstance(role_features, dict) and 'eid' in role_features:
+                    # 创建role_features的副本，移除eid字段
+                    clean_role_features = {k: v for k, v in role_features.items() if k != 'eid'}
+                else:
+                    clean_role_features = role_features
                 
                 # 估价成功后自动更新数据库中的base_price
                 if estimated_price > 0:
@@ -762,8 +776,8 @@ class RoleService:
                     "confidence": result.get('confidence', 0.0),
                     "market_value": int(estimated_price),  # 市场锚定估价即为最终价值
                     "anchor_count": result.get('anchor_count', 0),
-                    "feature": role_features,
-                    "eid": eid,
+                    "feature": clean_role_features,
+                    "eid": eid,  # 确保使用传入的eid参数，而不是从role_features中提取
                     "anchors": result.get('anchors', []),
                     "strategy": strategy,
                     "similarity_threshold": similarity_threshold,
@@ -771,6 +785,13 @@ class RoleService:
                 }
                 
             except Exception as e:
+                # 确保role_features中不包含eid，避免混淆
+                if isinstance(role_features, dict) and 'eid' in role_features:
+                    # 创建role_features的副本，移除eid字段
+                    clean_role_features = {k: v for k, v in role_features.items() if k != 'eid'}
+                else:
+                    clean_role_features = role_features
+                
                 return {
                     "error": f"估价计算失败: {str(e)}",
                     "estimated_price": 0,
@@ -778,8 +799,8 @@ class RoleService:
                     "confidence": 0.0,
                     "market_value": 0,
                     "anchor_count": 0,
-                    "feature": role_features,
-                    "eid": eid,
+                    "feature": clean_role_features,
+                    "eid": eid,  # 确保使用传入的eid参数，而不是从role_features中提取
                     "anchors": [],
                     "strategy": strategy,
                     "similarity_threshold": similarity_threshold,

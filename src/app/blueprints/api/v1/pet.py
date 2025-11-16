@@ -40,8 +40,8 @@ def get_pets():
             'equip_sn': request.args.get('equip_sn'),
             'equip_sn_list': request.args.getlist('equip_sn_list[]') or request.args.getlist('equip_sn_list') or None,
             'warning_rate': request.args.get('warning_rate'),
-            'sort_by': request.args.get('sort_by', 'price'),
-            'sort_order': request.args.get('sort_order', 'asc')
+            'sort_by': request.args.get('sort_by', 'update_time'),
+            'sort_order': request.args.get('sort_order', 'desc')
         }
         
         # 过滤掉空值

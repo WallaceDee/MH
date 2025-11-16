@@ -428,3 +428,19 @@ window.is_cloth_equip = function (kindid) {
 window.is_armor_equip = function (kindid) {
   return window.weapon_kinds.some((item) => item[0] == kindid)
 }
+
+window.skillOptions = []
+const pet_skill_classification = window.AUTO_SEARCH_CONFIG.pet_skill_classification
+for (const lowOrHightKey in pet_skill_classification) {
+  for (const label in pet_skill_classification[lowOrHightKey]) {
+    window.skillOptions.push({
+      value: '',
+      label: lowOrHightKey.replace('技能', '') + label,
+      children: pet_skill_classification[lowOrHightKey][label]
+    })
+  }
+}
+window.skillOptions.reverse()
+console.log({
+  skillOptions:window.skillOptions
+})

@@ -246,8 +246,8 @@ class EquipMarketDataCollector:
             # 获取MySQL装备数据总数
             full_count = db.session.query(Equipment).count()
             self.mysql_data_count = full_count
-            total_count = full_count  # 加载全部数据
-            # total_count = 2000  # 临时测试：加载500条数据
+            # total_count = full_count  # 加载全部数据
+            total_count = 3333  # 临时测试：加载500条数据
 
             print(f"装备总记录数: {full_count}，本次加载: {total_count} 条")
             
