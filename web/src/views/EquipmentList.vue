@@ -71,7 +71,7 @@
             </el-option>
           </el-select>
           <el-input-number size="mini" v-model="filters.gem_level" :min="0" :max="16" :step="1" style="width: 120px"
-            placeholder="锻练等级" controls-equip_type="right"></el-input-number>
+            placeholder="锻练等级" controls-position="right"></el-input-number>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchEquipments">查询</el-button>

@@ -202,14 +202,69 @@
                     </el-form-item>
                     <el-form-item label="特效"
                         v-if="equipForm.equip_type === 'normal' && externalSearchParams.special_effect !== undefined">
-                        <el-select v-model="select_equip_special_effect" placeholder="请选择特效" multiple clearable
-                            filterable>
-                            <el-option v-for="(label, value) in equip_special_effect" :key="value"
-                                :label="value === '1' ? label + '/超级简易' : label" :value="value">
-                            </el-option>
-                        </el-select>
+                        <el-radio-group v-model="select_equip_special_effect_enable">
+                            <el-radio :label="true">
+                                <el-select :disabled="!select_equip_special_effect_enable"
+                                    v-model="select_equip_special_effect" placeholder="请选择特效" multiple clearable
+                                    filterable>
+                                    <el-option v-for="(label, value) in equip_special_effect" :key="value"
+                                        :label="value === '1' ? label + '/超级简易' : label" :value="value">
+                                    </el-option>
+                                </el-select>
+                            </el-radio>
+                            <el-radio :label="false">无</el-radio>
+                        </el-radio-group>
                     </el-form-item>
-
+                    <el-form-item label="特技"
+                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.special_skill !== undefined">
+                        <el-radio-group v-model="select_equip_special_skill_enable">
+                            <el-radio :label="true">
+                                <el-select :disabled="!select_equip_special_skill_enable"
+                                    v-model="select_equip_special_skill" placeholder="请选择特技" clearable filterable>
+                                    <el-option v-for="[value, label] in equip_special_skills" :key="value"
+                                        :label="label" :value="value">
+                                    </el-option>
+                                </el-select>
+                            </el-radio>
+                            <el-radio :label="false">无</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                    <el-form-item label="属性" v-if="equipForm.equip_type === 'normal'">
+                        <el-form-item :label="equip_attr_list_label[attr]"
+                            v-for="attr in equip_attr_list.filter(a => externalSearchParamsJsonStr.indexOf(a) !== -1)"
+                            :key="attr">
+                            <el-input-number v-model="select_equip_attr_value[attr]" placeholder="请输入属性值"
+                                controls-position="right" style="width: 100px;"></el-input-number>
+                        </el-form-item>
+                    </el-form-item>
+                    <el-form-item label="宝石"
+                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.gem_level !== undefined">
+                        <el-radio-group v-model="select_equip_gem_enable">
+                            <el-radio :label="true">
+                                <el-select v-model="select_equip_gem_value" placeholder="镶嵌宝石" clearable filterable
+                                    :disabled="!select_equip_gem_enable" style="width: 120px">
+                                    <el-option v-for="(gemName, value) in gems_name" :key="value" :value="value"
+                                        :label="gemName">
+                                        <el-row type="flex" justify="space-between">
+                                            <el-col style="width: 34px; height: 34px; margin-right: 10px">
+                                                <el-image style="width: 34px; height: 34px; cursor: pointer"
+                                                    :src="getImageUrl(gem_image[value] + '.gif')" fit="cover"
+                                                    referrerpolicy="no-referrer">
+                                                </el-image>
+                                            </el-col>
+                                            <el-col style="width: 100px">
+                                                {{ gemName }}
+                                            </el-col>
+                                        </el-row>
+                                    </el-option>
+                                </el-select>
+                                <el-input-number v-model="select_equip_gem_level" size="mini" :min="1" :max="16"
+                                    :step="1" style="width: 100px" placeholder="锻练等级"
+                                    :disabled="!select_equip_gem_enable" controls-position="right"></el-input-number>
+                            </el-radio>
+                            <el-radio :label="false">无</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
                     <el-alert v-if="equipForm.equip_type === 'lingshi'" show-icon :closable="false"
                         style="margin-bottom: 10px;">
                         <span slot="title" v-html="lingshiTips"></span>
@@ -350,6 +405,7 @@ import PetImage from '@/components/PetImage.vue'
 import LogMonitor from '@/components/LogMonitor.vue'
 import windowReuseManager from '@/utils/windowReuseManager'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
+import { commonMixin } from '@/utils/mixins/commonMixin'
 
 const server_data_list = []
 for (let key in window.server_data) {
@@ -382,7 +438,7 @@ export default {
             default: null
         }
     },
-    mixins: [equipmentMixin, petMixin],
+    mixins: [commonMixin, equipmentMixin, petMixin],
     components: {
         EquipmentImage,
         LogMonitor,
@@ -390,9 +446,52 @@ export default {
     },
     data() {
         return {
+            gem_image: {
+                1: '4011',
+                2: '4002',
+                3: '4012',
+                4: '4004',
+                5: '4003',
+                6: '4010',
+                7: '4005',
+                8: '4007',
+                9: '4006',
+                10: '4008',
+                11: '4009',
+                12: '1108_4249',
+                4244: '4244',
+                '755_4036': '755_4036',
+                '756_4037': '756_4037',
+                '757_4038': '757_4038'
+            },
+            gems_name: window.AUTO_SEARCH_CONFIG.gems_name,
+            equip_attr_list: [
+                // 'init_damage', //all_damage已经包含init_damage
+                'init_damage_raw',
+                'init_defense',
+                'init_hp',
+                'init_dex',
+                'init_wakan',
+                'all_wakan',
+                'all_damage',
+                'damage'
+            ],
+            equip_attr_list_label: {
+                'init_damage_raw': '初伤（不含命中）',
+                'init_defense': '初防',
+                'init_hp': '初血',
+                'init_dex': '初敏',
+                'init_wakan': '初灵',
+                'all_wakan': '总灵',
+                'all_damage': '总伤',
+                'damage': '伤害'
+            },
             skillOptions: window.skillOptions,
             isChrome: typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
+            select_equip_special_effect_enable: true,
+            select_equip_special_skill_enable: true,
+            select_equip_gem_enable: true,
             select_pet_skill: [],
             select_pet_lingxing: 0,
             select_pet_growth: 1,
@@ -402,6 +501,7 @@ export default {
             price_min: 1,
             price_min_trigger: false,
             equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
+            equip_special_skills: window.AUTO_SEARCH_CONFIG.equip_special_skills,
             suit_transform_skills: window.AUTO_SEARCH_CONFIG.suit_transform_skills,
             suitOptions: [],
             suit_effect_type: '',
@@ -584,12 +684,113 @@ export default {
             get() {
                 const params = JSON.parse(this.equipParamsJson)
                 return params.special_effect !== undefined
-                    ? (params.special_effect===''?[]:params.special_effect.split(','))
+                    ? (params.special_effect === '' ? [] : params.special_effect.split(','))
                     : (this.externalSearchParams.special_effect ? this.externalSearchParams.special_effect.split(',') : [])
             },
             set(value) {
                 const params = JSON.parse(this.equipParamsJson)
-                params.special_effect = value !== undefined ? value.join(',') : undefined
+                params.special_effect = Array.isArray(value) && value.length > 0 ? value.join(',') : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        select_equip_special_skill: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                return params.special_skill !== undefined
+                    ? params.special_skill
+                    : (this.externalSearchParams.special_skill ? parseInt(this.externalSearchParams.special_skill) : 0)
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                params.special_skill = value !== undefined && value !== '' ? value : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        select_equip_gem_value: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                if (params.gem_value !== undefined) {
+                    return params.gem_value
+                }
+                const externalValue = this.externalSearchParams.gem_value
+                return externalValue !== undefined ? String(externalValue) : undefined
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                params.gem_value = value !== undefined && value !== '' ? String(value) : undefined
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        select_equip_gem_level: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                if (params.gem_level !== undefined) {
+                    return params.gem_level
+                }
+                const externalLevel = this.externalSearchParams.gem_level
+                return externalLevel !== undefined ? Number(externalLevel) : undefined
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                if (value === undefined || value === null || value === '') {
+                    delete params.gem_level
+                } else {
+                    params.gem_level = Number(value)
+                }
+                this.equipParamsJson = JSON.stringify(params, null, 2)
+            }
+        },
+        select_equip_attr_value: {
+            get() {
+                const params = JSON.parse(this.equipParamsJson)
+                const externalParams = this.externalSearchParams || {}
+                const allowedKeys = new Set(this.equip_attr_list || [])
+                const toNumber = (val) => {
+                    if (val === null || val === undefined || val === '') return undefined
+                    const num = Number(val)
+                    return Number.isNaN(num) ? val : num
+                }
+                const self = this
+                return new Proxy({}, {
+                    get(_, prop) {
+                        if (typeof prop === 'symbol') return undefined
+                        const key = String(prop)
+                        if (!allowedKeys.has(key)) return undefined
+                        if (Object.prototype.hasOwnProperty.call(params, key) && params[key] !== undefined) {
+                            return params[key]
+                        }
+                        const fallback = externalParams[key]
+                        return toNumber(fallback)
+                    },
+                    set(_, prop, value) {
+                        if (typeof prop === 'symbol') return true
+                        const key = String(prop)
+                        if (!allowedKeys.has(key)) return true
+                        const current = JSON.parse(self.equipParamsJson)
+                        if (value === undefined || value === null || value === '') {
+                            delete current[key]
+                        } else {
+                            current[key] = value
+                        }
+                        self.equipParamsJson = JSON.stringify(current, null, 2)
+                        return true
+                    }
+                })
+            },
+            set(value) {
+                const params = JSON.parse(this.equipParamsJson)
+                if (value && typeof value === 'object') {
+                    Object.entries(value).forEach(([key, val]) => {
+                        if (!this.equip_attr_list.includes(key)) {
+                            return
+                        }
+                        if (val === undefined || val === null || val === '') {
+                            delete params[key]
+                        } else {
+                            params[key] = val
+                        }
+                    })
+                }
                 this.equipParamsJson = JSON.stringify(params, null, 2)
             }
         },
@@ -740,7 +941,24 @@ export default {
                     hide_lingshi: this.activeTab === 'equip' && this.equipForm.equip_type === 'normal' ? 1 : undefined
                 }
                 const currentServerData = this.globalSettings.overall ? { server_id: undefined, server_name: undefined, areaid: undefined } : this.currentServerData
-                return JSON.stringify(Object.assign(JSON.parse(this.externalSearchParamsJsonStr), diyParams, currentServerData, mode_params), null, 2)
+                const mergedParams = Object.assign(
+                    {},
+                    JSON.parse(this.externalSearchParamsJsonStr),
+                    diyParams,
+                    currentServerData,
+                    mode_params
+                )
+                if (!this.select_equip_special_effect_enable) {
+                    delete mergedParams.special_effect
+                }
+                if (!this.select_equip_special_skill_enable) {
+                    delete mergedParams.special_skill
+                }
+                if (!this.select_equip_gem_enable) {
+                    delete mergedParams.gem_value
+                    delete mergedParams.gem_level
+                }
+                return JSON.stringify(mergedParams, null, 2)
             } catch (error) {
                 return '{}'
             }
@@ -752,6 +970,22 @@ export default {
             params.sum_attr_with_melt = newVal ? 1 : undefined
             params.sum_attr_without_melt = !newVal ? 1 : undefined
             this.equipParamsJson = JSON.stringify(params, null, 2)
+        },
+        select_equip_special_effect_enable(newVal) {
+            if (!newVal) {
+                this.select_equip_special_effect = undefined
+            }
+        },
+        select_equip_special_skill_enable(newVal) {
+            if (!newVal) {
+                this.select_equip_special_skill = undefined
+            }
+        },
+        select_equip_gem_enable(newVal) {
+            if (!newVal) {
+                this.select_equip_gem_value = undefined
+                this.select_equip_gem_level = undefined
+            }
         },
         price_min(newVal) {
             if (this.price_min_trigger) {
@@ -1383,26 +1617,15 @@ export default {
                     searchParams.hole_num = features.hole_num
                 }
 
-                const paramsKey = [
-                    // 'init_damage', //all_damage已经包含init_damage
-                    'init_damage_raw',
-                    'init_defense',
-                    'init_hp',
-                    'init_dex',
-                    'init_wakan',
-                    'all_wakan',
-                    'all_damage',
-                    'damage'
-                ]
                 //如果是武器打只太阳石，则忽略all_damage
                 if (searchParams.gem_value === '2') {
-                    paramsKey.splice(paramsKey.indexOf('all_damage'), 1)
+                    this.equip_attr_list.splice(this.equip_attr_list.indexOf('all_damage'), 1)
                 } else if (searchParams.gem_value === '1') {
                     //如果是武器打只红玛瑙，则忽略init_damage
-                    paramsKey.splice(paramsKey.indexOf('init_damage'), 1)
+                    this.equip_attr_list.splice(this.equip_attr_list.indexOf('init_damage'), 1)
                 }
 
-                paramsKey.forEach((value) => {
+                this.equip_attr_list.forEach((value) => {
                     if (features[value]) {
                         searchParams[value] = features[value]
                     }
