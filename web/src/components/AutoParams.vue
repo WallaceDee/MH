@@ -3,12 +3,13 @@
         <el-row slot="header" class="card-header" type="flex" justify="space-between" align="middle">
             <div><span class="emoji-icon">⚙️</span> 搜索配置</div>
             <div class="tool-buttons">
-                <el-dropdown split-button type="danger" @click="stopTask">
+                <el-dropdown split-button type="danger" @click="stopTask" v-if="!isChromeExtension">
                     🛑 停止
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item @click.native="resetTask">🛑 重置任务</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
+                <el-button type="danger" @click="stopTask" v-else>🛑 停止</el-button>
             </div>
         </el-row>
         <el-row type="flex">
@@ -78,8 +79,8 @@
                     </el-col>
                 </el-row>
                 <el-row type="flex" align="middle">
-                    <el-form-item label="最低价格" size="small" inline>
-                        <el-switch v-model="price_min_trigger"> </el-switch>
+                    <el-form-item label="最低价格" size="small">
+                        <el-switch v-model="price_min_enable"> </el-switch>
                         <el-input-number v-model="price_min" :min="10" :controls="false" style="margin-left: 5px;">
                         </el-input-number>
                     </el-form-item>
@@ -88,7 +89,7 @@
         </el-row>
         <el-tabs v-model="activeTab" tab-position="left">
             <!-- Playwright半自动收集器 -->
-            <el-tab-pane label="🖐️ 手动抓取" name="playwright" :disabled="!!externalParamsState.action">
+            <el-tab-pane label="🖐️ 手动抓取" name="playwright" v-if="!isChromeExtension">
                 <el-form :model="playwrightForm" label-width="120px" size="small">
                     <el-form-item label="无头模式">
                         <el-switch v-model="playwrightForm.headless" @change="onHeadlessToggle"></el-switch>
@@ -117,7 +118,7 @@
                 </el-form>
             </el-tab-pane>
             <!-- 角色爬虫 -->
-            <el-tab-pane label="👤 角色" name="role" :disabled="!!externalParamsState.action">
+            <el-tab-pane label="👤 角色" name="role" v-if="!isChromeExtension">
                 <el-form :model="roleForm" label-width="100px" size="small">
                     <!-- JSON参数编辑器 -->
                     <div class="params-editor">
@@ -147,8 +148,7 @@
             </el-tab-pane>
 
             <!-- 装备爬虫 -->
-            <el-tab-pane label="⚔️ 装备" name="equip"
-                :disabled="externalParamsState.action && externalParamsState.action !== 'similar_equip'">
+            <el-tab-pane label="⚔️ 装备" name="equip" v-if="externalParamsState.action === 'similar_equip'">
                 <el-form :model="equipForm" label-width="100px" size="small">
                     <el-form-item label="装备类型" v-if="externalParamsState.action !== 'similar_equip'">
                         <el-select v-model="equipForm.equip_type" @change="onEquipTypeChange" style="width: 100%">
@@ -229,19 +229,27 @@
                             <el-radio :label="false">无</el-radio>
                         </el-radio-group>
                     </el-form-item>
-                    <el-form-item label="属性" v-if="equipForm.equip_type === 'normal'">
-                        <el-form-item :label="equip_attr_list_label[attr]"
-                            v-for="attr in equip_attr_list.filter(a => externalSearchParamsJsonStr.indexOf(a) !== -1)"
+                    <el-form-item label="属性" >
+                        <el-form-item :label="equip_attr_list_label[attr]||attr" label-width="50px"
+                            v-for="attr in equip_attr_list.filter(a => externalSearchParams[a] !== undefined)"
                             :key="attr">
                             <el-input-number v-model="select_equip_attr_value[attr]" placeholder="请输入属性值"
                                 controls-position="right" style="width: 100px;"></el-input-number>
                         </el-form-item>
+                      
                     </el-form-item>
+                    <el-form-item label="附加属性" v-if="select_equip_addon_attr_type.length > 0">
+                            <el-checkbox-group v-model="select_equip_addon_attr_type">
+                                <template v-for="(attrNum,attr) in externalSearchParams">
+                                    <el-checkbox v-for="item in attrNum" :label="attr+(item>1?'_'+(item-2):'')" :key="attr+item"  v-if="attr.startsWith('added_attr.')">{{getAddedAttrType(attr)}}</el-checkbox>
+                                </template>
+                            </el-checkbox-group>
+                        </el-form-item>
                     <el-form-item label="宝石"
-                        v-if="equipForm.equip_type === 'normal' && externalSearchParams.gem_level !== undefined">
+                        v-if=" (externalSearchParams.gem_level !== undefined||externalSearchParams.jinglian_level !== undefined)">
                         <el-radio-group v-model="select_equip_gem_enable">
                             <el-radio :label="true">
-                                <el-select v-model="select_equip_gem_value" placeholder="镶嵌宝石" clearable filterable
+                                <el-select v-if="equipForm.equip_type === 'normal'" v-model="select_equip_gem_value" placeholder="镶嵌宝石" clearable filterable
                                     :disabled="!select_equip_gem_enable" style="width: 120px">
                                     <el-option v-for="(gemName, value) in gems_name" :key="value" :value="value"
                                         :label="gemName">
@@ -265,12 +273,9 @@
                             <el-radio :label="false">无</el-radio>
                         </el-radio-group>
                     </el-form-item>
-                    <el-alert v-if="equipForm.equip_type === 'lingshi'" show-icon :closable="false"
-                        style="margin-bottom: 10px;">
-                        <span slot="title" v-html="lingshiTips"></span>
-                    </el-alert>
+                 
                     <!-- JSON参数编辑器 -->
-                    <div v-if="!isChrome" class="params-editor">
+                    <div v-if="!isChromeExtension" class="params-editor">
                         <div class="params-actions">
                             <el-button type="text" size="mini" @click="() => resetParam('equip')">重置</el-button>
                             <el-button type="primary" size="mini" @click="() => saveParam('equip')"
@@ -312,8 +317,7 @@
             </el-tab-pane>
 
             <!-- 召唤兽爬虫 -->
-            <el-tab-pane label="🐲 召唤兽" name="pet"
-                :disabled="externalParamsState.action && externalParamsState.action !== 'similar_pet'">
+            <el-tab-pane label="🐲 召唤兽" name="pet" v-if="externalParamsState.action === 'similar_pet'">
                 <el-form :model="petForm" label-width="100px" size="small" inline>
                     <el-form-item label="技能" v-if="petForm.skill !== ''">
                         <el-cascader v-model="select_pet_skill" :options="skillOptions" :props="{
@@ -392,9 +396,8 @@
                     </el-form-item>
                 </el-form>
             </el-tab-pane>
-
         </el-tabs>
-        <LogMonitor :maxLines="8" simpleMode :isRunning="isRunning" v-if="log" />
+        <LogMonitor :maxLines="8" simpleMode :isRunning="isRunning" v-if="log&&!isChromeExtension" />
     </el-card>
 </template>
 
@@ -474,21 +477,28 @@ export default {
                 'init_wakan',
                 'all_wakan',
                 'all_damage',
-                'damage'
+                'damage', 'defense', 'magic_damage', 'magic_defense', 'fengyin', 'anti_fengyin', 'speed'
             ],
             equip_attr_list_label: {
-                'init_damage_raw': '初伤（不含命中）',
+                'init_damage_raw': '初伤',
                 'init_defense': '初防',
                 'init_hp': '初血',
                 'init_dex': '初敏',
                 'init_wakan': '初灵',
                 'all_wakan': '总灵',
                 'all_damage': '总伤',
-                'damage': '伤害'
+                'damage': '伤害',
+                'defense': '防御',
+                'magic_damage': '法伤',
+                'magic_defense': '法防',
+                'fengyin': '封印',
+                'anti_fengyin': '抗封印',
+                'speed': '速度'
             },
             skillOptions: window.skillOptions,
-            isChrome: typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
+            isChromeExtension: 1||typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
+            select_equip_addon_attr_type: [],
             select_equip_special_effect_enable: true,
             select_equip_special_skill_enable: true,
             select_equip_gem_enable: true,
@@ -499,7 +509,7 @@ export default {
             select_pet_level_enable: false,
             select_pet_level: [0, 180],
             price_min: 1,
-            price_min_trigger: false,
+            price_min_enable: false,
             equip_special_effect: window.AUTO_SEARCH_CONFIG.equip_special_effect,
             equip_special_skills: window.AUTO_SEARCH_CONFIG.equip_special_skills,
             suit_transform_skills: window.AUTO_SEARCH_CONFIG.suit_transform_skills,
@@ -727,15 +737,24 @@ export default {
                 if (params.gem_level !== undefined) {
                     return params.gem_level
                 }
-                const externalLevel = this.externalSearchParams.gem_level
+                if (params.jinglian_level !== undefined) {
+                    return params.jinglian_level
+                }
+                const externalLevel = this.externalSearchParams.gem_level||this.externalSearchParams.jinglian_level
                 return externalLevel !== undefined ? Number(externalLevel) : undefined
             },
             set(value) {
                 const params = JSON.parse(this.equipParamsJson)
                 if (value === undefined || value === null || value === '') {
                     delete params.gem_level
+                    delete params.jinglian_level
                 } else {
-                    params.gem_level = Number(value)
+                    if(this.externalSearchParams.gem_level){
+                        params.gem_level = Number(value)
+                    }
+                    if(this.externalSearchParams.jinglian_level){
+                        params.jinglian_level = Number(value)
+                    }
                 }
                 this.equipParamsJson = JSON.stringify(params, null, 2)
             }
@@ -796,27 +815,6 @@ export default {
         },
         externalSearchParams() {
             return JSON.parse(this.externalSearchParamsJsonStr)
-        },
-        lingshiTips() {
-            const labels = {
-                1: '固伤', 2: '伤害', 3: '速度', 4: '法伤', 5: '狂暴', 6: '物理暴击', 7: '法术暴击',
-                8: '封印', 9: '法伤结果', 10: '穿刺', 11: '治疗', 12: '气血', 13: '防御', 14: '法防',
-                15: '抗物理暴击', 16: '抗法术暴击', 17: '抗封', 18: '格挡', 19: '回复'
-            }
-            const highlighted = new Set()
-            for (let key in JSON.parse(this.externalSearchParamsJsonStr)) {
-                if (key.startsWith('added_attr.')) {
-                    const typeId = Number(key.replace('added_attr.', ''))
-                    if (!Number.isNaN(typeId)) highlighted.add(typeId)
-                }
-            }
-            const parts = []
-            for (let i = 1; i <= 19; i++) {
-                const name = labels[i]
-                const text = highlighted.has(i) ? `<b style="color:#F56C6C;">${name}</b>` : name
-                parts.push(`<b ${highlighted.has(i) ? 'style="color:#F56C6C;"' : ''}>${i}:</b> ${text}`)
-            }
-            return parts.join(', ')
         },
         view_loc() {
             return {
@@ -941,9 +939,49 @@ export default {
                     hide_lingshi: this.activeTab === 'equip' && this.equipForm.equip_type === 'normal' ? 1 : undefined
                 }
                 const currentServerData = this.globalSettings.overall ? { server_id: undefined, server_name: undefined, areaid: undefined } : this.currentServerData
+                const externalParams = JSON.parse(this.externalSearchParamsJsonStr)
+                
+                // 根据select_equip_addon_attr_type过滤附加属性
+                const filteredExternalParams = { ...externalParams }
+                if (this.activeTab === 'equip') {
+                    // 获取所有附加属性键（基础键，如 added_attr.1）
+                    const allAddedAttrKeys = Object.keys(externalParams).filter(key => key.startsWith('added_attr.'))
+                    
+                    // 统计每个基础属性类型被选中的数量
+                    const selectedAttrCounts = {}
+                    this.select_equip_addon_attr_type.forEach(selectedKey => {
+                        // 提取基础键名（去掉后缀，如 added_attr.1_0 -> added_attr.1）
+                        // 如果包含下划线且下划线后面是数字，则去掉下划线及后面的部分
+                        let baseKey = selectedKey
+                        const lastUnderscoreIndex = selectedKey.lastIndexOf('_')
+                        if (lastUnderscoreIndex > 0) {
+                            // 检查下划线后面是否是数字
+                            const afterUnderscore = selectedKey.substring(lastUnderscoreIndex + 1)
+                            if (/^\d+$/.test(afterUnderscore)) {
+                                // 是数字，去掉下划线及后面的部分
+                                baseKey = selectedKey.substring(0, lastUnderscoreIndex)
+                            }
+                        }
+                        if (baseKey.startsWith('added_attr.')) {
+                            selectedAttrCounts[baseKey] = (selectedAttrCounts[baseKey] || 0) + 1
+                        }
+                    })
+                    
+                    // 更新或删除附加属性
+                    allAddedAttrKeys.forEach(key => {
+                        if (selectedAttrCounts[key] !== undefined) {
+                            // 设置选中数量
+                            filteredExternalParams[key] = selectedAttrCounts[key]
+                        } else {
+                            // 删除未选中的附加属性
+                            delete filteredExternalParams[key]
+                        }
+                    })
+                }
+                
                 const mergedParams = Object.assign(
                     {},
-                    JSON.parse(this.externalSearchParamsJsonStr),
+                    filteredExternalParams,
                     diyParams,
                     currentServerData,
                     mode_params
@@ -957,6 +995,7 @@ export default {
                 if (!this.select_equip_gem_enable) {
                     delete mergedParams.gem_value
                     delete mergedParams.gem_level
+                    delete mergedParams.jinglian_level
                 }
                 return JSON.stringify(mergedParams, null, 2)
             } catch (error) {
@@ -985,16 +1024,17 @@ export default {
             if (!newVal) {
                 this.select_equip_gem_value = undefined
                 this.select_equip_gem_level = undefined
+                this.select_equip_jinglian_level = undefined
             }
         },
         price_min(newVal) {
-            if (this.price_min_trigger) {
+            if (this.price_min_enable) {
                 const params = JSON.parse(this.equipParamsJson)
-                params.price_min = this.price_min_trigger ? newVal * 100 : undefined
+                params.price_min = this.price_min_enable ? newVal * 100 : undefined
                 this.equipParamsJson = JSON.stringify(params, null, 2)
             }
         },
-        price_min_trigger(newVal) {
+        price_min_enable(newVal) {
             const params = JSON.parse(this.equipParamsJson)
             params.price_min = newVal ? this.price_min * 100 : undefined
             this.equipParamsJson = JSON.stringify(params, null, 2)
@@ -1201,6 +1241,14 @@ export default {
         this.cancelSleep()
     },
     methods: {
+        getAddedAttrType(attrName) {
+            const labels = {
+                1: '固伤', 2: '伤害', 3: '速度', 4: '法伤', 5: '狂暴', 6: '物理暴击', 7: '法术暴击',
+                8: '封印', 9: '法伤结果', 10: '穿刺', 11: '治疗', 12: '气血', 13: '防御', 14: '法防',
+                15: '抗物理暴击', 16: '抗法术暴击', 17: '抗封', 18: '格挡', 19: '回复'
+            }
+            return labels[Number(attrName.replace('added_attr.', ''))]
+        },
         // 解析列表数据
         parseListData(responseDataStr) {
             // 解析响应数据 Request.JSONP.request_map.request_数字(xxxx) 中的xxxx
@@ -1372,7 +1420,7 @@ export default {
         async stopTask() {
             try {
                 // 如果是Chrome插件模式，直接停止循环请求
-                if (this.isChrome && this.isRunning) {
+                if (this.isChromeExtension && this.isRunning) {
                     // 设置停止标志
                     this.isRunning = false
                     // 取消正在执行的延时
@@ -1406,7 +1454,7 @@ export default {
                     message: error.message
                 })
                 // 即使API调用失败，也尝试停止本地循环
-                if (this.isChrome) {
+                if (this.isChromeExtension) {
                     this.isRunning = false
                     this.cancelSleep()
                 }
@@ -1574,6 +1622,9 @@ export default {
                     // 将统计结果添加到搜索参数
                     Object.entries(addedAttrsCount).forEach(([value, count]) => {
                         searchParams[`added_attr.${value}`] = count
+                        for (let i = 0; i < count; i++) {
+                            this.select_equip_addon_attr_type.push(`added_attr.${value}${i>0?'_'+(i-1):''}`)
+                        }
                     })
                 }
 
@@ -1684,7 +1735,7 @@ export default {
                             query = this.genarateEquipmentSearchParams(res.data.features)
 
                             // 只在非Chrome环境下修改页面title和favicon（组件形式不需要）
-                            if (!this.isChrome) {
+                            if (!this.isChromeExtension) {
                                 // 使用equip_name,large_equip_desc改变当前title
                                 if (this.targetFeatures && this.targetFeatures.equip_level) {
                                     document.title = this.targetFeatures.equip_level + '级' + this.externalParamsState.equip_name + ' - ' + this.externalParamsState.large_equip_desc.replace(/#r|#Y|#G|#c4DBAF4|#W|#cEE82EE|#c7D7E82/g, '')
@@ -2062,7 +2113,7 @@ export default {
                 const params = config.getParams()
                 const searchType = this.getSearchType()
 
-                if (this.isChrome) {
+                if (this.isChromeExtension) {
                     try {
                         if (typeof chrome !== 'undefined' && chrome.tabs && chrome.debugger) {
                             const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
@@ -2181,7 +2232,7 @@ export default {
                 this.isRunning = false
 
                 // Chrome插件模式下，发出搜索完成事件，触发相似装备模态框刷新
-                if (this.isChrome) {
+                if (this.isChromeExtension) {
                     this.$root.$emit('search-task-completed')
                     console.log('已发出搜索完成事件')
                 }
@@ -2307,7 +2358,7 @@ export default {
                     })
 
                     // Chrome插件模式下，发出搜索完成事件，触发相似装备模态框刷新
-                    if (this.isChrome) {
+                    if (this.isChromeExtension) {
                         this.$root.$emit('search-task-completed')
                         console.log('已发出搜索完成事件')
                     }
@@ -2390,7 +2441,7 @@ export default {
         // 检查任务状态
         async checkTaskStatus() {
             // Chrome插件模式下，不通过API检查状态，由本地循环控制
-            if (this.isChrome) {
+            if (this.isChromeExtension) {
                 return
             }
 

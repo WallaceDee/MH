@@ -135,7 +135,7 @@ export default {
   computed: {
     // 判断是否为 Chrome 插件环境
     isChromeExtension() {
-      return typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
+      return 1||typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
     },
     // 从 Vuex 获取装备和召唤兽数据（仅在 Chrome 插件环境下）
     equipsAndPetsData() {

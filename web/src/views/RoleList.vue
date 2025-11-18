@@ -693,8 +693,7 @@ export default {
       }
     },
     async handlSummonePrice(role, rowIndex) {
-      const pet_list_desc = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
-      let pet_list = JSON.parse(role.all_summon_json)
+      let pet_list = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
       console.log('pet_list', pet_list)
       if (!pet_list || pet_list.length === 0) {
         this.$notify.warning({
@@ -742,7 +741,7 @@ export default {
             })
           }
         }
-        const pet_detail = pet_list_desc.find(pet => pet.equip_sn === item.equip_sn)
+        const pet_detail = pet_list.find(pet => pet.equip_sn === item.equip_sn)
         //召唤兽特征提取必传参数
         return {
           pet_detail,
