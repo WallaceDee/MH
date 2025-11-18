@@ -1184,50 +1184,73 @@ export default {
       this.valuationDialogTitle = {}
     },
 
-    // 宠物估价方法
     async handlePetPrice(role) {
-      const roleData = this.parserRoleData(role)
-      const { pet_info, split_pets, basic_info } = roleData
-      
-      // 合并宠物数据并格式化
-      const pet_list = [...pet_info, ...split_pets].map((pet) => {
-        console.log('DevToolsPanel - 原始宠物数据:', pet)
-        
-        const formattedPet = {
-          ...pet,
-          pet_detail: pet,
-          serverid: role.serverid,
-          server_name: role.server_name,
-          // 确保这些关键字段存在（从 pet 或 pet 的子属性中提取）
-          role_grade_limit: pet.role_grade_limit || pet.equip_level || pet.pet_grade,
-          equip_level: pet.equip_level || pet.pet_grade,
-          growth: pet.growth,
-          is_baobao: pet.is_baobao,
-          all_skill: pet.all_skill,
-          sp_skill: pet.sp_skill || pet.genius || '0',
-          evol_skill_list: pet.evol_skill_list || [],
-          texing: pet.texing || {},
-          lx: pet.lx || '0',
-          equip_list: pet.equip_list || [null, null, null],
-          neidan: pet.neidan || [],
-          equip_sn: pet.equip_sn,
-          equip_face_img: pet.icon || pet.equip_face_img
-        }
-        
-        console.log('DevToolsPanel - 格式化后宠物数据:', formattedPet)
-        console.log('DevToolsPanel - 关键字段检查:', {
-          growth: formattedPet.growth,
-          texing: formattedPet.texing,
-          lx: formattedPet.lx,
-          sp_skill: formattedPet.sp_skill,
-          evol_skill_list: formattedPet.evol_skill_list,
-          role_grade_limit: formattedPet.role_grade_limit,
-          equip_level: formattedPet.equip_level
+      let pet_list = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
+      if (!pet_list || pet_list.length === 0) {
+        this.$notify.warning({
+          title: '提示',
+          message: '没有可估价的宠物'
         })
-        
-        return formattedPet
+        return
+      }
+      pet_list = pet_list.map((item) => {
+        //TODO:等级
+        const role_grade_limit = window.CBG_GAME_CONFIG.pet_equip_type_to_grade_mapping[item.iType]
+        const all_skill = []
+        for (var typeid in item.all_skills) {
+          all_skill.push('' + typeid)
+        }
+        // 根据JavaScript逻辑计算evol_skill_list
+        const evol_skill_list = this.calculateEvolSkillList(item)
+        const texing = JSON.stringify(item.jinjie?.core)
+        const lx = item.jinjie?.lx || 0
+        const equip_list = []
+        for (var i = 0; i < 3; i++) {
+          var equip = item['summon_equip' + (i + 1)]
+          var equip_info = window.CBG_GAME_CONFIG.equip_info[equip?.iType] || {}
+          if (equip) {
+            equip_list.push({
+              type: equip.iType,
+              desc: equip.cDesc,
+              name: equip_info.name,
+              icon: window.ResUrl + `/images/equip/small/${equip?.iType}.gif`,
+              //lock_type: role.RoleInfoParser.get_lock_types(equip),
+              static_desc: equip_info.desc?.replace(/#R/g, '<br />')
+            })
+          } else {
+            equip_list.push(null)
+          }
+        }
+        const neidan = []
+        if (item.summon_core != undefined) {
+          for (var p in item.summon_core) {
+            var p_core = item.summon_core[p]
+            neidan.push({
+              name: window.CBG_GAME_CONFIG.pet_neidans[p] || '',
+              level: p_core[0],
+              isNeiDan: true
+            })
+          }
+        }
+ 
+        return {
+          ...item,
+          petData:item,
+          //召唤兽特征提取必传参数
+          equip_face_img:item.icon,
+          role_grade_limit,
+          equip_level: item.pet_grade,
+          growth: item.cheng_zhang,
+          evol_skill_list: JSON.stringify(evol_skill_list),
+          sp_skill: item.genius,
+          texing,
+          lx,
+          equip_list: JSON.stringify(equip_list),
+          neidan: JSON.stringify(neidan),
+          serverid: role.serverid,
+          server_name: role.server_name
+        }
       })
-
       this.petValuationDialogTitle = {
         nickname: basic_info.nickname,
         school: basic_info.school,

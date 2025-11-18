@@ -126,7 +126,7 @@
                 @click.native="handleEquipPrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">⚔️ {{
                   get_equip_num(scope.row.roleInfo) }}件</el-link></div>
             <el-link v-if="get_pet_num(scope.row.roleInfo) > 0"
-              @click.native="handlSummonePrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">🐲 {{
+              @click.native="handlePetPrice(scope.row, scope.$index)" type="primary" href="javascript:void(0)">🐲 {{
                 get_pet_num(scope.row.roleInfo) }}只
             </el-link>
           </template>
@@ -692,9 +692,8 @@ export default {
         this.$set(role, 'base_price', basePrice)
       }
     },
-    async handlSummonePrice(role, rowIndex) {
+    async handlePetPrice(role, rowIndex) {
       let pet_list = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
-      console.log('pet_list', pet_list)
       if (!pet_list || pet_list.length === 0) {
         this.$notify.warning({
           title: '提示',
@@ -741,18 +740,17 @@ export default {
             })
           }
         }
-        const pet_detail = pet_list.find(pet => pet.equip_sn === item.equip_sn)
-        //召唤兽特征提取必传参数
+ 
         return {
-          pet_detail,
-          equip_sn: item.equip_sn,
+          ...item,
+          petData:item,
+          //召唤兽特征提取必传参数
+          equip_face_img:item.icon,
           role_grade_limit,
-          equip_level: item.iGrade,
-          growth: item.grow / 1000,
-          is_baobao: item.iBaobao == 1 ? '是' : '否',
-          all_skill: all_skill.join('|'),
+          equip_level: item.pet_grade,
+          growth: item.cheng_zhang,
           evol_skill_list: JSON.stringify(evol_skill_list),
-          sp_skill: pet_detail.genius,
+          sp_skill: item.genius,
           texing,
           lx,
           equip_list: JSON.stringify(equip_list),
@@ -781,9 +779,7 @@ export default {
         // 调用批量宠物估价API
         const response = await this.$api.pet.batchPetValuation({
           eid: role.eid,
-          pet_list: pet_list.map(({ pet_detail, ...item }) => {
-            return item
-          }),
+          pet_list:pet_list.map(({petData,...p})=>p),
           strategy: 'fair_value',
           similarity_threshold: this.batchValuateParams.similarity_threshold,
           max_anchors: this.batchValuateParams.max_anchors

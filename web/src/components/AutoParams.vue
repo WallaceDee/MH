@@ -236,7 +236,6 @@
                             <el-input-number v-model="select_equip_attr_value[attr]" placeholder="请输入属性值"
                                 controls-position="right" style="width: 100px;"></el-input-number>
                         </el-form-item>
-                      
                     </el-form-item>
                     <el-form-item label="附加属性" v-if="select_equip_addon_attr_type.length > 0">
                             <el-checkbox-group v-model="select_equip_addon_attr_type">
@@ -359,7 +358,7 @@
                             controls-position="right" style="width: 90px;"></el-input-number>
                     </el-form-item>
                     <!-- JSON参数编辑器 -->
-                    <div class="params-editor">
+                    <div class="params-editor" v-if="!isChromeExtension">
                         <div class="params-actions">
                             <el-button type="mini" size="mini" @click="() => resetParam('pet')">重置</el-button>
                             <el-button type="primary" size="mini" @click="() => saveParam('pet')" :loading="petSaving"
@@ -2101,6 +2100,7 @@ export default {
             if (this.isRunning) return
 
             const config = this.paramManager[type]
+            console.log('config', config)
             if (!config) return
 
             // 检查JSON错误
@@ -2115,8 +2115,7 @@ export default {
 
                 if (this.isChromeExtension) {
                     try {
-                        if (typeof chrome !== 'undefined' && chrome.tabs && chrome.debugger) {
-                            const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+                            const [activeTab] = await chrome.tabs?.query({ active: true, currentWindow: true })||[]
                             if (!activeTab) {
                                 this.$notify && this.$notify.warning('未找到活动标签页')
                                 return
@@ -2133,7 +2132,6 @@ export default {
                                 params.multi,
                                 params.target_server_list
                             )
-                        }
                     } catch (error) {
                         console.error('搜索爬虫失败:', error)
                         this.isRunning = false
