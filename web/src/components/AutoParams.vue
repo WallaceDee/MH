@@ -229,8 +229,8 @@
                             <el-radio :label="false">无</el-radio>
                         </el-radio-group>
                     </el-form-item>
-                    <el-form-item label="属性" >
-                        <el-form-item :label="equip_attr_list_label[attr]||attr" label-width="50px"
+                    <el-form-item label="属性">
+                        <el-form-item :label="equip_attr_list_label[attr] || attr" label-width="50px"
                             v-for="attr in equip_attr_list.filter(a => externalSearchParams[a] !== undefined)"
                             :key="attr">
                             <el-input-number v-model="select_equip_attr_value[attr]" placeholder="请输入属性值"
@@ -238,18 +238,21 @@
                         </el-form-item>
                     </el-form-item>
                     <el-form-item label="附加属性" v-if="select_equip_addon_attr_type.length > 0">
-                            <el-checkbox-group v-model="select_equip_addon_attr_type">
-                                <template v-for="(attrNum,attr) in externalSearchParams">
-                                    <el-checkbox v-for="item in attrNum" :label="attr+(item>1?'_'+(item-2):'')" :key="attr+item"  v-if="attr.startsWith('added_attr.')">{{getAddedAttrType(attr)}}</el-checkbox>
-                                </template>
-                            </el-checkbox-group>
-                        </el-form-item>
+                        <el-checkbox-group v-model="select_equip_addon_attr_type">
+                            <template v-for="(attrNum, attr) in externalSearchParams">
+                                <el-checkbox v-for="item in attrNum" :label="attr + (item > 1 ? '_' + (item - 2) : '')"
+                                    :key="attr + item"
+                                    v-if="attr.startsWith('added_attr.')">{{ getAddedAttrType(attr) }}</el-checkbox>
+                            </template>
+                        </el-checkbox-group>
+                    </el-form-item>
                     <el-form-item label="宝石"
-                        v-if=" (externalSearchParams.gem_level !== undefined||externalSearchParams.jinglian_level !== undefined)">
+                        v-if="(externalSearchParams.gem_level !== undefined || externalSearchParams.jinglian_level !== undefined)">
                         <el-radio-group v-model="select_equip_gem_enable">
                             <el-radio :label="true">
-                                <el-select v-if="equipForm.equip_type === 'normal'" v-model="select_equip_gem_value" placeholder="镶嵌宝石" clearable filterable
-                                    :disabled="!select_equip_gem_enable" style="width: 120px">
+                                <el-select v-if="equipForm.equip_type === 'normal'" v-model="select_equip_gem_value"
+                                    placeholder="镶嵌宝石" clearable filterable :disabled="!select_equip_gem_enable"
+                                    style="width: 120px">
                                     <el-option v-for="(gemName, value) in gems_name" :key="value" :value="value"
                                         :label="gemName">
                                         <el-row type="flex" justify="space-between">
@@ -272,7 +275,7 @@
                             <el-radio :label="false">无</el-radio>
                         </el-radio-group>
                     </el-form-item>
-                 
+
                     <!-- JSON参数编辑器 -->
                     <div v-if="!isChromeExtension" class="params-editor">
                         <div class="params-actions">
@@ -396,7 +399,7 @@
                 </el-form>
             </el-tab-pane>
         </el-tabs>
-        <LogMonitor :maxLines="8" simpleMode :isRunning="isRunning" v-if="log&&!isChromeExtension" />
+        <LogMonitor :maxLines="8" simpleMode :isRunning="isRunning" v-if="log && !isChromeExtension" />
     </el-card>
 </template>
 
@@ -469,6 +472,7 @@ export default {
             gems_name: window.AUTO_SEARCH_CONFIG.gems_name,
             equip_attr_list: [
                 // 'init_damage', //all_damage已经包含init_damage
+                'fangyu',
                 'init_damage_raw',
                 'init_defense',
                 'init_hp',
@@ -492,10 +496,11 @@ export default {
                 'magic_defense': '法防',
                 'fengyin': '封印',
                 'anti_fengyin': '抗封印',
-                'speed': '速度'
+                'speed': '速度',
+                'fangyu': '防御'
             },
             skillOptions: window.skillOptions,
-            isChromeExtension: 1||typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
+            isChromeExtension: typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id,
             sum_attr_with_melt: true,
             select_equip_addon_attr_type: [],
             select_equip_special_effect_enable: true,
@@ -551,7 +556,7 @@ export default {
             // JSON参数字符串
             roleParamsJson: '',
             equipParamsJson: '{}',
-            petParamsJson: '',
+            petParamsJson: '{}',
             // JSON验证错误
             roleJsonError: '',
             equipJsonError: '',
@@ -739,7 +744,7 @@ export default {
                 if (params.jinglian_level !== undefined) {
                     return params.jinglian_level
                 }
-                const externalLevel = this.externalSearchParams.gem_level||this.externalSearchParams.jinglian_level
+                const externalLevel = this.externalSearchParams.gem_level || this.externalSearchParams.jinglian_level
                 return externalLevel !== undefined ? Number(externalLevel) : undefined
             },
             set(value) {
@@ -748,10 +753,10 @@ export default {
                     delete params.gem_level
                     delete params.jinglian_level
                 } else {
-                    if(this.externalSearchParams.gem_level){
+                    if (this.externalSearchParams.gem_level) {
                         params.gem_level = Number(value)
                     }
-                    if(this.externalSearchParams.jinglian_level){
+                    if (this.externalSearchParams.jinglian_level) {
                         params.jinglian_level = Number(value)
                     }
                 }
@@ -939,13 +944,13 @@ export default {
                 }
                 const currentServerData = this.globalSettings.overall ? { server_id: undefined, server_name: undefined, areaid: undefined } : this.currentServerData
                 const externalParams = JSON.parse(this.externalSearchParamsJsonStr)
-                
+
                 // 根据select_equip_addon_attr_type过滤附加属性
                 const filteredExternalParams = { ...externalParams }
                 if (this.activeTab === 'equip') {
                     // 获取所有附加属性键（基础键，如 added_attr.1）
                     const allAddedAttrKeys = Object.keys(externalParams).filter(key => key.startsWith('added_attr.'))
-                    
+
                     // 统计每个基础属性类型被选中的数量
                     const selectedAttrCounts = {}
                     this.select_equip_addon_attr_type.forEach(selectedKey => {
@@ -965,7 +970,7 @@ export default {
                             selectedAttrCounts[baseKey] = (selectedAttrCounts[baseKey] || 0) + 1
                         }
                     })
-                    
+
                     // 更新或删除附加属性
                     allAddedAttrKeys.forEach(key => {
                         if (selectedAttrCounts[key] !== undefined) {
@@ -977,7 +982,7 @@ export default {
                         }
                     })
                 }
-                
+
                 const mergedParams = Object.assign(
                     {},
                     filteredExternalParams,
@@ -1622,7 +1627,7 @@ export default {
                     Object.entries(addedAttrsCount).forEach(([value, count]) => {
                         searchParams[`added_attr.${value}`] = count
                         for (let i = 0; i < count; i++) {
-                            this.select_equip_addon_attr_type.push(`added_attr.${value}${i>0?'_'+(i-1):''}`)
+                            this.select_equip_addon_attr_type.push(`added_attr.${value}${i > 0 ? '_' + (i - 1) : ''}`)
                         }
                     })
                 }
@@ -2115,23 +2120,23 @@ export default {
 
                 if (this.isChromeExtension) {
                     try {
-                            const [activeTab] = await chrome.tabs?.query({ active: true, currentWindow: true })||[]
-                            if (!activeTab) {
-                                this.$notify && this.$notify.warning('未找到活动标签页')
-                                return
-                            }
-                            // 设置运行状态
-                            this.isRunning = true
-                            this.activeTab = type
+                        const [activeTab] = await chrome.tabs?.query({ active: true, currentWindow: true }) || []
+                        if (!activeTab) {
+                            this.$notify && this.$notify.warning('未找到活动标签页')
+                            return
+                        }
+                        // 设置运行状态
+                        this.isRunning = true
+                        this.activeTab = type
 
-                            // 开始多页随机延时请求（支持多区搜索）
-                            await this.doMultiPageRequest(
-                                activeTab.id,
-                                searchType,
-                                params.cached_params,
-                                params.multi,
-                                params.target_server_list
-                            )
+                        // 开始多页随机延时请求（支持多区搜索）
+                        await this.doMultiPageRequest(
+                            activeTab.id,
+                            searchType,
+                            params.cached_params,
+                            params.multi,
+                            params.target_server_list
+                        )
                     } catch (error) {
                         console.error('搜索爬虫失败:', error)
                         this.isRunning = false

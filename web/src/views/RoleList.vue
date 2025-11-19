@@ -221,9 +221,10 @@ import PetBatchValuationResult from '@/components/PetBatchValuationResult.vue'
 import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
+import { petMixin } from '@/utils/mixins/petMixin'
 export default {
   name: 'RoleList',
-  mixins: [commonMixin],
+  mixins: [commonMixin,petMixin],
   components: {
     RoleImage,
     EquipBatchValuationResult,
@@ -814,62 +815,7 @@ export default {
         this.petValuationLoading = false
       }
     },
-    calculateEvolSkillList(pet) {
-      const evol_skill_list = []
-
-      if (!pet.EvolSkill || !window.CBG_GAME_CONFIG.pet_skill_high_to_other_level_mapping) {
-        return evol_skill_list
-      }
-
-      // 解析进化技能ID
-      const cifu = pet.EvolSkill.split('|').map(Number)
-      const cifuObj = {}
-      cifu.forEach(function (number) {
-        cifuObj[number] = 1
-      })
-
-      const evol_skills = cifuObj
-      if (!evol_skills) {
-        return evol_skill_list
-      }
-
-      const evol_skill_str = []
-      for (const typeid in evol_skills) {
-        evol_skill_str.push('' + typeid)
-      }
-
-      for (let i = 0, max = evol_skill_str.length; i < max; i++) {
-        const typeid = evol_skill_str[i]
-        const evol_skill_hash = window.CBG_GAME_CONFIG.pet_skill_high_to_other_level_mapping[typeid]
-
-        if (!evol_skill_hash) {
-          continue
-        }
-
-        const evol_skill_item = {
-          skill_type: typeid,
-          level: evol_skills[typeid],
-          evol_type: typeid
-        }
-
-        if (pet.all_skills) {
-          const isHighSkill = pet.all_skills[String(evol_skill_hash.high_skill)]
-          const isLowSkill = pet.all_skills[String(evol_skill_hash.low_skill)]
-
-          if (isHighSkill || isLowSkill) {
-            evol_skill_item.hlightLight = true
-            if (!isHighSkill) {
-              evol_skill_item.evol_type = evol_skill_hash.low_skill
-            }
-          } else {
-            evol_skill_item.hlightLight = false
-          }
-        }
-        evol_skill_list.push(evol_skill_item)
-      }
-
-      return evol_skill_list
-    },
+  
     get_pet_num(roleInfo) {
       return roleInfo?.pet_info?.length + roleInfo?.split_pets?.length
     },

@@ -5,7 +5,75 @@ import { Notification } from 'element-ui'
 const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
 
 // 根据环境设置不同的baseURL
-const baseURL = isChromeExtension ? 'http://localhost:5000/api/v1' : '/api/v1'
+// const baseURL = isChromeExtension ? 'http://localhost:5000/api/v1' : '/api/v1'
+const baseURL = isChromeExtension ? 'http://xyq.lingtong.xyz/api/v1' : '/api/v1'
+
+// 缓存 fingerprint cookie
+let cachedFingerprint = ''
+let fingerprintCacheTime = 0
+const FINGERPRINT_CACHE_DURATION = 5 * 60 * 1000 // 缓存5分钟
+
+// 从目标窗口获取 fingerprint cookie
+const getFingerprintCookieFromTarget = async () => {
+  if (!isChromeExtension) {
+    return ''
+  }
+
+  try {
+    // 获取当前活动标签页
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+    
+    if (!activeTab || !activeTab.url || !activeTab.url.includes('cbg.163.com')) {
+      return ''
+    }
+
+    // 使用 Chrome Debugger API 获取 cookies
+    const result = await chrome.debugger.sendCommand(
+      { tabId: activeTab.id },
+      'Network.getAllCookies'
+    )
+
+    const cookies = Array.isArray(result?.cookies) ? result.cookies : []
+    
+    // 查找 domain 包含 xyq.cbg.163.com 且 name 为 fingerprint 的 cookie
+    const fingerprintCookie = cookies.find(
+      cookie => cookie.name === 'fingerprint' && 
+                cookie.domain && 
+                cookie.domain.includes('xyq.cbg.163.com')
+    )
+
+    if (fingerprintCookie) {
+      cachedFingerprint = fingerprintCookie.value || ''
+      fingerprintCacheTime = Date.now()
+      return cachedFingerprint
+    }
+
+    return ''
+  } catch (error) {
+    console.error('获取 fingerprint cookie 失败:', error)
+    return ''
+  }
+}
+
+// 获取 fingerprint cookie（同步方法，返回缓存值）
+const getFingerprintCookie = () => {
+  // 如果缓存过期，异步更新（不阻塞请求）
+  const now = Date.now()
+  if (now - fingerprintCacheTime > FINGERPRINT_CACHE_DURATION) {
+    getFingerprintCookieFromTarget().catch(err => {
+      console.error('更新 fingerprint cookie 缓存失败:', err)
+    })
+  }
+  
+  return cachedFingerprint
+}
+
+// 初始化 fingerprint cookie（供外部调用）
+export const initFingerprintCookie = async () => {
+  if (isChromeExtension) {
+    await getFingerprintCookieFromTarget()
+  }
+}
 
 // 创建axios实例
 const request = axios.create({
@@ -20,6 +88,10 @@ request.interceptors.request.use(
   config => {
     // 在发送请求之前做些什么
     console.log('发送请求:', config.method?.toUpperCase(), config.url)
+    const fingerprint = getFingerprintCookie()
+    if (fingerprint) {
+      config.headers['X-Fingerprint'] = fingerprint
+    }
     return config
   },
   error => {

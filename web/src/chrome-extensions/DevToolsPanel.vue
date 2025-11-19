@@ -1,6 +1,6 @@
 <template>
   <div class="panel">
-  
+  <Button @click="handleTest">测试</Button>
     <div class="panel-header">
       <el-row type="flex" align="middle">
         <div style="width: 32px;height: 32px;margin-right: 10px;position: relative;">
@@ -136,7 +136,12 @@
           }}</el-link>
       </span>
       <PetBatchValuationResult :results="petValuationResults" :total-value="petValuationTotalValue"
-        :pet-list="petValuationPetList" :loading="petValuationLoading"
+        :pet-list="petValuationPetList" :loading="petValuationLoading"  :valuate-params="{
+        similarity_threshold: 0.8,
+        max_anchors: 30,
+        serverid: undefined,
+        server_name: undefined
+      }" 
         @close="closePetValuationDialog" />
     </el-dialog>
   </div>
@@ -150,7 +155,8 @@ import PetBatchValuationResult from '@/components/PetBatchValuationResult.vue'
 import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
-
+import { petMixin } from '@/utils/mixins/petMixin'
+import { initFingerprintCookie } from '@/utils/request'
 const ROLE_KINDIDS = ['27', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '49', '51', '50', '77', '78', '79', '81', '82']
 const PET_KINDIDS = ['1', '65', '66', '67', '68', '69', '70', '71', '75', '80']
 const EQUIP_KINDIDS = ['2', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '17', '18', '19', '20', '21', '26', '28', '29', '42', '52', '53', '54', '55', '56', '57', '58', '59', '60', '61', '62', '63', '64', '72', '73', '74', '83']
@@ -201,7 +207,7 @@ export default {
       },
     }
   },
-  mixins: [commonMixin, equipmentMixin],
+  mixins: [commonMixin, equipmentMixin, petMixin],
   components: {
     RoleImage,
     SimilarRoleModal,
@@ -251,6 +257,11 @@ export default {
 
     // 监听窗口大小变化
     window.addEventListener('resize', this.handleWindowResize)
+
+    // 初始化 fingerprint cookie
+    initFingerprintCookie().catch(err => {
+      console.error('初始化 fingerprint cookie 失败:', err)
+    })
 
     // // 设置定时检查（每5秒检查一次）
     // this.connectionCheckTimer = setInterval(() => {
@@ -621,38 +632,74 @@ export default {
         }
       }
     },
+    async getPageCookies({ domain = 'xyq.cbg.163.com', showToast = false } = {}) {
+      try {
+        const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
+
+        if (!activeTab) {
+          if (showToast) this.$notify.warning('未找到活动标签页')
+          throw new Error('未找到活动标签页')
+        }
+
+        if (!activeTab.url || !activeTab.url.includes('cbg.163.com')) {
+          if (showToast) this.$notify.warning('请先访问梦幻西游藏宝阁页面')
+          throw new Error('请先访问梦幻西游藏宝阁页面')
+        }
+
+        if (!this.devtoolsConnected) {
+          if (showToast) this.$notify.warning('数据监听连接已断开，请重新加载页面')
+          throw new Error('数据监听连接已断开，请重新加载页面')
+        }
+
+        const result = await chrome.debugger.sendCommand(
+          { tabId: activeTab.id },
+          'Network.getAllCookies'
+        )
+
+        const cookies = Array.isArray(result?.cookies) ? result.cookies : []
+        const filteredCookies = domain
+          ? cookies.filter(cookie => cookie.domain && cookie.domain.includes(domain))
+          : cookies
+
+        if (showToast) {
+          if (filteredCookies.length > 0) {
+            this.$notify.success({
+              title: '获取 Cookies 成功',
+              message: `共获取到 ${filteredCookies.length} 个 cookies`,
+              duration: 3000
+            })
+          } else {
+            this.$notify.warning(`未获取到域名为 ${domain || '指定域名'} 的 cookies`)
+          }
+        }
+
+        return filteredCookies
+      } catch (error) {
+        console.error('获取 Cookies 失败:', error)
+        if (showToast) {
+          this.$notify.error({
+            title: '获取 Cookies 失败',
+            message: error.message || '未知错误'
+          })
+        }
+        return []
+      }
+    },
+    async handleTest() {
+      try {
+        const cookiesInfo = await this.getPageCookies({ domain: 'xyq.cbg.163.com', showToast: true })
+        if (cookiesInfo.length > 0) {
+          console.table(cookiesInfo)
+        }
+        return cookiesInfo
+      } catch (error) {
+        console.error('handleTest 获取 Cookies 出错:', error)
+        return []
+      }
+    },
     parserRoleData(data) {
       const roleInfo = new window.RoleInfoParser(data.large_equip_desc, { equip_level: data.equip_level })
       return roleInfo.result
-      // return {
-      //   RoleInfoParser: roleInfo,
-      //   roleInfo: roleInfo.result,
-      //   accept_bargain: data.accept_bargain,
-      //   collect_num: data.collect_num,
-      //   dynamic_tags: data.dynamic_tags,
-      //   eid: data.eid,
-      //   highlight: data.highlight,
-      //   is_split_independent_role: data.is_split_independent_role,
-      //   is_split_main_role: data.is_split_main_role,
-      //   large_equip_desc: data.large_equip_desc,
-      //   level: data.level,
-      //   other_info: data.other_info,
-      //   school: data.school,
-      //   seller_nickname: data.seller_nickname,
-      //   server_name: data.server_name,
-      //   serverid: data.serverid,
-      //   price: data.price,
-      //   sum_exp: data.sum_exp,
-      //   create_time: data.create_time,
-      //   update_time: data.create_time,
-      //   all_equip_json: '',
-      //   all_summon_json: '',
-      //   split_price_desc: '',
-      //   pet_price: '',
-      //   equip_price: '',
-      //   base_price: '',
-      //   history_price: '',
-      // }
     },
     parseListData(responseDataStr) {
       // 解析响应数据 Request.JSONP.request_map.request_数字(xxxx) 中的xxxx
@@ -842,7 +889,7 @@ export default {
         return 'unknown'
       }
     },
-    processNewData(dataArray) {
+    async processNewData(dataArray) {
       // 类型映射
       const typeMap = {
         'role': '角色',
@@ -852,6 +899,7 @@ export default {
 
       // 只处理新完成的请求，避免重复处理
       if (dataArray && dataArray.length > 0) {
+        const cookies = await this.getPageCookies({ showToast: false })
         dataArray.forEach(item => {
           if (item.responseData &&
             item.url &&
@@ -868,7 +916,8 @@ export default {
 
             this.$api.spider.parseResponse({
               url: item.url,
-              response_text: item.responseData
+              response_text: item.responseData,
+              cookies
             }).then(res => {
               console.log(`请求 ${item.requestId} 解析结果:`, res)
               if (res.code === 200) {
@@ -1185,7 +1234,10 @@ export default {
     },
 
     async handlePetPrice(role) {
-      let pet_list = [...role.roleInfo.pet_info, ...role.roleInfo.split_pets]
+      let roleData = this.parserRoleData(role)
+      console.log({roleData,role})
+      const { pet_info, split_pets, basic_info } = roleData
+      let pet_list = [...pet_info, ...split_pets]
       if (!pet_list || pet_list.length === 0) {
         this.$notify.warning({
           title: '提示',

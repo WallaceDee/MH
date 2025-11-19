@@ -52,7 +52,7 @@ class PetMarketAnchorEvaluator(BaseValuator):
             "role_grade_limit": 1,
             "growth": 0.2,
             "lx": 0.3,
-            "skill_count": 0.2,
+            "skill_count": 0.8,
             "texing": 0.2,
             "neidan_count": 0.2,
             "equip_level":0.8,
