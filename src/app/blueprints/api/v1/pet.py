@@ -9,7 +9,8 @@ import logging
 from flask import Blueprint, request, jsonify
 from ....controllers.pet_controller import PetController
 from ....utils.response import success_response, error_response
-
+from src.app.utils.auth import require_auth
+from .admin import require_admin
 logger = logging.getLogger(__name__)
 
 pet_bp = Blueprint('pet', __name__)
@@ -17,6 +18,7 @@ controller = PetController()
 
 
 @pet_bp.route('/', methods=['GET'])
+@require_auth
 def get_pets():
     """获取宠物列表"""
     try:
@@ -59,6 +61,7 @@ def get_pets():
 
 
 @pet_bp.route('/<string:equip_sn>', methods=['GET'])
+@require_auth
 def get_pet_by_equip_sn(equip_sn):
     """通过equip_sn查找召唤兽详情"""
     try:
@@ -77,6 +80,7 @@ def get_pet_by_equip_sn(equip_sn):
 
 
 @pet_bp.route('/anchors', methods=['POST'])
+@require_auth
 def find_pet_anchors():
     """寻找宠物市场锚点"""
     try:
@@ -105,6 +109,7 @@ def find_pet_anchors():
 
 
 @pet_bp.route('/valuation', methods=['POST'])
+@require_auth
 def get_pet_valuation():
     """获取宠物估价"""
     try:
@@ -137,9 +142,8 @@ def get_pet_valuation():
         return error_response(f"获取宠物估价失败: {str(e)}")
 
 
-
-
 @pet_bp.route('/unvalued-count', methods=['GET'])
+@require_admin
 def get_unvalued_pets_count():
     """获取当前年月携带装备但未估价的召唤兽数量"""
     try:
@@ -155,6 +159,7 @@ def get_unvalued_pets_count():
 
 
 @pet_bp.route('/batch-update-unvalued', methods=['POST'])
+@require_admin
 def batch_update_unvalued_pets_equipment():
     """批量更新未估价召唤兽的装备价格"""
     try:
@@ -170,6 +175,7 @@ def batch_update_unvalued_pets_equipment():
 
 
 @pet_bp.route('/task-status/<string:task_id>', methods=['GET'])
+@require_admin
 def get_task_status(task_id):
     """获取任务状态"""
     try:
@@ -184,10 +190,8 @@ def get_task_status(task_id):
         return error_response(f"获取任务状态失败: {str(e)}")
 
 
-
-
-
 @pet_bp.route('/stop-task/<string:task_id>', methods=['POST'])
+@require_admin
 def stop_task(task_id):
     """停止任务"""
     try:
@@ -203,6 +207,7 @@ def stop_task(task_id):
 
 
 @pet_bp.route('/active-tasks', methods=['GET'])
+@require_admin
 def get_active_tasks():
     """获取活跃任务列表"""
     try:
@@ -218,6 +223,7 @@ def get_active_tasks():
 
 
 @pet_bp.route('/update-equipments-price', methods=['POST'])
+@require_admin
 def update_pet_equipments_price():
     """更新召唤兽装备价格"""
     try:
@@ -350,6 +356,7 @@ def update_pet_equipments_price():
 
 
 @pet_bp.route('/batch-valuation', methods=['POST'])
+@require_auth
 def batch_pet_valuation():
     """批量宠物估价"""
     try:
@@ -412,6 +419,7 @@ def batch_pet_valuation():
 
 
 @pet_bp.route('/<string:pet_sn>', methods=['DELETE'])
+@require_admin
 def delete_pet(pet_sn):
     """删除宠物"""
     try:

@@ -13,6 +13,59 @@ let cachedFingerprint = ''
 let fingerprintCacheTime = 0
 const FINGERPRINT_CACHE_DURATION = 5 * 60 * 1000 // 缓存5分钟
 
+// 缓存 auth token
+let cachedAuthToken = null
+let authTokenCacheTime = 0
+const AUTH_TOKEN_CACHE_DURATION = 5 * 60 * 1000 // 缓存5分钟
+
+// 从chrome.storage获取auth token
+const getAuthTokenFromStorage = async () => {
+  if (!isChromeExtension) {
+    return null
+  }
+  
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['auth_token'], (result) => {
+      if (result.auth_token) {
+        cachedAuthToken = result.auth_token
+        authTokenCacheTime = Date.now()
+        resolve(result.auth_token)
+      } else {
+        resolve(null)
+      }
+    })
+  })
+}
+
+// 获取auth token（同步方法，返回缓存值）
+const getAuthToken = () => {
+  // 如果缓存过期，异步更新（不阻塞请求）
+  const now = Date.now()
+  if (now - authTokenCacheTime > AUTH_TOKEN_CACHE_DURATION) {
+    getAuthTokenFromStorage().catch(err => {
+      console.error('更新 auth token 缓存失败:', err)
+    })
+  }
+  
+  return cachedAuthToken
+}
+
+// 初始化auth token（供外部调用）
+export const initAuthToken = async () => {
+  if (isChromeExtension) {
+    cachedAuthToken = await getAuthTokenFromStorage()
+  }
+}
+
+// 清除auth token
+export const clearAuthToken = () => {
+  cachedAuthToken = null
+  authTokenCacheTime = 0
+  if (isChromeExtension) {
+    chrome.storage.local.remove(['auth_token', 'user_info'])
+  }
+}
+
 // 从目标窗口获取 fingerprint cookie
 const getFingerprintCookieFromTarget = async () => {
   if (!isChromeExtension) {
@@ -85,13 +138,33 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(
-  config => {
+  async config => {
     // 在发送请求之前做些什么
     console.log('发送请求:', config.method?.toUpperCase(), config.url)
-    const fingerprint = getFingerprintCookie()
+    
+    // 添加fingerprint
+    const fingerprint = getFingerprintCookie()||'admin'
     if (fingerprint) {
       config.headers['X-Fingerprint'] = fingerprint
     }
+    
+    // 添加auth token（排除登录和注册接口）
+    if (!config.url.includes('/auth/login') && !config.url.includes('/auth/register')) {
+      let token = null
+      
+      // Chrome扩展环境：从chrome.storage获取token
+      if (isChromeExtension) {
+        token = getAuthToken()
+      } else {
+        // Web应用：从localStorage获取token
+        token = localStorage.getItem('auth_token')
+      }
+      
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`
+      }
+    }
+    
     return config
   },
   error => {
@@ -126,6 +199,25 @@ request.interceptors.response.use(
         responseData = data.data
       } else {
         responseData = data
+      }
+      
+      // 如果是401未授权错误，清除token并触发登录
+      if (status === 401) {
+        if (isChromeExtension) {
+          clearAuthToken()
+          // 触发登录事件
+          if (typeof window !== 'undefined' && window.dispatchEvent) {
+            window.dispatchEvent(new CustomEvent('auth-required'))
+          }
+        } else {
+          // Web应用：清除localStorage并跳转到登录页
+          localStorage.removeItem('auth_token')
+          localStorage.removeItem('user_info')
+          // 触发全局事件，让Header等组件可以监听
+          if (typeof window !== 'undefined' && window.dispatchEvent) {
+            window.dispatchEvent(new CustomEvent('auth-required'))
+          }
+        }
       }
       
       console.log('错误响应数据:', responseData)

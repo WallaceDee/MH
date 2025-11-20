@@ -1,6 +1,5 @@
 <template>
   <div class="panel">
-  <Button @click="handleTest">测试</Button>
     <div class="panel-header">
       <el-row type="flex" align="middle">
         <div style="width: 32px;height: 32px;margin-right: 10px;position: relative;">
@@ -9,6 +8,18 @@
             :class="{ 'connected': devtoolsConnected, 'disconnected': !devtoolsConnected }"></span>
         </div>
         <h3 style="color: #fff;">梦幻灵瞳</h3>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+          <el-dropdown v-if="userInfo" @command="handleUserCommand">
+            <span style="color: #fff; cursor: pointer;">
+              <i class="el-icon-user"></i> {{ userInfo.username }}
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <a v-else href="javascript:void 0;" class=" btn1 js_alert_btn_0"
+          @click="showLoginModal = true">登录</a>
+        </div>
         <i class="el-icon-full-screen  btn1 js_alert_btn_0" style="color:#fff;line-height: 26px;" v-if="!isInNewWindow"
           href="javascript:void 0;" @click.prevent="openInNewTab"></i>
       </el-row>
@@ -74,11 +85,11 @@
                       <div>
                         <el-tag type="danger" v-if="isEmptyRole(parserRoleData(role))">空号</el-tag>
                         <template v-else>
-                          <el-tag @click="handleEquipPrice(role)" style="cursor: pointer;"
+                          <el-tag @click="$auth(handleEquipPrice, role)" style="cursor: pointer;"
                             v-if="get_equip_num(parserRoleData(role)) > 0">
                             ⚔️ {{ get_equip_num(parserRoleData(role)) }}
                           </el-tag>
-                          <el-tag type="success" @click="handlePetPrice(role)" style="cursor: pointer;"
+                          <el-tag type="success" @click="$auth(handlePetPrice, role)" style="cursor: pointer;"
                             v-if="get_pet_num(parserRoleData(role)) > 0">
                             🐲 {{ get_pet_num(parserRoleData(role)) }}
                           </el-tag>
@@ -144,18 +155,25 @@
       }" 
         @close="closePetValuationDialog" />
     </el-dialog>
+    
+    <!-- 登录模态框 -->
+    <LoginModal v-model="showLoginModal" @login-success="handleLoginSuccess" />
   </div>
 </template>
 <script>
 import dayjs from 'dayjs'
 import RoleImage from '@/components/RoleInfo/RoleImage.vue'
 import SimilarRoleModal from '@/components/SimilarRoleModal.vue'
+import LoginModal from './LoginModal.vue'
+import { initAuthToken, clearAuthToken } from '@/utils/request'
+import { api } from '@/utils/request'
 import EquipBatchValuationResult from '@/components/EquipBatchValuationResult.vue'
 import PetBatchValuationResult from '@/components/PetBatchValuationResult.vue'
 import EquipmentImage from '@/components/EquipmentImage/EquipmentImage.vue'
 import { commonMixin } from '@/utils/mixins/commonMixin'
 import { equipmentMixin } from '@/utils/mixins/equipmentMixin'
 import { petMixin } from '@/utils/mixins/petMixin'
+import { authMixin } from '@/utils/mixins/authMixin'
 import { initFingerprintCookie } from '@/utils/request'
 const ROLE_KINDIDS = ['27', '30', '31', '32', '33', '34', '35', '36', '37', '38', '39', '40', '41', '49', '51', '50', '77', '78', '79', '81', '82']
 const PET_KINDIDS = ['1', '65', '66', '67', '68', '69', '70', '71', '75', '80']
@@ -165,6 +183,8 @@ export default {
   data() {
     return {
       isSidePanel: true,
+      showLoginModal: false,
+      userInfo: null,
       pageInfo: {
         hasPager: false,
         currentPage: 0,
@@ -207,8 +227,9 @@ export default {
       },
     }
   },
-  mixins: [commonMixin, equipmentMixin, petMixin],
+  mixins: [commonMixin, equipmentMixin, petMixin, authMixin],
   components: {
+    LoginModal,
     RoleImage,
     SimilarRoleModal,
     EquipBatchValuationResult,
@@ -262,6 +283,23 @@ export default {
     initFingerprintCookie().catch(err => {
       console.error('初始化 fingerprint cookie 失败:', err)
     })
+    
+    // 只初始化token，不主动验证登录状态
+    initAuthToken().catch(err => {
+      console.error('初始化token失败:', err)
+    })
+    
+    // 从chrome.storage获取已保存的用户信息（如果有）
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      chrome.storage.local.get(['user_info'], (result) => {
+        if (result.user_info) {
+          this.userInfo = result.user_info
+        }
+      })
+    }
+    
+    // 监听需要认证的事件
+    window.addEventListener('auth-required', this.handleAuthRequired)
 
     // // 设置定时检查（每5秒检查一次）
     // this.connectionCheckTimer = setInterval(() => {
@@ -281,6 +319,9 @@ export default {
 
     // 移除窗口大小变化监听器
     window.removeEventListener('resize', this.handleWindowResize)
+    
+    // 移除认证事件监听器
+    window.removeEventListener('auth-required', this.handleAuthRequired)
 
     // 移除Chrome消息监听器
     this.removeMessageListener()
@@ -294,6 +335,62 @@ export default {
     this.expandedItems = []
   },
   methods: {
+    // 检查用户信息（仅在需要时调用，不主动验证）
+    async checkUserInfo() {
+      try {
+        const response = await api.get('/auth/me')
+        if (response.code === 200 && response.data.user) {
+          this.userInfo = response.data.user
+          // 保存到chrome.storage
+          chrome.storage.local.set({ user_info: response.data.user })
+          return true
+        } else {
+          // Token无效
+          this.userInfo = null
+          chrome.storage.local.remove(['user_info'])
+          return false
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error)
+        this.userInfo = null
+        chrome.storage.local.remove(['user_info'])
+        return false
+      }
+    },
+    
+    // 处理需要认证的事件
+    handleAuthRequired() {
+      this.showLoginModal = true
+      this.userInfo = null
+    },
+    
+    // 处理登录成功
+    handleLoginSuccess(data) {
+      this.userInfo = data.user
+      this.showLoginModal = false
+      this.$message.success('登录成功')
+    },
+    
+    // 处理用户命令
+    handleUserCommand(command) {
+      if (command === 'logout') {
+        this.handleLogout()
+      }
+    },
+    
+    // 处理登出
+    async handleLogout() {
+      try {
+        await api.post('/auth/logout')
+      } catch (error) {
+        console.error('登出失败:', error)
+      } finally {
+        clearAuthToken()
+        this.userInfo = null
+        this.$message.success('已退出登录')
+      }
+    },
+    
     // 更新窗口宽度
     updateWindowWidth() {
       if (typeof window !== 'undefined') {
@@ -502,7 +599,7 @@ export default {
           const message = result.result.value
 
           if (message.startsWith('SUCCESS:')) {
-            this.$notify.success(message.substring(8)) // 移除"SUCCESS:"前缀
+            // this.$notify.success(message.substring(8)) // 移除"SUCCESS:"前缀
             console.log(`${direction === 'next' ? '下一页' : '上一页'}按钮点击成功`)
           } else if (message.startsWith('ERROR:')) {
             this.$notify.warning(message.substring(6)) // 移除"ERROR:"前缀
@@ -682,18 +779,6 @@ export default {
             message: error.message || '未知错误'
           })
         }
-        return []
-      }
-    },
-    async handleTest() {
-      try {
-        const cookiesInfo = await this.getPageCookies({ domain: 'xyq.cbg.163.com', showToast: true })
-        if (cookiesInfo.length > 0) {
-          console.table(cookiesInfo)
-        }
-        return cookiesInfo
-      } catch (error) {
-        console.error('handleTest 获取 Cookies 出错:', error)
         return []
       }
     },
@@ -1004,13 +1089,13 @@ export default {
         case 'devtoolsConnected':
           this.devtoolsConnected = true
           this.connectionStatus = '已连接'
-          this.$notify.success(request.message)
+          // this.$notify.success(request.message)
           break
 
         case 'showDebuggerWarning':
           this.devtoolsConnected = false
           this.connectionStatus = '连接冲突'
-          this.$notify.warning(request.message)
+          // this.$notify.warning(request.message)
           break
 
         case 'clearRecommendData':

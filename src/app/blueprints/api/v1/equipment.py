@@ -9,6 +9,8 @@ import logging
 from flask import Blueprint, request, jsonify
 from ....controllers.equipment_controller import EquipmentController
 from ....utils.response import success_response, error_response
+from src.app.utils.auth import require_auth
+from .admin import require_admin
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +19,7 @@ controller = EquipmentController()
 
 
 @equipment_bp.route('/', methods=['GET'])
+@require_auth
 def get_equipments():
     """获取装备列表"""
     try:
@@ -80,6 +83,7 @@ def get_equipment_details(equip_sn):
 
 
 @equipment_bp.route('/anchors', methods=['POST'])
+@require_auth
 def find_equipment_anchors():
     """寻找装备市场锚点"""
     try:
@@ -108,6 +112,7 @@ def find_equipment_anchors():
 
 
 @equipment_bp.route('/valuation', methods=['POST'])
+@require_auth
 def get_equipment_valuation():
     """获取装备估价"""
     try:
@@ -141,6 +146,7 @@ def get_equipment_valuation():
 
 
 @equipment_bp.route('/batch-valuation', methods=['POST'])
+@require_auth
 def batch_equipment_valuation():
     """批量装备估价"""
     try:
@@ -203,6 +209,7 @@ def batch_equipment_valuation():
 
 
 @equipment_bp.route('/<string:equip_sn>', methods=['DELETE'])
+@require_admin
 def delete_equipment(equip_sn):
     """删除指定装备"""
     try:
@@ -249,6 +256,7 @@ def get_weapon_config():
         return error_response(f"获取武器数据失败: {str(e)}")
 
 @equipment_bp.route('/mark-abnormal', methods=['POST'])
+@require_auth
 def mark_equipment_as_abnormal():
     """标记装备为异常"""
     try:
@@ -274,6 +282,7 @@ def mark_equipment_as_abnormal():
         return error_response(f"标记装备异常失败: {str(e)}")
 
 @equipment_bp.route('/abnormal', methods=['GET'])
+@require_admin
 def get_abnormal_equipment_list():
     """获取异常装备列表"""
     try:
@@ -294,6 +303,7 @@ def get_abnormal_equipment_list():
         return error_response(f"获取异常装备列表失败: {str(e)}")
 
 @equipment_bp.route('/abnormal/<string:equip_sn>', methods=['PUT'])
+@require_admin
 def update_abnormal_equipment_status(equip_sn):
     """更新异常装备状态"""
     try:
@@ -321,6 +331,7 @@ def update_abnormal_equipment_status(equip_sn):
         return error_response(f"更新异常装备状态失败: {str(e)}")
 
 @equipment_bp.route('/abnormal/<string:equip_sn>', methods=['DELETE'])
+@require_admin
 def delete_abnormal_equipment(equip_sn):
     """删除异常装备记录"""
     try:
@@ -354,7 +365,6 @@ def get_equip_config():
         return success_response(data=result["data"], message="获取装备数据成功")
     except Exception as e:
         return error_response(f"获取装备数据失败: {str(e)}")
-
 
 @equipment_bp.route('/stats', methods=['GET'])
 def get_equipment_stats():
@@ -400,8 +410,8 @@ def get_equipment_stats():
         logger.error(f"获取装备统计失败: {e}")
         return error_response(f"获取装备统计失败: {str(e)}")
 
-
 @equipment_bp.route('/extract-features', methods=['POST'])
+@require_auth
 def extract_equipment_features():
     """提取装备特征"""
     try:

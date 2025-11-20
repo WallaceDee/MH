@@ -8,6 +8,8 @@
 from flask import Blueprint, send_file, request, jsonify, Response, current_app
 from ....controllers.system_controller import SystemController
 from ....utils.response import success_response, error_response
+from .admin import require_admin
+from src.app.utils.auth import require_auth
 import os
 import json
 import logging
@@ -40,6 +42,7 @@ controller = SystemController()
 
 
 @system_bp.route('/info', methods=['GET'])
+@require_admin
 def get_system_info():
     """获取系统信息"""
     try:
@@ -50,6 +53,7 @@ def get_system_info():
 
 
 @system_bp.route('/files', methods=['GET'])
+@require_admin
 def list_files():
     """列出输出文件"""
     try:
@@ -60,6 +64,7 @@ def list_files():
 
 
 @system_bp.route('/files/<filename>/download', methods=['GET'])
+@require_admin
 def download_file(filename):
     """下载文件"""
     try:
@@ -108,6 +113,7 @@ def get_config_file(filename):
 
 
 @system_bp.route('/config/search-params', methods=['GET'])
+@require_auth
 def get_search_params():
     """
     获取搜索参数配置
@@ -187,6 +193,7 @@ def get_search_params():
 
 
 @system_bp.route('/config/search-params/<param_type>', methods=['GET'])
+@require_admin
 def get_search_param_by_type(param_type: str):
     """
     根据类型获取特定的搜索参数配置
@@ -255,6 +262,7 @@ def get_search_param_by_type(param_type: str):
 
 
 @system_bp.route('/config/search-params/<param_type>', methods=['POST'])
+@require_admin
 def update_search_param(param_type: str):
     """
     更新特定类型的搜索参数配置
@@ -317,6 +325,7 @@ def update_search_param(param_type: str):
         return error_response(f"更新{param_type}参数配置失败: {str(e)}") 
     
 @system_bp.route('/market-data/status', methods=['GET'])
+@require_admin
 def get_market_data_status():
     """获取市场数据状态（参考装备实现）"""
     try:
@@ -441,6 +450,7 @@ def get_market_data_status():
 
 
 @system_bp.route('/market-data/cache-status', methods=['GET'])
+@require_admin
 def get_cache_status():
     """获取缓存状态"""
     try:
@@ -460,6 +470,7 @@ def get_cache_status():
 
 
 @system_bp.route('/market-data/equipment/cache-status', methods=['GET'])
+@require_admin
 def get_equipment_cache_status():
     """获取装备缓存状态"""
     try:
@@ -476,6 +487,7 @@ def get_equipment_cache_status():
 
 
 @system_bp.route('/market-data/equipment/refresh', methods=['POST'])
+@require_admin
 def refresh_equipment_data():
     """启动装备数据刷新"""
     try:
@@ -529,6 +541,7 @@ def refresh_equipment_data():
 
  
 @system_bp.route('/market-data/equipment/status', methods=['GET'])
+@require_admin
 def get_equipment_market_data_status():
     """获取装备市场数据状态"""
     try:
@@ -727,6 +740,7 @@ def get_equipment_market_data_status():
 
 
 @system_bp.route('/market-data/pet/cache-status', methods=['GET'])
+@require_admin
 def get_pet_cache_status():
     """获取召唤兽缓存状态"""
     try:
@@ -746,6 +760,7 @@ def get_pet_cache_status():
 
 
 @system_bp.route('/market-data/pet/status', methods=['GET'])
+@require_admin
 def get_pet_market_data_status():
     """获取召唤兽市场数据状态"""
     try:
@@ -915,6 +930,7 @@ def get_pet_market_data_status():
 
 
 @system_bp.route('/market-data/pet/refresh', methods=['POST'])
+@require_admin
 def refresh_pet_data():
     """启动召唤兽数据刷新"""
     try:
@@ -979,6 +995,7 @@ def refresh_pet_data():
 
 
 @system_bp.route('/market-data/pet/refresh-status', methods=['GET'])
+@require_admin
 def get_pet_refresh_status():
     """获取召唤兽数据刷新状态"""
     try:
@@ -998,6 +1015,7 @@ def get_pet_refresh_status():
 
 
 @system_bp.route('/redis/status', methods=['GET'])
+@require_admin
 def get_redis_status():
     """获取Redis状态信息"""
     try:
@@ -1065,6 +1083,7 @@ def get_redis_status():
 
 
 @system_bp.route('/market-data/equipment/refresh-status', methods=['GET'])
+@require_admin
 def get_equipment_refresh_status():
     """获取装备数据刷新进度状态"""
     try:
@@ -1081,6 +1100,7 @@ def get_equipment_refresh_status():
 
 
 @system_bp.route('/market-data/analysis', methods=['GET'])
+@require_admin
 def get_market_data_analysis():
     """获取市场数据详细分析"""
     try:
@@ -1179,6 +1199,7 @@ def get_market_data_analysis():
 
 
 @system_bp.route('/market-data/refresh', methods=['POST'])
+@require_admin
 def refresh_market_data():
     """启动角色市场数据刷新（与装备实现保持一致的模式）"""
     try:
@@ -1236,6 +1257,7 @@ def refresh_market_data():
 
 
 @system_bp.route('/market-data/role/refresh-status', methods=['GET'])
+@require_admin
 def get_role_refresh_status():
     """获取角色数据刷新进度状态"""
     try:

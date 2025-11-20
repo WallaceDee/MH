@@ -12,7 +12,8 @@ import os
 import sys
 import json
 import logging
-
+from src.app.utils.auth import require_auth
+from .admin import require_admin
 # 添加src目录到Python路径以便导入utils
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_dir))))
@@ -245,6 +246,7 @@ def find_role_anchors():
 
 
 @role_bp.route('/batch-valuation', methods=['POST'])
+@require_admin
 def batch_role_valuation():
     """批量角色估价"""
     try:
@@ -281,6 +283,7 @@ def batch_role_valuation():
 
 
 @role_bp.route('/<string:eid>/update-base-price', methods=['POST'])
+@require_auth
 def update_role_base_price(eid: str):
     """更新角色裸号价格"""
     try:

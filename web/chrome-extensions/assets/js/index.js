@@ -430,21 +430,17 @@ window.is_armor_equip = function (kindid) {
 }
 
 window.skillOptions = []
-const autoSearchConfig = (typeof window !== 'undefined' && window.AUTO_SEARCH_CONFIG) || {}
-const pet_skill_classification = autoSearchConfig.pet_skill_classification || {}
+const pet_skill_classification = window.AUTO_SEARCH_CONFIG.pet_skill_classification
 for (const lowOrHightKey in pet_skill_classification) {
-  const skillsGroup = pet_skill_classification[lowOrHightKey] || {}
-  for (const label in skillsGroup) {
+  for (const label in pet_skill_classification[lowOrHightKey]) {
     window.skillOptions.push({
       value: '',
-      label: (lowOrHightKey || '').replace('技能', '') + label,
-      children: skillsGroup[label]
+      label: lowOrHightKey.replace('技能', '') + label,
+      children: pet_skill_classification[lowOrHightKey][label]
     })
   }
 }
-if (Array.isArray(window.skillOptions)) {
-  window.skillOptions.reverse()
-}
+window.skillOptions.reverse()
 console.log({
   skillOptions:window.skillOptions
 })

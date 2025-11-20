@@ -36,14 +36,16 @@ API端点列表:
 from flask import Blueprint, request
 from ....controllers.spider_controller import SpiderController
 from ....utils.response import success_response, error_response
+from .admin import require_admin
 
 spider_bp = Blueprint('spider', __name__)
 controller = SpiderController()
 
 
 @spider_bp.route('/status', methods=['GET'])
+@require_admin
 def get_status():
-    """获取当前任务状态"""
+    """获取当前任务状态（需要管理员权限）"""
     try:
         status = controller.get_task_status()
         return success_response(data=status, message="获取状态成功")
@@ -52,8 +54,9 @@ def get_status():
 
 
 @spider_bp.route('/config', methods=['GET'])
+@require_admin
 def get_config():
-    """获取爬虫配置信息"""
+    """获取爬虫配置信息（需要管理员权限）"""
     try:
         config = controller.get_spider_config()
         return success_response(data=config, message="获取配置成功")
@@ -62,6 +65,7 @@ def get_config():
 
 
 @spider_bp.route('/basic/start', methods=['POST'])
+@require_admin
 def start_basic_spider():
     """启动基础爬虫（支持角色、装备、召唤兽）"""
     try:
@@ -100,6 +104,7 @@ def start_basic_spider():
 
 
 @spider_bp.route('/role/start', methods=['POST'])
+@require_admin
 def start_role_spider():
     """启动角色爬虫"""
     try:
@@ -116,6 +121,7 @@ def start_role_spider():
 
 
 @spider_bp.route('/equip/start', methods=['POST'])
+@require_admin
 def start_equip_spider():
     """启动装备爬虫"""
     try:
@@ -189,6 +195,7 @@ def start_equip_spider():
 
 
 @spider_bp.route('/pet/start', methods=['POST'])
+@require_admin
 def start_pet_spider():
     """启动召唤兽爬虫"""
     try:
@@ -214,8 +221,8 @@ def start_pet_spider():
     except Exception as e:
         return error_response(f"启动召唤兽爬虫失败: {str(e)}")
 
-
 @spider_bp.route('/proxy/start', methods=['POST'])
+@require_admin
 def start_proxy_spider():
     """启动代理爬虫"""
     try:
@@ -227,8 +234,8 @@ def start_proxy_spider():
     except Exception as e:
         return error_response(f"启动代理爬虫失败: {str(e)}")
 
-
 @spider_bp.route('/proxy/manage', methods=['POST'])
+@require_admin
 def manage_proxies():
     """管理代理IP"""
     try:
@@ -237,8 +244,8 @@ def manage_proxies():
     except Exception as e:
         return error_response(f"代理管理失败: {str(e)}")
 
-
 @spider_bp.route('/task/stop', methods=['POST'])
+@require_admin
 def stop_task():
     """停止当前任务"""
     try:
@@ -247,8 +254,8 @@ def stop_task():
     except Exception as e:
         return error_response(f"停止任务失败: {str(e)}")
 
-
 @spider_bp.route('/playwright/start', methods=['POST'])
+@require_admin
 def start_playwright():
     """启动Playwright收集器"""
     try:
@@ -268,8 +275,8 @@ def start_playwright():
     except Exception as e:
         return error_response(f"启动Playwright收集器失败: {str(e)}")
 
-
 @spider_bp.route('/cookie/check', methods=['GET'])
+@require_admin
 def check_cookie():
     """检查Cookie状态"""
     try:
@@ -278,8 +285,8 @@ def check_cookie():
     except Exception as e:
         return error_response(f"检查Cookie状态失败: {str(e)}")
 
-
 @spider_bp.route('/cookie/update', methods=['POST'])
+@require_admin
 def update_cookie():
     """更新Cookie"""
     try:
@@ -288,8 +295,8 @@ def update_cookie():
     except Exception as e:
         return error_response(f"启动Cookie更新程序失败: {str(e)}")
 
-
 @spider_bp.route('/task/reset', methods=['POST'])
+@require_admin
 def reset_task():
     """重置任务状态"""
     try:
@@ -298,8 +305,8 @@ def reset_task():
     except Exception as e:
         return error_response(f"重置任务状态失败: {str(e)}")
 
-
 @spider_bp.route('/logs', methods=['GET'])
+@require_admin
 def get_logs():
     """获取爬虫日志"""
     try:
@@ -319,8 +326,8 @@ def get_logs():
     except Exception as e:
         return error_response(f"获取日志失败: {str(e)}")
 
-
 @spider_bp.route('/logs/files', methods=['GET'])
+@require_admin
 def get_log_files():
     """获取日志文件列表"""
     try:
@@ -338,11 +345,8 @@ def get_log_files():
     except Exception as e:
         return error_response(f"获取日志文件列表失败: {str(e)}")
 
-
-
-
-
 @spider_bp.route('/logs/stream', methods=['GET'])
+@require_admin
 def stream_logs():
     """流式获取实时日志（Server-Sent Events）"""
     from flask import Response, stream_with_context
@@ -500,8 +504,8 @@ def stream_logs():
         }
     )
 
-
 @spider_bp.route('/files', methods=['GET'])
+@require_admin
 def list_files():
     """列出输出文件"""
     try:
@@ -512,8 +516,8 @@ def list_files():
     except Exception as e:
         return error_response(f"获取文件列表失败: {str(e)}")
 
-
 @spider_bp.route('/download/<filename>', methods=['GET'])
+@require_admin
 def download_file(filename):
     """下载文件"""
     try:
@@ -533,7 +537,6 @@ def download_file(filename):
 def manage_proxies_legacy():
     """管理代理IP（兼容性端点）"""
     return manage_proxies()
-
 
 @spider_bp.route('/parse/response', methods=['POST'])
 def parse_response_data():

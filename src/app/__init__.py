@@ -6,7 +6,7 @@ Flask应用工厂
 """
 
 import os
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_caching import Cache
 from .blueprints.api.v1 import api_v1_bp
@@ -62,8 +62,30 @@ def create_app(config_name='default'):
     app = Flask(__name__)
     print(" Flask应用已配置为仅提供API服务，前端由Nginx提供服务")
     
-    # 配置CORS
-    CORS(app)
+    # 配置CORS - 允许Chrome扩展和其他来源
+    CORS(app, 
+         resources={
+             r"/*": {
+                 "origins": "*",  # 允许所有来源（包括chrome-extension://）
+                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+                 "allow_headers": [
+                     "Content-Type", 
+                     "Authorization", 
+                     "X-Fingerprint", 
+                     "X-Requested-With",
+                     "Accept",
+                     "Origin",
+                     "Access-Control-Request-Method",
+                     "Access-Control-Request-Headers"
+                 ],
+                 "expose_headers": ["Content-Type"],
+                 "supports_credentials": False,
+                 "max_age": 3600
+             }
+         },
+         supports_credentials=False,
+         automatic_options=True,  # 自动处理OPTIONS请求
+         send_wildcard=True)  # 发送通配符响应
     
     # 设置日志
     setup_logging(app)
@@ -82,6 +104,23 @@ def create_app(config_name='default'):
     
     # 注册错误处理器
     register_error_handlers(app)
+    
+    # 处理OPTIONS预检请求（CORS预检）
+    @app.before_request
+    def handle_options():
+        """处理CORS预检请求"""
+        from flask import Response
+        
+        # 排除OPTIONS预检请求（CORS预检）- 直接返回空响应，让CORS处理
+        if request.method == 'OPTIONS':
+            response = Response()
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+            response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Fingerprint, X-Requested-With')
+            response.headers.add('Access-Control-Max-Age', '3600')
+            return response
+        
+        return None
     
     # 根路由 - 仅API模式
     @app.route('/')

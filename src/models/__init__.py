@@ -10,6 +10,8 @@ from .role import Role, LargeEquipDescData
 from .equipment import Equipment
 from .pet import Pet
 from .abnormal_equipment import AbnormalEquipment
+# User模型延迟导入，避免循环导入
+# from .user import User
 
 __all__ = [
     'Base',
@@ -17,5 +19,6 @@ __all__ = [
     'LargeEquipDescData', 
     'Equipment',
     'Pet',
-    'AbnormalEquipment'
+    'AbnormalEquipment',
+    # 'User'  # 延迟导入，需要时从 models.user 直接导入
 ]

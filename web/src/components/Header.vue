@@ -9,16 +9,41 @@
                 <el-menu-item index="/pets">🐲<span class="menu-item-text">召唤兽</span></el-menu-item>
                 <el-menu-item index="/equipment-desc-creator">🔨<span class="menu-item-text">装备模拟</span></el-menu-item>
                 <el-menu-item index="/market-data-status">📊<span class="menu-item-text">数据状态</span></el-menu-item>
+                <el-menu-item index="/admin/users">👤<span class="menu-item-text">用户管理</span></el-menu-item>
             </el-menu>
-            <el-popover placement="bottom" width="400" trigger="click" popper-class="cookie-popover"
-                :visible-arrow="false">
-                <el-button slot="reference" :type="cookieButtonType" class="cookie-button" size="mini">
-                    {{ cookieButtonText }}
-                </el-button>
-                <div>
-                    <CookieStatus :auto-check="true" :show-cache-info="true" :show-actions="true" />
+            <div class="header-right">
+                <el-popover placement="bottom" width="400" trigger="click" popper-class="cookie-popover"
+                    :visible-arrow="false">
+                    <el-button slot="reference" :type="cookieButtonType" class="cookie-button" size="mini">
+                        {{ cookieButtonText }}
+                    </el-button>
+                    <div>
+                        <CookieStatus :auto-check="true" :show-cache-info="true" :show-actions="true" />
+                    </div>
+                </el-popover>
+
+                <!-- 用户信息 -->
+                <div v-if="isLoggedIn" class="user-info">
+                    <el-dropdown @command="handleUserCommand" trigger="click">
+                        <span class="user-dropdown">
+                            <i class="el-icon-user-solid"></i>
+                            <span>{{ userInfo.username }}</span>
+                            <i class="el-icon-arrow-down el-icon--right"></i>
+                        </span>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item disabled>
+                                <span style="color: #909399;">{{ userInfo.is_premium ? '高级用户' : '普通用户' }}</span>
+                            </el-dropdown-item>
+                            <el-dropdown-item divided command="logout">
+                                <i class="el-icon-switch-button"></i> 退出登录
+                            </el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
                 </div>
-            </el-popover>
+                <el-button v-else type="primary" size="mini" @click="handleLogin" class="login-button">
+                    <i class="el-icon-user"></i> 登录
+                </el-button>
+            </div>
         </div>
     </el-header>
 </template>
@@ -28,6 +53,12 @@ export default {
     name: 'Header',
     components: {
         CookieStatus
+    },
+    data() {
+        return {
+            userInfo: null,
+            isLoggedIn: false
+        }
     },
     computed: {
         // 当前激活的菜单项索引
@@ -51,6 +82,8 @@ export default {
                 return '/equipment-desc-creator'
             } else if (path.startsWith('/market-data-status')) {
                 return '/market-data-status'
+            } else if (path.startsWith('/admin/users')) {
+                return '/admin/users'
             }
             
             return '/'
@@ -88,15 +121,32 @@ export default {
         }
     },
     mounted() {
+        // 检查登录状态
+        this.checkLoginStatus()
+
+        // 监听auth-required事件
+        window.addEventListener('auth-required', this.handleAuthRequired)
+
         // 启动定时器，每分钟更新一次按钮状态
         this.updateTimer = setInterval(() => {
             // 强制更新计算属性
             this.$forceUpdate()
         }, 60000) // 每分钟更新一次
         
-        // 监听路由变化
-        this.$watch('$route', () => {
-            // 路由变化时强制更新组件
+        // 监听路由变化 - 每次路由变化时重新检查登录状态
+        this.$watch('$route', (to) => {
+            // 重新检查登录状态
+            this.checkLoginStatus()
+            
+            // 如果路由需要认证但用户未登录，跳转到登录页
+            if (to.matched.some(record => record.meta.requiresAuth) && !this.isLoggedIn) {
+                this.$router.push({
+                    path: '/login',
+                    query: { redirect: to.fullPath }
+                })
+            }
+            
+            // 强制更新组件
             this.$forceUpdate()
         }, { immediate: true })
     },
@@ -104,6 +154,124 @@ export default {
         // 清理定时器
         if (this.updateTimer) {
             clearInterval(this.updateTimer)
+        }
+        // 移除事件监听
+        window.removeEventListener('auth-required', this.handleAuthRequired)
+    },
+    methods: {
+        /**
+         * 检查登录状态
+         * @returns {boolean} 是否已登录
+         */
+        checkLoginStatus() {
+            const token = localStorage.getItem('auth_token')
+            const userInfoStr = localStorage.getItem('user_info')
+            
+            if (token && userInfoStr) {
+                try {
+                    const userInfo = JSON.parse(userInfoStr)
+                    
+                    // 验证用户信息的完整性
+                    if (userInfo && userInfo.username) {
+                        this.userInfo = userInfo
+                        this.isLoggedIn = true
+                        return true
+                    } else {
+                        // 用户信息不完整，清除并标记为未登录
+                        console.warn('用户信息不完整，清除本地存储')
+                        this.clearLocalAuth()
+                        return false
+                    }
+                } catch (error) {
+                    console.error('解析用户信息失败:', error)
+                    this.clearLocalAuth()
+                    return false
+                }
+            } else {
+                this.userInfo = null
+                this.isLoggedIn = false
+                return false
+            }
+        },
+
+        /**
+         * 清除本地认证信息
+         */
+        clearLocalAuth() {
+            localStorage.removeItem('auth_token')
+            localStorage.removeItem('user_info')
+            this.userInfo = null
+            this.isLoggedIn = false
+        },
+
+        /**
+         * 验证登录状态（用于需要登录的操作）
+         * @param {string} message - 未登录时的提示信息
+         * @returns {boolean} 是否已登录
+         */
+        requireLogin(message = '请先登录') {
+            if (!this.isLoggedIn || !this.userInfo) {
+                this.$message.warning(message)
+                this.$router.push({
+                    path: '/login',
+                    query: { redirect: this.$route.fullPath }
+                })
+                return false
+            }
+            return true
+        },
+
+        /**
+         * 处理auth-required事件
+         */
+        handleAuthRequired() {
+            console.log('收到 auth-required 事件，清除登录状态')
+            this.clearLocalAuth()
+            
+            // 如果不在登录页，则跳转到登录页
+            if (this.$route.path !== '/login') {
+                this.$message.warning('登录已过期，请重新登录')
+                this.$router.push({
+                    path: '/login',
+                    query: { redirect: this.$route.fullPath }
+                })
+            }
+        },
+
+        /**
+         * 处理登录按钮点击
+         */
+        handleLogin() {
+            this.$router.push({
+                path: '/login',
+                query: { redirect: this.$route.fullPath }
+            })
+        },
+
+        /**
+         * 处理用户下拉菜单命令
+         */
+        async handleUserCommand(command) {
+            if (command === 'logout') {
+                await this.handleLogout()
+            }
+        },
+
+        /**
+         * 处理退出登录
+         */
+        async handleLogout() {
+            try {
+                await this.$api.auth.logout()
+            } catch (error) {
+                console.error('退出登录失败:', error)
+            } finally {
+                // 清除本地存储
+                this.clearLocalAuth()
+                this.$message.success('已退出登录')
+                // 跳转到登录页
+                this.$router.push('/login')
+            }
         }
     }
 }
@@ -165,5 +333,39 @@ export default {
 
 :global(.cookie-popover) {
     padding: 0 !important;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-info {
+    margin-left: 12px;
+}
+
+.user-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    color: #303133;
+    font-size: 14px;
+}
+
+.user-dropdown:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.user-dropdown .el-icon-user-solid {
+    font-size: 16px;
+}
+
+.login-button {
+    margin-left: 12px;
 }
 </style>

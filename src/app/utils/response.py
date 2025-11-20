@@ -32,6 +32,16 @@ def error_response(message="error", code=400, http_code=400, data=None):
     }), http_code
 
 
+def info_response(message="info", code=200, data=None):
+    """信息响应（用于提示信息，不是错误）"""
+    return jsonify({
+        "code": code,
+        "data": data,
+        "message": message,
+        "timestamp": int(time.time())
+    }), 200
+
+
 def paginated_response(data, total, page, page_size, message="success"):
     """分页响应"""
     return jsonify({
