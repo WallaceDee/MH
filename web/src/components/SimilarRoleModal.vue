@@ -1,6 +1,6 @@
 <template>
   <el-popover :data-role-eid="role.eid" :placement="placement" width="800" trigger="click"
-    popper-class="similar-role-popper" v-model="visible" @show="handleShow">
+    popper-class="similar-role-popper" v-model="visible" @show="handleShow" :disabled="disabled">
     <template #reference>
       <slot>
         <el-link type="primary" style="font-size: 12px;">查看相似</el-link>
@@ -93,6 +93,10 @@ export default {
   },
   mixins: [commonMixin],
   props: {
+    disabled: {
+      type: Boolean,
+      default: false
+    },
     role: {
       type: Object,
       required: true

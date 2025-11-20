@@ -862,7 +862,7 @@ class RoleService:
                 result_anchors = []
                 for anchor in anchors:
                     # 从数据库获取完整的角色信息
-                    anchor_eid = anchor.get('eid')
+                    anchor_eid = str(anchor.get('eid'))  # 确保eid始终是字符串类型
                     full_role_info = self.get_role_details(anchor_eid)
                     
                     if full_role_info:

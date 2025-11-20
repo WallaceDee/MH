@@ -178,8 +178,12 @@ class MarketAnchorEvaluator(BaseValuator):
             anchor_candidates = []
             error_count = 0
             
-            for i, (eid, market_row) in enumerate(market_data.iterrows()):
+            for i, (index_eid, market_row) in enumerate(market_data.iterrows()):
                 try:
+                    # 从行数据中获取真正的eid（优先从列中获取，如果没有则使用index）
+                    # 因为eid被设置为index后，可能不再是列，但index的值就是真正的eid
+                    eid = market_row.get('eid') if 'eid' in market_row.index else index_eid
+                    
                     # 计算相似度 - 确保数据类型转换
                     market_dict = self._convert_pandas_row_to_dict(market_row)    
                     
@@ -187,7 +191,7 @@ class MarketAnchorEvaluator(BaseValuator):
                     
                     if similarity >= similarity_threshold:
                         anchor_candidates.append({
-                            'eid': eid,
+                            'eid': eid,  # 使用真正的eid（从列或index获取）
                             'similarity': round(float(similarity), 3),
                             'price': float(market_row.get('price', 0)),
                             'features': market_dict

@@ -99,11 +99,10 @@
                     </el-col>
                   </el-row>
                   <div>
-                    <SimilarRoleModal :role="{ ...role, roleInfo: parserRoleData(role) }"
+                    <SimilarRoleModal :disabled="item.status !== 'completed'" :role="{ ...role, roleInfo: parserRoleData(role) }"
                       :search-params="{ selectedDate: selectedDate, roleType: 'normal' }">
                       <div> <el-link type="primary" href="javascript:void 0;" @click.prevent
-                          :disabled="item.status !== 'completed'">👤
-                          裸号</el-link></div>
+                          :disabled="item.status !== 'completed'">裸号估价</el-link></div>
                     </SimilarRoleModal>
                   </div>
                 </el-card>
