@@ -984,6 +984,10 @@ export default {
       // 只处理新完成的请求，避免重复处理
       if (dataArray && dataArray.length > 0) {
         const cookies = await this.getPageCookies({ showToast: false })
+        const login_user_username = cookies.find(cookie => cookie.name === 'login_user_urs')?.value
+        const cookieString = Array.isArray(cookies)
+          ? cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ')
+          : ''
         dataArray.forEach(item => {
           if (item.responseData &&
             item.url &&
@@ -1001,7 +1005,8 @@ export default {
             this.$api.spider.parseResponse({
               url: item.url,
               response_text: item.responseData,
-              cookies
+              cookies: cookieString,
+              loginUserUsername: login_user_username
             }).then(res => {
               console.log(`请求 ${item.requestId} 解析结果:`, res)
               if (res.code === 200) {

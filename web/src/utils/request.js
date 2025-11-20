@@ -5,8 +5,8 @@ import { Notification } from 'element-ui'
 const isChromeExtension = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id
 
 // 根据环境设置不同的baseURL
-// const baseURL = isChromeExtension ? 'http://localhost:5000/api/v1' : '/api/v1'
-const baseURL = isChromeExtension ? 'http://xyq.lingtong.xyz/api/v1' : '/api/v1'
+const baseURL = isChromeExtension ? 'http://localhost:5000/api/v1' : '/api/v1'
+// const baseURL = isChromeExtension ? 'http://xyq.lingtong.xyz/api/v1' : '/api/v1'
 
 // 缓存 fingerprint cookie
 let cachedFingerprint = ''

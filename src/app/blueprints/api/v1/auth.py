@@ -40,8 +40,8 @@ def register():
             return error_response("该手机号已被注册")
         
         # 检查邮箱是否已存在
-        if email and User.query.filter_by(email=email).first():
-            return error_response("邮箱已被注册")
+        # if email and User.query.filter_by(email=email).first():
+        #     return error_response("邮箱已被注册")
         
         # 创建新用户（默认未激活，需管理员启用）
         user = User(username=username, email=email, is_active=False)

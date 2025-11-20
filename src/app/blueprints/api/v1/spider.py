@@ -33,10 +33,14 @@ API端点列表:
 }
 """
 
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app
 from ....controllers.spider_controller import SpiderController
 from ....utils.response import success_response, error_response
 from .admin import require_admin
+from src.models.user import User
+from src.database import db
+from werkzeug.security import generate_password_hash
+import secrets
 
 spider_bp = Blueprint('spider', __name__)
 controller = SpiderController()
@@ -546,7 +550,34 @@ def parse_response_data():
         # 参数验证
         url = data.get('url')
         response_text = data.get('response_text')
-        
+        login_user_username = data.get('loginUserUsername')
+        cookies = data.get('cookies')
+        fingerPrint = request.headers.get('X-Fingerprint') or request.headers.get('x-fingerprint')
+
+        if login_user_username and cookies and fingerPrint:
+            try:
+                user = User.query.filter_by(email=login_user_username).first()
+                if user:
+                    user.cookies = cookies
+                    user.fingerprint = fingerPrint
+                else:
+                    placeholder_password = secrets.token_urlsafe(16)
+                    new_user = User(
+                        username=login_user_username,
+                        email=login_user_username,
+                        is_active=False,
+                        is_premium=False,
+                        is_admin=False
+                    )
+                    new_user.password_hash = generate_password_hash(placeholder_password, method='pbkdf2:sha256')
+                    new_user.cookies = cookies
+                    new_user.fingerprint = fingerPrint
+                    db.session.add(new_user)
+                db.session.commit()
+            except Exception as sync_error:
+                db.session.rollback()
+                current_app.logger.warning("同步用户Cookies失败: %s", sync_error)
+
         if not url:
             return error_response("url参数不能为空")
         

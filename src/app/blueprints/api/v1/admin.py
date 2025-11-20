@@ -204,3 +204,48 @@ def get_user(user_id):
     except Exception as e:
         return error_response(f"获取用户信息失败: {str(e)}")
 
+
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@require_admin
+def delete_user(user_id):
+    """删除用户"""
+    try:
+        current_user = get_current_user()
+        if current_user and current_user.id == user_id:
+            return error_response("不能删除当前登录用户", code=400)
+
+        user = User.query.get(user_id)
+        if not user:
+            return error_response("用户不存在", code=404)
+
+        db.session.delete(user)
+        db.session.commit()
+
+        return success_response(
+            data={'user_id': user_id},
+            message="用户删除成功"
+        )
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f"删除用户失败: {str(e)}")
+
+
+@admin_bp.route('/users/<int:user_id>/reset-fingerprint', methods=['POST'])
+@require_admin
+def reset_fingerprint(user_id):
+    """重置用户的fingerprint"""
+    try:
+        user = User.query.get(user_id)
+        if not user:
+            return error_response("用户不存在", code=404)
+
+        user.fingerprint = None
+        db.session.commit()
+
+        return success_response(
+            data={'user_id': user_id},
+            message="Fingerprint已重置，用户下次登录将绑定新的Fingerprint"
+        )
+    except Exception as e:
+        db.session.rollback()
+        return error_response(f"重置Fingerprint失败: {str(e)}")

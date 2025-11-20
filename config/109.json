@@ -1,10 +1,6 @@
 {
-  "bb_expt_fangyu": "17",
-  "bb_expt_fashu": "17",
-  "bb_expt_gongji": "17",
-  "bb_expt_kangfa": "17",
-  "level_max": "109",
-  "level_min": "109",
+  "level_max": "175",
+  "level_min": "170",
   "order_by": "price ASC",
-  "price_min": "1288800"
+  "price_min": "365700"
 }

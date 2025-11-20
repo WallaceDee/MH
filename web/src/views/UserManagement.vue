@@ -72,7 +72,7 @@
             <span v-else style="color: #909399;">无</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="280" fixed="right" align="center">
+        <el-table-column label="操作" width="360" fixed="right" align="center">
           <template slot-scope="scope">
             <el-button
               v-if="!scope.row.is_active"
@@ -109,6 +109,24 @@
               :loading="scope.row.settingPremium"
             >
               取消高级
+            </el-button>
+            <el-button
+              type="danger"
+              plain
+              size="mini"
+              :disabled="!scope.row.fingerprint"
+              @click="handleResetFingerprint(scope.row)"
+              :loading="scope.row.resettingFingerprint"
+            >
+              重置Fingerprint
+            </el-button>
+            <el-button
+              type="danger"
+              size="mini"
+              @click="handleDelete(scope.row)"
+              :loading="scope.row.deleting"
+            >
+              删除
             </el-button>
           </template>
         </el-table-column>
@@ -283,6 +301,66 @@ export default {
     handlePageChange(page) {
       this.pagination.page = page
       this.fetchUsers()
+    },
+
+    /**
+     * 删除用户
+     */
+    async handleDelete(user) {
+      this.$confirm('删除后该用户所有数据将被移除，确认继续？', '提示', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+        dangerouslyUseHTMLString: false
+      }).then(async () => {
+        this.$set(user, 'deleting', true)
+        try {
+          const response = await this.$api.admin.deleteUser(user.id)
+          if (response.code === 200) {
+            this.$message.success(response.message || '用户删除成功')
+            this.fetchUsers()
+          } else {
+            this.$message.error(response.message || '删除用户失败')
+          }
+        } catch (error) {
+          console.error('删除用户失败:', error)
+          this.$message.error('删除用户失败，请稍后重试')
+        } finally {
+          this.$set(user, 'deleting', false)
+        }
+      }).catch(() => {})
+    },
+
+    /**
+     * 重置Fingerprint
+     */
+    async handleResetFingerprint(user) {
+      if (!user.fingerprint) {
+        this.$message.warning('该用户尚未绑定Fingerprint')
+        return
+      }
+      this.$confirm('重置后用户下次登录将无需Fingerprint验证，并会绑定新的Fingerprint，确认继续？', '提示', {
+        confirmButtonText: '重置',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        this.$set(user, 'resettingFingerprint', true)
+        try {
+          const response = await this.$api.admin.resetFingerprint(user.id)
+          if (response.code === 200) {
+            this.$message.success(response.message || 'Fingerprint已重置')
+            user.fingerprint = null
+            this.fetchUsers()
+          } else {
+            this.$message.error(response.message || '重置Fingerprint失败')
+          }
+        } catch (error) {
+          console.error('重置Fingerprint失败:', error)
+          this.$message.error('重置Fingerprint失败，请稍后重试')
+        } finally {
+          this.$set(user, 'resettingFingerprint', false)
+        }
+      }).catch(() => {})
     },
 
     /**

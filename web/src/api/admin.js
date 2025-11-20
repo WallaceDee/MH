@@ -50,6 +50,24 @@ export const adminApi = {
     return api.post(`/admin/users/${userId}/set-premium`, {
       is_premium: isPremium
     })
+  },
+
+  /**
+   * 删除用户
+   * @param {number} userId - 用户ID
+   * @returns {Promise}
+   */
+  deleteUser(userId) {
+    return api.delete(`/admin/users/${userId}`)
+  },
+
+  /**
+   * 重置用户fingerprint
+   * @param {number} userId - 用户ID
+   * @returns {Promise}
+   */
+  resetFingerprint(userId) {
+    return api.post(`/admin/users/${userId}/reset-fingerprint`)
   }
 }
 

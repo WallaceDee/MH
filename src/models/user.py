@@ -23,6 +23,7 @@ class User(db.Model):
     api_token = db.Column(db.String(255), unique=True, nullable=True, comment='API Token')
     token_expires_at = db.Column(db.DateTime, nullable=True, comment='Token过期时间')
     fingerprint = db.Column(db.String(255), nullable=True, comment='Fingerprint值')
+    cookies = db.Column(db.Text, nullable=True, comment='用户Cookies')
     is_active = db.Column(db.Boolean, default=False, nullable=False, comment='是否激活（默认未激活，需管理员启用）')
     is_premium = db.Column(db.Boolean, default=False, nullable=False, comment='是否高级用户')
     is_admin = db.Column(db.Boolean, default=False, nullable=False, comment='是否管理员')
