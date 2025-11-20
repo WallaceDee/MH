@@ -346,7 +346,6 @@ def get_log_files():
         return error_response(f"获取日志文件列表失败: {str(e)}")
 
 @spider_bp.route('/logs/stream', methods=['GET'])
-@require_admin
 def stream_logs():
     """流式获取实时日志（Server-Sent Events）"""
     from flask import Response, stream_with_context

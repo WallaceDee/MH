@@ -1,5 +1,5 @@
 // 自动生成的登录信息文件
-// 生成时间: 1763222970.2626016
+// 生成时间: 1763626986.0047219
 
 window.LoginInfo = {
   "area_id": 54,
@@ -11,7 +11,7 @@ window.LoginInfo = {
   "block_urs": "ch****10@163.com",
   "user_icon": "2",
   "user_msg_num": 2,
-  "safe_code": "26hkJwKF",
+  "safe_code": "JryRwD-a",
   "user_level": "0",
   "user_roles": {
     "46171057": {
