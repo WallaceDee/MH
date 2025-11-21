@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- 爬虫配置区域 -->
-    <AutoParams :isRunning.sync="isRunning" :log="false" />
+    <AutoParams :isRunning.sync="isRunning" :log="false" style="margin-bottom: 10px;" />
     <!-- 实时日志监控 -->
     <LogMonitor :isRunning="isRunning" />
   </div>

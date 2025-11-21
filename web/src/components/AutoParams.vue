@@ -91,10 +91,10 @@
             <!-- Playwright半自动收集器 -->
             <el-tab-pane label="🖐️ 手动抓取" name="playwright" v-if="!isChromeExtension">
                 <el-form :model="playwrightForm" label-width="120px" size="small">
-                    <el-form-item label="无头模式">
+                    <!-- <el-form-item label="无头模式">
                         <el-switch v-model="playwrightForm.headless" @change="onHeadlessToggle"></el-switch>
                         <span class="form-tip">关闭后可以看到浏览器操作过程</span>
-                    </el-form-item>
+                    </el-form-item> -->
 
                     <el-form-item label="目标URL">
                         <el-select v-model="playwrightForm.target_url" style="width: 100%" @change="onTargetUrlChange">
@@ -148,7 +148,8 @@
             </el-tab-pane>
 
             <!-- 装备爬虫 -->
-            <el-tab-pane label="⚔️ 装备" name="equip" v-if="externalParamsState.action === 'similar_equip'">
+            <el-tab-pane label="⚔️ 装备" name="equip"
+                v-if="!(isChromeExtension && externalParamsState.action === 'similar_pet')">
                 <el-form :model="equipForm" label-width="100px" size="small">
                     <el-form-item label="装备类型" v-if="externalParamsState.action !== 'similar_equip'">
                         <el-select v-model="equipForm.equip_type" @change="onEquipTypeChange" style="width: 100%">
@@ -231,7 +232,7 @@
                     </el-form-item>
                     <el-form-item label="属性">
                         <el-form-item :label="equip_attr_list_label[attr] || attr" label-width="50px"
-                            v-for="attr in equip_attr_list.filter(a => externalSearchParams[a] !== undefined)"
+                            v-for="attr in equip_attr_list.filter(a => isChromeExtension?externalSearchParams[a] !== undefined:true)"
                             :key="attr">
                             <el-input-number v-model="select_equip_attr_value[attr]" placeholder="请输入属性值"
                                 controls-position="right" style="width: 100px;"></el-input-number>
@@ -241,8 +242,8 @@
                         <el-checkbox-group v-model="select_equip_addon_attr_type">
                             <template v-for="(attrNum, attr) in externalSearchParams">
                                 <el-checkbox v-for="item in attrNum" :label="attr + (item > 1 ? '_' + (item - 2) : '')"
-                                    :key="attr + item"
-                                    v-if="attr.startsWith('added_attr.')">{{ getAddedAttrType(attr) }}</el-checkbox>
+                                    :key="attr + item" v-if="attr.startsWith('added_attr.')">{{ getAddedAttrType(attr)
+                                    }}</el-checkbox>
                             </template>
                         </el-checkbox-group>
                     </el-form-item>
@@ -319,7 +320,8 @@
             </el-tab-pane>
 
             <!-- 召唤兽爬虫 -->
-            <el-tab-pane label="🐲 召唤兽" name="pet" v-if="externalParamsState.action === 'similar_pet'">
+            <el-tab-pane label="🐲 召唤兽" name="pet"
+                v-if="!(isChromeExtension && externalParamsState.action === 'similar_equip')">
                 <el-form :model="petForm" label-width="100px" size="small" inline>
                     <el-form-item label="技能" v-if="petForm.skill !== ''">
                         <el-cascader v-model="select_pet_skill" :options="skillOptions" :props="{
@@ -1062,7 +1064,7 @@ export default {
         select_pet_lingxing(newVal) {
             const params = JSON.parse(this.petParamsJson)
             // el-input-number 返回的是数字类型或null
-            params.lingxing = (newVal !== null && newVal !== undefined) ? String(newVal) : undefined
+            params.lingxing = (newVal !== null && newVal !== undefined&& newVal !== 0) ? String(newVal) : undefined
             this.petParamsJson = JSON.stringify(params, null, 2)
         },
         select_pet_growth(newVal) {
@@ -1086,7 +1088,7 @@ export default {
                 params.level_min = this.select_pet_level[0]
                 params.level_max = this.select_pet_level[1]
             } else {
-                params.level = undefined
+                params.level_min = undefined
                 params.level_max = undefined
             }
             this.petParamsJson = JSON.stringify(params, null, 2)
